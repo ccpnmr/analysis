@@ -170,9 +170,9 @@ class CcpnGLWidget(QOpenGLWidget):
     if not parent:        # don't initialise if nothing there
       return
 
-    self.parent = parent
+    self._parent = parent
 
-    for spectrumView in self.parent.spectrumViews:
+    for spectrumView in self._parent.spectrumViews:
       spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
 
     # midnight = QTime(0, 0, 0)
@@ -226,6 +226,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisR = 4
     self.axisT = 20
     self.axisB = 80
+
+    self.setAutoFillBackground(False)
 
   def resizeGL(self, w, h):
     # GL.glViewport(0, 0, w, h)
@@ -352,7 +354,7 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glEndList()
 
   def _connectSpectra(self):
-    for spectrumView in self.parent.spectrumViews:
+    for spectrumView in self._parent.spectrumViews:
       spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
 
   def setXRotation(self, angle):
@@ -533,6 +535,7 @@ void main()
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
+    print ('>>>GLVersion', self._GLVersion)
 
     self.gridList = []
     for li in range(3):
@@ -645,6 +648,9 @@ void main()
     self._testString = GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=63, y=117
                                 , color=(0.15, 0.6, 0.25, 1.0), GLContext=self)
 
+    # set the GL constants here
+    GL.glClearColor(0.2, 0.2, 0.2, 1.0)
+
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
 
@@ -662,7 +668,7 @@ void main()
 
     if self._lastButtonReleased == Qt.RightButton:
       # raise right-button context menu
-      self.parent.viewBox.menu.exec(self.mapToGlobal(ev.pos()))
+      self._parent.viewBox.menu.exec(self.mapToGlobal(ev.pos()))
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()
@@ -1000,7 +1006,7 @@ void main()
       #
       #     if self.peakLabelling == 0:
       #       text = _getScreenPeakAnnotation(peak, useShortCode=False)
-      #     elif self.parentWidget().strip.peakLabelling == 1:
+      #     elif self._parentWidget().strip.peakLabelling == 1:
       #       text = _getScreenPeakAnnotation(peak, useShortCode=True)
       #     else:
       #       text = _getPeakAnnotation(peak)  # original 'pid'
@@ -1075,7 +1081,7 @@ void main()
 
           if self.peakLabelling == 0:
             text = _getScreenPeakAnnotation(peak, useShortCode=False)
-          elif self.parentWidget().strip.peakLabelling == 1:
+          elif self._parentWidget().strip.peakLabelling == 1:
             text = _getScreenPeakAnnotation(peak, useShortCode=True)
           else:
             text = _getPeakAnnotation(peak)  # original 'pid'
@@ -1188,13 +1194,15 @@ void main()
 
     GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
 
-    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
-    GL.glDisable(GL.GL_BLEND)
+    # GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
+    GL.glEnable(GL.GL_BLEND)
     # GL.glDisable(GL.GL_ALPHA_TEST)
-    GL.glClearColor(0.05, 0.05, 0.05, 1.0)
-    GL.glBlendColor(0.0, 0.0, 0.0, 1.0)
+    # GL.glClearColor(0.2, 0.2, 0.2, 1.0)
+    GL.glBlendColor(1.0, 1.0, 1.0, 1.0)
+    GL.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO)
+
     # GL.glClearIndex()
-    GL.glClear(GL.GL_COLOR_BUFFER_BIT)  # | GL.GL_DEPTH_BUFFER_BIT)
+    GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
     GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
     GL.glDisable(GL.GL_BLEND)
@@ -1327,7 +1335,7 @@ void main()
     self.viewports.setViewport('mainView')
 
     GL.glLineWidth(1.0)
-    for spectrumView in self.parent.spectrumViews:
+    for spectrumView in self._parent.spectrumViews:
       try:
         # could put a signal on buildContours
         if spectrumView.buildContours:
@@ -1376,7 +1384,7 @@ void main()
                              0.0, 0.0, 0.0, 1.0]
     self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
-    for spectrumView in self.parent.spectrumViews:
+    for spectrumView in self._parent.spectrumViews:
       try:
         self._spectrumValues = spectrumView._getValues()
         # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
@@ -1588,7 +1596,7 @@ void main()
     # GL.glPopMatrix()
 
     # self.set2DProjection()
-    # for spectrumView in self.parent.spectrumViews:
+    # for spectrumView in self._parent.spectrumViews:
     #   self._drawPeakLists(spectrumView)
 
     # draw the mouse coordinates
@@ -1675,7 +1683,7 @@ void main()
     # draw the string
     self._testString.drawTextArray()
 
-    for spectrumView in self.parent.spectrumViews:
+    for spectrumView in self._parent.spectrumViews:
       try:
         self._buildPeakListLabels(spectrumView)      # should include rescaling
         self._drawPeakListLabels(spectrumView)
@@ -1820,6 +1828,7 @@ void main()
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     GL.glPopAttrib(GL.GL_ALL_ATTRIB_BITS)
+    # GLUT.glutSwapBuffers()
 
   def _makeSpectrumArray(self, spectrumView, drawList):
     drawList.renderMode = GLRENDERMODE_DRAW
@@ -1958,10 +1967,10 @@ void main()
     # GLU.gluOrtho2D(-10, 50, -10, 0)
 
     # testing - grab the coordinates from the plotWidget
-    # axisRangeL = self.parent.plotWidget.getAxis('bottom').range
+    # axisRangeL = self._parent.plotWidget.getAxis('bottom').range
     # axL = axisRangeL[0]
     # axR = axisRangeL[1]
-    # axisRangeB = self.parent.plotWidget.getAxis('right').range
+    # axisRangeB = self._parent.plotWidget.getAxis('right').range
     # axB = axisRangeB[0]
     # axT = axisRangeB[1]
 
@@ -1985,10 +1994,10 @@ void main()
     GL.glViewport(w-35-axisLine, 35, axisLine, h-35)   # leave a 35 width margin for the axes - bottom/right
                                         # (0,0) is bottom-left
 
-    # axisRangeL = self.parent.plotWidget.getAxis('bottom').range
+    # axisRangeL = self._parent.plotWidget.getAxis('bottom').range
     # axL = axisRangeL[0]
     # axR = axisRangeL[1]
-    # axisRangeB = self.parent.plotWidget.getAxis('right').range
+    # axisRangeB = self._parent.plotWidget.getAxis('right').range
     # axB = axisRangeB[0]
     # axT = axisRangeB[1]
 
@@ -2022,10 +2031,10 @@ void main()
     GL.glViewport(0, 35, w-35, axisLine)   # leave a 35 width margin for the axes - bottom/right
                                     # (0,0) is bottom-left
 
-    # axisRangeL = self.parent.plotWidget.getAxis('bottom').range
+    # axisRangeL = self._parent.plotWidget.getAxis('bottom').range
     # axL = axisRangeL[0]
     # axR = axisRangeL[1]
-    # axisRangeB = self.parent.plotWidget.getAxis('right').range
+    # axisRangeB = self._parent.plotWidget.getAxis('right').range
     # axB = axisRangeB[0]
     # axT = axisRangeB[1]
 

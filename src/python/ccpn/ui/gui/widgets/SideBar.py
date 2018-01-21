@@ -375,6 +375,8 @@ class SideBar(QtGui.QTreeWidget, Base):
           try:
             obj._mainWindow.sideBar.fillSideBar(obj)
             obj._mainWindow.show()
+            QtGui.QApplication.setActiveWindow(obj._mainWindow)
+
           except Exception as es:
             getLogger().warning('Error', str(es))
 

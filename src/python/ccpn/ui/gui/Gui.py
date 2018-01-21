@@ -169,7 +169,8 @@ class Gui(Ui):
     sys.stderr.write('==> Gui interface is ready\n' )
 
     self.mainWindow.show()
-    self.mainWindow.raise_()
+    QtGui.QApplication.setActiveWindow(self.mainWindow)
+
     self.qtApp.start()
 
   def _showRegisterPopup(self):
@@ -312,6 +313,7 @@ class MainWindow(coreClass, _GuiMainWindow):
 
     application = project._appBase
     _GuiMainWindow.__init__(self, application = application)
+
     # hide the window here and make visible later
     self.hide()
 

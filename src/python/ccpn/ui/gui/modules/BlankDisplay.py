@@ -99,6 +99,8 @@ class BlankDisplay(CcpnModule):
             self.project = obj
             obj._mainWindow.sideBar.fillSideBar(obj)
             obj._mainWindow.show()
+            QtGui.QApplication.setActiveWindow(obj._mainWindow)
+
             success = True
 
           if isinstance(obj, Spectrum):

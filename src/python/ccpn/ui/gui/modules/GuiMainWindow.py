@@ -371,6 +371,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
         if project:
           project._mainWindow.show()
+          QtGui.QApplication.setActiveWindow(project._mainWindow)
         else:
           MessageDialog.showError('loadProject', 'Error loading project:\n%s' % str(projectDir))
           Logging.getLogger().warning('Error loading project: %s' % str(projectDir))

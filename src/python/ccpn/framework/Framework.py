@@ -958,6 +958,7 @@ class Framework:
       project = self.newProject()
       try:
         project._mainWindow.show()
+        QtGui.QApplication.setActiveWindow(project._mainWindow)
       except Exception as es:
         getLogger().warning('Error creating new project:', str(es))
 
@@ -987,6 +988,8 @@ class Framework:
     project = self.ui.mainWindow.loadProject(projectDir=path)
     try:
       project._mainWindow.show()
+      QtGui.QApplication.setActiveWindow(project._mainWindow)
+
     except Exception as es:
       getLogger().warning('Error opening project:', str(es))
     finally:

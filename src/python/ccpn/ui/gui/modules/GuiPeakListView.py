@@ -1135,13 +1135,16 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
         else:
           self.setText(text)
 
+        undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+                     redoArgs=(peakItem, clearLabel))
+
       finally:
         if undo is not None:
           undo.decreaseBlocking()
         project._endCommandEchoBlock()
 
-      undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
-                   redoArgs=(peakItem, clearLabel))
+      # undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+      #              redoArgs=(peakItem, clearLabel))
 
   def clearPeakAnnotationItem(self, peakItem):
 

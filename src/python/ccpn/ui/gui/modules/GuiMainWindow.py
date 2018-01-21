@@ -119,11 +119,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.statusBar().showMessage('Ready')
     self.show()
 
-  # def resizeEvent(self, ev):
-  #   self.updateGeometry()
-  #   super(GuiMainWindow, self).resizeEvent(ev)
-  #   print('>>>update')
-  #
   def changeEvent(self, event):
     if event.type() == QtCore.QEvent.WindowStateChange:
       if self.windowState() & QtCore.Qt.WindowMinimized:
@@ -621,7 +616,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
                                      ['Save and Quit', 'Quit without Saving', 'Cancel'],
-                                   parent=self)
+                                   )
     if reply == 'Save and Quit':
       if event:
         event.accept()

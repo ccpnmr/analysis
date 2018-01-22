@@ -42,6 +42,7 @@ class ReferenceChemicalShifts(CcpnModule): # DropBase needs to be first, else th
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     self.plotWidget = pg.PlotWidget()
+    self.plotWidget.invertX()
     self.mainWindow = mainWindow
     self.project = self.mainWindow.project
     self.addWidget(self.plotWidget, 1, 0, 1, 4)

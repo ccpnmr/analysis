@@ -203,7 +203,7 @@ class NmrResidueTableModule(CcpnModule):
         for display in displays:
             if len(display.strips) > 0:
                 navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
-                                              widths=['full'] * len(display.strips[0].axisCodes),
+                                              widths=None,   #['full'] * len(display.strips[0].axisCodes),
                                               showSequentialResidues = (len(display.axisCodes) > 2) and
                                               self.sequentialStripsWidget.checkBox.isChecked(),
                                               markPositions = self.markPositionsWidget.checkBox.isChecked()

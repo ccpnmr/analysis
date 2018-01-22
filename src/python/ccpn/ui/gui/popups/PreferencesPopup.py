@@ -296,13 +296,17 @@ class PreferencesPopup(CcpnDialog):
 
     row += 1
     zoomPercent = self.preferences.general.zoomPercent
-    self.zoomPercentLabel = Label(parent, text="Manual zoom (%)", grid=(row, 0))
+    self.zoomPercentLabel = Label(parent, text="Manual Zoom (%)", grid=(row, 0))
     self.zoomPercentData = DoubleSpinbox(parent, step=1
                                             , min=1, max=100, grid=(row, 1), hAlign='l')
     self.zoomPercentData.setValue(int(zoomPercent))
     self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
     self.zoomPercentData.editingFinished.connect(self._setZoomPercent)
 
+    row += 1
+    self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
+    self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
+    self.showGridBox.toggled.connect(partial(self._toggleGeneralOptions, 'showGrid'))
 
   def _setExternalProgramsTabWidgets(self, parent):
     ''' 

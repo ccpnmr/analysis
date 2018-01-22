@@ -193,10 +193,9 @@ class GuiStrip(Frame):
                                         self.spectrumDisplay._processDroppedItems)
 
     # set peakLabelling to the default from preferences
-    try:
-      self.peakLabelling = self.application.preferences.general.annotationType
-    except:
-      self.peakLabelling = 0
+    self.peakLabelling = self.application.preferences.general.annotationType
+    self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
+
     self.show()
 
   @property

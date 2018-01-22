@@ -440,10 +440,13 @@ class ChemicalShiftsMapping(CcpnModule):
     nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())
     if nc:
       deltaShifts = [ n._deltaShift for n in nc.nmrResidues]
-      std = np.std(deltaShifts)
-      if std:
-        self.thresholdLinePos = std
-        self.thresholdSpinBox.set(std)
+      try:
+        std = np.std(deltaShifts)
+        if std:
+          self.thresholdLinePos = std
+          self.thresholdSpinBox.set(std)
+      except Exception as es:
+        getLogger().warning('Error processing deltaShifts: %s' % str(es))
 
   def _addAtomCheckBoxes(self, atoms, rowPos, colPos ):
     texts = sorted(atoms, key=CcpnSorting.stringSortKey)

@@ -666,13 +666,17 @@ class Framework:
 
     getLogger().debug('echoBlocking=%s' % self._echoBlocking)
     undo = self.project._undo
+
+    # TODO:ED testing moving this to here
+    self.project.resumeNotification()
+
     if undo is not None:                # ejb - changed from if undo:
       undo.decreaseWaypointBlocking()
 
     if self._echoBlocking > 0:
       # If statement should always be True, but to avoid weird behaviour in error situations we check
       self._echoBlocking -= 1
-    self.project.resumeNotification()
+    # self.project.resumeNotification()
 
   def addApplicationMenuSpec(self, spec, position=3):
     """Add an entirely new menu at specified position"""

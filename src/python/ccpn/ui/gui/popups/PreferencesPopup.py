@@ -257,7 +257,7 @@ class PreferencesPopup(CcpnDialog):
     row += 1
     self.peakSymbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))
     peakSymbol = self.preferences.general.peakSymbolType
-    self.peakSymbol = RadioButtons(parent, texts=['Cross', 'lineWidths'],
+    self.peakSymbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
                                     selectedInd=peakSymbol,
                                     callback=self._setPeakSymbol,
                                     direction='v',

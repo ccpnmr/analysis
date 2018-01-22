@@ -994,7 +994,7 @@ class PeakNd(QtGui.QGraphicsItem):
             painter.drawLine(r,-w,-r,-w)
         return
 
-      if symbolType == 1:                     # draw an ellipse at lineWidth
+      if symbolType == 1 or symbolType == 2:                     # draw an ellipse at lineWidth
         symbolWidths = list(self.peak.lineWidths)
 
         # TODO:ED check whether ppm or Hz for the lineWidths - assuming Hz by default
@@ -1018,7 +1018,9 @@ class PeakNd(QtGui.QGraphicsItem):
               pen = QtGui.QPen(QtGui.QColor('black'))
             pen.setWidth(lineThickness)
             painter.setPen(pen)
-            painter.drawEllipse(-pos[0]/2.0, -pos[1]/2.0, pos[0], pos[1])
+            if symbolType == 2:
+              painter.setBrush(QtGui.QColor(colour))
+            painter.drawEllipse(-pos[0] / 2.0, -pos[1] / 2.0, pos[0], pos[1])
 
           elif self._isInFlankingPlane:
             vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
@@ -1036,6 +1038,8 @@ class PeakNd(QtGui.QGraphicsItem):
             pen.setStyle(QtCore.Qt.DotLine)
             pen.setWidth(lineThickness)
             painter.setPen(pen)
+            if symbolType == 2:
+              painter.setBrush(QtGui.QColor(colour))
             painter.drawEllipse(-pos[0]/2.0, -pos[1]/2.0, pos[0], pos[1])
 
         else:
@@ -1122,7 +1126,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
       else:
         text = _getPeakAnnotation(peakItem.peak)                            # original 'pid'
 
-      self.setText(text)
+      # self.setText(text)
 
       project = peakItem.peak.project
       project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem, quiet=True)
@@ -1130,21 +1134,25 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
       if undo is not None:
         undo.increaseBlocking()
       try:
+        # TODO:ED can't remember why I did this
         if clearLabel:
           self.setText(text)
         else:
           self.setText(text)
 
-        undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
-                     redoArgs=(peakItem, clearLabel))
+        # undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+        #              redoArgs=(peakItem, clearLabel))
 
       finally:
         if undo is not None:
           undo.decreaseBlocking()
-        project._endCommandEchoBlock()
+        # project._endCommandEchoBlock()
 
-      # undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
-      #              redoArgs=(peakItem, clearLabel))
+      # TODO:ED check why this is updating in wrong correct place
+      undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+                   redoArgs=(peakItem, clearLabel))
+
+      project._endCommandEchoBlock()
 
   def clearPeakAnnotationItem(self, peakItem):
 

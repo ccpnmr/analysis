@@ -117,7 +117,7 @@ class SequenceModule(CcpnModule):
       try:
         seqGraphs[0].predictSequencePosition(seqGraphs[0].predictedStretch)
       except Exception as es:
-        getLogger().warning('Error: no predictedStretch found %s' % str(es))
+        getLogger().warning('Error: no predictedStretch found: %s' % str(es))
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
     """

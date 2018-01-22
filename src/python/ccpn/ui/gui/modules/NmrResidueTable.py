@@ -45,7 +45,7 @@ from ccpn.ui.gui.widgets.QuickTable import QuickTable, QuickTableFrame
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Blank import Blank
-from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
+from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, _getCurrentZoomRatio
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
@@ -202,8 +202,9 @@ class NmrResidueTableModule(CcpnModule):
         # navigate the displays
         for display in displays:
             if len(display.strips) > 0:
+                newWidths = _getCurrentZoomRatio(display.strips[0].viewBox.viewRange())
                 navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
-                                              widths=None,   #['full'] * len(display.strips[0].axisCodes),
+                                              widths=newWidths,   #['full'] * len(display.strips[0].axisCodes),
                                               showSequentialResidues = (len(display.axisCodes) > 2) and
                                               self.sequentialStripsWidget.checkBox.isChecked(),
                                               markPositions = self.markPositionsWidget.checkBox.isChecked()
@@ -393,9 +394,10 @@ class NmrResidueTable(QuickTable):
     self.application.ui.mainWindow.clearMarks()
     if self.current.strip is not None:
         strip = self.current.strip
+        newWidths = _getCurrentZoomRatio(strip.viewBox.viewRange())
         navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
-
-                                      widths=['default'] * len(strip.axisCodes))
+                                      widths = None)
+                                      # widths=['default'] * len(strip.axisCodes))
 
     else:
       logger.warning('Impossible to navigate to peak position. Set a current strip first')

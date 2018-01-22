@@ -52,6 +52,7 @@ except ImportError:
             "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
+AXIS_MARGIN = 5
 AXIS_MARGINRIGHT = 35
 AXIS_MARGINBOTTOM = 35
 AXIS_LINE = 5
@@ -406,12 +407,13 @@ void main()
 
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
+uniform vec4 axisScale;
 varying vec4 FC;
 attribute vec2 offset;
 
 void main()
 {
-  gl_Position = pMatrix * mvMatrix * (gl_Vertex + vec4(offset, 0.0, 0.0));
+  gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
   gl_TexCoord[0] = gl_MultiTexCoord0;
   FC = gl_Color;
 }
@@ -535,7 +537,7 @@ void main()
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
-    print ('>>>GLVersion', self._GLVersion)
+    # print ('>>>GLVersion', self._GLVersion)
 
     self.gridList = []
     for li in range(3):
@@ -591,7 +593,8 @@ void main()
     self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex
                                         , fragment=self._fragmentShaderTex
                                         , attributes={'pMatrix':(16, np.float32)
-                                                      , 'mvMatrix':(16, np.float32)})
+                                                      , 'mvMatrix':(16, np.float32)
+                                                      , 'axisScale':(4, np.float32)})
 
     # these are the links to the GL projection.model matrices
     # self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
@@ -604,6 +607,7 @@ void main()
     self._uVMatrix = np.zeros((16,), dtype=np.float32)
     self._aMatrix = np.zeros((16,), dtype=np.float32)
     self._useTexture = np.zeros((1,), dtype=np.int)
+    self._axisScale = np.zeros((4,), dtype=np.float32)
     self.worldCoordinate = np.zeros((4,), dtype=np.float32)
 
     # self._positiveContours = np.zeros((4,), dtype=np.float32)
@@ -649,7 +653,7 @@ void main()
                                 , color=(0.15, 0.6, 0.25, 1.0), GLContext=self)
 
     # set the GL constants here
-    GL.glClearColor(0.2, 0.2, 0.2, 1.0)
+    GL.glClearColor(0.05, 0.05, 0.05, 1.0)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -1067,6 +1071,17 @@ void main()
         for peak in pls.peaks:
           p0 = peak.position
 
+          # TODO:ED display the required peaks
+          strip = spectrumView.strip
+          _isInPlane = strip.peakIsInPlane(peak)
+          if not _isInPlane:
+            _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+          else:
+            _isInFlankingPlane = None
+
+          if not _isInPlane and not _isInFlankingPlane:
+            continue
+
           # need to map world coordinate to screen for drawing text
 
           colour = pls.textColour
@@ -1094,11 +1109,11 @@ void main()
           # TODO:ED concatenate all strings into a single list
           # add a new string to the list
 
-          self._screenZero = self._uVMatrix.reshape((4, 4)).dot(self.aInv.dot([p0[0], p0[1], 0, 1]))
+          # self._screenZero = self._uVMatrix.reshape((4, 4)).dot(self.aInv.dot([p0[0], p0[1], 0, 1]))
 
           drawList.stringList.append(GLString(text=text
                                       , font=self.firstFont
-                                      , x=self._screenZero[0], y=self._screenZero[1]
+                                      , x=p0[0], y=p0[1]       #self._screenZero[0], y=self._screenZero[1]
                                       , color=(colR, colG, colB, 1.0), GLContext=self
                                       , pid=peak.pid))
 
@@ -1195,7 +1210,7 @@ void main()
     GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
 
     # GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
-    GL.glEnable(GL.GL_BLEND)
+    GL.glDisable(GL.GL_BLEND)
     # GL.glDisable(GL.GL_ALPHA_TEST)
     # GL.glClearColor(0.2, 0.2, 0.2, 1.0)
     GL.glBlendColor(1.0, 1.0, 1.0, 1.0)
@@ -1557,7 +1572,13 @@ void main()
               +str(round(self.worldCoordinate[0], 3))\
               +", "+str(round(self.worldCoordinate[1], 3))
 
-    coords = 'F'
+    self.mouseString = GLString(text=coords
+                                , font=self.firstFont
+                                , x=self.worldCoordinate[0], y=self.worldCoordinate[1]
+                                # self._screenZero[0], y=self._screenZero[1]
+                                , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                , pid=None)
+
     # self.glut_print(self.worldCoordinate[0], self.worldCoordinate[1]
     #                 , GLUT.GLUT_BITMAP_HELVETICA_12
     #                 , coords
@@ -1610,13 +1631,19 @@ void main()
     # GL.glTranslate(self.worldCoordinate[0], self.worldCoordinate[1], 0.0)      # from bottom left of window?
     # GL.glScalef(3.0, 3.0, 1.0)                              # use this for scaling font
     GL.glColor3f(0.9, 0.9, 0.9)
-    self._uMVMatrix[0:16] = [self.pixelX*3.0, 0.0, 0.0, 0.0,
-                             0.0, self.pixelY*3.0, 0.0, 0.0,
+    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0,
                              0.0, 0.0, 1.0, 0.0,
-                             self.worldCoordinate[0]+(25*self.pixelX)
-                                  , self.worldCoordinate[1]+(25*self.pixelY), 0.0, 1.0]
+                             0.0, 0.0, 0.0, 1.0]
+    # self._uMVMatrix[0:16] = [self.pixelX*3.0, 0.0, 0.0, 0.0,
+    #                          0.0, self.pixelY*3.0, 0.0, 0.0,
+    #                          0.0, 0.0, 1.0, 0.0,
+    #                          self.worldCoordinate[0]+(25*self.pixelX)
+    #                               , self.worldCoordinate[1]+(25*self.pixelY), 0.0, 1.0]
     self._shaderProgramTex.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
-    GL.glCallLists([ord(c) for c in coords])
+    # GL.glCallLists([ord(c) for c in coords])
+
+    self.mouseString.drawTextArray()
     # GL.glPopMatrix()
 
     # draw axes labelling
@@ -1669,9 +1696,12 @@ void main()
     # draw the testString to the screen
     self.viewports.setViewport('mainView')
 
+    # testing text
+    # GL.glDisable(GL.GL_BLEND)
+
     # TODO:ED check that this is the correct dimensions of the window
-    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, w-35, 35, h, -1.0, 1.0)
-    # self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+    # self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, w-35, 35, h, -1.0, 1.0)
+    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
     self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
@@ -1679,6 +1709,10 @@ void main()
                              0.0, 0.0, 1.0, 0.0,
                              0.0, 0.0, 0.0, 1.0]
     self._shaderProgramTex.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+    self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+    # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
+    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, GL.GL_FALSE, self._axisScale)
 
     # draw the string
     self._testString.drawTextArray()
@@ -2015,7 +2049,7 @@ void main()
     axisLine = 5
     h = self.height()
     w = self.width()
-    GL.glViewport(w-AXIS_MARGIN, AXIS_MARGIN, AXIS_MARGIN, h-AXIS_MARGIN)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(w-AXIS_MARGIN, AXIS_MARGINRIGHT, AXIS_MARGINBOTTOM, h-AXIS_MARGIN)   # leave a 35 width margin for the axes - bottom/right
     GLU.gluOrtho2D(*axisLimits)      # nearly!
 
     GL.glMatrixMode(GL.GL_MODELVIEW)
@@ -2623,6 +2657,13 @@ class ShaderProgram(object):
                             , count, transpose, value)
     else:
       raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
+
+  def setGLUniform4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
+    if uniformLocation in self.uniformLocations:
+      GL.glUniform4fv(self.uniformLocations[uniformLocation]
+                      , count, value)
+    else:
+      raise RuntimeError('Error setting setGLUniform4fv: %s' % uniformLocation)
 
   def setGLUniform1i(self, uniformLocation=None, count=1, value=None):
     if uniformLocation in self.uniformLocations:

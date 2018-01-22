@@ -93,7 +93,7 @@ class QuickTable(TableWidget, Base):
                dataFrameObject=None,      # collate into a single object that can be changed quickly
                actionCallback=None, selectionCallback=None, checkBoxCallback = None,
                multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
-               enableExport=True, enableDelete=True,
+               enableExport=True, enableDelete=True, enableSearch=True,
                hideIndex=True, stretchLastSection=True,
                **kw):
     """
@@ -171,6 +171,7 @@ class QuickTable(TableWidget, Base):
     self.searchWidget = None
     self._setHeaderContextMenu()
     self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+    self._enableSearch = enableSearch
 
     # populate if a dataFrame has been passed in
     if dataFrameObject:
@@ -505,7 +506,7 @@ class QuickTable(TableWidget, Base):
     action = self.tableMenu.exec_(self.mapToGlobal(pos))
 
   def _raiseHeaderContextMenu(self, pos):
-    if self.searchWidget is None:
+    if self._enableSearch and self.searchWidget is None:
       if not attachSearchWidget(self):
         getLogger().warning('Search option not available')
 
@@ -514,7 +515,7 @@ class QuickTable(TableWidget, Base):
     self.headerContextMenumenu = QtGui.QMenu()
     columnsSettings = self.headerContextMenumenu.addAction("Columns Settings...")
     searchSettings = None
-    if self.searchWidget is not None:
+    if self._enableSearch and self.searchWidget is not None:
       searchSettings = self.headerContextMenumenu.addAction("Search")
     action = self.headerContextMenumenu.exec_(self.mapToGlobal(pos))
 

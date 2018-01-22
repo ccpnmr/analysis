@@ -615,6 +615,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
     prefFile.close()
 
+    # set the active window to mainWindow so that the quit popup centres correctly.
+    QtGui.QApplication.setActiveWindow(self)
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
                                      ['Save and Quit', 'Quit without Saving', 'Cancel'],
                                    )

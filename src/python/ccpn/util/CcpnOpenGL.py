@@ -1654,6 +1654,7 @@ void main()
       self.viewports.setViewport('bottomAxisBar')
       self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0, AXIS_MARGINBOTTOM, -1.0, 1.0)
       self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
 
       for axLabel in self.axisLabelling['0']:
         axisX = axLabel[2]
@@ -1673,6 +1674,7 @@ void main()
       self.viewports.setViewport('rightAxisBar')
       self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT, self.axisB, self.axisT, -1.0, 1.0)
       self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
 
       for axLabel in self.axisLabelling['1']:
         axisY = axLabel[2]

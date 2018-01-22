@@ -841,15 +841,19 @@ class QuickTable(TableWidget, Base):
       if self.multiSelect:
         if isinstance(objList, list):
           for obj in objList:
-            try:
+            if obj in multipleAttr:
               multipleAttr.remove(obj)
-            except:
-              getLogger().warning('%s not found in the list' % obj)
+            # try:
+            #   multipleAttr.remove(obj)
+            # except:
+            #   getLogger().warning('%s not found in the list' % obj)
         else:
-          try:
+          if objList in multipleAttr:
             multipleAttr.remove(objList)
-          except:
-            getLogger().warning('%s not found in the list' % objList)
+          # try:
+          #   multipleAttr.remove(objList)
+          # except:
+          #   getLogger().warning('%s not found in the list' % objList)
       else:
         setattr(self.current, singular, None)
 
@@ -1029,14 +1033,19 @@ class QuickTable(TableWidget, Base):
         if self._tableData['tableSelection']:
           tSelect = getattr(self, self._tableData['tableSelection'])
           if tSelect:
-            rows = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
 
-            if rows and len(rows) > 1:
-              self._dataFrameObject.appendObject(row)
-              # self.update()
-            else:
-              # self._update(self.nmrTable)
-              self._tableData['updateFunc'](tSelect)
+            # check that the object created is in the list viewed in tha table
+            # e.g. row.peakList == tSelect then add
+            if tSelect == getattr(row, self._tableData['tableName']):
+              objList = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
+
+              if objList and len(objList) > 1:
+                self._dataFrameObject.appendObject(row)
+                # self.update()
+              else:
+                # self._update(self.nmrTable)
+                self._dataFrameObject.appendObject(row)
+                # self._tableData['updateFunc'](tSelect)
 
       elif trigger == Notifier.CHANGE:
 

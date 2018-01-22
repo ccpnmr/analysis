@@ -547,11 +547,13 @@ class GuiStripNd(GuiStrip):
     #if peakListView:
     #  return peakListView
       
-    for spectrumView in self.spectrumViews:
-      for peakListView in spectrumView.peakListViews:
-        if peakList is peakListView.peakList:
-          #self.peakListViewDict[peakList] = peakListView
-          return peakListView
+    # TODO:ED temporary test because spectrumViews have been deleted at this point
+    if hasattr(self, 'spectrumViews'):
+      for spectrumView in self.spectrumViews:
+        for peakListView in spectrumView.peakListViews:
+          if peakList is peakListView.peakList:
+            #self.peakListViewDict[peakList] = peakListView
+            return peakListView
             
     return None
 

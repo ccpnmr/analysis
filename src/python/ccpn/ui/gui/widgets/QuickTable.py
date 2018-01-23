@@ -823,7 +823,7 @@ class QuickTable(TableWidget, Base):
 
   def clearSelection(self):
     """
-    clear the cxurrent selection in the table
+    clear the current selection in the table
     and remove objects form the current list
     """
     objList = self.getSelectedObjects()
@@ -1006,6 +1006,9 @@ class QuickTable(TableWidget, Base):
     row = data[Notifier.OBJECT]
     trigger = data[Notifier.TRIGGER]
 
+    if not self._dataFrameObject:
+      return
+
     self._silenceCallback = True
 
     try:
@@ -1023,8 +1026,9 @@ class QuickTable(TableWidget, Base):
 
         # remove item from self._dataFrameObject
 
-        self._dataFrameObject.removeObject(row)
-        self.clearSelection()
+        if row in self._dataFrameObject._objects:
+          self._dataFrameObject.removeObject(row)
+          self.clearSelection()
 
       elif trigger == Notifier.CREATE:
 

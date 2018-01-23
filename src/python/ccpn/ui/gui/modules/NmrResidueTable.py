@@ -49,6 +49,7 @@ from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, _getCurrentZoom
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Peak import Peak
 from PyQt4 import QtGui, QtCore
 from pyqtgraph import dockarea
 from pyqtgraph.dockarea import DockArea
@@ -264,7 +265,7 @@ class NmrResidueTable(QuickTable):
     self.moduleParent=moduleParent
     self._widget = Widget(parent=parent, **kwds)
 
-    self.nmrChain = None
+    self._nmrChain = None
     if actionCallback is None:
       actionCallback = self.defaultActionCallback
 
@@ -337,13 +338,14 @@ class NmrResidueTable(QuickTable):
       self._selectNmrChain(nmrChain)
 
     self.setTableNotifiers(tableClass=NmrChain
+                           , className=self.attributeName
+                           , tableSelection='_nmrChain'      # _nmrChain.nmrResidues
                            , rowClass=NmrResidue
-                           , cellClassNames=(NmrAtom, 'nmrResidue')
+                           , cellClassNames=[(NmrAtom, 'nmrResidue'),
+                                             (Peak, 'assignedNmrAtoms')]    # doesn't change anything
                            , tableName='nmrChain', rowName='nmrResidue'
                            , changeFunc=self.displayTableForNmrChain
-                           , className=self.attributeName
                            , updateFunc=self._update
-                           , tableSelection='nmrChain'      # - holds the current list
                            , pullDownWidget=self.ncWidget
                            , callBackClass=NmrResidue
                            , selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback)
@@ -381,8 +383,8 @@ class NmrResidueTable(QuickTable):
       else:
         for widgetObj in self.ncWidget.textList:
           if nmrChain.pid == widgetObj:
-            self.nmrChain = nmrChain
-            self.ncWidget.select(self.nmrChain.pid)
+            self._nmrChain = nmrChain
+            self.ncWidget.select(self._nmrChain.pid)
 
   def defaultActionCallback(self, nmrResidue, *args):
     """
@@ -416,7 +418,7 @@ class NmrResidueTable(QuickTable):
   #   thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
   #   nmrChain = data[Notifier.OBJECT]
   #
-  #   if self.nmrChain in thisChainList:
+  #   if self._nmrChain in thisChainList:
   #     trigger = data[Notifier.TRIGGER]
   #     if nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.DELETE:
   #
@@ -427,13 +429,13 @@ class NmrResidueTable(QuickTable):
   #       self.displayTableForNmrChain(nmrChain)
   #
   #     elif trigger == Notifier.RENAME:
-  #       if nmrChain == self.nmrChain:
+  #       if nmrChain == self._nmrChain:
   #         self.displayTableForNmrChain(nmrChain)
   #
   #   else:
   #     self.clear()
   #
-  #   logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+  #   logger.debug('>updateCallback>', data['notifier'], self._nmrChain, data['trigger'], data['object'], self._updateSilence)
   #
   # def _updateResidueCallback(self, data):
   #   """
@@ -443,7 +445,7 @@ class NmrResidueTable(QuickTable):
   #   nmrResidue = data[Notifier.OBJECT]
   #   trigger = data[Notifier.TRIGGER]
   #
-  #   if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
+  #   if self._nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
   #     # is the nmrResidue in the visible list
   #     # TODO:ED move these into the table class
   #
@@ -457,10 +459,10 @@ class NmrResidueTable(QuickTable):
   #
   #       # insert item into self._dataFrameObject
   #
-  #       if self.nmrChain.nmrResidues and len(self.nmrChain.nmrResidues) > 1:
+  #       if self._nmrChain.nmrResidues and len(self._nmrChain.nmrResidues) > 1:
   #         self._dataFrameObject.appendObject(nmrResidue)
   #       else:
-  #         self._update(self.nmrChain)
+  #         self._update(self._nmrChain)
   #
   #     elif trigger == Notifier.CHANGE:
   #
@@ -474,7 +476,7 @@ class NmrResidueTable(QuickTable):
   #       # modify the oldPid in the objectList, change to newPid
   #       self._dataFrameObject.renameObject(nmrResidue, oldPid)
   #
-  #   logger.debug('>updateResidueCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+  #   logger.debug('>updateResidueCallback>', data['notifier'], self._nmrChain, data['trigger'], data['object'], self._updateSilence)
   #
   # def _updateAtomCallback(self, data):
   #   """
@@ -484,18 +486,18 @@ class NmrResidueTable(QuickTable):
   #   nmrAtom = data[Notifier.OBJECT]
   #   nmrResidue = nmrAtom.nmrResidue
   #
-  #   if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
+  #   if self._nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
   #     # change the dataFrame for the updated nmrAtom
   #     self._dataFrameObject.changeObject(nmrResidue)
   #
-  #   logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+  #   logger.debug('>updateCallback>', data['notifier'], self._nmrChain, data['trigger'], data['object'], self._updateSilence)
 
   def _maximise(self):
     """
     refresh the table on a maximise event
     """
-    if self.nmrChain:
-      self.displayTableForNmrChain(self.nmrChain)
+    if self._nmrChain:
+      self.displayTableForNmrChain(self._nmrChain)
     else:
       self.clear()
 
@@ -548,17 +550,17 @@ class NmrResidueTable(QuickTable):
       # TODO:ED this should never be called, and where is it?
       self.current.clearNmrResidues()
 
-    NmrResidueTableModule.currentCallback = {'object':self.nmrChain, 'table':self}
+    NmrResidueTableModule.currentCallback = {'object':self._nmrChain, 'table':self}
 
 
   def _selectionPulldownCallback(self, item):
     """
     Notifier Callback for selecting NmrChain
     """
-    self.nmrChain = self.project.getByPid(item)
-    logger.debug('>selectionPulldownCallback>', item, type(item), self.nmrChain)
-    if self.nmrChain is not None:
-      self.displayTableForNmrChain(self.nmrChain)
+    self._nmrChain = self.project.getByPid(item)
+    logger.debug('>selectionPulldownCallback>', item, type(item), self._nmrChain)
+    if self._nmrChain is not None:
+      self.displayTableForNmrChain(self._nmrChain)
     else:
       self.clearTable()
 

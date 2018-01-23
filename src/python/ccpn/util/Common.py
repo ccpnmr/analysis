@@ -474,7 +474,9 @@ def axisCodesCompare(code, code2, mismatch=0):
         score = 2
       else:
         # except as above we need at least two char match
-        score = mismatch
+
+        # TODO:ED check matching codes when each contain more than 1 character; dict?
+        score = 3     #mismatch
     elif code.startswith('J') and score == 2:
       # 'Jab' matches 'J' or 'Jab...', but NOT 'Ja...'
       score = mismatch

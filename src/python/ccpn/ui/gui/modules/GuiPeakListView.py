@@ -1020,7 +1020,7 @@ class PeakNd(QtGui.QGraphicsItem):
             painter.setPen(pen)
             if symbolType == 2:
               painter.setBrush(QtGui.QColor(colour))
-            painter.drawEllipse(-pos[0] / 2.0, -pos[1] / 2.0, pos[0], pos[1])
+            painter.drawEllipse(-(pos[0]+1) / 2.0, -(pos[1]+1) / 2.0, pos[0], pos[1])
 
           elif self._isInFlankingPlane:
             vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
@@ -1040,7 +1040,7 @@ class PeakNd(QtGui.QGraphicsItem):
             painter.setPen(pen)
             if symbolType == 2:
               painter.setBrush(QtGui.QColor(colour))
-            painter.drawEllipse(-pos[0]/2.0, -pos[1]/2.0, pos[0], pos[1])
+            painter.drawEllipse(-(pos[0]+1) / 2.0, -(pos[1]+1) / 2.0, pos[0], pos[1])
 
         else:
           # lineWidths undefined; draw a dotted circle

@@ -64,6 +64,7 @@ class BarGraphWidget(Widget, Base):
     self.colour = colour
     self.aboveBrush = 'g'
     self.belowBrush = 'r'
+    self.disappearedBrush = 'b'
     self.threshouldLine = threshouldLine
     self.setData(viewBox=self.customViewBox, xValues=xValues,yValues=yValues, objects=objects,colour=colour,replace=True)
     self._addExtraItems()
@@ -252,23 +253,24 @@ nmrChain.nmrResidues = nmrResidues
 
 
 
-if __name__ == '__main__':
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-
-  app = TestApplication()
-  win = QtGui.QMainWindow()
-
-  moduleArea = CcpnModuleArea(mainWindow=None, )
-  chemicalShiftsMapping = ChemicalShiftsMapping(mainWindow=None, nmrChain=nmrChain)
-  moduleArea.addModule(chemicalShiftsMapping)
-
-
-
-
-  win.setCentralWidget(moduleArea)
-  win.resize(1000, 500)
-  win.setWindowTitle('Testing %s' % chemicalShiftsMapping.moduleName)
-  win.show()
-
-  app.start()
+# if __name__ == '__main__':
+#   from ccpn.ui.gui.widgets.Application import TestApplication
+#   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+#   from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping
+#
+#   app = TestApplication()
+#   win = QtGui.QMainWindow()
+#
+#   moduleArea = CcpnModuleArea(mainWindow=None, )
+#   chemicalShiftsMapping = ChemicalShiftsMapping(mainWindow=None, nmrChain=nmrChain)
+#   moduleArea.addModule(chemicalShiftsMapping)
+#
+#
+#
+#
+#   win.setCentralWidget(moduleArea)
+#   win.resize(1000, 500)
+#   win.setWindowTitle('Testing %s' % chemicalShiftsMapping.moduleName)
+#   win.show()
+#
+#   app.start()

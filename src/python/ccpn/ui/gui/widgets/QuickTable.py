@@ -562,26 +562,37 @@ class QuickTable(TableWidget, Base):
         if hasattr(selected[0], 'project'):
           thisProject = selected[0].project
           thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
-          try:
 
-            # self.blockSignals(True)
-            self._silenceCallback = True
+          # bug hunt
+          self._silenceCallback = True
+          for obj in selected:
+            if hasattr(obj, 'pid'):
 
-            # TODO:ED check why this does not undo as single event
-            for obj in selected:
-              if hasattr(obj, 'pid'):
+              # print ('>>> deleting', obj)
+              obj.delete()
+          self._silenceCallback = False
+          thisProject._endCommandEchoBlock()
 
-                # print ('>>> deleting', obj)
-                obj.delete()
-
-          except Exception as es:
-            getLogger().warning(str(es))
-          finally:
-
-            self._silenceCallback = False
-            # self.blockSignals(False)
-
-            thisProject._endCommandEchoBlock()
+          # try:
+          #
+          #   # self.blockSignals(True)
+          #   self._silenceCallback = True
+          #
+          #   # TODO:ED check why this does not undo as single event
+          #   for obj in selected:
+          #     if hasattr(obj, 'pid'):
+          #
+          #       print ('>>> deleting', obj)
+          #       obj.delete()
+          #
+          # except Exception as es:
+          #   getLogger().warning(str(es))
+          # finally:
+          #
+          #   self._silenceCallback = False
+          #   # self.blockSignals(False)
+          #
+          #   thisProject._endCommandEchoBlock()
 
         else:
 
@@ -1087,6 +1098,21 @@ class QuickTable(TableWidget, Base):
                       , self._tableData['tableSelection']
                       , data['trigger'], data['object'])
 
+  def _makeIterableList(self, inList):
+    """
+    Take a list of lists and concatenate into a single list.
+    Remove any None's from the list
+    :param inList:
+    :return single list:
+    """
+    if isinstance(inList, Iterable):
+      return [y for x in inList for y in self._makeIterableList(x) if inList]
+    else:
+      if inList:
+        return [inList]
+      else:
+        return []
+
   def _updateCellCallback(self, attr, data):
     """
     Notifier callback for updating the table
@@ -1095,27 +1121,46 @@ class QuickTable(TableWidget, Base):
     # thisTableList = getattr(data[Notifier.THEOBJECT]
     #                         , self._tableData['className'])   # get the tableList
 
-    cell = data[Notifier.OBJECT]
+    cellData = data[Notifier.OBJECT]
     # row = getattr(cell, self._tableData['rowName'])
-    rows = getattr(cell, attr)
-
-    if not isinstance(rows, (list, tuple)):
-      rows = [rows]
+    cells = getattr(cellData, attr)
+    cells = self._makeIterableList(cells)
 
     self._silenceCallback = True
-    for row in rows:
-      if getattr(row, self._tableData['tableName']).pid == self._tableData['pullDownWidget'].getText():
 
-        # keep the original sorting method
-        sortOrder = self.horizontalHeader().sortIndicatorOrder()
-        sortColumn = self.horizontalHeader().sortIndicatorSection()
+    for cell in cells:
+      callbacktypes = self._tableData['cellClassNames']
+      rowObj = None
+      if isinstance(callbacktypes, list):
+        for cBack in callbacktypes:
 
-        # change the dataFrame for the updated nmrCell
-        self._dataFrameObject.changeObject(row)
+          # check if row is the correct type of class
+          if isinstance(cell, cBack[0]):
+            rowObj = getattr(cell, cBack[1])
+      else:
+        rowObj = getattr(cell, callbacktypes[1])
 
-        # re-sort the table
-        if sortColumn < self.columnCount():
-          self.sortByColumn(sortColumn, sortOrder)
+      if rowObj:
+
+        # update the correct row
+        newData = data.copy()
+        newData[Notifier.OBJECT] = rowObj
+        newData[Notifier.TRIGGER] = Notifier.CHANGE
+        self._updateRowCallback(newData)
+
+        # temp2 = self._tableData['pullDownWidget']
+        # if foundCallBack.pid == temp2.getText():
+        #
+        #   # keep the original sorting method
+        #   sortOrder = self.horizontalHeader().sortIndicatorOrder()
+        #   sortColumn = self.horizontalHeader().sortIndicatorSection()
+        #
+        #   # change the dataFrame for the updated nmrCell
+        #   self._dataFrameObject.changeObject(row)
+        #
+        #   # re-sort the table
+        #   if sortColumn < self.columnCount():
+        #     self.sortByColumn(sortColumn, sortOrder)
 
     self._silenceCallback = False
     getLogger().debug('>updateCellCallback>', data['notifier']

@@ -257,8 +257,10 @@ class ChemicalShiftsMapping(CcpnModule):
       #                                        self._peakChangedCallBack, onceOnly=True)
       # self._peakChangedNotifier.lastPeakPos = None
 
-      self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',
+      self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE, Notifier.DELETE], 'NmrResidue',
                                            self._nmrResidueChanged)
+      self._nrDeletedNotifier = Notifier(self.project, [Notifier.CHANGE, Notifier.DELETE], 'NmrResidue',
+                                         self._nmrResidueDeleted)
 
       if self.project:
         if len(self.project.nmrChains) > 0:
@@ -513,6 +515,10 @@ class ChemicalShiftsMapping(CcpnModule):
     nmrResidue =  data[Notifier.OBJECT]
     self.updateModule()
 
+  def _nmrResidueDeleted(self, data):
+    if len(self.current.nmrResidues) == 0:
+      self.updateModule()
+
   def _selectNmrResiduesAboveThreshold(self):
     if self.aboveObjects:
       self.current.nmrResidues = self.aboveObjects
@@ -590,17 +596,17 @@ class ChemicalShiftsMapping(CcpnModule):
       if name == selectedNameColourC:
         self.disappearedPeakBrush = code
 
-    self.barGraphWidget.deleteLater()
-    self.barGraphWidget = None
-    self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application,
-                                         xValues=xs, yValues=ys, objects=obs,threshouldLine = thresholdPos,
-                                         grid=(10, 0))
+    # self.barGraphWidget.deleteLater()
+    # self.barGraphWidget = None
+    # self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application,
+    #                                      xValues=xs, yValues=ys, objects=obs,threshouldLine = thresholdPos,
+    #                                      grid=(10, 0))
     self.barGraphWidget.setMinimumHeight(100)
     self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
     self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._updateThreshold)
     self.barGraphWidget.customViewBox.addSelectionBox()
     self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
-
+    self.barGraphWidget.clearBars()
     self.barGraphWidget._lineMoved(aboveX=self.aboveX,
                                    aboveY=self.aboveY,
                                    aboveObjects=self.aboveObjects,
@@ -614,7 +620,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                    disappearedObjects = self.disappereadObjects,
                                    disappearedBrush = self.disappearedPeakBrush,
                                    )
-    self.splitter.addWidget(self.barGraphWidget)
+    # self.splitter.addWidget(self.barGraphWidget)
     # self._colourDeltaShiftTableValues()
 
   # def _colourDeltaShiftTableValues(self):
@@ -839,9 +845,10 @@ class ChemicalShiftsMapping(CcpnModule):
     # self._peakChangedNotifier.unRegister()
     if self._peakDeletedNotifier:
       self._peakDeletedNotifier.unRegister()
-
     if self._nrChangedNotifier:
       self._nrChangedNotifier.unRegister()
+    if self._nrDeletedNotifier:
+      self._nrDeletedNotifier.unRegister()
 
     super(ChemicalShiftsMapping, self)._closeModule()
 

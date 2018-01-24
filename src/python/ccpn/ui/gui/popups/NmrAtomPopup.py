@@ -61,6 +61,21 @@ class NmrAtomPopup(CcpnDialog):
     if nmrAtom.name:
       self.nmrAtomNamePulldown.select(self.nmrAtom.name)
 
+  def _repopulate(self):
+    self.nmrAtomLabel.setText("NmrAtom: %s " % self.nmrAtom.id)
+    self.nmrResiduePulldown.setData([x.id for x in self.nmrAtom.project.nmrResidues])
+    self.nmrResiduePulldown.select(self.nmrAtom.nmrResidue.id)
+    isotopeCode = self.nmrAtom.isotopeCode
+    nucleus = isotopeCode2Nucleus(isotopeCode)
+    if nucleus:
+      atomNames = sorted(set([x for y in PROTEIN_ATOM_NAMES.values() for x in y if x.startswith(nucleus)]))
+    else:
+      atomNames = sorted(set([x for y in PROTEIN_ATOM_NAMES.values() for x in y]))
+
+    self.nmrAtomNamePulldown.setData(texts=atomNames)
+
+    if self.nmrAtom.name:
+      self.nmrAtomNamePulldown.select(self.nmrAtom.name)
 
   def _applyChanges(self):
     """

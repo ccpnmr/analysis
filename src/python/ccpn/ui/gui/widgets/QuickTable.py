@@ -25,12 +25,13 @@ __date__ = "$Date$"
 
 import json
 import re
-
-from PyQt4 import QtGui, QtCore
 import pandas as pd
+import os
+
+from collections import Iterable
+from PyQt4 import QtGui, QtCore
 from pyqtgraph import TableWidget
 from pyqtgraph.widgets.TableWidget import _defersort
-import os
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject
@@ -839,7 +840,7 @@ class QuickTable(TableWidget, Base):
       singularAttr = getattr(self.current, singular)
 
       if self.multiSelect:
-        if isinstance(objList, list):
+        if isinstance(objList, Iterable):
           for obj in objList:
             if obj in multipleAttr:
               multipleAttr.remove(obj)
@@ -1024,11 +1025,10 @@ class QuickTable(TableWidget, Base):
 
       if trigger == Notifier.DELETE:
 
-        # remove item from self._dataFrameObject
+        # remove item from self._dataFrameObject and table
 
         if row in self._dataFrameObject._objects:
           self._dataFrameObject.removeObject(row)
-          self.clearSelection()
 
       elif trigger == Notifier.CREATE:
 
@@ -1038,18 +1038,12 @@ class QuickTable(TableWidget, Base):
           tSelect = getattr(self, self._tableData['tableSelection'])
           if tSelect:
 
-            # check that the object created is in the list viewed in tha table
+            # check that the object created is in the list viewed in this table
             # e.g. row.peakList == tSelect then add
             if tSelect == getattr(row, self._tableData['tableName']):
-              objList = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
 
-              if objList and len(objList) > 1:
-                self._dataFrameObject.appendObject(row)
-                # self.update()
-              else:
-                # self._update(self.nmrTable)
-                self._dataFrameObject.appendObject(row)
-                # self._tableData['updateFunc'](tSelect)
+              # add the row to the dataFrame and table
+              self._dataFrameObject.appendObject(row)
 
       elif trigger == Notifier.CHANGE:
 
@@ -1060,28 +1054,25 @@ class QuickTable(TableWidget, Base):
         # get the old pid before the rename
         oldPid = data[Notifier.OLDPID]
 
-        # modify the oldPid in the objectList, change to newPid
-        self._dataFrameObject.renameObject(row, oldPid)
+        if row in self._dataFrameObject._objects:
 
-        # TODO:ED check whether the new object is still in the active list - remove otherwise
-        if self._tableData['tableSelection']:
-          tSelect = getattr(self, self._tableData['tableSelection'])    # eg self.nmrChain
-          if tSelect:                                                   # eg self.nmrChain.nmrResidues
-            objList = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
+          # modify the oldPid in the objectList, change to newPid
+          self._dataFrameObject.renameObject(row, oldPid)
 
-            if objList and row not in objList:
-              # TODO:ED Check currect deletion
-              # print ('>>> deleting spare object %s' % row)
-              self._dataFrameObject.removeObject(row)
-              self.clearSelection()
-            else:
-              # print('>>> creating spare object %s' % row)
-              if objList and len(objList) > 1:
-                self._dataFrameObject.appendObject(row)
-                # self.update()
+          # TODO:ED check whether the new object is still in the active list - remove otherwise
+          if self._tableData['tableSelection']:
+            tSelect = getattr(self, self._tableData['tableSelection'])    # eg self.nmrChain
+            if tSelect:                                                   # eg self.nmrChain.nmrResidues
+              objList = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
+
+              if objList and row not in objList:
+                # TODO:ED Check current deletion
+                # print ('>>> deleting spare object %s' % row)
+                self._dataFrameObject.removeObject(row)
+
               else:
-                # self._update(self.nmrTable)
-                self._tableData['updateFunc'](tSelect)
+                # print('>>> creating spare object %s' % row)
+                self._dataFrameObject.appendObject(row)
 
       self.update()
       # re-sort the table

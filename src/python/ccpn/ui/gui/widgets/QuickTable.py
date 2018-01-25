@@ -1125,8 +1125,11 @@ class QuickTable(TableWidget, Base):
         rowObj = getattr(cell, callbacktypes[OBJECT_PARENT])
         rowCallback = callbacktypes[OBJECT_PARENT]
 
+      # concatenate the list - will always return a list
+      rowObjs = self._makeIterableList(rowObj)
+
       # update the correct row by calling row handler
-      if rowObj:
+      for rowObj in rowObjs:
         newData = data.copy()
         newData[Notifier.OBJECT] = rowObj
         newData[Notifier.TRIGGER] = Notifier.CHANGE

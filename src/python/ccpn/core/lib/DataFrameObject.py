@@ -110,25 +110,6 @@ class DataFrameObject(object):
   def table(self, table=None):
     self._table = table
 
-  def removeObject(self, obj):
-    # remove an object from the class
-    # if obj.pid in self._objectList:
-    if self.find(self._table, str(obj.pid), column='Pid') is not None:
-      self._table.silenceCallBack = True
-
-      # remove from internal list
-      self._objects.remove(obj)
-
-      # remove from dataFrame by Pid
-      self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj.pid]
-
-      # remove from table by pid
-      row = self.find(self._table, str(obj.pid), column='Pid')
-      if row is not None:
-        self._table.removeRow(row)
-
-      self._table.silenceCallBack = False
-
   def find(self, table, text, column='Pid'):
     model = table.model()
 
@@ -154,74 +135,116 @@ class DataFrameObject(object):
 
     return None
 
+  def removeObject(self, obj):
+    # remove an object from the class
+    row = self.find(self._table, str(obj.pid), column='Pid')
+    if row is not None:
+      self._table.silenceCallBack = True
+
+      try:
+        # remove from internal list
+        self._objects.remove(obj)
+
+        # remove from dataFrame by obj
+        self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj]
+
+        # remove from table by pid
+        row = self.find(self._table, str(obj.pid), column='Pid')
+        if row is not None:
+          self._table.removeRow(row)
+
+      except Exception as es:
+        getLogger().warning(str(es))
+      finally:
+        self._table.silenceCallBack = False
+
   def appendObject(self, obj):
-    found = self.find(self._table, str(obj.pid), column='Pid')
+    row = self.find(self._table, str(obj.pid), column='Pid')
 
     # check that the object doesn't already exists in the table
-    if found is None:
+    if row is None:
       self._table.silenceCallBack = True
 
-      # the object doesn't exist in list, so can be added
-      listDict = OrderedDict()
-      for header in self._columnDefinitions.columns:
-        listDict[header.headerText] = header.getValue(obj)
+      try:
+        # the object doesn't exist in list, so can be added
+        listDict = OrderedDict()
+        for header in self._columnDefinitions.columns:
+          listDict[header.headerText] = header.getValue(obj)
 
-      if self._dataFrame.empty:
-        # need to create a new dataFrame, table with index of 0
-        # set the table and column headings
+        if self._dataFrame.empty:
+          # need to create a new dataFrame, table with index of 0
+          # set the table and column headings
 
-        # keep internal list uptodate
-        self._objects = [obj]
-        self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
-        self._table.setData(self._dataFrame.values)
-        self._table.setHorizontalHeaderLabels(self.headings)
+          # keep internal list uptodate
+          self._objects = [obj]
+          self._table.setData(self._dataFrame.values)
+          self._table.setHorizontalHeaderLabels(self.headings)
 
-        # needed after setting the column headings
-        self._table.resizeColumnsToContents()
-        self._table.showColumns(self)
-        self._table.show()
+          # store the actual object in the dataFrame
+          if 'Pid' in listDict.keys():
+            listDict['Pid'] = obj
+          self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
 
-      else:
-        # append a new line to the end
+          # needed after setting the column headings
+          self._table.resizeColumnsToContents()
+          self._table.showColumns(self)
+          self._table.show()
 
-        # TODO:ED Check 'Index' - just to make sure that it is unique
-        if 'Index' in self._dataFrame:
-          newIndex = self._dataFrame['Index'].max()+1
-          listDict['Index'] = newIndex
+        else:
+          # append a new line to the end
 
-        # update internal list
-        self._objects.append(obj)
-        appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
+          # set Index to next available
+          if 'Index' in self._dataFrame:
+            newIndex = self._dataFrame['Index'].max()+1
+            if 'Index' in listDict.keys():
+              listDict['Index'] = newIndex
 
-        self._dataFrame = self._dataFrame.append(appendDataFrame)
-        self._table.appendRow(list(listDict.values()))
+          # update internal list
+          self._objects.append(obj)
+          self._table.appendRow(list(listDict.values()))
 
-      self._table.silenceCallBack = False
+          # store the actual object in the dataFrame
+          if 'Pid' in listDict.keys():
+            listDict['Pid'] = obj
+
+          # update the dataFrame
+          appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
+          self._dataFrame = self._dataFrame.append(appendDataFrame)
+
+      except Exception as es:
+        getLogger().warning(str(es))
+      finally:
+        self._table.silenceCallBack = False
 
   def renameObject(self, obj, oldPid):
-    foundRow = self.find(self._table, str(oldPid), column='Pid')
-
-    # check that the object exists in the table
-    if foundRow is not None:
+    row = self.find(self._table, str(oldPid), column='Pid')
+    if row is not None:
       self._table.silenceCallBack = True
 
-      # check whether the pid is used anywhere in the table
-      # this could be covered by the following change event
-      self._table.hide()
-      changeList = self._dataFrame.replace(to_replace=oldPid, value=obj.pid, inplace=True)
-      self._table.setData(self._dataFrame.values)
+      try:
+        # generate a new row
+        listDict = OrderedDict()
+        for header in self._columnDefinitions.columns:
+          listDict[header.headerText] = header.getValue(obj)
 
-      # update table from diff
-      self._table.setHorizontalHeaderLabels(self.headings)
+        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame['Pid'] == obj]
+        self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj]
 
-      # needed after setting the column headings
-      self._table.resizeColumnsToContents()
-      self._table.showColumns(self)
+        # keep the Index if it exists
+        if 'Index' in self._dataFrame_foundPid:
+          newIndex = self._dataFrame_foundPid['Index'].iloc[0]
+          if 'Index' in listDict.keys():
+            listDict['Index'] = newIndex
 
-      self._table.show()
-      self._table.silenceCallBack = False
+        self._dataFrame_foundPid.iloc[0] = list(listDict.values())
+        self._dataFrame = self._dataFrame.append(self._dataFrame_foundPid)
 
-      # TODO:ED new functionality may be to use the label types in preferences in the tables
+        self._table.setRow(row, list(listDict.values()))
+
+      except Exception as es:
+        getLogger().warning(str(es))
+      finally:
+        self._table.silenceCallBack = False
 
   def objAttr(self, headerText, obj):
     for header in self._columnDefinitions.columns:
@@ -234,35 +257,32 @@ class DataFrameObject(object):
         header.setEditValue(obj, value)
 
   def changeObject(self, obj):
-    # if obj.pid in self._objectList:
-    if self.find(self._table, str(obj.pid), column='Pid') is not None:
+    row = self.find(self._table, str(obj.pid), column='Pid')
+    if row is not None:
       self._table.silenceCallBack = True
 
-      # generate a new row
-      listDict = OrderedDict()
-      for header in self._columnDefinitions.columns:
-        listDict[header.headerText] = header.getValue(obj)
-
       try:
-        row = self.find(self._table, str(obj.pid), column='Pid')
-        if row is not None:
+        # generate a new row
+        listDict = OrderedDict()
+        for header in self._columnDefinitions.columns:
+          listDict[header.headerText] = header.getValue(obj)
 
-          # TODO:ED change object in the dataFrame - index is still bad
+        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame['Pid'] == obj]
+        self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj]
 
-          self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame['Pid'] == obj.pid]
-          self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj.pid]
-
-          if 'Index' in self._dataFrame_foundPid:
-            newIndex = self._dataFrame_foundPid['Index'].iloc[0]
+        # keep the Index if it exists
+        if 'Index' in self._dataFrame_foundPid:
+          newIndex = self._dataFrame_foundPid['Index'].iloc[0]
+          if 'Index' in listDict.keys():
             listDict['Index'] = newIndex
 
-          self._dataFrame_foundPid.iloc[0] = list(listDict.values())
-          self._dataFrame = self._dataFrame.append(self._dataFrame_foundPid)
+        self._dataFrame_foundPid.iloc[0] = list(listDict.values())
+        self._dataFrame = self._dataFrame.append(self._dataFrame_foundPid)
 
-          self._table.setRow(row, list(listDict.values()))
+        self._table.setRow(row, list(listDict.values()))
+
       except Exception as es:
         getLogger().warning(str(es))
-
       finally:
         self._table.silenceCallBack = False
 

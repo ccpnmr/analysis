@@ -62,6 +62,9 @@ from ccpn.util.Logging import getLogger
 # BG_COLOR = QtGui.QColor('#E0E0E0')
 # TODO:ED add some documentation here
 
+OBJECT_CLASS = 0
+OBJECT_PARENT = 1
+
 
 class QuickTable(TableWidget, Base):
   ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
@@ -1123,8 +1126,8 @@ class QuickTable(TableWidget, Base):
 
     cellData = data[Notifier.OBJECT]
     # row = getattr(cell, self._tableData['rowName'])
-    cells = getattr(cellData, attr)
-    cells = self._makeIterableList(cells)
+    # cells = getattr(cellData, attr)
+    cells = self._makeIterableList(cellData)
 
     self._silenceCallback = True
 
@@ -1135,32 +1138,18 @@ class QuickTable(TableWidget, Base):
         for cBack in callbacktypes:
 
           # check if row is the correct type of class
-          if isinstance(cell, cBack[0]):
-            rowObj = getattr(cell, cBack[1])
+          if isinstance(cell, cBack[OBJECT_CLASS]):
+            rowObj = getattr(cell, cBack[OBJECT_PARENT])
+            break
       else:
-        rowObj = getattr(cell, callbacktypes[1])
+        rowObj = getattr(cell, callbacktypes[OBJECT_PARENT])
 
+      # update the correct row by calling row handler
       if rowObj:
-
-        # update the correct row
         newData = data.copy()
         newData[Notifier.OBJECT] = rowObj
         newData[Notifier.TRIGGER] = Notifier.CHANGE
         self._updateRowCallback(newData)
-
-        # temp2 = self._tableData['pullDownWidget']
-        # if foundCallBack.pid == temp2.getText():
-        #
-        #   # keep the original sorting method
-        #   sortOrder = self.horizontalHeader().sortIndicatorOrder()
-        #   sortColumn = self.horizontalHeader().sortIndicatorSection()
-        #
-        #   # change the dataFrame for the updated nmrCell
-        #   self._dataFrameObject.changeObject(row)
-        #
-        #   # re-sort the table
-        #   if sortColumn < self.columnCount():
-        #     self.sortByColumn(sortColumn, sortOrder)
 
     self._silenceCallback = False
     getLogger().debug('>updateCellCallback>', data['notifier']
@@ -1218,16 +1207,16 @@ class QuickTable(TableWidget, Base):
       for cellClass in cellClassNames:
         self._cellNotifiers.append(Notifier(self.project
                                             , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                            , cellClass[0].__name__
-                                            , partial(self._updateCellCallback, cellClass[1])
-                                            , onceOnly=False))
+                                            , cellClass[OBJECT_CLASS].__name__
+                                            , partial(self._updateCellCallback, cellClass[OBJECT_PARENT])
+                                            , onceOnly=True))
     else:
       if cellClassNames:
         self._cellNotifiers.append(Notifier(self.project
                                             , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                            , cellClassNames[0].__name__
-                                            , partial(self._updateCellCallback, cellClassNames[1])
-                                            , onceOnly=False))
+                                            , cellClassNames[OBJECT_CLASS].__name__
+                                            , partial(self._updateCellCallback, cellClassNames[OBJECT_PARENT])
+                                            , onceOnly=True))
 
     if selectCurrentCallBack:
       self._selectCurrentNotifier = Notifier(self.current
@@ -1243,7 +1232,7 @@ class QuickTable(TableWidget, Base):
                         , 'rowClass': rowClass
                         , 'cellClassNames': cellClassNames
                         , 'tableName': tableName
-                        , 'rowName': rowName
+                        # , 'rowName': rowName
                         , 'className': className
                         , 'classCallBack': callBackClass._pluralLinkName if callBackClass else None
                         , 'selectCurrentCallBack': selectCurrentCallBack}

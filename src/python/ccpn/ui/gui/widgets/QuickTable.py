@@ -34,7 +34,7 @@ from pyqtgraph import TableWidget
 from pyqtgraph.widgets.TableWidget import _defersort
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.DataFrameObject import DataFrameObject
+from ccpn.core.lib.DataFrameObject import DataFrameObject, OBJECT_DATAFRAME
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Label import Label
@@ -429,7 +429,9 @@ class QuickTable(TableWidget, Base):
     # show the columns in the list
     for i, colName in enumerate(dataFrameObject.headings):
       if dataFrameObject.hiddenColumns:
-        if colName in dataFrameObject.hiddenColumns:
+
+        # always hide the special column OBJECT_DATAFRAME
+        if colName in dataFrameObject.hiddenColumns or colName == OBJECT_DATAFRAME:
           self.hideColumn(i)
         else:
           self.showColumn(i)
@@ -447,6 +449,9 @@ class QuickTable(TableWidget, Base):
             #   self.setItem(0, i, item)
             if header:
               header.setIcon(icon)
+      else:
+        if colName == OBJECT_DATAFRAME:
+          self.hideColumn(i)
 
   def _setDefaultRowHeight(self):
     # set a minimum height to the rows based on the fontmetrics of a generic character
@@ -969,41 +974,55 @@ class QuickTable(TableWidget, Base):
     """
     Notifier callback for updating the table
     """
-    thisTableList = getattr(data[Notifier.THEOBJECT]
-                            , self._tableData['className'])   # get the table list
+    # thisTableList = getattr(data[Notifier.THEOBJECT]
+    #                         , self._tableData['className'])   # get the table list
     table = data[Notifier.OBJECT]
-
-    self._silenceCallback = True
+    #
+    # self._silenceCallback = True
     tableSelect = self._tableData['tableSelection']
 
-    if tableSelect and getattr(self, tableSelect) in thisTableList:
+    currentTable = getattr(self, tableSelect) if tableSelect else None
+
+    if currentTable and currentTable == table:
       trigger = data[Notifier.TRIGGER]
 
-      # keep the original sorting method
-      sortOrder = self.horizontalHeader().sortIndicatorOrder()
-      sortColumn = self.horizontalHeader().sortIndicatorSection()
+      if trigger == Notifier.RENAME:
 
-      if table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.DELETE:
-
-        self.clearTable()
-
-      elif table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.CHANGE:
+        # keep the original sorting method
+        sortOrder = self.horizontalHeader().sortIndicatorOrder()
+        sortColumn = self.horizontalHeader().sortIndicatorSection()
 
         # self.displayTableForNmrTable(table)
         self._tableData['changeFunc'](table)
 
-      elif trigger == Notifier.RENAME:
-        if table == getattr(self, tableSelect):
+      # if tableSelect and getattr(self, tableSelect) in thisTableList:
+    #   trigger = data[Notifier.TRIGGER]
+    #
+    #   # keep the original sorting method
+    #   sortOrder = self.horizontalHeader().sortIndicatorOrder()
+    #   sortColumn = self.horizontalHeader().sortIndicatorSection()
+    #
+    #   if table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.DELETE:
+    #
+    #     self.clearTable()
+    #
+    #   elif table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.CHANGE:
+    #
+    #     # self.displayTableForNmrTable(table)
+    #     self._tableData['changeFunc'](table)
+    #
+    #   elif trigger == Notifier.RENAME:
+    #     if table == getattr(self, tableSelect):
+    #
+    #       # self.displayTableForNmrTable(table)
+    #       self._tableData['changeFunc'](table)
 
-          # self.displayTableForNmrTable(table)
-          self._tableData['changeFunc'](table)
+        # re-sort the table
+        if sortColumn < self.columnCount():
+          self.sortByColumn(sortColumn, sortOrder)
 
-      # re-sort the table
-      if sortColumn < self.columnCount():
-        self.sortByColumn(sortColumn, sortOrder)
-
-    else:
-      self.clearTable()
+    # else:
+    #   self.clearTable()
 
     self._silenceCallback = False
     getLogger().debug('>updateTableCallback>', data['notifier']
@@ -1140,16 +1159,23 @@ class QuickTable(TableWidget, Base):
           # check if row is the correct type of class
           if isinstance(cell, cBack[OBJECT_CLASS]):
             rowObj = getattr(cell, cBack[OBJECT_PARENT])
+            rowCallback = cBack[OBJECT_PARENT]
             break
       else:
         rowObj = getattr(cell, callbacktypes[OBJECT_PARENT])
+        rowCallback = callbacktypes[OBJECT_PARENT]
 
       # update the correct row by calling row handler
       if rowObj:
         newData = data.copy()
         newData[Notifier.OBJECT] = rowObj
         newData[Notifier.TRIGGER] = Notifier.CHANGE
-        self._updateRowCallback(newData)
+
+        # check whether we are the row object or still a cell object
+        if isinstance(rowObj, self._tableData['rowClass']):
+          self._updateRowCallback(newData)
+        else:
+          self._updateCellCallback(rowCallback, newData)
 
     self._silenceCallback = False
     getLogger().debug('>updateCellCallback>', data['notifier']
@@ -1206,17 +1232,17 @@ class QuickTable(TableWidget, Base):
     if isinstance(cellClassNames, list):
       for cellClass in cellClassNames:
         self._cellNotifiers.append(Notifier(self.project
-                                            , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                            , [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                             , cellClass[OBJECT_CLASS].__name__
                                             , partial(self._updateCellCallback, cellClass[OBJECT_PARENT])
-                                            , onceOnly=True))
+                                            , onceOnly=False))
     else:
       if cellClassNames:
         self._cellNotifiers.append(Notifier(self.project
-                                            , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                            , [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
                                             , cellClassNames[OBJECT_CLASS].__name__
                                             , partial(self._updateCellCallback, cellClassNames[OBJECT_PARENT])
-                                            , onceOnly=True))
+                                            , onceOnly=False))
 
     if selectCurrentCallBack:
       self._selectCurrentNotifier = Notifier(self.current
@@ -1307,10 +1333,13 @@ class QuickTableDelegate(QtGui.QStyledItemDelegate):
       for ii in range(self._parent.columnCount()):
         rowData.append(self._parent.item(row, ii).text())
 
-      if 'Pid' in self._parent._dataFrameObject.headings:
-        pidCol = self._parent._dataFrameObject.headings.index('Pid')
-        thisPid = rowData[pidCol]
-        obj = self._parent.project.getByPid(thisPid)
+      if OBJECT_DATAFRAME in self._parent._dataFrameObject.headings:
+        # pidCol = self._parent._dataFrameObject.headings.index('Pid')
+        # thisPid = rowData[pidCol]
+        # obj = self._parent.project.getByPid(thisPid)
+
+        # get the object to apply the data to
+        obj = self._parent._dataFrameObject.headings.index(OBJECT_DATAFRAME)
 
         # set the data which will fire notifiers to populate all tables
         func = self._parent._dataFrameObject.setEditValues[col]

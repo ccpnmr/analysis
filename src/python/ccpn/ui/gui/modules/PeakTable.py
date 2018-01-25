@@ -197,6 +197,7 @@ class PeakListTableWidget(QuickTable):
     # Serial column
     columnDefs.append(('#', 'serial', 'Peak serial number', None))
     columnDefs.append(('Pid', lambda pk: pk.pid, 'Pid of the Peak', None))
+    columnDefs.append(('_object', lambda pk: pk, 'Object', None))
 
     # Assignment column
     for i in range(peakList.spectrum.dimensionCount):

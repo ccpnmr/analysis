@@ -278,6 +278,7 @@ class NmrResidueTable(QuickTable):
       # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
       # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
       ('Pid',        lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None),
+      ('_object',     lambda nmrResidue: nmrResidue, 'Object', None),
       ('Sequence',   lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
       ('Type',       lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
       ('NmrAtoms',   lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
@@ -341,8 +342,8 @@ class NmrResidueTable(QuickTable):
                            , className=self.attributeName
                            , tableSelection='_nmrChain'      # _nmrChain.nmrResidues
                            , rowClass=NmrResidue
-                           , cellClassNames=[(NmrAtom, 'nmrResidue'),
-                                             (Peak, 'assignedNmrAtoms')]    # doesn't change anything
+                           , cellClassNames=[(NmrAtom, 'nmrResidue')
+                                            ,(Peak, 'assignedNmrAtoms')] # doesn't change anything
                            , tableName='nmrChain', rowName='nmrResidue'
                            , changeFunc=self.displayTableForNmrChain
                            , updateFunc=self._update

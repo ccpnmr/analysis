@@ -144,6 +144,7 @@ class CustomNmrResidueTable(NmrResidueTable):
     self.NMRcolumns = ColumnClass([
         ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
         ('Pid', lambda nmrResidue:nmrResidue.pid, 'Pid of NmrResidue', None),
+        ('_object', lambda nmrResidue:nmrResidue, 'Object', None),
         ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
         ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
         ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),

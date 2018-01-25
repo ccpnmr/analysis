@@ -140,6 +140,7 @@ class IntegralTable(QuickTable):
     self.ITcolumns = ColumnClass([
         ('#', lambda integral:integral.serial, '', None),
         ('Pid', lambda integral:integral.pid, 'Pid of integral', None),
+        ('_object', lambda integral:integral, 'Object', None),
         ('Value', lambda integral:integral.value, '', None),
         ('Lower Limit', lambda integral:IntegralTable._getLowerLimit(integral), '', None),
         ('Higher Limit', lambda integral:IntegralTable._getHigherLimit(integral), '', None),

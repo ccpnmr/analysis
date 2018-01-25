@@ -199,6 +199,7 @@ class RestraintTable(QuickTable):
     # create the column objects
     self.RLcolumns = ColumnClass([('#', '_key', 'Restraint Id', None),
                                   ('Pid', lambda restraint:restraint.pid, 'Pid of integral', None),
+                                  ('_object', lambda restraint:restraint, 'Object', None),
                                   ('Atoms', lambda restraint:RestraintTable._getContributions(restraint),
                   'Atoms involved in the restraint', None),
                  ('Target Value.', 'targetValue', 'Target value for the restraint', None),

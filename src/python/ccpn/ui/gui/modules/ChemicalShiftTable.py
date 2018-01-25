@@ -213,6 +213,7 @@ class ChemicalShiftTable(QuickTable):
     self.CScolumns = ColumnClass(
                 [('#', lambda cs:cs.nmrAtom.serial, 'NmrAtom serial number', None),
                  ('Pid', lambda cs:cs.pid, 'Pid of chemicalShift', None),
+                 ('_object', lambda cs: cs, 'Object', None),
                  ('NmrResidue', lambda cs:cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
                  ('Name', lambda cs:cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
                  ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None),

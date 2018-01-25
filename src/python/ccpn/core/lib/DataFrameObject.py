@@ -30,6 +30,8 @@ from PyQt4 import QtGui, QtCore
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 
+OBJECT_DATAFRAME = '_object'
+
 
 class DataFrameObject(object):
   # class to handle pandas dataframe and matching object pid list
@@ -146,7 +148,7 @@ class DataFrameObject(object):
         self._objects.remove(obj)
 
         # remove from dataFrame by obj
-        self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj]
+        self._dataFrame = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] != obj]
 
         # remove from table by pid
         row = self.find(self._table, str(obj.pid), column='Pid')
@@ -183,8 +185,8 @@ class DataFrameObject(object):
 
           # store the actual object in the dataFrame
           # needs to be done again as the pid needs to be an object
-          if 'Pid' in listDict.keys():
-            listDict['Pid'] = obj
+          # if 'Pid' in listDict.keys():
+          #   listDict['Pid'] = obj
           self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
 
           # needed after setting the column headings
@@ -206,8 +208,8 @@ class DataFrameObject(object):
           self._table.appendRow(list(listDict.values()))
 
           # store the actual object in the dataFrame
-          if 'Pid' in listDict.keys():
-            listDict['Pid'] = obj
+          # if 'Pid' in listDict.keys():
+          #   listDict['Pid'] = obj
           appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
           self._dataFrame = self._dataFrame.append(appendDataFrame)
 
@@ -227,8 +229,8 @@ class DataFrameObject(object):
         for header in self._columnDefinitions.columns:
           listDict[header.headerText] = header.getValue(obj)
 
-        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame['Pid'] == obj]
-        self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj]
+        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] == obj]
+        self._dataFrame = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] != obj]
 
         # keep the Index if it exists
         if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:
@@ -240,8 +242,8 @@ class DataFrameObject(object):
         self._table.setRow(row, list(listDict.values()))
 
         # store the actual object in the dataFrame
-        if 'Pid' in listDict.keys():
-          listDict['Pid'] = obj
+        # if 'Pid' in listDict.keys():
+        #   listDict['Pid'] = obj
         appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
         self._dataFrame = self._dataFrame.append(appendDataFrame)
 
@@ -271,8 +273,8 @@ class DataFrameObject(object):
         for header in self._columnDefinitions.columns:
           listDict[header.headerText] = header.getValue(obj)
 
-        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame['Pid'] == obj]
-        self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj]
+        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] == obj]
+        self._dataFrame = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] != obj]
 
         # keep the Index if it exists
         if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:
@@ -284,8 +286,8 @@ class DataFrameObject(object):
         self._table.setRow(row, list(listDict.values()))
 
         # store the actual object in the dataFrame
-        if 'Pid' in listDict.keys():
-          listDict['Pid'] = obj
+        # if 'Pid' in listDict.keys():
+        #   listDict['Pid'] = obj
         appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
         self._dataFrame = self._dataFrame.append(appendDataFrame)
 

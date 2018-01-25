@@ -175,12 +175,14 @@ class DataFrameObject(object):
           # need to create a new dataFrame, table with index of 0
           # set the table and column headings
 
-          # keep internal list uptodate
+          # set the initial objects; dataFrame needed to populate the first table
           self._objects = [obj]
+          self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
           self._table.setData(self._dataFrame.values)
           self._table.setHorizontalHeaderLabels(self.headings)
 
           # store the actual object in the dataFrame
+          # needs to be done again as the pid needs to be an object
           if 'Pid' in listDict.keys():
             listDict['Pid'] = obj
           self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
@@ -194,7 +196,7 @@ class DataFrameObject(object):
           # append a new line to the end
 
           # set Index to next available
-          if 'Index' in self._dataFrame:
+          if not self._dataFrame.empty and 'Index' in self._dataFrame:
             newIndex = self._dataFrame['Index'].max()+1
             if 'Index' in listDict.keys():
               listDict['Index'] = newIndex
@@ -206,8 +208,6 @@ class DataFrameObject(object):
           # store the actual object in the dataFrame
           if 'Pid' in listDict.keys():
             listDict['Pid'] = obj
-
-          # update the dataFrame
           appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
           self._dataFrame = self._dataFrame.append(appendDataFrame)
 
@@ -231,15 +231,19 @@ class DataFrameObject(object):
         self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj]
 
         # keep the Index if it exists
-        if 'Index' in self._dataFrame_foundPid:
+        if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:
           newIndex = self._dataFrame_foundPid['Index'].iloc[0]
           if 'Index' in listDict.keys():
             listDict['Index'] = newIndex
 
-        self._dataFrame_foundPid.iloc[0] = list(listDict.values())
-        self._dataFrame = self._dataFrame.append(self._dataFrame_foundPid)
-
+        # store to the table
         self._table.setRow(row, list(listDict.values()))
+
+        # store the actual object in the dataFrame
+        if 'Pid' in listDict.keys():
+          listDict['Pid'] = obj
+        appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
+        self._dataFrame = self._dataFrame.append(appendDataFrame)
 
       except Exception as es:
         getLogger().warning(str(es))
@@ -271,15 +275,19 @@ class DataFrameObject(object):
         self._dataFrame = self._dataFrame.ix[self._dataFrame['Pid'] != obj]
 
         # keep the Index if it exists
-        if 'Index' in self._dataFrame_foundPid:
+        if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:
           newIndex = self._dataFrame_foundPid['Index'].iloc[0]
           if 'Index' in listDict.keys():
             listDict['Index'] = newIndex
 
-        self._dataFrame_foundPid.iloc[0] = list(listDict.values())
-        self._dataFrame = self._dataFrame.append(self._dataFrame_foundPid)
-
+        # store to the table
         self._table.setRow(row, list(listDict.values()))
+
+        # store the actual object in the dataFrame
+        if 'Pid' in listDict.keys():
+          listDict['Pid'] = obj
+        appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
+        self._dataFrame = self._dataFrame.append(appendDataFrame)
 
       except Exception as es:
         getLogger().warning(str(es))

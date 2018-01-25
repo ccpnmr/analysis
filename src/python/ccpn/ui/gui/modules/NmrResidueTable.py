@@ -342,8 +342,7 @@ class NmrResidueTable(QuickTable):
                            , className=self.attributeName
                            , tableSelection='_nmrChain'      # _nmrChain.nmrResidues
                            , rowClass=NmrResidue
-                           , cellClassNames=[(NmrAtom, 'nmrResidue')
-                                            ,(Peak, 'assignedNmrAtoms')] # doesn't change anything
+                           , cellClassNames=[(NmrAtom, 'nmrResidue')] # doesn't change anything
                            , tableName='nmrChain', rowName='nmrResidue'
                            , changeFunc=self.displayTableForNmrChain
                            , updateFunc=self._update

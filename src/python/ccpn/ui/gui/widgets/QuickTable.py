@@ -136,7 +136,7 @@ class QuickTable(TableWidget, Base):
     self._dataFrameObject = dataFrameObject
 
     # set the preferred scrolling behaviour
-    self.setHorizontalScrollMode(self.ScrollPerItem)
+    self.setHorizontalScrollMode(self.ScrollPerPixel)
     self.setVerticalScrollMode(self.ScrollPerItem)
 
     # define the multiselection behaviour
@@ -540,25 +540,6 @@ class QuickTable(TableWidget, Base):
     if self.searchWidget is not None:
       self.searchWidget.show()
 
-  # def _addSearchWidget(self):
-  #   # TODO:Luca Add search option for any table
-  #   if self.parent is not None:
-  #     parentLayout = None
-  #     if isinstance(self._parent, Base):
-  #     # if hasattr(self.parent, 'getLayout'):
-  #       parentLayout = self._parent.getLayout()
-  #
-  #     if isinstance(parentLayout, QtGui.QGridLayout):
-  #       idx = parentLayout.indexOf(self)
-  #       location = parentLayout.getItemPosition(idx)
-  #       if location is not None:
-  #         if len(location)>0:
-  #           row, column, rowSpan, columnSpan = location
-  #           self.searchWidget = QuickTableFilter(table=self, grid=(0,0), vAlign='B')
-  #           parentLayout.addWidget(self.searchWidget, row+1, column, rowSpan+1, columnSpan)
-  #           self.searchWidget.hide()
-  #   return True
-  #
   def deleteObjFromTable(self):
     selected = self.getSelectedObjects()
     if selected:
@@ -580,27 +561,6 @@ class QuickTable(TableWidget, Base):
               obj.delete()
           self._silenceCallback = False
           thisProject._endCommandEchoBlock()
-
-          # try:
-          #
-          #   # self.blockSignals(True)
-          #   self._silenceCallback = True
-          #
-          #   # TODO:ED check why this does not undo as single event
-          #   for obj in selected:
-          #     if hasattr(obj, 'pid'):
-          #
-          #       print ('>>> deleting', obj)
-          #       obj.delete()
-          #
-          # except Exception as es:
-          #   getLogger().warning(str(es))
-          # finally:
-          #
-          #   self._silenceCallback = False
-          #   # self.blockSignals(False)
-          #
-          #   thisProject._endCommandEchoBlock()
 
         else:
 

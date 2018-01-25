@@ -40,7 +40,7 @@ General = "general"
 ApplicationName = "applicationName"
 ApplicationVersion = "applicationVersion"
 GuiModules = "guiModules"
-ClassNameModuleNameTuplesList = "classNameModuleTuplesList"
+ClassNameModuleName = "class_And_Module_Names"
 LayoutState =  "layoutState"
 
 DefaultLayoutFile = {
@@ -52,7 +52,7 @@ DefaultLayoutFile = {
                               },
                     GuiModules:
                               {
-                                ClassNameModuleNameTuplesList: {}
+                                ClassNameModuleName: [()]
                               },
 
                     LayoutState:
@@ -104,11 +104,11 @@ def _updateGeneral(mainWindow, layout):
   application = mainWindow.application
   applicationName = application.applicationName
   applicationVersion = application.applicationVersion
-  if layout[General]:
-    if layout.general[applicationName]:
-      layout.general.applicationName = applicationName
-    if layout.general[applicationVersion]:
-      layout.general.applicationVersion = applicationVersion
+  if General in layout:
+    if ApplicationName in layout.general:
+      setattr(layout.general, ApplicationName, applicationName)
+    if ApplicationVersion in layout.general:
+      setattr(layout.general, ApplicationVersion, applicationVersion)
 
 def _updateGuiModules(mainWindow, layout):
   """
@@ -120,22 +120,22 @@ def _updateGuiModules(mainWindow, layout):
   """
   guiModules = mainWindow.moduleArea.currentModules
 
-  classNameModuleNameTupleList = [] #list of tuples [(className, ModuleName), (className, ModuleName)]
+  classNames_ModuleNames = [] #list of tuples [(className, ModuleName), (className, ModuleName)]
   for module in guiModules:
     if not isinstance(module, GuiSpectrumDisplay): # Displays are not stored here but in the DataModel
-      classNameModuleNameTupleList.append((module.className, module.name()))
+      classNames_ModuleNames.append((module.className, module.name()))
 
-  if layout[GuiModules]:
-    if layout.guiModules[ClassNameModuleNameTuplesList]:
-        layout.guiModules.classNameModuleNameDict = classNameModuleNameTupleList
+  if GuiModules in  layout:
+    if ClassNameModuleName in layout.guiModules:
+        setattr(layout.guiModules, ClassNameModuleName, classNames_ModuleNames )
 
 def _updateLayoutState(mainWindow, layout):
-  if layout[LayoutState]:
-   layout.layoutState = mainWindow.moduleArea.saveState()
+  if LayoutState in layout:
+    setattr(layout, LayoutState, mainWindow.moduleArea.saveState())
 
 def _updateWarning(mainWindow, layout):
-  if layout[Warning]:
-    layout.warning = WarningMessage
+  if Warning in layout:
+    setattr(layout, Warning, WarningMessage)
 
 def updateSavedLayout(mainWindow):
   """
@@ -163,7 +163,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
   project = mainWindow.application.project
   if not jsonFilePath:
     jsonFilePath = getLayoutDirectoryPath(project.path) + '/' + DefaultLayoutFileName
-  file = open(jsonFilePath, "a")
+  file = open(jsonFilePath, "w")
   json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
   file.close()
 

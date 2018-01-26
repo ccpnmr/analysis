@@ -469,7 +469,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
 
       with progressManager(self.mainWindow, 'Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
 
-        try:
+        # try:
           if nmrChain.id == '@-':
             # assume that it is the only one
             nmrChain.assignSingleResidue(selectedNmrResidue, guiRes.residue)
@@ -483,8 +483,8 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
             guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
             guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
                                  res.shortName+'</strong></div>')
-        except Exception as es:
-          getLogger().warning('Sequence Graph: %s' % str(es))
+        # except Exception as es:
+        #   getLogger().warning('Sequence Module: %s' % str(es))
 
     #   if self._appBase is not None:
     #     appBase = self._appBase

@@ -80,10 +80,17 @@ class NmrResidueTableModule(CcpnModule):
 
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
-    self.application = mainWindow.application
-    self.project = mainWindow.application.project
-    self.current = mainWindow.application.current
-    
+    if mainWindow:
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
+      displayText = [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
+    else:
+      self.application = None
+      self.project = None
+      self.current = None
+      displayText = []
+
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
     self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
@@ -101,8 +108,7 @@ class NmrResidueTableModule(CcpnModule):
                                              orientation = 'left',
                                              labelText='Display(s):',
                                              tipText = 'SpectrumDisplay modules to respond to double-click',
-                                             texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
-                                             )
+                                             texts=[ALL] + displayText)
     self.displaysWidget.setFixedHeigths((None, None, 40))
     self.displaysWidget.pulldownList.set(ALL)
 
@@ -259,9 +265,15 @@ class NmrResidueTable(QuickTable):
     """
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
-    self.application = mainWindow.application
-    self.project = mainWindow.application.project
-    self.current = mainWindow.application.current
+    if mainWindow:
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
+    else:
+      self.application = None
+      self.project = None
+      self.current = None
+
     self.moduleParent=moduleParent
     self._widget = Widget(parent=parent, **kwds)
 

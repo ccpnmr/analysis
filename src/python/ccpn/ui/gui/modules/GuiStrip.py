@@ -124,9 +124,11 @@ class GuiStrip(Frame):
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
-                                   text='.', spacing=(0,0),
+                                   text='', spacing=(0,0),
                                    grid=(2,0), gridSpan=(1,3), hAlign='left', vAlign='top', hPolicy='minimum')
     self._stripLabel.setFont(textFontSmall)
+
+    # TODO:ED do the same as stripIDLabel
     self.hideStripLabel()
 
     # A label to display the cursor positions (updated by _showMousePosition)

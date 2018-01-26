@@ -1005,75 +1005,78 @@ class QuickTable(TableWidget, Base):
 
     self._silenceCallback = True
 
-    try:
-      # multiple delete from deleteObjFromTable messes with this
-      # if thisRow.pid == self._tableData['pullDownWidget'].getText():
+    # try:
 
-      # is the row in the table
-      # TODO:ED move these into the table class
+    # multiple delete from deleteObjFromTable messes with this
+    # if thisRow.pid == self._tableData['pullDownWidget'].getText():
 
-      # keep the original sorting method
-      sortOrder = self.horizontalHeader().sortIndicatorOrder()
-      sortColumn = self.horizontalHeader().sortIndicatorSection()
+    # is the row in the table
+    # TODO:ED move these into the table class
 
-      if trigger == Notifier.DELETE:
+    # keep the original sorting method
+    sortOrder = self.horizontalHeader().sortIndicatorOrder()
+    sortColumn = self.horizontalHeader().sortIndicatorSection()
 
-        # remove item from self._dataFrameObject and table
+    if trigger == Notifier.DELETE:
 
-        if row in self._dataFrameObject._objects:
-          self._dataFrameObject.removeObject(row)
+      # remove item from self._dataFrameObject and table
 
-      elif trigger == Notifier.CREATE:
+      if row in self._dataFrameObject._objects:
+        self._dataFrameObject.removeObject(row)
 
-        # insert item into self._dataFrameObject
+    elif trigger == Notifier.CREATE:
 
+      # insert item into self._dataFrameObject
+
+      if self._tableData['tableSelection']:
+        tSelect = getattr(self, self._tableData['tableSelection'])
+        if tSelect:
+
+          # check that the object created is in the list viewed in this table
+          # e.g. row.peakList == tSelect then add
+          if tSelect == getattr(row, self._tableData['tableName']):
+
+            # add the row to the dataFrame and table
+            self._dataFrameObject.appendObject(row)
+
+    elif trigger == Notifier.CHANGE:
+
+      # modify the line in the table
+      self._dataFrameObject.changeObject(row)
+
+    elif trigger == Notifier.RENAME:
+      # get the old pid before the rename
+      oldPid = data[Notifier.OLDPID]
+
+      if row in self._dataFrameObject._objects:
+
+        # modify the oldPid in the objectList, change to newPid
+        self._dataFrameObject.renameObject(row, oldPid)
+
+        # TODO:ED check whether the new object is still in the active list - remove otherwise
         if self._tableData['tableSelection']:
-          tSelect = getattr(self, self._tableData['tableSelection'])
-          if tSelect:
+          tSelect = getattr(self, self._tableData['tableSelection'])    # eg self.nmrChain
+          if tSelect and not tSelect.isDeleted:                                                   # eg self.nmrChain.nmrResidues
+            objList = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
 
-            # check that the object created is in the list viewed in this table
-            # e.g. row.peakList == tSelect then add
-            if tSelect == getattr(row, self._tableData['tableName']):
+            if objList and row not in objList:
+              # TODO:ED Check current deletion
+              # print ('>>> deleting spare object %s' % row)
+              self._dataFrameObject.removeObject(row)
 
-              # add the row to the dataFrame and table
+            else:
+              # print('>>> creating spare object %s' % row)
               self._dataFrameObject.appendObject(row)
+          else:
+            self.clearTable()
 
-      elif trigger == Notifier.CHANGE:
+    self.update()
+    # re-sort the table
+    if sortColumn < self.columnCount():
+      self.sortByColumn(sortColumn, sortOrder)
 
-        # modify the line in the table
-        self._dataFrameObject.changeObject(row)
-
-      elif trigger == Notifier.RENAME:
-        # get the old pid before the rename
-        oldPid = data[Notifier.OLDPID]
-
-        if row in self._dataFrameObject._objects:
-
-          # modify the oldPid in the objectList, change to newPid
-          self._dataFrameObject.renameObject(row, oldPid)
-
-          # TODO:ED check whether the new object is still in the active list - remove otherwise
-          if self._tableData['tableSelection']:
-            tSelect = getattr(self, self._tableData['tableSelection'])    # eg self.nmrChain
-            if tSelect:                                                   # eg self.nmrChain.nmrResidues
-              objList = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
-
-              if objList and row not in objList:
-                # TODO:ED Check current deletion
-                # print ('>>> deleting spare object %s' % row)
-                self._dataFrameObject.removeObject(row)
-
-              else:
-                # print('>>> creating spare object %s' % row)
-                self._dataFrameObject.appendObject(row)
-
-      self.update()
-      # re-sort the table
-      if sortColumn < self.columnCount():
-        self.sortByColumn(sortColumn, sortOrder)
-
-    except Exception as es:
-      getLogger().warning(str(es)+str(data))
+    # except Exception as es:
+    #   getLogger().warning(str(es)+str(data))
 
     self._silenceCallback = False
     getLogger().debug('>updateRowCallback>', data['notifier']

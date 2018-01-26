@@ -31,15 +31,20 @@ from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.util.Logging import getLogger
 import collections
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.DropBase import DropBase
 
 ModuleArea = DockArea
 Module = Dock
 
 
-class CcpnModuleArea(ModuleArea):
+class CcpnModuleArea(ModuleArea):   #, DropBase):
 
   def __init__(self, mainWindow):
     super(CcpnModuleArea, self).__init__(mainWindow)
+    # ModuleArea.__init__(self, mainWindow)
+    # DropBase.__init__(self, acceptDrops=True)
+
     # #GWV test to trace gridding issues
     # # remove the existing Vbox layout by transferring to a temp widget
     # QtGui.QWidget().setLayout(self.layout)  ## pyqtgraph stored the layout as self.layout
@@ -53,10 +58,12 @@ class CcpnModuleArea(ModuleArea):
     self.setContentsMargins(0, 0, 0, 0)
     self.currentModuleNames = []
 
+    # TODO:ED paint some text in here and add drop events
+
   def _getSerialName(self, moduleName):
       self.currentModuleNames.append(moduleName)
       counter = collections.Counter(self.currentModuleNames)
-      return str(moduleName) + '.' + str(counter[str(moduleName)])
+      return str(moduleName) + ':' + str(counter[str(moduleName)])
 
   @property
   def openedModules(self) -> list:
@@ -64,9 +71,6 @@ class CcpnModuleArea(ModuleArea):
     if self is not None:
       modules = list(self.findAll()[1].values())
       return modules
-
-
-
 
   def repopulateModules(self):
     """
@@ -90,7 +94,6 @@ class CcpnModuleArea(ModuleArea):
     """With these settings the user can close all the modules from the label 'close module' or pop up and
      when re-add a new module it makes sure there is a container available.
     """
-
 
     if not module._restored:
       if not isinstance(module, GuiSpectrumDisplay):  #

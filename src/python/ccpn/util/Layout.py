@@ -173,7 +173,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
     json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
     file.close()
   except Exception as e:
-    getLogger().warning('Impossitble to save Layout %s' %e)
+    getLogger().warning('Impossible to save Layout %s' %e)
 
 
 def _ccpnModulesImporter(path):
@@ -203,6 +203,7 @@ def _openCcpnModule(mainWindow, ccpnModules, className, moduleName=None):
         try:
           newCcpnModule = ccpnModule(mainWindow=mainWindow, name=moduleName)
           newCcpnModule._restored = True
+          # newCcpnModule.rename(newCcpnModule.name().split('.')[0])
 
           mainWindow.moduleArea.addModule(newCcpnModule)
         except Exception as e:

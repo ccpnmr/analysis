@@ -607,13 +607,10 @@ class Framework:
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)
 
-    # # add blank Display
-    # if len(self.ui.mainWindow.moduleArea.currentModulesNames) == 0:
-    #   # self.ui.mainWindow.newBlankDisplay()
-    #   self.addBlankDisplay()
-
-
-
+    # add blank Display
+    if len(self.ui.mainWindow.moduleArea.openedModules) == 0:
+      # self.ui.mainWindow.newBlankDisplay()
+      self.addBlankDisplay()
 
   def getByPid(self, pid):
     return self.project.getByPid(pid)

@@ -96,7 +96,9 @@ class SequenceModule(CcpnModule):
     # connect graphics scene dragMoveEvent to CcpnModule dragMoveEvent - required for drag-and-drop
     # assignment routines.
     self.scrollArea.scene.dragMoveEvent = self._dragMoveEvent
+    self.scrollArea.scene.dropEvent = self._dropEvent
     self.chainLabels = []
+    self._highlight = None
     self._refreshChainLabels()
 
     #GWV: removed fixed height restrictions but maximum height instead
@@ -110,15 +112,92 @@ class SequenceModule(CcpnModule):
     # TODO:ED add highlight if an nmrChain already selected
     # generate a create graph event? and let the response populate the module
 
+  def _getGuiItem(self, scene):
+    for item in scene.items():
+      if item.isUnderMouse() and item != self._highlight:
+        if hasattr(item, 'residue'):
+          # self._highlight.setPlainText(item.toPlainText())
+          return item
+    else:
+      return None
+
   def _dragMoveEvent(self, event):
-    # pos = event.scenePos()
-    # pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
-    # item = self.scrollArea.scene.itemAt(pos)
+    pos = event.scenePos()
+    pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
+
+    item = self._getGuiItem(self.scrollArea.scene)
+    if item:
+      self._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % 'orange' +
+                              item.toPlainText() + '</strong></div>')
+      self._highlight.setPos(item.pos())
+    else:
+      self._highlight.setPlainText('')
+
+    # item = self.scrollArea.scene.itemAt({"pids": ["NC:@2", "NR:@2.@142."]}pos)
     # ###item = self.scene.itemAt(event.scenePos())
     # if isinstance(item, GuiChainResidue):
     #   item.setDefaultTextColor(QtGui.QColor('orange'))
-    # event.accept()
-    pass
+    #   self._highlight.setPlainText(item.toPlainText())
+    #   self._highlight.setPos(item.pos())
+    # else:
+    #   self._highlight.setPlainText('')
+    event.accept()
+
+  def _dropEvent(self, event):
+
+    self._highlight.setPlainText('')
+    data, dataType = _interpretEvent(event)
+    if dataType == 'pids':
+
+      # check that the drop event contains the corrcect information
+      if isinstance(data, Iterable) and len(data) == 2:
+        nmrChain = self.mainWindow.project.getByPid(data[0])
+        nmrResidue = self.mainWindow.project.getByPid(data[1])
+        if isinstance(nmrChain, NmrChain) and isinstance(nmrResidue, NmrResidue):
+          if nmrResidue.nmrChain == nmrChain:
+            self._processNmrChains(data, event)
+
+  def _processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
+    """
+    Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
+    all succeeding residues according to the length of the list.
+    """
+
+    if self.colourScheme == 'dark':
+      colour = '#f7ffff'
+    elif self.colourScheme == 'light':
+      colour = '#666e98'
+    guiRes = self._getGuiItem(self.scrollArea.scene)
+    #self.scene.itemAt(event.scenePos())
+
+    # if not hasattr(guiRes, 'residue'):
+    #   return
+
+    nmrChain = self.mainWindow.project.getByPid(data[0])
+    selectedNmrResidue = self.mainWindow.project.getByPid(data[1])   # ejb - new, pass in selected nmrResidue
+    residues = [guiRes.residue]
+    toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
+    result = showYesNo('Assignment', 'Assign nmrChain: %s to residue: %s?' % (toAssign[0].nmrChain.id, residues[0].id))
+    if result:
+
+      with progressManager(self.mainWindow, 'Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
+
+        try:
+          if nmrChain.id == '@-':
+            # assume that it is the only one
+            nmrChain.assignSingleResidue(selectedNmrResidue, guiRes.residue)
+          else:
+            for ii in range(len(toAssign)-1):
+              resid = residues[ii]
+              next = resid.nextResidue    #TODO:ED may not have a .nextResidue
+              residues.append(next)
+            nmrChain.assignConnectedResidues(guiRes.residue)
+          for ii, res in enumerate(residues):
+            guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
+            guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
+                                 res.shortName+'</strong></div>')
+        except Exception as es:
+          getLogger().warning('Sequence Module: %s' % str(es))
 
   def populateFromSequenceGraphs(self):
     """
@@ -234,6 +313,14 @@ class SequenceModule(CcpnModule):
       for chain in self.project.chains:
         self._addChainLabel(chain, tryToUseSequenceCodes=True)
 
+    if self._highlight:
+      self.scrollArea.scene.removeItem(self._highlight)
+    self._highlight = QtGui.QGraphicsTextItem()
+    self._highlight.setDefaultTextColor(QtGui.QColor('orange'))
+    self._highlight.setFont(fixedWidthHugeFont)
+    self._highlight.setPlainText('')
+    # self._highlight.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+    self.scrollArea.scene.addItem(self._highlight)
 
 class GuiChainLabel(QtGui.QGraphicsTextItem):
   """
@@ -389,7 +476,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     # and this then means there is that awful itemAt(position) check in the drag functions
     # scene.dragLeaveEvent = self._dragLeaveEvent
     # scene.dragEnterEvent = self._dragEnterEvent
-    scene.dropEvent = self.dropEvent
+    # scene.dropEvent = self.dropEvent
     self.scene = scene
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     self._styleResidue()
@@ -436,7 +523,8 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     item = self.scene.itemAt(pos)
     ###item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
-      item.setDefaultTextColor(QtGui.QColor(self.colour3))
+      item.setDefaultTextColor(QtGui.QColor('orange'))    #self.colour3))
+      self.scene.update()
     event.accept()
 
   def _dragLeaveEvent(self, event:QtGui.QMouseEvent):
@@ -461,7 +549,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
   # WB: TODO: a version of this used to be in DropBase but that has
   # been changed but it is not clear (to me) how to use this new
   # system so stick with the old for now
-  def dropEvent(self, event):
+  def _dropEvent(self, event):
 
     data, dataType = _interpretEvent(event)
     if dataType == 'pids':
@@ -474,42 +562,6 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
           if nmrResidue.nmrChain == nmrChain:
             self._processNmrChains(data, event)
 
-  def _processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
-    """
-    Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
-    all succeeding residues according to the length of the list.
-    """
-
-    if self.colourScheme == 'dark':
-      colour = '#f7ffff'
-    elif self.colourScheme == 'light':
-      colour = '#666e98'
-    guiRes = self.scene.itemAt(event.scenePos())
-    nmrChain = self.mainWindow.project.getByPid(data[0])
-    selectedNmrResidue = self.mainWindow.project.getByPid(data[1])   # ejb - new, pass in selected nmrResidue
-    residues = [guiRes.residue]
-    toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
-    result = showYesNo('Assignment', 'Assign nmrChain: %s to residue: %s?' % (toAssign[0].nmrChain.id, residues[0].id))
-    if result:
-
-      with progressManager(self.mainWindow, 'Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
-
-        try:
-          if nmrChain.id == '@-':
-            # assume that it is the only one
-            nmrChain.assignSingleResidue(selectedNmrResidue, guiRes.residue)
-          else:
-            for ii in range(len(toAssign)-1):
-              resid = residues[ii]
-              next = resid.nextResidue    #TODO:ED may not have a .nextResidue
-              residues.append(next)
-            nmrChain.assignConnectedResidues(guiRes.residue)
-          for ii, res in enumerate(residues):
-            guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
-            guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
-                                 res.shortName+'</strong></div>')
-        except Exception as es:
-          getLogger().warning('Sequence Module: %s' % str(es))
 
     #   if self._appBase is not None:
     #     appBase = self._appBase

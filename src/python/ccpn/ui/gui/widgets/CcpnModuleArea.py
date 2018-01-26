@@ -29,6 +29,8 @@ from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.util.Logging import getLogger
+import collections
+from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 ModuleArea = DockArea
 Module = Dock
@@ -49,41 +51,34 @@ class CcpnModuleArea(ModuleArea):
     self.moveModule = self.moveDock
     self.mainWindow = mainWindow  # a link back to the parent MainWindow
     self.setContentsMargins(0, 0, 0, 0)
+    self.currentModuleNames = []
+
+  def _getSerialName(self, moduleName):
+      self.currentModuleNames.append(moduleName)
+      count = len(self.findAll()[1])
+      if count == 0:
+        self.currentModuleNames = []
+      counter = collections.Counter(self.currentModuleNames)
+      if counter[str(moduleName)] == 0:
+        return str(moduleName)
+      else:
+        return str(moduleName) + '.' + str(counter[str(moduleName)])
 
   @property
-  def currentModules(self) -> list:
+  def openedModules(self) -> list:
     'return all current modules in area'
     if self is not None:
       modules = list(self.findAll()[1].values())
       return modules
 
-  @property
-  def currentModulesNames(self) -> list:
-    'return the name of all current modules in area'
-    if self is not None:
-      modules = list(self.findAll()[1].keys())
-      return modules
 
-  @property
-  def currentModulesDict(self):
-    ''' returns {Class name : Name } of currently opened Modules. Used in restoring Layout '''
-    modules = {}
-    for moduleName, moduleObj in self.findAll()[1].items():
-      # modules.update({moduleObj.__class__.__name__: moduleName})
-      modules.update({moduleObj.className: moduleName})
-    return modules
 
-  @property
-  def layoutState(self):
-    ''' Returns a list in which the first argument is the current modules dict (see method) and the second argument 
-    is the stase as pyqtGraph  '''
-    return [self.currentModulesDict, self.saveState()]
 
   def repopulateModules(self):
     """
     Repopulate all modules to globally refresh all pulldowns, etc.
     """
-    modules = self.currentModules
+    modules = self.openedModules
     for module in modules:
       if hasattr(module, '_repopulateModule'):
         module._repopulateModule()
@@ -95,10 +90,18 @@ class CcpnModuleArea(ModuleArea):
     """
     pass
 
+
+
   def addModule(self, module, position=None, relativeTo=None, **kwds):
     """With these settings the user can close all the modules from the label 'close module' or pop up and
      when re-add a new module it makes sure there is a container available.
     """
+
+
+    if not module._restored:
+      if not isinstance(module, GuiSpectrumDisplay):  #
+        newName = self._getSerialName(module.name())
+        module.rename(newName)
 
     # test that only one instance of the module is opened
     if hasattr(type(module), '_alreadyOpened'):
@@ -207,7 +210,7 @@ class CcpnModuleArea(ModuleArea):
         self.home.removeTempArea(self)
 
   def _closeAll(self):
-    for module in self.currentModules:
+    for module in self.openedModules:
       module._closeModule()
 
   def saveState(self):
@@ -215,21 +218,29 @@ class CcpnModuleArea(ModuleArea):
     """
     Return a serialized (storable) representation of the state of
     all Docks in this DockArea."""
-    state = {'main': self.childState(self.topContainer), 'float': []}
-    for a in self.tempAreas:
-      geo = a.win.geometry()
-      geo = (geo.x(), geo.y(), geo.width(), geo.height())
-      state['float'].append((a.saveState(), geo))
+    state = {}
+    try:
+      state = {'main': self.childState(self.topContainer), 'float': []}
+      for a in self.tempAreas:
+        if a is not None:
+          geo = a.win.geometry()
+          geo = (geo.x(), geo.y(), geo.width(), geo.height())
+          state['float'].append((a.saveState(), geo))
+    except Exception as e:
+      getLogger().warning('Impossible to save layout. %s' %e)
     return state
 
   def childState(self, obj):
+
     if isinstance(obj, Dock):
       return ('dock', obj.name(), {})
     else:
       childs = []
-      for i in range(obj.count()):
-        childs.append(self.childState(obj.widget(i)))
-      return (obj.type(), childs, obj.saveState())
+      if obj is not None:
+        for i in range(obj.count()):
+          childs.append(self.childState(obj.widget(i)))
+        return (obj.type(), childs, obj.saveState())
+
 
   def restoreState(self, state):
     """
@@ -239,11 +250,9 @@ class CcpnModuleArea(ModuleArea):
     restore the arrangement of an existing set of Docks.
 
     """
-
     ## 1) make dict of all docks and list of existing containers
     containers, docks = self.findAll()
     oldTemps = self.tempAreas[:]
-    print ("found docks:", docks)
 
     # 2) create container structure, move docks into new containers
     self.buildFromState(state['main'], docks, self)
@@ -256,7 +265,6 @@ class CcpnModuleArea(ModuleArea):
 
     ## 4) Add any remaining docks to the bottom
     for d in docks.values():
-      print('moduleName', d.moduleName)
       self.moveDock(d, 'below', None)
 
     # print "\nKill old containers:"
@@ -268,7 +276,9 @@ class CcpnModuleArea(ModuleArea):
       if a is not None:
         a.apoptose()
 
+
   def buildFromState(self, state, docks, root, depth=0):
+
     typ, contents, state = state
     pfx = "  " * depth
     if typ == 'dock':
@@ -283,11 +293,12 @@ class CcpnModuleArea(ModuleArea):
     # if issubclass(root, Container):
     if hasattr(root, 'type'):
       root.insert(obj)
-      print (pfx+"Add:", obj, " -> ", root)
+
 
     if typ != 'dock':
       for o in contents:
         self.buildFromState(o, docks, obj, depth + 1)
       obj.apoptose(propagate=False)
       obj.restoreState(state)  ## this has to be done later?
+
 

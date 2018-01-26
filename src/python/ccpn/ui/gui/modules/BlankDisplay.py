@@ -44,6 +44,8 @@ class BlankDisplay(CcpnModule):
 
   includeSettingsWidget = False
   className = 'BlankDisplay'
+  _alreadyOpened = False
+  _currentModule = None
 
   def __init__(self, mainWindow, name='Blank Display'):
 
@@ -170,6 +172,7 @@ class BlankDisplay(CcpnModule):
     """
     Re-implementation of closeModule function from CcpnModule.
     """
+    self._alreadyOpened = False
     getLogger().info('Shortcut "ND" to open a new blank display')
     super(BlankDisplay, self)._closeModule()
 

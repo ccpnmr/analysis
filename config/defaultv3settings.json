@@ -27,7 +27,8 @@
         "zoomPercent": 5.0,
         "mouseMode": "select",
         "lastAxisOnly": true,
-        "showGrid": true
+        "showGrid": true,
+        "restoreLayoutOnOpening":true
     },
 
     "externalPrograms": {

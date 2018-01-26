@@ -498,7 +498,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                  , checkable=True, checked=visible
                                  , callback=partial(self._showSideBarModule, self.sideBar, self)))
 
-    for module in self.moduleArea.currentModules:
+    for module in self.moduleArea.openedModules:
       moduleSize = module.size()
       visible = moduleSize.width() != 0 and moduleSize.height() != 0
 

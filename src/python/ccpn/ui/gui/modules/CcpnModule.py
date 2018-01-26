@@ -85,6 +85,7 @@ class CcpnModule(Dock):
   maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsPosition = 'top'
   settingsMinimumSizes = (100, 50)
+  _restored = False
 
   _instances = set()
 
@@ -128,7 +129,7 @@ class CcpnModule(Dock):
 
     Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
-    Logging.getLogger().debug('module:"%s"' % (name,))
+    # Logging.getLogger().debug('module:"%s"' % (name,))
     self.mainWindow = mainWindow
     self.closeFunc = closeFunc
     CcpnModule.moduleName = name
@@ -294,6 +295,10 @@ class CcpnModule(Dock):
       else:
         dead.add(ref)
     cls._instances -= dead
+
+  def rename(self, newName):
+    self.label.setText(newName)
+    self._name = newName
 
   def _eventFilter(self, source, event):
     """

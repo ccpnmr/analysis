@@ -221,6 +221,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._isCTRL = ' '
 
     # self.installEventFilter(self)
+    # always respond to mouse events
     self.setFocusPolicy(Qt.StrongFocus)
 
     self.axisL = 12
@@ -228,12 +229,15 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisT = 20
     self.axisB = 80
 
-    self.setAutoFillBackground(False)
+    # self.setAttribute(Qt.WA_NoSystemBackground, True)
 
   def resizeGL(self, w, h):
     # GL.glViewport(0, 0, w, h)
-    # self.set2DProjectionFlat()
+    # print ('>>>resize')
+    self.makeCurrent()
+    GL.glUseProgram(self._shaderProgram1.program_id)
 
+    # self.set2DProjectionFlat()
 
     # put stuff in here that will change on a resize
     for li in self.gridList:
@@ -241,13 +245,13 @@ class CcpnGLWidget(QOpenGLWidget):
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
 
-    # self.update()
+    self.update()
 
   def wheelEvent(self, event):
     def between(val, l, r):
       return (l-val)*(r-val) <= 0
 
-    zoomScale = 25.0
+    zoomScale = 15.0
     zoomIn = (100.0+zoomScale)/100.0
     zoomOut = 100.0/(100.0+zoomScale)
 
@@ -382,6 +386,8 @@ class CcpnGLWidget(QOpenGLWidget):
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
 varying vec4 FC;
+uniform vec4 axisScale;
+attribute vec2 offset;
 
 void main()
 {
@@ -407,8 +413,8 @@ void main()
 
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
-uniform vec4 axisScale;
 varying vec4 FC;
+uniform vec4 axisScale;
 attribute vec2 offset;
 
 void main()
@@ -424,7 +430,7 @@ void main()
 
 uniform sampler2D texture;
 varying vec4 FC;
-vec4         filter;
+vec4    filter;
 
 void main()
 {
@@ -537,8 +543,17 @@ void main()
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
+
+    format = QSurfaceFormat()
+    format.setDepthBufferSize(24)
+    format.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
+    format.setProfile(QSurfaceFormat.CoreProfile)
+
+    self.context().setFormat(format)
+    self.makeCurrent()
     # print ('>>>GLVersion', self._GLVersion)
 
+    # initialise the arrays for the grid and axes
     self.gridList = []
     for li in range(3):
       self.gridList.append(GLVertexArray(numLists=1
@@ -556,6 +571,8 @@ void main()
 
     self._mouseList = GL.glGenLists(1)
     self._buildMouse = True
+    self._mouseCoords = ''
+    self.mouseString = None
 
     self._drawTextList = GL.glGenLists(1)
     self._axisXLabels = GL.glGenLists(1)
@@ -652,8 +669,10 @@ void main()
     self._testString = GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=63, y=117
                                 , color=(0.15, 0.6, 0.25, 1.0), GLContext=self)
 
+    # GLUT.glutInitDisplayMode(GLUT.glutCreateSubWindow | GLUT.GLUT_RGBA | GLUT.GLUT_DEPTH)
     # set the GL constants here
-    GL.glClearColor(0.05, 0.05, 0.05, 1.0)
+    GL.glClearColor(0.15, 0.15, 0.15, 1.0)
+    GL.glUseProgram(self._shaderProgram1.program_id)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -1202,51 +1221,28 @@ void main()
   #   painter.setRenderHint(QPainter.Antialiasing)
   #   painter.end()
 
+  def between(val, l, r):
+    return (l-val)*(r-val) <= 0
+
   def paintGL(self):
-    
-    def between(val, l, r):
-      return (l-val)*(r-val) <= 0
 
-    GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
-
-    # GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
-    GL.glDisable(GL.GL_BLEND)
-    # GL.glDisable(GL.GL_ALPHA_TEST)
-    # GL.glClearColor(0.2, 0.2, 0.2, 1.0)
-    GL.glBlendColor(1.0, 1.0, 1.0, 1.0)
-    GL.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO)
-
-    # GL.glClearIndex()
-    GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-
-    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
-    GL.glDisable(GL.GL_BLEND)
-
-    # getGLvector = (GL.GLfloat * 2)()
-    # GL.glGetFloatv(GL.GL_ALIASED_LINE_WIDTH_RANGE, getGLvector)
-    # linewidths = [i for i in getGLvector]
-
-    # setup projection matrix based on the axis limits
-    # need to move it, doesn't need to be done every frame
-
+    self.makeCurrent()
     w = self.width()
     h = self.height()
 
-    # self.set2DProjection()
+    GL.glClearColor(0, 0, 0, 1.0)
+    GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
 
-    GL.glUseProgram(self._shaderProgram1.program_id)
-    # self.viewports.setViewport('mainView')
-    # GL.glViewport(0, 35, w-35, h-35)   # leave a 35 width margin for the axes - bottom/right
-
-    self._shaderProgram1.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
-                                           self.axisT, -1.0, 1.0)
+    # set the current shader
+    currentShader = self._shaderProgram1
+    GL.glUseProgram(currentShader.program_id)
+    currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+                                    self.axisT, -1.0, 1.0)
 
     # TODO:ED check why this is h+35 and not h
     self._shaderProgram1.setViewportMatrix(self._uVMatrix, 0, w-35, 35, h+35, -1.0, 1.0)
     self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-
-    # self._useTexture = 0
-    # self._shaderProgram1.setGLUniform1i('useTexture', self._useTexture)
 
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
                             0.0, 1.0, 0.0, 0.0,
@@ -1269,86 +1265,62 @@ void main()
     self.pixelX = self._pointOne[0]-self._pointZero[0]
     self.pixelY = self._pointOne[1]-self._pointZero[1]
 
-    # set to the mainView and draw the grid
-    self.viewports.setViewport('mainView')
-    self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
-    self.gridList[0].drawIndexArray()
-
-    # draw the grid marks for the right axis
-    self.viewports.setViewport('rightAxis')
-    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
-    self.gridList[1].drawIndexArray()
-
-    # draw the grid marks for the bottom axis
-    self.viewports.setViewport('bottomAxis')
-    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
-    self.gridList[2].drawIndexArray()
-
     self.modelViewMatrix = (GL.GLdouble * 16)()
     self.projectionMatrix = (GL.GLdouble * 16)()
     self.viewport = (GL.GLint * 4)()
 
-    # GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX, self.modelViewMatrix)
-    # GL.glGetDoublev(GL.GL_PROJECTION_MATRIX, self.projectionMatrix)
-    # GL.glGetIntegerv(GL.GL_VIEWPORT, self.viewport)
+    self.drawGrid()
 
-    # self.worldCoordinate = GLU.gluUnProject(
-    #   self._mouseX, self._mouseY, 0,
-    #   self.modelViewMatrix,
-    #   self.projectionMatrix,
-    #   self.viewport,
-    # )
+    # now draw the spectra
+    self.viewports.setViewport('mainView')
+    self.drawSpectra()
 
-    # self.worldCoordinate = [0, 0]   #invTransform.dot([self._mouseX, self._mouseY, 0.0, 0.0])
-    # mw = [0, 35, w-36, h-1]
-    # if between(self._mouseX, mw[0], mw[2]) and between(self._mouseY, mw[1], mw[3]):
-    #   mb = (self._mouseX - mw[0]) / (mw[2] - mw[0])
-    #   mbx = self.axisL + mb * (self.axisR - self.axisL)
-    #   mb = (self._mouseY - mw[1]) / (mw[3] - mw[1])
-    #   mby = self.axisB + mb * (self.axisT - self.axisB)
-    #   self.worldCoordinate = [mbx, mby]
-
-    # self.viewport = [i for i in self.viewport]
-    # grab coordinates of the transformed viewport
-    # self._infiniteLineUL = GLU.gluUnProject(
-    #   0.0,
-    #   self.viewport[3]+self.viewport[1],
-    #   0.0,
-    #   self.modelViewMatrix,
-    #   self.projectionMatrix,
-    #   self.viewport,
-    # )
-    # self._infiniteLineBR = GLU.gluUnProject(
-    #   self.viewport[2]+self.viewport[0],
-    #   self.viewport[1],
-    #   0.0,
-    #   self.modelViewMatrix,
-    #   self.projectionMatrix,
-    #   self.viewport,
-    # )
-
-    # calculate the width of a world pixel on the screen
-    # origin = GLU.gluUnProject(
-    #   0.0, 0.0, 0.0,
-    #   self.modelViewMatrix,
-    #   self.projectionMatrix,
-    #   self.viewport,
-    # )
-    # pointOne = GLU.gluUnProject(
-    #   1.0, 1.0, 0.0,
-    #   self.modelViewMatrix,
-    #   self.projectionMatrix,
-    #   self.viewport,
-    # )
-    # self.pixelX = pointOne[0]-origin[0]
-    # self.pixelY = pointOne[1]-origin[1]
-
-    # GL.glEnable(GL.GL_LINE_SMOOTH)
-    # GL.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST)
-    GL.glDisable(GL.GL_BLEND)
+    GL.glUseProgram(self._shaderProgramTex.program_id)
 
     self.viewports.setViewport('mainView')
 
+    # TODO:ED check that this is the correct dimensions of the window
+    # self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, w-35, 35, h, -1.0, 1.0)
+    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+
+    self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0,
+                             0.0, 0.0, 1.0, 0.0,
+                             0.0, 0.0, 0.0, 1.0]
+    self._shaderProgramTex.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+    self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+    # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
+    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, GL.GL_FALSE, self._axisScale)
+
+    # draw the string
+    # self._testString.drawTextArray()
+
+    self.enableTexture()
+    self.drawLabels()
+
+    GL.glUseProgram(self._shaderProgram1.program_id)
+    self.drawSelectionBox()
+    self.drawCursors()
+
+    GL.glUseProgram(self._shaderProgramTex.program_id)
+    GL.glEnable(GL.GL_BLEND)
+    self.drawMouseCoords()
+
+    self.disableTexture()
+
+  def enableTexture(self):
+    GL.glEnable(GL.GL_BLEND)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    GL.glEnable(GL.GL_TEXTURE_2D)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
+
+  def disableTexture(self):
+    GL.glDisable(GL.GL_BLEND)
+    GL.glDisable(GL.GL_TEXTURE_2D)
+
+  def drawSpectra(self):
     GL.glLineWidth(1.0)
     for spectrumView in self._parent.spectrumViews:
       try:
@@ -1433,292 +1405,29 @@ void main()
 
         # self._buildPeakListLabels(spectrumView)      # should include rescaling
         # self._drawPeakListLabels(spectrumView)
-
       except Exception as es:
         raise es
 
-    # GL.glUseProgram(0)
-    # self.set2DProjection()
-
-    # this is needed if it is a paintEvent
-    # painter = QPainter(self)
-    # painter.setRenderHint(QPainter.Antialiasing)
-    #
-    # for bubble in self.bubbles:
-    #   if bubble.rect().intersects(QRectF(event.rect())):
-    #     bubble.drawBubble(painter)
-    #
-    # self.drawInstructions(painter)
-    #
-    # painter.end()
-
-    # draw cursor
-    # self.set2DProjectionFlat()
-    #
-    # GL.glColor4f(0.9, 0.9, 1.0, 150)
-    # GL.glBegin(GL.GL_LINES)
-    # GL.glVertex2f(self._mouseX, 0)
-    # GL.glVertex2f(self._mouseX, self.height())
-    # GL.glVertex2f(0, self._mouseY)
-    # GL.glVertex2f(self.width(), self._mouseY)
-    # GL.glEnd()
-
-    # self.set2DProjection()
-
-    # self.viewports.setViewport('mainView')
-    # self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
-    # self.gridList[0].drawIndexArray()
-    #
-    # # self.set2DProjectionRightAxis()
-    # self.viewports.setViewport('rightAxis')
-    # self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
-    # self.gridList[1].drawIndexArray()
-    #
-    # # self.set2DProjectionBottomAxis()
-    # self.viewports.setViewport('bottomAxis')
-    # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
-    # self.gridList[2].drawIndexArray()
-
-    # draw axis lines to right and bottom
-    # self.set2DProjectionFlat()
-    # h = self.height()
-    # w = self.width()
-    # GL.glColor4f(0.2, 1.0, 0.3, 1.0)
-    # GL.glBegin(GL.GL_LINES)
-    # GL.glVertex2d(0, 0)         # not sure why 0 doesn't work
-    # GL.glVertex2d(w-36, 0)      # think I'm drawing over it with the next viewport
-    # GL.glVertex2d(w-36, 0)
-    # GL.glVertex2d(w-36, h-36)
-    # GL.glEnd()
-
-    # draw all the peak GLLists here
-
-    # self.set2DProjection()      # set back to the main projection
-    # self.viewports.setViewport('mainView')
-
-    if self._drawSelectionBox:
-      GL.glEnable(GL.GL_BLEND)
-      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-
-      # self._dragStart = GLU.gluUnProject(
-      #   self._startCoordinate[0], self._startCoordinate[1], 0,
-      #   self.modelViewMatrix,
-      #   self.projectionMatrix,
-      #   self.viewport,
-      # )
-      # self._dragEnd = GLU.gluUnProject(
-      #   self._endCoordinate[0], self._endCoordinate[1], 0,
-      #   self.modelViewMatrix,
-      #   self.projectionMatrix,
-      #   self.viewport,
-      # )
-
-      self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                               0.0, 1.0, 0.0, 0.0,
-                               0.0, 0.0, 1.0, 0.0,
-                               0.0, 0.0, 0.0, 1.0]
-      self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
-
-      self._dragStart = self._startCoordinate
-      self._dragEnd = self._endCoordinate
-
-      if self._selectionMode == 1:    # yellow
-        GL.glColor4f(0.8, 0.9, 0.2, 0.3)
-      elif self._selectionMode == 2:      # purple
-        GL.glColor4f(0.8, 0.2, 0.9, 0.3)
-      elif self._selectionMode == 3:      # cyan
-        GL.glColor4f(0.2, 0.5, 0.9, 0.3)
-
-      GL.glBegin(GL.GL_QUADS)
-      GL.glVertex2d(self._dragStart[0], self._dragStart[1])
-      GL.glVertex2d(self._dragEnd[0], self._dragStart[1])
-      GL.glVertex2d(self._dragEnd[0], self._dragEnd[1])
-      GL.glVertex2d(self._dragStart[0], self._dragEnd[1])
-      GL.glEnd()
-
-      if self._selectionMode == 1:    # yellow
-        GL.glColor4f(0.8, 0.9, 0.2, 0.9)
-      elif self._selectionMode == 2:      # purple
-        GL.glColor4f(0.8, 0.2, 0.9, 0.9)
-      elif self._selectionMode == 3:      # cyan
-        GL.glColor4f(0.2, 0.5, 0.9, 0.9)
-
-      GL.glBegin(GL.GL_LINE_STRIP)
-      GL.glVertex2d(self._dragStart[0], self._dragStart[1])
-      GL.glVertex2d(self._dragEnd[0], self._dragStart[1])
-      GL.glVertex2d(self._dragEnd[0], self._dragEnd[1])
-      GL.glVertex2d(self._dragStart[0], self._dragEnd[1])
-      GL.glVertex2d(self._dragStart[0], self._dragStart[1])
-      GL.glEnd()
-      GL.glDisable(GL.GL_BLEND)
-
-    # print ('>>>Coords', self._infiniteLineBL, self._infiniteLineTR)
-    # this gets the correct mapped coordinates
-    GL.glColor4f(0.8, 0.9, 1.0, 1.0)
-    GL.glBegin(GL.GL_LINES)
-    # GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineUL[1])
-    # GL.glVertex2d(self.worldCoordinate[0], self._infiniteLineBR[1])
-    # GL.glVertex2d(self._infiniteLineUL[0], self.worldCoordinate[1])
-    # GL.glVertex2d(self._infiniteLineBR[0], self.worldCoordinate[1])
-
-    GL.glVertex2d(self.worldCoordinate[0], self.axisT)
-    GL.glVertex2d(self.worldCoordinate[0], self.axisB)
-    GL.glVertex2d(self.axisL, self.worldCoordinate[1])
-    GL.glVertex2d(self.axisR, self.worldCoordinate[1])
-
-    GL.glEnd()
-
-    coords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+" : "\
-              +str(round(self.worldCoordinate[0], 3))\
-              +", "+str(round(self.worldCoordinate[1], 3))
-
-    self.mouseString = GLString(text=coords
-                                , font=self.firstFont
-                                , x=self.worldCoordinate[0], y=self.worldCoordinate[1]
-                                # self._screenZero[0], y=self._screenZero[1]
-                                , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
-                                , pid=None)
-
-    # self.glut_print(self.worldCoordinate[0], self.worldCoordinate[1]
-    #                 , GLUT.GLUT_BITMAP_HELVETICA_12
-    #                 , coords
-    #                 , 1.0, 1.0, 1.0, 1.0)
-
-    # if self._buildTextFlag == GLRENDERMODE_REBUILD:
-    #   self._buildTextFlag = GLRENDERMODE_DRAW
-    #   GL.glNewList(self._drawTextList, GL.GL_COMPILE)
-    #
-    #   for ti in range(7):
-    #     # GL.glRotate(25.0, 0.0, 0.0, 1.0)      # can rotate if we need to :)
-    #
-    #     GL.glPushMatrix()
-    #     GL.glTranslate(ti*50.0, ti*50, 0.0)
-    #     GL.glCallLists([ord(c) for c in 'The Quick\tBrown Fox\n013617@something'])
-    #     GL.glPopMatrix()
-    #
-    #   GL.glEndList()
-
-    # self._useTexture = 1
-    # self._shaderProgram1.setGLUniform1i('useTexture', self._useTexture)
-
-    GL.glUseProgram(self._shaderProgramTex.program_id)
-
-    GL.glEnable(GL.GL_BLEND)
-    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-    GL.glEnable(GL.GL_TEXTURE_2D)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
-
-    # GL.glListBase( self.firstFont.base )
-
-    # GL.glPushMatrix()
-    # GL.glTranslated(50, 300, 0)
-    # # GL.glScalef(-0.5, -3.0, 1.0)        # because the axes are inverted
-    # GL.glCallList(self._drawTextList)
-    # GL.glPopMatrix()
-
-    # self.set2DProjection()
-    # for spectrumView in self._parent.spectrumViews:
-    #   self._drawPeakLists(spectrumView)
-
-    # draw the mouse coordinates
-    # self.set2DProjectionFlat()
-
-    # TODO:ED now change all the texts to drawList with coordinates as screen(x,y)
-    # rescale needs to keep the lists but offset the characters from the first in the list
-    # each string can be id'ed by a pid and attrib array keeps the world coordinate of the first character
-
-    # GL.glPushMatrix()
-    # GL.glTranslate(self.worldCoordinate[0], self.worldCoordinate[1], 0.0)      # from bottom left of window?
-    # GL.glScalef(3.0, 3.0, 1.0)                              # use this for scaling font
-    GL.glColor3f(0.9, 0.9, 0.9)
-    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0,
-                             0.0, 0.0, 0.0, 1.0]
-    # self._uMVMatrix[0:16] = [self.pixelX*3.0, 0.0, 0.0, 0.0,
-    #                          0.0, self.pixelY*3.0, 0.0, 0.0,
-    #                          0.0, 0.0, 1.0, 0.0,
-    #                          self.worldCoordinate[0]+(25*self.pixelX)
-    #                               , self.worldCoordinate[1]+(25*self.pixelY), 0.0, 1.0]
-    self._shaderProgramTex.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
-    # GL.glCallLists([ord(c) for c in coords])
-
-    self.mouseString.drawTextArray()
-    # GL.glPopMatrix()
-
-    # draw axes labelling
-    if labelsChanged:
-      GL.glNewList(self._axisLabels, GL.GL_COMPILE)
-
-      # put the axis labels into the bottom bar
-      self.viewports.setViewport('bottomAxisBar')
-      self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0, AXIS_MARGINBOTTOM, -1.0, 1.0)
-      self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-      self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
-
-      for axLabel in self.axisLabelling['0']:
-        axisX = axLabel[2]
-        axisXText = str(int(axisX)) if axLabel[3] >= 1 else str(axisX)
-
-        GL.glPushMatrix()
-        # GL.glTranslate(axisX-(5.0*self.pixelX*len(str(axisX))), 15, 0.0)
-        GL.glTranslate(axisX-(5.0*self.pixelX), 30, 0.0)
-        GL.glScalef(self.pixelX, 1.0, 1.0)
-        GL.glRotate(-90.0, 0.0, 0.0, 1.0)
-
-        GL.glColor3f(0.9, 0.9, 0.9)
-        GL.glCallLists([ord(c) for c in axisXText])
-        GL.glPopMatrix()
-
-      # put the axis labels into the right bar
-      self.viewports.setViewport('rightAxisBar')
-      self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT, self.axisB, self.axisT, -1.0, 1.0)
-      self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-      self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
-
-      for axLabel in self.axisLabelling['1']:
-        axisY = axLabel[2]
-        axisYText = str(int(axisY)) if axLabel[3] >= 1 else str(axisY)
-
-        GL.glPushMatrix()
-        GL.glTranslate(5.0, axisY-5.0*self.pixelY, 0.0)
-        GL.glScalef(1.0, self.pixelY, 1.0)
-
-        GL.glColor3f(0.9, 0.9, 0.9)
-        GL.glCallLists([ord(c) for c in axisYText])
-        GL.glPopMatrix()
-
-      GL.glEndList()
-
-    GL.glCallList(self._axisLabels)
-
-    # # testing text boundaries
-    # GL.glDisable(GL.GL_BLEND)
-
-    # draw the testString to the screen
+  def drawGrid(self):
+    # set to the mainView and draw the grid
     self.viewports.setViewport('mainView')
+    self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
+    self.gridList[0].drawIndexArray()
 
-    # testing text
-    # GL.glDisable(GL.GL_BLEND)
+    # draw the grid marks for the right axis
+    self.viewports.setViewport('rightAxis')
+    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self.gridList[1].drawIndexArray()
 
-    # TODO:ED check that this is the correct dimensions of the window
-    # self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, w-35, 35, h, -1.0, 1.0)
-    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+    # draw the grid marks for the bottom axis
+    self.viewports.setViewport('bottomAxis')
+    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self.gridList[2].drawIndexArray()
 
-    self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0,
-                             0.0, 0.0, 0.0, 1.0]
-    self._shaderProgramTex.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+  def drawAxes(self):
+    pass
 
-    self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-    # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
-    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, GL.GL_FALSE, self._axisScale)
-
-    # draw the string
-    self._testString.drawTextArray()
-
+  def drawLabels(self):
     for spectrumView in self._parent.spectrumViews:
       try:
         self._buildPeakListLabels(spectrumView)      # should include rescaling
@@ -1726,10 +1435,6 @@ void main()
 
       except Exception as es:
         raise es
-
-
-    GL.glDisable(GL.GL_BLEND)
-    GL.glDisable(GL.GL_TEXTURE_2D)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # new bit
@@ -1828,43 +1533,115 @@ void main()
     #   # GL.glEndList()
 
     # don't need the above bit
-    if self._testSpectrum.renderMode == GLRENDERMODE_DRAW:
-      GL.glUseProgram(self._shaderProgram2.program_id)
+    # if self._testSpectrum.renderMode == GLRENDERMODE_DRAW:
+    #   GL.glUseProgram(self._shaderProgram2.program_id)
+    #
+    #   # must be called after glUseProgram
+    #   # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
+    #   # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._uMVMatrix)
+    #
+    #   of = 1.0
+    #   on = -1.0
+    #   oa = 2.0 / (self.axisR - self.axisL)
+    #   ob = 2.0 / (self.axisT - self.axisB)
+    #   oc = -2.0 / (of - on)
+    #   od = -(of + on) / (of - on)
+    #   oe = -(self.axisT + self.axisB) / (self.axisT - self.axisB)
+    #   og = -(self.axisR + self.axisL) / (self.axisR - self.axisL)
+    #   # orthographic
+    #   self._uPMatrix[0:16] = [oa, 0.0, 0.0, 0.0,
+    #                           0.0, ob, 0.0, 0.0,
+    #                           0.0, 0.0, oc, 0.0,
+    #                           og, oe, od, 1.0]
+    #
+    #   # create modelview matrix
+    #   self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    #                            0.0, 1.0, 0.0, 0.0,
+    #                            0.0, 0.0, 1.0, 0.0,
+    #                            0.0, 0.0, 0.0, 1.0]
+    #
+    #   self._shaderProgram2.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    #   self._shaderProgram2.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    #
+    #   self.set2DProjectionFlat()
+    #   self._testSpectrum.drawIndexArray()
+    #   # GL.glUseProgram(0)
+    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      # must be called after glUseProgram
-      # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
-      # GL.glUniformMatrix4fv(self.uMVMatrix, 1, GL.GL_FALSE, self._uMVMatrix)
-
-      of = 1.0
-      on = -1.0
-      oa = 2.0 / (self.axisR - self.axisL)
-      ob = 2.0 / (self.axisT - self.axisB)
-      oc = -2.0 / (of - on)
-      od = -(of + on) / (of - on)
-      oe = -(self.axisT + self.axisB) / (self.axisT - self.axisB)
-      og = -(self.axisR + self.axisL) / (self.axisR - self.axisL)
-      # orthographic
-      self._uPMatrix[0:16] = [oa, 0.0, 0.0, 0.0,
-                              0.0, ob, 0.0, 0.0,
-                              0.0, 0.0, oc, 0.0,
-                              og, oe, od, 1.0]
-
-      # create modelview matrix
-      self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                               0.0, 1.0, 0.0, 0.0,
-                               0.0, 0.0, 1.0, 0.0,
-                               0.0, 0.0, 0.0, 1.0]
-
-      self._shaderProgram2.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-      self._shaderProgram2.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
-
-      self.set2DProjectionFlat()
-      self._testSpectrum.drawIndexArray()
-      GL.glUseProgram(0)
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    GL.glPopAttrib(GL.GL_ALL_ATTRIB_BITS)
+    # self.swapBuffers()
     # GLUT.glutSwapBuffers()
+
+  def drawCursors(self):
+    # draw the cursors
+    # need to change to VBOs
+    GL.glColor4f(0.8, 0.9, 1.0, 1.0)
+    GL.glBegin(GL.GL_LINES)
+
+    GL.glVertex2d(self.worldCoordinate[0], self.axisT)
+    GL.glVertex2d(self.worldCoordinate[0], self.axisB)
+    GL.glVertex2d(self.axisL, self.worldCoordinate[1])
+    GL.glVertex2d(self.axisR, self.worldCoordinate[1])
+
+    GL.glEnd()
+
+  def drawMouseCoords(self):
+    newCoords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+" : "\
+              +str(round(self.worldCoordinate[0], 3))\
+              +", "+str(round(self.worldCoordinate[1], 3))
+
+    if newCoords != self._mouseCoords:
+      self.mouseString = GLString(text=newCoords
+                                  , font=self.firstFont
+                                  , x=self.worldCoordinate[0], y=self.worldCoordinate[1]
+                                  # self._screenZero[0], y=self._screenZero[1]
+                                  , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                  , pid=None)
+      self._mouseCoords = newCoords
+    self.mouseString.drawTextArray()
+
+  def drawSelectionBox(self):
+    if self._drawSelectionBox:
+      GL.glEnable(GL.GL_BLEND)
+      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
+      # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+      #                          0.0, 1.0, 0.0, 0.0,
+      #                          0.0, 0.0, 1.0, 0.0,
+      #                          0.0, 0.0, 0.0, 1.0]
+      # self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+      #
+      self._dragStart = self._startCoordinate
+      self._dragEnd = self._endCoordinate
+
+      if self._selectionMode == 1:    # yellow
+        GL.glColor4f(0.8, 0.9, 0.2, 0.3)
+      elif self._selectionMode == 2:      # purple
+        GL.glColor4f(0.8, 0.2, 0.9, 0.3)
+      elif self._selectionMode == 3:      # cyan
+        GL.glColor4f(0.2, 0.5, 0.9, 0.3)
+
+      GL.glBegin(GL.GL_QUADS)
+      GL.glVertex2d(self._dragStart[0], self._dragStart[1])
+      GL.glVertex2d(self._dragEnd[0], self._dragStart[1])
+      GL.glVertex2d(self._dragEnd[0], self._dragEnd[1])
+      GL.glVertex2d(self._dragStart[0], self._dragEnd[1])
+      GL.glEnd()
+
+      if self._selectionMode == 1:    # yellow
+        GL.glColor4f(0.8, 0.9, 0.2, 0.9)
+      elif self._selectionMode == 2:      # purple
+        GL.glColor4f(0.8, 0.2, 0.9, 0.9)
+      elif self._selectionMode == 3:      # cyan
+        GL.glColor4f(0.2, 0.5, 0.9, 0.9)
+
+      GL.glBegin(GL.GL_LINE_STRIP)
+      GL.glVertex2d(self._dragStart[0], self._dragStart[1])
+      GL.glVertex2d(self._dragEnd[0], self._dragStart[1])
+      GL.glVertex2d(self._dragEnd[0], self._dragEnd[1])
+      GL.glVertex2d(self._dragStart[0], self._dragEnd[1])
+      GL.glVertex2d(self._dragStart[0], self._dragStart[1])
+      GL.glEnd()
+      GL.glDisable(GL.GL_BLEND)
 
   def _makeSpectrumArray(self, spectrumView, drawList):
     drawList.renderMode = GLRENDERMODE_DRAW
@@ -2138,9 +1915,6 @@ void main()
   def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
     dim = [self.width(), self.height()]
 
-    # ul = np.array([self._infiniteLineUL[0], self._infiniteLineUL[1]])
-    # br = np.array([self._infiniteLineBR[0], self._infiniteLineBR[1]])
-
     ul = np.array([self.axisL, self.axisT])
     br = np.array([self.axisR, self.axisB])
 
@@ -2149,18 +1923,10 @@ void main()
 
     if gridGLList.renderMode == GLRENDERMODE_REBUILD:
 
-      # GL.glNewList(gridGLList[0], GL.GL_COMPILE)
       gridGLList.renderMode = GLRENDERMODE_DRAW
       labelsChanged = True
 
-      # gridGLList[2] = None
-      # gridGLList[3] = None
-      # gridGLList[4] = 0
-
       gridGLList.clearArrays()
-
-      tempList = []
-      tempCol = []
 
       index = 0
       if ul[0] > br[0]:
@@ -2179,8 +1945,7 @@ void main()
         for ax in axisList:           #   range(0,2):  ## Draw grid for both axes
           ppl = np.array( dim[ax] / nl[ax] )                      # ejb
           c = np.clip(3.*(ppl-3), 0., 30.)
-          # GL.glColor4f(r, g, b, c/transparency)               # make high order lines more transparent
-          # GL.glBegin(GL.GL_LINES)
+
           bx = (ax+1) % 2
           for x in range(0, int(nl[ax])):
             p1 = np.array([0.,0.])
@@ -2191,9 +1956,6 @@ void main()
             p2[bx] = br[bx]
             if p1[ax] < min(ul[ax], br[ax]) or p1[ax] > max(ul[ax], br[ax]):
                 continue
-            # p.drawLine(QtCore.QPointF(p1[0], p1[1]), QtCore.QPointF(p2[0], p2[1]))
-            # GL.glVertex2f(p1[0], p1[1])
-            # GL.glVertex2f(p2[0], p2[1])
 
             if i == 1:            # should be largest scale grid
               if p1[0] == p2[0]:
@@ -2207,43 +1969,6 @@ void main()
             gridGLList.colors = np.append(gridGLList.colors, [r, g, b, c/transparency, r, g, b, c/transparency])
             gridGLList.numVertices += 2
             index += 2
-
-      #     GL.glEnd()
-      #
-      # GL.glEndList()
-      # gridGLList[2] = np.array(tempList, np.float32)
-      # gridGLList[3] = np.array(tempCol, np.float32)
-
-    # old drawing of the grid
-    # GL.glEnable(GL.GL_BLEND)
-    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-    # GL.glLineWidth(1.0)
-    #
-    # GL.glCallList(gridGLList[0])
-    #
-    # GL.glDisable(GL.GL_BLEND)
-
-
-    # new bit to use a vertex array to draw the peaks, very fast and easy
-    # GL.glEnable(GL.GL_BLEND)
-    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-    # GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-    # GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-    #
-    # GL.glVertexPointer(2, GL.GL_FLOAT, 0, gridGLList[2])
-    # GL.glColorPointer(4, GL.GL_FLOAT, 0, gridGLList[3])
-    # GL.glDrawArrays(GL.GL_LINES, 0, gridGLList[4])
-    #
-    # GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-    # GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-    # GL.glDisable(GL.GL_BLEND)
-
-    # tr = self.deviceTransform()
-    # p.setWorldTransform(fn.invertQTransform(tr))
-    # for t in texts:
-    #     x = tr.map(t[0]) + Point(0.5, 0.5)
-    #     p.drawText(x, t[1])
-    # p.end()
 
     return labelling, labelsChanged
 

@@ -136,6 +136,16 @@ class PreferencesPopup(CcpnDialog):
     self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
 
     row += 1
+    self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))
+    self.autoSaveLayoutOnQuitBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.autoSaveLayoutOnQuit)
+    self.autoSaveLayoutOnQuitBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoSaveLayoutOnQuit'))
+
+    row += 1
+    self.restoreLayoutOnOpeningLabel = Label(parent, text="Restore Layout On Opening: ", grid=(row, 0))
+    self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.restoreLayoutOnOpening)
+    self.restoreLayoutOnOpeningBox.toggled.connect(partial(self._toggleGeneralOptions, 'restoreLayoutOnOpening'))
+    
+    row += 1
     self.autoBackupEnabledLabel = Label(parent, text="Auto Backup On: ", grid=(row, 0))
     self.autoBackupEnabledBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.autoBackupEnabled)
     self.autoBackupEnabledBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoBackupEnabled'))

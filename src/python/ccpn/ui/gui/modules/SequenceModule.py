@@ -33,9 +33,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 
 from PyQt4 import QtCore, QtGui
-
+from collections import Iterable
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrChain import NmrChain
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthHugeFont
@@ -76,9 +78,12 @@ class SequenceModule(CcpnModule):
     self.setAcceptDrops(True)
     self.scrollArea = QtGui.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
+
     self.scrollArea.scene = QtGui.QGraphicsScene(self)
     self.scrollContents = QtGui.QGraphicsView(self.scrollArea.scene, self)
     self.scrollContents.setAcceptDrops(True)
+    self.scrollContents.setInteractive(True)
+
     self.scrollContents.setAlignment(QtCore.Qt.AlignLeft)
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
     self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
@@ -90,7 +95,7 @@ class SequenceModule(CcpnModule):
     self.mainWidget.layout().addWidget(self.scrollArea)
     # connect graphics scene dragMoveEvent to CcpnModule dragMoveEvent - required for drag-and-drop
     # assignment routines.
-    self.scrollArea.scene.dragMoveEvent = self.dragMoveEvent
+    self.scrollArea.scene.dragMoveEvent = self._dragMoveEvent
     self.chainLabels = []
     self._refreshChainLabels()
 
@@ -104,6 +109,16 @@ class SequenceModule(CcpnModule):
 
     # TODO:ED add highlight if an nmrChain already selected
     # generate a create graph event? and let the response populate the module
+
+  def _dragMoveEvent(self, event):
+    # pos = event.scenePos()
+    # pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
+    # item = self.scrollArea.scene.itemAt(pos)
+    # ###item = self.scene.itemAt(event.scenePos())
+    # if isinstance(item, GuiChainResidue):
+    #   item.setDefaultTextColor(QtGui.QColor('orange'))
+    # event.accept()
+    pass
 
   def populateFromSequenceGraphs(self):
     """
@@ -372,12 +387,15 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
     # WB: TODO: below is terrible code (the scene functions are trampled over and over)
     # but somehow this seems to be the way it has to be done
     # and this then means there is that awful itemAt(position) check in the drag functions
-    scene.dragLeaveEvent = self._dragLeaveEvent
-    scene.dragEnterEvent = self._dragEnterEvent
+    # scene.dragLeaveEvent = self._dragLeaveEvent
+    # scene.dragEnterEvent = self._dragEnterEvent
     scene.dropEvent = self.dropEvent
     self.scene = scene
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     self._styleResidue()
+
+  def mousePressEvent(self, ev):
+    pass
 
   def _styleResidue(self):
     """
@@ -447,7 +465,14 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
 
     data, dataType = _interpretEvent(event)
     if dataType == 'pids':
-      self._processNmrChains(data, event)
+
+      # check that the drop event contains the corrcect information
+      if isinstance(data, Iterable) and len(data) == 2:
+        nmrChain = self.mainWindow.project.getByPid(data[0])
+        nmrResidue = self.mainWindow.project.getByPid(data[1])
+        if isinstance(nmrChain, NmrChain) and isinstance(nmrResidue, NmrResidue):
+          if nmrResidue.nmrChain == nmrChain:
+            self._processNmrChains(data, event)
 
   def _processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
     """
@@ -469,7 +494,7 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
 
       with progressManager(self.mainWindow, 'Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
 
-        # try:
+        try:
           if nmrChain.id == '@-':
             # assume that it is the only one
             nmrChain.assignSingleResidue(selectedNmrResidue, guiRes.residue)
@@ -483,8 +508,8 @@ class GuiChainResidue(QtGui.QGraphicsTextItem, Base):
             guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
             guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
                                  res.shortName+'</strong></div>')
-        # except Exception as es:
-        #   getLogger().warning('Sequence Module: %s' % str(es))
+        except Exception as es:
+          getLogger().warning('Sequence Module: %s' % str(es))
 
     #   if self._appBase is not None:
     #     appBase = self._appBase

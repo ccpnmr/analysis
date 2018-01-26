@@ -18,7 +18,7 @@ __version__ = "$Revision: 3.0.b2 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
+__author__ = "$Author: Luca Mureddu $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -115,7 +115,7 @@ def _updateGuiModules(mainWindow, layout):
   
   :param mainWindow: 
   :param layout: 
-  :return: #updates classNameModuleNameTupleList on SavedLayout with list of tuples [(className, ModuleName), (className, ModuleName)]
+  :return: #updates classNameModuleNameTupleList on layout with list of tuples [(className, ModuleName), (className, ModuleName)]
   list of tuples because a multiple modules of the same class type can exist. E.g. two peakListTable modules! 
   """
   guiModules = mainWindow.moduleArea.currentModules
@@ -125,7 +125,7 @@ def _updateGuiModules(mainWindow, layout):
     if not isinstance(module, GuiSpectrumDisplay): # Displays are not stored here but in the DataModel
       classNames_ModuleNames.append((module.className, module.name()))
 
-  if GuiModules in  layout:
+  if GuiModules in layout:
     if ClassNameModuleName in layout.guiModules:
         setattr(layout.guiModules, ClassNameModuleName, classNames_ModuleNames )
 
@@ -139,11 +139,11 @@ def _updateWarning(mainWindow, layout):
 
 def updateSavedLayout(mainWindow):
   """
-  Updates the application.savedLayout Dict
+  Updates the application.layout Dict
   :param mainWindow: needed to get application
-  :return: an up to date savedLayout dictionary with the current state of GuiModules
+  :return: an up to date layout dictionary with the current state of GuiModules
   """
-  layout = mainWindow.application.savedLayout
+  layout = mainWindow.application.layout
   
   _updateGeneral(mainWindow, layout)
   _updateGuiModules(mainWindow, layout)
@@ -159,7 +159,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
   :return: None
   """
   updateSavedLayout(mainWindow)
-  layout = mainWindow.application.savedLayout
+  layout = mainWindow.application.layout
   project = mainWindow.application.project
   if not jsonFilePath:
     jsonFilePath = getLayoutDirectoryPath(project.path) + '/' + DefaultLayoutFileName
@@ -168,5 +168,111 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
   file.close()
 
 
+def _ccpnModulesImporter(path):
+  '''
+  :param path: fullPath of the directory where are located the CcpnModules files
+  :return: list of CcpnModule classes
+  '''
+  _ccpnModules = []
+  import pkgutil as _pkgutil
+  import inspect as _inspect
+  from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+
+  for loader, name, isPpkg in _pkgutil.walk_packages(path):
+    module = loader.find_module(name).load_module(name)
+    for i, obj in _inspect.getmembers(module):
+      if _inspect.isclass(obj):
+        if issubclass(obj, CcpnModule):
+          if hasattr(obj, 'className'):
+            _ccpnModules.append(obj)
+  return _ccpnModules
 
 
+def _openCcpnModule(mainWindow, ccpnModules, className, moduleName=None):
+  for ccpnModule in ccpnModules:
+    if ccpnModule is not None:
+      if ccpnModule.className == className:
+        try:
+          newCcpnModule = ccpnModule(mainWindow=mainWindow, name=moduleName)
+          mainWindow.moduleArea.addModule(newCcpnModule)
+        except Exception as e:
+          mainWindow.project._logger.warning("Layout restore failed: %s" % e)
+
+
+def _getApplicationSpecificModules(mainWindow, applicationName):
+  '''init imports. try except as some applications may not be distribuited '''
+  modules = []
+  from ccpn.framework.Framework import AnalysisAssign, AnalysisMetabolomics, AnalysisStructure, AnalysisScreen
+
+  if applicationName == AnalysisScreen:
+    try:
+      from ccpn.AnalysisScreen import modules as aS
+      modules.append(aS)
+    except Exception as e:
+      mainWindow.project._logger.warning("Import Error, %s" % e)
+
+  if applicationName == AnalysisAssign:
+    try:
+      from ccpn.AnalysisAssign import modules as aA
+      modules.append(aA)
+    except Exception as e:
+      mainWindow.project._logger.warning("Import Error, %s" % e)
+
+  if applicationName == AnalysisMetabolomics:
+    try:
+      from ccpn.AnalysisMetabolomics.ui.gui import modules as aM
+      modules.append(aM)
+    except Exception as e:
+      mainWindow.project._logger.warning("Import Error, %s" % e)
+
+  if applicationName == AnalysisStructure:
+    try:
+      from ccpn.AnalysisStructure import modules as aS
+      modules.append(aS)
+    except Exception as e:
+      mainWindow.project._logger.warning("Import Error, %s" % e)
+
+  return modules
+
+
+def _getAvailableModules(mainWindow, layout):
+  from ccpn.ui.gui import modules as gM
+  if General in layout:
+    if ApplicationName in layout.general:
+
+      applicationName = getattr(layout.general, ApplicationName)
+      modules = []
+      if applicationName != mainWindow.application.applicationName:
+        # TODO Needs to go in the logger
+        getLogger().debug('Same modules could not be loaded. Different application. Start a new project with %s' %applicationName)
+      else:
+        modules = _getApplicationSpecificModules(mainWindow, applicationName)
+      modules.append(gM)
+      paths = [item.__path__ for item in modules]
+      ccpnModules = [ccpnModule for path in paths for ccpnModule in _ccpnModulesImporter(path)]
+      return ccpnModules
+
+
+def restoreLayout(mainWindow, layout):
+  ## import all the ccpnModules classes specific for the application.
+  try:
+    ccpnModules = _getAvailableModules(mainWindow, layout)
+    # mainWindow.moduleArea._closeAll()
+    if GuiModules in layout:
+      if ClassNameModuleName in layout.guiModules:
+        classNameGuiModuleNameList = getattr(layout.guiModules, ClassNameModuleName)
+        for classNameGuiModuleName in classNameGuiModuleNameList:
+          if len(classNameGuiModuleName) == 2:
+            className, guiModuleName = classNameGuiModuleName
+            _openCcpnModule(mainWindow, ccpnModules, className, moduleName=guiModuleName)
+
+  except Exception as e:
+    getLogger().warning("Failed to restore Layout")
+
+  ## restore the layout positions and sizes
+  try:
+    if LayoutState in layout:
+      state = getattr(layout, LayoutState)
+      mainWindow.moduleArea.restoreState(state)
+  except Exception as e:
+    mainWindow.project._logger.warning("Layout error: %s" % e)

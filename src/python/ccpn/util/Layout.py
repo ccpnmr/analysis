@@ -35,7 +35,7 @@ from collections import defaultdict
 
 # TODO: Deal With Blank displays opening more then once.
 # TODO: Deal With empty spaces when a module could not be restored. Needs to Fill all available places.
-# TODO:
+# TODO: Save restore displays
 
 LayoutDirName = 'layout'
 DefaultLayoutFileName = 'v3Layout.json'

@@ -55,14 +55,8 @@ class CcpnModuleArea(ModuleArea):
 
   def _getSerialName(self, moduleName):
       self.currentModuleNames.append(moduleName)
-      count = len(self.findAll()[1])
-      if count == 0:
-        self.currentModuleNames = []
       counter = collections.Counter(self.currentModuleNames)
-      if counter[str(moduleName)] == 0:
-        return str(moduleName)
-      else:
-        return str(moduleName) + '.' + str(counter[str(moduleName)])
+      return str(moduleName) + '.' + str(counter[str(moduleName)])
 
   @property
   def openedModules(self) -> list:

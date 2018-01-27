@@ -53,8 +53,8 @@ except ImportError:
     sys.exit(1)
 
 AXIS_MARGIN = 5
-AXIS_MARGINRIGHT = 35
-AXIS_MARGINBOTTOM = 35
+AXIS_MARGINRIGHT = 40
+AXIS_MARGINBOTTOM = 40
 AXIS_LINE = 5
 
 GLRENDERMODE_IGNORE = 0
@@ -543,14 +543,33 @@ void main()
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
+    getLogger().info('OpenGL version: %s' % self._GLVersion)
 
-    format = QSurfaceFormat()
-    format.setDepthBufferSize(24)
-    format.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
-    format.setProfile(QSurfaceFormat.CoreProfile)
+    format = self.context().format()    #    QSurfaceFormat()
+    # # format.setDepthBufferSize(24)
+    # # format.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
+    # # format.setProfile(QSurfaceFormat.CoreProfile)
+    # # format.setAlphaBufferSize(8)
+    #
+    # self.makeCurrent()
+    # self.context().setFormat(format)
+    # self.context().create()
 
-    self.context().setFormat(format)
-    self.makeCurrent()
+    # glFormat = QtOpenGL.QGLFormat()
+    # glFormat.setVersion(4, 1)
+    # glFormat.setProfile(QtOpenGL.QGLFormat.CoreProfile)
+    # glFormat.setSampleBuffers(True)
+    # glFormat.setDefaultFormat(glFormat)
+    # print("Format version: " + str(glFormat.majorVersion()))
+    # myW = QtOpenGL.QGLWidget(glFormat)
+    # print("Widget context valid: " + str(myW.context().isValid()))
+    # print("Widget format version: " + str(myW.format().majorVersion()))
+    # print("Widget context format version: " + str(myW.context().format().majorVersion()))
+    # myW.setFormat(glFormat)
+    # print("Forced format valid: " + str(myW.context().isValid()))
+    # print("Forced format version: " + str(myW.format().majorVersion()))
+    # myW.show()
+
     # print ('>>>GLVersion', self._GLVersion)
 
     # initialise the arrays for the grid and axes
@@ -671,8 +690,9 @@ void main()
 
     # GLUT.glutInitDisplayMode(GLUT.glutCreateSubWindow | GLUT.GLUT_RGBA | GLUT.GLUT_DEPTH)
     # set the GL constants here
-    GL.glClearColor(0.15, 0.15, 0.15, 1.0)
+    GL.glClearColor(0.0, 0.0, 0.0, 1.0)
     GL.glUseProgram(self._shaderProgram1.program_id)
+    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -1163,7 +1183,7 @@ void main()
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
-    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
@@ -1192,7 +1212,7 @@ void main()
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
-    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
     GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
@@ -1230,9 +1250,7 @@ void main()
     w = self.width()
     h = self.height()
 
-    GL.glClearColor(0, 0, 0, 1.0)
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-    GL.glColorMask(GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE, GL.GL_TRUE)
 
     # set the current shader
     currentShader = self._shaderProgram1
@@ -1268,6 +1286,15 @@ void main()
     self.modelViewMatrix = (GL.GLdouble * 16)()
     self.projectionMatrix = (GL.GLdouble * 16)()
     self.viewport = (GL.GLint * 4)()
+
+    # GL.glEnable(GL.GL_BLEND)
+    # GL.glColor4f(0.2, 0.5, 0.9, 1.0)
+    # GL.glBegin(GL.GL_QUADS)
+    # GL.glVertex2d(self.axisL, (self.axisT+self.axisB)/2.0)
+    # GL.glVertex2d(self.axisL, self.axisB)
+    # GL.glVertex2d((self.axisR+self.axisL)/2.0, self.axisB)
+    # GL.glVertex2d((self.axisR+self.axisL)/2.0, (self.axisT+self.axisB)/2.0)
+    # GL.glEnd()
 
     self.drawGrid()
 
@@ -1308,11 +1335,14 @@ void main()
     GL.glEnable(GL.GL_BLEND)
     self.drawMouseCoords()
 
+    self.drawAxisLabels()
+
     self.disableTexture()
+    # GLUT.glutSwapBuffers()
 
   def enableTexture(self):
     GL.glEnable(GL.GL_BLEND)
-    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
     GL.glEnable(GL.GL_TEXTURE_2D)
     GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
 
@@ -1383,7 +1413,7 @@ void main()
 
         # draw the bounding box
         GL.glEnable(GL.GL_BLEND)
-        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
         GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
         # GL.glLineStipple(1, 0xAAAA)
@@ -1411,7 +1441,7 @@ void main()
   def drawGrid(self):
     # set to the mainView and draw the grid
     self.viewports.setViewport('mainView')
-    self.axisLabelling, labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
+    self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
     self.gridList[0].drawIndexArray()
 
     # draw the grid marks for the right axis
@@ -1424,8 +1454,59 @@ void main()
     self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
     self.gridList[2].drawIndexArray()
 
-  def drawAxes(self):
-    pass
+  def drawAxisLabels(self):
+    # draw axes labelling
+    if self.labelsChanged:
+
+      self._axisXLabelling = []
+
+      for axLabel in self.axisLabelling['0']:
+        axisX = axLabel[2]
+        axisXText = str(int(axisX)) if axLabel[3] >= 1 else str(axisX)
+
+        self._axisXLabelling.append(GLString(text=axisXText
+                                  , font=self.firstFont
+                                  , angle=np.pi/2.0
+                                  , x=axisX-(10.0*self.pixelX) #*len(str(axisX)))
+                                  , y=AXIS_MARGINBOTTOM-AXIS_LINE
+                                  , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                  , pid=None))
+
+      self._axisYLabelling = []
+
+      for xx, ayLabel in enumerate(self.axisLabelling['1']):
+        axisY = ayLabel[2]
+        axisYText = str(int(axisY)) if ayLabel[3] >= 1 else str(axisY)
+
+        self._axisYLabelling.append(GLString(text=axisYText
+                                  , font=self.firstFont
+                                  , x=AXIS_LINE
+                                  , y=axisY-(10.0*self.pixelY)
+                                  , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                  , pid=None))
+
+    # put the axis labels into the bottom bar
+    self.viewports.setViewport('bottomAxisBar')
+    self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
+    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, GL.GL_FALSE, self._axisScale)
+    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
+                                             AXIS_MARGINBOTTOM, -1.0, 1.0)
+    self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+    for lb in self._axisXLabelling:
+      lb.drawTextArray()
+
+    # put the axis labels into the right bar
+    self.viewports.setViewport('rightAxisBar')
+    self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
+    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, GL.GL_FALSE, self._axisScale)
+    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT
+                                             , self.axisB, self.axisT, -1.0, 1.0)
+    self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+    for lb in self._axisYLabelling:
+      lb.drawTextArray()
+
 
   def drawLabels(self):
     for spectrumView in self._parent.spectrumViews:
@@ -1602,14 +1683,8 @@ void main()
   def drawSelectionBox(self):
     if self._drawSelectionBox:
       GL.glEnable(GL.GL_BLEND)
-      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
-      # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-      #                          0.0, 1.0, 0.0, 0.0,
-      #                          0.0, 0.0, 1.0, 0.0,
-      #                          0.0, 0.0, 0.0, 1.0]
-      # self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
-      #
       self._dragStart = self._startCoordinate
       self._dragEnd = self._endCoordinate
 
@@ -2281,11 +2356,11 @@ class GLViewports(object):
 
   def setViewport(self, name):
     # change to the named viewport
-    def setVal(offsetType, w, h):
+    def setVal(offsetType, w, h, leftOffset):
       if offsetType[1] in 'alb':
         return offsetType[0]
       elif offsetType[1] == 'w':
-        return w+offsetType[0]
+        return w+offsetType[0]-leftOffset
       elif offsetType[1] == 'h':
         return h+offsetType[0]
 
@@ -2293,10 +2368,10 @@ class GLViewports(object):
       thisView = self._viewports[name]
       w=thisView[0].width()
       h=thisView[0].height()
-      l = setVal(thisView[1], w, h)
-      b = setVal(thisView[2], w, h)
-      wi = setVal(thisView[3], w, h)
-      he = setVal(thisView[4], w, h)
+      l = setVal(thisView[1], w, h, 0)
+      b = setVal(thisView[2], w, h, 0)
+      wi = setVal(thisView[3], w, h, l)
+      he = setVal(thisView[4], w, h, 0)
 
       GL.glViewport(l, b, wi, he)
                     # , w-thisView[3]-thisView[1], h-thisView[4]-thisView[2])
@@ -2495,7 +2570,7 @@ class GLVertexArray():
 
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
-      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
@@ -2523,7 +2598,7 @@ class GLVertexArray():
   def drawVertexColor(self):
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
-      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
@@ -2543,7 +2618,7 @@ class GLVertexArray():
 
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
-      GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
@@ -2586,12 +2661,11 @@ class GLVertexArray():
 
 
 class GLString(GLVertexArray):
-  def __init__(self, text=None, font=None, pid=None, color=(1.0, 1.0, 1.0, 1.0), x=0, y=0,
-               width=None, height=None, GLContext=None):
+  def __init__(self, text=None, font=None, pid=None, color=(1.0, 1.0, 1.0, 1.0), x=0.0, y=0.0,
+               angle=0.0, width=None, height=None, GLContext=None):
     super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=False
                                    , GLContext=GLContext, drawMode=GL.GL_TRIANGLES
                                    , dimension=2)
-
     self.text = text
     self.font = font
     self.pid = pid
@@ -2603,6 +2677,9 @@ class GLString(GLVertexArray):
     self.indexOffset = 0
     pen = [0, 0]              # [x, y]
     prev = None
+
+    cs, sn = math.cos(angle), math.sin(angle)
+    # rotate = np.matrix([[cs, sn], [-sn, cs]])
 
     for i, charCode in enumerate(text):
       c = ord(charCode)
@@ -2627,8 +2704,6 @@ class GLString(GLVertexArray):
 
           x0 = pen[0] + glyph[GlyphPX0] + kerning     # pen[0] + glyph.offset[0] + kerning
           y0 = pen[1] + glyph[GlyphPY0]               # pen[1] + glyph.offset[1]
-          # x1 = x0 + glyph[GlyphPX1]                 # x0 + glyph.size[0]
-          # y1 = y0 + glyph[GlyphPY1]                 # y0 - glyph.size[1]
           x1 = pen[0] + glyph[GlyphPX1] + kerning     # x0 + glyph.size[0]
           y1 = pen[1] + glyph[GlyphPY1]               # y0 - glyph.size[1]
           u0 = glyph[GlyphTX0]          # glyph.texcoords[0]
@@ -2636,9 +2711,14 @@ class GLString(GLVertexArray):
           u1 = glyph[GlyphTX1]          # glyph.texcoords[2]
           v1 = glyph[GlyphTY1]          # glyph.texcoords[3]
 
+          xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
+          xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
+          xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
+          xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
+
           index = i * 4
           indices = [index, index + 1, index + 2, index, index + 2, index + 3]
-          vertices = [[x0, y0], [x0, y1], [x1, y1], [x1, y0]]
+          vertices = [[xbl, ybl], [xtl, ytl], [xtr, ytr], [xbr, ybr]]
           texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
           colors = [color, ] * 4
           attribs = [[x, y], [x, y], [x, y], [x, y]]

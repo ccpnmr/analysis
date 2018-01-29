@@ -36,6 +36,16 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.Spectrum import Spectrum
+from ccpn.core.PeakList import PeakList
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.Note import Note
+from ccpn.core.IntegralList import IntegralList
+from ccpn.core.NmrChain import NmrChain
+from ccpn.core.StructureEnsemble import StructureEnsemble
+
+from ccpn.core.RestraintList import RestraintList
+
 from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
@@ -112,6 +122,79 @@ NEW_ITEM_DICT = {
   'SpectrumGroups': 'newSpectrumGroup',
   'Complexes': 'newComplex',
 }
+
+
+def _openSpectrumDisplay(mainWindow, spectrum):
+  spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
+
+  # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
+  # This routine can then be ommitted and the call above replaced by the one remaining line
+  mainWindow.pythonConsole.writeConsoleCommand(
+    "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
+  mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
+  getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
+  getLogger().info('application.createSpectrumDisplay(spectrum)')
+
+def _openSpectrumGroup(mainWindow, spectrumGroup):
+  '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
+  Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
+
+  if len(spectrumGroup.spectra) > 0:
+    spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
+    for spectrum in spectrumGroup.spectra: # Add the other spectra
+      spectrumDisplay.displaySpectrum(spectrum)
+
+    spectrumDisplay.isGrouped = True
+    spectrumDisplay.spectrumToolBar.hide()
+    spectrumDisplay.spectrumGroupToolBar.show()
+    spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+    mainWindow.application.current.strip = spectrumDisplay.strips[0]
+    if spectrumGroup.spectra[0].dimensionCount == 1:
+      mainWindow.application.current.strip.plotWidget.autoRange()
+
+
+def _openPeakList(mainWindow, peakList):
+  application = mainWindow.application
+  application.showPeakTable(peakList=peakList)
+
+def _openChemicalShiftList(mainWindow, chemicalShiftList):
+  application = mainWindow.application
+  application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList)
+
+def _openNote(mainWindow, note):
+  application = mainWindow.application
+  application.showNotesEditor(note=note)
+
+def _openRestraintList(mainWindow, restraintList):
+  application = mainWindow.application
+  application.showRestraintTable(restraintList=restraintList)
+
+def _openStructureTable(mainWindow, structureEnsemble):
+  application = mainWindow.application
+  application.showStructureTable(structureEnsemble=structureEnsemble)
+
+def _openNmrResidueTable(mainWindow, nmrChain):
+  application = mainWindow.application
+  application.showNmrResidueTable(nmrChain=nmrChain)
+
+def _openIntegralList(mainWindow, integralList):
+  application = mainWindow.application
+  application.showIntegralTable(integralList=integralList)
+
+
+
+OpenObjAction = {
+                  Spectrum: _openSpectrumDisplay,
+                  PeakList: _openPeakList,
+                  NmrChain: _openNmrResidueTable,
+                  SpectrumGroup:_openSpectrumGroup,
+                  ChemicalShiftList:_openChemicalShiftList,
+                  RestraintList: _openRestraintList,
+                  Note:_openNote,
+                  IntegralList: _openIntegralList,
+                  StructureEnsemble: _openStructureTable
+                 }
+
 ### Flag example code removed in revision 7686
 
 class SideBar(QtGui.QTreeWidget, Base):
@@ -468,6 +551,25 @@ class SideBar(QtGui.QTreeWidget, Base):
   def processText(self, text, event=None):
     newNote = self.project.newNote()
     newNote.text = text
+
+
+
+  def _openItemObject(self, objs):
+    for obj in objs:
+      if obj:
+        try:
+          if obj.__class__ in OpenObjAction:
+              OpenObjAction[obj.__class__](self.mainWindow, obj)
+
+          else:
+            info = showInfo('Not implemented yet!',
+                            'This function has not been implemented in the current version')
+        except Exception as e:
+          getLogger().warning('Error: %s' %e)
+
+
+
+
 
   def _deleteItemObject(self,  objs):
     """Removes the specified item from the sidebar and deletes it from the project.
@@ -863,6 +965,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           objs.append(objFromPid)
 
     if len(objs)>0:
+      contextMenu.addAction('Open', partial(self._openItemObject, objs))
       contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
       canBeCloned = True
       for obj in objs:

@@ -37,6 +37,9 @@ from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
+from ccpn.ui.gui.widgets.Font import Font
+from ccpn.ui.gui.guiSettings import getColourScheme, getColours, LabelFG
+from ccpn.util.Colour import  hexToRgb
 
 ModuleArea = DockArea
 Module = Dock
@@ -64,7 +67,10 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     self.currentModuleNames = []
     self.setAcceptDrops(True)
 
-    # TODO:ED paint some text in here and add drop events
+    self.textLabel = DropAreaLabel
+    self.fontLabel = Font('Helvetica', 36, bold=True)
+    self.colourLabel = hexToRgb(getColours()[LabelFG])
+
 
   def dragMoveEvent(self, event:QtGui.QMouseEvent):
     event.accept()
@@ -142,11 +148,19 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
   def paintEvent(self, ev):
     """
-    Copied from the parent VerticalLabel class to allow for modification in StyleSheet
+    Draws central label
     """
-    p = QtGui.QPainter(self)
-    rgn = self.contentsRect()
 
+    p = QtGui.QPainter(self)
+
+    # set font
+    p.setFont(self.fontLabel)
+
+    # set colour
+    p.setPen(QtGui.QColor(*self.colourLabel))
+
+     # set size
+    rgn = self.contentsRect()
     rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height())
     align  = QtCore.Qt.AlignVCenter|QtCore.Qt.AlignHCenter
     self.hint = p.drawText(rgn, align, DropAreaLabel)
@@ -341,31 +355,32 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     restore the arrangement of an existing set of Docks.
 
     """
-    ## 1) make dict of all docks and list of existing containers
-    containers, docks = self.findAll()
-    oldTemps = self.tempAreas[:]
+    if 'main' in state:
+      ## 1) make dict of all docks and list of existing containers
+      containers, docks = self.findAll()
+      oldTemps = self.tempAreas[:]
 
-    # 2) create container structure, move docks into new containers
-    self.buildFromState(state['main'], docks, self)
+      # 2) create container structure, move docks into new containers
+      self.buildFromState(state['main'], docks, self)
 
-    ## 3) create floating areas, populate
-    for s in state['float']:
-      a = self.addTempArea()
-      a.buildFromState(s[0]['main'], docks, a)
-      a.win.setGeometry(*s[1])
+      ## 3) create floating areas, populate
+      for s in state['float']:
+        a = self.addTempArea()
+        a.buildFromState(s[0]['main'], docks, a)
+        a.win.setGeometry(*s[1])
 
-    ## 4) Add any remaining docks to the bottom
-    for d in docks.values():
-      self.moveDock(d, 'below', None)
+      ## 4) Add any remaining docks to the bottom
+      for d in docks.values():
+        self.moveDock(d, 'below', None)
 
-    # print "\nKill old containers:"
-    ## 5) kill old containers
-    for c in containers:
-      if c is not None:
-        c.close()
-    for a in oldTemps:
-      if a is not None:
-        a.apoptose()
+      # print "\nKill old containers:"
+      ## 5) kill old containers
+      for c in containers:
+        if c is not None:
+          c.close()
+      for a in oldTemps:
+        if a is not None:
+          a.apoptose()
 
 
   def buildFromState(self, state, docks, root, depth=0):

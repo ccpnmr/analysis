@@ -31,6 +31,9 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 
 from PyQt4 import QtCore, QtGui
 from weakref import ref
+
+from ccpn.ui.gui.widgets.DropBase import DropBase
+
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from pyqtgraph.dockarea.DockArea import TempAreaWindow
@@ -52,7 +55,7 @@ settingsWidgetPositions = {
                            'right':  {'settings':(0,1), 'widget':(0,0)},
                            }
 
-class CcpnModule(Dock):
+class CcpnModule(Dock, DropBase):
   """
   Base class for CCPN modules
   sets self.application, self.current, self.project and self.mainWindow
@@ -99,7 +102,7 @@ class CcpnModule(Dock):
     Dock.__init__(self, name=name, area=self.area,
                    autoOrientation=False,
                    closable=closable)#, **kwds)   # ejb
-
+    DropBase.__init__(self, acceptDrops=True)
     self.hStyle = """
                   Dock > QWidget {
                       border: 0px solid #000;
@@ -438,15 +441,33 @@ class CcpnModule(Dock):
     getLogger().debug('Closing %s' % str(self.container()))
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 
+
+  def dragEnterEvent(self, *args):
+    if args:
+      event = args[0]
+      data = self.parseEvent(event)
+      if DropBase.PIDS in data:
+        self.raiseOverlay()
+
+        event.accept()
+
+    DockDrop.dragEnterEvent(self, *args)
+
+
   def dropEvent(self, *args):
     self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
-    source = args[0].source()
+    if args:
+      event = args[0]
+      source = event.source()
+      data = self.parseEvent(event)
+      if DropBase.PIDS in data:
+        DockDrop.dropEvent(self, *args)
 
-    if hasattr(source, 'implements') and source.implements('dock'):
-      DockDrop.dropEvent(self, *args)
-    else:
-      args[0].ignore()
-      return
+      if hasattr(source, 'implements') and source.implements('dock'):
+        DockDrop.dropEvent(self, *args)
+      else:
+        args[0].ignore()
+        return
 
 
 class CcpnModuleLabel(DockLabel):

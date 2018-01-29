@@ -74,6 +74,7 @@ messageFont     = helvetica14        # use in popup messages; does not seem to a
 LIGHT = 'light'
 DARK = 'dark'
 COLOUR_SCHEMES = (LIGHT, DARK)
+LabelFG = 'LabelFG'
 
 MARK_LINE_COLOUR_DICT = {
   'CA': '#0000FF',
@@ -125,12 +126,12 @@ def getColours():
 
   if colourScheme == DARK:
     textColour = '#f7ffff'
-    colourDict['LabelFG'] = textColour
+    colourDict[LabelFG] = textColour
     colourDict['LabelBG'] = '#2a3358'
 
   elif colourScheme == LIGHT:
     textColour = '#555D85'
-    colourDict['LabelFG'] = textColour
+    colourDict[LabelFG] = textColour
     colourDict['LabelBG'] = '#FBF4CC'
 
   else:

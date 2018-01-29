@@ -457,7 +457,7 @@ QTreeWidget::item::hover {
                   }
 
 QSplitter {
-          background-color: #122043;
+          background-color: #FBF4CC;
           }
 QSplitter::handle:horizontal {
     width: 1px;

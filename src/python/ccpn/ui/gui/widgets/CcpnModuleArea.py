@@ -69,7 +69,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
     self.textLabel = DropAreaLabel
     self.fontLabel = Font('Helvetica', 36, bold=True)
-    self.colourLabel = hexToRgb(getColours()[LabelFG])
+    self.colourLabel = hexToRgb('#bec4f3')
 
 
   def dragMoveEvent(self, event:QtGui.QMouseEvent):

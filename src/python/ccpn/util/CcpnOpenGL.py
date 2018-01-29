@@ -407,79 +407,79 @@ void main()
 }
 """
 
-#     # shader for plotting antialiased text to the screen
-#     self._vertexShaderTex = """
-# #version 120
-#
-# uniform mat4 mvMatrix;
-# uniform mat4 pMatrix;
-# varying vec4 FC;
-# uniform vec4 axisScale;
-# attribute vec2 offset;
-#
-# void main()
-# {
-#   gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
-#   gl_TexCoord[0] = gl_MultiTexCoord0;
-#   FC = gl_Color;
-# }
-# """
-#
-#     self._fragmentShaderTex = """
-# #version 120
-#
-# uniform sampler2D texture;
-# varying vec4 FC;
-# vec4    filter;
-#
-# void main()
-# {
-#   // vec4 current = texture2D(texture, uv);
-#   filter = texture2D(texture, gl_TexCoord[0].xy);
-#   gl_FragColor = vec4(FC.xyz, filter.w);
-# }
-# """
-
     # shader for plotting antialiased text to the screen
     self._vertexShaderTex = """
-    #version 120
+#version 120
 
-    uniform mat4 mvMatrix;
-    uniform mat4 pMatrix;
-    varying vec4 FC;
-    uniform vec4 axisScale;
-    attribute vec2 offset;
+uniform mat4 mvMatrix;
+uniform mat4 pMatrix;
+varying vec4 FC;
+uniform vec4 axisScale;
+attribute vec2 offset;
 
-    void main()
-    {
-      gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
-      gl_TexCoord[0] = gl_MultiTexCoord0;
-      FC = gl_Color;
-    }
-    """
+void main()
+{
+  gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+  FC = gl_Color;
+}
+"""
 
     self._fragmentShaderTex = """
 #version 120
-
-#ifdef GL_ES
-precision mediump float;
-#endif
 
 uniform sampler2D texture;
 varying vec4 FC;
 vec4    filter;
 
-varying vec4 v_color;
-varying vec2 v_texCoord;
-
-const float smoothing = 1.0/16.0;
-
-void main() {
-    float distance = texture2D(texture, v_texCoord).a;
-    float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
-    gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+void main()
+{
+  // vec4 current = texture2D(texture, uv);
+  filter = texture2D(texture, gl_TexCoord[0].xy);
+  gl_FragColor = vec4(FC.xyz, filter.w);
 }
 """
+
+#     # shader for plotting antialiased text to the screen
+#     self._vertexShaderTex = """
+#     #version 120
+#
+#     uniform mat4 mvMatrix;
+#     uniform mat4 pMatrix;
+#     varying vec4 FC;
+#     uniform vec4 axisScale;
+#     attribute vec2 offset;
+#
+#     void main()
+#     {
+#       gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+#       gl_TexCoord[0] = gl_MultiTexCoord0;
+#       FC = gl_Color;
+#     }
+#     """
+#
+#     self._fragmentShaderTex = """
+# #version 120
+#
+# #ifdef GL_ES
+# precision mediump float;
+# #endif
+#
+# uniform sampler2D texture;
+# varying vec4 FC;
+# vec4    filter;
+#
+# varying vec4 v_color;
+# varying vec2 v_texCoord;
+#
+# const float smoothing = 1.0/16.0;
+#
+# void main() {
+#     float distance = texture2D(texture, v_texCoord).a;
+#     float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+#     gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+# }
+# """
 
     # advanced shader for plotting contours
     self._vertexShader2 = """

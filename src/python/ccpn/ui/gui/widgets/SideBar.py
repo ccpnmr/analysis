@@ -80,7 +80,10 @@ _classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList',
                         'Residue', 'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
                         'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
 
+Pids = 'pids'
+
 # TODO Add Residue
+
 
 # ll = [_coreClassMap[x] for x in _classNamesInSidebar]
 # classesInSideBar = OrderedDict(((x.shortClassName, x) for x in ll))
@@ -123,6 +126,19 @@ NEW_ITEM_DICT = {
   'Complexes': 'newComplex',
 }
 
+
+def _openItemObject(mainWindow, objs):
+  for obj in objs:
+    if obj:
+      try:
+        if obj.__class__ in OpenObjAction:
+          OpenObjAction[obj.__class__](mainWindow, obj)
+
+        else:
+          info = showInfo('Not implemented yet!',
+                          'This function has not been implemented in the current version')
+      except Exception as e:
+        getLogger().warning('Error: %s' % e)
 
 def _openSpectrumDisplay(mainWindow, spectrum):
   spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
@@ -444,6 +460,7 @@ class SideBar(QtGui.QTreeWidget, Base):
   #TODO:RASMUS: assure proper message once the project.loadData has been cleaned up
   def _processDroppedItems(self, data):
     "Handle the dropped urls"
+    # CCPN INTERNAL. Called also from module area. Side bar and drop area must have same behaviours
     for url in data.get('urls',[]):
       # print('SideBar._processDroppedItems>>> dropped:', url)
       getLogger().info('SideBar._processDroppedItems>>> dropped: '+str(url))
@@ -554,18 +571,7 @@ class SideBar(QtGui.QTreeWidget, Base):
 
 
 
-  def _openItemObject(self, objs):
-    for obj in objs:
-      if obj:
-        try:
-          if obj.__class__ in OpenObjAction:
-              OpenObjAction[obj.__class__](self.mainWindow, obj)
 
-          else:
-            info = showInfo('Not implemented yet!',
-                            'This function has not been implemented in the current version')
-        except Exception as e:
-          getLogger().warning('Error: %s' %e)
 
 
 
@@ -849,7 +855,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           if objFromPid is not None:
             pids.append(objFromPid.pid)
 
-      itemData = json.dumps({'pids':pids})
+      itemData = json.dumps({DropBase.PIDS:pids})
       event.mimeData().setData(ccpnmrJsonData, itemData)
       event.mimeData().setText(itemData)
       event.accept()
@@ -965,7 +971,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           objs.append(objFromPid)
 
     if len(objs)>0:
-      contextMenu.addAction('Open', partial(self._openItemObject, objs))
+      contextMenu.addAction('Open', partial(_openItemObject, objs))
       contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
       canBeCloned = True
       for obj in objs:

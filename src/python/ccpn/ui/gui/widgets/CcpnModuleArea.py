@@ -23,7 +23,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt4 import QtGui, QtCore
-
+import json
+from ccpn.util.Constants import ccpnmrJsonData
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.Container import Container
@@ -31,18 +34,20 @@ from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.util.Logging import getLogger
 import collections
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
 
 ModuleArea = DockArea
 Module = Dock
+DropAreaLabel = 'Drop Area'
 
-
-class CcpnModuleArea(ModuleArea):   #, DropBase):
+class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
   def __init__(self, mainWindow):
-    super(CcpnModuleArea, self).__init__(mainWindow)
-    # ModuleArea.__init__(self, mainWindow)
+    # super(CcpnModuleArea, self).__init__(mainWindow)
+    ModuleArea.__init__(self, mainWindow)
+    DropBase.__init__(self, acceptDrops=True)
     # DropBase.__init__(self, acceptDrops=True)
 
     # #GWV test to trace gridding issues
@@ -57,8 +62,97 @@ class CcpnModuleArea(ModuleArea):   #, DropBase):
     self.mainWindow = mainWindow  # a link back to the parent MainWindow
     self.setContentsMargins(0, 0, 0, 0)
     self.currentModuleNames = []
+    self.setAcceptDrops(True)
 
     # TODO:ED paint some text in here and add drop events
+
+  def dragMoveEvent(self, event:QtGui.QMouseEvent):
+    event.accept()
+
+  def dragLeaveEvent(self, event):
+    # print ('>>>dragLeaveEvent %s' % str(event.type()))
+    super(CcpnModuleArea, self).dragLeaveEvent(event)
+    event.accept()
+
+  def dropEvent(self,event, *args):
+    data = self.parseEvent(event)
+
+    if DropBase.PIDS in data:
+     pids = data[DropBase.PIDS]
+     objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
+     _openItemObject(self.mainWindow, objs)
+
+    if DropBase.URLS in data:
+      self.mainWindow.sideBar._processDroppedItems(data)
+    event.accept()
+    super(CcpnModuleArea, self).dropEvent(event, *args)
+
+
+
+  def dragEnterEvent(self, event, enter=True):
+      event.accept()
+
+
+
+
+
+  def _handlePid(self, pid):
+    "handle a; return True in case it is a Spectrum or a SpectrumGroup"
+    success = False
+    obj = self.mainWindow.project.getByPid(pid)
+    print(pid)
+    if obj is not None and isinstance(obj, Spectrum):
+      spectrumDisplay = self._createSpectrumDisplay(obj)
+      self.current.strip = spectrumDisplay.strips[0]
+      if obj.dimensionCount == 1:
+        self.current.strip.plotWidget.autoRange()
+      success = True
+    elif obj is not None and isinstance(obj, SpectrumGroup):
+      self._handleSpectrumGroup(obj)
+      success = True
+    return success
+
+  def _createSpectrumDisplay(self, spectrum):
+    spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrum)
+    # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
+    # This routine can then be ommitted and the call above replaced by the one remaining line
+    self.mainWindow.pythonConsole.writeConsoleCommand(
+      "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
+    self.mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
+    getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
+    getLogger().info('application.createSpectrumDisplay(spectrum)')
+
+    return spectrumDisplay
+
+  def _handleSpectrumGroup(self, spectrumGroup):
+    '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
+    Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
+
+    if len(spectrumGroup.spectra) > 0:
+      spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
+      for spectrum in spectrumGroup.spectra: # Add the other spectra
+        spectrumDisplay.displaySpectrum(spectrum)
+      spectrumDisplay.isGrouped = True
+      spectrumDisplay.spectrumToolBar.hide()
+      spectrumDisplay.spectrumGroupToolBar.show()
+      spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+      self.current.strip = spectrumDisplay.strips[0]
+      if spectrumGroup.spectra[0].dimensionCount == 1:
+        self.current.strip.plotWidget.autoRange()
+
+  def paintEvent(self, ev):
+    """
+    Copied from the parent VerticalLabel class to allow for modification in StyleSheet
+    """
+    p = QtGui.QPainter(self)
+    rgn = self.contentsRect()
+
+    rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height())
+    align  = QtCore.Qt.AlignVCenter|QtCore.Qt.AlignHCenter
+    self.hint = p.drawText(rgn, align, DropAreaLabel)
+    p.end()
+
+
 
   def _getSerialName(self, moduleName):
       self.currentModuleNames.append(moduleName)

@@ -582,7 +582,7 @@ class Framework:
         if layout:
           Layout.restoreLayout(self._mainWindow, layout)
     except Exception as e:
-      getLogger().warning('Impossitble to restore Layout %s' % e)
+      getLogger().warning('Impossible to restore Layout %s' % e)
 
     # Initialise displays
     for spectrumDisplay in project.windows[0].spectrumDisplays: # there is exactly one window
@@ -607,10 +607,7 @@ class Framework:
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)
 
-    # add blank Display
-    if len(self.ui.mainWindow.moduleArea.openedModules) == 0:
-      # self.ui.mainWindow.newBlankDisplay()
-      self.addBlankDisplay()
+
 
   def getByPid(self, pid):
     return self.project.getByPid(pid)

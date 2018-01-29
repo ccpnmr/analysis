@@ -208,18 +208,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     """
     #TODO:GEERTEN: deal with Stylesheet issue; There is a Splitter class in Widgets
-    self.setStyleSheet("""QSplitter{
-                                    background-color: #bec4f3;
-                                    }
-                          QSplitter::handle:horizontal {
-                                                        width: 3px;
-                                                        }
-
-                          QSplitter::handle:vertical {
-                                                        height: 3px;
-                                                      }
-
-                                    """)
+    # self.setStyleSheet("""QSplitter{
+    #                                 background-color: #bec4f3;
+    #                                 }
+    #                       QSplitter::handle:horizontal {
+    #                                                     width: 3px;
+    #                                                     }
+    #
+    #                       QSplitter::handle:vertical {
+    #                                                     height: 3px;
+    #                                                   }
+    #
+    #                                 """)
     # IPythonConsole
     self.namespace = {'application': self.application,
                       'current': self.application.current,

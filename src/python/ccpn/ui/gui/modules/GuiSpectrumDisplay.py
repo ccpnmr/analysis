@@ -225,15 +225,18 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     theObject = data.get('theObject')
 
-    for url in data.get('urls',[]):
-      getLogger().debug('dropped: %s' % url)
-      objects = self.project.loadData(url)
+    if DropBase.URLS in data:
+      self.mainWindow.sideBar._processDroppedItems(data)
 
-      if objects is not None:
-        for obj in objects:
-          if isinstance(obj, Spectrum):
-            self._handlePid(obj.pid, theObject)  # pass the object as its pid so we use
-                                      # the same method used to process the pids
+    # for url in data.get('urls',[]):
+    #   getLogger().debug('dropped: %s' % url)
+    #   objects = self.project.loadData(url)
+    #
+    #   if objects is not None:
+    #     for obj in objects:
+    #       if isinstance(obj, Spectrum):
+    #         self._handlePid(obj.pid, theObject)  # pass the object as its pid so we use
+    #                                   # the same method used to process the pids
 
     for pid in data.get('pids',[]):
       getLogger().debug('dropped:', pid)

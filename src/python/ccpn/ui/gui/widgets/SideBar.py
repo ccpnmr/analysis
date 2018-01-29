@@ -460,7 +460,7 @@ class SideBar(QtGui.QTreeWidget, Base):
   #TODO:RASMUS: assure proper message once the project.loadData has been cleaned up
   def _processDroppedItems(self, data):
     "Handle the dropped urls"
-    # CCPN INTERNAL. Called also from module area. Side bar and drop area must have same behaviours
+    # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviours
     for url in data.get('urls',[]):
       # print('SideBar._processDroppedItems>>> dropped:', url)
       getLogger().info('SideBar._processDroppedItems>>> dropped: '+str(url))

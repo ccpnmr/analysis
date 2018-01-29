@@ -407,36 +407,77 @@ void main()
 }
 """
 
+#     # shader for plotting antialiased text to the screen
+#     self._vertexShaderTex = """
+# #version 120
+#
+# uniform mat4 mvMatrix;
+# uniform mat4 pMatrix;
+# varying vec4 FC;
+# uniform vec4 axisScale;
+# attribute vec2 offset;
+#
+# void main()
+# {
+#   gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+#   gl_TexCoord[0] = gl_MultiTexCoord0;
+#   FC = gl_Color;
+# }
+# """
+#
+#     self._fragmentShaderTex = """
+# #version 120
+#
+# uniform sampler2D texture;
+# varying vec4 FC;
+# vec4    filter;
+#
+# void main()
+# {
+#   // vec4 current = texture2D(texture, uv);
+#   filter = texture2D(texture, gl_TexCoord[0].xy);
+#   gl_FragColor = vec4(FC.xyz, filter.w);
+# }
+# """
+
     # shader for plotting antialiased text to the screen
     self._vertexShaderTex = """
-#version 120
+    #version 120
 
-uniform mat4 mvMatrix;
-uniform mat4 pMatrix;
-varying vec4 FC;
-uniform vec4 axisScale;
-attribute vec2 offset;
+    uniform mat4 mvMatrix;
+    uniform mat4 pMatrix;
+    varying vec4 FC;
+    uniform vec4 axisScale;
+    attribute vec2 offset;
 
-void main()
-{
-  gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
-  gl_TexCoord[0] = gl_MultiTexCoord0;
-  FC = gl_Color;
-}
-"""
+    void main()
+    {
+      gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+      gl_TexCoord[0] = gl_MultiTexCoord0;
+      FC = gl_Color;
+    }
+    """
 
     self._fragmentShaderTex = """
 #version 120
+
+#ifdef GL_ES
+precision mediump float;
+#endif
 
 uniform sampler2D texture;
 varying vec4 FC;
 vec4    filter;
 
-void main()
-{
-  // vec4 current = texture2D(texture, uv);
-  filter = texture2D(texture, gl_TexCoord[0].xy);
-  gl_FragColor = vec4(FC.xyz, filter.w);
+varying vec4 v_color;
+varying vec2 v_texCoord;
+
+const float smoothing = 1.0/16.0;
+
+void main() {
+    float distance = texture2D(texture, v_texCoord).a;
+    float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+    gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
 }
 """
 
@@ -588,20 +629,38 @@ void main()
     self.firstFont = CcpnGLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
     self._buildTextFlag = True
 
-    self._mouseList = GL.glGenLists(1)
+    # self._mouseList = GL.glGenLists(1)
     self._buildMouse = True
     self._mouseCoords = ''
     self.mouseString = None
 
-    self._drawTextList = GL.glGenLists(1)
-    self._axisXLabels = GL.glGenLists(1)
-    self._axisLabels = GL.glGenLists(1)
+    # self._drawTextList = GL.glGenLists(1)
+    # self._axisXLabels = GL.glGenLists(1)
+    # self._axisLabels = GL.glGenLists(1)
     self.peakLabelling = 0
 
     self._contourList = GLVertexArray(numLists=1
                                       , renderMode=GLRENDERMODE_REBUILD
                                       , blendMode=True
                                       , drawMode=GL.GL_TRIANGLES
+                                      , dimension=3
+                                      , GLContext=self)
+    self._selectionBox = GLVertexArray(numLists=1
+                                      , renderMode=GLRENDERMODE_REBUILD
+                                      , blendMode=True
+                                      , drawMode=GL.GL_QUADS
+                                      , dimension=3
+                                      , GLContext=self)
+    self._selectionOutline = GLVertexArray(numLists=1
+                                      , renderMode=GLRENDERMODE_REBUILD
+                                      , blendMode=True
+                                      , drawMode=GL.GL_LINES
+                                      , dimension=3
+                                      , GLContext=self)
+    self._marksList = GLVertexArray(numLists=1
+                                      , renderMode=GLRENDERMODE_REBUILD
+                                      , blendMode=True
+                                      , drawMode=GL.GL_LINES
                                       , dimension=3
                                       , GLContext=self)
 
@@ -1507,6 +1566,8 @@ void main()
     for lb in self._axisYLabelling:
       lb.drawTextArray()
 
+  def drawMarks(self):
+    pass
 
   def drawLabels(self):
     for spectrumView in self._parent.spectrumViews:
@@ -1681,6 +1742,7 @@ void main()
     self.mouseString.drawTextArray()
 
   def drawSelectionBox(self):
+    # should really use the proper VBOs for this
     if self._drawSelectionBox:
       GL.glEnable(GL.GL_BLEND)
       # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
@@ -2543,7 +2605,7 @@ class GLVertexArray():
     self.texcoords= np.array([], dtype=np.float32)    #np.zeros((len(text)*4,2), dtype=np.float32)
     self.attribs = np.array([], dtype=np.float32)     #np.zeros((len(text)*4,1), dtype=np.float32)
     self.numVertices = 0
-    self.GLLists = GL.glGenLists(numLists)
+    # self.GLLists = GL.glGenLists(numLists)
     self.numLists = numLists
     self.blendMode = blendMode
     self.drawMode = drawMode
@@ -2551,7 +2613,8 @@ class GLVertexArray():
     self._GLContext = GLContext
 
   def _close(self):
-    GL.glDeleteLists(self.GLLists, self.numLists)
+    # GL.glDeleteLists(self.GLLists, self.numLists)
+    pass
 
   def clearArrays(self):
     self.vertices = np.array([], dtype=np.float32)

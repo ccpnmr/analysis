@@ -37,7 +37,6 @@ from PyQt4.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
 
-from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
@@ -662,29 +661,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     else:
       if event:
         event.ignore()
-
-  #TODO:LUCA: this cannot be correct and ModuleArea is not updates; The proper way should be
-  # that moduleArea handles this: self.moduleArea.deleteModule(blankDisplay)
-  def deleteBlankDisplay(self):
-    """
-    Removes blank display from main window module area if one is present.
-    """
-    blankList = self.moduleArea.findAll()
-    if 'Blank Display' in blankList[1]:
-      blankDisplay = blankList[1]['Blank Display']
-      # blankDisplay.close()
-      blankDisplay._closeModule()
-
-  def newBlankDisplay(self, position='right', relativeTo=None):
-    "Adds new blank display to module area; returns BlankDisplay instance"
-    blankDisplay = BlankDisplay(mainWindow=self)
-
-    # blankDisplay = BlankDisplay.instance(mainWindow=self)     # ejb - failed test with a singleton
-    #FIXME:ED - still crashes when loading some projects
-    if not relativeTo:
-      relativeTo = self.moduleArea     # ejb
-    self.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
-    return blankDisplay
 
   def newMacroFromLog(self):
     """

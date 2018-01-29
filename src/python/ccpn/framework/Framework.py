@@ -878,8 +878,6 @@ class Framework:
                ))
 
     ms.append(('View',      [
-      ("New Blank Display", self.addBlankDisplay, [('shortcut', 'nd')]),
-      (),
       ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       # ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
@@ -1766,40 +1764,6 @@ class Framework:
   ###################################################################################################################
   ## MENU callbacks:  VIEW
   ###################################################################################################################
-
-  def addBlankDisplay(self, position='right', relativeTo=None):
-    # self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
-
-    mainWindow = self.ui.mainWindow
-    blankList = mainWindow.moduleArea.findAll()
-    if 'Blank Display' not in blankList[1]:
-
-      if not relativeTo:
-        relativeTo = mainWindow.moduleArea      # ejb - use same technique as below
-
-      from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
-      blankDisplay = BlankDisplay(mainWindow=mainWindow)
-      mainWindow.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
-
-    # if not BlankDisplay.isInstance():
-    #   blankDisplay = BlankDisplay.instance(mainWindow=mainWindow)
-    #   mainWindow.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
-    # else:
-    #   BlankDisplay.showInstance()
-
-  # Property to issue deprecation warning, remove when value removed
-
-  # ejb - temp removed 12/6/17
-
-  # @property
-  # def blankDisplay(self):
-  #   from warnings import warn
-  #   warn('{}.{} is deprecated.'.format(__class__, __name__), category=DeprecationWarning)
-  #   return self.__blankDisplay
-  # @blankDisplay.setter
-  # def blankDisplay(self, value):
-  #   self.__blankDisplay = value
-  #
 
   def showChemicalShiftTable(self
                              , position:str='bottom'

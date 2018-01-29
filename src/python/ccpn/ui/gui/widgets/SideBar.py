@@ -971,7 +971,7 @@ class SideBar(QtGui.QTreeWidget, Base):
           objs.append(objFromPid)
 
     if len(objs)>0:
-      contextMenu.addAction('Open', partial(_openItemObject, objs))
+      contextMenu.addAction('Open', partial(_openItemObject, self.mainWindow, objs))
       contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
       canBeCloned = True
       for obj in objs:

@@ -57,6 +57,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 
+AXIS_WIDTH = 30
+
 
 class GuiSpectrumDisplay(CcpnModule):
   """
@@ -504,6 +506,8 @@ class GuiSpectrumDisplay(CcpnModule):
         for ss in self.strips:
           ss.plotWidget.plotItem.axes['right']['item'].show()
 
+      self.setColumnStretches(True)
+
   def addStrip(self) -> 'GuiStripNd':
     """
     Creates a new strip by cloning strip with index (default the last) in the display.
@@ -547,14 +551,28 @@ class GuiSpectrumDisplay(CcpnModule):
     widgets = self.stripFrame.children()
     if widgets:
       thisLayout = self.stripFrame.layout()
-      maxCol = 0
-      for wid in widgets[1:]:
-        index = thisLayout.indexOf(wid)
-        row, column, cols, rows = thisLayout.getItemPosition(index)
-        maxCol = max(maxCol, column)
+      thisLayoutWidth = self.stripFrame.width()
+      if not self.lastAxisOnly:
+        maxCol = 0
+        for wid in widgets[1:]:
+          index = thisLayout.indexOf(wid)
+          row, column, cols, rows = thisLayout.getItemPosition(index)
+          maxCol = max(maxCol, column)
 
-      for col in range(0, maxCol+1):
-        thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
+        for col in range(0, maxCol+1):
+          thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
+      else:
+        maxCol = 0
+        for wid in widgets[1:]:
+          index = thisLayout.indexOf(wid)
+          row, column, cols, rows = thisLayout.getItemPosition(index)
+          maxCol = max(maxCol, column)
+
+        leftWidth = (thisLayoutWidth - AXIS_WIDTH) / (maxCol+1)
+        endWidth = leftWidth + AXIS_WIDTH
+        for col in range(0, maxCol):
+          thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
+        thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
 
   def resetYZooms(self):
     """Zooms Y axis of current strip to show entire region"""

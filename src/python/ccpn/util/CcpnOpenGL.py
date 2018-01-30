@@ -402,11 +402,18 @@ void main()
 
 varying vec4  FC;
 uniform vec4  background;
+//uniform ivec4 parameterList;
 
 void main()
 {
   gl_FragColor = FC;
-  gl_FragColor = vec4(FC.xyz, 1.0) * FC.w + background *(1-FC.w);
+  
+//  if (FC.w < 0.05)
+//    discard;
+//  else if (parameterList.x == 0)
+//    gl_FragColor = FC;
+//  else
+//    gl_FragColor = vec4(FC.xyz, 1.0) * FC.w + background * (1-FC.w);
 }
 """
 
@@ -438,11 +445,13 @@ uniform vec4    background;
 
 void main()
 {
-  // vec4 current = texture2D(texture, uv);
+//  vec4 current = texture2D(texture, uv);
   filter = texture2D(texture, gl_TexCoord[0].xy);
-  if (filter.w < 0.05)
-    discard;
-  gl_FragColor = vec4(FC.xyz, 1.0) * filter.w + background *(1-filter.w);
+//  if (filter.w < 0.05)
+//    discard;
+//  gl_FragColor = vec4(FC.xyz, 1.0) * filter.w + background *(1-filter.w);
+
+  gl_FragColor = vec4(FC.xyz, filter.w);
 }
 """
 
@@ -590,9 +599,9 @@ void main()
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
-    getLogger().info('OpenGL version: %s' % self._GLVersion)
+    # getLogger().info('OpenGL version: %s' % self._GLVersion)
 
-    format = self.context().format()    #    QSurfaceFormat()
+    # format = self.context().format()    #    QSurfaceFormat()
     # # format.setDepthBufferSize(24)
     # # format.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
     # # format.setProfile(QSurfaceFormat.CoreProfile)
@@ -680,6 +689,7 @@ void main()
                                         , fragment=self._fragmentShader1
                                         , attributes={'pMatrix':(16, np.float32)
                                                       , 'mvMatrix':(16, np.float32)
+                                                      , 'parameterList': (4, np.int32)
                                                       , 'background': (4, np.float32)})
     self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2
                                         , fragment=self._fragmentShader2
@@ -711,6 +721,7 @@ void main()
     self._useTexture = np.zeros((1,), dtype=np.int)
     self._axisScale = np.zeros((4,), dtype=np.float32)
     self._background = np.zeros((4,), dtype=np.float32)
+    self._parameterList = np.zeros((4,), dtype=np.int32)
     self.worldCoordinate = np.zeros((4,), dtype=np.float32)
 
     # self._positiveContours = np.zeros((4,), dtype=np.float32)
@@ -758,10 +769,13 @@ void main()
     # GLUT.glutInitDisplayMode(GLUT.glutCreateSubWindow | GLUT.GLUT_RGBA | GLUT.GLUT_DEPTH)
     # set the GL constants here
     # GL.glClearColor(*self._background)
-    GL.glUseProgram(self._shaderProgram1.program_id)
-    GL.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO)
-    GL.glClear(GL.GL_COLOR_BUFFER_BIT)
-    GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    # GL.glUseProgram(self._shaderProgram1.program_id)
+    # GL.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO)
+    # GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
+    # This is the correct blend function to ignore stray surface blending functions
+    GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
     # GL.glDisable(GL.GL_DEPTH_TEST)
 
     self.setBackgroundColour([0.05, 0.05, 0.05, 1.0])
@@ -773,10 +787,11 @@ void main()
     """
     GL.glClearColor(*col)
     self._background[0:4] = col
-    GL.glUseProgram(self._shaderProgram1.program_id)
-    self._shaderProgram1.setGLUniform4fv('background', 1, GL.GL_FALSE, self._background)
-    GL.glUseProgram(self._shaderProgramTex.program_id)
-    self._shaderProgramTex.setGLUniform4fv('background', 1, GL.GL_FALSE, self._background)
+
+    self._shaderProgram1.makeCurrent()
+    self._shaderProgram1.setBackground(self._background)
+    self._shaderProgramTex.makeCurrent()
+    self._shaderProgramTex.setBackground(self._background)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -1353,23 +1368,26 @@ void main()
     # GL.glEnable(GL.GL_DEPTH_TEST)
 
     # set the current shader
-    currentShader = self._shaderProgram1
-    GL.glUseProgram(currentShader.program_id)
+    currentShader = self._shaderProgram1.makeCurrent()
+
+    # self._parameterList[0:4] = [1, 0, 0, 0]
+    # self._shaderProgram1.setParameterList(self._parameterList)
+
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                     self.axisT, -1.0, 1.0)
 
     # TODO:ED check why this is h+35 and not h
-    self._shaderProgram1.setViewportMatrix(self._uVMatrix, 0, w-35, 35, h+35, -1.0, 1.0)
-    self._shaderProgram1.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    currentShader.setViewportMatrix(self._uVMatrix, 0, w-35, 35, h+35, -1.0, 1.0)
+    currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
                             0.0, 1.0, 0.0, 0.0,
                             0.0, 0.0, 1.0, 0.0,
                             0.0, 0.0, 0.0, 1.0]     # set to identity matrix
-    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
     # TODO:ED check why this isn't working
-    self._shaderProgram1.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
+    currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
                                            self.axisT, -1.0, 1.0)
 
     self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))     # projection
@@ -1400,26 +1418,27 @@ void main()
 
     # now draw the spectra
     self.viewports.setViewport('mainView')
+
     self.drawSpectra()
 
-    GL.glUseProgram(self._shaderProgramTex.program_id)
+    currentShader = self._shaderProgramTex.makeCurrent()
 
     self.viewports.setViewport('mainView')
 
     # TODO:ED check that this is the correct dimensions of the window
     # self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, w-35, 35, h, -1.0, 1.0)
-    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+    currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
 
-    self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
     self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
                              0.0, 1.0, 0.0, 0.0,
                              0.0, 0.0, 1.0, 0.0,
                              0.0, 0.0, 0.0, 1.0]
-    self._shaderProgramTex.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
     self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
     # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
-    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, GL.GL_FALSE, self._axisScale)
+    currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
 
     # draw the string
     # self._testString.drawTextArray()
@@ -1427,11 +1446,14 @@ void main()
     self.enableTexture()
     self.drawLabels()
 
-    GL.glUseProgram(self._shaderProgram1.program_id)
+    currentShader = self._shaderProgram1.makeCurrent()
+    # self._parameterList[0:4] = [0, 0, 0, 0]
+    # self._shaderProgram1.setParameterList(self._parameterList)
+
     self.drawSelectionBox()
     self.drawCursors()
 
-    GL.glUseProgram(self._shaderProgramTex.program_id)
+    currentShader = self._shaderProgramTex.makeCurrent()
     GL.glEnable(GL.GL_BLEND)
     self.drawMouseCoords()
 
@@ -1452,6 +1474,8 @@ void main()
 
   def drawSpectra(self):
     GL.glLineWidth(1.0)
+    GL.glDisable(GL.GL_BLEND)
+
     for spectrumView in self._parent.spectrumViews:
       try:
         # could put a signal on buildContours
@@ -1501,6 +1525,7 @@ void main()
                              0.0, 0.0, 0.0, 1.0]
     self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
+    GL.glEnable(GL.GL_BLEND)
     for spectrumView in self._parent.spectrumViews:
       try:
         self._spectrumValues = spectrumView._getValues()
@@ -1512,7 +1537,6 @@ void main()
         fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
 
         # draw the bounding box
-        GL.glEnable(GL.GL_BLEND)
         # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
         GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
@@ -1524,8 +1548,6 @@ void main()
         GL.glVertex2d(fx1, fy1)
         GL.glVertex2d(fx1, fy0)
         GL.glEnd()
-        # GL.glDisable(GL.GL_LINE_STIPPLE)
-        GL.glDisable(GL.GL_BLEND)
 
         # draw the peak List, labelling, marks
 
@@ -1540,18 +1562,20 @@ void main()
 
   def drawGrid(self):
     # set to the mainView and draw the grid
+
+    GL.glEnable(GL.GL_BLEND)
     self.viewports.setViewport('mainView')
-    self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=500.0)
+    self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
     self.gridList[0].drawIndexArray()
 
     # draw the grid marks for the right axis
     self.viewports.setViewport('rightAxis')
-    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
     self.gridList[1].drawIndexArray()
 
     # draw the grid marks for the bottom axis
     self.viewports.setViewport('bottomAxis')
-    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=64.0)
+    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
     self.gridList[2].drawIndexArray()
 
   def drawAxisLabels(self):
@@ -1588,7 +1612,7 @@ void main()
     # put the axis labels into the bottom bar
     self.viewports.setViewport('bottomAxisBar')
     self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
-    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, GL.GL_FALSE, self._axisScale)
+    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
     self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
                                              AXIS_MARGINBOTTOM, -1.0, 1.0)
     self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
@@ -1599,7 +1623,7 @@ void main()
     # put the axis labels into the right bar
     self.viewports.setViewport('rightAxisBar')
     self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
-    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, GL.GL_FALSE, self._axisScale)
+    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
     self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT
                                              , self.axisB, self.axisT, -1.0, 1.0)
     self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
@@ -2509,6 +2533,16 @@ class ShaderProgram(object):
       self.uniformLocations[att] = GL.glGetUniformLocation(self.program_id, att)
       self.uniformLocations['_'+att] = np.zeros((attributes[att][0],), dtype=attributes[att][1])
 
+  def makeCurrent(self):
+    GL.glUseProgram(self.program_id)
+    return self
+
+  def setBackground(self, col):
+    self.setGLUniform4fv('background', 1, col)
+
+  # def setParameterList(self, params):
+  #   self.setGLUniform4iv('parameterList', 1, params)
+
   def setProjectionAxes(self, attMatrix, left, right, bottom, top, near, far):
     # of = 1.0
     # on = -1.0
@@ -2563,12 +2597,19 @@ class ShaderProgram(object):
     else:
       raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
 
-  def setGLUniform4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
+  def setGLUniform4fv(self, uniformLocation=None, count=1, value=None):
     if uniformLocation in self.uniformLocations:
       GL.glUniform4fv(self.uniformLocations[uniformLocation]
                       , count, value)
     else:
       raise RuntimeError('Error setting setGLUniform4fv: %s' % uniformLocation)
+
+  def setGLUniform4iv(self, uniformLocation=None, count=1, value=None):
+    if uniformLocation in self.uniformLocations:
+      GL.glUniform4iv(self.uniformLocations[uniformLocation]
+                      , count, value)
+    else:
+      raise RuntimeError('Error setting setGLUniform4iv: %s' % uniformLocation)
 
   def setGLUniform1i(self, uniformLocation=None, count=1, value=None):
     if uniformLocation in self.uniformLocations:

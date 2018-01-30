@@ -342,22 +342,22 @@ class CcpnGLWidget(QOpenGLWidget):
   def _releaseDisplayLists(self, displayList):
     GL.glDeleteLists(displayList, 1)
 
-  def _createDisplayLists(self, numLists, displayList):
-    displayList = GL.glGenLists(numLists)
+  # def _createDisplayLists(self, numLists, displayList):
+  #   displayList = GL.glGenLists(numLists)
 
-  def _makeGLPeakList(self, spectrum:Spectrum, num:GL.GLint):
-    # clear the list and rebuild
-    # GL.glDeleteLists(self._GLPeakLists[num], 1)
-    # self._GLPeakLists[num] = (GL.glGenLists(1), True)       # list and rebuild flag
-
-    # this is actually quite old-school for openGL but good for test
-    GL.glNewList((self._GLPeakLists[num])[0], GL.GL_COMPILE)
-    GL.glColor4f(1.0, 1.0, 1.0, 1.0)
-
-    GL.glBegin(GL.GL_LINES)
-    GL.glEnd()
-
-    GL.glEndList()
+  # def _makeGLPeakList(self, spectrum:Spectrum, num:GL.GLint):
+  #   # clear the list and rebuild
+  #   # GL.glDeleteLists(self._GLPeakLists[num], 1)
+  #   # self._GLPeakLists[num] = (GL.glGenLists(1), True)       # list and rebuild flag
+  #
+  #   # this is actually quite old-school for openGL but good for test
+  #   GL.glNewList((self._GLPeakLists[num])[0], GL.GL_COMPILE)
+  #   GL.glColor4f(1.0, 1.0, 1.0, 1.0)
+  #
+  #   GL.glBegin(GL.GL_LINES)
+  #   GL.glEnd()
+  #
+  #   GL.glEndList()
 
   def _connectSpectra(self):
     for spectrumView in self._parent.spectrumViews:
@@ -1001,6 +1001,7 @@ void main()
 
   def _rescalePeakList(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
+    return
 
     x = abs(self.pixelX)
     y = abs(self.pixelY)
@@ -1109,18 +1110,38 @@ void main()
           #
           # # append the new points to the end of nparray
 
-          drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
-          drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
-                                                            , p0[0]+r, p0[1]+w
-                                                            , p0[0]+r, p0[1]-w
-                                                            , p0[0]-r, p0[1]+w])
-          drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
-          drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
-                                                          ,p0[0], p0[1]
-                                                          ,p0[0], p0[1]
-                                                          ,p0[0], p0[1]])
-          index += 4
-          drawList.numVertices += 4
+
+
+          # # draw a scaled cross on the screen
+          # drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+          # drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
+          #                                                   , p0[0]+r, p0[1]+w
+          #                                                   , p0[0]+r, p0[1]-w
+          #                                                   , p0[0]-r, p0[1]+w])
+          # drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+          # drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
+          #                                                 ,p0[0], p0[1]
+          #                                                 ,p0[0], p0[1]
+          #                                                 ,p0[0], p0[1]])
+          # index += 4
+          # drawList.numVertices += 4
+
+
+          # NOT WORKING!!!
+          numPoints = 2
+          ang = list(range(numPoints))
+          drawList.indices = np.append(drawList.indices, [[index+an, index+an+1] for an in ang])
+          drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.cos(an)
+                                                            , p0[1]-w*math.sin(an)
+                                                            , p0[0]-r*math.cos((an+1))
+                                                            , p0[1]-w*math.sin((an+1))] for an in ang])
+          drawList.colors = np.append(drawList.colors, [[0, 1, 1, 1.0, 1, 0, 1, 1.0] for an in ang])
+          drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
+          index += (numPoints * 2)
+          drawList.numVertices += (numPoints * 2)
+
+
+
 
           # tempVert.append([p0[0]-r, p0[1]-w])
           # tempVert.append([p0[0]+r, p0[1]+w])

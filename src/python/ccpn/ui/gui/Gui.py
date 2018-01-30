@@ -209,39 +209,6 @@ class Gui(Ui):
   def getByGid(self, gid):
     return self.application.project.getByPid(gid)
 
-  #TODO: this should be made failsafe
-  def addBlankDisplay(self, position='right', relativeTo=None):
-    logParametersString = "position={position}, relativeTo={relativeTo}".format(
-      position="'"+position+"'" if isinstance(position, str) else position,
-      relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
-    self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
-    thisBlank = None
-    try:
-      mDict = self.mainWindow.moduleArea.currentModulesDict
-      if 'BlankDisplay' in mDict:
-        thisBlank = None
-        # blankDisplay = mDict['BlankDisplay']
-        # blankDisplay.show()
-      else:
-        # LM 28/04/17
-        # This is not called anymore when a spectrum display is opened.
-        # For some reason is impossible to open a new blank display. Must be some conflict with function name across
-        # Gui/Framework/GuiMainwindow/mainMindow for the addBlankDisplay() function.
-        # The function in GuiMainWindow.addBlankDisplay() is not called so no blank display is added.
-
-
-        thisBlank = self.mainWindow.newBlankDisplay()
-        # return blankDisplay # Why a return blankDisplay?
-
-         # Fixme when found the original cause. The lines below are the same as GuiMainWindow.addBlankDisplay
-        # from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
-        # blankDisplay = BlankDisplay(mainWindow=self.mainWindow)
-        # self.mainWindow.moduleArea.addModule(blankDisplay, position='right'
-        #                                      , relativeTo=self.mainWindow.moduleArea)   # ejb
-
-    finally:
-      self.application._endCommandBlock()
-      return thisBlank
 
   from ccpn.core.IntegralList import IntegralList
   from ccpn.ui.gui.modules.CcpnModule import CcpnModule

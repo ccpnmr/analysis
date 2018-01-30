@@ -70,6 +70,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     self.textLabel = DropAreaLabel
     self.fontLabel = Font('Helvetica', 36, bold=True)
     self.colourLabel = hexToRgb('#bec4f3')
+    self._dropArea  = None # Needed to know where to add a newmodule when dropping a pid from sideBar
 
 
   def dragMoveEvent(self, event:QtGui.QMouseEvent):
@@ -86,7 +87,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     if DropBase.PIDS in data:
      pids = data[DropBase.PIDS]
      objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
-     _openItemObject(self.mainWindow, objs)
+     _openItemObject(self.mainWindow, objs, position=self._dropArea)
 
     if DropBase.URLS in data:
       self.mainWindow.sideBar._processDroppedItems(data)

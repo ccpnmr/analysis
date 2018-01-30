@@ -458,20 +458,31 @@ class CcpnModule(Dock, DropBase):
           mn = min(ld, rd, td, bd)
           if mn > 30:
             self.dropArea = "center"
+            self.area._dropArea = "center"
 
           elif (ld == mn or td == mn) and mn > self.height() / 3.:
             self.dropArea = "center"
+            self.area._dropArea = "center"
           elif (rd == mn or ld == mn) and mn > self.width() / 3.:
             self.dropArea = "center"
+            self.area._dropArea = "center"
 
           elif rd == mn:
             self.dropArea = "right"
+            self.area._dropArea = "right"
+            ev.accept()
           elif ld == mn:
             self.dropArea = "left"
+            self.area._dropArea = "left"
+            ev.accept()
           elif td == mn:
             self.dropArea = "top"
+            self.area._dropArea = "top"
+            ev.accept()
           elif bd == mn:
             self.dropArea = "bottom"
+            self.area._dropArea = "bottom"
+            ev.accept()
 
           if ev.source() is self and self.dropArea == 'center':
             # print "  no self-center"
@@ -487,16 +498,12 @@ class CcpnModule(Dock, DropBase):
           self.overlay.setDropArea(self.dropArea)
 
     #
-          self.widgetArea.setStyleSheet(self.dragStyle)
+          # self.widgetArea.setStyleSheet(self.dragStyle)
           self.update()
-          # if hasattr(self, 'drag'):
-          self.raiseOverlay()
-
-    #
-    #
-    #
-    #       self.updateStyle()
-    #       ev.accept()
+          # # if hasattr(self, 'drag'):
+          # self.raiseOverlay()
+          # self.updateStyle()
+          ev.accept()
 
     DockDrop.dragEnterEvent(self, *args)
 
@@ -511,7 +518,8 @@ class CcpnModule(Dock, DropBase):
         pids = data[DropBase.PIDS]
         objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
         _openItemObject(self.mainWindow, objs, position=self.dropArea)
-        print(self.dropArea)
+        event.accept()
+        print('DONE')
 
       if hasattr(source, 'implements') and source.implements('dock'):
         DockDrop.dropEvent(self, *args)

@@ -406,12 +406,15 @@ class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
     self._appBase = project._appBase
 
     _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                      name=self._wrappedData.name
+                                name=self._wrappedData.name
                                 )
-    # This is a normal guiModule that should be opened in module area from the position
-    # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
-    # self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
-    #                                                     , relativeTo=self.application.ui.mainWindow.moduleArea)
+
+    if not project._isNew:
+      # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
+      # This is a normal guiModule that should be opened in module area from the position
+      # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
+      self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
+                                                        , relativeTo=self.application.ui.mainWindow.moduleArea)
 #old name
 StripDisplayNd = SpectrumDisplayNd
 

@@ -368,6 +368,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if projectDir:
         project = self.application.loadProject(projectDir)
 
+
         if project:
           project._mainWindow.show()
           QtGui.QApplication.setActiveWindow(project._mainWindow)

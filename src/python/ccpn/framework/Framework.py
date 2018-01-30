@@ -991,6 +991,8 @@ class Framework:
       getLogger().info('Removing whitespace from name: %s' % name)
 
     project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
+    project._isNew = True
+    # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
 
     self._initialiseProject(project)
 

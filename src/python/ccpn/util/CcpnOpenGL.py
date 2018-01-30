@@ -1062,7 +1062,18 @@ void main()
       index=0
       for pls in spectrum.peakLists:
         for peak in pls.peaks:
-          #
+
+          # TODO:ED display the required peaks
+          strip = spectrumView.strip
+          _isInPlane = strip.peakIsInPlane(peak)
+          if not _isInPlane:
+            _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+          else:
+            _isInFlankingPlane = None
+
+          if not _isInPlane and not _isInFlankingPlane:
+            continue
+
           if hasattr(peak, '_isSelected') and peak._isSelected:
             colour = spectrumView.strip.plotWidget.highlightColour
           else:

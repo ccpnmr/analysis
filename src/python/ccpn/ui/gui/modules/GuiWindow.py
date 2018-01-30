@@ -462,33 +462,32 @@ class GuiWindow():
     # self.application.project.unblankNotification()
     # self.application.project.unblankNotification()
 
+  def setMouseMode(self, mode):
+    from ccpn.ui.gui.lib.mouseEvents import MouseModes
+    if mode in MouseModes:
+      self.mouseMode = mode
+      mouseModeText = ' Mouse Mode: '
+      self.statusBar().showMessage(mouseModeText + mode)
+      project = self.application.project
+      for strip in project.strips:
+        strip.viewBox._setMouseCursor()
 
   def switchMouseMode(self):
     from ccpn.ui.gui.lib.mouseEvents import MouseModes
     from ccpn.ui.gui.widgets.Icon import Icon
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
-    import time
-    mode = self.application.preferences.general.mouseMode
+    mode = self.mouseMode
     modesCount = len(MouseModes)
     if mode in MouseModes:
       i = MouseModes.index(mode)
       if i + 1 < modesCount:
         mode = MouseModes[i + 1]
-        self.application.preferences.general.mouseMode = mode
+        self.setMouseMode(mode)
       else:
         i = 0
         mode = MouseModes[i]
-        self.application.preferences.general.mouseMode = mode
-    mouseModeText = ' Mouse Mode: '
-    # icon = QtGui.QMessageBox.Information
-    # widget = MessageDialog.MessageDialog('',  mouseModeText, mode, icon=icon)
-    # widget.setWindowFlags(QtCore.Qt.FramelessWindowHint )
-    # widget.raise_()
-    # widget.exec_()
-    self.statusBar().showMessage(mouseModeText + mode)
-    project = self.application.project
-    for strip in project.strips:
-      strip.viewBox._setMouseCursor()
+        self.setMouseMode(mode)
+
 
 
 

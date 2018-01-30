@@ -25,7 +25,6 @@
         "peakSymbolThickness": 5,
         "zoomCentreType": 0,
         "zoomPercent": 5.0,
-        "mouseMode": "select",
         "lastAxisOnly": true,
         "showGrid": true,
         "restoreLayoutOnOpening":true

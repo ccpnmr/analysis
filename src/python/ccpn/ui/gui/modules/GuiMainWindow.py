@@ -36,7 +36,7 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
-
+from ccpn.ui.gui.lib.mouseEvents import PICK, SELECT
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
@@ -116,6 +116,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # self.newBlankDisplay()
 
     self.statusBar().showMessage('Ready')
+    self.mouseMode = SELECT
     self.show()
 
   def changeEvent(self, event):
@@ -525,6 +526,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         module.show()
     except Exception as es:
       Logging.getLogger().warning('Error expanding module: sideBar')
+
+  def keyPressEvent(self, e):
+
+    if e.key() == QtCore.Qt.Key_Escape:
+      # Reset Mouse Mode
+      mode = self.application.preferences.general.mouseMode
+      if mode == PICK:
+        self.setMouseMode(SELECT)
+
 
   def _fillPluginsMenu(self):
     from ccpn.framework.lib.ExtensionLoader import getPlugins

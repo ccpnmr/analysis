@@ -243,8 +243,10 @@ class ViewBox(pg.ViewBox):
       return self.menu
   def _setMouseCursor(self):
 
-    if self.preferences.general.mouseMode == PICK:
-      self.setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
+    if self.application.ui.mainWindow.mouseMode == PICK:
+      cursor = QtGui.QCursor(QtCore.Qt.CrossCursor)
+      self.setCursor(cursor)
+
     else:
       self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
@@ -274,7 +276,7 @@ class ViewBox(pg.ViewBox):
     # This is the correct future style for cursorPosition handling
     self.current.cursorPosition = (xPosition, yPosition)
 
-    if self.preferences.general.mouseMode == PICK:
+    if self.application.ui.mainWindow.mouseMode == PICK:
       self._pickAtMousePosition(event)
 
 

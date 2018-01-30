@@ -129,7 +129,7 @@ class GuiStrip(Frame):
     self._stripLabel.setFont(textFontSmall)
 
     # TODO:ED do the same as stripIDLabel
-    self.hideStripLabel()
+    # self.hideStripLabel()     # the top bar containing the residue Pid
 
     # A label to display the cursor positions (updated by _showMousePosition)
     # self._cursorLabel = Label(parent=self._labelWidget,

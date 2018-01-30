@@ -196,7 +196,6 @@ class CcpnGLWidget(QOpenGLWidget):
     # self.animationTimer.timeout.connect(self.animate)
     # self.animationTimer.start(25)
 
-    # self.setAutoFillBackground(False)
     # self.setMinimumSize(100, 50)
     # self.setWindowTitle("Overpainting a Scene")
 
@@ -229,7 +228,9 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisT = 20
     self.axisB = 80
 
-    # self.setAttribute(Qt.WA_NoSystemBackground, True)
+    self.setAutoFillBackground(True)
+    self.setAttribute(Qt.WA_NoSystemBackground, False)
+    self.setStyleSheet('background-color: #ff0000')
 
   def resizeGL(self, w, h):
     # GL.glViewport(0, 0, w, h)
@@ -400,10 +401,12 @@ void main()
 #version 120
 
 varying vec4  FC;
+uniform vec4  background;
 
 void main()
 {
   gl_FragColor = FC;
+  gl_FragColor = vec4(FC.xyz, 1.0) * FC.w + background *(1-FC.w);
 }
 """
 
@@ -431,12 +434,15 @@ void main()
 uniform sampler2D texture;
 varying vec4 FC;
 vec4    filter;
+uniform vec4    background;
 
 void main()
 {
   // vec4 current = texture2D(texture, uv);
   filter = texture2D(texture, gl_TexCoord[0].xy);
-  gl_FragColor = vec4(FC.xyz, filter.w);
+  if (filter.w < 0.05)
+    discard;
+  gl_FragColor = vec4(FC.xyz, 1.0) * filter.w + background *(1-filter.w);
 }
 """
 
@@ -618,7 +624,7 @@ void main()
     for li in range(3):
       self.gridList.append(GLVertexArray(numLists=1
                                          , renderMode=GLRENDERMODE_REBUILD
-                                         , blendMode=True
+                                         , blendMode=False
                                          , drawMode=GL.GL_LINES
                                          , dimension=2
                                          , GLContext=self))
@@ -673,8 +679,8 @@ void main()
     self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1
                                         , fragment=self._fragmentShader1
                                         , attributes={'pMatrix':(16, np.float32)
-                                                      , 'mvMatrix':(16, np.float32)})
-                                                      # , 'useTexture':(1, np.uint)})
+                                                      , 'mvMatrix':(16, np.float32)
+                                                      , 'background': (4, np.float32)})
     self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2
                                         , fragment=self._fragmentShader2
                                         , attributes={'pMatrix':(16, np.float32)
@@ -689,7 +695,8 @@ void main()
                                         , fragment=self._fragmentShaderTex
                                         , attributes={'pMatrix':(16, np.float32)
                                                       , 'mvMatrix':(16, np.float32)
-                                                      , 'axisScale':(4, np.float32)})
+                                                      , 'axisScale':(4, np.float32)
+                                                      , 'background': (4, np.float32)})
 
     # these are the links to the GL projection.model matrices
     # self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
@@ -703,6 +710,7 @@ void main()
     self._aMatrix = np.zeros((16,), dtype=np.float32)
     self._useTexture = np.zeros((1,), dtype=np.int)
     self._axisScale = np.zeros((4,), dtype=np.float32)
+    self._background = np.zeros((4,), dtype=np.float32)
     self.worldCoordinate = np.zeros((4,), dtype=np.float32)
 
     # self._positiveContours = np.zeros((4,), dtype=np.float32)
@@ -749,9 +757,26 @@ void main()
 
     # GLUT.glutInitDisplayMode(GLUT.glutCreateSubWindow | GLUT.GLUT_RGBA | GLUT.GLUT_DEPTH)
     # set the GL constants here
-    GL.glClearColor(0.0, 0.0, 0.0, 1.0)
+    # GL.glClearColor(*self._background)
     GL.glUseProgram(self._shaderProgram1.program_id)
+    GL.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO)
+    GL.glClear(GL.GL_COLOR_BUFFER_BIT)
     GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    # GL.glDisable(GL.GL_DEPTH_TEST)
+
+    self.setBackgroundColour([0.05, 0.05, 0.05, 1.0])
+
+  def setBackgroundColour(self, col):
+    """
+    set all background colours in the shaders
+    :param col - vec4, 4 element list e.g.: [0.05, 0.05, 0.05, 1.0], very dark gray
+    """
+    GL.glClearColor(*col)
+    self._background[0:4] = col
+    GL.glUseProgram(self._shaderProgram1.program_id)
+    self._shaderProgram1.setGLUniform4fv('background', 1, GL.GL_FALSE, self._background)
+    GL.glUseProgram(self._shaderProgramTex.program_id)
+    self._shaderProgramTex.setGLUniform4fv('background', 1, GL.GL_FALSE, self._background)
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -1309,7 +1334,12 @@ void main()
     w = self.width()
     h = self.height()
 
+    # GL.glBlendFunc(GL.GL_ONE, GL.GL_ZERO)
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
+    # TODO:ED I think the depth test is messing up the clear colour
+    # GL.glEnable(GL.GL_DEPTH_TEST)
 
     # set the current shader
     currentShader = self._shaderProgram1
@@ -1347,7 +1377,7 @@ void main()
     self.viewport = (GL.GLint * 4)()
 
     # GL.glEnable(GL.GL_BLEND)
-    # GL.glColor4f(0.2, 0.5, 0.9, 1.0)
+    # GL.glColor4f(0.5, 0.2, 0.5, 1.0)
     # GL.glBegin(GL.GL_QUADS)
     # GL.glVertex2d(self.axisL, (self.axisT+self.axisB)/2.0)
     # GL.glVertex2d(self.axisL, self.axisB)
@@ -2249,7 +2279,7 @@ class CcpnGLFont():
     GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
                      , self.fontPNG.shape[1], self.fontPNG.shape[0]
                      , 0
-                     , GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, self.fontPNG )
+                     , GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, self.fontPNG.data )
 
     # generate a MipMap to cope with smaller text (may not be needed soon)
     GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST )

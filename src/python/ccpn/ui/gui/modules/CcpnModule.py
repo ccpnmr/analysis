@@ -135,6 +135,9 @@ class CcpnModule(Dock, DropBase):
     # Logging.getLogger().debug('module:"%s"' % (name,))
     self.mainWindow = mainWindow
     self.closeFunc = closeFunc
+    self._nameSplitter = ':' #used to create the serial
+    self._serial = None
+    self._titleName = None # name without serial
     CcpnModule.moduleName = name
 
     self.widgetArea.setContentsMargins(0,0,0,0)
@@ -298,6 +301,36 @@ class CcpnModule(Dock, DropBase):
       else:
         dead.add(ref)
     cls._instances -= dead
+
+  @property
+  def titleName(self):
+    'module name without serial'
+    moduleName = self.name()
+    splits = moduleName.split(self._nameSplitter)
+    if len(splits)>1:
+      title = splits[0]
+      return title
+    else:
+      return moduleName
+
+  @property
+  def serial(self):
+    return self._serial
+
+  @serial.setter
+  def serial(self, value):
+    if isinstance(value, str):
+      try:
+        value = int(value)
+        return
+      except Exception as e:
+        getLogger().warnig('Cannot set attribute %s' %e)
+    if isinstance(value, int):
+      self._serial = value
+      return
+    else:
+      getLogger().warnig('Cannot set attribute. Serial must be an Int type')
+
 
   def rename(self, newName):
     self.label.setText(newName)

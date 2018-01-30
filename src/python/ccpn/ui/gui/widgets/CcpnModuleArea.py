@@ -65,6 +65,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     self.mainWindow = mainWindow  # a link back to the parent MainWindow
     self.setContentsMargins(0, 0, 0, 0)
     self.currentModuleNames = []
+    self._modulesNames = {}
     self.setAcceptDrops(True)
 
     self.textLabel = DropAreaLabel
@@ -165,12 +166,23 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     self.hint = p.drawText(rgn, align, DropAreaLabel)
     p.end()
 
+  def _updateModuleNames(self):
+    for module in self.openedModules:
+      self._setSerial(module)
+
+  def _setSerial(self, module):
+    if module.className in self._modulesNames:
+      if isinstance(self._modulesNames[module.className], list):
+        self._modulesNames[module.className].append(module.name())
+    else:
+      self._modulesNames.update({module.className: [module.name()]})
+
+    if module.className in self._modulesNames:
+      if not module.serial:
+        module.serial = len(list(set(self._modulesNames[module.className])))
 
 
-  def _getSerialName(self, moduleName):
-      self.currentModuleNames.append(moduleName)
-      counter = collections.Counter(self.currentModuleNames)
-      return str(moduleName) + ':' + str(counter[str(moduleName)])
+
 
   @property
   def openedModules(self) -> list:
@@ -201,11 +213,13 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     """With these settings the user can close all the modules from the label 'close module' or pop up and
      when re-add a new module it makes sure there is a container available.
     """
-
+    self._updateModuleNames()
     if not module._restored:
       if not isinstance(module, GuiSpectrumDisplay):  #
-        newName = self._getSerialName(module.name())
+        self._setSerial(module)
+        newName = module.titleName+module._nameSplitter+str(module.serial)
         module.rename(newName)
+
 
     # test that only one instance of the module is opened
     if hasattr(type(module), '_alreadyOpened'):

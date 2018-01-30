@@ -381,8 +381,10 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
 
     _GuiStripDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
                                       name=self._wrappedData.name)
-    self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
-                                                        , relativeTo=self.application.ui.mainWindow.moduleArea)
+    # This is a normal guiModule that should be opened in module area from the position
+    # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
+    # self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
+    #                                                     , relativeTo=self.application.ui.mainWindow.moduleArea)
 
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
@@ -406,8 +408,10 @@ class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
     _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
                                       name=self._wrappedData.name
                                 )
-    self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
-                                                        , relativeTo=self.application.ui.mainWindow.moduleArea)
+    # This is a normal guiModule that should be opened in module area from the position
+    # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
+    # self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
+    #                                                     , relativeTo=self.application.ui.mainWindow.moduleArea)
 #old name
 StripDisplayNd = SpectrumDisplayNd
 

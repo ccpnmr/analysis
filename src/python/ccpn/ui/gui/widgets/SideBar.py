@@ -127,12 +127,12 @@ NEW_ITEM_DICT = {
 }
 
 
-def _openItemObject(mainWindow, objs):
+def _openItemObject(mainWindow, objs, **args):
   for obj in objs:
     if obj:
       try:
         if obj.__class__ in OpenObjAction:
-          OpenObjAction[obj.__class__](mainWindow, obj)
+          OpenObjAction[obj.__class__](mainWindow, obj, **args)
 
         else:
           info = showInfo('Not implemented yet!',
@@ -140,8 +140,15 @@ def _openItemObject(mainWindow, objs):
       except Exception as e:
         getLogger().warning('Error: %s' % e)
 
-def _openSpectrumDisplay(mainWindow, spectrum):
+def _openSpectrumDisplay(mainWindow, spectrum, position=None):
   spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
+  mainWindow.moduleArea.addModule(spectrumDisplay, position=position
+                                                      , relativeTo=mainWindow.moduleArea)
+
+  if len(spectrumDisplay.strips)>0:
+    mainWindow.current.strip = spectrumDisplay.strips[0]
+    if spectrum.dimensionCount == 1:
+      mainWindow.current.strip.plotWidget.autoRange()
 
   # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
   # This routine can then be ommitted and the call above replaced by the one remaining line
@@ -169,33 +176,33 @@ def _openSpectrumGroup(mainWindow, spectrumGroup):
       mainWindow.application.current.strip.plotWidget.autoRange()
 
 
-def _openPeakList(mainWindow, peakList):
+def _openPeakList(mainWindow, peakList, position=None):
   application = mainWindow.application
-  application.showPeakTable(peakList=peakList)
+  application.showPeakTable(peakList=peakList, position=position)
 
-def _openChemicalShiftList(mainWindow, chemicalShiftList):
+def _openChemicalShiftList(mainWindow, chemicalShiftList, position=None):
   application = mainWindow.application
-  application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList)
+  application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList, position=position)
 
-def _openNote(mainWindow, note):
+def _openNote(mainWindow, note, position=None):
   application = mainWindow.application
-  application.showNotesEditor(note=note)
+  application.showNotesEditor(note=note, position=position)
 
-def _openRestraintList(mainWindow, restraintList):
+def _openRestraintList(mainWindow, restraintList, position=None):
   application = mainWindow.application
-  application.showRestraintTable(restraintList=restraintList)
+  application.showRestraintTable(restraintList=restraintList, position=position)
 
-def _openStructureTable(mainWindow, structureEnsemble):
+def _openStructureTable(mainWindow, structureEnsemble, position=None):
   application = mainWindow.application
-  application.showStructureTable(structureEnsemble=structureEnsemble)
+  application.showStructureTable(structureEnsemble=structureEnsemble, position=position)
 
-def _openNmrResidueTable(mainWindow, nmrChain):
+def _openNmrResidueTable(mainWindow, nmrChain, position=None):
   application = mainWindow.application
-  application.showNmrResidueTable(nmrChain=nmrChain)
+  application.showNmrResidueTable(nmrChain=nmrChain, position=position)
 
-def _openIntegralList(mainWindow, integralList):
+def _openIntegralList(mainWindow, integralList, position=None):
   application = mainWindow.application
-  application.showIntegralTable(integralList=integralList)
+  application.showIntegralTable(integralList=integralList, position=position)
 
 
 

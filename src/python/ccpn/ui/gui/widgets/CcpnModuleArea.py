@@ -93,8 +93,6 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     event.accept()
     super(CcpnModuleArea, self).dropEvent(event, *args)
 
-
-
   def dragEnterEvent(self, event, enter=True):
       event.accept()
 
@@ -102,49 +100,49 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
 
 
-  def _handlePid(self, pid):
-    "handle a; return True in case it is a Spectrum or a SpectrumGroup"
-    success = False
-    obj = self.mainWindow.project.getByPid(pid)
-    print(pid)
-    if obj is not None and isinstance(obj, Spectrum):
-      spectrumDisplay = self._createSpectrumDisplay(obj)
-      self.current.strip = spectrumDisplay.strips[0]
-      if obj.dimensionCount == 1:
-        self.current.strip.plotWidget.autoRange()
-      success = True
-    elif obj is not None and isinstance(obj, SpectrumGroup):
-      self._handleSpectrumGroup(obj)
-      success = True
-    return success
+  # def _handlePid(self, pid):
+  #   "handle a; return True in case it is a Spectrum or a SpectrumGroup"
+  #   success = False
+  #   obj = self.mainWindow.project.getByPid(pid)
+  #   print(pid)
+  #   if obj is not None and isinstance(obj, Spectrum):
+  #     spectrumDisplay = self._createSpectrumDisplay(obj)
+  #     self.current.strip = spectrumDisplay.strips[0]
+  #     if obj.dimensionCount == 1:
+  #       self.current.strip.plotWidget.autoRange()
+  #     success = True
+  #   elif obj is not None and isinstance(obj, SpectrumGroup):
+  #     self._handleSpectrumGroup(obj)
+  #     success = True
+  #   return success
 
-  def _createSpectrumDisplay(self, spectrum):
-    spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrum)
-    # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
-    # This routine can then be ommitted and the call above replaced by the one remaining line
-    self.mainWindow.pythonConsole.writeConsoleCommand(
-      "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
-    self.mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
-    getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
-    getLogger().info('application.createSpectrumDisplay(spectrum)')
-
-    return spectrumDisplay
-
-  def _handleSpectrumGroup(self, spectrumGroup):
-    '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
-    Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
-
-    if len(spectrumGroup.spectra) > 0:
-      spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
-      for spectrum in spectrumGroup.spectra: # Add the other spectra
-        spectrumDisplay.displaySpectrum(spectrum)
-      spectrumDisplay.isGrouped = True
-      spectrumDisplay.spectrumToolBar.hide()
-      spectrumDisplay.spectrumGroupToolBar.show()
-      spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
-      self.current.strip = spectrumDisplay.strips[0]
-      if spectrumGroup.spectra[0].dimensionCount == 1:
-        self.current.strip.plotWidget.autoRange()
+  # def _createSpectrumDisplay(self, spectrum):
+  #   spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrum)
+  #   # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
+  #   # This routine can then be ommitted and the call above replaced by the one remaining line
+  #   self.mainWindow.pythonConsole.writeConsoleCommand(
+  #     "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
+  #   self.mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
+  #   getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
+  #   getLogger().info('application.createSpectrumDisplay(spectrum)')
+  #
+  #   return spectrumDisplay
+  #
+  # def _handleSpectrumGroup(self, spectrumGroup):
+  #   '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
+  #   Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
+  #
+  #   if len(spectrumGroup.spectra) > 0:
+  #     spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
+  #     for spectrum in spectrumGroup.spectra: # Add the other spectra
+  #       spectrumDisplay.displaySpectrum(spectrum)
+  #     spectrumDisplay.isGrouped = True
+  #     spectrumDisplay.spectrumToolBar.hide()
+  #     spectrumDisplay.spectrumGroupToolBar.show()
+  #     spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+  #     self.current.strip = spectrumDisplay.strips[0]
+  #     if spectrumGroup.spectra[0].dimensionCount == 1:
+  #       self.current.strip.plotWidget.autoRange()
 
   def paintEvent(self, ev):
     """

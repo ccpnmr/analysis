@@ -44,7 +44,7 @@ from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.Widget import ScrollableWidget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
-
+from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
 
@@ -442,14 +442,61 @@ class CcpnModule(Dock, DropBase):
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 
 
+
   def dragEnterEvent(self, *args):
     if args:
-      event = args[0]
-      data = self.parseEvent(event)
+      ev = args[0]
+      data = self.parseEvent(ev)
       if DropBase.PIDS in data:
-        self.raiseOverlay()
+        if self.widgetArea:
 
-        event.accept()
+          ld = ev.pos().x()
+          rd = self.width() - ld
+          td = ev.pos().y()
+          bd = self.height() - td
+
+          mn = min(ld, rd, td, bd)
+          if mn > 30:
+            self.dropArea = "center"
+
+          elif (ld == mn or td == mn) and mn > self.height() / 3.:
+            self.dropArea = "center"
+          elif (rd == mn or ld == mn) and mn > self.width() / 3.:
+            self.dropArea = "center"
+
+          elif rd == mn:
+            self.dropArea = "right"
+          elif ld == mn:
+            self.dropArea = "left"
+          elif td == mn:
+            self.dropArea = "top"
+          elif bd == mn:
+            self.dropArea = "bottom"
+
+          if ev.source() is self and self.dropArea == 'center':
+            # print "  no self-center"
+            self.dropArea = None
+            ev.ignore()
+          elif self.dropArea not in self.allowedAreas:
+            # print "  not allowed"
+            self.dropArea = None
+            ev.ignore()
+          else:
+            # print "  ok"
+            ev.accept()
+          self.overlay.setDropArea(self.dropArea)
+
+    #
+          self.widgetArea.setStyleSheet(self.dragStyle)
+          self.update()
+          # if hasattr(self, 'drag'):
+          self.raiseOverlay()
+
+    #
+    #
+    #
+    #       self.updateStyle()
+    #       ev.accept()
 
     DockDrop.dragEnterEvent(self, *args)
 
@@ -461,14 +508,16 @@ class CcpnModule(Dock, DropBase):
       source = event.source()
       data = self.parseEvent(event)
       if DropBase.PIDS in data:
-        DockDrop.dropEvent(self, *args)
+        pids = data[DropBase.PIDS]
+        objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
+        _openItemObject(self.mainWindow, objs, position=self.dropArea)
+        print(self.dropArea)
 
       if hasattr(source, 'implements') and source.implements('dock'):
         DockDrop.dropEvent(self, *args)
       else:
         args[0].ignore()
         return
-
 
 class CcpnModuleLabel(DockLabel):
   """

@@ -154,7 +154,6 @@ def _openSpectrumDisplay(mainWindow, spectrum, position=None):
   # This routine can then be ommitted and the call above replaced by the one remaining line
   mainWindow.pythonConsole.writeConsoleCommand(
     "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
-  mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
   getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
   getLogger().info('application.createSpectrumDisplay(spectrum)')
 

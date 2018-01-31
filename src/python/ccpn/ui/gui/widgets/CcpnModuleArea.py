@@ -98,13 +98,10 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
     elif DropBase.URLS in data:
       self.mainWindow.sideBar._processDroppedItems(data)
-      print ('>>>dropURLS')
 
       # reset the dock area
       self.dropArea = None
       self.overlay.setDropArea(self.dropArea)
-    else:
-      print ('>>>other')
 
     if hasattr(source, 'implements') and source.implements('dock'):
       DockArea.dropEvent(self, event, *args)

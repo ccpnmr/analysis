@@ -567,7 +567,7 @@ class CcpnModule(Dock, DropBase):
         objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
         _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
         event.accept()
-        print('DONE')
+        # print('DONE')
 
         # reset the dock area
         self.dropArea = None

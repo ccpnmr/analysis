@@ -294,7 +294,7 @@ class SequenceModule(CcpnModule):
     action = self.mainWindow.application._findMenuAction('View', 'Show Sequence')
     if action: # should be True
       action.setChecked(False)
-    super(SequenceModule, self)._closeModule()
+    CcpnModule._closeModule(self)
 
   def close(self):
     self._closeModule()     # ejb - needed when closing/opening project

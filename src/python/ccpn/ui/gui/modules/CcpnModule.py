@@ -481,7 +481,9 @@ class CcpnModule(Dock, DropBase):
     if self.closeFunc:
       self.closeFunc()
 
-    self._instances.remove(ref(self))
+    if ref(self) in self._instances:
+      self._instances.remove(ref(self))
+
     getLogger().debug('Closing %s' % str(self.container()))
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 

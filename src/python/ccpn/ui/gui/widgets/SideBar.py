@@ -126,7 +126,6 @@ NEW_ITEM_DICT = {
   'Complexes': 'newComplex',
 }
 
-
 def _openItemObject(mainWindow, objs, **args):
   for obj in objs:
     if obj:
@@ -140,10 +139,9 @@ def _openItemObject(mainWindow, objs, **args):
       except Exception as e:
         getLogger().warning('Error: %s' % e)
 
-def _openSpectrumDisplay(mainWindow, spectrum, position=None):
+def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
   spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
-  mainWindow.moduleArea.addModule(spectrumDisplay, position=position
-                                                      , relativeTo=mainWindow.moduleArea)
+  mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 
   if len(spectrumDisplay.strips)>0:
     mainWindow.current.strip = spectrumDisplay.strips[0]
@@ -175,35 +173,33 @@ def _openSpectrumGroup(mainWindow, spectrumGroup):
       mainWindow.application.current.strip.plotWidget.autoRange()
 
 
-def _openPeakList(mainWindow, peakList, position=None):
+def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):
   application = mainWindow.application
-  application.showPeakTable(peakList=peakList, position=position)
+  application.showPeakTable(peakList=peakList, position=position, relativeTo=relativeTo)
 
-def _openChemicalShiftList(mainWindow, chemicalShiftList, position=None):
+def _openChemicalShiftList(mainWindow, chemicalShiftList, position=None, relativeTo=None):
   application = mainWindow.application
-  application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList, position=position)
+  application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList, position=position, relativeTo=relativeTo)
 
-def _openNote(mainWindow, note, position=None):
+def _openNote(mainWindow, note, position=None, relativeTo=None):
   application = mainWindow.application
-  application.showNotesEditor(note=note, position=position)
+  application.showNotesEditor(note=note, position=position, relativeTo=relativeTo)
 
-def _openRestraintList(mainWindow, restraintList, position=None):
+def _openRestraintList(mainWindow, restraintList, position=None, relativeTo=None):
   application = mainWindow.application
-  application.showRestraintTable(restraintList=restraintList, position=position)
+  application.showRestraintTable(restraintList=restraintList, position=position, relativeTo=relativeTo)
 
-def _openStructureTable(mainWindow, structureEnsemble, position=None):
+def _openStructureTable(mainWindow, structureEnsemble, position=None, relativeTo=None):
   application = mainWindow.application
-  application.showStructureTable(structureEnsemble=structureEnsemble, position=position)
+  application.showStructureTable(structureEnsemble=structureEnsemble, position=position, relativeTo=relativeTo)
 
-def _openNmrResidueTable(mainWindow, nmrChain, position=None):
+def _openNmrResidueTable(mainWindow, nmrChain, position=None, relativeTo=None):
   application = mainWindow.application
-  application.showNmrResidueTable(nmrChain=nmrChain, position=position)
+  application.showNmrResidueTable(nmrChain=nmrChain, position=position, relativeTo=relativeTo)
 
-def _openIntegralList(mainWindow, integralList, position=None):
+def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
   application = mainWindow.application
-  application.showIntegralTable(integralList=integralList, position=position)
-
-
+  application.showIntegralTable(integralList=integralList, position=position, relativeTo=relativeTo)
 
 OpenObjAction = {
                   Spectrum: _openSpectrumDisplay,
@@ -218,6 +214,7 @@ OpenObjAction = {
                  }
 
 ### Flag example code removed in revision 7686
+
 
 class SideBar(QtGui.QTreeWidget, Base):
   def __init__(self, parent=None, mainWindow=None, multiSelect=True):

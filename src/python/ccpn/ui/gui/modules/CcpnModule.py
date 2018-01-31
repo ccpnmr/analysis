@@ -40,6 +40,7 @@ from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.Widget import ScrollableWidget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
@@ -273,6 +274,13 @@ class CcpnModule(Dock, DropBase):
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
 
+    # attach the mouse events to the widget
+    # self.mainWidget.dragMoveEvent = self.dragMoveEvent
+    # self.mainWidget.mouseMoveEvent = self.mouseMoveEvent
+    # self.mainWidget.dragEnterEvent = self.dragEnterEvent
+    # self.mainWidget.dragLeaveEvent = self.dragLeaveEvent
+    # self.mainWidget.dropEvent = self.dropEvent
+
     # always explicitly show the mainWidget
     self.mainWidget.show()
 
@@ -329,7 +337,7 @@ class CcpnModule(Dock, DropBase):
       self._serial = value
       return
     else:
-      getLogger().warnig('Cannot set attribute. Serial must be an Int type')
+      getLogger().warning('Cannot set attribute. Serial must be an Int type')
 
 
   def rename(self, newName):
@@ -343,9 +351,10 @@ class CcpnModule(Dock, DropBase):
     Modules become transparent when dragging to another module.
     Ensure that the dropAreas become active
     """
-    if isinstance(source, CcpnModule):
+    if isinstance(source, CcpnModule) or isinstance(source, SideBar):
       if event.type() == QtCore.QEvent.DragEnter:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+        # print('>>>', source)
 
       elif event.type() == QtCore.QEvent.Leave:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
@@ -475,10 +484,16 @@ class CcpnModule(Dock, DropBase):
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 
 
+  def dragMoveEvent(self, *args):
+    DockDrop.dragMoveEvent(self, *args)
+
+  def dragLeaveEvent(self, *args):
+    DockDrop.dragLeaveEvent(self, *args)
 
   def dragEnterEvent(self, *args):
     if args:
       ev = args[0]
+      # print ('>>>', ev.source())
       data = self.parseEvent(ev)
       if DropBase.PIDS in data:
         if self.widgetArea:
@@ -530,16 +545,16 @@ class CcpnModule(Dock, DropBase):
             ev.accept()
           self.overlay.setDropArea(self.dropArea)
 
-    #
           # self.widgetArea.setStyleSheet(self.dragStyle)
           self.update()
           # # if hasattr(self, 'drag'):
           # self.raiseOverlay()
           # self.updateStyle()
-          ev.accept()
+          # ev.accept()
 
-    DockDrop.dragEnterEvent(self, *args)
-
+      src = ev.source()
+      if hasattr(src, 'implements') and src.implements('dock'):
+        DockDrop.dragEnterEvent(self, *args)
 
   def dropEvent(self, *args):
     self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
@@ -550,15 +565,20 @@ class CcpnModule(Dock, DropBase):
       if DropBase.PIDS in data:
         pids = data[DropBase.PIDS]
         objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
-        _openItemObject(self.mainWindow, objs, position=self.dropArea)
+        _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
         event.accept()
         print('DONE')
+
+        # reset the dock area
+        self.dropArea = None
+        self.overlay.setDropArea(self.dropArea)
 
       if hasattr(source, 'implements') and source.implements('dock'):
         DockDrop.dropEvent(self, *args)
       else:
         args[0].ignore()
         return
+
 
 class CcpnModuleLabel(DockLabel):
   """

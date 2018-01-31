@@ -193,7 +193,7 @@ class GuiSpectrumDisplay(CcpnModule):
       self._stripFrameScrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
       self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, 1, 0, 1, 7)
       self.stripFrame.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                    QtWidgets.QSizePolicy.MinimumExpanding)
+                                    QtWidgets.QSizePolicy.Expanding)
     else:
       self.qtParent.getLayout().addWidget(self.stripFrame, 1, 0, 1, 7)
 

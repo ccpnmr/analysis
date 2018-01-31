@@ -193,9 +193,10 @@ class SequenceModule(CcpnModule):
               residues.append(next)
             nmrChain.assignConnectedResidues(guiRes.residue)
           for ii, res in enumerate(residues):
-            guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
-            guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
-                                 res.shortName+'</strong></div>')
+            if hasattr(self, 'guiChainLabel'):
+              guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
+              guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
+                                   res.shortName+'</strong></div>')
         except Exception as es:
           getLogger().warning('Sequence Module: %s' % str(es))
 

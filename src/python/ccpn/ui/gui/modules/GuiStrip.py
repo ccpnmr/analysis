@@ -85,7 +85,7 @@ class GuiStrip(Frame):
     self.setContentsMargins(0, 0, 0, 0)
     #self.setMinimumWidth(250)
     self.setMinimumWidth(75)
-    self.setMinimumHeight(200)
+    self.setMinimumHeight(150)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
     #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
@@ -150,7 +150,7 @@ class GuiStrip(Frame):
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
-                                   text='', spacing=(0,0),
+                                   text='<none>', spacing=(0,0),
                                    grid=(2,0), gridSpan=(1,3), hAlign='left', vAlign='top', hPolicy='minimum')
     self._stripLabel.setFont(textFontSmall)
 

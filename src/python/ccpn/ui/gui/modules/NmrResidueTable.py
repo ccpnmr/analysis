@@ -41,14 +41,15 @@ from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.QuickTable import QuickTable, QuickTableFrame
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Blank import Blank
-from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
+from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, _getCurrentZoomRatio
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Peak import Peak
 from PyQt5 import QtGui, QtWidgets
 from pyqtgraph import dockarea
 from pyqtgraph.dockarea import DockArea
@@ -79,10 +80,17 @@ class NmrResidueTableModule(CcpnModule):
 
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
-    self.application = mainWindow.application
-    self.project = mainWindow.application.project
-    self.current = mainWindow.application.current
-    
+    if mainWindow:
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
+      displayText = [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
+    else:
+      self.application = None
+      self.project = None
+      self.current = None
+      displayText = []
+
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
     self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
@@ -96,12 +104,11 @@ class NmrResidueTableModule(CcpnModule):
                                              grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
                                              vPolicy='minimal',
                                              #minimumWidths=(colwidth, 0, 0),
-                                             fixedWidths=(colwidth, 2*colwidth, None),
+                                             fixedWidths=(colwidth, colwidth, colwidth),
                                              orientation = 'left',
                                              labelText='Display(s):',
                                              tipText = 'SpectrumDisplay modules to respond to double-click',
-                                             texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
-                                             )
+                                             texts=[ALL] + displayText)
     self.displaysWidget.setFixedHeigths((None, None, 40))
     self.displaysWidget.pulldownList.set(ALL)
 
@@ -139,7 +146,7 @@ class NmrResidueTableModule(CcpnModule):
                                            , mainWindow=self.mainWindow
                                            , moduleParent=self
                                            , setLayout=True
-                                           , actionCallback=self.navigateToNmrResidue
+                                           , actionCallback=self.navigateToNmrResidueCallBack
                                            , grid=(0,0))
 
     if nmrChain is not None:
@@ -147,6 +154,7 @@ class NmrResidueTableModule(CcpnModule):
 
     # install the event filter to handle maximising from floated dock
     self.installMaximiseEventHandler(self._maximise)
+    # self.mainWidget.layout().setVerticalSpacing(0)
 
   def _maximise(self):
     """
@@ -175,7 +183,7 @@ class NmrResidueTableModule(CcpnModule):
     return displays
 
   # def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
-  def navigateToNmrResidue(self, data):
+  def navigateToNmrResidueCallBack(self, data):
     """
     Navigate in selected displays to nmrResidue; skip if none defined
     """
@@ -201,8 +209,9 @@ class NmrResidueTableModule(CcpnModule):
         # navigate the displays
         for display in displays:
             if len(display.strips) > 0:
+                newWidths = _getCurrentZoomRatio(display.strips[0].viewBox.viewRange())
                 navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
-                                              widths=['full'] * len(display.strips[0].axisCodes),
+                                              widths=newWidths,   #['full'] * len(display.strips[0].axisCodes),
                                               showSequentialResidues = (len(display.axisCodes) > 2) and
                                               self.sequentialStripsWidget.checkBox.isChecked(),
                                               markPositions = self.markPositionsWidget.checkBox.isChecked()
@@ -248,24 +257,31 @@ class NmrResidueTable(QuickTable):
     except:
       return None
 
-  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None, nmrChain=None,  multiSelect = False,
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
+               checkBoxCallback = None, nmrChain=None,  multiSelect = False,
                **kwds):
     """
     Initialise the widgets for the module.
     """
     # Derive application, project, and current from mainWindow
-    self._mainWindow = mainWindow
-    self._application = mainWindow.application
-    self._project = mainWindow.application.project
-    self._current = mainWindow.application.current
+    self.mainWindow = mainWindow
+    if mainWindow:
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
+    else:
+      self.application = None
+      self.project = None
+      self.current = None
+
     self.moduleParent=moduleParent
     self._widget = Widget(parent=parent, **kwds)
 
-    self.nmrChain = None
+    self._nmrChain = None
     if actionCallback is None:
       actionCallback = self.defaultActionCallback
 
-    NmrResidueTable._project = self._project
+    NmrResidueTable.project = self.project
 
     # create the column objects
     self.NMRcolumns = ColumnClass([
@@ -274,6 +290,7 @@ class NmrResidueTable(QuickTable):
       # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
       # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None),
       ('Pid',        lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None),
+      ('_object',     lambda nmrResidue: nmrResidue, 'Object', None),
       ('Sequence',   lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
       ('Type',       lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
       ('NmrAtoms',   lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
@@ -289,7 +306,7 @@ class NmrResidueTable(QuickTable):
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
     self.ncWidget = NmrChainPulldown(parent=self._widget,
-                                     project=self._project, default=0,  #first NmrChain in project (if present)
+                                     project=self.project, default=0,  #first NmrChain in project (if present)
                                      grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100),
                                      showSelectName=True,
                                      sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
@@ -307,12 +324,13 @@ class NmrResidueTable(QuickTable):
 
     # initialise the table
     QuickTable.__init__(self, parent=parent
-                        , mainWindow=self._mainWindow
+                        , mainWindow=self.mainWindow
                         , dataFrameObject=None
                         , setLayout=True
                         , autoResize=True,  multiSelect=multiSelect
                         , actionCallback=actionCallback
                         , selectionCallback=selectionCallback
+                        , checkBoxCallback = checkBoxCallback
                         , grid = (3, 0), gridSpan = (1, 6)
                         , enableDelete=True
                         )
@@ -333,14 +351,15 @@ class NmrResidueTable(QuickTable):
       self._selectNmrChain(nmrChain)
 
     self.setTableNotifiers(tableClass=NmrChain
+                           , className=self.attributeName
+                           , tableSelection='_nmrChain'      # _nmrChain.nmrResidues
                            , rowClass=NmrResidue
-                           , cellClassNames=(NmrAtom, 'nmrAtom')
+                           , cellClassNames=[(NmrAtom, 'nmrResidue')] # doesn't change anything
                            , tableName='nmrChain', rowName='nmrResidue'
                            , changeFunc=self.displayTableForNmrChain
-                           , className=self.attributeName
                            , updateFunc=self._update
-                           , tableSelection='nmrChain'
                            , pullDownWidget=self.ncWidget
+                           , callBackClass=NmrResidue
                            , selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
@@ -376,8 +395,8 @@ class NmrResidueTable(QuickTable):
       else:
         for widgetObj in self.ncWidget.textList:
           if nmrChain.pid == widgetObj:
-            self.nmrChain = nmrChain
-            self.ncWidget.select(self.nmrChain.pid)
+            self._nmrChain = nmrChain
+            self.ncWidget.select(self._nmrChain.pid)
 
   def defaultActionCallback(self, nmrResidue, *args):
     """
@@ -386,12 +405,13 @@ class NmrResidueTable(QuickTable):
     """
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
-    self._application.ui.mainWindow.clearMarks()
-    if self._current.strip is not None:
-        strip = self._current.strip
+    self.application.ui.mainWindow.clearMarks()
+    if self.current.strip is not None:
+        strip = self.current.strip
+        newWidths = _getCurrentZoomRatio(strip.viewBox.viewRange())
         navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
-
-                                      widths=['default'] * len(strip.axisCodes))
+                                      widths = None)
+                                      # widths=['default'] * len(strip.axisCodes))
 
     else:
       logger.warning('Impossible to navigate to peak position. Set a current strip first')
@@ -410,7 +430,7 @@ class NmrResidueTable(QuickTable):
   #   thisChainList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the chainList
   #   nmrChain = data[Notifier.OBJECT]
   #
-  #   if self.nmrChain in thisChainList:
+  #   if self._nmrChain in thisChainList:
   #     trigger = data[Notifier.TRIGGER]
   #     if nmrChain.pid == self.ncWidget.getText() and trigger == Notifier.DELETE:
   #
@@ -421,13 +441,13 @@ class NmrResidueTable(QuickTable):
   #       self.displayTableForNmrChain(nmrChain)
   #
   #     elif trigger == Notifier.RENAME:
-  #       if nmrChain == self.nmrChain:
+  #       if nmrChain == self._nmrChain:
   #         self.displayTableForNmrChain(nmrChain)
   #
   #   else:
   #     self.clear()
   #
-  #   logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+  #   logger.debug('>updateCallback>', data['notifier'], self._nmrChain, data['trigger'], data['object'], self._updateSilence)
   #
   # def _updateResidueCallback(self, data):
   #   """
@@ -437,7 +457,7 @@ class NmrResidueTable(QuickTable):
   #   nmrResidue = data[Notifier.OBJECT]
   #   trigger = data[Notifier.TRIGGER]
   #
-  #   if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
+  #   if self._nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
   #     # is the nmrResidue in the visible list
   #     # TODO:ED move these into the table class
   #
@@ -451,10 +471,10 @@ class NmrResidueTable(QuickTable):
   #
   #       # insert item into self._dataFrameObject
   #
-  #       if self.nmrChain.nmrResidues and len(self.nmrChain.nmrResidues) > 1:
+  #       if self._nmrChain.nmrResidues and len(self._nmrChain.nmrResidues) > 1:
   #         self._dataFrameObject.appendObject(nmrResidue)
   #       else:
-  #         self._update(self.nmrChain)
+  #         self._update(self._nmrChain)
   #
   #     elif trigger == Notifier.CHANGE:
   #
@@ -468,7 +488,7 @@ class NmrResidueTable(QuickTable):
   #       # modify the oldPid in the objectList, change to newPid
   #       self._dataFrameObject.renameObject(nmrResidue, oldPid)
   #
-  #   logger.debug('>updateResidueCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+  #   logger.debug('>updateResidueCallback>', data['notifier'], self._nmrChain, data['trigger'], data['object'], self._updateSilence)
   #
   # def _updateAtomCallback(self, data):
   #   """
@@ -478,18 +498,18 @@ class NmrResidueTable(QuickTable):
   #   nmrAtom = data[Notifier.OBJECT]
   #   nmrResidue = nmrAtom.nmrResidue
   #
-  #   if self.nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
+  #   if self._nmrChain in thisChainList and nmrResidue.nmrChain.pid == self.ncWidget.getText():
   #     # change the dataFrame for the updated nmrAtom
   #     self._dataFrameObject.changeObject(nmrResidue)
   #
-  #   logger.debug('>updateCallback>', data['notifier'], self.nmrChain, data['trigger'], data['object'], self._updateSilence)
+  #   logger.debug('>updateCallback>', data['notifier'], self._nmrChain, data['trigger'], data['object'], self._updateSilence)
 
   def _maximise(self):
     """
     refresh the table on a maximise event
     """
-    if self.nmrChain:
-      self.displayTableForNmrChain(self.nmrChain)
+    if self._nmrChain:
+      self.displayTableForNmrChain(self._nmrChain)
     else:
       self.clear()
 
@@ -503,10 +523,10 @@ class NmrResidueTable(QuickTable):
       # # self.setColumns(self.NMRcolumns)
       # # self.setObjects(nmrChain.nmrResidues)
       # # self._highLightObjs(objs)
-      # self._selectOnTableCurrentNmrResidues(self._current.nmrResidues)
+      # self._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
       # # self.show()
 
-    self._project.blankNotification()
+    self.project.blankNotification()
     objs = self.getSelectedObjects()
 
     self._dataFrameObject = self.getDataFrameFromList(table=self
@@ -517,14 +537,14 @@ class NmrResidueTable(QuickTable):
     # populate from the Pandas dataFrame inside the dataFrameObject
     self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
     self._highLightObjs(objs)
-    self._project.unblankNotification()
+    self.project.unblankNotification()
 
 
-  # def setUpdateSilence(self, silence):
-  #   """
-  #   Silences/unsilences the update of the table until switched again
-  #   """
-  #   self._updateSilence = silence
+  def setUpdateSilence(self, silence):
+    """
+    Silences/unsilences the update of the table until switched again
+    """
+    self._updateSilence = silence
 
   def _selectionCallback(self, data):
     """
@@ -535,22 +555,24 @@ class NmrResidueTable(QuickTable):
     if selected:
       if self.multiSelect: #In this case selected is a List!!
         if isinstance(selected, list):
-          self._current.nmrResidues = selected
+          self.current.nmrResidues = selected
       else:
-        self._current.nmrResidue = selected[0]
+        self.current.nmrResidue = selected[0]
     else:
-      self._current.clearNmrResidues()
-    NmrResidueTableModule._currentCallback = {'object':self.nmrChain, 'table':self}
+      # TODO:ED this should never be called, and where is it?
+      self.current.clearNmrResidues()
+
+    NmrResidueTableModule.currentCallback = {'object':self._nmrChain, 'table':self}
 
 
   def _selectionPulldownCallback(self, item):
     """
     Notifier Callback for selecting NmrChain
     """
-    self.nmrChain = self._project.getByPid(item)
-    logger.debug('>selectionPulldownCallback>', item, type(item), self.nmrChain)
-    if self.nmrChain is not None:
-      self.displayTableForNmrChain(self.nmrChain)
+    self._nmrChain = self.project.getByPid(item)
+    logger.debug('>selectionPulldownCallback>', item, type(item), self._nmrChain)
+    if self._nmrChain is not None:
+      self.displayTableForNmrChain(self._nmrChain)
     else:
       self.clearTable()
 
@@ -590,9 +612,9 @@ class NmrResidueTable(QuickTable):
   #   """
   #
   #   # why is it blanking a notification here?
-  #   # NmrResidueTable._project.blankNotification()
+  #   # NmrResidueTable.project.blankNotification()
   #   nmrResidue.comment = value
-  #   # NmrResidueTable._project.unblankNotification()
+  #   # NmrResidueTable.project.unblankNotification()
 
   @staticmethod
   def _getNmrAtomNames(nmrResidue):
@@ -628,29 +650,29 @@ class NmrResidueTable(QuickTable):
   #   change calls on any other attribute
   #   """
   #   self._clearNotifiers()
-  #   self._chainNotifier = Notifier(self._project
+  #   self._chainNotifier = Notifier(self.project
   #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
   #                                     , NmrChain.__name__
   #                                     , self._updateChainCallback)
-  #   self._residueNotifier = Notifier(self._project
+  #   self._residueNotifier = Notifier(self.project
   #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
   #                                     , NmrResidue.__name__
   #                                     , self._updateResidueCallback
   #                                     , onceOnly=True)
-  #   self._atomNotifier = Notifier(self._project
+  #   self._atomNotifier = Notifier(self.project
   #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
   #                                     , NmrAtom.__name__
   #                                     , self._updateAtomCallback
   #                                     , onceOnly=True)
   #   # very slow
-  #   # self._peakNotifier = Notifier(self._project
+  #   # self._peakNotifier = Notifier(self.project
   #   #                               , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
   #   #                               , 'Peak'
   #   #                               , self._updateCallback
   #   #                               , onceOnly = True
   #   #                               )
   #
-  #   self._selectOnTableCurrentNmrResiduesNotifier = Notifier(self._current
+  #   self._selectOnTableCurrentNmrResiduesNotifier = Notifier(self.current
   #                                                      , [Notifier.CURRENT]
   #                                                      , targetName='nmrResidues'
   #                                                      , callback=self._selectOnTableCurrentNmrResiduesNotifierCallback)

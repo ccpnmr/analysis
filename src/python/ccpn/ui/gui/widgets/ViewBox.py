@@ -3,7 +3,7 @@ By Functionality:
 
 Zoom and pan:
     Left-drag:                          pans the spectrum.
-    Middle-drag:                        draws a zooming box and zooms the viewbox.
+
     shift-left-drag:                    draws a zooming box and zooms the viewbox.
     shift-middle-drag:                  draws a zooming box and zooms the viewbox.
     shift-right-drag:                   draws a zooming box and zooms the viewbox.
@@ -14,7 +14,7 @@ Peaks:
     Left-click:                         select peak near cursor in a spectrum display, deselecting others
     Control(Cmd)-left-click:            (de)select peak near cursor in a spectrum display, adding/removing to selection.
     Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
-
+    Middle-drag:                        Moves a selected peak.
     Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
     Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
 
@@ -33,7 +33,7 @@ By Mouse button:
     Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
     Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
 
-    Middle-drag:                        draws a zooming box and zooms the viewbox.
+
     shift-middle-drag:                  draws a zooming box and zooms the viewbox.
 
     Right-click:                        raises the context menu.
@@ -71,6 +71,8 @@ import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.Point import Point
 from ccpn.util import Common as commonUtil
+import numpy as np
+
 
 from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -81,7 +83,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.mouseEvents import \
   leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
   middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
-  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
+  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
 
 
@@ -170,8 +172,13 @@ class ViewBox(pg.ViewBox):
     # Override pyqtgraph ViewBoxMenu
     self.menu = self._getMenu() # built in GuiStrip, GuiStripNd, GuiStrip1D
     self.strip = strip
-    self.current = strip.spectrumDisplay.mainWindow.application.current
+    self.application = self.current = strip.spectrumDisplay.mainWindow.application
+    self.current = self.application.current
+    self.preferences = self.application.preferences
     self.mainWindow = strip.spectrumDisplay.mainWindow
+
+    self._setMouseCursor()
+
 
     # self.rbScaleBox: Native PyQtGraph; used for Zoom
 
@@ -192,6 +199,7 @@ class ViewBox(pg.ViewBox):
     self.mouseClickEvent = self._mouseClickEvent
     self.mouseDragEvent = self._mouseDragEvent
     self.hoverEvent = self._hoverEvent
+    self.state['wheelScaleFactor'] = -1.0/20.0 #speed of the wheel event. the larger the denominator the slower the zoom
 
     self._successiveClicks = None  # GWV: Store successive click events for zooming; None means first click not set
     self.crossHair = CrossHair(self, show=False, rgb=(255,255,0), dash=[20.0,7.0]) # dashes in pixels, [on, off]
@@ -235,6 +243,28 @@ class ViewBox(pg.ViewBox):
       self.menu = Menu('', self.parent(), isFloatWidget=True)
       return self.menu
 
+  def _setMouseCursor(self):
+
+    if self.application.ui.mainWindow.mouseMode == PICK:
+      cursor = QtGui.QCursor(QtCore.Qt.CrossCursor)
+      self.setCursor(cursor)
+
+    else:
+      self.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
+  def _pickAtMousePosition(self, event):
+    ''
+    event.accept()
+    self._resetBoxes()
+    mousePosition = self.mapSceneToView(event.pos())
+    position = [mousePosition.x(), mousePosition.y()]
+    orderedAxes = self.current.strip.orderedAxes
+    for orderedAxis in orderedAxes[2:]:
+      position.append(orderedAxis.position)
+
+    newPeaks = self.current.strip.peakPickPosition(position)
+    self.current.peaks = newPeaks
+
   def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
     Re-implementation of PyQtGraph mouse click event to allow custom actions 
@@ -248,18 +278,12 @@ class ViewBox(pg.ViewBox):
     # This is the correct future style for cursorPosition handling
     self.current.cursorPosition = (xPosition, yPosition)
 
+    if self.application.ui.mainWindow.mouseMode == PICK:
+      self._pickAtMousePosition(event)
+
     if controlShiftLeftMouse(event):
       # Control-Shift-left-click: pick peak
-      event.accept()
-      self._resetBoxes()
-      mousePosition=self.mapSceneToView(event.pos())
-      position = [mousePosition.x(), mousePosition.y()]
-      orderedAxes = self.current.strip.orderedAxes
-      for orderedAxis in orderedAxes[2:]:
-        position.append(orderedAxis.position)
-
-      newPeaks = self.current.strip.peakPickPosition(position)
-      self.current.peaks = newPeaks
+      self._pickAtMousePosition(event)
 
       # peaks = list(self.current.peaks)
       # peakLists = []
@@ -550,62 +574,84 @@ class ViewBox(pg.ViewBox):
                     peaks.append(peak)
         self.current.peaks = peaks
 
-    elif controlMiddleMouse(event):
-      # Control(Cmd)+middle drag: move a selected peak
-
+    elif middleMouse(event):
+      # middle drag: moves a selected peak
       event.accept()
+      self.setMouseEnabled(False, False)
+      refPosition = (self.mapSceneToView(event.buttonDownPos()).x(), self.mapSceneToView(event.buttonDownPos()).y())
 
-      peaks, peakListToIndicesDict = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
+      peaks = self.current.peaks
       if not peaks:
         return
-      if len(peaks) == 1:
-        peak = peaks[0]
-      else:
-        if event.isFinish():
-          getLogger().warn('Can only move one peak at a time')
-        return
 
-      startPoint = Point(event.buttonDownPos())
-      endPoint = Point(event.pos())
-      startPosition = self.childGroup.mapFromParent(startPoint)
-      endPosition = self.childGroup.mapFromParent(endPoint)
-      deltaPosition = endPosition - startPosition
-      deltaPosition = deltaPosition.x(), deltaPosition.y()
+      deltaPosition = np.subtract(self.current.cursorPosition , refPosition)
+      for peak in peaks:
+        peak.startPosition = peak.position
 
-      project = peak.project
-      undo = project._undo
-
-      if not hasattr(peak, 'startPosition'):
-        # start of move
-        project.newUndoPoint()
-        undo.increaseBlocking()
-        # project.blankNotification()
-
-      try:
-        if not hasattr(peak, 'startPosition'):
-          peak.startPosition = peak.position
-        indices = peakListToIndicesDict[peak.peakList]
-        position = list(peak.startPosition)
-        for n, index in enumerate(indices):
-          position[index] += deltaPosition[n]
-        peak.position = position
-
-      except:
-          undo.decreaseBlocking()
-          # project.unblankNotification()
-
-      else:
-        if event.isFinish():
-          undo.decreaseBlocking()
-          # project.unblankNotification()
-          if hasattr(peak, 'startPosition'):
-            undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
-                         redoArgs=[peak, 'position', peak.position])
-            delattr(peak, 'startPosition')
+      if event.isFinish():
+        for peak in peaks:
+          oldPosition = peak.position
+          peak.position =  oldPosition + deltaPosition
           peak._finaliseAction('change')
+          self.setMouseEnabled(True, True)
           self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
-            ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
-            )
+            ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
+        self.current.peaks = peaks
+      else: #this is when is being dragged
+        pass
+        # for peak in peaks:
+        #   # print(peak.position , deltaPosition)
+        #   peak.position =  (peak.position[0] + deltaPosition[0],peak.position[1] + deltaPosition[1] )
+
+      # startPoint = Point(event.buttonDownPos())
+      # endPoint = Point(event.pos())
+      # startPosition = self.childGroup.mapFromParent(startPoint)
+      # endPosition = self.childGroup.mapFromParent(endPoint)
+      # deltaPosition = endPosition - startPosition
+      # deltaPosition = deltaPosition.x(), deltaPosition.y()
+      #
+      # project = peak.project
+      # undo = project._undo
+      #
+      # if not hasattr(peak, 'startPosition'):
+      #   # start of move
+      #   project.newUndoPoint()
+      #   undo.increaseBlocking()
+      #   project.blankNotification()
+      #   self.setMouseEnabled(False,False)
+      #
+      # try:
+      #   self.pointer.show()
+      #   self.pointer.setPos(endPosition)
+      #   if not hasattr(peak, 'startPosition'):
+      #     peak.startPosition = peak.position
+      #   indices = peakListToIndicesDict[peak.peakList]
+      #   position = list(peak.startPosition)
+      #   for n, index in enumerate(indices):
+      #     position[index] += deltaPosition[n]
+      #   peak.position = self.current.cursorPosition
+      #   project.newUndoPoint()
+      #
+      # except:
+      #     undo.decreaseBlocking()
+      #     project.unblankNotification()
+      #     self.setMouseEnabled(True, True)
+      #     self.pointer.hide()
+
+      # else:
+      # if event.isFinish():
+      #   self.pointer.hide()
+      #   undo.decreaseBlocking()
+      #   project.unblankNotification()
+      #   self.setMouseEnabled(True, True)
+      #   if hasattr(peak, 'startPosition'):
+      #     undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
+      #                  redoArgs=[peak, 'position', peak.position])
+      #     delattr(peak, 'startPosition')
+      #   peak._finaliseAction('change')
+      #   self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
+      #     ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
+      #     )
 
     elif shiftLeftMouse(event) or shiftMiddleMouse(event) or shiftRightMouse(event):
       # Middle-drag, shift-left-drag, shift-middle-drag, shift-right-drag: draws a zooming box and zooms the viewbox.

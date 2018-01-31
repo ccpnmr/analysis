@@ -51,7 +51,7 @@ class MessageDialog(QtWidgets.QMessageBox):
   Using the 'multiline' to emulate the windowTitle, as on Mac the windows do not get their title
   """
   def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None):
-    QtWidgets.QMessageBox.__init__(self, parent)
+    QtWidgets.QMessageBox.__init__(self, None)
     self.setFont(messageFont)
     self.setWindowModality(QtCore.Qt.WindowModal)
 
@@ -280,6 +280,7 @@ class progressPopup(CcpnDialog):
     # vlayout.addStretch()
     # self.setLayout(vlayout)
 
+    # self.setWindowFlags(QtCore.Qt.WindowTitleHint)
     self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
     self.show()
     self.raise_()

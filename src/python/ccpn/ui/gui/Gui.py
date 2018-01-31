@@ -169,7 +169,8 @@ class Gui(Ui):
     sys.stderr.write('==> Gui interface is ready\n' )
 
     self.mainWindow.show()
-    self.mainWindow.raise_()
+    QtGui.QApplication.setActiveWindow(self.mainWindow)
+
     self.qtApp.start()
 
   def _showRegisterPopup(self):
@@ -208,39 +209,6 @@ class Gui(Ui):
   def getByGid(self, gid):
     return self.application.project.getByPid(gid)
 
-  #TODO: this should be made failsafe
-  def addBlankDisplay(self, position='right', relativeTo=None):
-    logParametersString = "position={position}, relativeTo={relativeTo}".format(
-      position="'"+position+"'" if isinstance(position, str) else position,
-      relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
-    self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
-    thisBlank = None
-    try:
-      mDict = self.mainWindow.moduleArea.currentModulesDict
-      if 'BlankDisplay' in mDict:
-        thisBlank = None
-        # blankDisplay = mDict['BlankDisplay']
-        # blankDisplay.show()
-      else:
-        # LM 28/04/17
-        # This is not called anymore when a spectrum display is opened.
-        # For some reason is impossible to open a new blank display. Must be some conflict with function name across
-        # Gui/Framework/GuiMainwindow/mainMindow for the addBlankDisplay() function.
-        # The function in GuiMainWindow.addBlankDisplay() is not called so no blank display is added.
-
-
-        thisBlank = self.mainWindow.newBlankDisplay()
-        # return blankDisplay # Why a return blankDisplay?
-
-         # Fixme when found the original cause. The lines below are the same as GuiMainWindow.addBlankDisplay
-        # from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
-        # blankDisplay = BlankDisplay(mainWindow=self.mainWindow)
-        # self.mainWindow.moduleArea.addModule(blankDisplay, position='right'
-        #                                      , relativeTo=self.mainWindow.moduleArea)   # ejb
-
-    finally:
-      self.application._endCommandBlock()
-      return thisBlank
 
   from ccpn.core.IntegralList import IntegralList
   from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -312,6 +280,7 @@ class MainWindow(coreClass, _GuiMainWindow):
 
     application = project._appBase
     _GuiMainWindow.__init__(self, application = application)
+
     # hide the window here and make visible later
     self.hide()
 
@@ -379,8 +348,10 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
 
     _GuiStripDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
                                       name=self._wrappedData.name)
-    self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
-                                                        , relativeTo=self.application.ui.mainWindow.moduleArea)
+    # This is a normal guiModule that should be opened in module area from the position
+    # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
+    # self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
+    #                                                     , relativeTo=self.application.ui.mainWindow.moduleArea)
 
 
 from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
@@ -401,9 +372,15 @@ class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
     self.application = project._appBase
     self._appBase = project._appBase
 
-    _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow
-                                , name=self._wrappedData.name)
-    self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
+    _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
+                                name=self._wrappedData.name
+                                )
+
+    if not project._isNew:
+      # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
+      # This is a normal guiModule that should be opened in module area from the position
+      # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
+      self.application.ui.mainWindow.moduleArea.addModule(self, position='right'
                                                         , relativeTo=self.application.ui.mainWindow.moduleArea)
 #old name
 StripDisplayNd = SpectrumDisplayNd

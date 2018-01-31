@@ -31,9 +31,10 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButton import RadioButton
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Widget import Widget
-
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
@@ -84,9 +85,16 @@ class PeakFindPopup(CcpnDialog):
       self.checkBox3Label = Label(self, 'Both')
       self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
       self.checkBox3.setChecked(True)
+
+      self.estimateFrame = Frame(parent=self, setLayout=True, spacing=(5,0)
+                            , showBorder=False, fShape='noFrame'
+                            , grid=(7,0))
+      self.estimateLineWidthLabel = Label(self.estimateFrame, 'Estimate Line Widths', grid=(0,1))
+      self.estimateLineWidthData = CheckBox(self.estimateFrame, grid=(0,0), checked=True, vAlign='t', hAlign='l')
+      self.estimateLineWidthData.setChecked(True)
       self._updateContents()
 
-      self.buttonBox = ButtonList(self, grid=(7, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
+      self.buttonBox = ButtonList(self, grid=(8, 2), gridSpan=(1, 4), texts=['Cancel', 'Find Peaks'],
                                   callbacks=[self.reject, self._pickPeaks])
     else:
       self.close()

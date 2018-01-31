@@ -67,8 +67,9 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
     QtGui.QDoubleSpinBox.__init__(self, parent)
     Base.__init__(self, **kwds)
 
-    if value is not None:
-      self.setValue(value)
+    # if value is not None:
+    #   value = value
+    #   # self.setValue(value)
 
     if min is not None:
       self.setMinimum(min)
@@ -100,7 +101,15 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
     self.setMinimumWidth(self.defaultMinimumSizes[0])
     self.setMinimumHeight(self.defaultMinimumSizes[1])
 
-    # self.setStyleSheet(self._styleSheet)
+    if value is not None:
+      value = value
+      self.setValue(value)
+
+  def get(self):
+    return self.value()
+
+  def set(self, value):
+    self.setValue(value)
 
   def setSelected(self):
     self.isSelected = True
@@ -115,3 +124,21 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
     if callback:
       self.connect(self, QtCore.SIGNAL("valueChanged(double)"), callback)
     self._callback = callback
+
+
+v = float("{0:.3f}".format(0.024))
+v1 = 0.029
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+
+  app = TestApplication()
+  popup = CcpnDialog()
+  sb = DoubleSpinbox(popup,value=v1, decimals=3, step=0.001, grid=(0,0))
+  # print('REAL = ',v, 'SPINBOX =', sb.value())
+
+  popup.show()
+  popup.raise_()
+
+  app.start()

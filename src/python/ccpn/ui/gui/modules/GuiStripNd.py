@@ -189,6 +189,7 @@ class GuiStripNd(GuiStrip):
 
       (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            True,   True,       self.spectrumDisplay.adjustContours, ''),
       (tType.actn, 'Cycle Peak Labels',     'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', True, True, self.cyclePeakLabelling, ''),
+      (tType.item, 'Share Y Axis',        '',                       '',                         True,   True,       self._toggleLastAxisOnly,             'lastAxisOnlyCheckBox'),
 
       # (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
       # (tType.actn, 'Remove Contour Level',  'icons/contour-remove',   'Remove One Level',         True,   True,       self.spectrumDisplay.removeContourLevel,''),
@@ -237,7 +238,8 @@ class GuiStripNd(GuiStrip):
     #   self.navigateToMenu.addAction(spectrumDisplay)
 
     self.crossHairAction.setChecked(self.crossHairIsVisible)
-    # self.gridAction.setChecked(self.gridIsVisible)
+    self.gridAction.setChecked(self.gridIsVisible)
+    self.lastAxisOnlyCheckBox.setChecked(self.spectrumDisplay.lastAxisOnly)
 
     return self.contextMenu
 
@@ -329,7 +331,9 @@ class GuiStripNd(GuiStrip):
     return zoomXArray, zoomYArray
 
   def resetAxisRange(self, axis):
-    if not axis:
+    # if not axis:
+    # TODO:ED check why this was here
+    if axis is None:
       return
 
     positionArray = []
@@ -355,6 +359,10 @@ class GuiStripNd(GuiStrip):
 
     GuiStrip._updateRegion(self, viewBox)
     self._updateTraces()
+
+  def _toggleLastAxisOnly(self):
+    self.spectrumDisplay.setLastAxisOnly(lastAxisOnly=self.lastAxisOnlyCheckBox.isChecked())
+    self.spectrumDisplay.showAxes()
 
   def _updateTraces(self):
 
@@ -385,6 +393,13 @@ class GuiStripNd(GuiStrip):
     """
     self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
     self._updateTraces()
+
+  def toggleLastAxisOnly(self):
+    """
+    Toggles whether the axis is displayed in the last strip of the display.
+    """
+    self.lastAxisOnlyCheckBox.setChecked(not self.lastAxisOnlyCheckBox.isChecked())
+    self._toggleLastAxisOnly()
 
   def _mouseMoved(self, positionPixel):
 
@@ -533,11 +548,13 @@ class GuiStripNd(GuiStrip):
     #if peakListView:
     #  return peakListView
       
-    for spectrumView in self.spectrumViews:
-      for peakListView in spectrumView.peakListViews:
-        if peakList is peakListView.peakList:
-          #self.peakListViewDict[peakList] = peakListView
-          return peakListView
+    # TODO:ED temporary test because spectrumViews have been deleted at this point
+    if hasattr(self, 'spectrumViews'):
+      for spectrumView in self.spectrumViews:
+        for peakListView in spectrumView.peakListViews:
+          if peakList is peakListView.peakList:
+            #self.peakListViewDict[peakList] = peakListView
+            return peakListView
             
     return None
 

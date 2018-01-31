@@ -57,6 +57,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 
+AXIS_WIDTH = 30
+
 
 class GuiSpectrumDisplay(CcpnModule):
   """
@@ -214,6 +216,7 @@ class GuiSpectrumDisplay(CcpnModule):
     # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
     # the module to another location
     self.hoverEvent = self._hoverEvent
+    self.lastAxisOnly = True
 
   def _hoverEvent(self, event):
     event.accept()
@@ -226,15 +229,18 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     theObject = data.get('theObject')
 
-    for url in data.get('urls',[]):
-      getLogger().debug('dropped: %s' % url)
-      objects = self.project.loadData(url)
+    if DropBase.URLS in data:
+      self.mainWindow.sideBar._processDroppedItems(data)
 
-      if objects is not None:
-        for obj in objects:
-          if isinstance(obj, Spectrum):
-            self._handlePid(obj.pid, theObject)  # pass the object as its pid so we use
-                                      # the same method used to process the pids
+    # for url in data.get('urls',[]):
+    #   getLogger().debug('dropped: %s' % url)
+    #   objects = self.project.loadData(url)
+    #
+    #   if objects is not None:
+    #     for obj in objects:
+    #       if isinstance(obj, Spectrum):
+    #         self._handlePid(obj.pid, theObject)  # pass the object as its pid so we use
+    #                                   # the same method used to process the pids
 
     for pid in data.get('pids',[]):
       getLogger().debug('dropped:', pid)
@@ -427,6 +433,7 @@ class GuiSpectrumDisplay(CcpnModule):
       strip._unDelete()
     finally:
       self._endCommandEchoBlock()
+      self.showAxes()
 
   def _removeIndexStrip(self, value):
     self.removeStrip(self.strips[value])
@@ -476,6 +483,8 @@ class GuiSpectrumDisplay(CcpnModule):
     #   # TODO:ED this may not be the correct strip to Redo:remove
     #   _undo.newItem(self.addStrip, self._removeIndexStrip, redoArgs=(-1,))
 
+    self.showAxes()
+
   def removeCurrentStrip(self):
     "Remove current.strip if it belongs to self"
     if self.current.strip is None:
@@ -490,6 +499,22 @@ class GuiSpectrumDisplay(CcpnModule):
   #   newStrip = self.strips[-1].clone()
 
   # def addStrip(self, stripIndex=-1) -> 'GuiStripNd':
+
+  def setLastAxisOnly(self, lastAxisOnly:bool=True):
+    self.lastAxisOnly = lastAxisOnly
+
+  def showAxes(self):
+    if self.strips:
+      if self.lastAxisOnly:
+        for ss in self.strips[:-1]:
+          ss.plotWidget.plotItem.axes['right']['item'].hide()
+        self.strips[-1].plotWidget.plotItem.axes['right']['item'].show()
+      else:
+        for ss in self.strips:
+          ss.plotWidget.plotItem.axes['right']['item'].show()
+
+      self.setColumnStretches(True)
+
   def addStrip(self) -> 'GuiStripNd':
     """
     Creates a new strip by cloning strip with index (default the last) in the display.
@@ -498,6 +523,8 @@ class GuiSpectrumDisplay(CcpnModule):
     newStrip = self.strips[stripIndex].clone()
 
     newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
+
+    self.showAxes()
 
     # do setColumnStretches here or in Gui.py (422)
     self.setColumnStretches(True)
@@ -515,6 +542,8 @@ class GuiSpectrumDisplay(CcpnModule):
     stripIndex = self.strips.index(strip)
     newStrip = strip.clone()
 
+    self.showAxes()
+
     # do setColumnStretches here or in Gui.py (422)
     self.setColumnStretches(True)
 
@@ -529,14 +558,28 @@ class GuiSpectrumDisplay(CcpnModule):
     widgets = self.stripFrame.children()
     if widgets:
       thisLayout = self.stripFrame.layout()
-      maxCol = 0
-      for wid in widgets[1:]:
-        index = thisLayout.indexOf(wid)
-        row, column, cols, rows = thisLayout.getItemPosition(index)
-        maxCol = max(maxCol, column)
+      thisLayoutWidth = self.stripFrame.width()
+      if not self.lastAxisOnly:
+        maxCol = 0
+        for wid in widgets[1:]:
+          index = thisLayout.indexOf(wid)
+          row, column, cols, rows = thisLayout.getItemPosition(index)
+          maxCol = max(maxCol, column)
 
-      for col in range(0, maxCol+1):
-        thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
+        for col in range(0, maxCol+1):
+          thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
+      else:
+        maxCol = 0
+        for wid in widgets[1:]:
+          index = thisLayout.indexOf(wid)
+          row, column, cols, rows = thisLayout.getItemPosition(index)
+          maxCol = max(maxCol, column)
+
+        leftWidth = (thisLayoutWidth - AXIS_WIDTH) / (maxCol+1)
+        endWidth = leftWidth + AXIS_WIDTH
+        for col in range(0, maxCol):
+          thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
+        thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
 
   def resetYZooms(self):
     """Zooms Y axis of current strip to show entire region"""
@@ -577,6 +620,36 @@ class GuiSpectrumDisplay(CcpnModule):
         self.current.strip._storeZoom()
     except:
       getLogger().warning('Error storing zoom')
+
+  def _zoomIn(self):
+    """zoom in to the current strip."""
+    try:
+      if not self.current.strip:
+        showWarning('Zoom In', 'No strip selected')
+        return
+      if self.current.strip not in self.strips:
+        showWarning('Zoom In', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                    % (self.current.strip.pid, self.pid))
+        return
+      else:
+        self.current.strip._zoomIn()
+    except:
+      getLogger().warning('Error zooming in')
+
+  def _zoomOut(self):
+    """zoom out of current strip."""
+    try:
+      if not self.current.strip:
+        showWarning('Zoom Out', 'No strip selected')
+        return
+      if self.current.strip not in self.strips:
+        showWarning('Zoom Out', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+                    % (self.current.strip.pid, self.pid))
+        return
+      else:
+        self.current.strip._zoomOut()
+    except:
+      getLogger().warning('Error zooming out')
 
   def toggleCrossHair(self):
     """Toggles whether cross hair is displayed in all strips of spectrum display."""

@@ -81,6 +81,8 @@ class SubmitMacroPopup(CcpnDialog):
 
     button = Button(self, 'Submit', callback=self._submitMacro, grid=(row, 1))
 
+    self.setMinimumSize(400, 400)
+
   def _selectMacro(self):
     
     dialog = FileDialog(parent=self.parent(), fileMode=FileDialog.ExistingFile, text='Select Macro',

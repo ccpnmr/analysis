@@ -30,6 +30,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.DataFrameObject import OBJECT_DATAFRAME
 
 
 class ColumnViewSettingsPopup(CcpnDialog):
@@ -71,28 +72,30 @@ class ColumnViewSettings(Widget):
 
   def initCheckBoxes(self):
     columns = self.dataFrameObject.headings   #   self.table._columns
-    hiddenColumns = self.dataFrameObject.hiddenColumns
+    hiddenColumns = self.dataFrameObject.hiddenColumns or []
 
     if columns:
       for i, colum in enumerate(columns):
 
-        if self.direction=='v':
-          i+=1
-          cb = CheckBox(self, text=colum, grid=(i, 1), callback=self.checkBoxCallBack
-                        , checked=True if colum not in hiddenColumns else False,
-                        hAlign='l',tipText= CheckboxTipText,)
-        else:
-          cb = CheckBox(self, text=colum, grid=(1, i), callback=self.checkBoxCallBack
-                        , checked=True if colum not in hiddenColumns else False,
-                        hAlign='l',tipText= CheckboxTipText,)
+        # always ignore the special column
+        if colum != OBJECT_DATAFRAME:
+          if self.direction=='v':
+            i+=1
+            cb = CheckBox(self, text=colum, grid=(i, 1), callback=self.checkBoxCallBack
+                          , checked=True if colum not in hiddenColumns else False,
+                          hAlign='l',tipText= CheckboxTipText,)
+          else:
+            cb = CheckBox(self, text=colum, grid=(1, i), callback=self.checkBoxCallBack
+                          , checked=True if colum not in hiddenColumns else False,
+                          hAlign='l',tipText= CheckboxTipText,)
 
-        cb.setMinimumSize(cb.sizeHint()*1.3)
+          cb.setMinimumSize(cb.sizeHint()*1.3)
 
-        self.checkBoxes.append(cb)
-        # if colum not in self.hideColumns:
-        #   self._showColumn(i, colum)
-        # else:
-        #   self._hideColumn(i, colum)
+          self.checkBoxes.append(cb)
+          # if colum not in self.hideColumns:
+          #   self._showColumn(i, colum)
+          # else:
+          #   self._hideColumn(i, colum)
 
   def _getHiddenColumns(self):
     return self.dataFrameObject.hiddenColumns

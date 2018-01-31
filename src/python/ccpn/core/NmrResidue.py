@@ -91,7 +91,8 @@ class NmrResidue(AbstractWrapperObject):
   _apiClassQualifiedName = ApiResonanceGroup._metaclass.qualifiedName()
 
   # used in chemical shift mapping
-  _deltaShift = 0
+  _deltaShift = None
+  _includeInDeltaShift = True   # default included in the calculation
 
   # CCPN properties  
   @property
@@ -1330,6 +1331,11 @@ def _newNmrResidue(self:NmrChain, sequenceCode:typing.Union[int,str]=None, resid
 
   apiNmrChain = self._wrappedData
   nmrProject = apiNmrChain.nmrProject
+
+  # TODO:ED residueType cannot be an empty string
+  if residueType == '':
+    residueType = None
+
   dd = {'name':residueType, 'details':comment,
         'residueType':residueType,'directNmrChain':apiNmrChain}
 

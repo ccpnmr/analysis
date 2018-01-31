@@ -36,8 +36,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
-
-from ccpn.ui.gui.modules.BlankDisplay import BlankDisplay
+from ccpn.ui.gui.lib.mouseEvents import PICK, SELECT
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
@@ -120,6 +119,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     # self.newBlankDisplay()
 
     self.statusBar().showMessage('Ready')
+    self.mouseMode = SELECT
     self.show()
 
   def changeEvent(self, event):
@@ -178,6 +178,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     if len(splitMenuString) > 1:
       topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
     for a in topMenuAction.actions():
+      # print ('>>>', menuString, a.text())
       if a.text() == splitMenuString[-1]:
         return a.menu() or a
     raise ValueError('Menu item not found.')
@@ -193,8 +194,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     if len(splitMenuString) > 1:
       topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
     for a in topMenuAction.actions():
-      # temp = a.text()
-      # print (temp)
+      # print ('>>>', menuString, a.text())
       if a.text() == splitMenuString[-1]:
         found = a.menu() if a.menu() else a
         break
@@ -211,18 +211,18 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     """
     #TODO:GEERTEN: deal with Stylesheet issue; There is a Splitter class in Widgets
-    self.setStyleSheet("""QSplitter{
-                                    background-color: #bec4f3;
-                                    }
-                          QSplitter::handle:horizontal {
-                                                        width: 3px;
-                                                        }
-
-                          QSplitter::handle:vertical {
-                                                        height: 3px;
-                                                      }
-
-                                    """)
+    # self.setStyleSheet("""QSplitter{
+    #                                 background-color: #bec4f3;
+    #                                 }
+    #                       QSplitter::handle:horizontal {
+    #                                                     width: 3px;
+    #                                                     }
+    #
+    #                       QSplitter::handle:vertical {
+    #                                                     height: 3px;
+    #                                                   }
+    #
+    #                                 """)
     # IPythonConsole
     self.namespace = {'application': self.application,
                       'current': self.application.current,
@@ -305,7 +305,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
   def _attachModulesMenuAction(self):
     # add a connect to call _fillModulesMenu when the menu item is about to show
     # so it is always uptodate
-    modulesMenu = self.getMenuAction('Modules')
+    modulesMenu = self.searchMenuAction('Show/hide Modules')
+    # modulesMenu = self.getMenuAction('Show/hide Modules')
     modulesMenu.aboutToShow.connect(self._fillModulesMenu)
 
   def _createMenu(self, spec, targetMenu=None):
@@ -371,8 +372,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
       if projectDir:
         project = self.application.loadProject(projectDir)
 
+
         if project:
           project._mainWindow.show()
+          QtGui.QApplication.setActiveWindow(project._mainWindow)
         else:
           MessageDialog.showError('loadProject', 'Error loading project:\n%s' % str(projectDir))
           Logging.getLogger().warning('Error loading project: %s' % str(projectDir))
@@ -489,10 +492,17 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
 
   def _fillModulesMenu(self):
-    modulesMenu = self.getMenuAction('Modules')
+    # modulesMenu = self.getMenuAction('Modules')
+    modulesMenu = self.searchMenuAction('Show/hide Modules')
     modulesMenu.clear()
 
-    for module in self.moduleArea.currentModules:
+    moduleSize = self.sideBar.size()
+    visible = moduleSize.width() != 0 and moduleSize.height() != 0
+    modulesMenu.addAction(Action(modulesMenu, text='Sidebar'
+                                 , checkable=True, checked=visible
+                                 , callback=partial(self._showSideBarModule, self.sideBar, self)))
+
+    for module in self.moduleArea.openedModules:
       moduleSize = module.size()
       visible = moduleSize.width() != 0 and moduleSize.height() != 0
 
@@ -510,6 +520,24 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
           module.setStretch(1, 1)
     except Exception as es:
       Logging.getLogger().warning('Error expanding module: %s', module.name())
+
+  def _showSideBarModule(self, module, modulesMenu):
+    try:
+      if module.size().height() != 0 and module.size().width() != 0:   #menuItem.isChecked():    # opposite as it has toggled
+        module.hide()
+      else:
+        module.show()
+    except Exception as es:
+      Logging.getLogger().warning('Error expanding module: sideBar')
+
+  def keyPressEvent(self, e):
+
+    if e.key() == QtCore.Qt.Key_Escape:
+      # Reset Mouse Mode
+      mode = self.application.preferences.general.mouseMode
+      if mode == PICK:
+        self.setMouseMode(SELECT)
+
 
   def _fillPluginsMenu(self):
     from ccpn.framework.lib.ExtensionLoader import getPlugins
@@ -567,8 +595,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                       plugin=plugin, application=self.application
                                       , mainWindow=self)
     plugin.ui = pluginModule
-    self.application.ui.pluginModules.append(pluginModule)
-    self.moduleArea.addModule(pluginModule)
+    if not pluginModule.aborted:
+      self.application.ui.pluginModules.append(pluginModule)
+      self.moduleArea.addModule(pluginModule)
     # TODO: open as pop-out, not as part of MainWindow
     # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
 
@@ -613,6 +642,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
     prefFile.close()
 
+    # set the active window to mainWindow so that the quit popup centres correctly.
+    QtGui.QApplication.setActiveWindow(self)
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
                                      ['Save and Quit', 'Quit without Saving', 'Cancel'],
                                    )
@@ -643,29 +674,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     else:
       if event:
         event.ignore()
-
-  #TODO:LUCA: this cannot be correct and ModuleArea is not updates; The proper way should be
-  # that moduleArea handles this: self.moduleArea.deleteModule(blankDisplay)
-  def deleteBlankDisplay(self):
-    """
-    Removes blank display from main window module area if one is present.
-    """
-    blankList = self.moduleArea.findAll()
-    if 'Blank Display' in blankList[1]:
-      blankDisplay = blankList[1]['Blank Display']
-      # blankDisplay.close()
-      blankDisplay._closeModule()
-
-  def newBlankDisplay(self, position='right', relativeTo=None):
-    "Adds new blank display to module area; returns BlankDisplay instance"
-    blankDisplay = BlankDisplay(mainWindow=self)
-
-    # blankDisplay = BlankDisplay.instance(mainWindow=self)     # ejb - failed test with a singleton
-    #FIXME:ED - still crashes when loading some projects
-    if not relativeTo:
-      relativeTo = self.moduleArea     # ejb
-    self.moduleArea.addModule(blankDisplay, position=position, relativeTo=relativeTo)
-    return blankDisplay
 
   def newMacroFromLog(self):
     """

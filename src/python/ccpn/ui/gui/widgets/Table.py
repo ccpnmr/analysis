@@ -155,7 +155,7 @@ from functools import partial
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 
-# BG_COLOR = QtGui.QColor('#E0E0E0')
+BG_COLOR = QtGui.QColor('#E0E0E0')
 
 
 class ObjectTable(QtWidgets.QTableView, Base):
@@ -910,6 +910,8 @@ class ObjectTable(QtWidgets.QTableView, Base):
         self.searchWidget.updateSearchWidgets(self)
 
     selectedObjects = self.getSelectedObjects()    # get current selection
+    getIndex = self.model.sourceModel().index
+    # print('FRFF', getIndex)
 
     model = self.model
     sourceModel = model.sourceModel()
@@ -935,7 +937,6 @@ class ObjectTable(QtWidgets.QTableView, Base):
 
     if n > m:
       sourceModel.endInsertRows()
-
     elif m > n:
       sourceModel.endRemoveRows()
 
@@ -946,6 +947,7 @@ class ObjectTable(QtWidgets.QTableView, Base):
       selectMode = selectionModel.Select | selectionModel.Rows
       select = selectionModel.select
       getIndex = self.model.sourceModel().index
+
       mapFromSource = self.model.mapFromSource
 
       for row, obj in enumerate(objects):
@@ -1215,9 +1217,10 @@ class ObjectTableItemDelegate(QtWidgets.QStyledItemDelegate):
         msg += 'required for table proxy editing'
         raise Exception(msg)
 
-      del widget
+      # del widget
       model = index.model()
       model.setData(index, value, EDIT_ROLE)
+
 
     else:
       return QtWidgets.QStyledItemDelegate.setModelData(self, widget, mode, index)
@@ -1583,3 +1586,95 @@ class Column:
   def _defaultIcon(self, obj):
 
     return self.defaultIcon
+
+
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Icon import Icon
+
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+  from ccpn.util import Colour
+
+
+  app = TestApplication()
+
+  class mockObj(object):
+    'Mock object to test the table widget editing properties'
+    exampleStr = 'exampleStr'
+    integer = 3
+    exampleFloat = 3.1 # This will create a double spin box
+    exampleBool = True # This will create a check box
+    string = 'white' # This will create a line Edit
+    exampleList = (('Mock', 'Test'),) # This will create a pulldown
+    color = QtGui.QColor('Red')
+    icon = Icon('icons/warning')
+    r= Colour.colourNameToHexDict['red']
+    y = Colour.colourNameToHexDict['yellow']
+    b = Colour.colourNameToHexDict['blue']
+    colouredIcons = [None, Icon(color=r),Icon(color=y),Icon(color=b)]
+
+    flagsList = [['']*len(colouredIcons),[Icon]*len(colouredIcons),1,colouredIcons ]  # This will create a pulldown. Make a list with the
+                                                                                      # same structure of pulldown setData function: (texts=None, objects=None, index=None,
+                                                                                      # icons=None, clear=True, headerText=None, headerEnabled=False, headerIcon=None)
+
+    def editBool(self, value):
+      mockObj.exampleBool =  value
+
+    def editFloat(self, value):
+      mockObj.exampleFloat = value
+
+
+    def editPulldown(self, value):
+      mockObj.exampleList = value
+
+    def editStr(self, value):
+      mockObj.exampleStr = value
+
+    def editFlags(self, value):
+      print('test')
+
+  popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
+
+  cString = Column(heading       =   'Str',
+                  getValue       = lambda i: mockObj.exampleStr,
+                  setEditValue   = lambda mockObj, value: mockObj.editStr(mockObj, value),
+                  getColor       = lambda i: mockObj.y,
+                  )
+
+  cFloat = Column(heading       =   'Float',
+                  getValue      = lambda i: mockObj.exampleFloat,
+                  setEditValue  = lambda mockObj, value: mockObj.editFloat(mockObj, value),
+                  editDecimals  = 3, editStep=0.1,
+                  getColor = lambda i: mockObj.r,
+                  )
+  cBool = Column(heading       = 'Bool',
+                 getValue      = lambda i: mockObj.exampleBool,
+                 setEditValue  = lambda mockObj, value: mockObj.editBool(mockObj, value),
+                 getColor = lambda i: mockObj.b,
+                 )
+
+  cPulldown = Column(heading='Pulldown',
+                 getValue=lambda i: mockObj.exampleList,
+                 setEditValue=lambda mockObj, value: mockObj.editPulldown(mockObj, value),
+                 )
+  cIcon = Column(heading='Icon',
+                 getValue=None,
+                 getIcon=lambda i: mockObj.icon,
+                )
+  cFlags = Column(heading='Flags',
+                  getValue=lambda i: mockObj.flagsList,
+                  setEditValue=lambda mockObj, value: mockObj.editFlags(mockObj, value),
+                  getColor=lambda i: mockObj.color,
+                 )
+
+  table = ObjectTable(parent=popup, columns=[cString, cFloat, cBool, cPulldown, cIcon, cFlags], objects=None,  grid=(0, 0))
+  table.setObjects([mockObj]*5)
+  print(table.model.index)
+  popup.show()
+  popup.raise_()
+  app.start()
+
+
+

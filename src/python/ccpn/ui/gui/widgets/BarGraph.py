@@ -356,6 +356,11 @@ class CustomViewBox(pg.ViewBox):
     self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self, triggered=self.showAboveThreshold)
     self.contextMenu.addAction(self.showAboveThresholdAction)
 
+    ## Selection: Select Above Threshold
+    self.selectAboveThresholdAction = QtGui.QAction("Select Items Above Threshold", self,
+                                                  triggered=self.selectAboveThreshold)
+    self.contextMenu.addAction(self.selectAboveThresholdAction)
+
 
     self.contextMenu.addSeparator()
     self.contextMenu.addAction('Export', self.showExportDialog)
@@ -431,6 +436,12 @@ class CustomViewBox(pg.ViewBox):
     else:
       print('NOT FOUND')
 
+  def selectAboveThreshold(self):
+    '''Reimplement this in the module subclass'''
+
+    pass
+
+
   def showExportDialog(self):
     if self.exportDialog is None:
       ### parent() is the graphicsScene
@@ -443,44 +454,44 @@ class CustomViewBox(pg.ViewBox):
 ###################################      Mock DATA    ################################################
 ######################################################################################################
 
-from collections import namedtuple
-import random
-
-nmrResidues = []
-for i in range(30):
-  nmrResidue = namedtuple('nmrResidue', ['sequenceCode'])
-  nmrResidue.__new__.__defaults__ = (0,)
-  nmrResidue.sequenceCode = int(random.randint(1,300))
-  nmrResidues.append(nmrResidue)
-
-x1 = [nmrResidue.sequenceCode for nmrResidue in nmrResidues]
-y1 = [(i**random.random())/10 for i in range(len(x1))]
-
-
-xLows = []
-yLows = []
-
-xMids = []
-yMids = []
-
-xHighs = []
-yHighs = []
-
-
-for x, y in zip(x1,y1):
-    if y <= 0.5:
-        xLows.append(x)
-        yLows.append(y)
-    if y > 0.5 and y <= 1:
-        xMids.append(x)
-        yMids.append(y)
-    if y > 1:
-        xHighs.append(x)
-        yHighs.append(y)
-
-######################################################################################################
-################################### Start Application ################################################
+# from collections import namedtuple
+# import random
+#
+# nmrResidues = []
+# for i in range(30):
+#   nmrResidue = namedtuple('nmrResidue', ['sequenceCode'])
+#   nmrResidue.__new__.__defaults__ = (0,)
+#   nmrResidue.sequenceCode = int(random.randint(1,300))
+#   nmrResidues.append(nmrResidue)
+#
+# x1 = [nmrResidue.sequenceCode for nmrResidue in nmrResidues]
+# y1 = [(i**random.random())/10 for i in range(len(x1))]
+#
+#
+# xLows = []
+# yLows = []
+#
+# xMids = []
+# yMids = []
+#
+# xHighs = []
+# yHighs = []
+#
+#
+# for x, y in zip(x1,y1):
+#     if y <= 0.5:
+#         xLows.append(x)
+#         yLows.append(y)
+#     if y > 0.5 and y <= 1:
+#         xMids.append(x)
+#         yMids.append(y)
+#     if y > 1:
+#         xHighs.append(x)
+#         yHighs.append(y)
+#
 # ######################################################################################################
+# ################################### Start Application ################################################
+# # ######################################################################################################
 #
 # app = pg.mkQApp()
 #
@@ -489,30 +500,47 @@ for x, y in zip(x1,y1):
 # plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
 # customViewBox.setParent(plotWidget)
 #
+# x=[6,
+#     8,
+#     10,
+#     12,
+#     14,
+#     16,
+#     18,
+#     20]
+# y = [
+# 1.731,
+# 10.809,
+# 10.658,
+# 4.831,
+# 11.406,
+# 5.287,
+# 2.971,
+# 4.412,
+# ]
 #
-#
-# xLow = BarGraph(viewBox=customViewBox, xValues=xLows, yValues=yLows, objects=[nmrResidues], brush='r', widht=1)
-# xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
-# xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
+# xLow = BarGraph(viewBox=customViewBox, xValues=x, yValues=y, objects=[], brush='r', widht=1)
+# # xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
+# # xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
 #
 #
 # customViewBox.addItem(xLow)
-# customViewBox.addItem(xMid)
-# customViewBox.addItem(xHigh)
+# # customViewBox.addItem(xMid)
+# # customViewBox.addItem(xHigh)
 #
-# xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
-# customViewBox.addItem(xLine)
+# # xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
+# # customViewBox.addItem(xLine)
 #
 # l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
 # l.setParentItem(customViewBox.graphicsItem())
 #
 # c1 = plotWidget.plot(pen='r', name='low')
-# c2 = plotWidget.plot(pen='b', name='mid')
-# c3 = plotWidget.plot(pen='g', name='high')
+# # c2 = plotWidget.plot(pen='b', name='mid')
+# # c3 = plotWidget.plot(pen='g', name='high')
 #
 # l.addItem(c1, 'low')
-# l.addItem(c2, 'mid')
-# l.addItem(c3, 'high')
+# # l.addItem(c2, 'mid')
+# # l.addItem(c3, 'high')
 #
 # # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
 # customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)
@@ -530,6 +558,5 @@ for x, y in zip(x1,y1):
 #   import sys
 #   if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
 #     QtWidgets.QApplication.instance().exec_()
-#
-#
-#
+
+

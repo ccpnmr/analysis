@@ -113,6 +113,9 @@ class Project(AbstractWrapperObject):
   # pid to object and ccpnData to object
   #__slots__ = ['_pid2Obj', '_data2Obj']
 
+  # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
+  _isNew = None
+
   # Implementation methods
   def __init__(self, wrappedData: ApiNmrProject):
     """ Special init for root (Project) object

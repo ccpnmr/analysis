@@ -28,6 +28,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import pyqtgraph as pg
 import numpy as np
 import pandas as pd
+from collections import OrderedDict
+from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -237,69 +239,136 @@ class StructureTableModule(CcpnModule):
     """
     self._closeModule()
 
-class NewStructureTable(pg.TableWidget):
+# class NewStructureTable(pg.TableWidget):
+#   """
+#   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
+#   """
+#   #row.modelNumber, etc., may not exist..
+#   columnHeadings = [
+#                 ('Index', np.uint),
+#                 ('modelNumber', np.uint),
+#                 ('chainCode', np.str),
+#                 ('sequenceId', np.uint),
+#                 ('insertionCode', np.str),
+#                 ('residueName', np.str),
+#                 ('atomName', np.str),
+#                 ('altLocationCode', np.str),
+#                 ('element', np.str),
+#                 ('x', np.float32),
+#                 ('y', np.float32),
+#                 ('z', np.float32),
+#                 ('occupancy', np.float32),
+#                 ('bFactor', np.float32),
+#                 ('nmrChainCode', np.str),
+#                 ('nmrSequenceCode', np.str),
+#                 ('nmrResidueName', np.str),
+#                 ('nmrAtomName', np.str)]       # will need to put the comment back in
+#
+#   columnFunction = [
+#                 ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index', None),
+#                 ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
+#                 ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
+#                 ('sequenceId', lambda row: StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None),
+#                 ('insertionCode', lambda row: StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode', None),
+#                 ('residueName', lambda row: StructureTable._stLamStr(row, 'residueName'), 'residueName', None),
+#                 ('atomName', lambda row: StructureTable._stLamStr(row, 'atomName'), 'atomName', None),
+#                 ('altLocationCode', lambda row: StructureTable._stLamStr(row, 'altLocationCode'), 'altLocationCode', None),
+#                 ('element', lambda row: StructureTable._stLamStr(row, 'element'), 'element', None),
+#                 ('x', lambda row: StructureTable._stLamFloat(row, 'x'), 'x', None),
+#                 ('y', lambda row: StructureTable._stLamFloat(row, 'y'), 'y', None),
+#                 ('z', lambda row: StructureTable._stLamFloat(row, 'z'), 'z', None),
+#                 ('occupancy', lambda row: StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None),
+#                 ('bFactor', lambda row: StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None),
+#                 ('nmrChainCode', lambda row: StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode', None),
+#                 ('nmrSequenceCode', lambda row: StructureTable._stLamStr(row, 'nmrSequenceCode'), 'nmrSequenceCode', None),
+#                 ('nmrResidueName', lambda row: StructureTable._stLamStr(row, 'nmrResidueName'), 'nmrResidueName', None),
+#                 ('nmrAtomName', lambda row: StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
+#                 ('Comment', lambda row:StructureTable._getCommentText(row), 'Notes',
+#                  lambda row, value:StructureTable._setComment(row, 'comment', value))
+#   ]
+#
+#         # testing - usage example
+#         # w = pg.TableWidget()
+#         #
+#         # data = np.array([
+#         #   (1, 1.6, 'x'),
+#         #   (3, 5.4, 'y'),
+#         #   (8, 12.5, 'z'),
+#         #   (443, 1e-12, 'w'),
+#         # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
+#         #
+#         # w.setData(data)
+#
+#   pass
+
+class QuickTableStructure(QuickTable):
   """
-  Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
+  QuickTable specific to tables that only contain a single pid for the pandas dataframe
   """
-  #row.modelNumber, etc., may not exist..
-  columnHeadings = [
-                ('Index', np.uint),
-                ('modelNumber', np.uint),
-                ('chainCode', np.str),
-                ('sequenceId', np.uint),
-                ('insertionCode', np.str),
-                ('residueName', np.str),
-                ('atomName', np.str),
-                ('altLocationCode', np.str),
-                ('element', np.str),
-                ('x', np.float32),
-                ('y', np.float32),
-                ('z', np.float32),
-                ('occupancy', np.float32),
-                ('bFactor', np.float32),
-                ('nmrChainCode', np.str),
-                ('nmrSequenceCode', np.str),
-                ('nmrResidueName', np.str),
-                ('nmrAtomName', np.str)]       # will need to put the comment back in
+  def __init__(self, *args, **kwargs):
+    super(QuickTableStructure, self).__init__(*args, **kwargs)
 
-  columnFunction = [
-                ('#', lambda row: StructureTable._stLamInt(row, 'Index'), 'Index', None),
-                ('modelNumber', lambda row: StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
-                ('chainCode', lambda row: StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
-                ('sequenceId', lambda row: StructureTable._stLamInt(row, 'sequenceId'), 'sequenceId', None),
-                ('insertionCode', lambda row: StructureTable._stLamStr(row, 'insertionCode'), 'insertionCode', None),
-                ('residueName', lambda row: StructureTable._stLamStr(row, 'residueName'), 'residueName', None),
-                ('atomName', lambda row: StructureTable._stLamStr(row, 'atomName'), 'atomName', None),
-                ('altLocationCode', lambda row: StructureTable._stLamStr(row, 'altLocationCode'), 'altLocationCode', None),
-                ('element', lambda row: StructureTable._stLamStr(row, 'element'), 'element', None),
-                ('x', lambda row: StructureTable._stLamFloat(row, 'x'), 'x', None),
-                ('y', lambda row: StructureTable._stLamFloat(row, 'y'), 'y', None),
-                ('z', lambda row: StructureTable._stLamFloat(row, 'z'), 'z', None),
-                ('occupancy', lambda row: StructureTable._stLamFloat(row, 'occupancy'), 'occupancy', None),
-                ('bFactor', lambda row: StructureTable._stLamFloat(row, 'bFactor'), 'bFactor', None),
-                ('nmrChainCode', lambda row: StructureTable._stLamStr(row, 'nmrChainCode'), 'nmrChainCode', None),
-                ('nmrSequenceCode', lambda row: StructureTable._stLamStr(row, 'nmrSequenceCode'), 'nmrSequenceCode', None),
-                ('nmrResidueName', lambda row: StructureTable._stLamStr(row, 'nmrResidueName'), 'nmrResidueName', None),
-                ('nmrAtomName', lambda row: StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
-                ('Comment', lambda row:StructureTable._getCommentText(row), 'Notes',
-                 lambda row, value:StructureTable._setComment(row, 'comment', value))
-  ]
+  def _selectionTableCallback(self, itemSelection):
+    if not self._silenceCallback:
 
-        # testing - usage example
-        # w = pg.TableWidget()
-        #
-        # data = np.array([
-        #   (1, 1.6, 'x'),
-        #   (3, 5.4, 'y'),
-        #   (8, 12.5, 'z'),
-        #   (443, 1e-12, 'w'),
-        # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
-        #
-        # w.setData(data)
+      rowList = self.getSelectedRows()
+      dataTable = {}
+      for col in range(self.columnCount()):
+        colName = self.horizontalHeaderItem(col).text()
+        dataTable[colName] = []
+        for row in rowList:
+          dataTable[colName].append(self.item(row, col).text())
+      newPd = pd.DataFrame.from_dict(dataTable)
 
-  pass
+      if rowList:
+        data = CallBack(theObject = self._dataFrameObject
+                        , object = newPd
+                        , index = None
+                        , targetName = self.className
+                        , trigger = CallBack.DOUBLECLICK
+                        , row = None
+                        , col = None
+                        , rowItem = None)
 
-class StructureTable(QuickTable):
+        self._selectionCallback(data)
+
+  def _doubleClickCallback(self, itemSelection):
+    model = self.selectionModel()
+
+    # selects all the items in the row
+    selection = model.selectedRows()
+
+    if itemSelection:
+      row = itemSelection.row()
+      col = itemSelection.column()
+
+      dataTable = {}
+      for colFind in range(self.columnCount()):
+        colName = self.horizontalHeaderItem(colFind).text()
+        dataTable[colName] = []
+        dataTable[colName].append(self.item(row, colFind).text())
+      newPd = pd.DataFrame.from_dict(dataTable)
+
+      data = CallBack(theObject = self._dataFrameObject
+                      , object = newPd
+                      , index = None
+                      , targetName = self.className
+                      , trigger = CallBack.DOUBLECLICK
+                      , row = row
+                      , col = col
+                      , rowItem = dataTable)
+
+      if self._actionCallback and not self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback
+        self._actionCallback(data)
+      elif self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback:
+        item = self.item(row, col)
+        item.setEditable(True)
+        # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
+        # item.textChanged.connect(partial(self._changeMe, item))
+        self.editItem(item)         # enter the editing mode
+
+
+class StructureTable(QuickTableStructure):
   """
   Class to present a StructureTable and a StructureData pulldown list, wrapped in a Widget
   """
@@ -393,13 +462,7 @@ class StructureTable(QuickTable):
 
     QuickTable.__init__(self, parent=parent
                         , mainWindow=self._mainWindow
-
                         , dataFrameObject=None    # class collating table and objects and headings
-
-                        # , dataFrame=None
-                        # , columns=self._columnNames
-                        # , hiddenColumns=self._hiddenColumns
-                        # , objects = None
                         , setLayout=True
                         , autoResize=True, multiSelect=True
                         , selectionCallback=self._selectionCallback
@@ -676,18 +739,23 @@ class StructureTable(QuickTable):
     """
     self._updateSilence = silence
 
-  def _selectionCallback(self, structureData, row, col):
+  def _selectionCallback(self, data):      #structureData, row, col):
     """
     Notifier Callback for selecting a row in the table
     """
-    self._current.structureData = structureData
-    StructureTable._currentCallback = {'object':self.thisObj, 'table':self}
+    obj = data[CallBack.OBJECT]
 
-  def _actionCallback(self, atomRecordTuple, row, column):
+    # self._current.structureData = obj
+    # StructureTable._currentCallback = {'object':self.thisObj, 'table':self}
+
+  def _actionCallback(self, data):      # atomRecordTuple, row, column):
     """
     Notifier DoubleClick action on item in table
     """
-    getLogger().debug('StructureTable>>>', atomRecordTuple, row, column)
+    obj = data[CallBack.OBJECT]
+
+    # getLogger().debug('StructureTable>>>', atomRecordTuple, row, column)
+    getLogger().debug('StructureTable>>>', obj)
 
   def _selectionPulldownCallback(self, item):
     """
@@ -877,3 +945,4 @@ class StructureTable(QuickTable):
   #   getLogger().info('table.paint '+str(self.paintCount))
   #   self.paintCount+=1
   #   return super(StructureTable, self).paintEvent(event)
+

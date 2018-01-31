@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -132,12 +132,49 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
 
   peakLabel = []
   pdNA = peak.dimensionNmrAtoms
+
+  # # create a list for each residue
+  # peakNmrDict = {}
+  # for atoms in pdNA:
+  #   # if len(atom) != 0:
+  #   for thisAtom in atoms:
+  #     thisID = thisAtom.nmrResidue.id
+  #     if thisID not in peakNmrDict.keys():
+  #       peakNmrDict[thisID] = [thisAtom]
+  #     else:
+  #       peakNmrDict[thisID].append(thisAtom)
+  #
+  # for pdNA in peakNmrDict.values():
+  #   resLabel = []
+  #   if pdNA:
+  #     try:
+  #       for item in pdNA:
+  #         if len(resLabel) > 0 and useShortCode:
+  #           label = item.name
+  #         else:
+  #           label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+  #         resLabel.append(label)
+  #
+  #     except:
+  #       resLabel.append('-')
+  #   else:
+  #     if len(pdNA) == 1:
+  #       resLabel.append('1H')
+  #     else:
+  #       resLabel.append('_')
+  #
+  #   peakLabel.append(', '.join(resLabel))
+  #
+  # peakLabel = '; '.join(peakLabel)
+  # return peakLabel
+
   for dimension in range(peak.peakList.spectrum.dimensionCount):
 
     # TODO:ED add a sequence of labels that can be cycled through
     if pdNA[dimension]:
       try:
         peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0]
+
         if all(x==peakNmrResidues[0] for x in peakNmrResidues):
           for item in pdNA[dimension]:
             if len(peakLabel) > 0 and useShortCode:
@@ -147,9 +184,34 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
             peakLabel.append(label)
 
         else:
-          for item in pdNA[dimension]:
-            label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
-            peakLabel.append(label)
+          # for item in pdNA[dimension]:
+          #   label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+          #   peakLabel.append(label)
+
+          peakNmrDict = {}
+          for atom in pdNA[dimension]:
+            thisID = atom.nmrResidue.id
+            if thisID not in peakNmrDict.keys():
+              peakNmrDict[thisID] = [atom]
+            else:
+              peakNmrDict[thisID].append(atom)
+
+          resLabels = []
+          for thispdNA in peakNmrDict.values():
+            resLabel = []
+            try:
+              for item in thispdNA:
+                if len(resLabel) > 0 and useShortCode:
+                  label = item.name
+                else:
+                  label = chainLabel(item) + shortCode(item) + item.nmrResidue.sequenceCode + item.name
+                resLabel.append(label)
+            except:
+              resLabel.append('-')
+
+            resLabels.append(', '.join(resLabel))
+
+          peakLabel.append('; '.join(resLabels))
 
       except:
         peakLabel.append('-')
@@ -827,11 +889,7 @@ class PeakNd(QtWidgets.QGraphicsItem):
     if self.peakListView.isDeleted: # strip has been deleted
       return
 
-    if self.peak: # TBD: is this ever not true??
-
-      if self.peak.isDeleted:
-        return
-
+    if self.peak and not self.peak.isDeleted:
       ###self.setSelected(self.peak in self.application.current.peaks)
       # self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self.peak._isSelected:
@@ -839,101 +897,178 @@ class PeakNd(QtWidgets.QGraphicsItem):
       else:
         colour = self.peakListView.peakList.symbolColour
 
-      if self._isInPlane:
-        # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
-        ###self.annotation.setupPeakAnnotationItem(self)
-        # r, w, box = self.drawData
+      symbolType = self.application.preferences.general.peakSymbolType
 
-        # r, w = self.drawData
-        vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
-        # base on minimum ppm axis for the minute
-        # r = (0.5 * 0.05)/ abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
-        #               QtCore.QPoint(0, 0)).x())
-        # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
-        #   QtCore.QPoint(0, 0)).y())
-        pos = (0.05 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
-                      QtCore.QPoint(0, 0)).x()),
-               0.05 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
-                QtCore.QPoint(0, 0)).y()))
-        w = r = max(pos)        # pos[self.minIndex]
-        self.annotation.setPos(r, -w)
+      peakOkay = True
+      if symbolType == 0:    # a cross
+        symbolWidth = self.application.preferences.general.peakSymbolSize / 2.0
+        lineThickness = self.application.preferences.general.peakSymbolThickness / 2.0
 
-        # if self.hover:
-        # self.setZValue(10)
-        #painter.setBrush(NULL_COLOR)
+        if self._isInPlane:
+          # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
+          ###self.annotation.setupPeakAnnotationItem(self)
+          # r, w, box = self.drawData
 
-        # painter.setPen(QtGui.QColor('white'))
-        # if self.press:
-        #   painter.drawRect(self.bbox)
-        ###strip = self.strip
-        ###peak = self.peak
-        ###xDim = strip.spectrumViews[0].dimensionOrdering[0] - 1
-        ###yDim = strip.spectrumViews[0].dimensionOrdering[1] - 1
-        ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
-        ###yPpm = peak.position[yDim]
-        ###self.setPos(xPpm, yPpm)
-        #colour = self.peakListView.peakList.symbolColour
-        if widget:
-          painter.setPen(QtGui.QColor(colour))
-          # if self.colourScheme == 'light':
-          #   painter.setPen(QtGui.QColor('#080000'))
+          # r, w = self.drawData
+          vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+          # base on minimum ppm axis for the minute
+          # r = (0.5 * 0.05)/ abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+          #               QtCore.QPoint(0, 0)).x())
+          # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+          #   QtCore.QPoint(0, 0)).y())
+          pos = (symbolWidth / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                        QtCore.QPoint(0, 0)).x()),
+                 symbolWidth / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                  QtCore.QPoint(0, 0)).y()))
+          w = r = max(pos)        # pos[self.minIndex]
+          self.annotation.setPos(r, -w)
+
+          # if self.hover:
+          # self.setZValue(10)
+          #painter.setBrush(NULL_COLOR)
+
+          # painter.setPen(QtGui.QColor('white'))
+          # if self.press:
+          #   painter.drawRect(self.bbox)
+          ###strip = self.strip
+          ###peak = self.peak
+          ###xDim = strip.spectrumViews[0].dimensionOrdering[0] - 1
+          ###yDim = strip.spectrumViews[0].dimensionOrdering[1] - 1
+          ###xPpm = peak.position[xDim] # TBD: does a peak have to have a position??
+          ###yPpm = peak.position[yDim]
+          ###self.setPos(xPpm, yPpm)
+          #colour = self.peakListView.peakList.symbolColour
+          if widget:
+            pen = QtGui.QPen(QtGui.QColor(colour))
+          else:
+            pen = QtGui.QPen(QtGui.QColor('black'))
+
           # else:
-          #   painter.setPen(QtGui.QColor('#f7ffff'))
+          #   painter.setPen(self.color)
+          #   self.setZValue(0)
+          pen.setWidth(lineThickness)
+          painter.setPen(pen)
+          painter.drawLine(-r,-w,r,w)
+          painter.drawLine(-r,w,r,-w)
+          ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
+          ###painter.drawLine(xPpm-r,yPpm+r,xPpm+r,yPpm-r)
+
+          #if self.peak in self.application.current.peaks:
+          if self.peak._isSelected:
+            painter.drawLine(-r,-w,-r,w)
+            painter.drawLine(-r,w,r,w)
+            painter.drawLine(r,w,r,-w)
+            painter.drawLine(r,-w,-r,-w)
+          #
+          # if self.isSelected:
+          #   painter.setPen(QtGui.QColor('white'))
+          #   painter.drawRect(-r,-r,w,w)
+
+        elif self._isInFlankingPlane:
+          #colour = self.peakListView.peakList.symbolColour
+          pen = QtGui.QPen(QtGui.QColor(colour))
+          pen.setStyle(QtCore.Qt.DotLine)
+          pen.setWidth(lineThickness)
+          painter.setPen(pen)
+          # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
+          ###self.annotation.setupPeakAnnotationItem(self)
+
+          # r, w = self.drawData
+          vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+          # base on minimum ppm axis for the minute
+          # r = (0.5 * 0.05)/ abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+          #               QtCore.QPoint(0, 0)).x())
+          # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+          #   QtCore.QPoint(0, 0)).y())
+          pos = (symbolWidth / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                        QtCore.QPoint(0, 0)).x()),
+                 symbolWidth / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                  QtCore.QPoint(0, 0)).y()))
+          w = r = max(pos)        # pos[self.minIndex]
+          self.annotation.setPos(r, -w)
+
+          painter.drawLine(-r,-w,r,w)
+          painter.drawLine(-r,w,r,-w)
+
+          #if self.peak in self.application.current.peaks:
+          if self.peak._isSelected:
+            painter.drawLine(-r,-w,-r,w)
+            painter.drawLine(-r,w,r,w)
+            painter.drawLine(r,w,r,-w)
+            painter.drawLine(r,-w,-r,-w)
+        return
+
+      if symbolType == 1 or symbolType == 2:                     # draw an ellipse at lineWidth
+        symbolWidths = list(self.peak.lineWidths)
+
+        # TODO:ED check whether ppm or Hz for the lineWidths - assuming Hz by default
+        if symbolWidths[0] and symbolWidths[1]:
+          symbolWidths[0] = symbolWidths[0] / self.peak.peakList.spectrum.spectrometerFrequencies[0]
+          symbolWidths[1] = symbolWidths[1] / self.peak.peakList.spectrum.spectrometerFrequencies[1]
+          lineThickness = self.application.preferences.general.peakSymbolThickness / 2.0
+
+          if self._isInPlane:
+            vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+            pos = (symbolWidths[0] / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                          QtCore.QPoint(0, 0)).x()),
+                   symbolWidths[1] / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                    QtCore.QPoint(0, 0)).y()))
+            # w = r = max(pos)        # pos[self.minIndex]
+            # self.annotation.setPos(r, -w)
+
+            if widget:
+              pen = QtGui.QPen(QtGui.QColor(colour))
+            else:
+              pen = QtGui.QPen(QtGui.QColor('black'))
+            pen.setWidth(lineThickness)
+            painter.setPen(pen)
+            if symbolType == 2:
+              painter.setBrush(QtGui.QColor(colour))
+            painter.drawEllipse(-(pos[0]+1) / 2.0, -(pos[1]+1) / 2.0, pos[0], pos[1])
+
+          elif self._isInFlankingPlane:
+            vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
+            pos = (symbolWidths[0] / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                          QtCore.QPoint(0, 0)).x()),
+                   symbolWidths[1] / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                    QtCore.QPoint(0, 0)).y()))
+            # w = r = max(pos)        # pos[self.minIndex]
+            # self.annotation.setPos(r, -w)
+
+            if widget:
+              pen = QtGui.QPen(QtGui.QColor(colour))
+            else:
+              pen = QtGui.QPen(QtGui.QColor('black'))
+            pen.setStyle(QtCore.Qt.DotLine)
+            pen.setWidth(lineThickness)
+            painter.setPen(pen)
+            if symbolType == 2:
+              painter.setBrush(QtGui.QColor(colour))
+            painter.drawEllipse(-(pos[0]+1) / 2.0, -(pos[1]+1) / 2.0, pos[0], pos[1])
+
         else:
-          painter.setPen(QtGui.QColor('black'))
-        # painter.drawEllipse(box)
+          # lineWidths undefined; draw a dotted circle
+          symbolWidth = self.application.preferences.general.peakSymbolSize / 2.0
+          lineThickness = self.application.preferences.general.peakSymbolThickness / 2.0
 
-        # else:
-        #   painter.setPen(self.color)
-        #   self.setZValue(0)
-        painter.drawLine(-r,-w,r,w)
-        painter.drawLine(-r,w,r,-w)
-        ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
-        ###painter.drawLine(xPpm-r,yPpm+r,xPpm+r,yPpm-r)
+          if self._isInPlane or self._isInFlankingPlane:
+            vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
 
-        #if self.peak in self.application.current.peaks:
-        if self.peak._isSelected:
-          painter.drawLine(-r,-w,-r,w)
-          painter.drawLine(-r,w,r,w)
-          painter.drawLine(r,w,r,-w)
-          painter.drawLine(r,-w,-r,-w)
-        #
-        # if self.isSelected:
-        #   painter.setPen(QtGui.QColor('white'))
-        #   painter.drawRect(-r,-r,w,w)
+            pos = (symbolWidth / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
+                          QtCore.QPoint(0, 0)).x()),
+                   symbolWidth / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
+                    QtCore.QPoint(0, 0)).y()))
+            w = r = max(pos)        # pos[self.minIndex]
+            self.annotation.setPos(r, -w)
 
-      elif self._isInFlankingPlane:
-        #colour = self.peakListView.peakList.symbolColour
-        pen = QtGui.QPen(QtGui.QColor(colour))
-        pen.setStyle(QtCore.Qt.DotLine)
-        painter.setPen(pen)
-        # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
-        ###self.annotation.setupPeakAnnotationItem(self)
+            pen = QtGui.QPen(QtGui.QColor(colour))
+            pen.setStyle(QtCore.Qt.DashLine)
+            pen.setWidth(lineThickness)
+            painter.setPen(pen)
+            painter.drawEllipse(-r/2.0, -w/2.0, r, w)
 
-        # r, w = self.drawData
-        vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
-        # base on minimum ppm axis for the minute
-        # r = (0.5 * 0.05)/ abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
-        #               QtCore.QPoint(0, 0)).x())
-        # w = (0.5 * 0.4)/ abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
-        #   QtCore.QPoint(0, 0)).y())
-        pos = (0.05 / abs(vbMTS(QtCore.QPoint(1, 0)).x() - vbMTS(
-                      QtCore.QPoint(0, 0)).x()),
-               0.05 / abs(vbMTS(QtCore.QPoint(0, 1)).y() - vbMTS(
-                QtCore.QPoint(0, 0)).y()))
-        w = r = max(pos)        # pos[self.minIndex]
-        self.annotation.setPos(r, -w)
-
-        painter.drawLine(-r,-w,r,w)
-        painter.drawLine(-r,w,r,-w)
-
-        #if self.peak in self.application.current.peaks:
-        if self.peak._isSelected:
-          painter.drawLine(-r,-w,-r,w)
-          painter.drawLine(-r,w,r,w)
-          painter.drawLine(r,w,r,-w)
-          painter.drawLine(r,-w,-r,-w)
-
+      # other symbols here
+      pass
 
 ###FONT = QtGui.QFont("DejaVu Sans Mono", 9)
 ###FONT_METRIC = QtGui.QFontMetricsF(FONT)
@@ -989,14 +1124,14 @@ class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
     self.setBrush(QtGui.QColor(colour))
 
     if self.parentWidget():
-      if self.parentWidget().strip.peakLabelling == 0:
-        text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=False)
-      elif self.parentWidget().strip.peakLabelling == 1:
-        text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=True)
+      if self.parentWidget().strip.peakLabelling == 1:
+        text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=False)  # full
+      elif self.parentWidget().strip.peakLabelling == 0:
+        text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=True)   # short
       else:
-        text = _getPeakAnnotation(peakItem.peak)            # original 'pid'
+        text = _getPeakAnnotation(peakItem.peak)                            # original 'pid'
 
-      self.setText(text)
+      # self.setText(text)
 
       project = peakItem.peak.project
       project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem, quiet=True)
@@ -1004,19 +1139,25 @@ class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
       if undo is not None:
         undo.increaseBlocking()
       try:
+        # TODO:ED can't remember why I did this
         if clearLabel:
           self.setText(text)
         else:
           self.setText(text)
 
+        # undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+        #              redoArgs=(peakItem, clearLabel))
+
       finally:
         if undo is not None:
           undo.decreaseBlocking()
-        project._endCommandEchoBlock()
+        # project._endCommandEchoBlock()
 
+      # TODO:ED check why this is updating in wrong correct place
       undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
                    redoArgs=(peakItem, clearLabel))
 
+      project._endCommandEchoBlock()
 
   def clearPeakAnnotationItem(self, peakItem):
 

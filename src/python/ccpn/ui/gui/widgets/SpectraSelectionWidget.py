@@ -55,16 +55,17 @@ class SpectraSelectionWidget(Widget,Base):
 
     self.project = None # Testing reasons
     # Derive application, project, and current from mainWindow
+    self.allSG_CheckBoxes = []
+    self.allSpectraCheckBoxes = []
+
     if mainWindow is not None:
       self.mainWindow = mainWindow
       self.application = mainWindow.application
       self.project = mainWindow.application.project
       self.current = mainWindow.application.current
 
-      self.allSpectraCheckBoxes = []
-      self.allSG_CheckBoxes = []
-      self._setWidgets()
 
+      self._setWidgets()
 
 
 

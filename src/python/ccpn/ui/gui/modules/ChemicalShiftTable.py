@@ -199,20 +199,21 @@ class ChemicalShiftTable(QuickTable):
     Initialise the widgets for the module.
     """
     # Derive application, project, and current from mainWindow
-    self._mainWindow = mainWindow
-    self._application = mainWindow.application
-    self._project = mainWindow.application.project
-    self._current = mainWindow.application.current
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
     self.moduleParent=moduleParent
     self._widget = Widget(parent=parent, **kwds)
     self.chemicalShiftList = None
 
-    ChemicalShiftTable._project = self._project
+    ChemicalShiftTable.project = self.project
 
     # create the column objects
     self.CScolumns = ColumnClass(
                 [('#', lambda cs:cs.nmrAtom.serial, 'NmrAtom serial number', None),
                  ('Pid', lambda cs:cs.pid, 'Pid of chemicalShift', None),
+                 ('_object', lambda cs: cs, 'Object', None),
                  ('NmrResidue', lambda cs:cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
                  ('Name', lambda cs:cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
                  ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None),
@@ -231,7 +232,7 @@ class ChemicalShiftTable(QuickTable):
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0, 0), gridSpan=(1, 1))
     self.ncWidget = ChemicalShiftListPulldown(parent=self._widget,
-                                     project=self._project, default=0,
+                                     project=self.project, default=0,
                                      # first NmrChain in project (if present)
                                      grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      showSelectName=True,
@@ -250,7 +251,7 @@ class ChemicalShiftTable(QuickTable):
 
     # initialise the table
     QuickTable.__init__(self, parent=parent
-                        , mainWindow=self._mainWindow
+                        , mainWindow=self.mainWindow
                         , dataFrameObject=None
                         , setLayout=True
                         , autoResize=True
@@ -282,6 +283,7 @@ class ChemicalShiftTable(QuickTable):
                            , updateFunc=self._update
                            , tableSelection='chemicalShiftList'
                            , pullDownWidget=self.CScolumns
+                           , callBackClass=ChemicalShift
                            , selectCurrentCallBack=None)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
@@ -340,7 +342,7 @@ class ChemicalShiftTable(QuickTable):
     Update the table
     """
     if not self._updateSilence:
-      self._project.blankNotification()
+      self.project.blankNotification()
       objs = self.getSelectedObjects()
 
       self._dataFrameObject = self.getDataFrameFromList(table=self
@@ -351,7 +353,7 @@ class ChemicalShiftTable(QuickTable):
       # populate from the Pandas dataFrame inside the dataFrameObject
       self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
       self._highLightObjs(objs)
-      self._project.unblankNotification()
+      self.project.unblankNotification()
 
   def setUpdateSilence(self, silence):
     """
@@ -380,20 +382,20 @@ class ChemicalShiftTable(QuickTable):
     else:
       obj = None
 
-    self._current.chemicalShift = obj
-    ChemicalShiftTableModule._currentCallback = {'object':self.chemicalShiftList, 'table':self}
+    self.current.chemicalShift = obj
+    ChemicalShiftTableModule.currentCallback = {'object':self.chemicalShiftList, 'table':self}
 
     #FIXME:ED - this is copied from the original version below
     if obj: # should presumably always be the case
       chemicalShift = obj
-      self._current.nmrAtom = chemicalShift.nmrAtom
-      self._current.nmrResidue = chemicalShift.nmrAtom.nmrResidue
+      self.current.nmrAtom = chemicalShift.nmrAtom
+      self.current.nmrResidue = chemicalShift.nmrAtom.nmrResidue
 
   def _selectionPulldownCallback(self, item):
     """
     Notifier Callback for selecting ChemicalShiftList from the pull down menu
     """
-    self.chemicalShiftList = self._project.getByPid(item)
+    self.chemicalShiftList = self.project.getByPid(item)
     logger.debug('>selectionPulldownCallback>', item, type(item), self.chemicalShiftList)
     if self.chemicalShiftList is not None:
       self.displayTableForChemicalShift(self.chemicalShiftList)
@@ -429,9 +431,9 @@ class ChemicalShiftTable(QuickTable):
   #   """
   #   CCPN-INTERNAL: Insert a comment into ObjectTable
   #   """
-  #   ChemicalShiftTable._project.blankNotification()
+  #   ChemicalShiftTable.project.blankNotification()
   #   chemicalShift.comment = value
-  #   ChemicalShiftTable._project.unblankNotification()
+  #   ChemicalShiftTable.project.unblankNotification()
 
   @staticmethod
   def _stLamFloat(row, name):
@@ -450,11 +452,11 @@ class ChemicalShiftTable(QuickTable):
   #   change calls on any other attribute
   #   """
   #   self._clearNotifiers()
-  #   self._chemicalShiftListNotifier = Notifier(self._project
+  #   self._chemicalShiftListNotifier = Notifier(self.project
   #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
   #                                     , ChemicalShiftList.__name__
   #                                     , self._updateCallback)
-  #   self._chemicalShiftNotifier = Notifier(self._project
+  #   self._chemicalShiftNotifier = Notifier(self.project
   #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
   #                                     , ChemicalShift.__name__
   #                                     , self._updateCallback

@@ -36,6 +36,16 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.Spectrum import Spectrum
+from ccpn.core.PeakList import PeakList
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.Note import Note
+from ccpn.core.IntegralList import IntegralList
+from ccpn.core.NmrChain import NmrChain
+from ccpn.core.StructureEnsemble import StructureEnsemble
+
+from ccpn.core.RestraintList import RestraintList
+
 from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
@@ -70,7 +80,10 @@ _classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList',
                         'Residue', 'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
                         'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
 
+Pids = 'pids'
+
 # TODO Add Residue
+
 
 # ll = [_coreClassMap[x] for x in _classNamesInSidebar]
 # classesInSideBar = OrderedDict(((x.shortClassName, x) for x in ll))
@@ -112,7 +125,96 @@ NEW_ITEM_DICT = {
   'SpectrumGroups': 'newSpectrumGroup',
   'Complexes': 'newComplex',
 }
+
+def _openItemObject(mainWindow, objs, **args):
+  for obj in objs:
+    if obj:
+      try:
+        if obj.__class__ in OpenObjAction:
+          OpenObjAction[obj.__class__](mainWindow, obj, **args)
+
+        else:
+          info = showInfo('Not implemented yet!',
+                          'This function has not been implemented in the current version')
+      except Exception as e:
+        getLogger().warning('Error: %s' % e)
+
+def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
+  spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
+  mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+
+  if len(spectrumDisplay.strips)>0:
+    mainWindow.current.strip = spectrumDisplay.strips[0]
+    if spectrum.dimensionCount == 1:
+      mainWindow.current.strip.plotWidget.autoRange()
+
+  # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
+  # This routine can then be ommitted and the call above replaced by the one remaining line
+  mainWindow.pythonConsole.writeConsoleCommand(
+    "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
+  getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
+  getLogger().info('application.createSpectrumDisplay(spectrum)')
+
+def _openSpectrumGroup(mainWindow, spectrumGroup):
+  '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
+  Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
+
+  if len(spectrumGroup.spectra) > 0:
+    spectrumDisplay = mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
+    for spectrum in spectrumGroup.spectra: # Add the other spectra
+      spectrumDisplay.displaySpectrum(spectrum)
+
+    spectrumDisplay.isGrouped = True
+    spectrumDisplay.spectrumToolBar.hide()
+    spectrumDisplay.spectrumGroupToolBar.show()
+    spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
+    mainWindow.application.current.strip = spectrumDisplay.strips[0]
+    if spectrumGroup.spectra[0].dimensionCount == 1:
+      mainWindow.application.current.strip.plotWidget.autoRange()
+
+
+def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showPeakTable(peakList=peakList, position=position, relativeTo=relativeTo)
+
+def _openChemicalShiftList(mainWindow, chemicalShiftList, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList, position=position, relativeTo=relativeTo)
+
+def _openNote(mainWindow, note, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showNotesEditor(note=note, position=position, relativeTo=relativeTo)
+
+def _openRestraintList(mainWindow, restraintList, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showRestraintTable(restraintList=restraintList, position=position, relativeTo=relativeTo)
+
+def _openStructureTable(mainWindow, structureEnsemble, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showStructureTable(structureEnsemble=structureEnsemble, position=position, relativeTo=relativeTo)
+
+def _openNmrResidueTable(mainWindow, nmrChain, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showNmrResidueTable(nmrChain=nmrChain, position=position, relativeTo=relativeTo)
+
+def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showIntegralTable(integralList=integralList, position=position, relativeTo=relativeTo)
+
+OpenObjAction = {
+                  Spectrum: _openSpectrumDisplay,
+                  PeakList: _openPeakList,
+                  NmrChain: _openNmrResidueTable,
+                  SpectrumGroup:_openSpectrumGroup,
+                  ChemicalShiftList:_openChemicalShiftList,
+                  RestraintList: _openRestraintList,
+                  Note:_openNote,
+                  IntegralList: _openIntegralList,
+                  StructureEnsemble: _openStructureTable
+                 }
+
 ### Flag example code removed in revision 7686
+
 
 class SideBar(QtWidgets.QTreeWidget, Base):
   def __init__(self, parent=None, mainWindow=None, multiSelect=True):
@@ -361,6 +463,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   #TODO:RASMUS: assure proper message once the project.loadData has been cleaned up
   def _processDroppedItems(self, data):
     "Handle the dropped urls"
+    # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviours
     for url in data.get('urls',[]):
       # print('SideBar._processDroppedItems>>> dropped:', url)
       getLogger().info('SideBar._processDroppedItems>>> dropped: '+str(url))
@@ -375,6 +478,8 @@ class SideBar(QtWidgets.QTreeWidget, Base):
           try:
             obj._mainWindow.sideBar.fillSideBar(obj)
             obj._mainWindow.show()
+            QtGui.QApplication.setActiveWindow(obj._mainWindow)
+
           except Exception as es:
             getLogger().warning('Error', str(es))
 
@@ -466,6 +571,14 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def processText(self, text, event=None):
     newNote = self.project.newNote()
     newNote.text = text
+
+
+
+
+
+
+
+
 
   def _deleteItemObject(self,  objs):
     """Removes the specified item from the sidebar and deletes it from the project.
@@ -871,6 +984,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
           objs.append(objFromPid)
 
     if len(objs)>0:
+      contextMenu.addAction('Open', partial(_openItemObject, self.mainWindow, objs))
       contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
       canBeCloned = True
       for obj in objs:

@@ -119,6 +119,9 @@ class Notifier(object):
   OBJECT = 'object'
   GETPID = 'pid'
   OLDPID = 'oldPid'
+  VALUE = 'value'
+  PREVIOUSVALUE = 'previousValue'
+  TARGETNAME = 'targetName'
 
   _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, MONITOR, CURRENT)
 

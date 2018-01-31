@@ -185,12 +185,12 @@ class RestraintTable(QuickTable):
     Initialise the widgets for the module.
     """
     # Derive application, project, and current from mainWindow
-    self._mainWindow = mainWindow
-    self._application = mainWindow.application
-    self._project = mainWindow.application.project
-    self._current = mainWindow.application.current
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
     self.moduleParent=moduleParent
-    RestraintTable._project = self._project
+    RestraintTable.project = self.project
 
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
@@ -199,6 +199,7 @@ class RestraintTable(QuickTable):
     # create the column objects
     self.RLcolumns = ColumnClass([('#', '_key', 'Restraint Id', None),
                                   ('Pid', lambda restraint:restraint.pid, 'Pid of integral', None),
+                                  ('_object', lambda restraint:restraint, 'Object', None),
                                   ('Atoms', lambda restraint:RestraintTable._getContributions(restraint),
                   'Atoms involved in the restraint', None),
                  ('Target Value.', 'targetValue', 'Target value for the restraint', None),
@@ -217,7 +218,7 @@ class RestraintTable(QuickTable):
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0, 0), gridSpan=(1, 1))
     self.rtWidget = RestraintsPulldown(parent=self._widget
-                                     , project=self._project, default=0
+                                     , project=self.project, default=0
                                      , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
                                      , showSelectName=True
                                      , sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents
@@ -234,7 +235,7 @@ class RestraintTable(QuickTable):
 
     # initialise the table
     QuickTable.__init__(self, parent=parent
-                        , mainWindow=self._mainWindow
+                        , mainWindow=self.mainWindow
                         , dataFrameObject=None
                         , setLayout=True
                         , autoResize=True
@@ -263,6 +264,7 @@ class RestraintTable(QuickTable):
                            , updateFunc=self._update
                            , tableSelection='restraintList'
                            , pullDownWidget=self.RLcolumns
+                           , callBackClass=Restraint
                            , selectCurrentCallBack=None)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
@@ -305,7 +307,7 @@ class RestraintTable(QuickTable):
     if self.restraintList in thisRestraintList:
       self.displayTableForRestraint(self.restraintList)
     else:
-      self.clearTable()
+      self.clear()
 
   def _maximise(self):
     """
@@ -320,19 +322,18 @@ class RestraintTable(QuickTable):
     """
     Update the table
     """
-    if not self._updateSilence:
-      self._project.blankNotification()
-      objs = self.getSelectedObjects()
+    self.project.blankNotification()
+    objs = self.getSelectedObjects()
 
-      self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                  , buildList=restraintList.restraints
-                                                  , colDefs=self.RLcolumns
-                                                  , hiddenColumns=self._hiddenColumns)
+    self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                , buildList=restraintList.restraints
+                                                , colDefs=self.RLcolumns
+                                                , hiddenColumns=self._hiddenColumns)
 
-      # populate from the Pandas dataFrame inside the dataFrameObject
-      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-      self._highLightObjs(objs)
-      self._project.unblankNotification()
+    # populate from the Pandas dataFrame inside the dataFrameObject
+    self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+    self._highLightObjs(objs)
+    self.project.unblankNotification()
 
   def setUpdateSilence(self, silence):
     """
@@ -346,8 +347,8 @@ class RestraintTable(QuickTable):
     """
     restraint = data[Notifier.OBJECT]
 
-    self._current.restraint = restraint
-    RestraintTableModule._currentCallback = {'object':self.restraintList, 'table':self}
+    self.current.restraint = restraint
+    RestraintTableModule.currentCallback = {'object':self.restraintList, 'table':self}
 
   def _actionCallback(self, data, *args):
     """
@@ -361,7 +362,7 @@ class RestraintTable(QuickTable):
     """
     Notifier Callback for selecting restraint from the pull down menu
     """
-    self.restraintList = self._project.getByPid(item)
+    self.restraintList = self.project.getByPid(item)
     logger.debug('>selectionPulldownCallback>', item, type(item), self.restraintList)
     if self.restraintList is not None:
       # self.thisDataSet = self._getAttachedDataSet(item)
@@ -424,9 +425,9 @@ class RestraintTable(QuickTable):
   #   """
   #   CCPN-INTERNAL: Insert a comment into ObjectTable
   #   """
-  #   RestraintTable._project.blankNotification()
+  #   RestraintTable.project.blankNotification()
   #   chemicalShift.comment = value
-  #   RestraintTable._project.unblankNotification()
+  #   RestraintTable.project.unblankNotification()
   #
   # def _setNotifiers(self):
   #   """
@@ -435,11 +436,11 @@ class RestraintTable(QuickTable):
   #   change calls on any other attribute
   #   """
   #   self._clearNotifiers()
-  #   self._restraintListNotifier = Notifier(self._project
+  #   self._restraintListNotifier = Notifier(self.project
   #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
   #                                     , RestraintList.__name__
   #                                     , self._updateCallback)
-  #   self._restraintNotifier = Notifier(self._project
+  #   self._restraintNotifier = Notifier(self.project
   #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
   #                                     , Restraint.__name__
   #                                     , self._updateCallback)

@@ -77,7 +77,11 @@ class _Pulldown(PulldownListCompoundWidget):
             minimumWidths = (100,150)
 
         if showSelectName:
-          self.textList = ['<Select>']+getPids(project, self.attributeName) # ejb
+          gotPids = getPids(project, self.attributeName)
+          if gotPids:
+            self.textList = ['<Select>']+gotPids
+          else:
+            self.textList = ['<Select>']
         else:
           self.textList = getPids(project, self.attributeName)  # ejb
 
@@ -104,7 +108,11 @@ class _Pulldown(PulldownListCompoundWidget):
           return None
 
       if self.showSelectName:
-        self.textList = ['<Select>'] + getPids(self.project, self.attributeName)
+        gotPids = getPids(self.project, self.attributeName)
+        if gotPids:
+          self.textList = ['<Select>'] + gotPids
+        else:
+          self.textList = ['<Select>']
       else:
         self.textList = getPids(self.project, self.attributeName)
 

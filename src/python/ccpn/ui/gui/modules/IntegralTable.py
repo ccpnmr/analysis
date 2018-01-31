@@ -125,12 +125,12 @@ class IntegralTable(QuickTable):
     Initialise the widgets for the module.
     """
     # Derive application, project, and current from mainWindow
-    self._mainWindow = mainWindow
-    self._application = mainWindow.application
-    self._project = mainWindow.application.project
-    self._current = mainWindow.application.current
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
     self.moduleParent=moduleParent
-    IntegralTable._project = self._project
+    IntegralTable.project = self.project
 
     kwds['setLayout'] = True  ## Assure we have a layout with the widget
     self._widget = Widget(parent=parent, **kwds)
@@ -140,6 +140,7 @@ class IntegralTable(QuickTable):
     self.ITcolumns = ColumnClass([
         ('#', lambda integral:integral.serial, '', None),
         ('Pid', lambda integral:integral.pid, 'Pid of integral', None),
+        ('_object', lambda integral:integral, 'Object', None),
         ('Value', lambda integral:integral.value, '', None),
         ('Lower Limit', lambda integral:IntegralTable._getLowerLimit(integral), '', None),
         ('Higher Limit', lambda integral:IntegralTable._getHigherLimit(integral), '', None),
@@ -156,7 +157,7 @@ class IntegralTable(QuickTable):
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0, 0), gridSpan=(1, 1))
     self.itWidget = IntegralListPulldown(parent=self._widget
-                                         , project=self._project, default=0
+                                         , project=self.project, default=0
                                          , grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100)
                                          , showSelectName=True
                                          , sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents
@@ -173,7 +174,7 @@ class IntegralTable(QuickTable):
 
     # initialise the table
     QuickTable.__init__(self, parent=parent
-                        , mainWindow=self._mainWindow
+                        , mainWindow=self.mainWindow
                         , dataFrameObject=None
                         , setLayout=True
                         , autoResize=True
@@ -205,6 +206,7 @@ class IntegralTable(QuickTable):
                            , updateFunc=self._update
                            , tableSelection='integralList'
                            , pullDownWidget=self.ITcolumns
+                           , callBackClass=Integral
                            , selectCurrentCallBack=self._selectOnTableCurrentIntegralsNotifierCallback)
 
   def _selectIntegralList(self, integralList=None):
@@ -254,19 +256,18 @@ class IntegralTable(QuickTable):
     """
     Update the table
     """
-    if not self._updateSilence:
-      self._project.blankNotification()
-      objs = self.getSelectedObjects()
+    self.project.blankNotification()
+    objs = self.getSelectedObjects()
 
-      self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                  , buildList=integralList.integrals
-                                                  , colDefs=self.ITcolumns
-                                                  , hiddenColumns=self._hiddenColumns)
+    self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                , buildList=integralList.integrals
+                                                , colDefs=self.ITcolumns
+                                                , hiddenColumns=self._hiddenColumns)
 
-      # populate from the Pandas dataFrame inside the dataFrameObject
-      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-      self._highLightObjs(objs)
-      self._project.unblankNotification()
+    # populate from the Pandas dataFrame inside the dataFrameObject
+    self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+    self._highLightObjs(objs)
+    self.project.unblankNotification()
 
   def setUpdateSilence(self, silence):
     """
@@ -275,12 +276,12 @@ class IntegralTable(QuickTable):
     self._updateSilence = silence
 
   def _clearRegions(self):
-    strip = self._current.strip
+    strip = self.current.strip
     if strip:
       strip.plotWidget.viewBox._clearIntegralRegions()
 
   def _showRegions(self):
-    strip = self._current.strip
+    strip = self.current.strip
     if strip:
       strip.plotWidget.viewBox._showIntegralLines()
 
@@ -292,9 +293,9 @@ class IntegralTable(QuickTable):
 
     self._clearRegions()
     if integrals is None:
-      self._current.clearIntegrals()
+      self.current.clearIntegrals()
     else:
-      self._current.integrals = integrals
+      self.current.integrals = integrals
 
   def _actionCallback(self, data, *kw):
     """
@@ -312,7 +313,7 @@ class IntegralTable(QuickTable):
     Notifier Callback for selecting integral from the pull down menu
     """
     if item is not None:
-      self.integralList = self._project.getByPid(item)
+      self.integralList = self.project.getByPid(item)
       if self.integralList is not None:
         self.displayTableForIntegralList(self.integralList)
       else:
@@ -336,8 +337,8 @@ class IntegralTable(QuickTable):
 
   # def _showLines(self, integral):
   #
-  #   if self._application is not None:
-  #     self.strip = self._current.strip
+  #   if self.application is not None:
+  #     self.strip = self.current.strip
   #     if self.strip is not None:
   #       self.plotWidget = self.strip.plotWidget
   #       if len(integral.limits) == 1:
@@ -345,14 +346,14 @@ class IntegralTable(QuickTable):
   #       self.plotWidget.addItem(self.linearRegions)
 
   # def _clearLines(self):
-  #   if self._application is not None:
-  #     self.strip = self._current.strip
+  #   if self.application is not None:
+  #     self.strip = self.current.strip
   #     if self.strip is not None:
   #       self.plotWidget = self.strip.plotWidget
   #       self.plotWidget.removeItem(self.linearRegions)
   #
   # def _lineMoved(self):
-  #   integral = self._current.integral
+  #   integral = self.current.integral
   #   values = []
   #   for line in self.linearRegions.lines:
   #       values.append(line.pos().x())
@@ -363,14 +364,14 @@ class IntegralTable(QuickTable):
   def _navigateToPosition(self):
     ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
-    integral = self._current.integral
-    if self._current.strip is not None:
+    integral = self.current.integral
+    if self.current.strip is not None:
       widths = None
       try:
-        widths = _getCurrentZoomRatio(self._current.strip.viewBox.viewRange())
+        widths = _getCurrentZoomRatio(self.current.strip.viewBox.viewRange())
         if len(integral.limits) == 1:
           positions=integral.limits[0]
-          navigateToPositionInStrip(strip=self._current.strip, positions=positions, widths=widths)
+          navigateToPositionInStrip(strip=self.current.strip, positions=positions, widths=widths)
       except Exception as e:
         logger.warning('Impossible to navigate to peak position.', e)
     else:
@@ -420,9 +421,9 @@ class IntegralTable(QuickTable):
   #   """
   #   CCPN-INTERNAL: Insert a comment into ObjectTable
   #   """
-  #   IntegralTable._project.blankNotification()
+  #   IntegralTable.project.blankNotification()
   #   integral.comment = value
-  #   IntegralTable._project.unblankNotification()
+  #   IntegralTable.project.unblankNotification()
   #
   # def _setNotifiers(self):
   #   """
@@ -431,14 +432,14 @@ class IntegralTable(QuickTable):
   #   change calls on any other attribute
   #   """
   #   # self._clearNotifiers()
-  #   self._selectOnTableCurrentIntegralsNotifier = Notifier(self._current, [Notifier.CURRENT], targetName='integrals',
+  #   self._selectOnTableCurrentIntegralsNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='integrals',
   #                                                          callback=self._selectOnTableCurrentIntegralsNotifierCallback)
   #
-  #   self._integralListNotifier = Notifier(self._project
+  #   self._integralListNotifier = Notifier(self.project
   #                                          , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
   #                                          , IntegralList.__name__
   #                                          , self._updateCallback)
-  #   self._integralNotifier = Notifier(self._project
+  #   self._integralNotifier = Notifier(self.project
   #                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
   #                                      , Integral.__name__
   #                                      , self._updateCallback)

@@ -25,7 +25,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
 from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -52,7 +51,7 @@ class SetupNmrResiduesPopup(CcpnDialog):
     self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in project.nmrChains])
     newWidget = QtWidgets.QWidget()
     newWidget.setLayout(QtWidgets.QGridLayout())
-    self.assignmentCheckBox = CheckBox(newWidget)
+    self.assignmentCheckBox = CheckBox(newWidget, checked=True)
     assignmentLabel = Label(newWidget, "Keep existing assignments")
     newWidget.layout().addWidget(self.assignmentCheckBox, 0, 0)
     newWidget.layout().addWidget(assignmentLabel, 0, 1)

@@ -34,6 +34,8 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.BasePopup import BasePopup
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.WebBrowser import WebBrowser
+from ccpn.util.Logging import getLogger
+
 
 class ButtonList(QtWidgets.QWidget, Base):
 
@@ -43,7 +45,7 @@ class ButtonList(QtWidgets.QWidget, Base):
     QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, setLayout=True, **kw)     # ejb - added setLayout
 
-
+    self.buttonNames = {}
 
     if commands:
       print("qtgui.ButtonList.commands is deprecated; use .callbacks")
@@ -109,6 +111,19 @@ class ButtonList(QtWidgets.QWidget, Base):
       button.setMinimumWidth(width*1.5)
 
       self.buttons.append(button)
+      self.buttonNames[text] = i+j
+
+  def setButtonEnabled(self, buttonName:str, enable:bool=True):
+    """
+    Enable/Disable a button by name
+    :param buttonName(str) - name of the button:
+    :param enable(bool) - True or False:
+    """
+    if buttonName in self.buttonNames.keys():
+      self.buttons[self.buttonNames[buttonName]].setEnabled(enable)
+    else:
+      getLogger().warning('Button %s not found in the list' % buttonName)
+
 
 class UtilityButtonList(ButtonList):
 

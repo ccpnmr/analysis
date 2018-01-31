@@ -74,8 +74,8 @@ class GuiStrip(Frame):
 
     getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
     Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
-                         acceptDrops=True, hPolicy='expanding', vPolicy='expanding' ##'minimal'
-                  )
+                   acceptDrops=True, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+                   )
 
     # it appears to be required to explicitly set these, otherwise
     # the Widget will not fill all available space
@@ -88,7 +88,7 @@ class GuiStrip(Frame):
     self.setMinimumHeight(200)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
-                                 #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
+    #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
     self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     # GWV: plotWidget appears not to be responsive to contentsMargins
     self.plotWidget.setContentsMargins(10, 30, 10, 30)
@@ -131,8 +131,8 @@ class GuiStrip(Frame):
 
     # Widgets for _stripIdLabel and _stripLabel
     self._labelWidget = Widget(parent=self, setLayout=True,
-                                     hPolicy='expanding', vAlign='center',
-                                     grid=(0, 0), spacing=(0,0))
+                               hPolicy='expanding', vAlign='center',
+                               grid=(0, 0), spacing=(0,0))
     self._labelWidget.layout().setHorizontalSpacing(0)
     self._labelWidget.layout().setVerticalSpacing(0)
 
@@ -150,10 +150,12 @@ class GuiStrip(Frame):
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
-                                   text='.', spacing=(0,0),
+                                   text='', spacing=(0,0),
                                    grid=(2,0), gridSpan=(1,3), hAlign='left', vAlign='top', hPolicy='minimum')
     self._stripLabel.setFont(textFontSmall)
-    self.hideStripLabel()
+
+    # TODO:ED do the same as stripIDLabel
+    # self.hideStripLabel()     # the top bar containing the residue Pid
 
     # A label to display the cursor positions (updated by _showMousePosition)
     # self._cursorLabel = Label(parent=self._labelWidget,
@@ -181,7 +183,7 @@ class GuiStrip(Frame):
     ###self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
     self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)    # update mouse cursors
     self.storedZooms = []
-    
+
     self.beingUpdated = False
     self.xPreviousRegion, self.yPreviousRegion = self.viewBox.viewRange()
 
@@ -215,10 +217,13 @@ class GuiStrip(Frame):
     # For now, all dropevents are not strip specific, use spectrumDisplay's
     # handling
     self._droppedNotifier = GuiNotifier(self,
-                                       [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                                       self.spectrumDisplay._processDroppedItems)
+                                        [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                                        self.spectrumDisplay._processDroppedItems)
 
-    self.peakLabelling = 0
+    # set peakLabelling to the default from preferences
+    self.peakLabelling = self.application.preferences.general.annotationType
+    self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
+
     self.show()
 
   @property
@@ -329,7 +334,7 @@ class GuiStrip(Frame):
   def _newPhasingTrace(self):
     for spectrumView in self.spectrumViews:
       spectrumView._newPhasingTrace()
-      
+
   """
   def newHPhasingTrace(self):
     
@@ -341,17 +346,17 @@ class GuiStrip(Frame):
     for spectrumView in self.spectrumViews:
       spectrumView.newVPhasingTrace(self.mousePosition[0])
   """
-   
+
   def _setPhasingPivot(self):
-    
+
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
     position = self.current.cursorPosition[0] if direction == 0 else self.current.cursorPosition[1]
     phasingFrame.pivotEntry.set(position)
     self._updatePivot()
-      
+
   def removePhasingTraces(self):
-    
+
     for spectrumView in self.spectrumViews:
       spectrumView.removePhasingTraces()
 
@@ -361,9 +366,9 @@ class GuiStrip(Frame):
     self.hPhasingPivot.setPos(self.mousePosition[0])
     self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
   """
-  
+
   def _updatePivot(self): # this is called if pivot entry at bottom of display is updated and then "return" key used
-  
+
     phasingFrame = self.spectrumDisplay.phasingFrame
     position = phasingFrame.pivotEntry.get()
     direction = phasingFrame.getDirection()
@@ -372,37 +377,37 @@ class GuiStrip(Frame):
     else:
       self.vPhasingPivot.setPos(position)
     self._updatePhasing()
-  
+
   def _movedPivot(self): # this is called if pivot on screen is dragged
-    
+
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
     if direction == 0:
       position = self.hPhasingPivot.getXPos()
     else:
       position = self.vPhasingPivot.getYPos()
-      
+
     phasingFrame.pivotEntry.set(position)
     self._updatePhasing()
-    
+
   def turnOnPhasing(self):
-    
+
     self.hPhasingPivot.setVisible(True)
     self.vPhasingPivot.setVisible(True)
-      
+
     for spectrumView in self.spectrumViews:
       spectrumView._turnOnPhasing()
-      
+
   def turnOffPhasing(self):
-    
+
     self.hPhasingPivot.setVisible(False)
     self.vPhasingPivot.setVisible(False)
-      
+
     for spectrumView in self.spectrumViews:
       spectrumView._turnOffPhasing()
-      
+
   def _changedPhasingDirection(self):
-    
+
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
     if direction == 0:
@@ -411,10 +416,10 @@ class GuiStrip(Frame):
     else:
       self.hPhasingPivot.setVisible(False)
       self.vPhasingPivot.setVisible(True)
-      
+
     for spectrumView in self.spectrumViews:
       spectrumView._changedPhasingDirection()
-      
+
   def _updatePhasing(self):
     #
     # TODO:GEERTEN: Fix with proper stylesheet
@@ -423,7 +428,7 @@ class GuiStrip(Frame):
     self.vPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:
       spectrumView._updatePhasing()
-      
+
   def _updateXRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
     # this code is complicated because need to keep viewBox region and axis region in sync
@@ -459,11 +464,19 @@ class GuiStrip(Frame):
 
     if not self._finaliseDone: return
 
+    # this only wants to get the scaling of the modified strip and not the actual values
+
     xRange = list(self.viewBox.viewRange()[0])
     for strip in self.spectrumDisplay.strips:
       if strip is not self:
         stripXRange = list(strip.viewBox.viewRange()[0])
         if _widthsChangedEnough(stripXRange, xRange):
+
+          # TODO:ED check whether the strip has a range set yet
+          diff = (xRange[1]-xRange[0])/2.0
+          mid = (stripXRange[1]+stripXRange[0])/2.0
+          xRange = (mid-diff, mid+diff)
+
           strip.viewBox.setXRange(*xRange, padding=0)
 
   def _updateY(self):
@@ -540,7 +553,7 @@ class GuiStrip(Frame):
 
   # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
   def _initRulers(self):
-    
+
     for mark in self._project.marks:
       apiMark = mark._wrappedData
       for apiRuler in apiMark.rulers:
@@ -570,8 +583,8 @@ class GuiStrip(Frame):
     # )
 
     self.plotWidget.mouseLabel.setText(format %
-      (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
-    )
+                                       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
+                                       )
     self.plotWidget.mouseLabel.setPos(position.x(), position.y())
     self.plotWidget.mouseLabel.show()
 
@@ -640,6 +653,49 @@ class GuiStrip(Frame):
 
     zoomPopup.exec_()
 
+  # TODO. Set limit range properly for each case: 1D/nD, flipped axis
+  # def setZoomLimits(self, xLimits, yLimits, factor=5):
+  #   '''
+  #
+  #   :param xLimits: List [min, max] , e.g ppm [0,15]
+  #   :param yLimits:  List [min, max]  eg. intensities [-300,2500]
+  #   :param factor:
+  #   :return: Limits the viewBox from zooming in too deeply(crashing the program) to zooming out too far.
+  #   '''
+  #   ratio = (abs(xLimits[0] - xLimits[1])/abs(yLimits[0] - yLimits[1]))/factor
+  #   if max(yLimits)>max(xLimits):
+  #     self.viewBox.setLimits(xMin=-abs(min(xLimits)) * factor,
+  #                            xMax=max(xLimits) * factor,
+  #                            yMin=-abs(min(yLimits)) * factor,
+  #                            yMax=max(yLimits) * factor,
+  #                            minXRange=((max(xLimits) - min(xLimits))/max(xLimits)) * ratio,
+  #                            maxXRange=max(xLimits) * factor,
+  #                            minYRange=(((max(yLimits) - min(yLimits))/max(yLimits))),
+  #                            maxYRange=max(yLimits) * factor
+  #                            )
+  #   else:
+  #     self.viewBox.setLimits(xMin=-abs(min(xLimits)) * factor,
+  #                            xMax=max(xLimits) * factor,
+  #                            yMin=-abs(min(yLimits)) * factor,
+  #                            yMax=max(yLimits) * factor,
+  #                            minXRange=((max(xLimits) - min(xLimits))/max(xLimits)) ,
+  #                            maxXRange=max(xLimits) * factor,
+  #                            minYRange=(((max(yLimits) - min(yLimits))/max(yLimits)))*ratio,
+  #                            maxYRange=max(yLimits) * factor
+  #                            )
+
+  # def removeZoomLimits(self):
+  #   self.viewBox.setLimits(xMin=None,
+  #                          xMax=None,
+  #                          yMin=None,
+  #                          yMax=None,
+  #                          # Zoom Limits
+  #                          minXRange=None,
+  #                          maxXRange=None,
+  #                          minYRange=None,
+  #                          maxYRange=None
+  #                          )
+
   def _storeZoom(self):
     """
     Adds current region to the zoom stack for the strip.
@@ -659,6 +715,48 @@ class GuiStrip(Frame):
       self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1], padding=padding)
     else:
       self.resetZoom()
+
+  def _zoomIn(self):
+    """
+    zoom in to the strip.
+    """
+    if not self._finaliseDone: return
+    zoomPercent = -self.application.preferences.general.zoomPercent/100.0
+    padding = self.application.preferences.general.stripRegionPadding
+    currentRange = self.viewBox.viewRange()
+    l = currentRange[0][0]
+    r = currentRange[0][1]
+    b = currentRange[1][0]
+    t = currentRange[1][1]
+    dx = (r-l)/2.0
+    dy = (t-b)/2.0
+    nl = l-zoomPercent*dx
+    nr = r+zoomPercent*dx
+    nt = t+zoomPercent*dy
+    nb = b-zoomPercent*dy
+    self.plotWidget.setXRange(nl, nr, padding=padding)
+    self.plotWidget.setYRange(nb, nt, padding=padding)
+
+  def _zoomOut(self):
+    """
+    zoom out of the strip.
+    """
+    if not self._finaliseDone: return
+    zoomPercent = +self.application.preferences.general.zoomPercent/100.0
+    padding = self.application.preferences.general.stripRegionPadding
+    currentRange = self.viewBox.viewRange()
+    l = currentRange[0][0]
+    r = currentRange[0][1]
+    b = currentRange[1][0]
+    t = currentRange[1][1]
+    dx = (r-l)/2.0
+    dy = (t-b)/2.0
+    nl = l-zoomPercent*dx
+    nr = r+zoomPercent*dx
+    nt = t+zoomPercent*dy
+    nb = b-zoomPercent*dy
+    self.plotWidget.setXRange(nl, nr, padding=padding)
+    self.plotWidget.setYRange(nb, nt, padding=padding)
 
   def showPeaks(self, peakList:PeakList, peaks:typing.List[Peak]=None):
     ###from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
@@ -698,9 +796,9 @@ class GuiStrip(Frame):
           visibleSpectrumViews[0].setVisible(False)
           spectrumViews[0].setVisible(True)
       else:
-        print('Option available if only one spectrum per time is toggled on')
+        getLogger().warning('Option available if only one spectrum per time is toggled on')
     else:
-      print('No spectra displayed')
+      getLogger().warning('No spectra displayed')
 
   def _moveToPreviousSpectrumView(self):
     spectrumViews = self.spectrumViews
@@ -713,9 +811,9 @@ class GuiStrip(Frame):
         visibleSpectrumViews[0].setVisible(False)
         spectrumViews[currentIndex - 1].setVisible(True)
       else:
-        print('Option available if only one spectrum per time is toggled on')
+        getLogger().warning('Option available if only one spectrum per time is toggled on')
     else:
-      print('No spectra displayed')
+      getLogger().warning('No spectra displayed')
 
 
 # Notifiers:

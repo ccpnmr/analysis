@@ -64,6 +64,7 @@ class BarGraphWidget(Widget, Base):
     self.colour = colour
     self.aboveBrush = 'g'
     self.belowBrush = 'r'
+    self.disappearedBrush = 'b'
     self.threshouldLine = threshouldLine
     self.setData(viewBox=self.customViewBox, xValues=xValues,yValues=yValues, objects=objects,colour=colour,replace=True)
     self._addExtraItems()
@@ -152,12 +153,16 @@ class BarGraphWidget(Widget, Base):
     if len(args)>0:
         aboveX = args['aboveX']
         aboveY =  args['aboveY']
+        disappearedX = args['disappearedX']
+        disappearedY = args['disappearedY']
         aboveObjects = args['aboveObjects']
         belowX =  args['belowX']
         belowY =  args['belowY']
         belowObjects =  args['belowObjects']
+        disappearedObjects =  args['disappearedObjects']
         self.aboveBrush = args['aboveBrush']
         self.belowBrush = args['belowBrush']
+        self.disappearedBrush = args['disappearedBrush']
 
     else:
       aboveX = []
@@ -166,6 +171,9 @@ class BarGraphWidget(Widget, Base):
       belowX = []
       belowY = []
       belowObjects = []
+      disappearedX = []
+      disappearedY = []
+      disappearedObjects = []
 
 
       pos = self.xLine.pos().y()
@@ -184,13 +192,18 @@ class BarGraphWidget(Widget, Base):
 
     self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application = self.application,
                                    xValues=aboveX, yValues=aboveY, objects=aboveObjects, brush=self.aboveBrush)
-    self.belowTrheshold = BarGraph(viewBox=self.customViewBox, application = self.application,
-                                   xValues=belowX, yValues=belowY, objects=belowObjects,brush=self.belowBrush)
+    self.belowThreshold = BarGraph(viewBox=self.customViewBox, application = self.application,
+                                   xValues=belowX, yValues=belowY, objects=belowObjects, brush=self.belowBrush)
+    self.disappearedPeaks = BarGraph(viewBox=self.customViewBox, application=self.application,
+                                   xValues=disappearedX, yValues=disappearedY, objects=disappearedObjects,
+                                     brush=self.disappearedBrush)
 
     self.customViewBox.addItem(self.aboveThreshold)
-    self.customViewBox.addItem(self.belowTrheshold)
+    self.customViewBox.addItem(self.belowThreshold)
+    self.customViewBox.addItem(self.disappearedPeaks)
     self.barGraphs.append(self.aboveThreshold)
-    self.barGraphs.append(self.belowTrheshold)
+    self.barGraphs.append(self.belowThreshold)
+    self.barGraphs.append(self.disappearedPeaks)
     self.updateViewBoxLimits()
     if self.customViewBox.allLabelsShown:
       self.customViewBox.showAllLabels()
@@ -240,23 +253,24 @@ nmrChain.nmrResidues = nmrResidues
 
 
 
-if __name__ == '__main__':
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-
-  app = TestApplication()
-  win = QtGui.QMainWindow()
-
-  moduleArea = CcpnModuleArea(mainWindow=None, )
-  chemicalShiftsMapping = ChemicalShiftsMapping(mainWindow=None, nmrChain=nmrChain)
-  moduleArea.addModule(chemicalShiftsMapping)
-
-
-
-
-  win.setCentralWidget(moduleArea)
-  win.resize(1000, 500)
-  win.setWindowTitle('Testing %s' % chemicalShiftsMapping.moduleName)
-  win.show()
-
-  app.start()
+# if __name__ == '__main__':
+#   from ccpn.ui.gui.widgets.Application import TestApplication
+#   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+#   from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping
+#
+#   app = TestApplication()
+#   win = QtGui.QMainWindow()
+#
+#   moduleArea = CcpnModuleArea(mainWindow=None, )
+#   chemicalShiftsMapping = ChemicalShiftsMapping(mainWindow=None, nmrChain=nmrChain)
+#   moduleArea.addModule(chemicalShiftsMapping)
+#
+#
+#
+#
+#   win.setCentralWidget(moduleArea)
+#   win.resize(1000, 500)
+#   win.setWindowTitle('Testing %s' % chemicalShiftsMapping.moduleName)
+#   win.show()
+#
+#   app.start()

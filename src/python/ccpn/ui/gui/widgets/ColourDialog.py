@@ -61,6 +61,9 @@ class ColourDialog(QtWidgets.QColorDialog):
 
     self.setColour(colour)
 
+  def get(self):
+    return self.getColor()
+
 
   def getColor(self, initialColour=None):
 

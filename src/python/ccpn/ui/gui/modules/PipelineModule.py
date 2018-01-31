@@ -125,7 +125,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
       # FIXME hack to give serial number to the pipeline module
       nameCount = 1
-      for module in self.mainWindow.moduleArea.currentModules:
+      for module in self.mainWindow.moduleArea.openedModules:
         if isinstance(module, GuiPipeline):
           nameCount += 1
       name = self.moduleName + str(nameCount)

@@ -65,7 +65,7 @@ class ShortcutModule(CcpnDialog):
     self.setStyleSheet('ScrollArea > QWidget {background-color: #00092d}')
 
     self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-    self.setMinimumHeight(250)
+    self.setMinimumSize(400, 400)
 
     # self._sequenceGraphScrollArea.layout().addWidget(self.shortcutWidget)
 

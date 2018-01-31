@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Sequence
 
 import pyqtgraph as pg
+import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets, QtOpenGL
 
 from ccpn.ui.gui.widgets.ViewBox import ViewBox
@@ -98,11 +99,14 @@ class PlotWidget(pg.PlotWidget):
       self.foreground = '#080000'
       self.gridColour = '#080000'
       self.highlightColour = '#3333ff'
+      self._labellingColour = (10, 10, 10)
     else:
       self.background = '#080000'
       self.foreground = '#f7ffff'
       self.gridColour = '#f7ffff'
       self.highlightColour = '#00ff00'
+      self._labellingColour = (255, 255, 255)
+
     self.setBackground(self.background)
     #self.setForeground(self.foreground) # does not seem to have this (or typo?)
 
@@ -127,13 +131,13 @@ class PlotWidget(pg.PlotWidget):
     self.crossHair2 = CrossHair(self, show=False, colour=self.foreground)
 
     # add label to show mouse coordinates at the position of the cursor
-    self.mouseLabel = pg.TextItem(text='', color=(255,255,255), anchor=(0,1))
+    self.mouseLabel = pg.TextItem(text='', color=self._labellingColour, anchor=(0,1))
     self.mouseLabel.hide()
     self.addItem(self.mouseLabel)
     self.mouseLabel.setZValue(1.0)      # brings the item to the top (I assume everything else is 0)
 
     # add label to show stripID in the top corner
-    self.stripIDLabel = pg.TextItem(text='BOX LABEL', color=(255,255,255))
+    self.stripIDLabel = pg.TextItem(text='BOX LABEL', color=self._labellingColour)
     self.stripIDLabel.show()
     self.addItem(self.stripIDLabel)
     self.stripIDLabel.setZValue(1.0)
@@ -144,10 +148,12 @@ class PlotWidget(pg.PlotWidget):
       for orientation in ('right', 'bottom'):
         axisItem = self.plotItem.axes[orientation]['item']
         axisItem.setPen(color=self.highlightColour)
+        self.stripIDLabel.setColor(color=self.highlightColour)
     else:
       for orientation in ('right', 'bottom'):
         axisItem = self.plotItem.axes[orientation]['item']
         axisItem.setPen(color=self.foreground)
+        self.stripIDLabel.setColor(color=self.foreground)
 
   def toggleGrid(self):
     "Toggle grid state"
@@ -336,6 +342,25 @@ class PlotWidget(pg.PlotWidget):
     axisOrder = self.strip.axisOrder
     self.xAxisTextItem = AxisTextItem(self, orientation='top', axisCode=axisOrder[0])
     self.yAxisTextItem = AxisTextItem(self, orientation='left', axisCode=axisOrder[1])
+
+  # TODO:ED this does override but acnnot change the zoom centre
+  # def wheelEvent(self, ev, axis=None):
+  #   mask = np.array(self.state['mouseEnabled'], dtype=np.float)
+  #   if axis is not None and axis >= 0 and axis < len(mask):
+  #     mv = mask[axis]
+  #     mask[:] = 0
+  #     mask[axis] = mv
+  #   s = ((mask * 0.02) + 1) ** (
+  #       ev.delta() * self.state['wheelScaleFactor'])  # actual scaling factor
+  #
+  #   center = None   # Point(fn.invertQTransform(self.childGroup.transform()).map(ev.pos()))
+  #   # center = ev.pos()
+  #
+  #   self._resetTarget()
+  #   self.scaleBy(s, center)
+  #   self.sigRangeChangedManually.emit(self.state['mouseEnabled'])
+  #   ev.accept()
+
 
 class AxisTextItem(pg.TextItem):
 

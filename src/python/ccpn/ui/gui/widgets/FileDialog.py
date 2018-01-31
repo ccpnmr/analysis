@@ -252,7 +252,7 @@ class LineEditButtonDialog(Widget, Base):
     self.directory = directory
 
     tipText= 'Click the icon to select'
-    self.lineEdit = LineEdit(self, text=self.textLineEdit, textAligment='l', hAlign='l', minimumWidth=100,
+    self.lineEdit = LineEdit(self, text=self.textLineEdit, textAlignment='l', hAlign='l', minimumWidth=100,
                              tipText=tipText, grid=(0, 0))
     self.lineEdit.setEnabled(False)
     self.lineEdit.setSizePolicy(QtWidgets.QSizePolicy.Expanding,

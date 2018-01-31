@@ -50,6 +50,8 @@ class GuiWindow():
     self.application = application
     self.current = self.application.current
 
+
+
   def _setShortcuts(self):
     """
     Sets shortcuts for functions not specified in the main window menubar
@@ -73,6 +75,7 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self), context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("t, a"), self, partial(self.toggleLastAxisOnly, self), context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("t, r"), self, self.removePhasingTraces, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
@@ -81,9 +84,12 @@ class GuiWindow():
     QtGui.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("m, n"), self, self.moveToNextSpectrum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("m, p"), self, self.moveToPreviousSpectrum, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("m, m"), self, self.switchMouseMode, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("z, r"), self, self.restoreZoom, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("z, i"), self, self.zoomIn, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("z, o"), self, self.zoomOut, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, l"), self, self.cyclePeakLabelling, context=context)
     QtGui.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
 
@@ -262,6 +268,13 @@ class GuiWindow():
     if self.application.current.strip:
       self.application.current.strip.toggleVerticalTrace()
 
+  def toggleLastAxisOnly(self, window:'GuiWindow'):
+    """
+    Toggles whether the axis is displayed in the last strip of the display
+    """
+    if self.application.current.strip:
+      self.application.current.strip.toggleLastAxisOnly()
+
   def togglePhaseConsole(self, window:'GuiWindow'):
     """
     Toggles whether the phasing console is displayed in the specified window.
@@ -389,6 +402,7 @@ class GuiWindow():
     """
     peaks = self.current.peaks
     n = len(peaks)
+    # self.application.project.blankNotification()
     if n == 1:
       peaks[0].snapToExtremum()
     elif n > 1:
@@ -402,7 +416,7 @@ class GuiWindow():
 
   def storeZoom(self):
     """
-    store the zoom of the currently selected strip onto a queue
+    store the zoom of the currently selected strip
     """
     if self.current.strip:
       self.current.strip.spectrumDisplay._storeZoom()
@@ -411,10 +425,28 @@ class GuiWindow():
 
   def restoreZoom(self):
     """
-    restore the zoom of the currently selected strip to the top item of the queue
+    restore the zoom of the currently selected strip
     """
     if self.current.strip:
       self.current.strip.spectrumDisplay._restoreZoom()
+    else:
+      getLogger().warning('No current strip. Select a strip first.')
+
+  def zoomIn(self):
+    """
+    zoom in to the currently selected strip
+    """
+    if self.current.strip:
+      self.current.strip.spectrumDisplay._zoomIn()
+    else:
+      getLogger().warning('No current strip. Select a strip first.')
+
+  def zoomOut(self):
+    """
+    zoom out of the currently selected strip
+    """
+    if self.current.strip:
+      self.current.strip.spectrumDisplay._zoomOut()
     else:
       getLogger().warning('No current strip. Select a strip first.')
 
@@ -426,3 +458,37 @@ class GuiWindow():
       self.current.strip.spectrumDisplay._cyclePeakLabelling()
     else:
       getLogger().warning('No current strip. Select a strip first.')
+
+    # self.application.project.unblankNotification()
+    # self.application.project.unblankNotification()
+
+  def setMouseMode(self, mode):
+    from ccpn.ui.gui.lib.mouseEvents import MouseModes
+    if mode in MouseModes:
+      self.mouseMode = mode
+      mouseModeText = ' Mouse Mode: '
+      self.statusBar().showMessage(mouseModeText + mode)
+      project = self.application.project
+      for strip in project.strips:
+        strip.viewBox._setMouseCursor()
+
+  def switchMouseMode(self):
+    from ccpn.ui.gui.lib.mouseEvents import MouseModes
+    from ccpn.ui.gui.widgets.Icon import Icon
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    mode = self.mouseMode
+    modesCount = len(MouseModes)
+    if mode in MouseModes:
+      i = MouseModes.index(mode)
+      if i + 1 < modesCount:
+        mode = MouseModes[i + 1]
+        self.setMouseMode(mode)
+      else:
+        i = 0
+        mode = MouseModes[i]
+        self.setMouseMode(mode)
+
+
+
+
+

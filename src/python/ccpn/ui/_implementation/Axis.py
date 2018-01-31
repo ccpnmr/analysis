@@ -1,5 +1,5 @@
-"""GUI Display Strip class
-
+"""
+GUI Display Strip class
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Optional
 
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Project import Project
@@ -131,9 +131,12 @@ class Axis(AbstractWrapperObject):
     self._wrappedData.axis.resonances = tuple(x._wrappedData for x in value)
 
   @property
-  def strip(self):
+  def strip(self) -> Optional[Strip]:
     """Strip that Axis belongs to"""
-    return self._project._data2Obj.get(self._wrappedData.strip)
+    if self._wrappedData:
+      return self._project._data2Obj.get(self._wrappedData.strip)
+    else:
+      return None
 
   # Implementation functions
   @classmethod

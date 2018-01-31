@@ -35,8 +35,11 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES
 from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
@@ -134,6 +137,16 @@ class PreferencesPopup(CcpnDialog):
     self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
 
     row += 1
+    self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))
+    self.autoSaveLayoutOnQuitBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.autoSaveLayoutOnQuit)
+    self.autoSaveLayoutOnQuitBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoSaveLayoutOnQuit'))
+
+    row += 1
+    self.restoreLayoutOnOpeningLabel = Label(parent, text="Restore Layout On Opening: ", grid=(row, 0))
+    self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.restoreLayoutOnOpening)
+    self.restoreLayoutOnOpeningBox.toggled.connect(partial(self._toggleGeneralOptions, 'restoreLayoutOnOpening'))
+    
+    row += 1
     self.autoBackupEnabledLabel = Label(parent, text="Auto Backup On: ", grid=(row, 0))
     self.autoBackupEnabledBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.autoBackupEnabled)
     self.autoBackupEnabledBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoBackupEnabled'))
@@ -192,6 +205,20 @@ class PreferencesPopup(CcpnDialog):
     self.pipesPathData.setDisabled(True)
     self.pipesPathDataButton.setDisabled(True)
 
+    row += 1
+    self.annotationsLabel = Label(parent, text="Annotations", grid=(row, 0))
+    try:
+      annType = self.preferences.general.annotationType
+    except:
+      annType = 0
+      self.preferences.general.annotationType = annType
+    self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
+                                                       selectedInd=annType,
+                                                       callback=self._setAnnotations,
+                                                       direction='v',
+                                                       grid=(row, 1), hAlign='l',
+                                                       tipTexts=None,
+                                                       )
 
     # row += 1
     # Spacer(parent, row, 1
@@ -238,6 +265,59 @@ class PreferencesPopup(CcpnDialog):
     #        , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
     #        , grid=(row , 0), gridSpan=(row, 1))
 
+    row += 1
+    self.peakSymbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))
+    peakSymbol = self.preferences.general.peakSymbolType
+    self.peakSymbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
+                                    selectedInd=peakSymbol,
+                                    callback=self._setPeakSymbol,
+                                    direction='v',
+                                    grid=(row, 1), hAlign='l',
+                                    tipTexts=None,
+                                    )
+    row += 1
+    self.peakSymbolSizeLabel = Label(parent, text="Peak Symbol Size (ppm)", grid=(row, 0))
+    self.peakSymbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01
+                                            , min=0.01, max=1.0, grid=(row, 1), hAlign='l')
+    self.peakSymbolSizeData.setMinimumWidth(LineEditsMinimumWidth)
+    symbolSize = self.preferences.general.peakSymbolSize
+    self.peakSymbolSizeData.setValue(float('%.3f' % symbolSize))
+    self.peakSymbolSizeData.editingFinished.connect(self._setPeakSymbolSize)
+
+    row += 1
+    self.peakSymbolThicknessLabel = Label(parent, text="Peak Symbol Thickness (point)", grid=(row, 0))
+    self.peakSymbolThicknessData = Spinbox(parent, step=1
+                                            , min=1, max=20, grid=(row, 1), hAlign='l')
+    self.peakSymbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+    symbolThickness = self.preferences.general.peakSymbolThickness
+    self.peakSymbolThicknessData.setValue(int(symbolThickness))
+    self.peakSymbolThicknessData.editingFinished.connect(self._setPeakSymbolThickness)
+
+    row += 1
+    self.zoomCentreLabel = Label(parent, text="Zoom Centre", grid=(row, 0))
+    zoomCentre = self.preferences.general.zoomCentreType
+    self.zoomCentre = RadioButtons(parent, texts=['Centre on Mouse', 'Centre on Screen'],
+                                    selectedInd=zoomCentre,
+                                    callback=self._setZoomCentre,
+                                    direction='v',
+                                    grid=(row, 1), hAlign='l',
+                                    tipTexts=None,
+                                    )
+    self.zoomCentre.setEnabled(False)
+
+    row += 1
+    zoomPercent = self.preferences.general.zoomPercent
+    self.zoomPercentLabel = Label(parent, text="Manual Zoom (%)", grid=(row, 0))
+    self.zoomPercentData = DoubleSpinbox(parent, step=1
+                                            , min=1, max=100, grid=(row, 1), hAlign='l')
+    self.zoomPercentData.setValue(int(zoomPercent))
+    self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
+    self.zoomPercentData.editingFinished.connect(self._setZoomPercent)
+
+    row += 1
+    self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
+    self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
+    self.showGridBox.toggled.connect(partial(self._toggleGeneralOptions, 'showGrid'))
 
   def _setExternalProgramsTabWidgets(self, parent):
     ''' 
@@ -396,7 +476,7 @@ class PreferencesPopup(CcpnDialog):
 
   def _getPymolPath(self):
 
-    dialog = FileDialog(self, text='Select File')
+    dialog = FileDialog(self, text='Select File',  preferences=self.preferences.general)
     file = dialog.selectedFile()
     if file:
       self.pymolPath.setText(file)
@@ -424,5 +504,66 @@ class PreferencesPopup(CcpnDialog):
       return
     self.preferences.general.peakDropFactor = dropFactor
 
+  def _setPeakSymbolSize(self):
+    """
+    Set the size of the peak symbols (ppm)
+    """
+    try:
+      peakSymbolSize = float(self.peakSymbolSizeData.text())
+    except:
+      return
+    self.preferences.general.peakSymbolSize = peakSymbolSize
+
+  def _setPeakSymbolThickness(self):
+    """
+    Set the Thickness of the peak symbols (ppm)
+    """
+    try:
+      peakSymbolThickness = int(self.peakSymbolThicknessData.text())
+    except:
+      return
+    self.preferences.general.peakSymbolThickness = peakSymbolThickness
+
   def _toggleSpectralOptions(self, preference, checked):
     self.preferences.spectra[preference] = str(checked)
+
+  def _setAnnotations(self):
+    """
+    Set the annotation type for the pid labels
+    """
+    try:
+      annotationType = self.annotationsData.getIndex()
+    except:
+      return
+    self.preferences.general.annotationType = annotationType
+
+  def _setPeakSymbol(self):
+    """
+    Set the peak symbol type - current a cross or lineWidths
+    """
+    try:
+      peakSymbol = self.peakSymbol.getIndex()
+    except:
+      return
+    self.preferences.general.peakSymbolType = peakSymbol
+
+  def _setZoomCentre(self):
+    """
+    Set the zom centring method to either mouse position or centre of the screen
+    """
+    try:
+      zoomCentre = self.zoomCentre.getIndex()
+    except:
+      return
+    self.preferences.general.zoomCentreType = zoomCentre
+
+  def _setZoomPercent(self):
+    """
+    Set the value for manual zoom
+    """
+    try:
+      zoomPercent = float(self.zoomPercentData.text())
+    except:
+      return
+    self.preferences.general.zoomPercent = zoomPercent
+

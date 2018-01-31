@@ -30,6 +30,9 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from weakref import ref
+
+from ccpn.ui.gui.widgets.DropBase import DropBase
 
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
@@ -37,11 +40,12 @@ from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.Widget import ScrollableWidget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
-
+from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
 
@@ -52,7 +56,7 @@ settingsWidgetPositions = {
                            'right':  {'settings':(0,1), 'widget':(0,0)},
                            }
 
-class CcpnModule(Dock):
+class CcpnModule(Dock, DropBase):
   """
   Base class for CCPN modules
   sets self.application, self.current, self.project and self.mainWindow
@@ -85,6 +89,9 @@ class CcpnModule(Dock):
   maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsPosition = 'top'
   settingsMinimumSizes = (100, 50)
+  _restored = False
+
+  _instances = set()
 
   def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
 
@@ -96,7 +103,7 @@ class CcpnModule(Dock):
     Dock.__init__(self, name=name, area=self.area,
                    autoOrientation=False,
                    closable=closable)#, **kwds)   # ejb
-
+    DropBase.__init__(self, acceptDrops=True)
     self.hStyle = """
                   Dock > QWidget {
                       border: 0px solid #000;
@@ -126,9 +133,12 @@ class CcpnModule(Dock):
 
     Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
-    Logging.getLogger().debug('module:"%s"' % (name,))
+    # Logging.getLogger().debug('module:"%s"' % (name,))
     self.mainWindow = mainWindow
     self.closeFunc = closeFunc
+    self._nameSplitter = ':' #used to create the serial
+    self._serial = None
+    self._titleName = None # name without serial
     CcpnModule.moduleName = name
 
     self.widgetArea.setContentsMargins(0,0,0,0)
@@ -264,6 +274,13 @@ class CcpnModule(Dock):
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
 
+    # attach the mouse events to the widget
+    # self.mainWidget.dragMoveEvent = self.dragMoveEvent
+    # self.mainWidget.mouseMoveEvent = self.mouseMoveEvent
+    # self.mainWidget.dragEnterEvent = self.dragEnterEvent
+    # self.mainWidget.dragLeaveEvent = self.dragLeaveEvent
+    # self.mainWidget.dropEvent = self.dropEvent
+
     # always explicitly show the mainWidget
     self.mainWidget.show()
 
@@ -279,6 +296,55 @@ class CcpnModule(Dock):
 
     self.update()     # ejb - make sure that the widgetArea starts the correct size
 
+    self._instances.add(ref(self))
+
+  @classmethod
+  def getInstances(cls):
+    dead = set()
+    for ref in cls._instances:
+      obj = ref()
+      if obj is not None:
+        # if isinstance(obj, cls):
+        if obj.className == cls.className:
+          yield obj
+      else:
+        dead.add(ref)
+    cls._instances -= dead
+
+  @property
+  def titleName(self):
+    'module name without serial'
+    moduleName = self.name()
+    splits = moduleName.split(self._nameSplitter)
+    if len(splits)>1:
+      title = splits[0]
+      return title
+    else:
+      return moduleName
+
+  @property
+  def serial(self):
+    return self._serial
+
+  @serial.setter
+  def serial(self, value):
+    if isinstance(value, str):
+      try:
+        value = int(value)
+        return
+      except Exception as e:
+        getLogger().warnig('Cannot set attribute %s' %e)
+    if isinstance(value, int):
+      self._serial = value
+      return
+    else:
+      getLogger().warning('Cannot set attribute. Serial must be an Int type')
+
+
+  def rename(self, newName):
+    self.label.setText(newName)
+    self._name = newName
+
   def _eventFilter(self, source, event):
     """
     CCPNInternal
@@ -286,9 +352,10 @@ class CcpnModule(Dock):
     Modules become transparent when dragging to another module.
     Ensure that the dropAreas become active
     """
-    if isinstance(source, CcpnModule):
+    if isinstance(source, CcpnModule) or isinstance(source, SideBar):
       if event.type() == QtCore.QEvent.DragEnter:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+        # print('>>>', source)
 
       elif event.type() == QtCore.QEvent.Leave:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
@@ -414,18 +481,107 @@ class CcpnModule(Dock):
     if self.closeFunc:
       self.closeFunc()
 
+    if ref(self) in self._instances:
+      self._instances.remove(ref(self))
+
     getLogger().debug('Closing %s' % str(self.container()))
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 
+
+  def dragMoveEvent(self, *args):
+    DockDrop.dragMoveEvent(self, *args)
+
+  def dragLeaveEvent(self, *args):
+    DockDrop.dragLeaveEvent(self, *args)
+
+  def dragEnterEvent(self, *args):
+    if args:
+      ev = args[0]
+      # print ('>>>', ev.source())
+      data = self.parseEvent(ev)
+      if DropBase.PIDS in data:
+        if self.widgetArea:
+
+          ld = ev.pos().x()
+          rd = self.width() - ld
+          td = ev.pos().y()
+          bd = self.height() - td
+
+          mn = min(ld, rd, td, bd)
+          if mn > 30:
+            self.dropArea = "center"
+            self.area._dropArea = "center"
+
+          elif (ld == mn or td == mn) and mn > self.height() / 3.:
+            self.dropArea = "center"
+            self.area._dropArea = "center"
+          elif (rd == mn or ld == mn) and mn > self.width() / 3.:
+            self.dropArea = "center"
+            self.area._dropArea = "center"
+
+          elif rd == mn:
+            self.dropArea = "right"
+            self.area._dropArea = "right"
+            ev.accept()
+          elif ld == mn:
+            self.dropArea = "left"
+            self.area._dropArea = "left"
+            ev.accept()
+          elif td == mn:
+            self.dropArea = "top"
+            self.area._dropArea = "top"
+            ev.accept()
+          elif bd == mn:
+            self.dropArea = "bottom"
+            self.area._dropArea = "bottom"
+            ev.accept()
+
+          if ev.source() is self and self.dropArea == 'center':
+            # print "  no self-center"
+            self.dropArea = None
+            ev.ignore()
+          elif self.dropArea not in self.allowedAreas:
+            # print "  not allowed"
+            self.dropArea = None
+            ev.ignore()
+          else:
+            # print "  ok"
+            ev.accept()
+          self.overlay.setDropArea(self.dropArea)
+
+          # self.widgetArea.setStyleSheet(self.dragStyle)
+          self.update()
+          # # if hasattr(self, 'drag'):
+          # self.raiseOverlay()
+          # self.updateStyle()
+          # ev.accept()
+
+      src = ev.source()
+      if hasattr(src, 'implements') and src.implements('dock'):
+        DockDrop.dragEnterEvent(self, *args)
+
   def dropEvent(self, *args):
     self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
-    source = args[0].source()
+    if args:
+      event = args[0]
+      source = event.source()
+      data = self.parseEvent(event)
+      if DropBase.PIDS in data:
+        pids = data[DropBase.PIDS]
+        objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
+        _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
+        event.accept()
+        # print('DONE')
 
-    if hasattr(source, 'implements') and source.implements('dock'):
-      DockDrop.dropEvent(self, *args)
-    else:
-      args[0].ignore()
-      return
+        # reset the dock area
+        self.dropArea = None
+        self.overlay.setDropArea(self.dropArea)
+
+      if hasattr(source, 'implements') and source.implements('dock'):
+        DockDrop.dropEvent(self, *args)
+      else:
+        args[0].ignore()
+        return
 
 
 class CcpnModuleLabel(DockLabel):

@@ -372,7 +372,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
       if projectDir:
         project = self.application.loadProject(projectDir)
 
-
         if project:
           project._mainWindow.show()
           QtGui.QApplication.setActiveWindow(project._mainWindow)
@@ -492,7 +491,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
 
   def _fillModulesMenu(self):
-    # modulesMenu = self.getMenuAction('Modules')
     modulesMenu = self.searchMenuAction('Show/hide Modules')
     modulesMenu.clear()
 

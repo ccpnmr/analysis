@@ -542,9 +542,9 @@ class Framework:
     if self.ui:
       if not self._isRegistered():
         self.ui.mainWindow.show()
-        QtGui.QApplication.processEvents()
+        QtWidgets.QApplication.processEvents()
         popup = RegisterPopup(self.ui.mainWindow, version=self.applicationVersion, modal=True)
-        QtGui.QApplication.processEvents()
+        QtWidgets.QApplication.processEvents()
         popup.show()
         popup.raise_()
         popup.exec_()
@@ -973,7 +973,7 @@ class Framework:
       project = self.newProject()
       try:
         project._mainWindow.show()
-        QtGui.QApplication.setActiveWindow(project._mainWindow)
+        QtWidgets.QApplication.setActiveWindow(project._mainWindow)
       except Exception as es:
         getLogger().warning('Error creating new project:', str(es))
 
@@ -1005,7 +1005,7 @@ class Framework:
     project = self.ui.mainWindow.loadProject(projectDir=path)
     try:
       project._mainWindow.show()
-      QtGui.QApplication.setActiveWindow(project._mainWindow)
+      QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
     except Exception as es:
       getLogger().warning('Error opening project:', str(es))

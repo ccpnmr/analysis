@@ -26,7 +26,7 @@ __date__ = "$Date$"
 import json
 import re
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets
 import pandas as pd
 from pyqtgraph import TableWidget
 import os

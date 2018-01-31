@@ -205,7 +205,7 @@ class SequenceModule(CcpnModule):
     """
     # get the list of open sequenceGraphs
     from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraphModule
-    seqGraphs = [sg for sg in SequenceGraphModule.getinstances()]
+    seqGraphs = [sg for sg in SequenceGraphModule.getInstances()]
 
     if seqGraphs:
       try:

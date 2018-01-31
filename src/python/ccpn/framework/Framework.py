@@ -1706,10 +1706,14 @@ class Framework:
     """Toggles whether Sequence Module is displayed or not"""
     from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 
-    if SequenceModule._alreadyOpened is True:
-      if SequenceModule._currentModule is not None:
-        SequenceModule._currentModule.close()
-        SequenceModule._alreadyOpened = False
+    openList = [m for m in SequenceModule.getInstances()]
+    if openList:
+      openList[0].close()
+      # SequenceModule._alreadyOpened = False
+    # if SequenceModule._alreadyOpened is True:
+    #   if SequenceModule._currentModule is not None:
+    #     SequenceModule._currentModule.close()
+    #     SequenceModule._alreadyOpened = False
     else:
       self.showSequenceModule()
 

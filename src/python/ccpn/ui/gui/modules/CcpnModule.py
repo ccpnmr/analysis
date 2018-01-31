@@ -299,12 +299,13 @@ class CcpnModule(Dock, DropBase):
     self._instances.add(ref(self))
 
   @classmethod
-  def getinstances(cls):
+  def getInstances(cls):
     dead = set()
     for ref in cls._instances:
       obj = ref()
       if obj is not None:
-        if isinstance(obj, cls):
+        # if isinstance(obj, cls):
+        if obj.className == cls.className:
           yield obj
       else:
         dead.add(ref)
@@ -480,6 +481,7 @@ class CcpnModule(Dock, DropBase):
     if self.closeFunc:
       self.closeFunc()
 
+    self._instances.remove(ref(self))
     getLogger().debug('Closing %s' % str(self.container()))
     super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
 

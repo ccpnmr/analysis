@@ -206,6 +206,7 @@ def _openCcpnModule(mainWindow, ccpnModules, className, moduleName=None):
           # newCcpnModule.rename(newCcpnModule.name().split('.')[0])
 
           mainWindow.moduleArea.addModule(newCcpnModule)
+
         except Exception as e:
           getLogger().warning("Layout restore failed: %s" % e)
 

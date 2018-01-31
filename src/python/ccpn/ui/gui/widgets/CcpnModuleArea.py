@@ -28,7 +28,7 @@ from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from pyqtgraph.dockarea.Dock import Dock
-from pyqtgraph.dockarea.DockArea import DockArea
+from pyqtgraph.dockarea.DockArea import DockArea, DockDrop
 from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.util.Logging import getLogger
@@ -69,37 +69,62 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     self.setAcceptDrops(True)
 
     self.textLabel = DropAreaLabel
-    self.fontLabel = Font('Helvetica', 36, bold=True)
+    self.fontLabel = Font('Helvetica', 36, bold=False)
     self.colourLabel = hexToRgb('#bec4f3')
     self._dropArea  = None # Needed to know where to add a newmodule when dropping a pid from sideBar
 
 
-  def dragMoveEvent(self, event:QtGui.QMouseEvent):
-    event.accept()
+  # def dragMoveEvent(self, event:QtGui.QMouseEvent):
+  #   event.accept()
+  #
+  # def dragLeaveEvent(self, event):
+  #   # print ('>>>dragLeaveEvent %s' % str(event.type()))
+  #   super(CcpnModuleArea, self).dragLeaveEvent(event)
+  #   event.accept()
+  #
 
-  def dragLeaveEvent(self, event):
-    # print ('>>>dragLeaveEvent %s' % str(event.type()))
-    super(CcpnModuleArea, self).dragLeaveEvent(event)
-    event.accept()
-
-  def dropEvent(self,event, *args):
+  def dropEvent(self, event, *args):
     data = self.parseEvent(event)
+    source = event.source()
 
     if DropBase.PIDS in data:
-     pids = data[DropBase.PIDS]
-     objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
-     _openItemObject(self.mainWindow, objs, position=self._dropArea)
+      pids = data[DropBase.PIDS]
+      objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
+      _openItemObject(self.mainWindow, objs, position=self.dropArea)
 
-    if DropBase.URLS in data:
+      # reset the dock area
+      self.dropArea = None
+      self.overlay.setDropArea(self.dropArea)
+
+    elif DropBase.URLS in data:
       self.mainWindow.sideBar._processDroppedItems(data)
+      print ('>>>dropURLS')
+
+      # reset the dock area
+      self.dropArea = None
+      self.overlay.setDropArea(self.dropArea)
+    else:
+      print ('>>>other')
+
+    if hasattr(source, 'implements') and source.implements('dock'):
+      DockArea.dropEvent(self, event, *args)
+
     event.accept()
-    super(CcpnModuleArea, self).dropEvent(event, *args)
 
-  def dragEnterEvent(self, event, enter=True):
-      event.accept()
+  def dragEnterEvent(self, *args):
+    event = args[0]
+    DockArea.dragEnterEvent(self, *args)
+    event.accept()
 
+  def dragLeaveEvent(self, *args):
+    event = args[0]
+    DockArea.dragLeaveEvent(self, *args)
+    event.accept()
 
-
+  def dragMoveEvent(self, *args):
+    event = args[0]
+    DockArea.dragMoveEvent(self, *args)
+    event.accept()
 
 
   # def _handlePid(self, pid):

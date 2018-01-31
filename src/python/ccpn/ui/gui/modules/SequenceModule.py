@@ -315,9 +315,9 @@ class SequenceModule(CcpnModule):
 
     if self._highlight:
       self.scrollArea.scene.removeItem(self._highlight)
-    self._highlight = QtGui.QGraphicsTextItem()
+    self._highlight = QtWidgets.QGraphicsTextItem()
     self._highlight.setDefaultTextColor(QtGui.QColor('orange'))
-    self._highlight.setFont(fixedWidthHugeFont)
+    self._highlight.setFont(fixedWidthLargeFont)
     self._highlight.setPlainText('')
     # self._highlight.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
     self.scrollArea.scene.addItem(self._highlight)

@@ -532,8 +532,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     if e.key() == QtCore.Qt.Key_Escape:
       # Reset Mouse Mode
-      mode = self.application.preferences.general.mouseMode
-      if mode == PICK:
+      mode = self.mouseMode
+      if mode != SELECT:
         self.setMouseMode(SELECT)
 
 

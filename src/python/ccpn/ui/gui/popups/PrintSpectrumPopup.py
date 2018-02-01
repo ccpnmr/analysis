@@ -44,11 +44,19 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 import os
 
 class SelectSpectrumDisplayPopup(CcpnDialog):
-  def __init__(self,parent=None, project=None, **kw):
+  def __init__(self, parent=None, mainWindow=None, **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Print to File', **kw)
 
-    self.project = project
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+    self.mainWindow = mainWindow
+    if self.mainWindow:
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+    else:
+      self.application = None
+      self.project = None
+
+    # self.project = project
+    # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
     self.setContentsMargins(15, 20, 25, 5)  # L,T,R,B
     self.setFixedWidth(400)
@@ -61,8 +69,8 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
     self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtWidgets.QFrame()
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
-    self.spectrumDisplayIds = [sd.title for sd in project.spectrumDisplays]
-    self.spectrumDisplayPids = [sd.pid for sd in project.spectrumDisplays]
+    self.spectrumDisplayIds = [sd.title for sd in self.project.spectrumDisplays]
+    self.spectrumDisplayPids = [sd.pid for sd in self.project.spectrumDisplays]
     self.radioButtonBox = RadioButtons(self.scrollArea
                                        , self.spectrumDisplayIds
                                        , direction='v')

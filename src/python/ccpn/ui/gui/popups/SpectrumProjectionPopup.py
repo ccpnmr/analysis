@@ -40,21 +40,24 @@ import os
 
 
 class SpectrumProjectionPopup(CcpnDialog):
-  def __init__(self, parent=None, project=None
+  def __init__(self, parent=None, mainWindow=None
                , title='Make Spectrum Projection', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
+    self.application =  self.mainWindow.application
+
     projectionMethods = ('max', 'sum', 'sum above noise')
-    self.project = project
     spectrumLabel = Label(self, 'Spectrum to project', grid=(0, 0))
     self.spectrumPulldown = PulldownList(self, grid=(0, 1), callback=self.setAxisPulldown, gridSpan=(1, 2))
-    self.spectrumPulldown.setData([spectrum.pid for spectrum in project.spectra])
+    self.spectrumPulldown.setData([spectrum.pid for spectrum in self.project.spectra])
     filePathLabel = Label(self, 'New Spectrum Path', grid=(1, 0))
     self.filePathLineEdit = LineEdit(self, grid=(1, 1))
     self.pathButton = Button(self, grid=(1, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
     axisLabel = Label(self, 'Projection axis', grid=(2, 0))
     self.axisPulldown = PulldownList(self, grid=(2, 1), gridSpan=(1, 2))
-    self.axisPulldown.setData(project.spectra[0].axisCodes)
+    self.axisPulldown.setData(self.project.spectra[0].axisCodes)
     methodLabel = Label(self, 'Projection Method', grid=(4, 0))
     self.methodPulldown = PulldownList(self, grid=(4, 1), gridSpan=(1, 2))
     self.methodPulldown.setData(projectionMethods)

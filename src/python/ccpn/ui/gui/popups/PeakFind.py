@@ -43,8 +43,8 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 class PeakFindPopup(CcpnDialog):
 # class PeakFindPopup(QtWidgets.QDialog, Base):
   '''This popup works only for nDs. should be renamed '''
-  def __init__(self, mainWindow, **kw):
-    CcpnDialog.__init__(self, parent=mainWindow, setLayout=True, windowTitle='', **kw)
+  def __init__(self, parent=None, mainWindow=None, **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='', **kw)
     # super(PeakFindPopup, self).__init__(parent)
     # Base.__init__(self, **kw)
     self.mainWindow = mainWindow

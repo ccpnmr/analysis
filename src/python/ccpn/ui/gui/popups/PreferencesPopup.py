@@ -57,15 +57,22 @@ LineEditsMinimumWidth = 195
 NotImplementedTipText = 'This option has not been implemented yet'
 
 class PreferencesPopup(CcpnDialog):
-  def __init__(self, parent=None, preferences=None, project=None, title='Preferences', **kw):
-    CcpnDialog.__init__(self, parent=parent, setLayout=True, windowTitle=title, size=(300, 100), **kw)
+  def __init__(self, parent=None, mainWindow=None, preferences=None, title='Preferences', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(300, 100), **kw)
 
-    if not project:                                         # ejb - should always be loaded
+    self.mainWindow = mainWindow
+    if self.mainWindow:
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+    else:
+      self.application = None
+      self.project = None
+
+    if not self.project:                                         # ejb - should always be loaded
       MessageDialog.showWarning(title, 'No project loaded')
       self.close()
       return
 
-    self.project = project
     self.preferences = preferences
     self.oldPreferences = preferences
 

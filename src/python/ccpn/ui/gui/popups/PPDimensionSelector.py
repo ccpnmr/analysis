@@ -31,8 +31,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
 class PPdimensionSelector(CcpnDialog):
-  def __init__(self, mainWindow=None, title='Select Dimension', **kw):
-    CcpnDialog.__init__(self, parent=mainWindow, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Select Dimension', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     self.mainWindow = mainWindow
     self.buttons = ButtonList(self, texts=['Cancel',' 1D ', ' ND '],
@@ -53,7 +53,7 @@ class PPdimensionSelector(CcpnDialog):
   def _openNDpeakPicker(self):
     from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
     self.reject()
-    popup = PeakFindPopup(mainWindow=self.mainWindow)
+    popup = PeakFindPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
     popup.exec_()
     popup.raise_()
 

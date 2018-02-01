@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 class CopyPeaks(CcpnDialog):
 
   def __init__(self, parent=None,  mainWindow=None, title='Copy Peaks to PeakLists', **kw):
-    CcpnDialog.__init__(self, parent=parent, setLayout=True, windowTitle=title, size=(700, 600), **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kw)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

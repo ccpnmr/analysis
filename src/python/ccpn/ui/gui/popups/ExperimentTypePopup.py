@@ -45,15 +45,19 @@ def _getExperimentTypes(project, spectrum):
   # return list(project._experimentTypeMap[spectrum.dimensionCount].get(atomCodes).keys())
 
 class ExperimentTypePopup(CcpnDialog):
-  def __init__(self, parent=None, project=None, title:str='Experiment Type Selection', **kw):
+  def __init__(self, parent=None, mainWindow=None, title:str='Experiment Type Selection', **kw):
 
     from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
+    self.application =  self.mainWindow.application
+
     self.parent = parent
-    spectra = project.spectra
-    self.experimentTypes = project._experimentTypeMap
+    spectra = self.project.spectra
+    self.experimentTypes = self.project._experimentTypeMap
     self.spPulldowns = []
     self.scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
     self.scrollArea.setWidgetResizable(True)

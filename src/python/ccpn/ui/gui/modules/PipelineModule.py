@@ -830,7 +830,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 class FilterMethods(CcpnDialog):
 
-  def __init__(self, parent=None, title='Preferred Pipes', **kw):
+  def __init__(self, parent=None, mainWindow=None, title='Preferred Pipes', **kw):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
 
     self.parent = parent

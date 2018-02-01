@@ -723,7 +723,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                              , 'Select the executable file on preferences')
       if ok:
         from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-        pp = PreferencesPopup(preferences=self.application.preferences, project=self.project)
+        pp = PreferencesPopup(mainWindow=self.mainWindow, preferences=self.application.preferences)
         pp.tabWidget.setCurrentIndex(pp.tabWidget.count()-1)
         pp.exec_()
         return

@@ -1489,7 +1489,7 @@ class Framework:
     """
     from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
 
-    PreferencesPopup(preferences=self.preferences, project=self.project).exec_()
+    PreferencesPopup(mainWindow=self.ui.mainWindow, preferences=self.preferences).exec_()
 
   def getSavedLayoutPath(self):
     """Opens a saved Layout as dialog box and gets directory specified in the file dialog."""
@@ -1659,7 +1659,7 @@ class Framework:
     else:
       from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
       if self.current.strip:
-        popup = PeakFindPopup(mainWindow=self.ui.mainWindow)
+        popup = PeakFindPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
         popup.exec_()
         popup.raise_()
       else:
@@ -1913,7 +1913,7 @@ class Framework:
     if len(self.project.spectrumDisplays) == 0:
       MessageDialog.showWarning('', 'No Spectrum Display found')
     else:
-      SelectSpectrumDisplayPopup(project=self.project).exec_()
+      SelectSpectrumDisplayPopup(mainWindow=self.ui.mainWindow).exec_()
       # PrintSpectrumDisplayPopup(project=self.project).exec_()
 
   def toggleToolbar(self):

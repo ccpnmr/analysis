@@ -45,10 +45,12 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 class ProjectSummaryPopup(CcpnDialog):
-  def __init__(self, project, parent=None, title='Project Summary', modal=False, **kw):
+  def __init__(self, parent=None, mainWindow=None, title='Project Summary', modal=False, **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
-    self.project = project
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
 
     # self.setContentsMargins(15,15,15,15)
     # QtWidgets.QDialog.__init__(self, parent=parent)

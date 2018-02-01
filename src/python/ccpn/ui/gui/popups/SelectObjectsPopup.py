@@ -36,19 +36,23 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 class SelectObjectsPopup(CcpnDialog):
-  def __init__(self, parent=None, project=None
+  def __init__(self, parent=None, mainWindow=None
                , dim=None, objects=None
                , title='Select Objects', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
+    self.mainWindow = mainWindow
+    self.project = self.mainWindow.project
+    self.application =  self.mainWindow.application
+
     self.parent = parent
     if len(objects)>0:
-      if project.getByPid(objects[0]._pluralLinkName) == 'spectra':
-        objects = [spectrum.pid for spectrum in project.spectra if len(spectrum.axisCodes) >= dim]
+      if self.project.getByPid(objects[0]._pluralLinkName) == 'spectra':
+        objects = [spectrum.pid for spectrum in self.project.spectra if len(spectrum.axisCodes) >= dim]
       else:
         objects=[object.pid for object in objects]
 
-      label1a = Label(self, text="Selected %s" % project.getByPid(objects[0])._pluralLinkName, grid=(0, 0))
+      label1a = Label(self, text="Selected %s" % self.project.getByPid(objects[0])._pluralLinkName, grid=(0, 0))
       objects.insert(0, '  ')
       self.objectPulldown = PulldownList(self, grid=(1, 0), callback=self._selectObject)
       self.objectPulldown.setData(objects)

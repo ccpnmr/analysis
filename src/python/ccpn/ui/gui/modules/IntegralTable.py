@@ -65,12 +65,10 @@ class IntegralTableModule(CcpnModule):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
+    # TODO:ED check what settings are needed and set to True above if needed
+    # self._ITwidget = Widget(self.settingsWidget, setLayout=True,
+    #                         grid=(0, 0), vAlign='top', hAlign='left')
 
-    self._ITwidget = Widget(self.settingsWidget, setLayout=True,
-                            grid=(0, 0), vAlign='top', hAlign='left')
-
-
-    
     self.integralTable = IntegralTable(parent=self.mainWidget
                                        , mainWindow=self.mainWindow
                                        , moduleParent=self

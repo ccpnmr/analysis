@@ -84,8 +84,9 @@ class RestraintTableModule(CcpnModule):
                                              orientation = 'left',
                                              labelText='Display(s):',
                                              tipText = 'SpectrumDisplay modules to respond to double-click',
-                                             texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
+                                             texts=[ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
                                              )
+    self.displaysWidget.setPreSelect(self._fillDisplayWidget)
     self.displaysWidget.setFixedHeigths((None, None, 40))
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -129,6 +130,10 @@ class RestraintTableModule(CcpnModule):
 
     # install the event filter to handle maximising from floated dock
     self.installMaximiseEventHandler(self._maximise)
+
+  def _fillDisplayWidget(self):
+    list = [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
+    self.displaysWidget.setItems(list)
 
   def _maximise(self):
     """

@@ -111,6 +111,7 @@ class NmrResidueTableModule(CcpnModule):
                                              texts=[ALL] + displayText)
     self.displaysWidget.setFixedHeigths((None, None, 40))
     self.displaysWidget.pulldownList.set(ALL)
+    self.displaysWidget.setPreSelect(self._fillDisplayWidget)
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
                                              self._NTSwidget,
@@ -155,6 +156,10 @@ class NmrResidueTableModule(CcpnModule):
     # install the event filter to handle maximising from floated dock
     self.installMaximiseEventHandler(self._maximise)
     # self.mainWidget.layout().setVerticalSpacing(0)
+
+  def _fillDisplayWidget(self):
+    list = [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
+    self.displaysWidget.setItems(list)
 
   def _maximise(self):
     """

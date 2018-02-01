@@ -138,16 +138,27 @@ class ListCompoundWidget(CompoundBaseWidget):
       self.setFixedWidths(fixedWidths)
 
   def setPreSelect(self, callBack=None):
+    """
+    Add a user callback to the pulldown that fires on a mouse click.
+    facilitates populating the pulldown list just before it opens
+    :param callBack = method to call on click:
+    """
     if callBack:
       self.pulldownList.installEventFilter(self)
       self._callBack = callBack
 
   def eventFilter(self, target, event):
+    """
+    call the user callback when the pulldown has been clicked
+    """
     if target == self.pulldownList and event.type() == QtCore.QEvent.MouseButtonPress:
       self._callBack()
     return False
 
   def setItems(self, list):
+    """
+    set the list of items in the pulldown
+    """
     self.pulldownList.clear()
     self.pulldownList.addItems(list)
 

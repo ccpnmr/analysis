@@ -162,8 +162,9 @@ class StructureTableModule(CcpnModule):
                                              orientation = 'left',
                                              labelText='Display(s):',
                                              tipText = 'SpectrumDisplay modules to respond to double-click',
-                                             texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
+                                             texts=[ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
                                              )
+    self.displaysWidget.setPreSelect(self._fillDisplayWidget)
     self.displaysWidget.setFixedHeigths((None, None, 40))
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -204,6 +205,10 @@ class StructureTableModule(CcpnModule):
 
     if structureEnsemble is not None:
       self.selectStructureEnsemble(structureEnsemble)
+
+  def _fillDisplayWidget(self):
+    list = [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
+    self.displaysWidget.setItems(list)
 
   def selectStructureEnsemble(self, structureEnsemble=None):
     """

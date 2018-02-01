@@ -88,6 +88,7 @@ class ChemicalShiftTableModule(CcpnModule):
                                              tipText = 'SpectrumDisplay modules to respond to double-click',
                                              texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
                                              )
+    self.displaysWidget.setPreSelect(self._fillDisplayWidget)
     self.displaysWidget.setFixedHeigths((None, None, 40))
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -131,6 +132,10 @@ class ChemicalShiftTableModule(CcpnModule):
       self.selectChemicalShiftList(chemicalShiftList)
 
     self.installMaximiseEventHandler(self._maximise)
+
+  def _fillDisplayWidget(self):
+    list = [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
+    self.displaysWidget.setItems(list)
 
   def _maximise(self):
     """

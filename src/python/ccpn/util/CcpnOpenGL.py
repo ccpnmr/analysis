@@ -429,7 +429,7 @@ attribute vec2 offset;
 
 void main()
 {
-  gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+  gl_Position = pMatrix * mvMatrix * (gl_Vertex * 5 * axisScale + vec4(offset, 0.0, 0.0));
   gl_TexCoord[0] = gl_MultiTexCoord0;
   FC = gl_Color;
 }

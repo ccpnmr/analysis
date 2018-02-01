@@ -1,4 +1,5 @@
 """
+Module Documentation Here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -187,12 +188,21 @@ def _ccpnModulesImporter(path):
   from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
   for loader, name, isPpkg in _pkgutil.walk_packages(path):
-    module = loader.find_module(name).load_module(name)
+    print ('>>>loading', name)
+    findModule = loader.find_module(name)
+    print ('>>>find', findModule)
+    try:
+      module = findModule.load_module(name)
+    except Exception as es:
+      print (str(es))
+    print ('>>>found')
     for i, obj in _inspect.getmembers(module):
       if _inspect.isclass(obj):
         if issubclass(obj, CcpnModule):
           if hasattr(obj, 'className'):
+            print ('>>>     end')
             _ccpnModules.append(obj)
+            print ('>>>     append')
   return _ccpnModules
 
 

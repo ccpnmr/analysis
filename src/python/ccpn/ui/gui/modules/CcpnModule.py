@@ -485,8 +485,10 @@ class CcpnModule(Dock, DropBase):
       self._instances.remove(ref(self))
 
     getLogger().debug('Closing %s' % str(self.container()))
-    super(CcpnModule, self).close()   # ejb - remove recursion when closing table from commandline
-
+    try:
+      self.deleteLater()   # ejb - remove recursion when closing table from commandline
+    except Exception as es:
+      print ('>>>delete CcpnModule Error')
 
   def dragMoveEvent(self, *args):
     DockDrop.dragMoveEvent(self, *args)

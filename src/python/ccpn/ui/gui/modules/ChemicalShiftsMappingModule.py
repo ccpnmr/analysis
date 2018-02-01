@@ -30,7 +30,6 @@ __date__ = "$Date: 2017-04-07 10:28:43 +0000 (Fri, April 07, 2017) $"
 
 from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
-import pyqtgraph as pg
 
 import os
 import numpy as np
@@ -104,7 +103,9 @@ PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 
 
 class CustomNmrResidueTable(NmrResidueTable):
-  ''' Custon nmrResidue Table with extra Delta Shifts column'''
+  """
+  Custon nmrResidue Table with extra Delta Shifts column
+  """
   deltaShiftsColumn = ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None)
 
   # columnDefs = [
@@ -705,10 +706,10 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
   def _showOnMolecularViewer(self):
-    ''' 
+    """
     1) write the script in the scripts/pymol dir
     2) run pymol with the script
-    '''
+    """
     import json
     import subprocess
 

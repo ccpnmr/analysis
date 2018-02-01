@@ -1,7 +1,6 @@
-'''
+"""
 Reimplementation of PyQtGraph
-
-'''
+"""
 
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -14,6 +13,7 @@ from ccpn.ui.gui.exporters1D.TextExporter import TextExporter
 ExporterList = {'1D': [ImageExporter, SVGExporter, TextExporter],
                 'nD': [SVGExporter]
                 }
+
 
 class CustomExportDialog(QtWidgets.QDialog):
   def __init__(self, scene, titleName=None, spectrumDimension=None ):

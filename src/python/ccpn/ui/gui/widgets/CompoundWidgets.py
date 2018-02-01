@@ -137,6 +137,20 @@ class ListCompoundWidget(CompoundBaseWidget):
     if fixedWidths is not None:
       self.setFixedWidths(fixedWidths)
 
+  def setPreSelect(self, callBack=None):
+    if callBack:
+      self.pulldownList.installEventFilter(self)
+      self._callBack = callBack
+
+  def eventFilter(self, target, event):
+    if target == self.pulldownList and event.type() == QtCore.QEvent.MouseButtonPress:
+      self._callBack()
+    return False
+
+  def setItems(self, list):
+    self.pulldownList.clear()
+    self.pulldownList.addItems(list)
+
   def showPulldownList(self, show):
     if show:
       self.pulldownList.show()

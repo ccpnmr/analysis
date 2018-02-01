@@ -33,7 +33,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from weakref import ref
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
-
+from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from pyqtgraph.dockarea.DockArea import TempAreaWindow
@@ -485,10 +485,19 @@ class CcpnModule(Dock, DropBase):
       self._instances.remove(ref(self))
 
     getLogger().debug('Closing %s' % str(self.container()))
+
+    if not self._container:
+      area = self.mainWindow.moduleArea
+      if area:
+        if area._container is None:
+          for i in area.children():
+            if isinstance(i, Container):
+              self._container = i
     try:
-      self.deleteLater()   # ejb - remove recursion when closing table from commandline
+      super(CcpnModule, self).close()
+      # self.deleteLater()   # ejb - remove recursion when closing table from commandline
     except Exception as es:
-      print ('>>>delete CcpnModule Error')
+      getLogger().debug('>>>delete CcpnModule Error %s' %es)
 
   def dragMoveEvent(self, *args):
     DockDrop.dragMoveEvent(self, *args)

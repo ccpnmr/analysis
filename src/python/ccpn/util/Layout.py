@@ -265,7 +265,6 @@ def _getAvailableModules(mainWindow, layout):
       applicationName = getattr(layout.general, ApplicationName)
       modules = []
       if applicationName != mainWindow.application.applicationName:
-        # TODO Needs to go in the logger
         getLogger().debug('Same modules could not be loaded. Different application. Start a new project with %s' %applicationName)
       else:
         modules = _getApplicationSpecificModules(mainWindow, applicationName)
@@ -291,6 +290,7 @@ def restoreLayout(mainWindow, layout):
 
   except Exception as e:
     getLogger().warning("Failed to restore Layout")
+
 
   ## restore the layout positions and sizes
   try:

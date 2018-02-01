@@ -77,7 +77,10 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     textColour = colours[LabelFG]
     self.colourLabel = hexToRgb(textColour)
     self._dropArea  = None # Needed to know where to add a newmodule when dropping a pid from sideBar
-
+    if self._container is None:
+      for i in self.children():
+        if isinstance(i, Container):
+          self._container = i
 
   # def dragMoveEvent(self, event:QtGui.QMouseEvent):
   #   event.accept()
@@ -340,6 +343,16 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     # self.movePythonConsole()
     self.mainWindow.application.ccpnModules = self.ccpnModules
     return module
+
+  def getContainer(self, obj):
+    if obj is None:
+      return self
+    if obj.container() is None:
+      for i in self.children():
+        if isinstance(i, Container):
+          self._container = i
+    return obj.container()
+
 
   # def movePythonConsole(self):
   #   if 'PYTHON CONSOLE' in self.findAll()[1]:

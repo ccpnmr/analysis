@@ -24,14 +24,22 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
 
-class CcpnWebView(QWebEngineView):
+class CcpnWebView(CcpnModule):
 
-  def __init__(self, urlPath, parent=None):
-    QWebEngineView.__init__(self, parent)
+  className = 'CcpnWebView'
 
-    urlPath = 'file://'+urlPath     # ejb - new webengine needs to prefix
-    self.load(QUrl(urlPath))
+  def __init__(self, mainWindow=None, name='CcpNmr V3 Documentation', urlPath=None):
+    """
+    Initialise the Module widgets
+    """
+    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-    self.show()
+    self.webView = QWebEngineView()
+    self.addWidget(self.webView, 0, 0, 1, 1)  # make it the first item
+
+    urlPath = 'file://'+urlPath               # webEngine needs to prefix
+    self.webView.load(QUrl(urlPath))
+    self.webView.show()

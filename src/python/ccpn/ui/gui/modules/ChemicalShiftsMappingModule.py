@@ -523,8 +523,8 @@ class ChemicalShiftsMapping(CcpnModule):
     xs = []
     ys = []
     obs = []
-    self.disappereadX = []
-    self.disappereadY = []
+    self.disappearedX = []
+    self.disappearedY = []
     self.disappereadObjects = []
     self.aboveX = []
     self.aboveY = []
@@ -555,8 +555,8 @@ class ChemicalShiftsMapping(CcpnModule):
                       y = self.disappearedBarThresholdSpinBox.value()
                     else:
                       y = 0
-                  self.disappereadY.append(y)
-                  self.disappereadX.append(x)
+                  self.disappearedY.append(y)
+                  self.disappearedX.append(x)
                   self.disappereadObjects.append(nmrResidue)
                   nmrResidue.missingPeaks = True
             if nmrResidue._deltaShift:
@@ -611,8 +611,8 @@ class ChemicalShiftsMapping(CcpnModule):
                                    belowObjects=self.belowObjects,
                                    belowBrush=self.belowBrush,
                                    aboveBrush=self.aboveBrush,
-                                   disappearedX = self.disappereadX,
-                                   disappearedY=self.disappereadY,
+                                   disappearedX = self.disappearedX,
+                                   disappearedY=self.disappearedY,
                                    disappearedObjects = self.disappereadObjects,
                                    disappearedBrush = self.disappearedPeakBrush,
                                    )
@@ -678,8 +678,8 @@ class ChemicalShiftsMapping(CcpnModule):
     # selectedAtomNames = [cb.text() for cb in self.atomCheckBoxes if cb.isChecked()]
     selectedAtomNames = [rb.getSelectedText() for rb in self.atomRadioButtons if rb.getSelectedText()]
     if self.nmrResidueTable:
-      if self.nmrResidueTable.nmrChain:
-        for nmrResidue in self.nmrResidueTable.nmrChain.nmrResidues:
+      if self.nmrResidueTable._nmrChain:
+        for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
 
           spectra = self.spectraSelectionWidget.getSelections()
           self._updatedPeakCount(nmrResidue, spectra)
@@ -690,7 +690,7 @@ class ChemicalShiftsMapping(CcpnModule):
             nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
           else:
             nmrResidue._deltaShift = None
-        self.updateTable(self.nmrResidueTable.nmrChain)
+        self.updateTable(self.nmrResidueTable._nmrChain)
         self.updateBarGraph()
 
 
@@ -739,7 +739,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     aboveThresholdResidues = "+".join([str(x) for x in self.aboveX])
     belowThresholdResidues = "+".join([str(x) for x in self.belowX])
-    missingdResidues = "+".join([str(x) for x in self.disappereadX])
+    missingdResidues = "+".join([str(x) for x in self.disappearedX])
     selection = "+".join([str(x.sequenceCode) for x in self.current.nmrResidues])
 
     colourAboveThreshold = hexToRgb(self.aboveBrush)

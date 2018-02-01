@@ -2091,9 +2091,12 @@ class Framework:
       self._systemOpen(path)
     else:
       from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
-      self.newModule = CcpnModule(mainWindow=mainWindow, name=title)
-      view = CcpnWebView(path)
-      self.newModule.addWidget(view, 0, 0, 1, 1)      # make it the first item
+
+      self.newModule = CcpnWebView(mainWindow=mainWindow, name=title, urlPath=path)
+
+      # self.newModule = CcpnModule(mainWindow=mainWindow, name=title)
+      # view = CcpnWebView(path)
+      # self.newModule.addWidget(view, 0, 0, 1, 1)      # make it the first item
       # self.newModule.mainWidget = view      # ejb
 
       self.ui.mainWindow.moduleArea.addModule(self.newModule, position='top', relativeTo=mainWindow.moduleArea)

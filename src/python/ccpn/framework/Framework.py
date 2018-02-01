@@ -1978,16 +1978,17 @@ class Framework:
 
     openList = [m for m in PythonConsoleModule.getInstances()]
     # if 'Python Console' in mainWindow.moduleArea.findAll()[1]:
-    if openList:
-      if mainWindow.pythonConsoleModule.isVisible():
+    # if len(openList)>0:
+    if mainWindow.pythonConsoleModule is not None:
 
-        # TODO:ED causes a problem if the console is in a tempAreaWindow
-        mainWindow.pythonConsoleModule.hide()
-      else:
-        mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
+        if mainWindow.pythonConsoleModule.isVisible():
+
+          # TODO:ED causes a problem if the console is in a tempAreaWindow
+          mainWindow.pythonConsoleModule.hide()
+        else:
+          mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
+
     else:
-      #TODO:LUCA: put in a proper PythonConsoleModule file; have a method showPythonConsole(True/False);
-      # initialise in GuiMainWindow on __init__; set appropriate Menu callbacks
       action = self._findMenuAction('View', 'Python Console')
       closeFunc = action.trigger if action else None
       mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)

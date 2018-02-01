@@ -117,7 +117,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     # blank display opened later by the _initLayout if there is nothing to show otherwise
     # self.newBlankDisplay()
-
+    self.pythonConsoleModule = None
     self.statusBar().showMessage('Ready')
     self.mouseMode = SELECT
     self.show()

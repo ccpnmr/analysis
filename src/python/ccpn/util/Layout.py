@@ -274,6 +274,36 @@ def _getAvailableModules(mainWindow, layout):
       return ccpnModules
 
 
+def _traverse(o, tree_types=(list, tuple)):
+  '''used to flat the state in a long list '''
+  if isinstance(o, tree_types):
+    for value in o:
+      for subvalue in _traverse(value, tree_types):
+        yield subvalue
+  else:
+    yield o
+
+def _getModuleNamesFromState(layoutState):
+  ''' '''
+  mains = layoutState['main']
+  flts = layoutState['float']
+
+  lls = []
+  lls += list(_traverse(mains))
+  lls += list(_traverse(flts))
+
+  for i in list(_traverse(flts)):
+    if isinstance(i, dict):
+      if 'main' in i:
+        lls += list(_traverse(i['main']))
+
+  excludingList = ['vertical', 'dock', 'horizontal', 'main', 'sizes','float']
+  names = [i for i in lls if i not in excludingList if isinstance(i, str)
+          ]
+
+
+  return names
+
 def restoreLayout(mainWindow, layout):
   ## import all the ccpnModules classes specific for the application.
   # mainWindow.moduleArea._closeAll()
@@ -291,12 +321,20 @@ def restoreLayout(mainWindow, layout):
   except Exception as e:
     getLogger().warning("Failed to restore Layout")
 
-
-  ## restore the layout positions and sizes
-  try:
-    if LayoutState in layout:
-      state = getattr(layout, LayoutState)
-      mainWindow.moduleArea.restoreState(state)
-
-  except Exception as e:
-    getLogger().warning("Layout error: %s" % e)
+  if LayoutState in layout:
+    # Very important step:
+    # Checks if the all the modules opened are apresent in the layout state. If not, will not restore the geometries
+    state = getattr(layout, LayoutState)
+    namesFromState = _getModuleNamesFromState(state)
+    openedModulesName =[i.name() for i in mainWindow.moduleArea.ccpnModules]
+    compare = list( set(namesFromState) & set(openedModulesName))
+    print('namesFromState', sorted(namesFromState))
+    print('compare   @@@',sorted(compare))
+    print('openedModulesName',sorted(openedModulesName))
+    if len(compare) == len(openedModulesName):
+      try:
+        mainWindow.moduleArea.restoreState(state)
+      except Exception as e:
+        getLogger().warning("Layout error: %s" % e)
+    else:
+      getLogger().warning("Layout error: Some of the modules are missing. Geometries could not be restored")

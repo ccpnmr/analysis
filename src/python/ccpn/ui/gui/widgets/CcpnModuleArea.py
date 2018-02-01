@@ -381,10 +381,10 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       module._closeModule()
 
   def saveState(self):
-    # FIXME. Crashes if no modules
     """
     Return a serialized (storable) representation of the state of
     all Docks in this DockArea."""
+
     state = {}
     try:
       state = {'main': self.childState(self.topContainer), 'float': []}

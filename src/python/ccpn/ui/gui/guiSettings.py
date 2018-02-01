@@ -88,7 +88,8 @@ messageFont           = helvetica14        # use in popup messages; does not see
 # Colours
 LIGHT = 'light'
 DARK = 'dark'
-COLOUR_SCHEMES = (LIGHT, DARK)
+DEFAULT = 'default'
+COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
 LabelFG = 'LabelFG'
 
 MARK_LINE_COLOUR_DICT = {
@@ -148,6 +149,11 @@ def getColours():
     textColour = '#555D85'
     colourDict[LabelFG] = textColour
     colourDict['LabelBG'] = '#FBF4CC'
+
+  elif colourScheme == DEFAULT:
+    textColour = '#000000'
+    colourDict[LabelFG] = textColour
+    colourDict['LabelBG'] = '#000000'
 
   else:
     raise RuntimeError('Undefined colour scheme')

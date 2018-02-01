@@ -71,7 +71,9 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
     self.textLabel = DropAreaLabel
     self.fontLabel = Font('Helvetica', 36, bold=False)
-    self.colourLabel = hexToRgb('#bec4f3')
+    colours = getColours()
+    textColour = colours[LabelFG]
+    self.colourLabel = hexToRgb(textColour)
     self._dropArea  = None # Needed to know where to add a newmodule when dropping a pid from sideBar
 
 

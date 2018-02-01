@@ -178,31 +178,31 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
 
 
 def _ccpnModulesImporter(path):
-  '''
+  """
   :param path: fullPath of the directory where are located the CcpnModules files
   :return: list of CcpnModule classes
-  '''
+  """
   _ccpnModules = []
   import pkgutil as _pkgutil
   import inspect as _inspect
   from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
   for loader, name, isPpkg in _pkgutil.walk_packages(path):
-    print ('>>>loading', name)
+    # print ('>>>loading', name)
     findModule = loader.find_module(name)
-    print ('>>>find', findModule)
+    # print ('>>>find', findModule)
     try:
       module = findModule.load_module(name)
     except Exception as es:
       print (str(es))
-    print ('>>>found')
+    # print ('>>>found')
     for i, obj in _inspect.getmembers(module):
       if _inspect.isclass(obj):
         if issubclass(obj, CcpnModule):
           if hasattr(obj, 'className'):
-            print ('>>>     end')
+            # print ('>>>     end')
             _ccpnModules.append(obj)
-            print ('>>>     append')
+            # print ('>>>     append')
   return _ccpnModules
 
 

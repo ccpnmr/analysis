@@ -500,7 +500,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                  , checkable=True, checked=visible
                                  , callback=partial(self._showSideBarModule, self.sideBar, self)))
 
-    for module in self.moduleArea.openedModules:
+    for module in self.moduleArea.ccpnModules:
       moduleSize = module.size()
       visible = moduleSize.width() != 0 and moduleSize.height() != 0
 
@@ -532,7 +532,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     if e.key() == QtCore.Qt.Key_Escape:
       # Reset Mouse Mode
-      mode = self.mouseMode
+      mode = self.mouseModemmm
       if mode != SELECT:
         self.setMouseMode(SELECT)
 

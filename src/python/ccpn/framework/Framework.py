@@ -232,6 +232,7 @@ class Framework:
     self.applicationVersion = applicationVersion
     self.revision = Version.revision
     self.plugins = []  # Hack for now, how should we store these?
+    self.ccpnModules = []
 
     printCreditsText(sys.stderr, applicationName, applicationVersion)
 

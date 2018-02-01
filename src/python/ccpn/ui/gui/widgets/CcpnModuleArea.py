@@ -67,6 +67,8 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     self.setContentsMargins(0, 0, 0, 0)
     self.currentModuleNames = []
     self._modulesNames = {}
+    self._ccpnModules = []
+
     self.setAcceptDrops(True)
 
     self.textLabel = DropAreaLabel
@@ -192,7 +194,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     p.end()
 
   def _updateModuleNames(self):
-    for module in self.openedModules:
+    for module in self.ccpnModules:
       self._setSerial(module)
 
   def _setSerial(self, module):
@@ -210,17 +212,24 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
 
   @property
-  def openedModules(self) -> list:
+  def ccpnModules(self) -> list:
     'return all current modules in area'
+    return self._ccpnModules
+    # if self is not None:
+    #   modules = list(self.findAll()[1].values())
+    #   return modules
+
+  @ccpnModules.getter
+  def ccpnModules(self):
     if self is not None:
-      modules = list(self.findAll()[1].values())
-      return modules
+      ccpnModules = list(self.findAll()[1].values())
+      return ccpnModules
 
   def repopulateModules(self):
     """
     Repopulate all modules to globally refresh all pulldowns, etc.
     """
-    modules = self.openedModules
+    modules = self.ccpnModules
     for module in modules:
       if hasattr(module, '_repopulateModule'):
         module._repopulateModule()
@@ -239,6 +248,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
      when re-add a new module it makes sure there is a container available.
     """
     self._updateModuleNames()
+
     if not module._restored:
       if not isinstance(module, GuiSpectrumDisplay):  #
         self._setSerial(module)
@@ -328,6 +338,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     # self.modules[CcpnModule.name(module)] = module
     self.modules[module.name()] = module                # ejb - testing
     # self.movePythonConsole()
+    self.mainWindow.application.ccpnModules = self.ccpnModules
     return module
 
   # def movePythonConsole(self):
@@ -353,7 +364,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
         self.home.removeTempArea(self)
 
   def _closeAll(self):
-    for module in self.openedModules:
+    for module in self.ccpnModules:
       module._closeModule()
 
   def saveState(self):

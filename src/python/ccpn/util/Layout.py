@@ -124,7 +124,7 @@ def _updateGuiModules(mainWindow, layout):
   :return: #updates classNameModuleNameTupleList on layout with list of tuples [(className, ModuleName), (className, ModuleName)]
   list of tuples because a multiple modules of the same class type can exist. E.g. two peakListTable modules! 
   """
-  guiModules = mainWindow.moduleArea.openedModules
+  guiModules = mainWindow.moduleArea.ccpnModules
 
   classNames_ModuleNames = [] #list of tuples [(className, ModuleName), (className, ModuleName)]
   for module in guiModules:

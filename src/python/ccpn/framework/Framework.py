@@ -1003,14 +1003,17 @@ class Framework:
 
   def openProject(self, path=None):
     project = self.ui.mainWindow.loadProject(projectDir=path)
-    try:
-      project._mainWindow.show()
-      QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+    if project:
+      try:
+        project._mainWindow.show()
+        QtWidgets.QApplication.setActiveWindow(project._mainWindow)
 
-    except Exception as es:
-      getLogger().warning('Error opening project:', str(es))
-    finally:
-      return project
+      except Exception as es:
+        getLogger().warning('Error opening project:', str(es))
+      finally:
+        return project
+    else:
+      return None
 
   def loadProject(self, path=None):
     """

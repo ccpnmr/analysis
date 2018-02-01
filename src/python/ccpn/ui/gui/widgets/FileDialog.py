@@ -66,7 +66,7 @@ class FileDialog(QtWidgets.QFileDialog):
     self.setFileMode(fileMode)
     self.setAcceptMode(acceptMode)
     if filter is not None:
-     self.setFilter(filter)
+     self.setNameFilter(filter)
 
     if selectFile is not None:    # ejb - populates fileDialog with a suggested filename
       self.selectFile(selectFile)
@@ -107,6 +107,7 @@ class FileDialog(QtWidgets.QFileDialog):
       funcName = staticFunctionDict[(acceptMode, fileMode)]
       self.result = getattr(self, funcName)(caption=text, **kw)
     else:
+      self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
       self.result = self.exec_()
 
   # overrides Qt function, which does not pay any attention to whether Cancel button selected

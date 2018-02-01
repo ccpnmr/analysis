@@ -559,7 +559,9 @@ class GuiSpectrumDisplay(CcpnModule):
     if widgets:
       thisLayout = self.stripFrame.layout()
       thisLayoutWidth = self.stripFrame.width()
-      if not self.lastAxisOnly:
+
+      # TODO:ED doesn't update when resizing
+      if not self.lastAxisOnly or True:
         maxCol = 0
         for wid in widgets[1:]:
           index = thisLayout.indexOf(wid)

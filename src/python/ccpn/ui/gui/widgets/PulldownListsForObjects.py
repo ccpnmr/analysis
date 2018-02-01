@@ -93,11 +93,12 @@ class _Pulldown(PulldownListCompoundWidget):
                                                 sizeAdjustPolicy=sizeAdjustPolicy,
                                                 callback=callback, default=default, **kwds)
         # add a notifier to update the pulldown list
-        self.updatePulldownList(project
-                                , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                , self.className
-                                , self._getPids)
-                                # , getPids, self.attributeName)
+        if project:
+          self.updatePulldownList(project
+                                  , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
+                                  , self.className
+                                  , self._getPids)
+                                  # , getPids, self.attributeName)
 
     def __str__(self):
         return '<PulldownListCompoundWidget for "%s">' % self.className

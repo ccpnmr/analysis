@@ -194,7 +194,7 @@ def _ccpnModulesImporter(path):
     try:
       module = findModule.load_module(name)
     except Exception as es:
-      getLogger().debug('Error loading module: %s' % str(es))
+      getLogger().warning('Error loading module: %s' % str(es))
     # print ('>>>found')
     for i, obj in _inspect.getmembers(module):
       if _inspect.isclass(obj):

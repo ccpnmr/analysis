@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b2 $"
+__version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +30,7 @@ import sys
 import string
 
 # PATH1 = '/Users/wb104/miniconda3/envs/ccpnmr_dist'
-# PATH2 = '/Users/wb104/release/ccpnmr3.0.b2/miniconda'
+# PATH2 = '/Users/wb104/release/ccpnmr3.0.b3/miniconda'
 
 # Search through the /bin and /lib subdirectories of /miniconda
 # and point the paths to the correct place

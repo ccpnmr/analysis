@@ -471,17 +471,19 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
       with progressManager(self.mainWindow, 'Loading...'):
         objects = self.project.loadData(url)
+        print(objects)
+        if objects is not None:
 
-      # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner
-      for obj in objects:
-        if isinstance(obj, Project):
-          try:
-            obj._mainWindow.sideBar.fillSideBar(obj)
-            obj._mainWindow.show()
-            QtWidgets.QApplication.setActiveWindow(obj._mainWindow)
+          # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner
+          for obj in objects:
+            if isinstance(obj, Project):
+              try:
+                obj._mainWindow.sideBar.fillSideBar(obj)
+                obj._mainWindow.show()
+                QtWidgets.QApplication.setActiveWindow(obj._mainWindow)
 
-          except Exception as es:
-            getLogger().warning('Error', str(es))
+              except Exception as es:
+                getLogger().warning('Error', str(es))
 
       # if objects is None or len(objects) == 0:
       #   showWarning('Invalid File', 'Cannot handle "%s"' % url)

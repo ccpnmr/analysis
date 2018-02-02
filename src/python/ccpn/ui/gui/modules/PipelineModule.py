@@ -606,7 +606,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     color = QtGui.QColor('Red')
     header = QtWidgets.QListWidgetItem(DropHereLabel)
     header.setFlags(QtCore.Qt.NoItemFlags)
-    header.setTextColor(color)
+    header.setBackground(color)
     return header
 
   def _createAllSettingWidgets(self):
@@ -624,8 +624,8 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     self.inputDataList.addItem(self._getInputDataHeaderLabel())
     self.settingsWidgets.append(self.inputDataList)
-    self.connect(self.inputDataList, QtCore.SIGNAL("dropped"), self._itemsDropped)
-
+    # self.connect(self.inputDataList, QtCore.SIGNAL("dropped"), self._itemsDropped)
+    self.inputDataList.dropped.connect(self._itemsDropped)
     #
     self.autoLabel = Label(self, 'Auto Run')
     self.settingsWidgets.append(self.autoLabel)

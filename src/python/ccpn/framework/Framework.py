@@ -469,7 +469,7 @@ class Framework:
             layout = json.load(fp, object_hook=AttrDict)
             self.layout = layout
         else: # opens the default
-          Layout._createLayoutFile(self.project)
+          Layout._createLayoutFile(self)
           self._getUserLayout()
     except Exception as e:
       getLogger().warning('No layout found. %s' %e)

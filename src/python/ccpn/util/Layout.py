@@ -84,10 +84,16 @@ def createLayoutDirectory(project):
       os.makedirs(layoutDirectory)
       return layoutDirectory
 
-def _createLayoutFile(project):
+def _createLayoutFile(application):
   try:
+    project = application.project
     path =  getLayoutDirectoryPath(project.path)+'/'+DefaultLayoutFileName
     file = open(path, "w")
+    if General in DefaultLayoutFile:
+      if ApplicationName in DefaultLayoutFile[General]:
+        DefaultLayoutFile[General][ApplicationName] = application.applicationName
+      if ApplicationVersion in DefaultLayoutFile[General]:
+        DefaultLayoutFile[General][ApplicationVersion] = application.applicationVersion
     json.dump(DefaultLayoutFile, file, sort_keys=False, indent=4, separators=(',', ': '))
     file.close()
   except Exception as e:

@@ -4,7 +4,7 @@ Reimplementation of PyQtGraph
 
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
-from pyqtgraph.GraphicsScene.exportDialogTemplate_pyqt import Ui_Form
+from ccpn.ui.gui.exporters1D.exportDialogPyQTGraph import UiForm
 
 from ccpn.ui.gui.exporters1D.ImageExporter import ImageExporter
 from ccpn.ui.gui.exporters1D.SVGExporter import SVGExporter
@@ -30,7 +30,7 @@ class CustomExportDialog(QtWidgets.QDialog):
     # self.selectBox.hide()
     # self.scene.addItem(self.selectBox)
 
-    self.ui =  Ui_Form()
+    self.ui =  UiForm()
     self.ui.setupUi(self)
     self._setUiStyle()
 

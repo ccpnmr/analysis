@@ -145,7 +145,6 @@ def _updateFilenNames(mainWindow, layout):
 
     if len(names) > 0:
       if FileNames in layout:
-        print(names)
         setattr(layout, FileNames, names)
 
 

@@ -297,7 +297,7 @@ def _getModuleNamesFromState(layoutState):
       if 'main' in i:
         lls += list(_traverse(i['main']))
 
-  excludingList = ['vertical', 'dock', 'horizontal', 'main', 'sizes','float']
+  excludingList = ['vertical', 'dock', 'horizontal','tab', 'main', 'sizes','float']
   names = [i for i in lls if i not in excludingList if isinstance(i, str)
           ]
 

@@ -138,17 +138,15 @@ def _updateFilenNames(mainWindow, layout):
         file = pyModule.__file__
         if file:
           path = os.path.abspath(file)
-          paths.append(path)
-    if len(paths)>0:
-      for path in paths:
-        basename = ntpath.basename(path)
-        basenameList = os.path.splitext(basename)
-        if len(basenameList)>0:
-          names.append(basenameList[0])
+          basename = ntpath.basename(path)
+          basenameList = os.path.splitext(basename)
+          if len(basenameList)>0:
+            names.append(basenameList[0])
 
     if len(names) > 0:
       if FileNames in layout:
-          setattr(layout, FileNames, names)
+        print(names)
+        setattr(layout, FileNames, names)
 
 
 def _updateGuiModules(mainWindow, layout):

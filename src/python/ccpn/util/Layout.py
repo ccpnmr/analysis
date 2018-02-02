@@ -316,6 +316,9 @@ def restoreLayout(mainWindow, layout):
     if GuiModules in layout:
       if ClassNameModuleName in layout.guiModules:
         classNameGuiModuleNameList = getattr(layout.guiModules, ClassNameModuleName)
+        if not list(_traverse(classNameGuiModuleNameList)):
+          return
+        print('classNameGuiModuleNameList', classNameGuiModuleNameList)
         for classNameGuiModuleName in classNameGuiModuleNameList:
           if len(classNameGuiModuleName) == 2:
             className, guiModuleName = classNameGuiModuleName
@@ -328,6 +331,8 @@ def restoreLayout(mainWindow, layout):
     # Very important step:
     # Checks if the all the modules opened are apresent in the layout state. If not, will not restore the geometries
     state = getattr(layout, LayoutState)
+    if not state:
+      return
     namesFromState = _getModuleNamesFromState(state)
     openedModulesName =[i.name() for i in mainWindow.moduleArea.ccpnModules]
     compare = list( set(namesFromState) & set(openedModulesName))

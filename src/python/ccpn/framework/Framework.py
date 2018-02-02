@@ -2206,7 +2206,7 @@ def getSaveDirectory(parent, preferences=None):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
 
   dialog = FileDialog(parent=parent, fileMode=FileDialog.AnyFile, text='Save Project As',
-                      acceptMode=FileDialog.AcceptSave, preferences=preferences, filter='*.ccpn',
+                      acceptMode=FileDialog.AcceptSave, preferences=preferences,
                       restrictDirToFilter=False)
   newPath = dialog.selectedFile()
   if not newPath:

@@ -35,8 +35,9 @@ from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.util.Logging import getLogger
 import collections
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.guiSettings import getColourScheme, getColours, LabelFG
@@ -417,18 +418,20 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     restore the arrangement of an existing set of Docks.
 
     """
+    modulesNames = [m.name() for m in self.ccpnModules]
+
     if 'main' in state:
       ## 1) make dict of all docks and list of existing containers
       containers, docks = self.findAll()
       oldTemps = self.tempAreas[:]
 
       # 2) create container structure, move docks into new containers
-      self.buildFromState(state['main'], docks, self)
+      self._buildFromState(modulesNames, state['main'], docks, self)
 
       ## 3) create floating areas, populate
       for s in state['float']:
         a = self.addTempArea()
-        a.buildFromState(s[0]['main'], docks, a)
+        a._buildFromState(modulesNames,s[0]['main'], docks, a)
         a.win.setGeometry(*s[1])
 
       ## 4) Add any remaining docks to the bottom
@@ -445,16 +448,23 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
           a.apoptose()
 
 
-  def buildFromState(self, state, docks, root, depth=0):
+  def _buildFromState(self, openedModulesNames, state, docks, root, depth=0):
 
     typ, contents, state = state
     pfx = "  " * depth
     if typ == 'dock':
-      try:
+      # try:
+      if contents in openedModulesNames:
         obj = docks[contents]
         del docks[contents]
-      except KeyError:
-        raise Exception('Cannot restore dock state; no dock with name "%s"' % contents)
+      else:
+        obj = CcpnModule(self.mainWindow, contents)
+        obj.className = 'Failed'
+        label = Label(obj, 'Failed to restore %s'%contents)
+        obj.addWidget(label)
+
+      # except KeyError:
+      #   raise Exception('Cannot restore dock state; no dock with name "%s"' % contents)
     else:
       obj = self.makeContainer(typ)
 
@@ -465,7 +475,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
     if typ != 'dock':
       for o in contents:
-        self.buildFromState(o, docks, obj, depth + 1)
+        self._buildFromState(openedModulesNames, o, docks, obj, depth + 1)
       obj.apoptose(propagate=False)
       obj.restoreState(state)  ## this has to be done later?
 

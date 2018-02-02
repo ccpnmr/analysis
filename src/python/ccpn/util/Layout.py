@@ -285,21 +285,24 @@ def _traverse(o, tree_types=(list, tuple)):
 
 def _getModuleNamesFromState(layoutState):
   ''' '''
-  mains = layoutState['main']
-  flts = layoutState['float']
+  names = []
+  if not layoutState:
+    return names
 
   lls = []
-  lls += list(_traverse(mains))
-  lls += list(_traverse(flts))
-
-  for i in list(_traverse(flts)):
-    if isinstance(i, dict):
-      if 'main' in i:
-        lls += list(_traverse(i['main']))
+  if 'main' in layoutState:
+   mains = layoutState['main']
+   lls += list(_traverse(mains))
+  if 'float' in layoutState:
+   flts = layoutState['float']
+   lls += list(_traverse(flts))
+   for i in list(_traverse(flts)):
+      if isinstance(i, dict):
+        if 'main' in i:
+          lls += list(_traverse(i['main']))
 
   excludingList = ['vertical', 'dock', 'horizontal','tab', 'main', 'sizes','float']
-  names = [i for i in lls if i not in excludingList if isinstance(i, str)
-          ]
+  names = [i for i in lls if i not in excludingList if isinstance(i, str)]
 
 
   return names

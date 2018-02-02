@@ -231,7 +231,6 @@ def _ccpnModulesImporter(path, neededModules):
       try:
         findModule = loader.find_module(name)
         # for neededModule in neededModules:
-        print(findModule.name, name,'FINDER')
         module = findModule.load_module(name)
       # print ('>>>found')
         for i, obj in _inspect.getmembers(module):

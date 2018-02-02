@@ -139,6 +139,10 @@ class SpectrumPropertiesPopup(CcpnDialog):
         if t is not None:
           changes = t._changes
           self._applyAllChanges(changes)
+          if self.spectrum:
+            for specViews in self.spectrum.spectrumViews:
+              specViews.buildContours = True
+              specViews.update()
 
       applyAccept = True
     except Exception as es:
@@ -1017,6 +1021,7 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
+    self.orderedSpectra = orderedSpectra
 
     self.tabWidget = QtWidgets.QTabWidget()
 
@@ -1073,6 +1078,10 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
         if t is not None:
           changes = t._changes
           self._applyAllChanges(changes)
+          for specNum, thisSpec in enumerate(self.orderedSpectra):
+            for specViews in thisSpec.spectrumViews:
+              specViews.buildContours = True
+              specViews.update()
 
       applyAccept = True
     except Exception as es:

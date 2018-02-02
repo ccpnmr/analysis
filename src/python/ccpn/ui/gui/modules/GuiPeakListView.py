@@ -1152,13 +1152,13 @@ class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
       finally:
         if undo is not None:
           undo.decreaseBlocking()
-        # project._endCommandEchoBlock()
+        project._endCommandEchoBlock()
 
       # TODO:ED check why this is updating in wrong correct place
       undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
                    redoArgs=(peakItem, clearLabel))
 
-      project._endCommandEchoBlock()
+      # project._endCommandEchoBlock()
 
   def clearPeakAnnotationItem(self, peakItem):
 

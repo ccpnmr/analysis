@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 PI = 3.1415926535898
 from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg, QtPrintSupport
+from  PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -35,12 +36,18 @@ from math import atan2, sin, cos, sqrt, degrees, radians, hypot, pi
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 
-class CompoundView(QtWidgets.QGraphicsView, Base):
+class CompoundView(QGraphicsView, Base):
 
   def __init__(self, parent=None, smiles=None, variant=None, preferences=None, **kw):
 
-
-    QtWidgets.QGraphicsView.__init__(self, parent)
+    super(CompoundView, self).__init__()
+    self.scene = QGraphicsScene(self)
+    self.tic_tac_toe = TicTacToe()
+    self.scene.addItem(self.tic_tac_toe)
+    self.scene.setSceneRect(0, 0, 300, 300)
+    self.setScene(self.scene)
+    self.setCacheMode(QGraphicsView.CacheBackground)
+    # QtWidgets.QGraphicsView.__init__(self, parent)
 
     Base.__init__(self, **kw)
 
@@ -87,7 +94,7 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
     self.needSelectedAtom = []
     self.needFurtherCheck = []
     self.contextMenu = self.setupContextMenu()
-  
+
     # self.setGeometry(20, 40, 350, 350) #[(1) < left, (2) < up, (3)Width, (4)Height
     self.setRenderHint(QtGui.QPainter.Antialiasing)
     self.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
@@ -96,11 +103,14 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
     self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
     self.setInteractive(True)
     self.resetView()
-    self.scene = QtWidgets.QGraphicsScene(self)
-    self.setScene(self.scene)
+    # self.tic_tac_toe = TicTacToe()
+    # self.scene = QtWidgets.QGraphicsScene(self)
+    # self.scene.addItem(self.tic_tac_toe)
+    # self.scene.setSceneRect(0, 0, 300, 300)
+    # self.setScene(self.scene)
 
     self.selectionBox = SelectionBox(self.scene, self)
-    #self.scene.addItem(self.selectionBox)
+    self.scene.addItem(self.selectionBox)
 
     self.editAtom = None
     self.editWidget = QtWidgets.QLineEdit()
@@ -110,7 +120,7 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
     effect = QtWidgets.QGraphicsDropShadowEffect(self)
     effect.setBlurRadius(3)
     effect.setOffset(2,2)
-    
+
     #self.editWidget.setGraphicsEffect(effect)
     self.editWidget.returnPressed.connect(self.setAtomName)
     self.editWidget.hide()
@@ -129,7 +139,7 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
     self.autoChirality = True
 
     self.addGraphicsItems()
-    
+
     if self.variant and self.showSkeletalFormula:
       self.variant.snapAtomsToGrid(50.0)
       self.updateAll()
@@ -141,6 +151,7 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
     'set the smiles'
     compound = importSmiles(smiles)
     variant = list(compound.variants)[0]
+    print(smiles, compound.variants)
     self.setVariant(variant)
     variant.snapAtomsToGrid(ignoreHydrogens=False)
     self.smiles = smiles
@@ -338,10 +349,8 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
       
       items = set(scene.items())
       items.remove(self.editProxy)
-      try:
-        items.remove(self.selectionBox)
-      except Exception as es:
-        print ('>>>error', str(es))
+      # items.remove(self.selectionBox)
+      print(items)
 
       for item in items:
         item.hide()
@@ -434,8 +443,8 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
     
     self.atomViews = {}
     for atom in self.variant.varAtoms:
-      AtomItem(scene, self, atom)
-  
+      a = AtomItem(scene, self, atom)
+      scene.addItem(a)
     # Draw bonds
     done = set()
     self.bondItems = bondDict = {}
@@ -445,7 +454,10 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
         pass
         
       bondItem = BondItem(scene, self, bond)
+      scene.addItem(bondItem)
       done.add(atoms)
+
+
 
  
   def centroid(self, views):
@@ -1190,8 +1202,9 @@ BOND_CHANGE_DICT = {'single':'double',
 class AtomLabel(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, atomView, compoundView, atom):
+    super(AtomLabel, self).__init__()
 
-    QtWidgets.QGraphicsItem.__init__(self)
+    # QtWidgets.QGraphicsItem.__init__(self)
     self.scene = scene
 
     #effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)
@@ -1317,9 +1330,10 @@ class AtomLabel(QtWidgets.QGraphicsItem):
 class SelectionBox(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView):
-
-    QtWidgets.QGraphicsItem.__init__(self)
-    self.scene = scene
+    super(SelectionBox, self).__init__()
+    # QtWidgets.QGraphicsItem.__init__(self)
+    # self._scene = scene
+    print(self.scene(), scene, 'TEST')
 
     self.setZValue(1)
     self.compoundView = compoundView
@@ -1364,8 +1378,8 @@ class SelectionBox(QtWidgets.QGraphicsItem):
 class AtomGroupItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, atomGroup):
-
-    QtWidgets.QGraphicsItem.__init__(self)
+    super(AtomGroupItem, self).__init__()
+    # QtWidgets.QGraphicsItem.__init__(self)
     self.scene = scene
 
     compoundView.groupItems[atomGroup] = self
@@ -1574,8 +1588,9 @@ class AromaticItem(AtomGroupItem):
 class AtomItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, atom):
+    super(AtomItem, self).__init__()
 
-    QtWidgets.QGraphicsItem.__init__(self)
+    # QtWidgets.QGraphicsItem.__init__(self)
     self.scene = scene
 
     compoundView.atomViews[atom] = self
@@ -1617,7 +1632,7 @@ class AtomItem(QtWidgets.QGraphicsItem):
     self.freeDrag = False
 
     self.atomLabel = AtomLabel(scene, self, compoundView, atom)
-    #compoundView.scene.addItem(self.atomLabel)
+    compoundView.scene.addItem(self.atomLabel)
 
     self.syncToAtom()
 
@@ -2552,11 +2567,60 @@ class AtomItem(QtWidgets.QGraphicsItem):
 
     self.highlights = set()
 
+class TicTacToe(QtWidgets.QGraphicsItem):
+  def __init__(self):
+    super(TicTacToe, self).__init__()
+    self.board = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]]
+    self.O = 0
+    self.X = 1
+    self.turn = self.O
+
+  def reset(self):
+    for y in range(3):
+      for x in range(3):
+        self.board[y][x] = -1
+    self.turn = self.O
+    self.update()
+
+  def select(self, x, y):
+    if x < 0 or y < 0 or x >= 3 or y >= 3:
+      return
+    if self.board[y][x] == -1:
+      self.board[y][x] = self.turn
+      self.turn = 1 - self.turn
+
+  def paint(self, painter, option, widget):
+    painter.setPen(Qt.black)
+    painter.drawLine(0, 100, 300, 100)
+    painter.drawLine(0, 200, 300, 200)
+    painter.drawLine(100, 0, 100, 300)
+    painter.drawLine(200, 0, 200, 300)
+
+    for y in range(3):
+      for x in range(3):
+        if self.board[y][x] == self.O:
+          painter.setPen(Qt.red)
+          painter.drawEllipse(QPointF(50 + x * 100, 50 + y * 100), 30, 30)
+        elif self.board[y][x] == self.X:
+          painter.setPen(Qt.blue)
+          painter.drawLine(20 + x * 100, 20 + y * 100, 80 + x * 100, 80 + y * 100)
+          painter.drawLine(20 + x * 100, 80 + y * 100, 80 + x * 100, 20 + y * 100)
+
+  def boundingRect(self):
+    return QRectF(0, 0, 300, 300)
+
+  def mousePressEvent(self, event):
+    pos = event.pos()
+    self.select(int(pos.x() / 100), int(pos.y() / 100))
+    self.update()
+    super(TicTacToe, self).mousePressEvent(event)
+
 class BondItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, bond):
+    super(BondItem, self).__init__()
 
-    QtWidgets.QGraphicsItem.__init__(self)
+    # QtWidgets.QGraphicsItem.__init__(self)
     self.scene = scene
 
     compoundView.bondItems[bond] = self
@@ -6934,7 +6998,8 @@ if __name__ == '__main__':
   popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
 
   smilesText = 'CCC'
-  compoundView = CompoundView(popup, smiles=smilesText, grid=(0,0))
+  compoundView = CompoundView(popup, smiles=smilesText,)
+  popup.getLayout().addWidget(compoundView)
   compoundView.centerView()
   compoundView.updateAll()
 

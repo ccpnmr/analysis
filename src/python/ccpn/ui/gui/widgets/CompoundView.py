@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 PI = 3.1415926535898
-from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg
+from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg, QtPrintSupport
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
@@ -491,7 +491,7 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
   def exportPdf(self):
 
     if self.compound:
-      printer = QtGui.QPrinter()
+      printer = QtPrintSupport.QPrinter()
       oldRes = printer.resolution()
       newRes = 600.0
       fRes = oldRes/newRes
@@ -499,23 +499,25 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
 
       fType = 'PDF (*.pdf)'
       dialog = FileDialog(self, acceptMode=1, fileMode=0, filter=fType, preferences=self.preferences)
-      filePath = dialog.selectedFiles[0]
+      filePaths = dialog.selectedFiles()
+      if len(filePaths)>0:
+        filePath = filePaths[0]
 
-      if filePath:
-        printer.setOutputFileName(filePath)
-        pdfPainter = QtGui.QPainter(printer)
-        self.bondColor = Qt.black
-        scene = self.scene
-        items = scene.items()
-        cache = [None] * len(items)
-        for i, item in enumerate(items):
-          cache[i] = item.cacheMode()
-          item.setCacheMode(item.NoCache)
-        scene.render(pdfPainter)
-        pdfPainter.end()
-        self.bondColor = Qt.white
-        for i in range(len(items)):
-          items[i].setCacheMode(cache[i])
+        if filePath:
+          printer.setOutputFileName(filePath)
+          pdfPainter = QtGui.QPainter(printer)
+          self.bondColor = Qt.black
+          scene = self.scene
+          items = scene.items()
+          cache = [None] * len(items)
+          for i, item in enumerate(items):
+            cache[i] = item.cacheMode()
+            item.setCacheMode(item.NoCache)
+          scene.render(pdfPainter)
+          pdfPainter.end()
+          self.bondColor = Qt.white
+          for i in range(len(items)):
+            items[i].setCacheMode(cache[i])
 
   def exportSvg(self):
 
@@ -6922,3 +6924,20 @@ class Compound:
 
     return hydrogens
 
+
+if __name__ == '__main__':
+
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+
+  app = TestApplication()
+  popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
+
+  smilesText = 'CCC'
+  compoundView = CompoundView(popup, smiles=smilesText, grid=(0,0))
+  compoundView.centerView()
+  compoundView.updateAll()
+
+  popup.show()
+  popup.raise_()
+  app.start()

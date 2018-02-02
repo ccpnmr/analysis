@@ -331,10 +331,11 @@ def restoreLayout(mainWindow, layout):
     print('namesFromState', sorted(namesFromState))
     print('compare   @@@',sorted(compare))
     print('openedModulesName',sorted(openedModulesName))
-    if len(compare) == len(openedModulesName):
-      try:
-        mainWindow.moduleArea.restoreState(state)
-      except Exception as e:
-        getLogger().warning("Layout error: %s" % e)
-    else:
-      getLogger().warning("Layout error: Some of the modules are missing. Geometries could not be restored")
+    if len(openedModulesName)>0:
+      if len(compare) == len(openedModulesName):
+        try:
+          mainWindow.moduleArea.restoreState(state)
+        except Exception as e:
+            getLogger().warning("Layout error: %s" % e)
+      else:
+        getLogger().warning("Layout error: Some of the modules are missing. Geometries could not be restored")

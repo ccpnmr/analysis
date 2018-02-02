@@ -270,7 +270,7 @@ def _getApplicationSpecificModules(mainWindow, applicationName):
 
   if applicationName == AnalysisScreen:
     try:
-      from ccpn.AnalysisScreen import modules as aS
+      from ccpn.AnalysisScreen.gui import modules as aS
       modules.append(aS)
     except Exception as e:
       getLogger().warning("Import Error for AnalysisScreen , %s" % e)

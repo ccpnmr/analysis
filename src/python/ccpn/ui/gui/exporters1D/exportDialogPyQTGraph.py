@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file './pyqtgraph/GraphicsScene/exportDialogTemplate.ui'
-#
-# Created: Mon Dec 23 10:10:52 2013
-#      by: PyQt4 UI code generator 4.10
-#
-# WARNING! All changes made in this file will be lost!
+"""
+Reimplementation of PyQtGraph
+"""
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 

@@ -45,7 +45,7 @@ class PPdimensionSelector(CcpnDialog):
   def _open1DpeakPicker(self):
     from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
     self.reject()
-    popup = PickPeak1DPopup(mainWindow=self.mainWindow)
+    popup = PickPeak1DPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
     popup.exec_()
     popup.raise_()
 

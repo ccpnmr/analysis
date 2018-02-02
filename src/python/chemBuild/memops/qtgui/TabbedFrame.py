@@ -2,12 +2,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base, Icon
 
-class TabbedFrame(QtGui.QTabWidget, Base):
+class TabbedFrame(QtWidgets.QTabWidget, Base):
 
   def __init__(self, parent=None, texts=None, icons=None,
                callback=None, widgets=None, tipTexts=None, **kw):
 
-    QtGui.QTabWidget.__init__(self, parent)
+    QtWidgets.QTabWidget.__init__(self, parent)
     Base.__init__(self, parent, **kw)
  
     if not widgets:
@@ -46,7 +46,7 @@ class TabbedFrame(QtGui.QTabWidget, Base):
   def clear(self):
   
     self.widgets = []
-    QtGui.QTabWidget.clear(self)
+    QtWidgets.QTabWidget.clear(self)
   
   def appendTab(self, text=None, icon=None, widget=None, tipText=None):
 

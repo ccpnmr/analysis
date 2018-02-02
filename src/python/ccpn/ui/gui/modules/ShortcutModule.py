@@ -188,7 +188,7 @@ class UserShortcuts():
             except:
               getLogger().warning('Error executing macro: %s ' % function)
 
-          # QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])),
+          # QtWidgets.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])),
           #                 self, partial(self.namespace['runMacro'], function.split('(')[1].split(')')[0]),
           #                 context=context)
 
@@ -202,5 +202,5 @@ class UserShortcuts():
             except:
               getLogger().warning('Error executing user shortcut: %s ' % function)
 
-          # QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
+          # QtWidgets.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
           #                 reduce(getattr, function.split('.')[1:], stub), context=context)

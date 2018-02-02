@@ -478,7 +478,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
           try:
             obj._mainWindow.sideBar.fillSideBar(obj)
             obj._mainWindow.show()
-            QtGui.QApplication.setActiveWindow(obj._mainWindow)
+            QtWidgets.QApplication.setActiveWindow(obj._mainWindow)
 
           except Exception as es:
             getLogger().warning('Error', str(es))
@@ -1001,47 +1001,47 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def raisePopup(self, obj, item):
 
     if obj.shortClassName == 'SP':
-      popup = SpectrumPropertiesPopup(mainWindow=self.mainWindow, spectrum=obj)
+      popup = SpectrumPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrum=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'PL':
-      popup = PeakListPropertiesPopup(mainWindow=self.mainWindow, peakList=obj)
+      popup = PeakListPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, peakList=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SG':
-      popup = SpectrumGroupEditor(mainWindow=self.mainWindow, spectrumGroup=obj)
+      popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumGroup=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SA':
-      popup = SamplePropertiesPopup(mainWindow=self.mainWindow, sample=obj)
+      popup = SamplePropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, sample=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SC':
-      popup = EditSampleComponentPopup(mainWindow=self.mainWindow, sampleComponent=obj)
+      popup = EditSampleComponentPopup(parent=self.mainWindow, mainWindow=self.mainWindow, sampleComponent=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SU':
-      popup = SubstancePropertiesPopup(mainWindow=self.mainWindow, substance=obj)
+      popup = SubstancePropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, substance=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NC':
-      popup = NmrChainPopup(mainWindow=self.mainWindow, nmrChain=obj)
+      popup = NmrChainPopup(parent=self.mainWindow, mainWindow=self.mainWindow, nmrChain=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NR':
-      popup = NmrResiduePopup(mainWindow=self.mainWindow, nmrResidue=obj)
+      popup = NmrResiduePopup(parent=self.mainWindow, mainWindow=self.mainWindow, nmrResidue=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NA':
-      popup = NmrAtomPopup(mainWindow=self.mainWindow, nmrAtom=obj)
+      popup = NmrAtomPopup(parent=self.mainWindow, mainWindow=self.mainWindow, nmrAtom=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'CL':
-      popup = ChemicalShiftListPopup(mainWindow=self.mainWindow, chemicalShiftList=obj)
+      popup = ChemicalShiftListPopup(parent=self.mainWindow, mainWindow=self.mainWindow, chemicalShiftList=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SE':
-      popup = StructurePopup(mainWindow=self.mainWindow, structure=obj)
+      popup = StructurePopup(parent=self.mainWindow, mainWindow=self.mainWindow, structure=obj)
       popup.exec_()
       popup.raise_()
 
@@ -1066,7 +1066,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       showInfo('Not implemented yet!',
           'This function has not been implemented in the current version')
     elif obj.shortClassName == 'DS':
-      popup = DataSetPopup(mainWindow=self.mainWindow, dataSet=obj)
+      popup = DataSetPopup(parent=self.mainWindow, mainWindow=self.mainWindow, dataSet=obj)
       popup.exec_()
       popup.raise_()
 
@@ -1100,14 +1100,14 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     elif obj.shortClassName == 'IL':
       # to be decided when we design structure
 
-      # popup = IntegralListPopup(mainWindow=self.mainWindow, integralList=obj)   # ejb - temp
+      # popup = IntegralListPopup(parent=self.mainWindow, mainWindow=self.mainWindow, integralList=obj)   # ejb - temp
       # popup.exec_()
       # popup.raise_()
 
       showInfo('Not implemented yet!',
                'This function has not been implemented in the current version')
     elif obj.shortClassName == 'NO':
-      popup = NotesPopup(mainWindow=self.mainWindow, note=obj)
+      popup = NotesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, note=obj)
       popup.exec_()
       popup.raise_()
 
@@ -1150,17 +1150,17 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       if itemParent is None:
         # Top level object - parent is project
         if item.parent().text(0) == 'Chains':
-          popup = CreateChainPopup(mainWindow=self.mainWindow)
+          popup = CreateChainPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
           popup.exec_()
           popup.raise_()
           return
         elif item.parent().text(0) == 'Substances':
-          popup = SubstancePropertiesPopup(mainWindow=self.mainWindow, newSubstance=True)   # ejb - application=self.application,
+          popup = SubstancePropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, newSubstance=True)   # ejb - application=self.application,
           popup.exec_()
           popup.raise_()        # included setModal(True) in the above as was not modal???
           return
         elif item.parent().text(0) == 'SpectrumGroups':
-          popup = SpectrumGroupEditor(mainWindow=self.mainWindow, addNew=True)
+          popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, addNew=True)
           popup.exec_()
           popup.raise_()
           return
@@ -1172,7 +1172,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       else:
         # Lower level object - get parent from parentItem
         if itemParent.shortClassName == 'DS':
-          popup = RestraintTypePopup(mainWindow=self.mainWindow)
+          popup = RestraintTypePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
           popup.exec_()
           popup.raise_()
           restraintType = popup.restraintType
@@ -1187,7 +1187,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
           return
         elif itemParent.shortClassName == 'SA':
-          popup = EditSampleComponentPopup(mainWindow=self.mainWindow, sample=itemParent, newSampleComponent=True)
+          popup = EditSampleComponentPopup(parent=self.mainWindow, mainWindow=self.mainWindow, sample=itemParent, newSampleComponent=True)
           popup.exec_()
           popup.raise_()
           return

@@ -33,7 +33,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 
 
-class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
+class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
   # # To be done more rigeriously later
   # _styleSheet = """
@@ -64,7 +64,7 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
     The spin box has the given parent.
     """
 
-    QtGui.QDoubleSpinBox.__init__(self, parent)
+    QtWidgets.QDoubleSpinBox.__init__(self, parent)
     Base.__init__(self, **kwds)
 
     # if value is not None:
@@ -120,9 +120,11 @@ class DoubleSpinbox(QtGui.QDoubleSpinBox, Base):
   def setCallback(self, callback):
     "Sets callback; disconnects if callback=None"
     if self._callback is not None:
-      self.disconnect(self, QtCore.SIGNAL('valueChanged(double)'), self._callback)
+      # self.disconnect(self, QtCore.SIGNAL('valueChanged(double)'), self._callback)
+      self.valueChanged.disconnect()
     if callback:
-      self.connect(self, QtCore.SIGNAL("valueChanged(double)"), callback)
+      # self.connect(self, QtCore.SIGNAL("valueChanged(double)"), callback)
+      self.valueChanged.connect(callback)
     self._callback = callback
 
 

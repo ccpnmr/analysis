@@ -10,9 +10,10 @@ class Button(QtWidgets.QPushButton, Base):
   def __init__(self, parent, text='', callback=None, icon=None,
                toggle=None, command=None, **kw):
     
-    
-    QtWidgets.QPushButton.__init__(self, text, parent)
+    QtWidgets.QPushButton.__init__(self, text, parent, parent=None)
     Base.__init__(self, parent, **kw)
+
+    # self.setText(text)
 
     if icon: # filename or pixmap
       self.setIcon(Icon(icon))
@@ -40,10 +41,12 @@ class Button(QtWidgets.QPushButton, Base):
   def setCallback(self, callback):
   
     if self.callback:
-      self.disconnect(self, QtCore.SIGNAL('clicked()'), self.callback)
-    
+      # self.disconnect(self, QtCore.SIGNAL('clicked()'), self.callback)
+      self.clicked.disconnect(self.callback)
+
     if callback:
-      self.connect(self, QtCore.SIGNAL('clicked()'), callback)
+      # self.connect(self, QtCore.SIGNAL('clicked()'), callback)
+      self.clicked.connect(callback)
       # self.clicked.connect doesn't work with lambda, yet...
     
     self.callback = callback

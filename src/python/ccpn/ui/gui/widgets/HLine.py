@@ -72,7 +72,7 @@ class HLine(Widget, Base):
       qp.drawLine(0, self.lineHeight, self.geometry().right(), self.lineHeight)
 
 def main():
-  app = QtGui.QApplication(sys.argv)
+  app = QtWidgets.QApplication(sys.argv)
   ex = HLine()
   sys.exit(app.exec_())
 

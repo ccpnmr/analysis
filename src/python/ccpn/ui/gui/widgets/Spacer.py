@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-05-17 13:51:05 +0000 (Wed, May 17, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 
-class Spacer(QtGui.QSpacerItem):
+class Spacer(QtWidgets.QSpacerItem):
   """
   Widget used to put spaces into modules and popups.
   """
@@ -38,6 +38,6 @@ class Spacer(QtGui.QSpacerItem):
     :param args:
     :param kw:
     """
-    QtGui.QSpacerItem.__init__(self, *args)
+    QtWidgets.QSpacerItem.__init__(self, *args)
 
     parent.layout().addItem(self, kw['grid'][0], kw['grid'][1], kw['gridSpan'][0], kw['gridSpan'][1])

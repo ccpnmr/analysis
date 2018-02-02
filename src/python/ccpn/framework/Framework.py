@@ -1489,7 +1489,7 @@ class Framework:
     """
     from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
 
-    PreferencesPopup(mainWindow=self.ui.mainWindow, preferences=self.preferences).exec_()
+    PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences).exec_()
 
   def getSavedLayoutPath(self):
     """Opens a saved Layout as dialog box and gets directory specified in the file dialog."""
@@ -1645,7 +1645,7 @@ class Framework:
       MessageDialog.showWarning('Peak Picking', 'Project has no Spectra.')
     else:
       from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
-      popup = PickPeak1DPopup(mainWindow=self.ui.mainWindow)
+      popup = PickPeak1DPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
       popup.exec_()
       popup.raise_()
 
@@ -1682,7 +1682,7 @@ class Framework:
       return
     else:
       from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
-      popup = CopyPeaks(mainWindow=self.ui.mainWindow)
+      popup = CopyPeaks(CopyPeaks=self.ui.mainWindow)
       peaks = self.current.peaks
       popup._selectPeaks(peaks)
       popup.exec()
@@ -1700,7 +1700,7 @@ class Framework:
     from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showCreateChainPopup()")
     getLogger().info("application.showCreateChainPopup()")
-    popup = CreateChainPopup(mainWindow=self.ui.mainWindow).exec_()
+    popup = CreateChainPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
 
 
   def toggleSequenceModule(self):
@@ -1913,7 +1913,7 @@ class Framework:
     if len(self.project.spectrumDisplays) == 0:
       MessageDialog.showWarning('', 'No Spectrum Display found')
     else:
-      SelectSpectrumDisplayPopup(mainWindow=self.ui.mainWindow).exec_()
+      SelectSpectrumDisplayPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
       # PrintSpectrumDisplayPopup(project=self.project).exec_()
 
   def toggleToolbar(self):

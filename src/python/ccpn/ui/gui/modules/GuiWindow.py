@@ -59,42 +59,39 @@ class GuiWindow():
     # this trampled the menu py shortcut
     from functools import partial
     context = QtCore.Qt.ApplicationShortcut
-    QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("Del"), self, partial(self.deleteSelectedPeaks), context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks, context=context)
-    # QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project), context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project),
+    QtWidgets.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("Del"), self, partial(self.deleteSelectedPeaks), context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks, context=context)
+    # QtWidgets.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project), context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project),
                     context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(AssignmentLib.propagateAssignments,
+    QtWidgets.QShortcut(QtGui.QKeySequence("c, a"), self, partial(AssignmentLib.propagateAssignments,
                                                               current=self.application.current),
                     context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self), context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self), context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self), context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self), context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("t, a"), self, partial(self.toggleLastAxisOnly, self), context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("t, r"), self, self.removePhasingTraces, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("i, 1"), self, self.addIntegral1D, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("m, n"), self, self.moveToNextSpectrum, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("m, p"), self, self.moveToPreviousSpectrum, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("m, m"), self, self.switchMouseMode, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("z, r"), self, self.restoreZoom, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("z, i"), self, self.zoomIn, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("z, o"), self, self.zoomOut, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence("p, l"), self, self.cyclePeakLabelling, context=context)
-    QtGui.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
-
-
-
+    QtWidgets.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self), context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self), context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self), context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self), context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("t, a"), self, partial(self.toggleLastAxisOnly, self), context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("t, r"), self, self.removePhasingTraces, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("i, 1"), self, self.addIntegral1D, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("m, n"), self, self.moveToNextSpectrum, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("m, p"), self, self.moveToPreviousSpectrum, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("m, m"), self, self.switchMouseMode, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("z, r"), self, self.restoreZoom, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("z, i"), self, self.zoomIn, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("z, o"), self, self.zoomOut, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("p, l"), self, self.cyclePeakLabelling, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
 
   def _setUserShortcuts(self, preferences=None, mainWindow=None):
 
@@ -111,19 +108,19 @@ class GuiWindow():
       try:
         self.application._userShortcuts.addUserShortcut(shortcut, function)
 
-        QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
+        QtWidgets.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
                             partial(UserShortcuts.runUserShortcut, self.application._userShortcuts, shortcut))
       except:
         getLogger().warning('Error setting user shortcuts function')
 
       # if function.split('(')[0] == 'runMacro':
-      #   QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])),
+      #   QtWidgets.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])),
       #             self, partial(self.namespace['runMacro'], function.split('(')[1].split(')')[0]), context=context)
       #
       # else:
       #   stub = self.namespace.get(function.split('.')[0])
       #   try:
-      #     QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
+      #     QtWidgets.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
       #                     reduce(getattr, function.split('.')[1:], stub), context=context)
       #   except:
       #     getLogger().warning('Function cannot be found')

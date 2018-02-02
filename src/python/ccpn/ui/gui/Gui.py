@@ -169,7 +169,7 @@ class Gui(Ui):
     sys.stderr.write('==> Gui interface is ready\n' )
 
     self.mainWindow.show()
-    QtGui.QApplication.setActiveWindow(self.mainWindow)
+    QtWidgets.QApplication.setActiveWindow(self.mainWindow)
 
     self.qtApp.start()
 

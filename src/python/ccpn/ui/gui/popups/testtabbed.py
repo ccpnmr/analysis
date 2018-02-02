@@ -35,7 +35,7 @@ class TabDialog(CcpnDialog):
 
         fileInfo = QtCore.QFileInfo(fileName)
 
-        tabWidget = QtGui.QTabWidget()
+        tabWidget = QtWidgets.QTabWidget()
         tabWidget.addTab(GeneralTab(fileInfo), "General")
         tabWidget.addTab(PermissionsTab(fileInfo), "Permissions")
         tabWidget.addTab(ApplicationsTab(fileInfo), "Applications")

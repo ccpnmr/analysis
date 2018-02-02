@@ -44,7 +44,7 @@ from ccpnmr.chemBuild.exchange.Inchi import makeInchi, importInchi
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 QAction = QtWidgets.QAction
-Qconnect = QtCore.QObject.connect
+# Qconnect = QtCore.QObject.connect
 
 CHEM_GROUP_DIR = path.join(path.dirname(path.dirname(__file__)), 'chemGroups')
 ICON_DIR =  path.join(path.dirname(path.dirname(__file__)), 'icons')
@@ -251,12 +251,12 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     # Shortcuts
     
     # Extra compared to standard actions
-    QtGui.QShortcut(Qkeys("Del"), self, self.deleteAtoms)
-    QtGui.QShortcut(Qkeys("Ctrl+Del"), self, self.deleteBonds)
-    QtGui.QShortcut(Qkeys("Ctrl+A"), self, self.selectAll)
+    QtWidgets.QShortcut(Qkeys("Del"), self, self.deleteAtoms)
+    QtWidgets.QShortcut(Qkeys("Ctrl+Del"), self, self.deleteBonds)
+    QtWidgets.QShortcut(Qkeys("Ctrl+A"), self, self.selectAll)
         
     for elem in ('C','N','H','O','P','S','I','F','B'):
-      QtGui.QShortcut(Qkeys(elem), self, lambda e=elem:self.addAtom(e))
+      QtWidgets.QShortcut(Qkeys(elem), self, lambda e=elem:self.addAtom(e))
 
     # Status
     statusBar = self.statusBar()
@@ -269,7 +269,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     self.setCentralWidget(self.splitter)
 
     # Left panels
-    toolbox = QtGui.QToolBox(self)
+    toolbox = QtWidgets.QToolBox(self)
     toolbox.setMinimumWidth(220)
     self.splitter.addWidget(toolbox)
     
@@ -357,7 +357,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
     # Properties panel
 
-    toolbox = QtGui.QToolBox(self)
+    toolbox = QtWidgets.QToolBox(self)
     toolbox.setMinimumWidth(220)
     self.splitter.addWidget(toolbox)
     

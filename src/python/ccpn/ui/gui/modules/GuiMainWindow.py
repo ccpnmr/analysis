@@ -374,7 +374,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         if project:
           project._mainWindow.show()
-          QtGui.QApplication.setActiveWindow(project._mainWindow)
+          QtWidgets.QApplication.setActiveWindow(project._mainWindow)
         else:
           MessageDialog.showError('loadProject', 'Error loading project:\n%s' % str(projectDir))
           Logging.getLogger().warning('Error loading project: %s' % str(projectDir))
@@ -641,7 +641,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     prefFile.close()
 
     # set the active window to mainWindow so that the quit popup centres correctly.
-    QtGui.QApplication.setActiveWindow(self)
+    QtWidgets.QApplication.setActiveWindow(self)
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
                                      ['Save and Quit', 'Quit without Saving', 'Cancel'],
                                    )

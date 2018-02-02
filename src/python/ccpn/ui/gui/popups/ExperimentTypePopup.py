@@ -115,7 +115,7 @@ class ExperimentTypePopup(CcpnDialog):
 
   def raiseExperimentFilterPopup(self, spectrum, spectrumIndex, atomCodes):
 
-    popup = ExperimentFilterPopup(spectrum=spectrum, application=spectrum.project._appBase)
+    popup = ExperimentFilterPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectrum=spectrum)
     popup.exec_()
     if popup.expType:
       self.spPulldowns[spectrumIndex].select(popup.expType)

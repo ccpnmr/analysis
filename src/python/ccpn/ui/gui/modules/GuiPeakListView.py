@@ -50,7 +50,8 @@ IDENTITY.reset()
 #
 #   def __init__(self, scene):
 #
-#     QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+#     QtWidgets.QGraphicsItem.__init__(self)
+#     self.scene = scene
 #
 #     # self.glWidget = glWidget
 #     self.peaks = {}

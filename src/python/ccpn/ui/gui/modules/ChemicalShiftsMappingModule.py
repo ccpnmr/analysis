@@ -321,7 +321,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     i = 0
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
-    self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(1,2))
+    self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, parent=self.mainWindow, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(1,2))
     self._checkSpectraWithPeakListsOnly()
 
     # self.spectraSelectionWidget.setMaximumHeight(150)
@@ -723,7 +723,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                              , 'Select the executable file on preferences')
       if ok:
         from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-        pp = PreferencesPopup(mainWindow=self.mainWindow, preferences=self.application.preferences)
+        pp = PreferencesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, preferences=self.application.preferences)
         pp.tabWidget.setCurrentIndex(pp.tabWidget.count()-1)
         pp.exec_()
         return

@@ -51,7 +51,8 @@ class AtomLabel(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, atomView, compoundView, atom):
     
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
     
     #effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)
     #effect.setBlurRadius(SHADOW_RADIUS)
@@ -179,7 +180,8 @@ class SelectionBox(QtWidgets.QGraphicsItem):
         
   def __init__(self, scene, compoundView):
     
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
     self.setZValue(1)
     self.compoundView = compoundView
     self.begin = None
@@ -224,7 +226,8 @@ class AtomGroupItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, atomGroup):
     
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
     
     compoundView.groupItems[atomGroup] = self
     
@@ -433,7 +436,8 @@ class AtomItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, atom):
     
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
     
     compoundView.atomViews[atom] = self
     
@@ -1418,7 +1422,8 @@ class BondItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, bond):
     
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
      
     compoundView.bondItems[bond] = self
    

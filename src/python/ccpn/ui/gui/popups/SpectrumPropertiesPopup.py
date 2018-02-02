@@ -70,17 +70,17 @@ class SpectrumPropertiesPopup(CcpnDialog):
 
     # layout = QtWidgets.QGridLayout()
     # self.setLayout(layout)
-    self.tabWidget = QtGui.QTabWidget()
+    self.tabWidget = QtWidgets.QTabWidget()
     # tabWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     if spectrum.dimensionCount == 1:
-      self._generalTab = GeneralTab(spectrum)
+      self._generalTab = GeneralTab(spectrum, mainWindow=self.mainWindow)
       self._dimensionsTab = DimensionsTab(spectrum, spectrum.dimensionCount)
 
       self.tabWidget.addTab(self._generalTab, "General")
       self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
       self._contoursTab = None
     else:
-      self._generalTab = GeneralTab(spectrum)
+      self._generalTab = GeneralTab(spectrum, mainWindow=self.mainWindow)
       self._dimensionsTab = DimensionsTab(spectrum, spectrum.dimensionCount)
       self._contoursTab = ContoursTab(spectrum)
 
@@ -197,11 +197,15 @@ class FilePathValidator(QtGui.QValidator):
 
 
 class GeneralTab(QtWidgets.QWidget, Base):
-  def __init__(self, spectrum, parent=None, item=None):
+  def __init__(self, spectrum, parent=None, mainWindow=None, item=None):
 
     from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
     super(GeneralTab, self).__init__(parent)
     Base.__init__(self, setLayout=True)      # ejb
+
+    self.mainWindow = mainWindow
+    self.application = self.mainWindow.application
+    self.project = self.mainWindow.project
 
     self.item = item
     self.spectrum = spectrum
@@ -212,7 +216,7 @@ class GeneralTab(QtWidgets.QWidget, Base):
     Label(self, text="Spectrum name ", grid=(1, 0))
     self.nameData = LineEdit(self, vAlign='t', grid=(1, 1))
     self.nameData.setText(spectrum.name)
-    self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
+    self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
     self.nameData.textChanged.connect(self._queueSpectrumNameChange)  # ejb - was editingFinished
     
     Label(self, text="Path", vAlign='t', hAlign='l', grid=(2, 0))
@@ -362,7 +366,7 @@ class GeneralTab(QtWidgets.QWidget, Base):
       doubleCrosshairLabel = Label(self, text="Show Second Cursor", grid=(11, 0), vAlign='t', hAlign='l')
       doubleCrosshairCheckBox = CheckBox(self, grid=(11, 1), checked=True, vAlign='t', hAlign='l')
       doubleCrosshairCheckBox.setChecked(spectrum.showDoubleCrosshair)
-      self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
+      self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
       doubleCrosshairCheckBox.stateChanged.connect(self._queueChangeDoubleCrosshair)
 
   def _repopulate(self):
@@ -444,7 +448,7 @@ class GeneralTab(QtWidgets.QWidget, Base):
 
   def _raiseExperimentFilterPopup(self, spectrum):
     from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup
-    popup = ExperimentFilterPopup(spectrum=spectrum, application=spectrum.project._appBase)
+    popup = ExperimentFilterPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrum=spectrum)
     popup.exec_()
     self.spectrumType.select(popup.expType)
 
@@ -565,7 +569,8 @@ class GeneralTab(QtWidgets.QWidget, Base):
     self.pathData.setText(shortenedPath)
 
   def _queueSetSpectrumColour(self, spectrum):
-    dialog = ColourDialog()
+    dialog = ColourDialog(self)
+
     newColour = dialog.getColor()
     if newColour:
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
@@ -611,7 +616,7 @@ class DimensionsTab(QtWidgets.QWidget, Base):
 
     Label(self, text="Dimension ", grid=(1, 0), hAlign='l', vAlign='t',)
 
-    self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
+    self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
     for i in range(dimensions):
       dimLabel = Label(self, text='%s' % str(i+1), grid =(1, i+1), vAlign='t', hAlign='l')
 
@@ -763,7 +768,7 @@ class ContoursTab(QtWidgets.QWidget, Base):
         positiveContoursCheckBox.setChecked(True)
       else:
         positiveContoursCheckBox.setChecked(False)
-    self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
+    self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
     positiveContoursCheckBox.stateChanged.connect(self._queueChangePositiveContourDisplay)
 
     positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(2, 0), vAlign='c', hAlign='l')
@@ -952,7 +957,7 @@ class ContoursTab(QtWidgets.QWidget, Base):
 
   # change colours using comboboxes and colour buttons
   def _queueChangePosSpectrumColour(self, spectrum):
-    dialog = ColourDialog()
+    dialog = ColourDialog(self)
     newColour = dialog.getColor()
     if newColour is not None:
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
@@ -966,7 +971,7 @@ class ContoursTab(QtWidgets.QWidget, Base):
       self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
 
   def _queueChangeNegSpectrumColour(self, spectrum):
-    dialog = ColourDialog()
+    dialog = ColourDialog(self)
     newColour = dialog.getColor()
     if newColour is not None:
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
@@ -1013,7 +1018,7 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
 
-    self.tabWidget = QtGui.QTabWidget()
+    self.tabWidget = QtWidgets.QTabWidget()
 
     self._contoursTab = []
     for specNum, thisSpec in enumerate(orderedSpectra):

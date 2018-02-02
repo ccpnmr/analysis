@@ -338,7 +338,10 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
       
       items = set(scene.items())
       items.remove(self.editProxy)
-      items.remove(self.selectionBox)
+      try:
+        items.remove(self.selectionBox)
+      except Exception as es:
+        print ('>>>error', str(es))
 
       for item in items:
         item.hide()
@@ -635,7 +638,7 @@ class CompoundView(QtWidgets.QGraphicsView, Base):
   
   def wheelEvent(self, event):
     
-    if event.delta() < 0:
+    if event.angleDelta().y() < 0:
       fac = 0.8333
     else:
       fac = 1.2
@@ -1186,7 +1189,8 @@ class AtomLabel(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, atomView, compoundView, atom):
 
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
 
     #effect = QtWidgets.QGraphicsDropShadowEffect(compoundView)
     #effect.setBlurRadius(SHADOW_RADIUS)
@@ -1312,7 +1316,9 @@ class SelectionBox(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView):
 
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
+
     self.setZValue(1)
     self.compoundView = compoundView
     self.begin = None
@@ -1357,7 +1363,8 @@ class AtomGroupItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, atomGroup):
 
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
 
     compoundView.groupItems[atomGroup] = self
 
@@ -1566,7 +1573,8 @@ class AtomItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, atom):
 
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
 
     compoundView.atomViews[atom] = self
 
@@ -2546,7 +2554,8 @@ class BondItem(QtWidgets.QGraphicsItem):
 
   def __init__(self, scene, compoundView, bond):
 
-    QtWidgets.QGraphicsItem.__init__(self, scene=scene)
+    QtWidgets.QGraphicsItem.__init__(self)
+    self.scene = scene
 
     compoundView.bondItems[bond] = self
 

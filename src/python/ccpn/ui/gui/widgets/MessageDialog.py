@@ -77,7 +77,7 @@ class MessageDialog(QtWidgets.QMessageBox):
     # must be the first event outside of the __init__ otherwise frameGeometries are not valid
     super(MessageDialog, self).resizeEvent(ev)
 
-    activeWindow = QtGui.QApplication.activeWindow()
+    activeWindow = QtWidgets.QApplication.activeWindow()
     if activeWindow:
       point = activeWindow.rect().center()
       global_point = activeWindow.mapToGlobal(point)

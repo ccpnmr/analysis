@@ -470,7 +470,7 @@ class FileSystemTreePanel(QtWidgets.QWidget, Base):
     self.dirPath = None
     self.callback = callback
     self.fileTypes = fileTypes or []
-    self.model = QtGui.QFileSystemModel()
+    self.model = QtWidgets.QFileSystemModel()
     self.model.setNameFilterDisables(False)
     if showHiddenFiles:
       filters = self.model.filter()

@@ -313,7 +313,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     
   def adjustContours(self):
     # insert popup to modify contours
-    popup = SpectrumDisplayPropertiesPopup(mainWindow=self.mainWindow, orderedSpectra=self.orderedSpectra())
+    popup = SpectrumDisplayPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, orderedSpectra=self.orderedSpectra())
     popup.exec_()
     popup.raise_()
 

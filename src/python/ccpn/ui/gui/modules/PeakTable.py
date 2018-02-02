@@ -365,7 +365,7 @@ class PeakListTableWidget(QuickTable):
 
   def _copyPeaks(self):
     from ui.gui.popups.CopyPeaksPopup import CopyPeaks
-    popup = CopyPeaks(mainWindow=self.mainWindow)
+    popup = CopyPeaks(parent=self.mainWindow, mainWindow=self.mainWindow)
     self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
     if self._selectedPeakList is not None:
       spectrum = self._selectedPeakList.spectrum

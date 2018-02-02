@@ -36,7 +36,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
 class ExperimentFilterPopup(CcpnDialog):
-  def __init__(self, spectrum=None, parent=None, application=None,
+  def __init__(self, parent=None, mainWindow=None, spectrum=None,
                title:str='Experiment Type Filter', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
@@ -46,7 +46,11 @@ class ExperimentFilterPopup(CcpnDialog):
     self.expType = None
     self.transferSwitches = []
 
-    self.experimentClassification = application.experimentClassifications
+    self.mainWindow = mainWindow
+    self.application = self.mainWindow.application
+    self.project = self.mainWindow.project
+
+    self.experimentClassification = self.application.experimentClassifications
 
     # filter by detection nucleus
     self.cCheckBox = CheckBox(detectionBox, grid=(0, 0), hAlign='r', callback=self.updateChoices)

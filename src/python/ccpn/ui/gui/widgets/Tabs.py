@@ -50,9 +50,9 @@ from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 
 
-class Tabs(QtGui.QTabWidget, Base):
+class Tabs(QtWidgets.QTabWidget, Base):
   def __init__(self, parent,  **kw):
-    QtGui.QTabWidget.__init__(self, parent)
+    QtWidgets.QTabWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
 

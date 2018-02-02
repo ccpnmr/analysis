@@ -510,7 +510,7 @@ class CcpnModule(Dock, DropBase):
       ev = args[0]
       # print ('>>>', ev.source())
       data = self.parseEvent(ev)
-      if DropBase.PIDS in data:
+      if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):
         if self.widgetArea:
 
           ld = ev.pos().x()

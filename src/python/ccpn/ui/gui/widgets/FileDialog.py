@@ -37,7 +37,8 @@ class FileDialog(QtWidgets.QFileDialog):
   #              acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, **kw):
 
   def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
-               acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, filter=None, **kw):
+               acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, filter=None,
+               restrictDirToFilter=False, **kw):
 
     # ejb - added selectFile to suggest a filename in the file box
     #       this is not passed to the super class
@@ -102,6 +103,12 @@ class FileDialog(QtWidgets.QFileDialog):
                                           }
                           """)
 
+    # need to do this before setting DontUseNativeDialog
+    if restrictDirToFilter == True:
+      self.filterSelected.connect(self._predir)
+      self.directoryEntered.connect(self._dir)
+      self._restrictedType = filter
+
     # self.result is '' (first case) or 0 (second case) if Cancel button selected
     if preferences and preferences.useNative and not sys.platform.lower() == 'linux':
       funcName = staticFunctionDict[(acceptMode, fileMode)]
@@ -109,6 +116,16 @@ class FileDialog(QtWidgets.QFileDialog):
     else:
       self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
       self.result = self.exec_()
+
+  def _predir(self, file:str):
+    if file.endswith(self._restrictedType):
+      self.fileSelected = None
+
+  def _dir(self, directory: str):
+    if directory.endswith(self._restrictedType):
+      return False
+
+    return True
 
   # overrides Qt function, which does not pay any attention to whether Cancel button selected
   def selectedFiles(self):

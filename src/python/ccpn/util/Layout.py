@@ -25,18 +25,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
+import ntpath
 import glob
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.util.AttrDict import AttrDict
 import json
 from collections import defaultdict
+import sys, os
 
 
-# TODO: Deal With Blank displays opening more then once.
-# TODO: Deal With empty spaces when a module could not be restored. Needs to Fill all available places.
-# TODO: Save restore displays
 
 LayoutDirName = 'layout'
 DefaultLayoutFileName = 'v3Layout.json'
@@ -46,6 +44,7 @@ General = "general"
 ApplicationName = "applicationName"
 ApplicationVersion = "applicationVersion"
 GuiModules = "guiModules"
+FileNames = 'fileNames'
 ClassNameModuleName = "class_And_Module_Names"
 LayoutState =  "layoutState"
 
@@ -61,6 +60,10 @@ DefaultLayoutFile = {
                                 ClassNameModuleName: [()]
                               },
 
+                    FileNames:
+                              [
+                              ]
+                              ,
                     LayoutState:
                               {
 
@@ -116,6 +119,38 @@ def _updateGeneral(mainWindow, layout):
     if ApplicationVersion in layout.general:
       setattr(layout.general, ApplicationVersion, applicationVersion)
 
+
+def _updateFilenNames(mainWindow, layout):
+  """
+
+  :param mainWindow:
+  :param layout:
+  :return: #updates the fileNames needed for importing the module. list of file name from the full path
+
+  """
+  guiModules = mainWindow.moduleArea.ccpnModules
+  paths = []
+  names = []
+  for guiModule in guiModules:
+    if not isinstance(guiModule, GuiSpectrumDisplay): #Don't Save spectrum Displays
+      pyModule = sys.modules[guiModule.__module__]
+      if pyModule:
+        file = pyModule.__file__
+        if file:
+          path = os.path.abspath(file)
+          paths.append(path)
+    if len(paths)>0:
+      for path in paths:
+        basename = ntpath.basename(path)
+        basenameList = os.path.splitext(basename)
+        if len(basenameList)>0:
+          names.append(basenameList[0])
+
+    if len(names) > 0:
+      if FileNames in layout:
+          setattr(layout, FileNames, names)
+
+
 def _updateGuiModules(mainWindow, layout):
   """
   
@@ -152,6 +187,7 @@ def updateSavedLayout(mainWindow):
   layout = mainWindow.application.layout
   
   _updateGeneral(mainWindow, layout)
+  _updateFilenNames(mainWindow, layout)
   _updateGuiModules(mainWindow, layout)
   _updateLayoutState(mainWindow, layout)
   _updateWarning(mainWindow, layout)
@@ -177,7 +213,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
     getLogger().warning('Impossible to save Layout %s' %e)
 
 
-def _ccpnModulesImporter(path):
+def _ccpnModulesImporter(path, neededModules):
   """
   :param path: fullPath of the directory where are located the CcpnModules files
   :return: list of CcpnModule classes
@@ -189,20 +225,24 @@ def _ccpnModulesImporter(path):
 
   for loader, name, isPpkg in _pkgutil.walk_packages(path):
     # print ('>>>loading', name)
-    findModule = loader.find_module(name)
-    # print ('>>>find', findModule)
-    try:
-      module = findModule.load_module(name)
-    except Exception as es:
-      getLogger().warning('Error loading module: %s' % str(es))
-    # print ('>>>found')
-    for i, obj in _inspect.getmembers(module):
-      if _inspect.isclass(obj):
-        if issubclass(obj, CcpnModule):
-          if hasattr(obj, 'className'):
-            # print ('>>>     end')
-            _ccpnModules.append(obj)
-            # print ('>>>     append')
+    # print(neededModules, name)
+    if name in neededModules:
+
+      try:
+        findModule = loader.find_module(name)
+        # for neededModule in neededModules:
+        print(findModule.name, name,'FINDER')
+        module = findModule.load_module(name)
+      # print ('>>>found')
+        for i, obj in _inspect.getmembers(module):
+          if _inspect.isclass(obj):
+            if issubclass(obj, CcpnModule):
+              if hasattr(obj, 'className'):
+                # print ('>>>     end')
+                _ccpnModules.append(obj)
+                # print ('>>>     append')
+      except Exception as es:
+        getLogger().warning('Error loading module: %s' % str(es))
   return _ccpnModules
 
 
@@ -231,33 +271,33 @@ def _getApplicationSpecificModules(mainWindow, applicationName):
       from ccpn.AnalysisScreen import modules as aS
       modules.append(aS)
     except Exception as e:
-      getLogger().warning("Import Error, %s" % e)
+      getLogger().warning("Import Error for AnalysisScreen , %s" % e)
 
   if applicationName == AnalysisAssign:
     try:
       from ccpn.AnalysisAssign import modules as aA
       modules.append(aA)
     except Exception as e:
-      getLogger().warning("Import Error, %s" % e)
+      getLogger().warning("Import Error for AnalysisAssign , %s" % e)
 
   if applicationName == AnalysisMetabolomics:
     try:
       from ccpn.AnalysisMetabolomics.ui.gui import modules as aM
       modules.append(aM)
     except Exception as e:
-      getLogger().warning("Import Error, %s" % e)
+      getLogger().warning("Import Error for AnalysisMetabolomics , %s" % e)
 
   if applicationName == AnalysisStructure:
     try:
       from ccpn.AnalysisStructure import modules as aS
       modules.append(aS)
     except Exception as e:
-      getLogger().warning("Import Error, %s" % e)
+      getLogger().warning("Import Error for AnalysisStructure , %s" % e)
 
   return modules
 
 
-def _getAvailableModules(mainWindow, layout):
+def _getAvailableModules(mainWindow, layout, neededModules):
   from ccpn.ui.gui import modules as gM
   if General in layout:
     if ApplicationName in layout.general:
@@ -265,12 +305,14 @@ def _getAvailableModules(mainWindow, layout):
       applicationName = getattr(layout.general, ApplicationName)
       modules = []
       if applicationName != mainWindow.application.applicationName:
-        getLogger().debug('Same modules could not be loaded. Different application. Start a new project with %s' %applicationName)
+        getLogger().debug('The layout was saved in a different application. Same of the modules might not be loaded.'
+                          'If this happens,  start a new project with %s' %applicationName)
       else:
         modules = _getApplicationSpecificModules(mainWindow, applicationName)
       modules.append(gM)
       paths = [item.__path__ for item in modules]
-      ccpnModules = [ccpnModule for path in paths for ccpnModule in _ccpnModulesImporter(path)]
+
+      ccpnModules = [ccpnModule for path in paths for ccpnModule in _ccpnModulesImporter(path, neededModules)]
       return ccpnModules
 
 
@@ -310,35 +352,38 @@ def _getModuleNamesFromState(layoutState):
 def restoreLayout(mainWindow, layout):
   ## import all the ccpnModules classes specific for the application.
   # mainWindow.moduleArea._closeAll()
-  try:
-    ccpnModules = _getAvailableModules(mainWindow, layout)
-    # mainWindow.moduleArea._closeAll()
-    if GuiModules in layout:
-      if ClassNameModuleName in layout.guiModules:
-        classNameGuiModuleNameList = getattr(layout.guiModules, ClassNameModuleName)
-        if not list(_traverse(classNameGuiModuleNameList)):
-          return
-        print('classNameGuiModuleNameList', classNameGuiModuleNameList)
-        for classNameGuiModuleName in classNameGuiModuleNameList:
-          if len(classNameGuiModuleName) == 2:
-            className, guiModuleName = classNameGuiModuleName
-            _openCcpnModule(mainWindow, ccpnModules, className, moduleName=guiModuleName)
 
-  except Exception as e:
-    getLogger().warning("Failed to restore Layout")
+  if FileNames in layout:
+    neededModules = getattr(layout, FileNames)
+    if len(neededModules)>0:
+      if GuiModules in layout:
+        if ClassNameModuleName in layout.guiModules:
+          classNameGuiModuleNameList = getattr(layout.guiModules, ClassNameModuleName)
+          # Checks if  modules  are present in the layout file. If not stops it
+          if not list(_traverse(classNameGuiModuleNameList)):
+            return
+
+          try:
+            ccpnModules = _getAvailableModules(mainWindow, layout, neededModules)
+            for classNameGuiModuleName in classNameGuiModuleNameList:
+              if len(classNameGuiModuleName) == 2:
+                className, guiModuleName = classNameGuiModuleName
+                neededModules.append(className)
+                _openCcpnModule(mainWindow, ccpnModules, className, moduleName=guiModuleName)
+
+          except Exception as e:
+            getLogger().warning("Failed to restore Layout")
 
   if LayoutState in layout:
     # Very important step:
-    # Checks if the all the modules opened are apresent in the layout state. If not, will not restore the geometries
+    # Checks if the all the modules opened are present in the layout state. If not, will not restore the geometries
     state = getattr(layout, LayoutState)
     if not state:
       return
     namesFromState = _getModuleNamesFromState(state)
     openedModulesName =[i.name() for i in mainWindow.moduleArea.ccpnModules]
     compare = list( set(namesFromState) & set(openedModulesName))
-    print('namesFromState', sorted(namesFromState))
-    print('compare   @@@',sorted(compare))
-    print('openedModulesName',sorted(openedModulesName))
+
     if len(openedModulesName)>0:
       if len(compare) == len(openedModulesName):
         try:

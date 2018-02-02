@@ -58,8 +58,9 @@ class MacroEditor(CcpnModule):
     # layouts
     #widget = QtWidgets.QWidget()
     widget = self.mainWidget
-    widgetLayout = QtWidgets.QGridLayout()
-    widget.setLayout(widgetLayout)
+    # widgetLayout = QtWidgets.QGridLayout()
+    # widget.setLayout(widgetLayout)
+
     widget.layout().setSpacing(5)
     widget.layout().setContentsMargins(10,10,10,10)
     widget.layout().addWidget(self.label1,    0, 0, 1, 1)

@@ -59,6 +59,7 @@ from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
+from ccpn.ui.gui.guiSettings import getColourScheme
 
 # from functools import partial
 
@@ -1336,7 +1337,7 @@ class Framework:
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
     oldPath = self.project.path
-    newPath = getSaveDirectory(self.preferences.general)
+    newPath = getSaveDirectory(self.ui.mainWindow, self.preferences.general)
     if newPath:
       # Next line unnecessary, but does not hurt
       newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
@@ -1417,7 +1418,7 @@ class Framework:
                                     includeArchives=False, includeSummaries=True)
 
     MessageDialog.showInfo('Project Archived',
-                           'Project archived to %s' % fileName, colourScheme=self.ui.mainWindow.colourScheme)
+                           'Project archived to %s' % fileName, colourScheme=getColourScheme())
 
     self.ui.mainWindow._updateRestoreArchiveMenu()
 
@@ -2129,7 +2130,7 @@ class Framework:
 
   def showAboutPopup(self):
     from ccpn.ui.gui.popups.AboutPopup import AboutPopup
-    popup = AboutPopup()
+    popup = AboutPopup(parent=self.ui.mainWindow)
     popup.exec_()
     popup.raise_()
 
@@ -2201,11 +2202,11 @@ class Framework:
   #       return
   #     spectrumDisplay.printToFile(path)
 
-def getSaveDirectory(preferences=None):
+def getSaveDirectory(parent, preferences=None):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
 
-  dialog = FileDialog(fileMode=FileDialog.AnyFile, text='Save Project As',
-                      acceptMode=FileDialog.AcceptSave, preferences=preferences)
+  dialog = FileDialog(parent=parent, fileMode=FileDialog.DirectoryOnly, text='Save Project As',
+                      acceptMode=FileDialog.AcceptSave, preferences=preferences, filter='*.ccpn')
   newPath = dialog.selectedFile()
   if not newPath:
     return

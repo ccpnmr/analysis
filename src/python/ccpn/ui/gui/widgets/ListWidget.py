@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -46,6 +47,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
   #              border: 1px solid #182548;
   #              }
   # """
+
+  dropped = pyqtSignal()
 
   def __init__(self, parent=None, objects=None, callback=None
                , rightMouseCallback=None
@@ -96,7 +99,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
       self.clear()
       self.items = []
     for text in texts:
-      item = QtGui.QListWidgetItem(str(text))
+      item = QtWidgets.QListWidgetItem(str(text))
       self.addItem(item)
 
   def setObjects(self, objects, name='pid'):

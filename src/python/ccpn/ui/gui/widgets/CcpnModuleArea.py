@@ -38,7 +38,7 @@ from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
+from ccpn.ui.gui.widgets.SideBar import SideBar, OpenObjAction, _openItemObject
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.guiSettings import getColourScheme, getColours, LabelFG
 from ccpn.util.Colour import  hexToRgb
@@ -96,7 +96,8 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     data = self.parseEvent(event)
     source = event.source()
 
-    if DropBase.PIDS in data:
+    # drop an item from the sidebar onto the drop area
+    if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):
       pids = data[DropBase.PIDS]
       objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
       _openItemObject(self.mainWindow, objs, position=self.dropArea)
@@ -119,8 +120,18 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
   def dragEnterEvent(self, *args):
     event = args[0]
-    DockArea.dragEnterEvent(self, *args)
-    event.accept()
+    data = self.parseEvent(event)
+
+    if DropBase.PIDS in data and isinstance(data['event'].source(), SideBar):
+      DockArea.dragEnterEvent(self, *args)
+      event.accept()
+    else:
+      DockDrop.dragEnterEvent(self, *args)
+      event.accept()
+
+      # # reset the dock area
+      # self.dropArea = None
+      # self.overlay.setDropArea(self.dropArea)
 
   def dragLeaveEvent(self, *args):
     event = args[0]

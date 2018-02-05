@@ -354,8 +354,13 @@ class CcpnModule(Dock, DropBase):
     """
     if isinstance(source, CcpnModule) or isinstance(source, SideBar):
       if event.type() == QtCore.QEvent.DragEnter:
-        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
-        # print('>>>', source)
+        data = self.parseEvent(event)
+        if DropBase.PIDS in data and not isinstance(data['event'].source(), SideBar):
+          self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+        else:
+
+          # make transparent to enable module dragging
+          self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
       elif event.type() == QtCore.QEvent.Leave:
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)

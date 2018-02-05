@@ -46,6 +46,7 @@ from ccpn.util.Colour import  hexToRgb
 ModuleArea = DockArea
 Module = Dock
 DropAreaLabel = 'Drop Area'
+Failed = 'Failed'
 
 class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
@@ -451,6 +452,12 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
         if a is not None:
           a.apoptose()
 
+      for d in self.ccpnModules:
+        if d:
+          if d.className == Failed:
+            d.close()
+            getLogger().warning('Failed to restore: %s' %d.name())
+
 
   def _buildFromState(self, openedModulesNames, state, docks, root, depth=0):
 
@@ -463,7 +470,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
         del docks[contents]
       else:
         obj = CcpnModule(self.mainWindow, contents)
-        obj.className = 'Failed'
+        obj.className = Failed
         label = Label(obj, 'Failed to restore %s'%contents)
         obj.addWidget(label)
         self.addModule(obj)

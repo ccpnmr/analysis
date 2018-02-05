@@ -48,7 +48,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
   #              }
   # """
 
-  dropped = pyqtSignal()
+  dropped = pyqtSignal(list)
 
   def __init__(self, parent=None, objects=None, callback=None
                , rightMouseCallback=None
@@ -121,7 +121,6 @@ class ListWidget(QtWidgets.QListWidget, Base):
   def getObjects(self):
      return list(self.objects)
 
-
   def getSelectedObjects(self):
     indexes =  self.selectedIndexes()
     objects = []
@@ -130,7 +129,6 @@ class ListWidget(QtWidgets.QListWidget, Base):
       if obj is not None:
         objects.append(obj)
     return objects
-
 
   def select(self, name):
     for index in range(self.count()):
@@ -141,7 +139,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
   def clearSelection(self):
     for i in range(self.count()):
       item = self.item(i)
-      self.setItemSelected(item, False)
+      # self.setItemSelected(item, False)
+      item.setSelected(False)
 
   def getTexts(self):
     items = []
@@ -177,6 +176,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.clearSelection()
       else:
         super(ListWidget, self).mousePressEvent(event)
+
 
   def raiseContextMenu(self, event):
     """
@@ -256,7 +256,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
       links = []
       for url in event.mimeData().urls():
         links.append(str(url.toLocalFile()))
-      self.emit(QtCore.SIGNAL("dropped"), links)
+      # self.emit(QtCore.SIGNAL("dropped"), links)
+      self.dropped.emit(links)
       if self.sortOnDrop is True:
         self.sortItems()
     else:
@@ -268,7 +269,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
             event.setDropAction(QtCore.Qt.CopyAction)
           else:
             event.setDropAction(QtCore.Qt.MoveAction)
-          self.emit(QtCore.SIGNAL("dropped"), items)
+          # self.emit(QtCore.SIGNAL("dropped"), items)
+          self.dropped.emit(items)
           super(ListWidget, self).dropEvent(event)
           if self.sortOnDrop is True:
             self.sortItems()
@@ -276,7 +278,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
 
           if event.source() is self.dropSource:             # check that the drop comes
             event.setDropAction(QtCore.Qt.MoveAction)       # from only the permitted widget
-            self.emit(QtCore.SIGNAL("dropped"), items)
+            # self.emit(QtCore.SIGNAL("dropped"), items)
+            self.dropped.emit(items)
             super(ListWidget, self).dropEvent(event)
             if self.sortOnDrop is True:
               self.sortItems()
@@ -298,7 +301,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
       #       actionType = QtCore.Qt.MoveAction             # ejb - changed from Move
       #
       #   event.setDropAction(actionType)
-      #   self.emit(QtCore.SIGNAL("dropped"), items)
+      #   # self.emit(QtCore.SIGNAL("dropped"), items)
+      #   self.dropped.emit(items)
       #   super(ListWidget, self).dropEvent(event)
       # else:
       #   event.ignore()

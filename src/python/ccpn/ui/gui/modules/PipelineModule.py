@@ -176,6 +176,8 @@ class GuiPipeline(CcpnModule, Pipeline):
     # show settings on startup
     self._settingsCallback()
 
+    # stop the blue overlay popping up when dragging over a spectrum
+    self.allowedAreas = ['top', 'left', 'right', 'bottom']
 
   def _getGuiFromPipes(self, pipes):
     allGuiPipes = []

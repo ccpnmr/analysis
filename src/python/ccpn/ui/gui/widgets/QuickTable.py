@@ -216,6 +216,8 @@ class QuickTable(TableWidget, Base):
     self.setMinimumSize(30, 30)
     self.searchWidget = None
     self._parent.layout().setVerticalSpacing(0)
+
+    self.setDefaultTableData()
   #
   # def _cellClicked(self, row, col):
   #   self._currentRow = row
@@ -351,6 +353,9 @@ class QuickTable(TableWidget, Base):
     # TODO:ED generate a callback dict for the selected item
     # data = OrderedDict()
     # data['OBJECT'] = return pid, key/values, row, col
+
+    if not self._selectionCallback:
+      return
 
     if not self._silenceCallback:
     # if not self._mousePressed:
@@ -720,7 +725,7 @@ class QuickTable(TableWidget, Base):
     if path:
       self.findExportFormats(path)
 
-  def findExportFormats(self, path):
+  def findExportFormats(self, path, sheet_name='Table'):
     formatTypes = OrderedDict([
                                ('.xlsx', self.dataFrameToExcel),
                                ('.csv', self.dataFrameToCsv),
@@ -730,25 +735,42 @@ class QuickTable(TableWidget, Base):
 
     extension = os.path.splitext(path)[1]
     if extension in formatTypes.keys():
-       formatTypes[extension](self._dataFrameObject.dataFrame, path)
+       formatTypes[extension](self._dataFrameObject, path, sheet_name)
        return
     else:
       try:
-        self.findExportFormats(str(path) + self.saveDialog.selectedNameFilter())
+        self.findExportFormats(str(path) + self.saveDialog.selectedNameFilter(), sheet_name)
       except:
         print('Format file not supported')
 
-  def dataFrameToExcel(self, dataFrame, path):
-    dataFrame.to_excel(path, sheet_name='Table', index=False)
+  def dataFrameToExcel(self, dataFrameObject, path, sheet_name='Table'):
+    visColumns = dataFrameObject.visibleColumnHeadings
+    # writer = pd.ExcelWriter(path, engine='xlsxwriter')
+    #
+    # dataFrameExcel = dataFrameObject.dataFrame.apply(pd.to_numeric, errors='ignore')
+    # dataFrameExcel.to_excel(writer, sheet_name=sheet_name, index=False, columns=visColumns)
+    dataFrameObject.dataFrame.to_excel(path, sheet_name=sheet_name, index=False, columns=visColumns)
 
-  def dataFrameToCsv(self, dataFrame, path):
-    dataFrame.to_csv(path)
+  def dataFrameToCsv(self, dataFrameObject, path):
+    dataFrameObject.dataFrame.to_csv(path)
 
-  def dataFrameToTsv(self, dataFrame, path):
-    dataFrame.to_csv(path, sep='\t')
+  def dataFrameToTsv(self, dataFrameObject, path):
+    dataFrameObject.dataFrame.to_csv(path, sep='\t')
 
-  def dataFrameToJson(self, dataFrame, path):
-    dataFrame.to_json(path, orient = 'split')
+  def dataFrameToJson(self, dataFrameObject, path):
+    dataFrameObject.dataFrame.to_json(path, orient = 'split')
+
+  def tableToDataFrame(self):
+    return self._dataFrameObject.dataFrame[self._dataFrameObject.visibleColumnHeadings]
+  # def tableToDataFrame(self):
+  #   from pandas import DataFrame
+  #   headers = self._dataFrameObject.visibleColumnHeadings   #[c.heading for c in self.columns]
+  #   rows = []
+  #   for obj in self.objects:
+  #     rows.append([x.getValue(obj) for x in self.columns])
+  #   dataFrame = DataFrame(rows, index=None, columns=headers)
+  #   dataFrame.apply(pd.to_numeric, errors='ignore')
+  #   return dataFrame
 
   def scrollToSelectedIndex(self):
     h = self.horizontalHeader()
@@ -1232,10 +1254,22 @@ class QuickTable(TableWidget, Base):
                         , 'rowClass': rowClass
                         , 'cellClassNames': cellClassNames
                         , 'tableName': tableName
-                        # , 'rowName': rowName
                         , 'className': className
                         , 'classCallBack': callBackClass._pluralLinkName if callBackClass else None
                         , 'selectCurrentCallBack': selectCurrentCallBack}
+
+  def setDefaultTableData(self):
+    self._tableData = {'updateFunc': None
+                        , 'changeFunc': None
+                        , 'tableSelection': None
+                        , 'pullDownWidget': None
+                        , 'tableClass': None
+                        , 'rowClass': None
+                        , 'cellClassNames': None
+                        , 'tableName': None
+                        , 'className': None
+                        , 'classCallBack': None
+                        , 'selectCurrentCallBack': None }
 
   def clearTableNotifiers(self):
     """

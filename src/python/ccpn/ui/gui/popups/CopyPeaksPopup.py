@@ -30,6 +30,8 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+
 
 class CopyPeaks(CcpnDialog):
 
@@ -120,15 +122,21 @@ class CopyPeaks(CcpnDialog):
       self.copyButtons.buttons[1].setDisabled(False)
 
   def _copyButton(self):
-    peakLists = self.inputPeaksListWidget.getSelectedObjects()
-    peaks = self.inputPeaksWidget.getSelectedObjects()
-    if len(peaks)>0:
-      if len(peakLists) > 0:
-        for peak in peaks:
-          for peakList in peakLists:
-            peak.copyTo(peakList)
 
-    getLogger().info('Peaks copied. Finished')
+    # TODO:ED trap copying to invalid spectra
+    try:
+      peakLists = self.inputPeaksListWidget.getSelectedObjects()
+      peaks = self.inputPeaksWidget.getSelectedObjects()
+      if len(peaks)>0:
+        if len(peakLists) > 0:
+          for peak in peaks:
+            for peakList in peakLists:
+              peak.copyTo(peakList)
+
+      getLogger().info('Peaks copied. Finished')
+    except Exception as es:
+      getLogger().warning('Error copyin peaks: %s' % str(es))
+      showWarning(str(self.windowTitle()), str(es))
     self._closePopup()
 
 

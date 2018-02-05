@@ -97,6 +97,10 @@ class DataFrameObject(object):
     return self._columnDefinitions.columns
 
   @property
+  def visibleColumnHeadings(self):
+    return [col for col in self._columnDefinitions.headings if col not in self._hiddenColumns and col != OBJECT_DATAFRAME]
+
+  @property
   def headings(self):
     return self._columnDefinitions.headings
 

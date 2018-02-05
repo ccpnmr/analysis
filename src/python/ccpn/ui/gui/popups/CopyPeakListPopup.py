@@ -33,11 +33,12 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
 class CopyPeakListPopup(CcpnDialog):
-  def __init__(self, parent=None, application=None, title='Copy PeakList', **kw):
+  def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', **kw):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
 
-    self.application = application
-    self.project = self.application.project
+    self.mainWindow= mainWindow
+    self.application = self.mainWindow.application
+    self.project = self.mainWindow.project
 
     self._setMainLayout()
     self.setWidgets()

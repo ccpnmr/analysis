@@ -1405,7 +1405,7 @@ class Framework:
     from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
 
     if self.ui:
-      popup = ProjectSummaryPopup(self.project, self.ui.mainWindow, modal=True)
+      popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
       popup.show()
       popup.raise_()
       popup.exec_()
@@ -1674,7 +1674,8 @@ class Framework:
       return
     else:
       from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
-      CopyPeakListPopup(application=self).exec_()
+      popup = CopyPeakListPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+      popup.exec_()
 
   def showCopyPeaks(self):
     if not self.project.peakLists:
@@ -1683,7 +1684,7 @@ class Framework:
       return
     else:
       from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
-      popup = CopyPeaks(CopyPeaks=self.ui.mainWindow)
+      popup = CopyPeaks(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
       peaks = self.current.peaks
       popup._selectPeaks(peaks)
       popup.exec()

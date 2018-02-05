@@ -99,7 +99,7 @@ class CompoundBaseWidget(Frame):
       if width is not None:
         self._widgets[i].setFixedWidth(width)
 
-  def setFixedHeigths(self, fixedHeights):
+  def setFixedHeights(self, fixedHeights):
     "Set fixed heights of widgets"
     if len(fixedHeights) < len(self._widgets):
       raise RuntimeError('Not enough values to set fixed heights of all widgets')

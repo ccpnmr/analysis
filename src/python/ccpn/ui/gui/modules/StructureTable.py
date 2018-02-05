@@ -165,7 +165,7 @@ class StructureTableModule(CcpnModule):
                                              texts=[ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
                                              )
     self.displaysWidget.setPreSelect(self._fillDisplayWidget)
-    self.displaysWidget.setFixedHeigths((None, None, 40))
+    self.displaysWidget.setFixedHeights((None, None, 40))
 
     self.sequentialStripsWidget = CheckBoxCompoundWidget(
                                              self._STwidget,
@@ -207,7 +207,7 @@ class StructureTableModule(CcpnModule):
       self.selectStructureEnsemble(structureEnsemble)
 
   def _fillDisplayWidget(self):
-    list = [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
+    list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
     self.displaysWidget.setItems(list)
 
   def selectStructureEnsemble(self, structureEnsemble=None):

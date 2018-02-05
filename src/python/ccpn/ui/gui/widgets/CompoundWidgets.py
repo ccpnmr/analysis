@@ -116,7 +116,7 @@ class ListCompoundWidget(CompoundBaseWidget):
     self._addWidget(self.label)
 
     # pulldown
-    texts = [' > select-to-add <'] + list(texts)
+    texts = ['> select-to-add <'] + list(texts)
     self.pulldownList = PulldownList(parent=self, texts=texts, callback=self._addToListWidget, index=0)
     self._addWidget(self.pulldownList)
 

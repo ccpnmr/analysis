@@ -165,8 +165,9 @@ class CompoundView(QGraphicsView, Base):
 
     return QtWidgets.QGraphicsView.resizeEvent(self, event)
     
+  # def paintEvent(self, event: QtGui.QPaintEvent):
+  #   return QtWidgets.QGraphicsView.paintEvent(self, event)
 
-        
   def setAtomName(self):
     
     atom = self.editAtom

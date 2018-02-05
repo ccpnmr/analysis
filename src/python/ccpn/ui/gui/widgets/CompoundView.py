@@ -168,7 +168,6 @@ class CompoundView(QGraphicsView, Base):
       return
     
     text = self.editWidget.text().strip()
-    print(text, 'text', atom.name)
 
     if text and (text != atom.name):
       used = set([a.name for a in atom.compound.atoms])

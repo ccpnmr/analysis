@@ -1,0 +1,8 @@
+1. Save assignment tolerances to Spectrum tolerances?
+2. Separate values from GUI, move widgets out of parameter dictionary to gui dictionary, same structure, use callback to update parameter dictionary
+3. Write parameter dictionary to JSON, in plugin path (how about mutiple users using the same plugins, this should be user specific, define plugin settings store dir)
+   On save values and also on close plugin?
+4. Validate input, check reasonable values, e.g. MDsteps, or assignment tolerances. On suspicious values, color code widget.
+5. Talos exporter, and talos importer (from CING).
+
+pluginPath

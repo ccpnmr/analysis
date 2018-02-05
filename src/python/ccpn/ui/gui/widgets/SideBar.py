@@ -471,7 +471,6 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
       with progressManager(self.mainWindow, 'Loading...'):
         objects = self.project.loadData(url)
-        print(objects)
         if objects is not None:
 
           # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner

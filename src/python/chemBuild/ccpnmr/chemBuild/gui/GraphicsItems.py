@@ -478,7 +478,7 @@ class AtomItem(QtWidgets.QGraphicsItem):
     self.freeDrag = False
     
     self.atomLabel = AtomLabel(scene, self, compoundView, atom)
-    #compoundView.scene.addItem(self.atomLabel)
+    compoundView.scene.addItem(self.atomLabel)
     
     self.syncToAtom()
   

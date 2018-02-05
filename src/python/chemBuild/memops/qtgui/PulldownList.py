@@ -25,7 +25,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
     PulldownList.setData(self, texts, objects, index, icons)
     self.setCallback(callback)
 
-    self.connect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)
+    self.currentIndexChanged.connect(self._callback)
+
 
   def currentObject(self):
 

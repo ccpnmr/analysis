@@ -19,7 +19,7 @@ Align options
 
 class Base(object):
 
-  def __init__(self, parent, tipText=None, grid=(None, None), gridSpan=(1,1),
+  def __init__(self, parent=None, tipText=None, grid=(None, None), gridSpan=(1,1),
                stretch=(0,0), sticky='', bgColor=None, isFloatWidget=False):
     
     # Tool tips

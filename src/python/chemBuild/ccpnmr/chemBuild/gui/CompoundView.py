@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 QPointF = QtCore.QPointF
 QRectF = QtCore.QRectF
-
+from  PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
 from ccpnmr.chemBuild.model.Variant import Variant
 from ccpnmr.chemBuild.model.VarAtom import VarAtom
 from ccpnmr.chemBuild.model.Atom import Atom
@@ -21,12 +21,16 @@ from ccpnmr.chemBuild.general.Constants import LINK, MIMETYPE, MIMETYPE_ELEMENT,
 from ccpnmr.chemBuild.general.Constants import ATOM_NAME_FG, ELEMENT_FONT
 from ccpnmr.chemBuild.general.Constants import AROMATIC, EQUIVALENT, PROCHIRAL
     
-class CompoundView(QtWidgets.QGraphicsView):
+class CompoundView(QGraphicsView):
 
   def __init__(self, parent=None, variant=None):
 
-    QtWidgets.QGraphicsView.__init__(self, parent)
-    
+    super(CompoundView, self).__init__()
+    self.scene = QGraphicsScene(self)
+    self.scene.setSceneRect(0, 0, 300, 300)
+    self.setScene(self.scene)
+    self.setCacheMode(QGraphicsView.CacheBackground)
+
     self.parent = parent
     self.rotatePos = None
     if variant:
@@ -70,7 +74,7 @@ class CompoundView(QtWidgets.QGraphicsView):
     self.setScene(self.scene)
 
     self.selectionBox = SelectionBox(self.scene, self)
-    #self.scene.addItem(self.selectionBox)
+    self.scene.addItem(self.selectionBox)
 
     self.editAtom = None
     self.editWidget = QtWidgets.QLineEdit()
@@ -264,8 +268,8 @@ class CompoundView(QtWidgets.QGraphicsView):
       w = bbox.width()
       h = bbox.height()
       painter.drawText(qPoint(x0+pad, y1-pad), text)
-    
-    text = self.compound.name
+    if self.compound:
+      text = self.compound.name
     if text:
       bbox = fontMetric.boundingRect(text)
       h = bbox.height()
@@ -987,7 +991,6 @@ class CompoundView(QtWidgets.QGraphicsView):
 
   def addLink(self, name, atoms):
         
-    
     if ('next' in name) and  self.variant.polyLink in ('middle', 'start'):
       msg = 'Cannot add another next residue link'
       QtWidgets.QMessageBox.warning(self, "Abort", msg)
@@ -1084,6 +1087,7 @@ class CompoundView(QtWidgets.QGraphicsView):
           atomView.syncToAtom()
         else:
           atomView = AtomItem(scene, self, atom)
+          scene.addItem(atomView)
 
       zombieBonds = set(self.bondItems.keys()) - set(var.bonds)
       for bond in zombieBonds:
@@ -1096,6 +1100,7 @@ class CompoundView(QtWidgets.QGraphicsView):
         
         if not bondItem:
           bondItem = BondItem(scene, self, bond)
+          scene.addItem(bondItem)
        
       self.parent.updateVars()
     
@@ -1246,7 +1251,7 @@ class CompoundView(QtWidgets.QGraphicsView):
   
   def wheelEvent(self, event):
     
-    if event.delta() < 0:
+    if event.angleDelta().y() < 0:
       fac = 0.8333
     else:
       fac = 1.2

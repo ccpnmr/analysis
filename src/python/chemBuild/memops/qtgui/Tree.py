@@ -63,9 +63,9 @@ class Tree(QtWidgets.QTreeView, Base):
     
 
   def currentChanged(self, index, prev):
-
-    if self.callback:
-      self.callback(index)
+    if hasattr(self, 'callback'):
+      if self.callback:
+        self.callback(index)
 
     return QtWidgets.QTreeView.currentChanged(self, index, prev)
     

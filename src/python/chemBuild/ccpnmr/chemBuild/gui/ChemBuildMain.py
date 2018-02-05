@@ -6,7 +6,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, QtSvg
 
 from ccpnmr.chemBuild.gui.CompoundView import CompoundView
 from ccpnmr.chemBuild.gui.AtomDragWidget import AtomDragWidget
-
+from functools import partial
 from memops.qtgui.CheckButton import CheckButton
 from memops.qtgui.Button import Button
 from memops.qtgui.CategoryMenu import CategoryMenu
@@ -345,7 +345,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
                  FileType('SYBL2 Mol2', ['*.mol2']),
                  FileType('PDB', ['*.pdb']),
                 ]
-    fileTree = FileSystemTreePanel(self, fileTypes=fileTypes, callback=self.importCompoundFile)
+    fileTree = FileSystemTreePanel(None, fileTypes=fileTypes, callback=self.importCompoundFile)
     toolbox.addItem(fileTree, self.getIcon('file-system.png'), 'Browse Files')
 
     # Main panel
@@ -367,7 +367,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     # Simple Properties
     row = 0
     for i, (cat, properties) in enumerate(PROPERTIES_ATOM):
-      label = Label(frame, ' ' + cat + ':', grid=(row, 0), gridSpan=(1,3))
+      label = Label(parent=frame, text=' ' + cat + ':', grid=(row, 0), gridSpan=(1,3))
       
       row += 1
 
@@ -391,7 +391,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
     col = 0   
     for linkText, linkType, icon,  in LINKS:
-      button = Button(frame, '', lambda x=linkType: self.addLink(x), self.getIcon(icon),
+      button = Button(frame, '', partial(self.addLink, linkType), self.getIcon(icon),
                       tipText=linkText, grid=(row,col))
       button.setIconSize(QtCore.QSize(28,28))
       col += 1
@@ -488,7 +488,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     layout.addWidget(label)
     layout.setStretch(7,2)
     
-    self.detailsEdit = box = QtGui.QTextEdit(frame)
+    self.detailsEdit = box = QtWidgets.QTextEdit(frame)
     box.textChanged.connect(self.changeDetails)
     layout.addWidget(box)
 
@@ -1389,7 +1389,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
   
   def toggleAutoChirality(self, action):
     
-    state = action.isChecked()
+    state = action
      
     if self.compound:
       self.compoundView.autoChirality = state
@@ -1407,7 +1407,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
   def toggleAtomNames(self, action):
     
-    state = action.isChecked()
+    state = action
      
     if self.compound:
       self.compoundView.nameAtoms = state
@@ -1415,7 +1415,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
   def toggleAtomStats(self, action):
     
-    state = action.isChecked()
+    state = action
      
     if self.compound:
       self.compoundView.showStats = state
@@ -1423,7 +1423,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
   def toggleSkeletalFormula(self, action):
     
-    state = action.isChecked()
+    state = action
     
     if self.compound:
       self.compoundView.showSkeletalFormula = state
@@ -1441,7 +1441,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     
   def toggleChargeSymbols(self, action):
     
-    state = action.isChecked()
+    state = action
      
     if self.compound:
       self.compoundView.showChargeSymbols = state
@@ -1449,7 +1449,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
   def toggleChiralityLabels(self, action):
     
-    state = action.isChecked()
+    state = action
     
     if self.compound:
       self.compoundView.showChiralities = state
@@ -1457,7 +1457,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
 
   def toggleGroups(self, action):
     
-    state = action.isChecked()
+    state = action
     
     if self.compound:
       self.compoundView.showGroups = state

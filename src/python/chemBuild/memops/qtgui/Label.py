@@ -6,10 +6,10 @@ from .Base import Base
 
 class Label(QtWidgets.QLabel, Base):
 
-  def __init__(self, parent, text='', align=None, textColor=None, **kw):
+  def __init__(self, text='', align=None, textColor=None, **kw):
 
-    QtWidgets.QLabel.__init__(self, text, parent=None)
-    Base.__init__(self, parent, **kw)
+    QtWidgets.QLabel.__init__(self, text)
+    Base.__init__(self,  **kw)
     
     if align:
       letter = align.lower()[0]

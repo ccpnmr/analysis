@@ -199,10 +199,11 @@ class Compound:
   def unsetAtomGroup(self, atoms, groupType):
   
     for atom in atoms:
-      for varAtom in atom.varAtoms:
-        for group in list(varAtom.atomGroups):
-          if group.groupType == groupType:
-            group.delete()
+      if hasattr(atom, 'varAtoms'):
+        for varAtom in atom.varAtoms:
+          for group in list(varAtom.atomGroups):
+            if group.groupType == groupType:
+              group.delete()
       
   def setAtomsEquivalent(self, atoms):
     

@@ -462,7 +462,7 @@ class ObjectTable(QtWidgets.QTableView, Base):
     #model.currentRowChanged.connect(self._callback)
     
     header = self.verticalHeader()
-    header.setResizeMode(header.Interactive)
+    # header.setResizeMode(header.Interactive)
     header.setStretchLastSection(False)
     
     rowHeight = self.bbox('A').height() + 4
@@ -475,7 +475,7 @@ class ObjectTable(QtWidgets.QTableView, Base):
       header.setVisible(False)
   
     header = ObjectHeaderView(Qt.Horizontal, self)
-    header.setMovable(True)
+    # header.setMovable(True)
     header.setMinimumSectionSize(30)
     header.setDefaultSectionSize(30)
     #header.setSortIndicatorShown(False)

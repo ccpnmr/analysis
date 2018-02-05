@@ -239,13 +239,6 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
         module._repopulateModule()
     pass
 
-  def switchModule(self, module1, module2):
-    """
-    switch the new module into the blankDisplay
-    """
-    pass
-
-
 
   def addModule(self, module, position=None, relativeTo=None, **kwds):
     """With these settings the user can close all the modules from the label 'close module' or pop up and
@@ -462,6 +455,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
         obj.className = 'Failed'
         label = Label(obj, 'Failed to restore %s'%contents)
         obj.addWidget(label)
+        self.addModule(obj)
 
       # except KeyError:
       #   raise Exception('Cannot restore dock state; no dock with name "%s"' % contents)

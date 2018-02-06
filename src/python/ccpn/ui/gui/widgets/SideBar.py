@@ -746,9 +746,13 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def _restoreExpandedState(self, list):
     for lItem in list:
       items = self.findItems(lItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
+      if len(items)> 1:
+        print ('>>>expand Error')
+
       for item in items:
         # self.setItemExpanded(item, list[lItem])
-        self.expandItem(item)   #, list[lItem])
+        item.setExpanded(list[lItem])
+        # self.expandItem(item)   #, list[lItem])
 
   def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
     """rename NmrResidue(s) from previous pid oldPid to current object pid"""

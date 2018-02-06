@@ -383,7 +383,9 @@ class SubstancePropertiesPopup(CcpnDialog):
         self.substance.smiles = value
         if self.compoundView is not None:
           self.compoundView.setSmiles(value)
-          self.compoundView.scene.setSceneRect(self.compoundView.scene.itemsBoundingRect())  # resize to the new items
+
+          # resize to the new items
+          self.compoundView.scene.setSceneRect(self.compoundView.scene.itemsBoundingRect())
 
   def _empiricalFormulaChanged(self, value):
     if value:

@@ -1368,9 +1368,9 @@ def _pdbStringToDf(modelLines:list, modelNumber=1):
 
 
 def averageStructure(ensemble:EnsembleData) -> EnsembleData:
-  '''
+  """
   Calculate the average structure from all the models in an EnsembleData object.
-  '''
+  """
   identifierColumns = ['chainCode', 'sequenceId', 'atomName']  # Still need to include altLocationCode
   dataColumns = ['x', 'y', 'z', 'occupancy', 'bFactor']
   dataColumns = [c for c in dataColumns if c in ensemble.columns]

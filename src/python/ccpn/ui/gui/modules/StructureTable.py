@@ -411,7 +411,7 @@ class StructureTable(QuickTableStructure):
     StructureTable._project = self._project
 
     # create the column objects
-    self.STcolumns = ColumnClass([
+    self.structureColumns = [
       ('#', lambda row:StructureTable._stLamInt(row, 'Index'), 'Index', None),
       ('modelNumber', lambda row:StructureTable._stLamInt(row, 'modelNumber'), 'modelNumber', None),
       ('chainCode', lambda row:StructureTable._stLamStr(row, 'chainCode'), 'chainCode', None),
@@ -437,7 +437,8 @@ class StructureTable(QuickTableStructure):
       ('nmrAtomName', lambda row:StructureTable._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None),
       ('Comment', lambda row:StructureTable._getCommentText(row), 'Notes',
        lambda row, value:StructureTable._setComment(row, 'comment', value))
-    ])    # [Column(colName, func, tipText, editValue) for colName, func, tipText, editValue in self.columnDefs]
+    ]    # [Column(colName, func, tipText, editValue) for colName, func, tipText, editValue in self.columnDefs]
+    self.STcolumns = ColumnClass(self.structureColumns)
 
     # create the table; objects are added later via the displayTableForStructure method
     self.spacer = Spacer(self._widget, 5, 5
@@ -590,12 +591,17 @@ class StructureTable(QuickTableStructure):
           self.thisDataSet = None
         else:
           self.thisDataSet = dt.parameters['average']
+
+          # set the new columns
+          AVheadings = list(self.thisDataSet)
+          self.AVcolumns = ColumnClass([col for col in self.structureColumns if col[0] in AVheadings or col[0] == '#'])
+
           if len(self.stButtons.radioButtons) > 0:
             self.stButtons.radioButtons[1].setEnabled(True)
       else:
         self.thisDataSet = None
     except:
-      self.thisDatSet = None
+      self.thisDataSet = None
 
       # from ccpn.util.StructureData import averageStructure
       # dt.parameters['average'] = averageStructure(item.data)
@@ -733,10 +739,20 @@ class StructureTable(QuickTableStructure):
     Update the table from EnsembleData
     """
     if not self._updateSilence:
-      tuples = structureData.as_namedtuples()
-      self.setColumns(self.STcolumns)
-      self.setObjects(tuples)
-      self.show()
+      # tuples = structureData.as_namedtuples()
+      # self.setColumns(self.STcolumns)
+      # self.setObjects(tuples)
+      # self.show()
+
+      self._dataFrameObject = self.getDataFrameFromRows(table=self
+                                                  , dataFrame=structureData
+                                                  , colDefs=self.AVcolumns
+                                                  , hiddenColumns=self._hiddenColumns)
+
+      # new populate from Pandas
+      self._project.blankNotification()
+      self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+      self._project.unblankNotification()
 
   def setUpdateSilence(self, silence):
     """

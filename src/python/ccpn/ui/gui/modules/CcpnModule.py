@@ -294,6 +294,9 @@ class CcpnModule(Dock, DropBase):
   #   "Return name of self; done to allow for override in GuiSpectrumDisplay as that is a wrapper object as well"
   #   return self.name()
 
+    # stop the blue overlay popping up when dragging over a spectrum
+    self.allowedAreas = ['top', 'left', 'right', 'bottom']
+
     self.update()     # ejb - make sure that the widgetArea starts the correct size
 
     self._instances.add(ref(self))

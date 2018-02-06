@@ -30,6 +30,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
+from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 class CopyPeakListPopup(CcpnDialog):
@@ -84,8 +86,12 @@ class CopyPeakListPopup(CcpnDialog):
 
   def _copyPeakListToSpectrum(self):
     if self.sourcePeakList is not None:
-      if self.targetSpectrum is not None:
-        self.sourcePeakList.copyTo(self.targetSpectrum)
+      try:
+        if self.targetSpectrum is not None:
+          self.sourcePeakList.copyTo(self.targetSpectrum)
+      except Exception as es:
+        getLogger().warning('Error copying peakList: %s' % str(es))
+        showWarning(str(self.windowTitle()), str(es))
 
   def _populateSourcePeakListPullDown(self):
     sourcePullDownData = []

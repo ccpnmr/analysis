@@ -52,8 +52,10 @@ class ExperimentTypePopup(CcpnDialog):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     self.mainWindow = mainWindow
-    self.project = self.mainWindow.project
-    self.application =  self.mainWindow.application
+    if mainWindow:
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
 
     self.parent = parent
     spectra = self.project.spectra
@@ -115,7 +117,7 @@ class ExperimentTypePopup(CcpnDialog):
 
   def raiseExperimentFilterPopup(self, spectrum, spectrumIndex, atomCodes):
 
-    popup = ExperimentFilterPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectrum=spectrum)
+    popup = ExperimentFilterPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrum=spectrum)
     popup.exec_()
     if popup.expType:
       self.spPulldowns[spectrumIndex].select(popup.expType)

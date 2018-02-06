@@ -1628,7 +1628,7 @@ class Framework:
       MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
     else:
       from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
-      popup = SpectrumProjectionPopup(self.ui.mainWindow, self.project)
+      popup = SpectrumProjectionPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
       popup.exec_()
 
 
@@ -1641,7 +1641,7 @@ class Framework:
       MessageDialog.showWarning('Experiment Type Selection', 'Project has no Spectra.')
     else:
       from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
-      popup = ExperimentTypePopup(self.ui.mainWindow, self.project)
+      popup = ExperimentTypePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
       popup.exec_()
 
 

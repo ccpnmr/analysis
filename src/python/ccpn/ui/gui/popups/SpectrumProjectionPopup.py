@@ -83,10 +83,13 @@ class SpectrumProjectionPopup(CcpnDialog):
     axisIndices = [spectrum.axisCodes.index(x) for x in spectrum.axisCodes]
     axisCodeIndex = spectrum.axisCodes.index(projectionAxisCode)
     axisIndices.remove(axisCodeIndex)
-    xDim, yDim = axisIndices
-    spectrum.projectedToFile(path=filePath, xDim=xDim+1, yDim=yDim+1, method=method)
-    self.project.loadData(filePath)
-    self.accept()
+
+    # TODO:ED error here, assumes a 3D spectrum
+    if len(axisIndices) == 2:
+      xDim, yDim = axisIndices
+      spectrum.projectedToFile(path=filePath, xDim=xDim+1, yDim=yDim+1, method=method)
+      self.project.loadData(filePath)
+      self.accept()
 
   def _getSpectrumFile(self):
     if os.path.exists('/'.join(self.filePathLineEdit.text().split('/')[:-1])):

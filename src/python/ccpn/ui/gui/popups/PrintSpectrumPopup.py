@@ -42,6 +42,8 @@ from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 import os
+from ccpn.ui.gui.widgets.Spacer import Spacer
+
 
 class SelectSpectrumDisplayPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, **kw):
@@ -65,15 +67,28 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
     self.label = Label(self, text='Select Spectrum Display to Print', grid=(0,0), gridSpan=(1,2)
                        , hAlign='centre', vAlign='centre')
     self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2), setLayout=True)
+
+    # self._spacer = Spacer(self, 5, 5
+    #                       , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+    #                       , grid=(2, 1), gridSpan=(1, 1))
+
     self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtWidgets.QFrame()
-    self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+    # self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtWidgets.QFrame()
+    #
+    # self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
     self.spectrumDisplayIds = [sd.title for sd in self.project.spectrumDisplays]
     self.spectrumDisplayPids = [sd.pid for sd in self.project.spectrumDisplays]
-    self.radioButtonBox = RadioButtons(self.scrollArea
+    self.radioButtonBox = RadioButtons(None       #self.scrollAreaWidgetContents
                                        , self.spectrumDisplayIds
                                        , direction='v')
+    self.radioButtonBox.setMinimumSize(self.radioButtonBox.sizeHint())
+
+    self.radioButtonBox.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                      QtWidgets.QSizePolicy.MinimumExpanding)
+
+    self.scrollArea.setWidget(self.radioButtonBox)
+
     # self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self._sequenceGraphScrollArea, project, setLayout=True)
     self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self.getDisplayToPrint],
                                 texts=['Cancel', 'Select Display'])

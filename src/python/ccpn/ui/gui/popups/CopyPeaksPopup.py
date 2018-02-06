@@ -137,7 +137,7 @@ class CopyPeaks(CcpnDialog):
     except Exception as es:
       getLogger().warning('Error copyin peaks: %s' % str(es))
       showWarning(str(self.windowTitle()), str(es))
-    self._closePopup()
+    # self._closePopup()
 
 
   def _selectPeaks(self, peaks):

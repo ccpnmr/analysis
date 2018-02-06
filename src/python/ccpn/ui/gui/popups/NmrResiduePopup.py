@@ -166,12 +166,6 @@ class NmrResiduePopup(CcpnDialog):
         self.nmrResidue.rename(newSeqCode)
 
       self.nmrResidueLabel.setText("NMR Residue: %s" % self.nmrResidue.id)
-      if self.parent:
-        if self.parent.name() == 'PEAK ASSIGNER':
-          self.parent.emptyAllTablesAndLists()
-          self.parent.updateTables()
-          self.parent.updateAssignedNmrAtomsListwidgets()
-          self.parent.updateWidgetLabels()
 
       applyAccept = True
     except Exception as es:

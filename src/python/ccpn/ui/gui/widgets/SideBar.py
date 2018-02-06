@@ -1024,7 +1024,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     elif obj.shortClassName == 'SU':
       popup = SubstancePropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, substance=obj)
       popup.exec_()
-      popup.raise_()
+      # popup.raise_()
     elif obj.shortClassName == 'NC':
       popup = NmrChainPopup(parent=self.mainWindow, mainWindow=self.mainWindow, nmrChain=obj)
       popup.exec_()
@@ -1158,7 +1158,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         elif item.parent().text(0) == 'Substances':
           popup = SubstancePropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, newSubstance=True)   # ejb - application=self.application,
           popup.exec_()
-          popup.raise_()        # included setModal(True) in the above as was not modal???
+          # popup.raise_()        # included setModal(True) in the above as was not modal???
           return
         elif item.parent().text(0) == 'SpectrumGroups':
           popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, addNew=True)

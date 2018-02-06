@@ -124,6 +124,20 @@ class ButtonList(QtWidgets.QWidget, Base):
     else:
       getLogger().warning('Button %s not found in the list' % buttonName)
 
+  def setButtonVisible(self, buttonName:str, visible:bool=True):
+    """
+    Show/hide a button by name
+    :param buttonName(str) - name of the button:
+    :param visible(bool) - True or False:
+    """
+    if buttonName in self.buttonNames.keys():
+      if visible:
+        self.buttons[self.buttonNames[buttonName]].show()
+      else:
+        self.buttons[self.buttonNames[buttonName]].hide()
+    else:
+      getLogger().warning('Button %s not found in the list' % buttonName)
+
 
 class UtilityButtonList(ButtonList):
 

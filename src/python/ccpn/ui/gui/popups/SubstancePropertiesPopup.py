@@ -33,6 +33,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
@@ -54,9 +55,9 @@ class SubstancePropertiesPopup(CcpnDialog):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
-    self.setModal(True)         # ejb - WHY????
+    # self.setModal(True)         # ejb - WHY????
 
     self.mainWindow = mainWindow              # ejb - should always be done like this
     self.application = mainWindow.application
@@ -69,6 +70,10 @@ class SubstancePropertiesPopup(CcpnDialog):
     self.preferences = self.application.preferences
 
     self.createNewSubstance = newSubstance
+
+    self.contentsFrame = Frame(self, setLayout=True, grid=(1,1), spacing=(5,5))
+    # self.moreWidgetsFrame = Frame(self, setLayout=True, grid=(1,1), gridSpan=(3,1), spacing=(5,5))
+
     self._setMainLayout()
     self._setWidgets()
     self._addWidgetsToLayout(self._allWidgets(), self.mainLayout)
@@ -79,8 +84,9 @@ class SubstancePropertiesPopup(CcpnDialog):
       self._hideSubstanceCreator()
 
   def _setMainLayout(self):
-    self.mainLayout = QtWidgets.QGridLayout()
-    self.setLayout(self.mainLayout)
+    self.mainLayout = self.contentsFrame.layout()   # QtWidgets.QGridLayout()
+    # self.contentsFrame.setLayout(self.mainLayout)
+
     # self.setWindowTitle("Substance Properties")
     # self.setFixedHeight(300)
     self.mainLayout.setContentsMargins(15, 20, 25, 10)  # L,T,R,B
@@ -89,15 +95,15 @@ class SubstancePropertiesPopup(CcpnDialog):
     for setWidget in self._getWidgetsToSet():
       setWidget()
 
-  def _addWidgetsToLayout(self, widgets, layout):
+  def _addWidgetsToLayout(self, widgets, frame):
     count = int(len(widgets) / 2)
     self.positions = [[i + 1, j] for i in range(count) for j in range(2)]
     for position, widget in zip(self.positions, widgets):
       i, j = position
-      layout.addWidget(widget, i, j)
+      frame.layout().addWidget(widget, i, j)
 
   def _getWidgetsToSet(self):
-    widgetsToSet = (self._initialOpitionWidgets, self._setCurrentSubstanceWidgets,
+    widgetsToSet = (self._initialOptionWidgets, self._setCurrentSubstanceWidgets,
                     self._substanceNameWidget, self.labellingWidget,
                     self._chemicalNameWidget, self._referenceSpectrumWidget,
                     self._smilesWidget, self._empiricalFormulaWidget,
@@ -105,7 +111,9 @@ class SubstancePropertiesPopup(CcpnDialog):
                     self._casNumberWidget, self._atomWidget, self._bondCountWidget,
                     self._ringCountWidget, self._bondDonorCountWidget, self._bondAcceptorCountWidget,
                     self._polarSurfaceAreaWidget, self._logPWidget, self._showCompoundView,
-                    self._setPerformButtonWidgets)
+                    self._setPerformButtonWidgets
+                    # self._moreWidgetsFrame
+                    )
     return widgetsToSet
 
   def _allWidgets(self):
@@ -133,7 +141,7 @@ class SubstancePropertiesPopup(CcpnDialog):
             self.spacerLabel, self.buttonBox
     )
 
-  def _initialOpitionWidgets(self):
+  def _initialOptionWidgets(self):
     self.spacerLabel = Label(self, text="")
     self.selectInitialRadioButtons = RadioButtons(self, texts=['New', 'From Existing'],
                                                   selectedInd=1,
@@ -273,26 +281,33 @@ class SubstancePropertiesPopup(CcpnDialog):
     else:
       smiles = ''
     self.compoundView = CompoundView(self, smiles=smiles, preferences=self.preferences)
+    # self.compoundView.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+    #                                 QtWidgets.QSizePolicy.MinimumExpanding)
+    # self.compoundView.scene.setSceneRect(self.compoundView.scene.itemsBoundingRect())  # resize to the new items
 
     self.compoundView.centerView()
     self.compoundView.updateAll()
 
+
   def _setPerformButtonWidgets(self):
     self.spacerLabel = Label(self, text="")
-    callbacks = [self._hideExtraSettings, self._showMoreSettings, self.reject, self._okButton]
-    texts = ['Less', 'More', 'Cancel', 'Ok']
+    callbacks = [self._hideExtraSettings, self._showMoreSettings, self.reject, self. _applyChanges, self._okButton]
+    texts = ['Less', 'More', 'Cancel', 'Apply', 'Ok']
 
     # if not self.createNewSubstance:
       # Apply doesn't really work when creating new substance
       # (So after the apply, does the next apply/ok affect the just created substance or is a new one created??)
       # Pulldown list is not updated
       # But more seriously you end up editing existing substance instead of creating new ones
-    callbacks.insert(-1, self._applyChanges)
-    texts.insert(-1, 'Apply')
+    # callbacks.insert(-1, self._applyChanges)
+    # texts.insert(-1, 'Apply')
 
     self.buttonBox = ButtonList(self, callbacks=callbacks, texts=texts)
     self._hideExtraSettings()
 
+  def _moreWidgetsFrame(self):
+    # create a new frame to the more/less stuff in
+    self.moreWidgetsFrame = Frame(self, setLayout=True, spacing=(5,5))
 
   # CallBacks
 
@@ -368,6 +383,7 @@ class SubstancePropertiesPopup(CcpnDialog):
         self.substance.smiles = value
         if self.compoundView is not None:
           self.compoundView.setSmiles(value)
+          self.compoundView.scene.setSceneRect(self.compoundView.scene.itemsBoundingRect())  # resize to the new items
 
   def _empiricalFormulaChanged(self, value):
     if value:
@@ -468,22 +484,22 @@ class SubstancePropertiesPopup(CcpnDialog):
       return substance
 
   def _hideExtraSettings(self):
-    self.hide()
+    self.contentsFrame.hide()
     for w in self._allWidgets()[12:-1]:
       w.hide()
-    self.buttonBox.buttons[0].hide()
-    self.buttonBox.buttons[1].show()
-    self.show()
-    self.setMaximumHeight(200)
+    self.buttonBox.setButtonVisible('Less', False)
+    self.buttonBox.setButtonVisible('More', True)
+    self.contentsFrame.show()
+    self.setFixedHeight(250)
 
   def _showMoreSettings(self):
-    self.hide()
+    self.contentsFrame.hide()
     for w in self._allWidgets()[12:-1]:
       w.show()
-    self.buttonBox.buttons[0].show()
-    self.buttonBox.buttons[1].hide()
-    self.show()
-    self.setMaximumHeight(800)
+    self.buttonBox.setButtonVisible('More', False)
+    self.buttonBox.setButtonVisible('Less', True)
+    self.contentsFrame.show()
+    self.setFixedHeight(800)
 
   def _checkCurrentSubstances(self):
     if len(self.project.substances) > 0:

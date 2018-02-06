@@ -40,7 +40,7 @@ class CompoundView(QGraphicsView, Base):
 
   def __init__(self, parent=None, smiles=None, variant=None, preferences=None, **kw):
 
-    super(CompoundView, self).__init__()
+    super(CompoundView, self).__init__(parent)
     self.scene = QGraphicsScene(self)
     self.scene.setSceneRect(0, 0, 300, 300)
     self.setScene(self.scene)
@@ -341,8 +341,8 @@ class CompoundView(QGraphicsView, Base):
       
       items = set(scene.items())
       items.remove(self.editProxy)
-      # items.remove(self.selectionBox)
-      print(items)
+      items.remove(self.selectionBox)
+      # print(items)
 
       for item in items:
         item.hide()
@@ -1325,7 +1325,7 @@ class SelectionBox(QtWidgets.QGraphicsItem):
     super(SelectionBox, self).__init__()
     # QtWidgets.QGraphicsItem.__init__(self)
     # self._scene = scene
-    print(self.scene(), scene, 'TEST')
+    # print(self.scene(), scene, 'TEST')
 
     self.setZValue(1)
     self.compoundView = compoundView

@@ -76,6 +76,14 @@ ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, Analys
 interfaceNames = ('NoUi', 'Gui')
 
 
+def _ccpnExceptionhook(type, value, tback):
+  '''This because PyQT raises and catches exceptions,
+  but doesn't pass them along instead makes the program crashing miserably.'''
+  sys.__excepthook__(type, value, tback)
+
+sys.excepthook = _ccpnExceptionhook
+
+
 def printCreditsText(fp, programName, version):
   """Initial text to terminal """
   from ccpn.framework.PathsAndUrls import ccpnLicenceUrl

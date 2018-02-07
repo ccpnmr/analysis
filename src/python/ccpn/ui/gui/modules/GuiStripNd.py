@@ -168,6 +168,13 @@ class GuiStripNd(GuiStrip):
 
     self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
 
+  def _rebuildStripContours(self):
+    # TODO:ED need to rebuild the contours here
+
+    # redraw the contours
+    for specNum, thisSpecView in enumerate(self.spectrumDisplay.spectrumViews):
+      thisSpecView.buildContours = True
+      thisSpecView.update()
 
   def _get2dContextMenu(self) -> Menu:
     """
@@ -504,12 +511,15 @@ class GuiStripNd(GuiStrip):
     zAxis = self.orderedAxes[n+2]
     planeLabel = self.planeToolbar.planeLabels[n]
     zAxis.width = value * planeLabel.singleStep()
+    self._rebuildStripContours()
 
   def nextZPlane(self, n:int=0):
     """
     Increases z ppm position by one plane
     """
     self.changeZPlane(n, planeCount=-1) # -1 because ppm units are backwards
+    self._rebuildStripContours()
+
     self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
     getLogger().info("application.getByGid(%r).nextZPlane()" % self.pid)
 
@@ -518,6 +528,8 @@ class GuiStripNd(GuiStrip):
     Decreases z ppm position by one plane
     """
     self.changeZPlane(n, planeCount=1) # -1 because ppm units are backwards
+    self._rebuildStripContours()
+
     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
     getLogger().info("application.getByGid(%r).prevZPlane()" % self.pid)
 
@@ -533,6 +545,7 @@ class GuiStripNd(GuiStrip):
 
     if planeLabel.minimum() <= value <= planeLabel.maximum():
       self.changeZPlane(n, position=value)
+      self._rebuildStripContours()
 
   # def setPlaneCount(self, n:int=0, value:int=1):
   #   """

@@ -61,37 +61,42 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
     # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
     self.setContentsMargins(15, 20, 25, 5)  # L,T,R,B
-    self.setFixedWidth(400)
-    self.setFixedHeight(300)
+    # self.setFixedWidth(400)
+    # self.setFixedHeight(300)
 
     self.label = Label(self, text='Select Spectrum Display to Print', grid=(0,0), gridSpan=(1,2)
                        , hAlign='centre', vAlign='centre')
-    self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2), setLayout=True)
+    # self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2), setLayout=True)
 
     # self._spacer = Spacer(self, 5, 5
     #                       , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
     #                       , grid=(2, 1), gridSpan=(1, 1))
 
-    self.scrollArea.setWidgetResizable(True)
+    # self.scrollArea.setWidgetResizable(True)
     # self.scrollAreaWidgetContents = Frame(self, setLayout=True)#QtWidgets.QFrame()
     #
     # self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
+    # TODO:ED remove scroll area
     self.spectrumDisplayIds = [sd.title for sd in self.project.spectrumDisplays]
     self.spectrumDisplayPids = [sd.pid for sd in self.project.spectrumDisplays]
-    self.radioButtonBox = RadioButtons(None       #self.scrollAreaWidgetContents
+    self.radioButtonBox = RadioButtons(self       #self.scrollAreaWidgetContents
                                        , self.spectrumDisplayIds
+                                       , grid=(3,0), gridSpan=(1,2)
                                        , direction='v')
-    self.radioButtonBox.setMinimumSize(self.radioButtonBox.sizeHint())
 
-    self.radioButtonBox.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                      QtWidgets.QSizePolicy.MinimumExpanding)
+    # self.radioButtonBox.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+    #                                   QtWidgets.QSizePolicy.MinimumExpanding)
 
-    self.scrollArea.setWidget(self.radioButtonBox)
+    # self.scrollArea.setWidget(self.radioButtonBox)
 
     # self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self._sequenceGraphScrollArea, project, setLayout=True)
     self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self.getDisplayToPrint],
                                 texts=['Cancel', 'Select Display'])
+
+    self.radioButtonBox.setMinimumSize(self.radioButtonBox.sizeHint())
+    self.radioButtonBox.setContentsMargins(15, 15, 15, 15)  # L,T,R,B
+    self.setFixedSize(self.sizeHint())
 
   def _getViewBox(self, spectrumDisplay):
     if len(spectrumDisplay.spectrumViews)>0:

@@ -222,6 +222,7 @@ class PlaneToolbar(ToolBar):
 
     ToolBar.__init__(self, parent=qtParent, **kw)
 
+    self.strip = strip
     self.planeLabels = []
     self.planeCounts = []
     for i in range(len(strip.orderedAxes)-2):
@@ -259,3 +260,10 @@ class PlaneToolbar(ToolBar):
     else:
       if self.nextPlaneCallback:
         self.nextPlaneCallback(n)
+
+    # TODO:ED need to rebuild the contours here
+
+    # redraw the contours
+    for specNum, thisSpecView in enumerate(self.strip.spectrumDisplay.spectrumViews):
+      thisSpecView.buildContours = True
+      thisSpecView.update()

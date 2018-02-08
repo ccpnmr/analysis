@@ -376,7 +376,7 @@ void main()
   gl_Position = vec4( floor(0.5 + viewport.x*pos.x) / viewport.x,
                       floor(0.5 + viewport.y*pos.y) / viewport.y,
                       pos.zw );
-                                
+               
   gl_TexCoord[0] = gl_MultiTexCoord0;
   FC = gl_Color;
 }
@@ -1878,8 +1878,8 @@ class CcpnGLFont():
     # texture sizes
     dx = 1.0 / float(self.fontPNG.shape[1])
     dy = 1.0 / float(self.fontPNG.shape[0])
-    hdx = dx / 2.0
-    hdy = dy / 2.0
+    hdx = dx / 10.0
+    hdy = dy / 10.0
 
     while exitDims is False and row < len(self.fontInfo):
       line = self.fontInfo[row]
@@ -1983,9 +1983,9 @@ class CcpnGLFont():
     GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST )
     GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST )
 
-    # the following 2 lines generate a multitexture mipmap
-    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
-    GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
+    # the following 2 lines generate a multitexture mipmap - shouldn't need here
+    # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
+    # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
     GL.glDisable(GL.GL_TEXTURE_2D)
 
     # create a list of GLdisplayLists to handle each character - deprecated, changing to VBOs

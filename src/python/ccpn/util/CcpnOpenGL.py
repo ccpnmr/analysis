@@ -63,106 +63,6 @@ GLRENDERMODE_RESCALE = 2
 GLRENDERMODE_REBUILD = 3
 
 
-# class CcpnOpenGLWidget(QtWidgets.QOpenGLWidget):
-#
-#     def __init__(self, parent=None):
-#       super(QtWidgets.QOpenGLWidget, self).__init__(parent)
-#       self.trolltechPurple = QtGui.QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
-#
-#     def minimumSizeHint(self):
-#       return QtCore.QSize(100, 300)
-#
-#     def sizeHint(self):
-#       return QtCore.QSize(400, 400)
-#
-#     def initializeGL(self):
-#       # self.qglClearColor(self.trolltechPurple.dark())
-#       GL.glClearColor(*self.trolltechPurple.getRgb())
-#
-#     def paintGL(self):
-#       GL.glMatrixMode(GL.GL_MODELVIEW)
-#       GL.glLoadIdentity()
-#       GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-#       GL.glColor3f(1,0,0)
-#       GL.glRectf(-1,-1,1,0)
-#       GL.glColor3f(0,1,0)
-#       GL.glRectf(-1,0,1,1)
-#       GL.glBegin(GL.GL_TRIANGLES)
-#       GL.glVertex2f(3.0, 3.0)
-#       GL.glVertex2f(5.0, 3.0)
-#       GL.glVertex2f(5.0, 5.0)
-#       GL.glVertex2f(6.0, 4.0)
-#       GL.glVertex2f(7.0, 4.0)
-#       GL.glVertex2f(7.0, 7.0)
-#       GL.glEnd()
-#       GL.glFinish()
-#
-#     def resizeGL(self, w, h):
-#       GL.glViewport(0, 0, w, h)
-
-
-# class Bubble(object):
-#   def __init__(self, position, radius, velocity):
-#     self.position = position
-#     self.vel = velocity
-#     self.radius = radius
-#
-#     self.innerColor = self.randomColor()
-#     self.outerColor = self.randomColor()
-#     self.updateBrush()
-#
-#   def updateBrush(self):
-#     gradient = QRadialGradient(QPointF(self.radius, self.radius),
-#                                self.radius, QPointF(self.radius * 0.5, self.radius * 0.5))
-#
-#     gradient.setColorAt(0, QColor(255, 255, 255, 255))
-#     gradient.setColorAt(0.25, self.innerColor)
-#     gradient.setColorAt(1, self.outerColor)
-#     self.brush = QBrush(gradient)
-#
-#   def drawBubble(self, painter):
-#     painter.save()
-#     painter.translate(self.position.x() - self.radius,
-#                       self.position.y() - self.radius)
-#     painter.setBrush(self.brush)
-#     painter.drawEllipse(0, 0, int(2 * self.radius), int(2 * self.radius))
-#     painter.restore()
-#
-#   def randomColor(self):
-#     red = random.randrange(205, 256)
-#     green = random.randrange(205, 256)
-#     blue = random.randrange(205, 256)
-#     alpha = random.randrange(91, 192)
-#
-#     return QColor(red, green, blue, alpha)
-#
-#   def move(self, bbox):
-#     self.position += self.vel
-#     leftOverflow = self.position.x() - self.radius - bbox.left()
-#     rightOverflow = self.position.x() + self.radius - bbox.right()
-#     topOverflow = self.position.y() - self.radius - bbox.top()
-#     bottomOverflow = self.position.y() + self.radius - bbox.bottom()
-#
-#     if leftOverflow < 0.0:
-#       self.position.setX(self.position.x() - 2 * leftOverflow)
-#       self.vel.setX(-self.vel.x())
-#     elif rightOverflow > 0.0:
-#       self.position.setX(self.position.x() - 2 * rightOverflow)
-#       self.vel.setX(-self.vel.x())
-#
-#     if topOverflow < 0.0:
-#       self.position.setY(self.position.y() - 2 * topOverflow)
-#       self.vel.setY(-self.vel.y())
-#     elif bottomOverflow > 0.0:
-#       self.position.setY(self.position.y() - 2 * bottomOverflow)
-#       self.vel.setY(-self.vel.y())
-#
-#   def rect(self):
-#     return QRectF(self.position.x() - self.radius,
-#                   self.position.y() - self.radius, 2 * self.radius,
-#                   2 * self.radius)
-
-
 class CcpnGLWidget(QOpenGLWidget):
   def __init__(self, parent=None, rightMenu=None):
     super(CcpnGLWidget, self).__init__(parent)
@@ -173,37 +73,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self._parent = parent
 
+    # TODO:ED need to check how this works
     for spectrumView in self._parent.spectrumViews:
       spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
 
-    # midnight = QTime(0, 0, 0)
-    # random.seed(midnight.secsTo(QTime.currentTime()))
-    #
-    # self.object = 0
-    # self.xRot = 0
-    # self.yRot = 0
-    # self.zRot = 0
-    # self.image = QImage()
-    # self.bubbles = []
     self.lastPos = QPoint()
-    #
-    # self.trolltechGreen = QColor.fromCmykF(0.40, 0.0, 1.0, 0.0)
-    # self.trolltechPurple = QColor.fromCmykF(0.39, 0.39, 0.0, 0.0)
-
-    # TODO:ED need to explicitly call self.update() to refresh after an update
-    # self.animationTimer = QTimer()
-    # self.animationTimer.setSingleShot(False)
-    # self.animationTimer.timeout.connect(self.animate)
-    # self.animationTimer.start(25)
-
-    # self.setMinimumSize(100, 50)
-    # self.setWindowTitle("Overpainting a Scene")
-
     self._mouseX = 0
     self._mouseY = 0
 
     # self.eventFilter = self._eventFilter
-    # self.installEventFilter(self)   # ejb
+    # self.installEventFilter(self)
     self.setMouseTracking(True)                 # generate mouse events when button not pressed
 
     self.base = None
@@ -219,26 +98,138 @@ class CcpnGLWidget(QOpenGLWidget):
     self._isSHIFT = ' '
     self._isCTRL = ' '
 
-    # self.installEventFilter(self)
     # always respond to mouse events
     self.setFocusPolicy(Qt.StrongFocus)
 
+    # set initial axis limits - should be changed by strip.display..
     self.axisL = 12
     self.axisR = 4
     self.axisT = 20
     self.axisB = 80
 
-    self.setAutoFillBackground(True)
-    self.setAttribute(Qt.WA_NoSystemBackground, False)
-    self.setStyleSheet('background-color: #ff0000')
+  def rescale(self):
+    """
+    change to axes of the view, axis visibility, scale and rebuild matrices when necessary
+    to improve display speed
+    """
+    w = self.width()
+    h = self.height()
+
+    currentShader = self._shaderProgram1.makeCurrent()
+
+    # set projection to axis coordinates
+    currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+                                    self.axisT, -1.0, 1.0)
+
+    # needs to be offset from (0,0) for mouse scaling
+    currentShader.setViewportMatrix(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, 0, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
+    currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                            0.0, 1.0, 0.0, 0.0,
+                            0.0, 0.0, 1.0, 0.0,
+                            0.0, 0.0, 0.0, 1.0]     # set to identity matrix
+    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+    # map mouse coordinates to world coordinates - only needs to change on resize, move soon
+    currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
+                                           self.axisT, -1.0, 1.0)
+
+    self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))     # projection
+    self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))   # modelView
+    self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))     # viewport
+    self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
+
+    # calculate the size of the screen pixels in axis coordinates
+    self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
+    self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
+    self.pixelX = self._pointOne[0]-self._pointZero[0]
+    self.pixelY = self._pointOne[1]-self._pointZero[1]
+
+    self.modelViewMatrix = (GL.GLdouble * 16)()
+    self.projectionMatrix = (GL.GLdouble * 16)()
+    self.viewport = (GL.GLint * 4)()
+
+    # change to the text shader
+    currentShader = self._shaderProgramTex.makeCurrent()
+
+    currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+    currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    #                          0.0, 1.0, 0.0, 0.0,
+    #                          0.0, 0.0, 1.0, 0.0,
+    #                          0.0, 0.0, 0.0, 1.0]
+    # currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+    self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+    self._view[0:4] = [w-AXIS_MARGINRIGHT, h-AXIS_MARGINBOTTOM, 1.0, 1.0]
+
+    # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
+    currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
+    currentShader.setGLUniform4fv('viewport', 1, self._view)
 
   def resizeGL(self, w, h):
-    # GL.glViewport(0, 0, w, h)
-    # print ('>>>resize')
-    self.makeCurrent()
     GL.glUseProgram(self._shaderProgram1.program_id)
 
-    # self.set2DProjectionFlat()
+    self.w = self.width()
+    self.h = self.height()
+
+    self.rescale()
+
+    # currentShader = self._shaderProgram1.makeCurrent()
+    #
+    # # set projection to axis coordinates
+    # currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+    #                                 self.axisT, -1.0, 1.0)
+    #
+    # # needs to be offset from (0,0) for mouse scaling
+    # currentShader.setViewportMatrix(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, 0, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
+    # currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    #
+    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    #                         0.0, 1.0, 0.0, 0.0,
+    #                         0.0, 0.0, 1.0, 0.0,
+    #                         0.0, 0.0, 0.0, 1.0]     # set to identity matrix
+    # currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    #
+    # # map mouse coordinates to world coordinates - only needs to change on resize, move soon
+    # currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
+    #                                        self.axisT, -1.0, 1.0)
+    #
+    # self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))     # projection
+    # self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))   # modelView
+    # self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))     # viewport
+    # self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
+    #
+    # # calculate the size of the screen pixels in axis coordinates
+    # self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
+    # self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
+    # self.pixelX = self._pointOne[0]-self._pointZero[0]
+    # self.pixelY = self._pointOne[1]-self._pointZero[1]
+    #
+    # self.modelViewMatrix = (GL.GLdouble * 16)()
+    # self.projectionMatrix = (GL.GLdouble * 16)()
+    # self.viewport = (GL.GLint * 4)()
+    #
+    # # change to the text shader
+    # currentShader = self._shaderProgramTex.makeCurrent()
+    #
+    # currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
+    # currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    #
+    # # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    # #                          0.0, 1.0, 0.0, 0.0,
+    # #                          0.0, 0.0, 1.0, 0.0,
+    # #                          0.0, 0.0, 0.0, 1.0]
+    # # currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    #
+    # self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+    # self._view[0:4] = [w-AXIS_MARGINRIGHT, h-AXIS_MARGINBOTTOM, 1.0, 1.0]
+    #
+    # # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
+    # currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
+    # currentShader.setGLUniform4fv('viewport', 1, self._view)
 
     # put stuff in here that will change on a resize
     for li in self.gridList:
@@ -252,19 +243,24 @@ class CcpnGLWidget(QOpenGLWidget):
     def between(val, l, r):
       return (l-val)*(r-val) <= 0
 
+    # TODO:ED this is not working for touchpad
     zoomScale = 15.0
     zoomIn = (100.0+zoomScale)/100.0
     zoomOut = 100.0/(100.0+zoomScale)
 
     numDegrees = event.angleDelta() / 8
     axisLine = 5
-    h = self.height()
-    w = self.width()
+    h = self.h
+    w = self.w
 
     # find the correct viewport
     mw = [0, 35, w-36, h-1]
     ba = [0, 0, w - 36, 34]
     ra = [w-36, 35, w, h]
+
+    self._mouseX = event.pos().x()
+    self._mouseY = self.height() - event.pos().y()
+
     if between(self._mouseX, mw[0], mw[2]) and between(self._mouseY, mw[1], mw[3]):
       mb = (self._mouseX - mw[0]) / (mw[2] - mw[0])
       mbx = self.axisL + mb * (self.axisR - self.axisL)
@@ -329,6 +325,7 @@ class CcpnGLWidget(QOpenGLWidget):
         pp.renderMode = GLRENDERMODE_RESCALE
 
     event.accept()
+    self.rescale()
     self.update()
 
   def eventFilter(self, obj, event):
@@ -338,26 +335,6 @@ class CcpnGLWidget(QOpenGLWidget):
       event.accept()
       return True
     return super(CcpnGLWidget, self).eventFilter(obj, event)
-
-  def _releaseDisplayLists(self, displayList):
-    GL.glDeleteLists(displayList, 1)
-
-  # def _createDisplayLists(self, numLists, displayList):
-  #   displayList = GL.glGenLists(numLists)
-
-  # def _makeGLPeakList(self, spectrum:Spectrum, num:GL.GLint):
-  #   # clear the list and rebuild
-  #   # GL.glDeleteLists(self._GLPeakLists[num], 1)
-  #   # self._GLPeakLists[num] = (GL.glGenLists(1), True)       # list and rebuild flag
-  #
-  #   # this is actually quite old-school for openGL but good for test
-  #   GL.glNewList((self._GLPeakLists[num])[0], GL.GL_COMPILE)
-  #   GL.glColor4f(1.0, 1.0, 1.0, 1.0)
-  #
-  #   GL.glBegin(GL.GL_LINES)
-  #   GL.glEnd()
-  #
-  #   GL.glEndList()
 
   def _connectSpectra(self):
     for spectrumView in self._parent.spectrumViews:
@@ -423,13 +400,23 @@ void main()
 
 uniform mat4 mvMatrix;
 uniform mat4 pMatrix;
-varying vec4 FC;
 uniform vec4 axisScale;
+uniform vec4 viewport;
+varying vec4 FC;
+varying vec4 FO;
 attribute vec2 offset;
 
 void main()
 {
-  gl_Position = pMatrix * mvMatrix * (gl_Vertex * 5 * axisScale + vec4(offset, 0.0, 0.0));
+  // viewport is scaled to axis
+  vec4 pos = pMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+                      // character pos              world coord
+                      
+  // centre on the nearest pixel in NDC
+  gl_Position = vec4( floor(0.5 + viewport.x*pos.x) / viewport.x,
+                      floor(0.5 + viewport.y*pos.y) / viewport.y,
+                      pos.zw );
+                                
   gl_TexCoord[0] = gl_MultiTexCoord0;
   FC = gl_Color;
 }
@@ -442,6 +429,7 @@ uniform sampler2D texture;
 varying vec4 FC;
 vec4    filter;
 uniform vec4    background;
+varying vec4 FO;
 
 void main()
 {
@@ -599,34 +587,6 @@ void main()
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
-    # getLogger().info('OpenGL version: %s' % self._GLVersion)
-
-    # format = self.context().format()    #    QSurfaceFormat()
-    # # format.setDepthBufferSize(24)
-    # # format.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
-    # # format.setProfile(QSurfaceFormat.CoreProfile)
-    # # format.setAlphaBufferSize(8)
-    #
-    # self.makeCurrent()
-    # self.context().setFormat(format)
-    # self.context().create()
-
-    # glFormat = QtOpenGL.QGLFormat()
-    # glFormat.setVersion(4, 1)
-    # glFormat.setProfile(QtOpenGL.QGLFormat.CoreProfile)
-    # glFormat.setSampleBuffers(True)
-    # glFormat.setDefaultFormat(glFormat)
-    # print("Format version: " + str(glFormat.majorVersion()))
-    # myW = QtOpenGL.QGLWidget(glFormat)
-    # print("Widget context valid: " + str(myW.context().isValid()))
-    # print("Widget format version: " + str(myW.format().majorVersion()))
-    # print("Widget context format version: " + str(myW.context().format().majorVersion()))
-    # myW.setFormat(glFormat)
-    # print("Forced format valid: " + str(myW.context().isValid()))
-    # print("Forced format version: " + str(myW.format().majorVersion()))
-    # myW.show()
-
-    # print ('>>>GLVersion', self._GLVersion)
 
     # initialise the arrays for the grid and axes
     self.gridList = []
@@ -644,14 +604,9 @@ void main()
     self.firstFont = CcpnGLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
     self._buildTextFlag = True
 
-    # self._mouseList = GL.glGenLists(1)
     self._buildMouse = True
     self._mouseCoords = ''
     self.mouseString = None
-
-    # self._drawTextList = GL.glGenLists(1)
-    # self._axisXLabels = GL.glGenLists(1)
-    # self._axisLabels = GL.glGenLists(1)
     self.peakLabelling = 0
 
     self._contourList = GLVertexArray(numLists=1
@@ -684,7 +639,6 @@ void main()
     #                                   , blendMode=True
     #                                   , drawMode=GL.GL_TRIANGLES)
 
-    # TODO:ED only have openGL 2.1 installed, so no point yet
     self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1
                                         , fragment=self._fragmentShader1
                                         , attributes={'pMatrix':(16, np.float32)
@@ -706,7 +660,8 @@ void main()
                                         , attributes={'pMatrix':(16, np.float32)
                                                       , 'mvMatrix':(16, np.float32)
                                                       , 'axisScale':(4, np.float32)
-                                                      , 'background': (4, np.float32)})
+                                                      , 'background': (4, np.float32)
+                                                      , 'viewport':(4, np.float32)})
 
     # these are the links to the GL projection.model matrices
     # self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
@@ -722,6 +677,7 @@ void main()
     self._axisScale = np.zeros((4,), dtype=np.float32)
     self._background = np.zeros((4,), dtype=np.float32)
     self._parameterList = np.zeros((4,), dtype=np.int32)
+    self._view = np.zeros((4,), dtype=np.float32)
     self.worldCoordinate = np.zeros((4,), dtype=np.float32)
 
     # self._positiveContours = np.zeros((4,), dtype=np.float32)
@@ -734,19 +690,23 @@ void main()
                                        , dimension=4
                                        , GLContext=self)
 
+    self.w = 0
+    self.h = 0
     self.viewports = GLViewports()
+
+    # TODO:ED error here when calulating the top offset, FOUND
     self.viewports.addViewport('mainView', self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
-                                                , (-AXIS_MARGINRIGHT, 'w'), (0, 'h'))
+                                                , (-AXIS_MARGINRIGHT, 'w'), (-AXIS_MARGINBOTTOM, 'h'))
 
     self.viewports.addViewport('mainViewFullWidth', self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
-                                                        , (-AXIS_MARGINRIGHT, 'w'), (0, 'h'))
+                                                        , (0, 'w'), (-AXIS_MARGINBOTTOM, 'h'))
 
     self.viewports.addViewport('rightAxis', self, (-(AXIS_MARGINRIGHT+AXIS_LINE), 'w')
                                                   , (AXIS_MARGINBOTTOM, 'a')
-                                                  , (AXIS_LINE, 'a'), (0, 'h'))
+                                                  , (AXIS_LINE, 'a'), (-AXIS_MARGINBOTTOM, 'h'))
 
     self.viewports.addViewport('rightAxisBar', self, (-AXIS_MARGINRIGHT, 'w'), (AXIS_MARGINBOTTOM, 'a')
-                                                    , (0, 'w'), (0, 'h'))
+                                                    , (0, 'w'), (-AXIS_MARGINBOTTOM, 'h'))
 
     self.viewports.addViewport('bottomAxis', self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
                                                   , (-AXIS_MARGINRIGHT, 'w'), (AXIS_LINE, 'a'))
@@ -763,22 +723,17 @@ void main()
     # def set2DProjectionBottomAxisBar   GL.glViewport(0, 0, w - AXIS_MARGIN, AXIS_MARGIN)
     # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
 
-    self._testString = GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=63, y=117
-                                , color=(0.15, 0.6, 0.25, 1.0), GLContext=self)
-
-    # GLUT.glutInitDisplayMode(GLUT.glutCreateSubWindow | GLUT.GLUT_RGBA | GLUT.GLUT_DEPTH)
-    # set the GL constants here
-    # GL.glClearColor(*self._background)
-    # GL.glUseProgram(self._shaderProgram1.program_id)
-    # GL.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO)
-    # GL.glClear(GL.GL_COLOR_BUFFER_BIT)
-    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+    # testing string
+    self._testStrings = [GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=2.813*xx, y=15.13571*xx
+                                , color=(0.15, 0.6, 0.25, 1.0), GLContext=self) for xx in list(range(50))]
 
     # This is the correct blend function to ignore stray surface blending functions
     GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
-    # GL.glDisable(GL.GL_DEPTH_TEST)
-
     self.setBackgroundColour([0.05, 0.05, 0.05, 1.0])
+
+    # extra data
+    self.axisCodes = None
+
 
   def setBackgroundColour(self, col):
     """
@@ -836,31 +791,15 @@ void main()
     dy = event.pos().y() - self.lastPos.y()
     self.lastPos = event.pos()
 
-    # if event.buttons() & Qt.LeftButton:
-    #   self.setXRotation(self.xRot + 8 * dy)
-    #   self.setYRotation(self.yRot + 8 * dx)
-    # elif event.buttons() & Qt.RightButton:
-    #   self.setXRotation(self.xRot + 8 * dy)
-    #   self.setZRotation(self.zRot + 8 * dx)
-
+    # calculate mouse coordinate within the mainView
     self._mouseX = event.pos().x()
-    self._mouseY = self.height() - event.pos().y()
-
-    # print ('INV~~~~~~~')
+    self._mouseY = self.height() - event.pos().y() - AXIS_MARGINBOTTOM
 
     # translate mouse to NDC
     vect = self.vInv.dot([self._mouseX, self._mouseY, 0.0, 1.0])
 
     # translate to axis coordinates
     self.worldCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
-
-    # self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
-    # self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
-    # self.pixelX = self._pointOne[0]-self._pointZero[0]
-    # self.pixelY = self._pointOne[1]-self._pointZero[1]
-
-    # print (self._mouseX, self._mouseY, " : ", vect[0:2], self.worldCoordinate)
-    # print (self._mouseX, self._mouseY, " : ", np.array([self._mouseX, self._mouseY, 0.0, 0.0], dtype=np.float32).dot(self._invTransform))
 
     if event.buttons() & Qt.LeftButton:
       # do the complicated keypresses first
@@ -883,71 +822,13 @@ void main()
         self.axisT += dy * self.pixelY
         self.axisB += dy * self.pixelY
 
+        self.rescale()
+
         # spawn rebuild event for the grid
         for li in self.gridList:
           li.renderMode = GLRENDERMODE_REBUILD
         for pp in self._GLPeakLists.values():
           pp.renderMode = GLRENDERMODE_RESCALE
-
-        #   event.modifiers() & QtCore.Qt.ShiftModifier):
-    #   position = event.scenePos()
-    #   mousePoint = self.mapSceneToView(position)
-    #   print(mousePoint)
-    #
-    #   elif (event.button() == QtCore.Qt.LeftButton) and (
-    #   event.modifiers() & QtCore.Qt.ShiftModifier) and not (
-    # event.modifiers() & QtCore.Qt.ControlModifier):
-    # print('Add Select')
-    #
-    # elif event.button() == QtCore.Qt.MiddleButton and not event.modifiers():
-    # event.accept()
-    # print('Pick and Assign')
-    #
-    # elif event.button() == QtCore.Qt.RightButton and not event.modifiers():
-    # event.accept()
-    # print('Context Menu to be activated here')
-
-  # def paintEvent_WithPainter(self, event):
-  #   self.makeCurrent()
-  #
-  #   GL.glMatrixMode(GL.GL_MODELVIEW)
-  #   GL.glPushMatrix()
-  #
-  #   self.set3DProjection()
-  #
-  #   self.setClearColor(self.trolltechPurple.darker())
-  #   GL.glShadeModel(GL.GL_SMOOTH)
-  #   GL.glEnable(GL.GL_DEPTH_TEST)
-  #   # GL.glEnable(GL.GL_CULL_FACE)
-  #   GL.glEnable(GL.GL_LIGHTING)
-  #   GL.glEnable(GL.GL_LIGHT0)
-  #   GL.glEnable(GL.GL_MULTISAMPLE)
-  #   GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION,
-  #                     (0.5, 5.0, 7.0, 1.0))
-  #
-  #   self.setupViewport(self.width(), self.height())
-  #
-  #   GL.glClear(
-  #     GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-  #   GL.glLoadIdentity()
-  #   GL.glTranslated(0.0, 0.0, -10.0)
-  #   GL.glRotated(self.xRot / 16.0, 1.0, 0.0, 0.0)
-  #   GL.glRotated(self.yRot / 16.0, 0.0, 1.0, 0.0)
-  #   GL.glRotated(self.zRot / 16.0, 0.0, 0.0, 1.0)
-  #   GL.glCallList(self.object)
-  #
-  #   GL.glMatrixMode(GL.GL_MODELVIEW)
-  #   GL.glPopMatrix()
-  #
-  #   painter = QPainter(self)
-  #   painter.setRenderHint(QPainter.Antialiasing)
-  #
-  #   for bubble in self.bubbles:
-  #     if bubble.rect().intersects(QRectF(event.rect())):
-  #       bubble.drawBubble(painter)
-  #
-  #   self.drawInstructions(painter)
-  #   painter.end()
 
     self.update()
 
@@ -983,6 +864,7 @@ void main()
 
   def _rescalePeakListLabels(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
+    return
 
     x = abs(self.pixelX)
     y = abs(self.pixelY)
@@ -1001,7 +883,6 @@ void main()
 
   def _rescalePeakList(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
-    return
 
     x = abs(self.pixelX)
     y = abs(self.pixelY)
@@ -1040,22 +921,10 @@ void main()
                                                       , blendMode=False, drawMode=GL.GL_LINES
                                                       , dimension=2, GLContext=self)
 
-      # self._GLPeakLists[spectrum.pid] = [GL.glGenLists(1), GLRENDERMODE_REBUILD, np.array([]), np.array([]), 0, None]
-
     drawList = self._GLPeakLists[spectrum.pid]
 
     if drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
-
-      # GL.glNewList(drawList[0], GL.GL_COMPILE)
-      #
-      # drawList[2] = None
-      # drawList[3] = None
-      # drawList[4] = 0
-      # drawList[5] = []
-      #
-      # tempVert = []
-      # tempCol = []
 
       drawList.clearArrays()
 
@@ -1074,7 +943,6 @@ void main()
         w = 0.05
         r = 0.025 * x / y
 
-      # GL.glBegin(GL.GL_LINES)
       index=0
       for pls in spectrum.peakLists:
         for peak in pls.peaks:
@@ -1099,101 +967,33 @@ void main()
           colG = int(colour.strip('# ')[2:4], 16)/255.0
           colB = int(colour.strip('# ')[4:6], 16)/255.0
 
-          # draw a cross
-          # TODO:ED need to put scaling in here to keep the cross square at 0.1ppm
+          # keep the cross square at 0.1ppm
           p0 = peak.position
-          # GL.glBegin(GL.GL_LINES)
-          # GL.glVertex2d(p0[0]-r, p0[1]-w)
-          # GL.glVertex2d(p0[0]+r, p0[1]+w)
-          # GL.glVertex2d(p0[0]+r, p0[1]-w)
-          # GL.glVertex2d(p0[0]-r, p0[1]+w)
-          #
-          # # append the new points to the end of nparray
+          drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+          drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
+                                                            , p0[0]+r, p0[1]+w
+                                                            , p0[0]+r, p0[1]-w
+                                                            , p0[0]-r, p0[1]+w])
+          drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+          drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
+                                                          ,p0[0], p0[1]
+                                                          ,p0[0], p0[1]
+                                                          ,p0[0], p0[1]])
+          index += 4
+          drawList.numVertices += 4
 
-
-
-          # # draw a scaled cross on the screen
-          # drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
-          # drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
-          #                                                   , p0[0]+r, p0[1]+w
-          #                                                   , p0[0]+r, p0[1]-w
-          #                                                   , p0[0]-r, p0[1]+w])
-          # drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
-          # drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
-          #                                                 ,p0[0], p0[1]
-          #                                                 ,p0[0], p0[1]
-          #                                                 ,p0[0], p0[1]])
-          # index += 4
-          # drawList.numVertices += 4
-
-
-          # NOT WORKING!!!
-          numPoints = 2
-          ang = list(range(numPoints))
-          drawList.indices = np.append(drawList.indices, [[index+an, index+an+1] for an in ang])
-          drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.cos(an)
-                                                            , p0[1]-w*math.sin(an)
-                                                            , p0[0]-r*math.cos((an+1))
-                                                            , p0[1]-w*math.sin((an+1))] for an in ang])
-          drawList.colors = np.append(drawList.colors, [[0, 1, 1, 1.0, 1, 0, 1, 1.0] for an in ang])
-          drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
-          index += (numPoints * 2)
-          drawList.numVertices += (numPoints * 2)
-
-
-
-
-          # tempVert.append([p0[0]-r, p0[1]-w])
-          # tempVert.append([p0[0]+r, p0[1]+w])
-          # tempVert.append([p0[0]+r, p0[1]-w])
-          # tempVert.append([p0[0]-r, p0[1]+w])
-          #
-          # tempCol.append([colR, colG, colB, 1.0])
-          # tempCol.append([colR, colG, colB, 1.0])
-          # tempCol.append([colR, colG, colB, 1.0])
-          # tempCol.append([colR, colG, colB, 1.0])
-          #
-          # drawList[4] += 4                              # store the number of points
-          # drawList[5].append((p0[0], p0[1]))            # store the point for quicker access
-          #                                               # required for rescale
-          #
-          # if hasattr(peak, '_isSelected') and peak._isSelected:
-          #   # draw box
-          #   GL.glVertex2d(p0[0]-r, p0[1]-w)
-          #   GL.glVertex2d(p0[0]+r, p0[1]-w)
-          #   GL.glVertex2d(p0[0]+r, p0[1]+w)
-          #   GL.glVertex2d(p0[0]-r, p0[1]+w)
-          # GL.glEnd()
-          #
-
-      #     # TODO:ED don't delete yet, this is the peak label drawing
-      #     # glut text failure - need something better
-      #     colour = pls.textColour
-      #     colR = int(colour.strip('# ')[0:2], 16)/255.0
-      #     colG = int(colour.strip('# ')[2:4], 16)/255.0
-      #     colB = int(colour.strip('# ')[4:6], 16)/255.0
-      #     GL.glColor4f(colR, colG, colB, 1.0)
-      #
-      #     GL.glPushMatrix()
-      #     GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
-      #     GL.glScaled(self.pixelX, self.pixelY, 1.0)
-      #
-      #     if self.peakLabelling == 0:
-      #       text = _getScreenPeakAnnotation(peak, useShortCode=False)
-      #     elif self._parentWidget().strip.peakLabelling == 1:
-      #       text = _getScreenPeakAnnotation(peak, useShortCode=True)
-      #     else:
-      #       text = _getPeakAnnotation(peak)  # original 'pid'
-      #
-      #     GL.glCallLists([ord(c) for c in text])
-      #
-      #     GL.glPopMatrix()
-      #
-      # # GL.glEnd()
-      # GL.glEndList()
-
-      # drawList[2] = np.array(tempVert, np.float32)
-      # drawList[3] = np.array(tempCol, np.float32)
+          # # draw an ellipse
+          # numPoints = 24
+          # ang = list(range(numPoints))
+          # drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
+          # drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(an*2*np.pi/numPoints)
+          #                                                   , p0[1]-w*math.cos(an*2*np.pi/numPoints)
+          #                                                   , p0[0]-r*math.sin((an+1)*2*np.pi/numPoints)
+          #                                                   , p0[1]-w*math.cos((an+1)*2*np.pi/numPoints)] for an in ang])
+          # drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
+          # drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
+          # index += (numPoints * 2)
+          # drawList.numVertices += (numPoints * 2)
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -1211,31 +1011,8 @@ void main()
     if drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
-      # drawList[1] = GLRENDERMODE_DRAW               # back to draw mode
-      # drawList[2] = None
-      # drawList[3] = None
-      # drawList[4] = 0
-      # drawList[5] = []
       drawList.clearArrays()
       drawList.stringList = []
-
-      # tempVert = []
-      # tempCol = []
-
-      # find the correct scale to draw square pixels
-      # don't forget to change when the axes change
-      x = abs(self.pixelX)
-      y = abs(self.pixelY)
-      minIndex = 0 if x <= y else 1
-      pos = [0.05, 0.05 * y / x]
-      w = r = pos[minIndex]
-
-      if x <= y:
-        r = 0.05
-        w = 0.025 * y / x
-      else:
-        w = 0.05
-        r = 0.025 * x / y
 
       for pls in spectrum.peakLists:
         for peak in pls.peaks:
@@ -1252,17 +1029,10 @@ void main()
           if not _isInPlane and not _isInFlankingPlane:
             continue
 
-          # need to map world coordinate to screen for drawing text
-
           colour = pls.textColour
           colR = int(colour.strip('# ')[0:2], 16)/255.0
           colG = int(colour.strip('# ')[2:4], 16)/255.0
           colB = int(colour.strip('# ')[4:6], 16)/255.0
-          # GL.glColor4f(colR, colG, colB, 1.0)
-          #
-          # GL.glPushMatrix()
-          # GL.glTranslated(p0[0]+r, p0[1]-w, 0.0)
-          # GL.glScaled(self.pixelX, self.pixelY, 1.0)
 
           if self.peakLabelling == 0:
             text = _getScreenPeakAnnotation(peak, useShortCode=False)
@@ -1271,31 +1041,16 @@ void main()
           else:
             text = _getPeakAnnotation(peak)  # original 'pid'
 
-          # TODO:ED change this to a vertex array
-          # GL.glCallLists([ord(c) for c in text])
-          # for c in text:
-          #   ch = ord(c)
-
-          # TODO:ED concatenate all strings into a single list
-          # add a new string to the list
-
-          # self._screenZero = self._uVMatrix.reshape((4, 4)).dot(self.aInv.dot([p0[0], p0[1], 0, 1]))
-
+          # TODO:ED check axisCodes and ordering
           drawList.stringList.append(GLString(text=text
                                       , font=self.firstFont
-                                      , x=p0[0], y=p0[1]       #self._screenZero[0], y=self._screenZero[1]
+                                      , x=p0[0], y=p0[1]
+                                      # , x=self._screenZero[0], y=self._screenZero[1]
                                       , color=(colR, colG, colB, 1.0), GLContext=self
                                       , pid=peak.pid))
 
-          # GL.glPopMatrix()
-      # GL.glEndList()
-      # drawList[2] = np.array(tempVert, np.float32)
-      # drawList[3] = np.array(tempCol, np.float32)
-
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
-
-      # self._rescalePeakListLabels(spectrumView=spectrumView)
 
   def _drawVertexColor(self, drawList):
     # new bit to use a vertex array to draw the peaks, very fast and easy
@@ -1314,7 +1069,7 @@ void main()
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
-    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
@@ -1343,7 +1098,7 @@ void main()
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
-    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
     GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
@@ -1359,113 +1114,85 @@ void main()
 
     GL.glDisable(GL.GL_BLEND)
 
-
-
   def _round_sig(self, x, sig=6, small_value=1.0e-9):
     return 0 if x==0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
-
-  # TODO:ED the blending isn't working when the dock is popped out of the mainwindow
-  # def paintEvent(self, event):
-  #   self.makeCurrent()
-  # 
-  #   painter = QPainter(self)
-  #   painter.setRenderHint(QPainter.Antialiasing)
-  #   painter.end()
 
   def between(val, l, r):
     return (l-val)*(r-val) <= 0
 
   def paintGL(self):
+    w = self.w
+    h = self.h
 
-    self.makeCurrent()
-    w = self.width()
-    h = self.height()
-
-    # GL.glBlendFunc(GL.GL_ONE, GL.GL_ZERO)
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
-    # TODO:ED I think the depth test is messing up the clear colour
-    # GL.glEnable(GL.GL_DEPTH_TEST)
-
-    # set the current shader
     currentShader = self._shaderProgram1.makeCurrent()
 
-    # self._parameterList[0:4] = [1, 0, 0, 0]
-    # self._shaderProgram1.setParameterList(self._parameterList)
-
+    # # set projection to axis coordinates
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                     self.axisT, -1.0, 1.0)
-
-    # TODO:ED check why this is h+35 and not h
-    currentShader.setViewportMatrix(self._uVMatrix, 0, w-35, 35, h+35, -1.0, 1.0)
+    #
+    # # needs to be offset from (0,0) for mouse scaling
+    # currentShader.setViewportMatrix(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, 0, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    #
+    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    #                         0.0, 1.0, 0.0, 0.0,
+    #                         0.0, 0.0, 1.0, 0.0,
+    #                         0.0, 0.0, 0.0, 1.0]     # set to identity matrix
+    # currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    #
+    # # map mouse coordinates to world coordinates - only needs to change on resize, move soon
+    # currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
+    #                                        self.axisT, -1.0, 1.0)
+    #
+    # self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))     # projection
+    # self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))   # modelView
+    # self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))     # viewport
+    # self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
+    #
+    # # calculate the size of the screen pixels in axis coordinates
+    # self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
+    # self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
+    # self.pixelX = self._pointOne[0]-self._pointZero[0]
+    # self.pixelY = self._pointOne[1]-self._pointZero[1]
+    #
+    # self.modelViewMatrix = (GL.GLdouble * 16)()
+    # self.projectionMatrix = (GL.GLdouble * 16)()
+    # self.viewport = (GL.GLint * 4)()
 
-    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                            0.0, 1.0, 0.0, 0.0,
-                            0.0, 0.0, 1.0, 0.0,
-                            0.0, 0.0, 0.0, 1.0]     # set to identity matrix
-    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
-
-    # TODO:ED check why this isn't working
-    currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
-                                           self.axisT, -1.0, 1.0)
-
-    self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))     # projection
-    self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))   # modelView
-    self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))     # viewport
-    self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
-
-    # calculate the size of the screen pixels in axis coordinates
-    self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
-    self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
-    self.pixelX = self._pointOne[0]-self._pointZero[0]
-    self.pixelY = self._pointOne[1]-self._pointZero[1]
-
-    self.modelViewMatrix = (GL.GLdouble * 16)()
-    self.projectionMatrix = (GL.GLdouble * 16)()
-    self.viewport = (GL.GLint * 4)()
-
-    # GL.glEnable(GL.GL_BLEND)
-    # GL.glColor4f(0.5, 0.2, 0.5, 1.0)
-    # GL.glBegin(GL.GL_QUADS)
-    # GL.glVertex2d(self.axisL, (self.axisT+self.axisB)/2.0)
-    # GL.glVertex2d(self.axisL, self.axisB)
-    # GL.glVertex2d((self.axisR+self.axisL)/2.0, self.axisB)
-    # GL.glVertex2d((self.axisR+self.axisL)/2.0, (self.axisT+self.axisB)/2.0)
-    # GL.glEnd()
-
+    # draw the grid components
     self.drawGrid()
 
-    # now draw the spectra
+    # draw the spectra, need to reset the viewport
     self.viewports.setViewport('mainView')
-
     self.drawSpectra()
 
+    # change to the text shader
     currentShader = self._shaderProgramTex.makeCurrent()
 
-    self.viewports.setViewport('mainView')
-
-    # TODO:ED check that this is the correct dimensions of the window
-    # self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, w-35, 35, h, -1.0, 1.0)
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0,
-                             0.0, 0.0, 0.0, 1.0]
-    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
-
+    #
+    # # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    # #                          0.0, 1.0, 0.0, 0.0,
+    # #                          0.0, 0.0, 1.0, 0.0,
+    # #                          0.0, 0.0, 0.0, 1.0]
+    # # currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    #
     self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
+    # self._view[0:4] = [w-AXIS_MARGINRIGHT, h-AXIS_MARGINBOTTOM, 1.0, 1.0]
+    #
     # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
     currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
-
-    # draw the string
-    # self._testString.drawTextArray()
+    # currentShader.setGLUniform4fv('viewport', 1, self._view)
 
     self.enableTexture()
     self.drawLabels()
+
+    # # draw test string
+    # for tt in self._testStrings:
+    #   tt.drawTextArray()
 
     currentShader = self._shaderProgram1.makeCurrent()
     # self._parameterList[0:4] = [0, 0, 0, 0]
@@ -1481,11 +1208,9 @@ void main()
     self.drawAxisLabels()
 
     self.disableTexture()
-    # GLUT.glutSwapBuffers()
 
   def enableTexture(self):
     GL.glEnable(GL.GL_BLEND)
-    # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
     GL.glEnable(GL.GL_TEXTURE_2D)
     GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
 
@@ -1831,7 +1556,6 @@ void main()
     # should really use the proper VBOs for this
     if self._drawSelectionBox:
       GL.glEnable(GL.GL_BLEND)
-      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
       self._dragStart = self._startCoordinate
       self._dragEnd = self._endCoordinate
@@ -2489,7 +2213,7 @@ class GLViewports(object):
   # Class to handle the different viewports in the display
   def __init__(self):
     # define a new empty list
-    self._viewports = {}
+    self._views = {}
 
   def addViewport(self, name, parent, left, bottom, rightOffset, topOffset):
     # add a new viewport
@@ -2497,7 +2221,7 @@ class GLViewports(object):
     # left, bottom - coordinates of bottom-left corner
     # rightOffset   - offset from the right border
     # topOffset     - offset from the top border
-    self._viewports[name] = (parent, left, bottom, rightOffset, topOffset)
+    self._views[name] = (parent, left, bottom, rightOffset, topOffset)
 
     # e.g., GL.glViewport(0, 35, w-35, h-35)   # leave a 35 width margin for the axes - bottom/right
     #                      0, 35, -35, 0
@@ -2512,8 +2236,8 @@ class GLViewports(object):
       elif offsetType[1] == 'h':
         return h+offsetType[0]
 
-    if name in self._viewports:
-      thisView = self._viewports[name]
+    if name in self._views:
+      thisView = self._views[name]
       w=thisView[0].width()
       h=thisView[0].height()
       l = setVal(thisView[1], w, h, 0)
@@ -2522,6 +2246,30 @@ class GLViewports(object):
       he = setVal(thisView[4], w, h, 0)
 
       GL.glViewport(l, b, wi, he)
+                    # , w-thisView[3]-thisView[1], h-thisView[4]-thisView[2])
+    else:
+      raise RuntimeError('Error: viewport %s does not exist' % name)
+
+  def getViewport(self, name):
+    # change to the named viewport
+    def setVal(offsetType, w, h, leftOffset):
+      if offsetType[1] in 'alb':
+        return offsetType[0]
+      elif offsetType[1] == 'w':
+        return w+offsetType[0]-leftOffset
+      elif offsetType[1] == 'h':
+        return h+offsetType[0]
+
+    if name in self._views:
+      thisView = self._views[name]
+      w=thisView[0].width()
+      h=thisView[0].height()
+      l = setVal(thisView[1], w, h, 0)
+      b = setVal(thisView[2], w, h, 0)
+      wi = setVal(thisView[3], w, h, l)
+      he = setVal(thisView[4], w, h, 0)
+
+      return (l, b, wi, he)
                     # , w-thisView[3]-thisView[1], h-thisView[4]-thisView[2])
     else:
       raise RuntimeError('Error: viewport %s does not exist' % name)
@@ -2736,7 +2484,6 @@ class GLVertexArray():
 
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
-      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
@@ -2764,7 +2511,6 @@ class GLVertexArray():
   def drawVertexColor(self):
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
-      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
@@ -2784,7 +2530,6 @@ class GLVertexArray():
 
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
-      # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)

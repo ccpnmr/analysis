@@ -97,17 +97,17 @@ class GuiStrip(Frame):
     self.layout().setVerticalSpacing(0)
     # self.plotWidget.showGrid(x=True, y=True, alpha=None)
 
-    # self._useCcpnGL = True
-    # # TODO: ED comment out the block below to return to normal
-    # if self._useCcpnGL:
-    #   self.plotWidget.hide()
-    #   from ccpn.util.CcpnOpenGL import CcpnGLWidget
-    #   # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
-    #   # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
-    #
-    #   self._testCcpnOpenGLWidget = CcpnGLWidget(self)
-    #   self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
-    #   self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+    self._useCcpnGL = True
+    # TODO: ED comment out the block below to return to normal
+    if self._useCcpnGL:
+      self.plotWidget.hide()
+      from ccpn.util.CcpnOpenGL import CcpnGLWidget
+      # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
+      # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
+
+      self._testCcpnOpenGLWidget = CcpnGLWidget(self)
+      self.getLayout().addWidget(self._testCcpnOpenGLWidget, 3, 0)
+      self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
     # self.plotWidgetOverlay = pg.PlotWidget(self, useOpenGL=useOpenGL)  #    make a copy
     # self.plotWidgetOverlay.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)

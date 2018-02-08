@@ -33,7 +33,7 @@ from imageio import imread
 
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 from PyQt5.QtCore import (QPoint, QPointF, QRect, QRectF, QSize, Qt, QTime,
-        QTimer)
+        QTimer, pyqtSignal, pyqtSlot)
 from PyQt5.QtGui import (QBrush, QColor, QFontMetrics, QImage, QPainter,
         QRadialGradient, QSurfaceFormat)
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
@@ -62,16 +62,55 @@ GLRENDERMODE_DRAW = 1
 GLRENDERMODE_RESCALE = 2
 GLRENDERMODE_REBUILD = 3
 
+GLSOURCE = 'source'
+GLAXISVALUES = 'axisValues'
+GLMOUSECOORDS = 'mouseCoords'
+GLSPECTRUMDISPLAY = 'spectrumDisplay'
+GLBOTTOMAXISVALUE = 'bottomAxis'
+GLTOPAXISVALUE = 'topAxis'
+GLLEFTAXISVALUE = 'leftAxis'
+GLRIGHTAXISVALUE = 'rightAxis'
+
+from sandbox.Geerten.v4core.Lib.decorators import singleton
+
+@singleton
+class _GLSignalClass(QtWidgets.QWidget):
+
+  externalXAxisChanged = pyqtSignal(dict)
+  externalYAxisChanged = pyqtSignal(dict)
+  externalMouseMoved = pyqtSignal(dict)
+
+  def __init__(self):
+    super(_GLSignalClass, self).__init__()
+
+  def _emitSignal(self, value):
+    self.externalXAxisChanged.emit(value)
+
 
 class CcpnGLWidget(QOpenGLWidget):
-  def __init__(self, parent=None, rightMenu=None):
+
+  def __init__(self, parent=None, mainWindow=None, rightMenu=None):
     super(CcpnGLWidget, self).__init__(parent)
+
+    self._GLSignals = _GLSignalClass()
+    self._GLSignals.externalXAxisChanged.connect(self._externalXAxisChanged)
+    self._GLSignals.externalYAxisChanged.connect(self._externalYAxisChanged)
+    self._GLSignals.externalMouseMoved.connect(self._externalMouseMoved)
 
     self._rightMenu = rightMenu
     if not parent:        # don't initialise if nothing there
       return
 
     self._parent = parent
+    self.mainWindow = mainWindow
+    if mainWindow:
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
+    else:
+      self.application = None
+      self.project = None
+      self.current = None
 
     # TODO:ED need to check how this works
     for spectrumView in self._parent.spectrumViews:
@@ -237,6 +276,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
       self.rescale()
 
+      aDict = { GLSOURCE: self
+                , GLSPECTRUMDISPLAY: self._parent.spectrumDisplay
+                , GLAXISVALUES: { GLBOTTOMAXISVALUE: self.axisB
+                                , GLTOPAXISVALUE: self.axisT}
+              }
+      self._GLSignals.externalYAxisChanged.emit(aDict)
+
       # spawn rebuild event for the grid
       for li in self.gridList:
         li.renderMode = GLRENDERMODE_REBUILD
@@ -372,7 +418,7 @@ void main()
   vec4 pos = pMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
                     // character_pos              world_coord
                       
-  // centre on the nearest pixel in NDC
+  // centre on the nearest pixel in NDC - shouldn't be needed but textures not correct yet
   gl_Position = vec4( floor(0.5 + viewport.x*pos.x) / viewport.x,
                       floor(0.5 + viewport.y*pos.y) / viewport.y,
                       pos.zw );
@@ -633,7 +679,7 @@ void main()
     self._background = np.zeros((4,), dtype=np.float32)
     self._parameterList = np.zeros((4,), dtype=np.int32)
     self._view = np.zeros((4,), dtype=np.float32)
-    self.worldCoordinate = np.zeros((4,), dtype=np.float32)
+    self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
 
     # self._positiveContours = np.zeros((4,), dtype=np.float32)
     # self._negativeContours = np.zeros((4,), dtype=np.float32)
@@ -762,21 +808,21 @@ void main()
     vect = self.vInv.dot([self._mouseX, self._mouseY, 0.0, 1.0])
 
     # translate to axis coordinates
-    self.worldCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
+    self.cursorCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
 
     if event.buttons() & Qt.LeftButton:
       # do the complicated keypresses first
       if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
           (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
-        self._endCoordinate = self.worldCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
+        self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 3
 
       elif self._key == Qt.Key_Shift:
-        self._endCoordinate = self.worldCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
+        self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 1
 
       elif self._key == Qt.Key_Control:
-        self._endCoordinate = self.worldCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
+        self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 2
 
       else:
@@ -792,6 +838,9 @@ void main()
           li.renderMode = GLRENDERMODE_REBUILD
         for pp in self._GLPeakLists.values():
           pp.renderMode = GLRENDERMODE_RESCALE
+
+    aDict = { GLSOURCE: self, GLMOUSECOORDS: self.cursorCoordinate }
+    self._GLSignals.externalMouseMoved.emit(aDict)
 
     self.update()
 
@@ -1219,7 +1268,7 @@ void main()
 
     GL.glEnable(GL.GL_BLEND)
     self.viewports.setViewport('mainView')
-    self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[2,1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
+    self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
     self.gridList[0].drawIndexArray()
 
     # draw the grid marks for the right axis
@@ -1438,10 +1487,10 @@ void main()
     GL.glColor4f(0.8, 0.9, 1.0, 1.0)
     GL.glBegin(GL.GL_LINES)
 
-    GL.glVertex2d(self.worldCoordinate[0], self.axisT)
-    GL.glVertex2d(self.worldCoordinate[0], self.axisB)
-    GL.glVertex2d(self.axisL, self.worldCoordinate[1])
-    GL.glVertex2d(self.axisR, self.worldCoordinate[1])
+    GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
+    GL.glVertex2d(self.cursorCoordinate[0], self.axisB)
+    GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
+    GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
 
     GL.glEnd()
 
@@ -1453,13 +1502,13 @@ void main()
 
   def drawMouseCoords(self):
     newCoords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+" : "\
-              +str(round(self.worldCoordinate[0], 3))\
-              +", "+str(round(self.worldCoordinate[1], 3))
+              +str(round(self.cursorCoordinate[0], 3))\
+              +", "+str(round(self.cursorCoordinate[1], 3))
 
     if newCoords != self._mouseCoords:
       self.mouseString = GLString(text=newCoords
                                   , font=self.firstFont
-                                  , x=self.worldCoordinate[0], y=self.worldCoordinate[1]
+                                  , x=self.cursorCoordinate[0], y=self.cursorCoordinate[1]
                                   # self._screenZero[0], y=self._screenZero[1]
                                   , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
                                   , pid=None)
@@ -1834,6 +1883,28 @@ void main()
             index += 2
 
     return labelling, labelsChanged
+
+  @pyqtSlot(dict)
+  def _externalXAxisChanged(self, aDict):
+    if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+      pass
+
+  @pyqtSlot(dict)
+  def _externalYAxisChanged(self, aDict):
+    if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+
+      # match the values for the Y axis
+      self.axisB = aDict[GLAXISVALUES][GLBOTTOMAXISVALUE]
+      self.axisT = aDict[GLAXISVALUES][GLTOPAXISVALUE]
+
+      self.rescale()
+      self.update()
+
+  @pyqtSlot(dict)
+  def _externalMouseMoved(self, aDict):
+    if aDict[GLSOURCE] != self:
+      self.cursorCoordinate = aDict[GLMOUSECOORDS]
+      self.update()
 
 
 GlyphXpos = 'Xpos'

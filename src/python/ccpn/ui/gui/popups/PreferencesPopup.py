@@ -247,7 +247,7 @@ class PreferencesPopup(CcpnDialog):
     self.dropFactorLabel = Label(parent, text="Peak Picking Drop (%)", grid=(row, 0))
     self.dropFactorData = LineEdit(parent, grid=(row, 1), hAlign='l')
     self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
-    self.dropFactorData.setText('%.0f' % (100*self.preferences.general.peakDropFactor))
+    self.dropFactorData.setText('%.1f' % (100*self.preferences.general.peakDropFactor))
     self.dropFactorData.editingFinished.connect(self._setDropFactor)
 
     row += 1

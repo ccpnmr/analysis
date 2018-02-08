@@ -97,7 +97,7 @@ class GuiStrip(Frame):
     self.layout().setVerticalSpacing(0)
     # self.plotWidget.showGrid(x=True, y=True, alpha=None)
 
-    self._useCcpnGL = False
+    self._useCcpnGL = True
     # TODO: ED comment out the block below to return to normal
     if self._useCcpnGL:
       self.plotWidget.hide()

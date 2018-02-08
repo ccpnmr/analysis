@@ -78,6 +78,7 @@ class _GLSignalClass(QtWidgets.QWidget):
 
   externalXAxisChanged = pyqtSignal(dict)
   externalYAxisChanged = pyqtSignal(dict)
+  externalAllAxesChanged = pyqtSignal(dict)
   externalMouseMoved = pyqtSignal(dict)
 
   def __init__(self):
@@ -95,6 +96,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._GLSignals = _GLSignalClass()
     self._GLSignals.externalXAxisChanged.connect(self._externalXAxisChanged)
     self._GLSignals.externalYAxisChanged.connect(self._externalYAxisChanged)
+    self._GLSignals.externalAllAxesChanged.connect(self._externalAllAxesChanged)
     self._GLSignals.externalMouseMoved.connect(self._externalMouseMoved)
 
     self._rightMenu = rightMenu
@@ -274,21 +276,22 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + zoomOut * (self.axisB - mby)
         self.axisT = mby - zoomOut * (mby - self.axisT)
 
-      self.rescale()
-
       aDict = { GLSOURCE: self
                 , GLSPECTRUMDISPLAY: self._parent.spectrumDisplay
                 , GLAXISVALUES: { GLBOTTOMAXISVALUE: self.axisB
-                                , GLTOPAXISVALUE: self.axisT}
+                                , GLTOPAXISVALUE: self.axisT
+                                , GLLEFTAXISVALUE: self.axisL
+                                , GLRIGHTAXISVALUE: self.axisR}
               }
-      self._GLSignals.externalYAxisChanged.emit(aDict)
+      self._GLSignals.externalAllAxesChanged.emit(aDict)
+      self._rescaleAllAxes()
 
       # spawn rebuild event for the grid
       for li in self.gridList:
         li.renderMode = GLRENDERMODE_REBUILD
 
     elif between(mx, ba[0], ba[2]) and between(my, ba[1], ba[3]):
-      # in the rightAxisBar
+      # in the bottomAxisBar
       mb = (mx - ba[0]) / (ba[2] - ba[0])
       mbx = self.axisL + mb * (self.axisR - self.axisL)
 
@@ -299,18 +302,18 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisL = mbx + zoomOut * (self.axisL - mbx)
         self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
-      self.rescale()
-
-      # spawn rebuild event for the grid
-      self.gridList[0].renderMode = GLRENDERMODE_REBUILD
-      self.gridList[2].renderMode = GLRENDERMODE_REBUILD
-
-      # ratios have changed so rescale the peaks symbols
-      for pp in self._GLPeakLists.values():
-        pp.renderMode = GLRENDERMODE_RESCALE
+      aDict = { GLSOURCE: self
+                , GLSPECTRUMDISPLAY: self._parent.spectrumDisplay
+                , GLAXISVALUES: { GLBOTTOMAXISVALUE: self.axisB
+                                , GLTOPAXISVALUE: self.axisT
+                                , GLLEFTAXISVALUE: self.axisL
+                                , GLRIGHTAXISVALUE: self.axisR}
+              }
+      self._GLSignals.externalXAxisChanged.emit(aDict)
+      self._rescaleXAxis()
 
     elif between(mx, ra[0], ra[2]) and between(my, ra[1], ra[3]):
-      # in the bottomAxisBar
+      # in the rightAxisBar
       mb = (my - ra[1]) / (ra[3] - ra[1])
       mby = self.axisB + mb * (self.axisT - self.axisB)
 
@@ -321,17 +324,51 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + zoomOut * (self.axisB - mby)
         self.axisT = mby - zoomOut * (mby - self.axisT)
 
-      self.rescale()
-
-      # spawn rebuild event for the grid
-      self.gridList[0].renderMode = GLRENDERMODE_REBUILD
-      self.gridList[1].renderMode = GLRENDERMODE_REBUILD
-
-      # ratios have changed so rescale the peaks symbols
-      for pp in self._GLPeakLists.values():
-        pp.renderMode = GLRENDERMODE_RESCALE
+      aDict = { GLSOURCE: self
+                , GLSPECTRUMDISPLAY: self._parent.spectrumDisplay
+                , GLAXISVALUES: { GLBOTTOMAXISVALUE: self.axisB
+                                , GLTOPAXISVALUE: self.axisT
+                                , GLLEFTAXISVALUE: self.axisL
+                                , GLRIGHTAXISVALUE: self.axisR}
+              }
+      self._GLSignals.externalYAxisChanged.emit(aDict)
+      self._rescaleYAxis()
 
     event.accept()
+
+  def _rescaleXAxis(self):
+    self.rescale()
+
+    # spawn rebuild event for the grid
+    self.gridList[0].renderMode = GLRENDERMODE_REBUILD
+    self.gridList[2].renderMode = GLRENDERMODE_REBUILD
+
+    # ratios have changed so rescale the peaks symbols
+    for pp in self._GLPeakLists.values():
+      pp.renderMode = GLRENDERMODE_RESCALE
+
+    self.update()
+
+  def _rescaleYAxis(self):
+    self.rescale()
+
+    # spawn rebuild event for the grid
+    self.gridList[0].renderMode = GLRENDERMODE_REBUILD
+    self.gridList[1].renderMode = GLRENDERMODE_REBUILD
+
+    # ratios have changed so rescale the peaks symbols
+    for pp in self._GLPeakLists.values():
+      pp.renderMode = GLRENDERMODE_RESCALE
+
+    self.update()
+
+  def _rescaleAllAxes(self):
+    self.rescale()
+
+    # spawn rebuild event for the grid
+    for li in self.gridList:
+      li.renderMode = GLRENDERMODE_REBUILD
+
     self.update()
 
   def eventFilter(self, obj, event):
@@ -831,13 +868,15 @@ void main()
         self.axisT += dy * self.pixelY
         self.axisB += dy * self.pixelY
 
-        self.rescale()
-
-        # spawn rebuild event for the grid
-        for li in self.gridList:
-          li.renderMode = GLRENDERMODE_REBUILD
-        for pp in self._GLPeakLists.values():
-          pp.renderMode = GLRENDERMODE_RESCALE
+        aDict = {GLSOURCE:self
+          , GLSPECTRUMDISPLAY:self._parent.spectrumDisplay
+          , GLAXISVALUES:{GLBOTTOMAXISVALUE:self.axisB
+            , GLTOPAXISVALUE:self.axisT
+            , GLLEFTAXISVALUE:self.axisL
+            , GLRIGHTAXISVALUE:self.axisR}
+                 }
+        self._GLSignals.externalAllAxesChanged.emit(aDict)
+        self._rescaleAllAxes()
 
     aDict = { GLSOURCE: self, GLMOUSECOORDS: self.cursorCoordinate }
     self._GLSignals.externalMouseMoved.emit(aDict)
@@ -1884,21 +1923,62 @@ void main()
 
     return labelling, labelsChanged
 
+  def _widthsChangedEnough(self, r1, r2, tol=1e-5):
+    r1 = sorted(r1)
+    r2 = sorted(r2)
+    minDiff = abs(r1[0] - r2[0])
+    maxDiff = abs(r1[1] - r2[1])
+    return (minDiff > tol) or (maxDiff > tol)
+
   @pyqtSlot(dict)
   def _externalXAxisChanged(self, aDict):
+
     if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
-      pass
+
+      # match only the scale for the X axis
+      axisL = aDict[GLAXISVALUES][GLLEFTAXISVALUE]
+      axisR = aDict[GLAXISVALUES][GLRIGHTAXISVALUE]
+
+      if self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
+        diff = (axisR - axisL) / 2.0
+        mid = (self.axisR + self.axisL) / 2.0
+        self.axisL = mid-diff
+        self.axisR = mid+diff
+        self._rescaleXAxis()
 
   @pyqtSlot(dict)
   def _externalYAxisChanged(self, aDict):
     if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
 
-      # match the values for the Y axis
-      self.axisB = aDict[GLAXISVALUES][GLBOTTOMAXISVALUE]
-      self.axisT = aDict[GLAXISVALUES][GLTOPAXISVALUE]
+      # match the Y axis
+      axisB = aDict[GLAXISVALUES][GLBOTTOMAXISVALUE]
+      axisT = aDict[GLAXISVALUES][GLTOPAXISVALUE]
 
-      self.rescale()
-      self.update()
+      if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]):
+        self.axisB = axisB
+        self.axisT = axisT
+        self._rescaleYAxis()
+
+  @pyqtSlot(dict)
+  def _externalAllAxesChanged(self, aDict):
+    if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+
+      # match the values for the Y axis, and scale for the X axis
+      axisB = aDict[GLAXISVALUES][GLBOTTOMAXISVALUE]
+      axisT = aDict[GLAXISVALUES][GLTOPAXISVALUE]
+      axisL = aDict[GLAXISVALUES][GLLEFTAXISVALUE]
+      axisR = aDict[GLAXISVALUES][GLRIGHTAXISVALUE]
+
+      if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and\
+        self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
+
+        diff = (axisR - axisL) / 2.0
+        mid = (self.axisR + self.axisL) / 2.0
+        self.axisL = mid-diff
+        self.axisR = mid+diff
+        self.axisB = axisB
+        self.axisT = axisT
+        self._rescaleAllAxes()
 
   @pyqtSlot(dict)
   def _externalMouseMoved(self, aDict):

@@ -803,9 +803,12 @@ void main()
     self._drawSelectionBox = False
     self._lastButtonReleased = ev.button()
 
-    if self._lastButtonReleased == Qt.RightButton:
-      # raise right-button context menu
-      self._parent.viewBox.menu.exec(self.mapToGlobal(ev.pos()))
+    # TODO:ED test the current viewBox mouse press event :)
+    self._parent.viewBox._mouseClickEvent(ev)
+
+    # if self._lastButtonReleased == Qt.RightButton:
+    #   # raise right-button context menu
+    #   self._parent.viewBox.menu.exec(self.mapToGlobal(ev.pos()))
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()
@@ -830,6 +833,13 @@ void main()
 
     # spawn a repaint event - otherwise cursor will not update
     self.update()
+
+  def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
+    """
+    Re-implementation of PyQtGraph mouse click event to allow custom actions
+    for different mouse click events.
+    """
+    self.current.strip = self.strip
 
   def mouseMoveEvent(self, event):
     self.setFocus()
@@ -1294,7 +1304,10 @@ void main()
         # draw the peak List, labelling, marks
 
         self._buildPeakLists(spectrumView)      # should include rescaling
+
+        GL.glLineWidth(3.0)
         self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
+        GL.glLineWidth(1.0)
         # self._drawPeakListVertices(spectrumView)
 
         # self._buildPeakListLabels(spectrumView)      # should include rescaling

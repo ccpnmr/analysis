@@ -1905,13 +1905,15 @@ class CcpnGLFont():
               self.fontGlyph[chrNum][GlyphOrigH] = h0
               self.fontGlyph[chrNum][GlyphKerns] = {}
 
+              # TODO:ED okay for now, but need to check for rounding errors
+
               # calculate the coordinated within the texture
               x = a0#+0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
-              y = b0#+0.5           # self.fontGlyph[chrNum][GlyphYpos])
+              y = b0-0.1           # self.fontGlyph[chrNum][GlyphYpos])
               px = e0           # self.fontGlyph[chrNum][GlyphXoffset]
               py = f0           # self.fontGlyph[chrNum][GlyphYoffset]
               w = c0#-1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
-              h = d0-1           # self.fontGlyph[chrNum][GlyphHeight]+1
+              h = d0#+0.5           # self.fontGlyph[chrNum][GlyphHeight]+1
               gw = g0           # self.fontGlyph[chrNum][GlyphOrigW]
               gh = h0           # self.fontGlyph[chrNum][GlyphOrigH]
 
@@ -1923,7 +1925,7 @@ class CcpnGLFont():
 
               # coordinates mapped to the quad
               self.fontGlyph[chrNum][GlyphPX0] = px
-              self.fontGlyph[chrNum][GlyphPY0] = gh-(py+h+1)
+              self.fontGlyph[chrNum][GlyphPY0] = gh-(py+h)
               self.fontGlyph[chrNum][GlyphPX1] = px+(w)
               self.fontGlyph[chrNum][GlyphPY1] = gh-py
 

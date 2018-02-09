@@ -57,7 +57,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     ###self.inactivePeakItems = set() # contains unused peakItems
     self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
 
-    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name, useScrollArea=True)
+    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name, useScrollArea=False)
     # .mainWindow, .current and .application are set by GuiSpectrumDisplay
     # .project is set by the wrapper
 

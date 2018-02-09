@@ -2088,8 +2088,8 @@ void main()
     stripAxisIndex = self.axisCodes.index(axisCode)
 
     if stripAxisIndex == 0:
-      self.axisL = range[0]
-      self.axisR = range[1]
+      self.axisL = range[1]
+      self.axisR = range[0]
 
       self._rescaleXAxis(update=update)
 

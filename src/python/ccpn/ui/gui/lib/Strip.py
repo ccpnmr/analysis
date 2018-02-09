@@ -100,13 +100,16 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
         continue
 
   # TODO:ED now do the same for the OpenGL widget
-
-  # try:
+  # OR just copy from the strip axes
+  try:
     for ii, axisCode in enumerate(axisCodes):
-      stripAxisIndex = strip.axisCodes.index(axisCode)
+      try:
+        stripAxisIndex = strip.axisCodes.index(axisCode)
+      except ValueError as e:
+        continue
 
-      if isinstance(positions[ii], float):
-        strip._testCcpnOpenGLWidget.setAxisPosition(axisCode=axisCode, position=positions[ii], update=False)
+      if ii<len(positions) and positions[ii]:
+        strip._testCcpnOpenGLWidget.setAxisPosition(axisCode=axisCode, position=positions[ii], update=True)
 
       if widths is not None:
         if ii<len(widths) and widths[ii]:
@@ -124,7 +127,7 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
               strip._testCcpnOpenGLWidget.setAxisRange(axisCode=axisCode, range=range,
                                                        update=False)
 
-            if widths[ii] == 'default' and stripAxisIndex < 2:
+            elif widths[ii] == 'default':
               # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
 
               if (commonUtil.name2IsotopeCode(axisCode) == '13C' or
@@ -138,8 +141,8 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
 
     strip._testCcpnOpenGLWidget.update()
 
-  # except:
-  #   getLogger().warning('Error: OpenGL widget not instantiated for %s' % strip)
+  except:
+    getLogger().warning('Error: OpenGL widget not instantiated for %s' % strip)
 
   # if _undo is not None:
   #   _undo.decreaseBlocking()

@@ -99,6 +99,48 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
       except:
         continue
 
+  # TODO:ED now do the same for the OpenGL widget
+
+  # try:
+    for ii, axisCode in enumerate(axisCodes):
+      stripAxisIndex = strip.axisCodes.index(axisCode)
+
+      if isinstance(positions[ii], float):
+        strip._testCcpnOpenGLWidget.setAxisPosition(axisCode=axisCode, position=positions[ii], update=False)
+
+      if widths is not None:
+        if ii<len(widths) and widths[ii]:
+
+          if isinstance(widths[ii], float):
+
+            strip._testCcpnOpenGLWidget.setAxisWidth(axisCode=axisCode, width=widths[ii],
+                                                     update=False)
+
+          elif isinstance(widths[ii], str):
+            # if the list item is a str with value, full, reset the corresponding axis
+            if widths[ii] == 'full':
+
+              range = strip.getAxisRange(stripAxisIndex)
+              strip._testCcpnOpenGLWidget.setAxisRange(axisCode=axisCode, range=range,
+                                                       update=False)
+
+            if widths[ii] == 'default' and stripAxisIndex < 2:
+              # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
+
+              if (commonUtil.name2IsotopeCode(axisCode) == '13C' or
+                  commonUtil.name2IsotopeCode(axisCode) == '15N'):
+
+                strip._testCcpnOpenGLWidget.setAxisWidth(axisCode=axisCode, width=5,
+                                                         update=False)
+              else:
+                strip._testCcpnOpenGLWidget.setAxisWidth(axisCode=axisCode, width=0.5,
+                                                         update=False)
+
+    strip._testCcpnOpenGLWidget.update()
+
+  # except:
+  #   getLogger().warning('Error: OpenGL widget not instantiated for %s' % strip)
+
   # if _undo is not None:
   #   _undo.decreaseBlocking()
 

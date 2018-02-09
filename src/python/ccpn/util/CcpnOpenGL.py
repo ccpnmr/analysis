@@ -65,6 +65,7 @@ GLRENDERMODE_REBUILD = 3
 GLSOURCE = 'source'
 GLAXISVALUES = 'axisValues'
 GLMOUSECOORDS = 'mouseCoords'
+GLMOUSEMOVEDDICT = 'mouseMovedict'
 GLSPECTRUMDISPLAY = 'spectrumDisplay'
 GLBOTTOMAXISVALUE = 'bottomAxis'
 GLTOPAXISVALUE = 'topAxis'
@@ -147,6 +148,10 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisR = 4
     self.axisT = 20
     self.axisB = 80
+
+    self._orderedAxes = None
+    self._axisOrder = None
+    self._axisCodes = None
 
   def rescale(self):
     """
@@ -336,7 +341,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     event.accept()
 
-  def _rescaleXAxis(self):
+  def _rescaleXAxis(self, update=True):
     self.rescale()
 
     # spawn rebuild event for the grid
@@ -347,9 +352,10 @@ class CcpnGLWidget(QOpenGLWidget):
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
 
-    self.update()
+    if update:
+      self.update()
 
-  def _rescaleYAxis(self):
+  def _rescaleYAxis(self, update=True):
     self.rescale()
 
     # spawn rebuild event for the grid
@@ -360,16 +366,18 @@ class CcpnGLWidget(QOpenGLWidget):
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
 
-    self.update()
+    if update:
+      self.update()
 
-  def _rescaleAllAxes(self):
+  def _rescaleAllAxes(self, update=True):
     self.rescale()
 
     # spawn rebuild event for the grid
     for li in self.gridList:
       li.renderMode = GLRENDERMODE_REBUILD
 
-    self.update()
+    if update:
+      self.update()
 
   def eventFilter(self, obj, event):
     self._key = '_'
@@ -397,6 +405,25 @@ class CcpnGLWidget(QOpenGLWidget):
     angle = self.normalizeAngle(angle)
     if angle != self.zRot:
       self.zRot = angle
+
+  def initialiseAxes(self, display=None):
+    """
+    setup the correct axis range and padding
+    :param axes - list of axis objects:
+    :param padding - x, y padding values:
+    """
+    self.orderedAxes = display.axes
+    self._axisCodes = display.axisCodes
+    self._axisOrder = display.axisOrder
+
+    axis = self._orderedAxes[0]
+    self.axisL = axis.region[1]
+    self.axisR = axis.region[0]
+
+    axis = self._orderedAxes[1]
+    self.axisT = axis.region[0]
+    self.axisB = axis.region[1]
+    self.update()
 
   def initializeGL(self):
 
@@ -769,8 +796,10 @@ void main()
     GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
     self.setBackgroundColour([0.05, 0.05, 0.05, 1.0])
 
-    # extra data
-    self.axisCodes = None
+    # get information from the parent class (strip)
+    self.orderedAxes = self._parent.orderedAxes
+    self.axisOrder = self._parent.axisOrder
+    self.axisCodes = self._parent.axisCodes
 
   def setBackgroundColour(self, col):
     """
@@ -857,6 +886,28 @@ void main()
     # translate to axis coordinates
     self.cursorCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
 
+    # from GuiMainWindow _mousePositionMoved(786)
+    # axisCodes = strip.axisCodes
+    # orderedAxes = strip.orderedAxes
+
+    currentPos = self._parent.current.cursorPosition
+    mouseMovedDict = dict(strip=self._parent)   #strip)
+    xPos = yPos = 0
+    for n, axisCode in enumerate(self._axisCodes):
+      if n == 0:
+        xPos = pos = self.cursorCoordinate[0]
+      elif n == 1:
+        yPos = pos = self.cursorCoordinate[1]
+      else:
+        try:
+          # get the remaining axes
+          pos = self._orderedAxes[n].position
+        except:
+          pos = 0
+      mouseMovedDict[axisCode] = pos
+
+    self._parent.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
+
     if event.buttons() & Qt.LeftButton:
       # do the complicated keypresses first
       if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
@@ -879,8 +930,8 @@ void main()
         self.axisB += dy * self.pixelY
 
         aDict = {GLSOURCE:self
-          , GLSPECTRUMDISPLAY:self._parent.spectrumDisplay
-          , GLAXISVALUES:{GLBOTTOMAXISVALUE:self.axisB
+            , GLSPECTRUMDISPLAY:self._parent.spectrumDisplay
+            , GLAXISVALUES:{GLBOTTOMAXISVALUE:self.axisB
             , GLTOPAXISVALUE:self.axisT
             , GLLEFTAXISVALUE:self.axisL
             , GLRIGHTAXISVALUE:self.axisR}
@@ -888,7 +939,9 @@ void main()
         self._GLSignals.externalAllAxesChanged.emit(aDict)
         self._rescaleAllAxes()
 
-    aDict = { GLSOURCE: self, GLMOUSECOORDS: self.cursorCoordinate }
+    aDict = { GLSOURCE: self
+            , GLMOUSECOORDS: self.cursorCoordinate
+            , GLMOUSEMOVEDDICT: mouseMovedDict }
     self._GLSignals.externalMouseMoved.emit(aDict)
 
     self.update()
@@ -1015,6 +1068,9 @@ void main()
 
           # keep the cross square at 0.1ppm
           p0 = peak.position
+
+          #
+
           drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
           drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
                                                             , p0[0]+r, p0[1]+w
@@ -1552,10 +1608,43 @@ void main()
     """
     pass
 
+  @property
+  def axisOrder(self):
+    return self._axisOrder
+
+  @axisOrder.setter
+  def axisOrder(self, axisOrder):
+    self._axisOrder = axisOrder
+
+  @property
+  def axisCodes(self):
+    return self._axisCodes
+
+  @axisCodes.setter
+  def axisCodes(self, axisCodes):
+    self._axisCodes = axisCodes
+
+  @property
+  def orderedAxes(self):
+    return self._orderedAxes
+
+  @orderedAxes.setter
+  def orderedAxes(self, axes):
+    self._orderedAxes = axes
+    try:
+      if self._orderedAxes[1] and self._orderedAxes[1].code == 'intensity':
+        self.mouseFormat = " %s: %.3f\n %s: %.4g"
+      else:
+        self.mouseFormat = " %s: %.2f\n %s: %.2f"
+    except:
+      self.mouseFormat = " %s: %.3f  %s: %.4g"
+
   def drawMouseCoords(self):
-    newCoords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+" : "\
-              +str(round(self.cursorCoordinate[0], 3))\
-              +", "+str(round(self.cursorCoordinate[1], 3))
+    # newCoords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+"\n "\
+    #           +str(round(self.cursorCoordinate[0], 3))\
+    #           +"\n "+str(round(self.cursorCoordinate[1], 3))
+
+    newCoords = self.mouseFormat % (self._axisOrder[0], self.cursorCoordinate[0], self._axisOrder[1], self.cursorCoordinate[1])
 
     if newCoords != self._mouseCoords:
       self.mouseString = GLString(text=newCoords
@@ -1959,6 +2048,57 @@ void main()
         self.axisR = mid+diff
         self._rescaleXAxis()
 
+  def setAxisPosition(self, axisCode, position, update=True):
+    stripAxisIndex = self.axisCodes.index(axisCode)
+
+    if stripAxisIndex == 0:
+      diff = (self.axisR - self.axisL) / 2.0
+      self.axisL = position - diff
+      self.axisR = position + diff
+
+      self._rescaleXAxis(update=update)
+
+    elif stripAxisIndex == 1:
+      diff = (self.axisT - self.axisB) / 2.0
+      self.axisB = position - diff
+      self.axisT = position + diff
+
+      self._rescaleYAxis(update=update)
+
+  def setAxisWidth(self, axisCode, width, update=True):
+    stripAxisIndex = self.axisCodes.index(axisCode)
+
+    if stripAxisIndex == 0:
+      diff = np.sign(self.axisR-self.axisL) * width / 2.0
+      mid = (self.axisR + self.axisL) / 2.0
+      self.axisL = mid - diff
+      self.axisR = mid + diff
+
+      self._rescaleXAxis(update=update)
+
+    elif stripAxisIndex == 1:
+      diff = np.sign(self.axisT-self.axisB) * width / 2.0
+      mid = (self.axisT + self.axisB) / 2.0
+      self.axisB = mid - diff
+      self.axisT = mid + diff
+
+      self._rescaleYAxis(update=update)
+
+  def setAxisRange(self, axisCode, range, update=True):
+    stripAxisIndex = self.axisCodes.index(axisCode)
+
+    if stripAxisIndex == 0:
+      self.axisL = range[0]
+      self.axisR = range[1]
+
+      self._rescaleXAxis(update=update)
+
+    elif stripAxisIndex == 1:
+      self.axisB = range[1]
+      self.axisT = range[0]
+
+      self._rescaleYAxis(update=update)
+
   @pyqtSlot(dict)
   def _externalYAxisChanged(self, aDict):
     if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
@@ -1974,7 +2114,9 @@ void main()
 
   @pyqtSlot(dict)
   def _externalAllAxesChanged(self, aDict):
-    if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+    sDisplay = aDict[GLSPECTRUMDISPLAY]
+    source = aDict[GLSOURCE]
+    if source != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
 
       # match the values for the Y axis, and scale for the X axis
       axisB = aDict[GLAXISVALUES][GLBOTTOMAXISVALUE]
@@ -1996,8 +2138,28 @@ void main()
   @pyqtSlot(dict)
   def _externalMouseMoved(self, aDict):
     if aDict[GLSOURCE] != self:
-      self.cursorCoordinate = aDict[GLMOUSECOORDS]
-      self.update()
+      # self.cursorCoordinate = aDict[GLMOUSECOORDS]
+      # self.update()
+
+      mouseMovedDict = aDict[GLMOUSEMOVEDDICT]
+
+      currentPos = self._parent.current.cursorPosition
+
+      # cursorPosition = self.cursorCoordinates
+      for n, axis in enumerate(self._axisOrder[:2]):
+        if axis in mouseMovedDict.keys():
+          self.cursorCoordinate[n] = mouseMovedDict[axis]
+
+      # if cursorPosition:
+      #   position = list(cursorPosition)
+      #
+      #   # get all axes for updating traces
+      #   for axis in self._orderedAxes[2:]:
+      #     position.append(axis.position)
+
+        # self.cursorCoordinate = (cursorPosition[0], cursorPosition[1])
+        self._parent.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+        self.update()
 
 
 GlyphXpos = 'Xpos'
@@ -2682,7 +2844,9 @@ class GLString(GLVertexArray):
 
         if (c == 10):                                 # newline
           pen[0] = 0
-          pen[1] = pen[1] + font.height
+          pen[1] = 0      #pen[1] + font.height
+          for vt in self.vertices:
+            vt[1] = vt[1] + font.height
 
         elif (c == 9):                                # tab
           pen[0] = pen[0] + 4 * font.width

@@ -100,7 +100,7 @@ class GuiStrip(Frame):
     self._useCcpnGL = True
     # TODO: ED comment out the block below to return to normal
     if self._useCcpnGL:
-      self.plotWidget.hide()
+      # self.plotWidget.hide()
       from ccpn.util.CcpnOpenGL import CcpnGLWidget
       # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
       # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
@@ -108,6 +108,10 @@ class GuiStrip(Frame):
       self._testCcpnOpenGLWidget = CcpnGLWidget(parent=self, mainWindow=self.mainWindow)
       self.getLayout().addWidget(self._testCcpnOpenGLWidget, 3, 0)
       self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+      # set the ID label in the new widget
+      self._testCcpnOpenGLWidget.stripIDLabel = '.'.join(self.id.split('.'))
+      self._testCcpnOpenGLWidget.gridVisible = self.application.preferences.general.showGrid
 
     # self.plotWidgetOverlay = pg.PlotWidget(self, useOpenGL=useOpenGL)  #    make a copy
     # self.plotWidgetOverlay.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
@@ -147,10 +151,11 @@ class GuiStrip(Frame):
     # TODO:ED check - have moved the label to the top-left corner
     self.plotWidget.stripIDLabel.setText('.'.join(self.id.split('.')))
 
+
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
-                                   text='<none>', spacing=(0,0),
+                                   text='', spacing=(0,0),
                                    grid=(2,0), gridSpan=(1,3), hAlign='left', vAlign='top', hPolicy='minimum')
     self._stripLabel.setFont(textFontSmall)
 
@@ -916,3 +921,7 @@ def _setupGuiStrip(project:Project, apiStrip):
   strip.viewBox.sigXRangeChanged.connect(strip._updateXRegion)
   strip.viewBox.sigYRangeChanged.connect(strip._updateYRegion)
 
+  try:
+    strip._testCcpnOpenGLWidget.initialiseAxes(display=strip.spectrumDisplay)
+  except:
+    getLogger().warning('Error: OpenGL widget not instantiated for %s' % strip)

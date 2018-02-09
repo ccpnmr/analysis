@@ -436,6 +436,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       ## 3) create floating areas, populate
       for s in state['float']:
         a = self.addTempArea()
+        a._buildFromState = self._buildFromState
         a._buildFromState(modulesNames,s[0]['main'], docks, a)
         a.win.setGeometry(*s[1])
 

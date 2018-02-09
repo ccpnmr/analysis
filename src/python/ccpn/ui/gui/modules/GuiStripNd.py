@@ -360,6 +360,30 @@ class GuiStripNd(GuiStrip):
     elif axis == 1:
       self.zoomY(*zoomArray)
 
+  def getAxisRange(self, axis):
+    # if not axis:
+    # TODO:ED check why this was here
+    if axis is None:
+      return
+
+    positionArray = []
+
+    for spectrumView in self.spectrumViews:
+
+      # Get spectrum dimension index matching display X or Y
+      # without using axis codes, as they may not match
+      spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+      spectrumLimits = spectrumView.spectrum.spectrumLimits
+      positionArray.append(spectrumLimits[spectrumIndices[axis]])
+
+    positionArrayFlat = numpy.array(positionArray).flatten()
+    zoomArray = ([min(positionArrayFlat), max(positionArrayFlat)])
+
+    return zoomArray
+    # if axis == 0:
+    #   self.zoomX(*zoomArray)
+    # elif axis == 1:
+    #   self.zoomY(*zoomArray)
 
   def _updateRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse

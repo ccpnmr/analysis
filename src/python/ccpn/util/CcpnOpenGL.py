@@ -26,6 +26,7 @@ __date__ = "$Date$"
 import sys
 import math, random
 import ctypes
+import functools
 from imageio import imread
 
 # import the freetype2 library
@@ -72,7 +73,31 @@ GLTOPAXISVALUE = 'topAxis'
 GLLEFTAXISVALUE = 'leftAxis'
 GLRIGHTAXISVALUE = 'rightAxis'
 
-from sandbox.Geerten.v4core.Lib.decorators import singleton
+
+def singleton(cls):
+  """ Use class as singleton.
+  From: https://wiki.python.org/moin/PythonDecoratorLibrary#Singleton
+  Annotated by GWV
+  """
+  @functools.wraps(cls.__new__)
+  def singleton_new(cls, *args, **kw):
+    # check if it already exists
+    it = cls.__dict__.get('__it__')
+    if it is not None:
+      return it
+    # it did not yet exist; generate an instance
+    cls.__it__ = it = cls.__new_original__(cls, *args, **kw)
+    it.__init_original__(*args, **kw)
+    return it
+
+  # keep the new method and replace by singleton_new
+  cls.__new_original__ = cls.__new__
+  cls.__new__ = singleton_new
+  # keep the init method and replace by the object init
+  cls.__init_original__ = cls.__init__
+  cls.__init__ = object.__init__
+  return cls
+
 
 @singleton
 class _GLSignalClass(QtWidgets.QWidget):
@@ -239,12 +264,33 @@ class CcpnGLWidget(QOpenGLWidget):
     def between(val, l, r):
       return (l-val)*(r-val) <= 0
 
-    # TODO:ED this is not working for touchpad
-    zoomScale = 15.0
+    numPixels = event.pixelDelta()
+    numDegrees = event.angleDelta() / 120
+
+    zoomScale = 0.0
+    if numPixels:
+
+      # always seems to be numPixels - check with Linux
+      scrollDirection = numPixels.y()
+      zoomScale = 5.0
+
+      if abs(scrollDirection) < 5:
+        event.ignore()
+        return
+
+    elif numDegrees:
+
+      # this may work when using Linux
+      scrollDirection = numDegrees.y()
+      zoomscale = 5.0
+
+    else:
+      event.ignore()
+      return
+
     zoomIn = (100.0+zoomScale)/100.0
     zoomOut = 100.0/(100.0+zoomScale)
 
-    numDegrees = event.angleDelta() / 8
     axisLine = 5
     h = self.h
     w = self.w
@@ -264,7 +310,7 @@ class CcpnGLWidget(QOpenGLWidget):
       mb = (mx - mw[0]) / (mw[2] - mw[0])
       mbx = self.axisL + mb * (self.axisR - self.axisL)
 
-      if numDegrees.y() < 0:
+      if scrollDirection < 0:
         self.axisL = mbx + zoomIn * (self.axisL - mbx)
         self.axisR = mbx - zoomIn * (mbx - self.axisR)
       else:
@@ -274,7 +320,7 @@ class CcpnGLWidget(QOpenGLWidget):
       mb = (my - mw[1]) / (mw[3] - mw[1])
       mby = self.axisB + mb * (self.axisT - self.axisB)
 
-      if numDegrees.y() < 0:
+      if scrollDirection < 0:
         self.axisB = mby + zoomIn * (self.axisB - mby)
         self.axisT = mby - zoomIn * (mby - self.axisT)
       else:
@@ -300,7 +346,7 @@ class CcpnGLWidget(QOpenGLWidget):
       mb = (mx - ba[0]) / (ba[2] - ba[0])
       mbx = self.axisL + mb * (self.axisR - self.axisL)
 
-      if numDegrees.y() < 0:
+      if scrollDirection < 0:
         self.axisL = mbx + zoomIn * (self.axisL - mbx)
         self.axisR = mbx - zoomIn * (mbx - self.axisR)
       else:
@@ -322,7 +368,7 @@ class CcpnGLWidget(QOpenGLWidget):
       mb = (my - ra[1]) / (ra[3] - ra[1])
       mby = self.axisB + mb * (self.axisT - self.axisB)
 
-      if numDegrees.y() < 0:
+      if scrollDirection < 0:
         self.axisB = mby + zoomIn * (self.axisB - mby)
         self.axisT = mby - zoomIn * (mby - self.axisT)
       else:

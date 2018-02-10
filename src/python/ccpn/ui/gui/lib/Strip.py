@@ -139,6 +139,8 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
                 strip._testCcpnOpenGLWidget.setAxisWidth(axisCode=axisCode, width=0.5,
                                                          update=False)
 
+    # build here so it doesn't conflict with OpenGl update
+    strip._testCcpnOpenGLWidget.buildAll()
     strip._testCcpnOpenGLWidget.update()
 
   except:

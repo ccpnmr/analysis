@@ -73,6 +73,8 @@ GLTOPAXISVALUE = 'topAxis'
 GLLEFTAXISVALUE = 'leftAxis'
 GLRIGHTAXISVALUE = 'rightAxis'
 
+SPECTRUM_MATRIX = 'spectrumMatrix'
+
 
 def singleton(cls):
   """ Use class as singleton.
@@ -1326,18 +1328,26 @@ void main()
     GL.glDisable(GL.GL_BLEND)
     GL.glDisable(GL.GL_TEXTURE_2D)
 
-  def drawSpectra(self):
-    GL.glLineWidth(1.0)
-    GL.glDisable(GL.GL_BLEND)
+  def buildAll(self):
+    self.buildSpectra()
+    self.buildAxisLabels()
+    self.buildGrid()
 
+  def buildSpectra(self):
+    if self._parent.isDeleted:
+      return
+
+    self._spectrumSettings = {}
     for spectrumView in self._parent.spectrumViews:
       try:
-        # could put a signal on buildContours
+
+        self._spectrumSettings[spectrumView] = {}
+
         if spectrumView.buildContours:
           spectrumView._buildContours(None)  # need to trigger these changes now
           spectrumView.buildContours = False  # set to false, as we have rebuilt
-          # set to True and update() will rebuild the contours
-          # can be done with a call to self.rebuildContours()
+
+        # build spectrum settings for speed
 
         self._spectrumValues = spectrumView._getValues()
         # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
@@ -1355,11 +1365,65 @@ void main()
         yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
 
         # create modelview matrix for the spectrum to be drawn
-        self._uMVMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
-                                 0.0, yScale, 0.0, 0.0,
-                                 0.0, 0.0, 1.0, 0.0,
-                                 fx0, fy0, 0.0, 1.0]
-        self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+        self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
+
+        self._spectrumSettings[spectrumView][SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
+                                                                       0.0, yScale, 0.0, 0.0,
+                                                                       0.0, 0.0, 1.0, 0.0,
+                                                                       fx0, fy0, 0.0, 1.0]
+
+        self._buildPeakLists(spectrumView)  # should include rescaling
+
+      except Exception as es:
+        raise es
+
+  def drawSpectra(self):
+    self.buildSpectra()
+
+    if self._parent.isDeleted:
+      return
+
+    GL.glLineWidth(1.0)
+    GL.glDisable(GL.GL_BLEND)
+
+    for spectrumView in self._parent.spectrumViews:
+      try:
+        # # could put a signal on buildContours
+        #
+        # # if spectrumView.buildContours:
+        # #   spectrumView._buildContours(None)  # need to trigger these changes now
+        # #   spectrumView.buildContours = False  # set to false, as we have rebuilt
+        #
+        #   # set to True and update() will rebuild the contours
+        #   # can be done with a call to self.rebuildContours()
+        #
+        # self._spectrumValues = spectrumView._getValues()
+        # # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
+        # # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
+        #
+        # dx = self.sign(self.axisR - self.axisL)
+        # dy = self.sign(self.axisT - self.axisB)
+        #
+        # # get the bounding box of the spectra
+        # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+        # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+        # dxAF = fx0 - fx1
+        # dyAF = fy0 - fy1
+        # xScale = dx*dxAF/self._spectrumValues[0].totalPointCount
+        # yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
+        #
+        # # create modelview matrix for the spectrum to be drawn
+        # self._uMVMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
+        #                          0.0, yScale, 0.0, 0.0,
+        #                          0.0, 0.0, 1.0, 0.0,
+        #                          fx0, fy0, 0.0, 1.0]
+        # self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+        # set the scale matrix
+        self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
+                                                   , 1, GL.GL_FALSE
+                                                   , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
         # draw the spectrum - call the existing glCallList
         spectrumView._paintContoursNoClip()
@@ -1405,7 +1469,7 @@ void main()
 
         # draw the peak List, labelling, marks
 
-        self._buildPeakLists(spectrumView)      # should include rescaling
+        # self._buildPeakLists(spectrumView)      # should include rescaling
 
         GL.glLineWidth(3.0)
         self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
@@ -1417,26 +1481,32 @@ void main()
       except Exception as es:
         raise es
 
+  def buildGrid(self):
+    self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
+    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
+    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
+
   def drawGrid(self):
     # set to the mainView and draw the grid
 
+    self.buildGrid()
     GL.glEnable(GL.GL_BLEND)
     self.viewports.setViewport('mainView')
-    self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
+    # self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
     self.gridList[0].drawIndexArray()
 
     # draw the grid marks for the right axis
     self.viewports.setViewport('rightAxis')
-    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
+    # self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
     self.gridList[1].drawIndexArray()
 
     # draw the grid marks for the bottom axis
     self.viewports.setViewport('bottomAxis')
-    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
+    # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
     self.gridList[2].drawIndexArray()
 
-  def drawAxisLabels(self):
-    # draw axes labelling
+  def buildAxisLabels(self):
+    # build axes labelling
     if self.labelsChanged:
 
       self._axisXLabelling = []
@@ -1466,6 +1536,11 @@ void main()
                                   , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
                                   , pid=None))
 
+  def drawAxisLabels(self):
+    # draw axes labelling
+
+    self.buildAxisLabels()
+
     # put the axis labels into the bottom bar
     self.viewports.setViewport('bottomAxisBar')
     self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
@@ -1492,6 +1567,9 @@ void main()
     pass
 
   def drawLabels(self):
+    if self._parent.isDeleted:
+      return
+
     for spectrumView in self._parent.spectrumViews:
       try:
         self._buildPeakListLabels(spectrumView)      # should include rescaling
@@ -1638,6 +1716,9 @@ void main()
   def drawCursors(self):
     # draw the cursors
     # need to change to VBOs
+
+    # add cursors to marks?
+
     GL.glColor4f(0.8, 0.9, 1.0, 1.0)
     GL.glBegin(GL.GL_LINES)
 
@@ -1987,24 +2068,6 @@ void main()
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
 
-  def drawInstructions(self, painter):
-    text = "Click and drag with the left mouse button to rotate the Qt " \
-           "logo."
-    metrics = QFontMetrics(self.font())
-    border = max(4, metrics.leading())
-
-    rect = metrics.boundingRect(0, 0, self.width() - 2 * border,
-                                int(self.height() * 0.125), Qt.AlignCenter | Qt.TextWordWrap,
-                                text)
-    painter.setRenderHint(QPainter.TextAntialiasing)
-    painter.fillRect(QRect(0, 0, self.width(), rect.height() + 2 * border),
-                     QColor(0, 0, 0, 127))
-    painter.setPen(Qt.white)
-    painter.fillRect(QRect(0, 0, self.width(), rect.height() + 2 * border),
-                     QColor(0, 0, 0, 127))
-    painter.drawText((self.width() - rect.width()) / 2, border, rect.width(),
-                     rect.height(), Qt.AlignCenter | Qt.TextWordWrap, text)
-
   def setClearColor(self, c):
     GL.glClearColor(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
@@ -2012,15 +2075,14 @@ void main()
     GL.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
   def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
-    dim = [self.width(), self.height()]
-
-    ul = np.array([self.axisL, self.axisT])
-    br = np.array([self.axisR, self.axisB])
-
-    labelling = {'0': [], '1': []}
+    labelling = {'0':[], '1':[]}
     labelsChanged = False
 
     if gridGLList.renderMode == GLRENDERMODE_REBUILD:
+      dim = [self.width(), self.height()]
+
+      ul = np.array([self.axisL, self.axisT])
+      br = np.array([self.axisR, self.axisB])
 
       gridGLList.renderMode = GLRENDERMODE_DRAW
       labelsChanged = True

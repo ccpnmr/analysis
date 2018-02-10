@@ -100,13 +100,13 @@ class GuiStrip(Frame):
     self._useCcpnGL = True
     # TODO: ED comment out the block below to return to normal
     if self._useCcpnGL:
-      # self.plotWidget.hide()
+      self.plotWidget.hide()
       from ccpn.util.CcpnOpenGL import CcpnGLWidget
       # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
       # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
 
       self._testCcpnOpenGLWidget = CcpnGLWidget(parent=self, mainWindow=self.mainWindow)
-      self.getLayout().addWidget(self._testCcpnOpenGLWidget, 3, 0)
+      self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)    # (3,0) if not hiding plotWidget
       self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
       # set the ID label in the new widget

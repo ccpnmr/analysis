@@ -164,6 +164,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.base = None
     self.spectrumValues = []
 
+    self.highlighted = False
     self._drawSelectionBox = False
     self._selectionMode = 0
     self._startCoordinate = None
@@ -193,17 +194,17 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # TODO:ED fix this to get the correct colours
     if self._parent.spectrumDisplay.mainWindow.application.colourScheme == 'light':
-      self.background = '#f7ffff'
-      self.foreground = '#080000'
-      self.gridColour = '#080000'
-      self.highlightColour = '#3333ff'
-      self._labellingColour = (10, 10, 10)
+      self.background = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
+      self.foreground = (0.5, 0.0, 0.0, 1.0)    #'#080000'
+      self.gridColour = (0.5, 0.0, 0.0, 1.0)    #'#080000'
+      self.highlightColour = (0.23, 0.23, 1.0, 1.0)    #'#3333ff'
+      self._labellingColour = (0.05, 0.05, 0.05, 1.0)
     else:
-      self.background = '#080000'
-      self.foreground = '#f7ffff'
-      self.gridColour = '#f7ffff'
-      self.highlightColour = '#00ff00'
-      self._labellingColour = (255, 255, 255)
+      self.background = (0.5, 0.0, 0.0, 1.0)    #'#080000'
+      self.foreground = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
+      self.gridColour = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
+      self.highlightColour = (0.2, 1.0, 0.3, 1.0)   #'#00ff00'
+      self._labellingColour = (1.0, 1.0, 1.0, 1.0)
 
   def close(self):
     self._GLSignals.externalXAxisChanged.disconnect()
@@ -1206,7 +1207,7 @@ void main()
             continue
 
           if hasattr(peak, '_isSelected') and peak._isSelected:
-            colour = spectrumView.strip.plotWidget.highlightColour
+            colour = self.highlightColour
           else:
             colour = pls.symbolColour
 
@@ -1468,10 +1469,10 @@ void main()
     currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
     # cheat for the moment
-    if self._parent.current.strip == self._parent:
-      colour = [0.2, 1.0, 0.3, 1.0]
+    if self.highlighted:
+      colour = self.highlightColour
     else:
-      colour = [0.95, 0.95, 0.95, 1.0]
+      colour = self.foreground
 
     GL.glDisable(GL.GL_BLEND)
 
@@ -1665,9 +1666,27 @@ void main()
         raise es
 
   def buildGrid(self):
-    self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
-    self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
-    self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
+    self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
+                                                             scaleGrid=[1, 0],
+                                                             r=self.foreground[0],
+                                                             g=self.foreground[1],
+                                                             b=self.foreground[2],
+                                                             transparency=300.0)
+
+    if self.highlighted:
+      self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=self.highlightColour[0],
+                                                             g=self.highlightColour[1],
+                                                             b=self.highlightColour[2], transparency=32.0)
+      self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=self.highlightColour[0],
+                                                             g=self.highlightColour[1],
+                                                             b=self.highlightColour[2], transparency=32.0)
+    else:
+      self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=self.foreground[0],
+                                                             g=self.foreground[1],
+                                                             b=self.foreground[2], transparency=32.0)
+      self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=self.foreground[0],
+                                                             g=self.foreground[1],
+                                                             b=self.foreground[2], transparency=32.0)
 
   def drawGrid(self):
     # set to the mainView and draw the grid
@@ -1688,11 +1707,16 @@ void main()
     # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
     self.gridList[2].drawIndexArray()
 
-  def buildAxisLabels(self):
+  def buildAxisLabels(self, refresh=False):
     # build axes labelling
-    if self.labelsChanged:
+    if refresh or self.labelsChanged:
 
       self._axisXLabelling = []
+
+      if self.highlighted:
+        labelColour = self.highlightColour
+      else:
+        labelColour = self.foreground
 
       for axLabel in self.axisLabelling['0']:
         axisX = axLabel[2]
@@ -1703,7 +1727,7 @@ void main()
                                   , angle=np.pi/2.0
                                   , x=axisX-(10.0*self.pixelX) #*len(str(axisX)))
                                   , y=AXIS_MARGINBOTTOM-AXIS_LINE
-                                  , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                  , color=labelColour, GLContext=self
                                   , pid=None))
 
       # append the axisCode to the end
@@ -1711,7 +1735,7 @@ void main()
                                 , font=self.firstFont
                                 , x=self.axisL+(5*self.pixelX)
                                 , y=AXIS_LINE
-                                , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                , color=labelColour, GLContext=self
                                 , pid=None))
 
       self._axisYLabelling = []
@@ -1724,7 +1748,7 @@ void main()
                                   , font=self.firstFont
                                   , x=AXIS_LINE
                                   , y=axisY-(10.0*self.pixelY)
-                                  , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                  , color=labelColour, GLContext=self
                                   , pid=None))
 
       # append the axisCode to the end
@@ -1732,7 +1756,7 @@ void main()
                                 , font=self.firstFont
                                 , x=AXIS_LINE
                                 , y=self.axisT-(1.5*self.firstFont.height*self.pixelY)
-                                , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                , color=labelColour, GLContext=self
                                 , pid=None))
 
   def drawAxisLabels(self):
@@ -1928,17 +1952,17 @@ void main()
 
     GL.glEnd()
 
-  def drawOverlayText(self):
+  def drawOverlayText(self, refresh=False):
     """
     draw extra information to the screen
     """
     # cheat for the moment
-    if self._parent.current.strip == self._parent:
-      colour = [0.2, 1.0, 0.3, 1.0]
+    if self.highlighted:
+      colour = self.highlightColour
     else:
-      colour = [0.95, 0.95, 0.95, 1.0]
+      colour = self.foreground
 
-    if self.stripIDLabel != self._oldStripIDLabel:
+    if refresh or self.stripIDLabel != self._oldStripIDLabel:
       self.stripIDString = GLString(text=self.stripIDLabel
                                   , font=self.firstFont
                                   , x=self.axisL+(10.0*self.pixelX)
@@ -2293,8 +2317,29 @@ void main()
   def highlightCurrentStrip(self, current):
     if current:
       self.highlighted = True
+
+      self.drawOverlayText(refresh=True)
+      for gr in self.gridList:
+        gr.renderMode = GLRENDERMODE_REBUILD
+      self.buildGrid()
+      self.buildAxisLabels()
+
+      # set axes colour
+      # set stripIDStringcolour
+      # set to self.highLightColour
     else:
       self.highlighted = False
+      self.drawOverlayText(refresh=True)
+      for gr in self.gridList:
+        gr.renderMode = GLRENDERMODE_REBUILD
+      self.buildGrid()
+      self.buildAxisLabels()
+
+      # set axes colour
+      # set stripIDStringcolour
+      # set to self.foreground
+
+    self.update()
 
   def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
 

@@ -287,7 +287,7 @@ class GuiStrip(Frame):
     self.plotWidget.highlightAxes(self is self.current.strip)
 
     try:
-      self._testCcpnOpenGLWidget._highlightCurrentStrip(self is self.current.strip)
+      self._testCcpnOpenGLWidget.highlightCurrentStrip(self is self.current.strip)
     except Exception as es:
       getLogger().warning('OpenGL widget not instantiated')
 

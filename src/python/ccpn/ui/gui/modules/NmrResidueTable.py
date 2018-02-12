@@ -159,7 +159,7 @@ class NmrResidueTableModule(CcpnModule):
 
   def _fillDisplayWidget(self):
     list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-    self.displaysWidget.setItems(list)
+    self.displaysWidget.pulldownList.setData(texts=list)
 
   def _maximise(self):
     """
@@ -214,7 +214,7 @@ class NmrResidueTableModule(CcpnModule):
         # navigate the displays
         for display in displays:
             if len(display.strips) > 0:
-                newWidths = _getCurrentZoomRatio(display.strips[0].viewBox.viewRange())
+                newWidths = []      #_getCurrentZoomRatio(display.strips[0].viewBox.viewRange())
                 navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
                                               widths=newWidths,   #['full'] * len(display.strips[0].axisCodes),
                                               showSequentialResidues = (len(display.axisCodes) > 2) and

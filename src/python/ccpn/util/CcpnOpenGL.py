@@ -63,6 +63,10 @@ GLRENDERMODE_DRAW = 1
 GLRENDERMODE_RESCALE = 2
 GLRENDERMODE_REBUILD = 3
 
+GLREFRESHMODE_NEVER = 0
+GLREFRESHMODE_ALWAYS = 1
+GLREFRESHMODE_REBUILD = 2
+
 GLSOURCE = 'source'
 GLAXISVALUES = 'axisValues'
 GLMOUSECOORDS = 'mouseCoords'
@@ -180,6 +184,12 @@ class CcpnGLWidget(QOpenGLWidget):
     self._axisOrder = None
     self._axisCodes = None
 
+  def close(self):
+    self._GLSignals.externalXAxisChanged.disconnect()
+    self._GLSignals.externalYAxisChanged.disconnect()
+    self._GLSignals.externalAllAxesChanged.disconnect()
+    self._GLSignals.externalMouseMoved.disconnect()
+
   def rescale(self):
     """
     change to axes of the view, axis visibility, scale and rebuild matrices when necessary
@@ -260,6 +270,8 @@ class CcpnGLWidget(QOpenGLWidget):
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
 
+    # TODO:ED marks and horizontal/vertical traces
+
     self.update()
 
   def wheelEvent(self, event):
@@ -274,9 +286,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
       # always seems to be numPixels - check with Linux
       scrollDirection = numPixels.y()
-      zoomScale = 5.0
+      zoomScale = 8.0
 
-      if abs(scrollDirection) < 5:
+      # stop the very sensitive movements
+      if abs(scrollDirection) < 3:
         event.ignore()
         return
 
@@ -284,7 +297,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
       # this may work when using Linux
       scrollDirection = numDegrees.y()
-      zoomscale = 5.0
+      zoomscale = 8.0
 
     else:
       event.ignore()
@@ -994,7 +1007,7 @@ void main()
 
     self.update()
 
-  @QtCore.pyqtSlot(bool)
+  @pyqtSlot(bool)
   def paintGLsignal(self, bool):
     # my signal to update the screen after the spectra have changed
     if bool:
@@ -1026,15 +1039,16 @@ void main()
 
   def _rescalePeakListLabels(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
+    symbolWidth = self._parent.application.preferences.general.peakSymbolSize / 2.0
 
     x = abs(self.pixelX)
     y = abs(self.pixelY)
     if x <= y:
-      r = 0.05
-      w = 0.05 * y / x
+      r = symbolWidth
+      w = symbolWidth * y / x
     else:
-      w = 0.05
-      r = 0.05 * x / y
+      w = symbolWidth
+      r = symbolWidth * x / y
 
     # drawList.clearVertices()
     # drawList.vertices = drawList.attribs
@@ -1045,20 +1059,24 @@ void main()
   def _rescalePeakList(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
 
-    x = abs(self.pixelX)
-    y = abs(self.pixelY)
-    if x <= y:
-      r = 0.05
-      w = 0.05 * y / x
-    else:
-      w = 0.05
-      r = 0.05 * x / y
+    if drawList.refreshMode == GLREFRESHMODE_REBUILD:
+      symbolWidth = self._parent.application.preferences.general.peakSymbolSize / 2.0
 
-    # drawList.clearVertices()
-    # drawList.vertices = drawList.attribs
-    offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
-    for pp in range(0, 2*drawList.numVertices, 8):
-      drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
+      # resize the peaks to keep the correct ratio
+      x = abs(self.pixelX)
+      y = abs(self.pixelY)
+      if x <= y:
+        r = symbolWidth
+        w = symbolWidth * y / x
+      else:
+        w = symbolWidth
+        r = symbolWidth * x / y
+
+      # drawList.clearVertices()
+      # drawList.vertices = drawList.attribs
+      offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
+      for pp in range(0, 2*drawList.numVertices, 8):
+        drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
 
   def _buildPeakLists(self, spectrumView):
     spectrum = spectrumView.spectrum
@@ -1073,28 +1091,49 @@ void main()
     if drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
+      drawList.refreshMode = GLRENDERMODE_DRAW
+
       drawList.clearArrays()
 
       # find the correct scale to draw square pixels
       # don't forget to change when the axes change
+
+      symbolType = self._parent.application.preferences.general.peakSymbolType
+      symbolWidth = self._parent.application.preferences.general.peakSymbolSize / 2.0
+      lineThickness = self._parent.application.preferences.general.peakSymbolThickness / 2.0
+
       x = abs(self.pixelX)
       y = abs(self.pixelY)
-      minIndex = 0 if x <= y else 1
-      pos = [0.05, 0.05 * y / x]
-      w = r = pos[minIndex]
 
-      if x <= y:
-        r = 0.05
-        w = 0.025 * y / x
-      else:
-        w = 0.05
-        r = 0.025 * x / y
+      if symbolType == 0:  # a cross
+        # fix the aspect ratio of the cross to match the screen
+        minIndex = 0 if x <= y else 1
+        pos = [symbolWidth, symbolWidth * y / x]
+        w = r = pos[minIndex]
 
+        if x <= y:
+          r = symbolWidth
+          w = symbolWidth * y / x
+        else:
+          w = symbolWidth
+          r = symbolWidth * x / y
+
+        # change the ratio on resize
+        drawList.refreshMode = GLREFRESHMODE_REBUILD
+
+      if symbolType == 1 or symbolType == 2:  # draw an ellipse at lineWidth
+
+        # fix the size to the axes
+        drawList.refreshMode = GLREFRESHMODE_NEVER
+
+      # build the peaks VBO
       index=0
       for pls in spectrum.peakLists:
+        spectrumFrequency = spectrum.spectrometerFrequencies
+
         for peak in pls.peaks:
 
-          # TODO:ED display the required peaks
+          # TODO:ED display the required peaks - possibly build all then on draw selected later
           strip = spectrumView.strip
           _isInPlane = strip.peakIsInPlane(peak)
           if not _isInPlane:
@@ -1114,36 +1153,53 @@ void main()
           colG = int(colour.strip('# ')[2:4], 16)/255.0
           colB = int(colour.strip('# ')[4:6], 16)/255.0
 
-          # keep the cross square at 0.1ppm
-          p0 = peak.position
+          p0 = [0.0] * len(self.axisOrder)
+          lineWidths = [0.0] * len(self.axisOrder)
+          for ps, psCode in enumerate(self.axisOrder):
+            for pp, ppCode in enumerate(peak.axisCodes):
+              if ppCode == psCode:
+                p0[ps] = peak.position[pp]
+                lineWidths[ps] = peak.lineWidths[pp]
 
-          #
+          # p0 = (peak.position[self._axisOrder[0]], peak.position[self._axisOrder[1]])
 
-          drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
-          drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
-                                                            , p0[0]+r, p0[1]+w
-                                                            , p0[0]+r, p0[1]-w
-                                                            , p0[0]-r, p0[1]+w])
-          drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
-          drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
-                                                          ,p0[0], p0[1]
-                                                          ,p0[0], p0[1]
-                                                          ,p0[0], p0[1]])
-          index += 4
-          drawList.numVertices += 4
+          if symbolType == 0:
+            # draw a cross
+            # keep the cross square at 0.1ppm
+            drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+            drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
+                                                              , p0[0]+r, p0[1]+w
+                                                              , p0[0]+r, p0[1]-w
+                                                              , p0[0]-r, p0[1]+w])
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
+                                                            ,p0[0], p0[1]
+                                                            ,p0[0], p0[1]
+                                                            ,p0[0], p0[1]])
+            index += 4
+            drawList.numVertices += 4
 
-          # # draw an ellipse
-          # numPoints = 24
-          # ang = list(range(numPoints))
-          # drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
-          # drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(an*2*np.pi/numPoints)
-          #                                                   , p0[1]-w*math.cos(an*2*np.pi/numPoints)
-          #                                                   , p0[0]-r*math.sin((an+1)*2*np.pi/numPoints)
-          #                                                   , p0[1]-w*math.cos((an+1)*2*np.pi/numPoints)] for an in ang])
-          # drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
-          # drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
-          # index += (numPoints * 2)
-          # drawList.numVertices += (numPoints * 2)
+          if symbolType == 1 or symbolType == 2:  # draw an ellipse at lineWidth
+            try:
+              r = 0.5 * lineWidths[0] / spectrumFrequency[0]
+              w = 0.5 * lineWidths[1] / spectrumFrequency[1]
+
+              # draw an ellipse at lineWidth
+              numPoints = 24                    # 24 points around the circle
+              ang = list(range(numPoints))
+              drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
+              drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(an*2*np.pi/numPoints)
+                                                                , p0[1]-w*math.cos(an*2*np.pi/numPoints)
+                                                                , p0[0]-r*math.sin((an+1)*2*np.pi/numPoints)
+                                                                , p0[1]-w*math.cos((an+1)*2*np.pi/numPoints)] for an in ang])
+              drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
+              drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
+              index += (numPoints * 2)
+              drawList.numVertices += (numPoints * 2)
+            except:
+
+              # no lineWidth so no peak added
+              pass
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -1347,6 +1403,12 @@ void main()
           spectrumView._buildContours(None)  # need to trigger these changes now
           spectrumView.buildContours = False  # set to false, as we have rebuilt
 
+          # TODO:ED check how to efficiently trigger a rebuild of the peaklists
+          if spectrumView.spectrum.pid in self._GLPeakLists.keys():
+            self._GLPeakLists[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+          if spectrumView.spectrum.pid in self._GLPeakListLabels.keys():
+            self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+
         # build spectrum settings for speed
 
         self._spectrumValues = spectrumView._getValues()
@@ -1383,6 +1445,8 @@ void main()
 
     if self._parent.isDeleted:
       return
+
+    lineThickness = self._parent.application.preferences.general.peakSymbolThickness / 2.0
 
     GL.glLineWidth(1.0)
     GL.glDisable(GL.GL_BLEND)
@@ -1471,7 +1535,7 @@ void main()
 
         # self._buildPeakLists(spectrumView)      # should include rescaling
 
-        GL.glLineWidth(3.0)
+        GL.glLineWidth(lineThickness)
         self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
         GL.glLineWidth(1.0)
         # self._drawPeakListVertices(spectrumView)
@@ -2142,6 +2206,8 @@ void main()
 
   @pyqtSlot(dict)
   def _externalXAxisChanged(self, aDict):
+    if self._parent.isDeleted:
+      return
 
     if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
 
@@ -2209,6 +2275,9 @@ void main()
 
   @pyqtSlot(dict)
   def _externalYAxisChanged(self, aDict):
+    if self._parent.isDeleted:
+      return
+
     if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
 
       # match the Y axis
@@ -2222,8 +2291,12 @@ void main()
 
   @pyqtSlot(dict)
   def _externalAllAxesChanged(self, aDict):
+    if self._parent.isDeleted:
+      return
+
     sDisplay = aDict[GLSPECTRUMDISPLAY]
     source = aDict[GLSOURCE]
+
     if source != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
 
       # match the values for the Y axis, and scale for the X axis
@@ -2245,6 +2318,9 @@ void main()
 
   @pyqtSlot(dict)
   def _externalMouseMoved(self, aDict):
+    if self._parent.isDeleted:
+      return
+
     if aDict[GLSOURCE] != self:
       # self.cursorCoordinate = aDict[GLMOUSECOORDS]
       # self.update()
@@ -2794,21 +2870,26 @@ class ShaderProgram(object):
 
 class GLVertexArray():
   def __init__(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
+               , refreshMode = GLREFRESHMODE_NEVER
                , blendMode=False, drawMode=GL.GL_LINES, dimension=3, GLContext=None):
-    self.initialise(numLists=numLists, renderMode=renderMode
+
+    self.initialise(numLists=numLists, renderMode=renderMode, refreshMode = refreshMode
                     , blendMode=blendMode, drawMode=drawMode, dimension=dimension, GLContext=GLContext)
 
   def initialise(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
+                , refreshMode=GLREFRESHMODE_NEVER
                 , blendMode=False, drawMode=GL.GL_LINES, dimension=3
                 , GLContext=None):
+
     self.renderMode = renderMode
+    self.refreshMode = refreshMode
     self.vertices = np.array([], dtype=np.float32)    #np.zeros((len(text)*4,3), dtype=np.float32)
     self.indices = np.array([], dtype=np.uint)        #np.zeros((len(text)*6, ), dtype=np.uint)
     self.colors = np.array([], dtype=np.float32)      #np.zeros((len(text)*4,4), dtype=np.float32)
     self.texcoords= np.array([], dtype=np.float32)    #np.zeros((len(text)*4,2), dtype=np.float32)
     self.attribs = np.array([], dtype=np.float32)     #np.zeros((len(text)*4,1), dtype=np.float32)
     self.numVertices = 0
-    # self.GLLists = GL.glGenLists(numLists)
+
     self.numLists = numLists
     self.blendMode = blendMode
     self.drawMode = drawMode

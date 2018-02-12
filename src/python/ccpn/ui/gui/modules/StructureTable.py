@@ -208,7 +208,7 @@ class StructureTableModule(CcpnModule):
 
   def _fillDisplayWidget(self):
     list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-    self.displaysWidget.setItems(list)
+    self.displaysWidget.pulldownList.setData(texts=list)
 
   def selectStructureEnsemble(self, structureEnsemble=None):
     """

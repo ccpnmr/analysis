@@ -122,8 +122,11 @@ class _GLSignalClass(QtWidgets.QWidget):
 
 class CcpnGLWidget(QOpenGLWidget):
 
-  def __init__(self, parent=None, mainWindow=None, rightMenu=None):
+  def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(CcpnGLWidget, self).__init__(parent)
+
+    # flag to display paintGL but keep an empty screen
+    self._blankDisplay = False
 
     self._GLSignals = _GLSignalClass()
     self._GLSignals.externalXAxisChanged.connect(self._externalXAxisChanged)
@@ -183,6 +186,24 @@ class CcpnGLWidget(QOpenGLWidget):
     self._orderedAxes = None
     self._axisOrder = None
     self._axisCodes = None
+
+    self._oldStripIDLabel = None
+    self.stripIDLabel = stripIDLabel if stripIDLabel else ''
+    self.stripIDString = None
+
+    # TODO:ED fix this to get the correct colours
+    if self._parent.spectrumDisplay.mainWindow.application.colourScheme == 'light':
+      self.background = '#f7ffff'
+      self.foreground = '#080000'
+      self.gridColour = '#080000'
+      self.highlightColour = '#3333ff'
+      self._labellingColour = (10, 10, 10)
+    else:
+      self.background = '#080000'
+      self.foreground = '#f7ffff'
+      self.gridColour = '#f7ffff'
+      self.highlightColour = '#00ff00'
+      self._labellingColour = (255, 255, 255)
 
   def close(self):
     self._GLSignals.externalXAxisChanged.disconnect()
@@ -258,6 +279,9 @@ class CcpnGLWidget(QOpenGLWidget):
     currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
     currentShader.setGLUniform4fv('viewport', 1, self._view)
 
+    # TODO:ED marks and horizontal/vertical traces
+    self._rescaleOverlayText()
+
   def resizeGL(self, w, h):
     self.w = w
     self.h = h
@@ -270,8 +294,6 @@ class CcpnGLWidget(QOpenGLWidget):
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
 
-    # TODO:ED marks and horizontal/vertical traces
-
     self.update()
 
   def wheelEvent(self, event):
@@ -279,7 +301,8 @@ class CcpnGLWidget(QOpenGLWidget):
       return (l-val)*(r-val) <= 0
 
     numPixels = event.pixelDelta()
-    numDegrees = event.angleDelta() / 120
+    numDegrees = event.angleDelta() / 8
+    zoomCentre = self._parent.application.preferences.general.zoomCentreType
 
     zoomScale = 0.0
     if numPixels:
@@ -289,7 +312,7 @@ class CcpnGLWidget(QOpenGLWidget):
       zoomScale = 8.0
 
       # stop the very sensitive movements
-      if abs(scrollDirection) < 3:
+      if abs(scrollDirection) < 2:
         event.ignore()
         return
 
@@ -298,6 +321,11 @@ class CcpnGLWidget(QOpenGLWidget):
       # this may work when using Linux
       scrollDirection = numDegrees.y()
       zoomscale = 8.0
+
+      # stop the very sensitive movements
+      if abs(scrollDirection) < 2:
+        event.ignore()
+        return
 
     else:
       event.ignore()
@@ -322,7 +350,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
     if between(mx, mw[0], mw[2]) and between(my, mw[1], mw[3]):
       # if in the mainView
-      mb = (mx - mw[0]) / (mw[2] - mw[0])
+      if zoomCentre == 0:       # centre on mouse
+        mb = (mx - mw[0]) / (mw[2] - mw[0])
+      else:                     # centre on the screen
+        mb = 0.5
+
       mbx = self.axisL + mb * (self.axisR - self.axisL)
 
       if scrollDirection < 0:
@@ -332,7 +364,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisL = mbx + zoomOut * (self.axisL - mbx)
         self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
-      mb = (my - mw[1]) / (mw[3] - mw[1])
+      if zoomCentre == 0:       # centre on mouse
+        mb = (my - mw[1]) / (mw[3] - mw[1])
+      else:  # centre on the screen
+        mb = 0.5
+
       mby = self.axisB + mb * (self.axisT - self.axisB)
 
       if scrollDirection < 0:
@@ -358,7 +394,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
     elif between(mx, ba[0], ba[2]) and between(my, ba[1], ba[3]):
       # in the bottomAxisBar
-      mb = (mx - ba[0]) / (ba[2] - ba[0])
+      if zoomCentre == 0:       # centre on mouse
+        mb = (mx - ba[0]) / (ba[2] - ba[0])
+      else:  # centre on the screen
+        mb = 0.5
+
       mbx = self.axisL + mb * (self.axisR - self.axisL)
 
       if scrollDirection < 0:
@@ -380,7 +420,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
     elif between(mx, ra[0], ra[2]) and between(my, ra[1], ra[3]):
       # in the rightAxisBar
-      mb = (my - ra[1]) / (ra[3] - ra[1])
+      if zoomCentre == 0:       # centre on mouse
+        mb = (my - ra[1]) / (ra[3] - ra[1])
+      else:  # centre on the screen
+        mb = 0.5
+
       mby = self.axisB + mb * (self.axisT - self.axisB)
 
       if scrollDirection < 0:
@@ -413,6 +457,8 @@ class CcpnGLWidget(QOpenGLWidget):
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
 
+    self._rescaleOverlayText()
+
     if update:
       self.update()
 
@@ -427,6 +473,8 @@ class CcpnGLWidget(QOpenGLWidget):
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
 
+    self._rescaleOverlayText()
+
     if update:
       self.update()
 
@@ -436,6 +484,8 @@ class CcpnGLWidget(QOpenGLWidget):
     # spawn rebuild event for the grid
     for li in self.gridList:
       li.renderMode = GLRENDERMODE_REBUILD
+
+    self._rescaleOverlayText()
 
     if update:
       self.update()
@@ -449,6 +499,9 @@ class CcpnGLWidget(QOpenGLWidget):
     return super(CcpnGLWidget, self).eventFilter(obj, event)
 
   def _connectSpectra(self):
+    """
+    haven't tested this yet
+    """
     for spectrumView in self._parent.spectrumViews:
       spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
 
@@ -1056,6 +1109,14 @@ void main()
     for pp in range(0, 2*drawList.numVertices, 8):
       drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
 
+  def _rescaleOverlayText(self):
+    if self.stripIDString:
+      vertices = self.stripIDString.numVertices
+      offsets = [self.axisL+(10.0*self.pixelX)
+                 , self.axisT-(1.5*self.firstFont.height*self.pixelY)]
+      for pp in range(0, vertices):
+        self.stripIDString.attribs[pp] = offsets
+
   def _rescalePeakList(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
 
@@ -1153,6 +1214,7 @@ void main()
           colG = int(colour.strip('# ')[2:4], 16)/255.0
           colB = int(colour.strip('# ')[4:6], 16)/255.0
 
+          # get the correct coordinates based on the axisCodes
           p0 = [0.0] * len(self.axisOrder)
           lineWidths = [0.0] * len(self.axisOrder)
           for ps, psCode in enumerate(self.axisOrder):
@@ -1180,26 +1242,35 @@ void main()
             drawList.numVertices += 4
 
           if symbolType == 1 or symbolType == 2:  # draw an ellipse at lineWidth
-            try:
+            if lineWidths[0] and lineWidths[1]:
+
+              # draw 24 connected segments
               r = 0.5 * lineWidths[0] / spectrumFrequency[0]
               w = 0.5 * lineWidths[1] / spectrumFrequency[1]
+              numPoints = 24
+              angPlus = 2 * np.pi
+              skip = 1
+            else:
+              # draw 12 disconnected segments (dotted)
+              r = symbolWidth
+              w = symbolWidth
+              numPoints = 12
+              angPlus = 1.0 * np.pi
+              skip = 2
 
-              # draw an ellipse at lineWidth
-              numPoints = 24                    # 24 points around the circle
-              ang = list(range(numPoints))
-              drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
-              drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(an*2*np.pi/numPoints)
-                                                                , p0[1]-w*math.cos(an*2*np.pi/numPoints)
-                                                                , p0[0]-r*math.sin((an+1)*2*np.pi/numPoints)
-                                                                , p0[1]-w*math.cos((an+1)*2*np.pi/numPoints)] for an in ang])
-              drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
-              drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
-              index += (numPoints * 2)
-              drawList.numVertices += (numPoints * 2)
-            except:
+            # draw an ellipse at lineWidth
+            ang = list(range(numPoints))
+            drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
+            drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(skip*an*angPlus/numPoints)
+                                                              , p0[1]-w*math.cos(skip*an*angPlus/numPoints)
+                                                              , p0[0]-r*math.sin((skip*an+1)*angPlus/numPoints)
+                                                              , p0[1]-w*math.cos((skip*an+1)*angPlus/numPoints)] for an in ang])
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
+            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
+            index += (numPoints * 2)
+            drawList.numVertices += (numPoints * 2)
 
-              # no lineWidth so no peak added
-              pass
+            # TODO:ED filled ellipse
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -1222,7 +1293,13 @@ void main()
 
       for pls in spectrum.peakLists:
         for peak in pls.peaks:
-          p0 = peak.position
+
+          # get the correct coordinates based on the axisCodes
+          p0 = [0.0] * len(self.axisOrder)
+          for ps, psCode in enumerate(self.axisOrder):
+            for pp, ppCode in enumerate(peak.axisCodes):
+              if ppCode == psCode:
+                p0[ps] = peak.position[pp]
 
           # TODO:ED display the required peaks
           strip = spectrumView.strip
@@ -1332,6 +1409,9 @@ void main()
 
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
+    if self._blankDisplay:
+      return
+
     currentShader = self._shaderProgram1.makeCurrent()
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                     self.axisT, -1.0, 1.0)
@@ -1369,11 +1449,50 @@ void main()
 
     currentShader = self._shaderProgramTex.makeCurrent()
     self.drawMouseCoords()
+
     self.drawOverlayText()
 
     self.drawAxisLabels()
 
     self.disableTexture()
+
+    # use the current viewport matrix to display the last bit of the axes
+    currentShader = self._shaderProgram1.makeCurrent()
+    currentShader.setProjectionAxes(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, -1, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
+    self.viewports.setViewport('mainView')
+    currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
+    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0,
+                             0.0, 0.0, 1.0, 0.0,
+                             0.0, 0.0, 0.0, 1.0]
+    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+    # cheat for the moment
+    if self._parent.current.strip == self._parent:
+      colour = [0.2, 1.0, 0.3, 1.0]
+    else:
+      colour = [0.95, 0.95, 0.95, 1.0]
+
+    GL.glDisable(GL.GL_BLEND)
+
+    GL.glColor4f(*colour)
+    GL.glBegin(GL.GL_LINES)
+
+    GL.glVertex2d(0,0)
+    GL.glVertex2d(w-AXIS_MARGINRIGHT, 0)
+    GL.glVertex2d(w-AXIS_MARGINRIGHT, 0)
+    GL.glVertex2d(w-AXIS_MARGINRIGHT, h-AXIS_MARGINBOTTOM)
+
+    # GL.glVertex2d(-.1,0)
+    # GL.glVertex2d(.1, 0)
+    # GL.glVertex2d(0, -.1)
+    # GL.glVertex2d(0, .1)
+
+    # GL.glVertex3d(-1.0, -0.99, 0)
+    # GL.glVertex3d(1.0, -0.99, 0)
+    # GL.glVertex3d(1.0, -0.99, 0)
+    # GL.glVertex3d(1.0, 1.0, 0)
+    GL.glEnd()
 
   def enableTexture(self):
     GL.glEnable(GL.GL_BLEND)
@@ -1446,7 +1565,7 @@ void main()
     if self._parent.isDeleted:
       return
 
-    lineThickness = self._parent.application.preferences.general.peakSymbolThickness / 2.0
+    lineThickness = self._parent.application.preferences.general.peakSymbolThickness
 
     GL.glLineWidth(1.0)
     GL.glDisable(GL.GL_BLEND)
@@ -1587,6 +1706,14 @@ void main()
                                   , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
                                   , pid=None))
 
+      # append the axisCode to the end
+      self._axisXLabelling.append(GLString(text=self.axisCodes[0]
+                                , font=self.firstFont
+                                , x=self.axisL+(5*self.pixelX)
+                                , y=AXIS_LINE
+                                , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                , pid=None))
+
       self._axisYLabelling = []
 
       for xx, ayLabel in enumerate(self.axisLabelling['1']):
@@ -1599,6 +1726,14 @@ void main()
                                   , y=axisY-(10.0*self.pixelY)
                                   , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
                                   , pid=None))
+
+      # append the axisCode to the end
+      self._axisYLabelling.append(GLString(text=self.axisCodes[1]
+                                , font=self.firstFont
+                                , x=AXIS_LINE
+                                , y=self.axisT-(1.5*self.firstFont.height*self.pixelY)
+                                , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
+                                , pid=None))
 
   def drawAxisLabels(self):
     # draw axes labelling
@@ -1797,7 +1932,24 @@ void main()
     """
     draw extra information to the screen
     """
-    pass
+    # cheat for the moment
+    if self._parent.current.strip == self._parent:
+      colour = [0.2, 1.0, 0.3, 1.0]
+    else:
+      colour = [0.95, 0.95, 0.95, 1.0]
+
+    if self.stripIDLabel != self._oldStripIDLabel:
+      self.stripIDString = GLString(text=self.stripIDLabel
+                                  , font=self.firstFont
+                                  , x=self.axisL+(10.0*self.pixelX)
+                                  , y=self.axisT-(1.5*self.firstFont.height*self.pixelY)
+                                  # self._screenZero[0], y=self._screenZero[1]
+                                  , color=colour, GLContext=self
+                                  , pid=None)
+      self._oldStripIDLabel = self.stripIDLabel
+
+    # draw the strikp ID to the screen
+    self.stripIDString.drawTextArray()
 
   @property
   def axisOrder(self):
@@ -2138,7 +2290,21 @@ void main()
   def setColor(self, c):
     GL.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())
 
+  def highlightCurrentStrip(self, current):
+    if current:
+      self.highlighted = True
+    else:
+      self.highlighted = False
+
   def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
+
+    def check(ll):
+      # check if a number ends in an even digit
+      val = '%.0f' % (ll[2] / ll[3])
+      if val[-1] in '02468':
+        return True
+      return False
+
     labelling = {'0':[], '1':[]}
     labelsChanged = False
 
@@ -2183,7 +2349,14 @@ void main()
                 continue
 
             if i == 1:            # should be largest scale grid
-              if p1[0] == p2[0]:
+              # p1[0] = self._round_sig(p1[0], sig=4)
+              # p1[1] = self._round_sig(p1[1], sig=4)
+              # p2[0] = self._round_sig(p2[0], sig=4)
+              # p2[1] = self._round_sig(p2[1], sig=4)
+              d[0] = self._round_sig(d[0], sig=4)
+              d[1] = self._round_sig(d[1], sig=4)
+
+              if '%.5f' % p1[0] == '%.5f' % p2[0]:        # easy to round off as strings
                 labelling[str(ax)].append((i, ax, p1[0], d[0]))
               else:
                 labelling[str(ax)].append((i, ax, p1[1], d[1]))
@@ -2194,6 +2367,13 @@ void main()
             gridGLList.colors = np.append(gridGLList.colors, [r, g, b, c/transparency, r, g, b, c/transparency])
             gridGLList.numVertices += 2
             index += 2
+
+      # restrict the labelling to the maximum without overlap
+      for ll in labelling.keys():
+        lStrings = labelling[ll]
+        if len(lStrings) > 16:
+          #restrict
+          labelling[ll] = [ls for ls in lStrings if check(ls)]
 
     return labelling, labelsChanged
 
@@ -3075,6 +3255,8 @@ class GLString(GLVertexArray):
           pen[0] = pen[0] + glyph[GlyphOrigW] + kerning
           # pen[1] = pen[1] + glyph[GlyphHeight]
           prev = charCode
+
+      self.numVertices = len(self.vertices)
 
     # total width of text - probably don't need
     # width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]

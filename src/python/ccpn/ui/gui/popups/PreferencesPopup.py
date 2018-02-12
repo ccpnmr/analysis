@@ -310,7 +310,7 @@ class PreferencesPopup(CcpnDialog):
                                     grid=(row, 1), hAlign='l',
                                     tipTexts=None,
                                     )
-    self.zoomCentre.setEnabled(False)
+    # self.zoomCentre.setEnabled(False)
 
     row += 1
     zoomPercent = self.preferences.general.zoomPercent

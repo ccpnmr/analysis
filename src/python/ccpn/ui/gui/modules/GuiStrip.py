@@ -286,6 +286,11 @@ class GuiStrip(Frame):
     "Callback to highlight the axes of current strip"
     self.plotWidget.highlightAxes(self is self.current.strip)
 
+    try:
+      self._testCcpnOpenGLWidget._highlightCurrentStrip(self is self.current.strip)
+    except Exception as es:
+      getLogger().warning('OpenGL widget not instantiated')
+
   def _printToFile(self, printer):
     # CCPN INTERNAL - called in printToFile method of GuiMainWindow
 

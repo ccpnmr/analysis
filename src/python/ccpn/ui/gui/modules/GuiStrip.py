@@ -229,16 +229,33 @@ class GuiStrip(Frame):
     self.peakLabelling = self.application.preferences.general.annotationType
     self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
 
+    try:
+      self._testCcpnOpenGLWidget.setGridVisible(self.application.preferences.general.showGrid)
+    except Exception as es:
+      getLogger().debug('OpenGL widget not instantiated')
+
     self.show()
 
   @property
   def gridIsVisible(self):
     "True if grid is visible"
+
+    try:
+      return self._testCcpnOpenGLWidget.gridVisible
+    except Exception as es:
+      getLogger().debug('OpenGL widget not instantiated')
+
     return self.plotWidget.grid.isVisible()
 
   @property
   def crossHairIsVisible(self):
     "True if crosshair is visible"
+
+    try:
+      return self._testCcpnOpenGLWidget.crossHairVisible
+    except Exception as es:
+      getLogger().debug('OpenGL widget not instantiated')
+
     return self.plotWidget.crossHair1.isVisible()
 
   @property
@@ -289,7 +306,7 @@ class GuiStrip(Frame):
     try:
       self._testCcpnOpenGLWidget.highlightCurrentStrip(self is self.current.strip)
     except Exception as es:
-      getLogger().warning('OpenGL widget not instantiated')
+      getLogger().debug('OpenGL widget not instantiated')
 
   def _printToFile(self, printer):
     # CCPN INTERNAL - called in printToFile method of GuiMainWindow
@@ -513,11 +530,21 @@ class GuiStrip(Frame):
     if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
       self.plotWidget.crossHair2.toggle()
 
+    try:
+      self._testCcpnOpenGLWidget.toggleCrossHair()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
   def _showCrossHair(self):
     "Displays crosshair in strip"
     self.plotWidget.crossHair1.show()
     if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
       self.plotWidget.crossHair2.show()
+
+    try:
+      self._testCcpnOpenGLWidget.crossHairVisible = True
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
   def _hideCrossHair(self):
     "Hides crosshair in strip."
@@ -525,9 +552,19 @@ class GuiStrip(Frame):
     if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
       self.plotWidget.crossHair2.hide()
 
+    try:
+      self._testCcpnOpenGLWidget.crossHairVisible = False
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
   def toggleGrid(self):
     "Toggles whether grid is visible in the strip."
     self.plotWidget.toggleGrid()
+
+    try:
+      self._testCcpnOpenGLWidget.toggleGrid()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
   def cyclePeakLabelling(self):
     "Toggles whether peak labelling is minimal is visible in the strip."
@@ -929,4 +966,4 @@ def _setupGuiStrip(project:Project, apiStrip):
   try:
     strip._testCcpnOpenGLWidget.initialiseAxes(display=strip.spectrumDisplay)
   except:
-    getLogger().warning('Error: OpenGL widget not instantiated for %s' % strip)
+    getLogger().debug('Error: OpenGL widget not instantiated for %s' % strip)

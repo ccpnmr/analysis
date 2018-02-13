@@ -144,7 +144,7 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
     strip._testCcpnOpenGLWidget.update()
 
   except:
-    getLogger().warning('Error: OpenGL widget not instantiated for %s' % strip)
+    getLogger().debug('Error: OpenGL widget not instantiated for %s' % strip)
 
   # if _undo is not None:
   #   _undo.decreaseBlocking()

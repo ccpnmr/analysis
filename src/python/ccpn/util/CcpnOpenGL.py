@@ -187,6 +187,10 @@ class CcpnGLWidget(QOpenGLWidget):
     self._orderedAxes = None
     self._axisOrder = None
     self._axisCodes = None
+    
+    self._gridVisible = True
+    self._crossHairVisible = True
+    self._axesVisible = True
 
     self._oldStripIDLabel = None
     self.stripIDLabel = stripIDLabel if stripIDLabel else ''
@@ -205,6 +209,11 @@ class CcpnGLWidget(QOpenGLWidget):
       self.gridColour = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
       self.highlightColour = (0.2, 1.0, 0.3, 1.0)   #'#00ff00'
       self._labellingColour = (1.0, 1.0, 1.0, 1.0)
+
+    self._preferences = self._parent.application.preferences.general
+
+    self._peakLabelling = self._preferences.annotationType
+    self._gridVisible = self._preferences.showGrid
 
   def close(self):
     self._GLSignals.externalXAxisChanged.disconnect()
@@ -303,7 +312,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     numPixels = event.pixelDelta()
     numDegrees = event.angleDelta() / 8
-    zoomCentre = self._parent.application.preferences.general.zoomCentreType
+    zoomCentre = self._preferences.zoomCentreType
 
     zoomScale = 0.0
     if numPixels:
@@ -1093,7 +1102,7 @@ void main()
 
   def _rescalePeakListLabels(self, spectrumView):
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
-    symbolWidth = self._parent.application.preferences.general.peakSymbolSize / 2.0
+    symbolWidth = self._preferences.peakSymbolSize / 2.0
 
     x = abs(self.pixelX)
     y = abs(self.pixelY)
@@ -1122,7 +1131,7 @@ void main()
     drawList = self._GLPeakLists[spectrumView.spectrum.pid]
 
     if drawList.refreshMode == GLREFRESHMODE_REBUILD:
-      symbolWidth = self._parent.application.preferences.general.peakSymbolSize / 2.0
+      symbolWidth = self._preferences.peakSymbolSize / 2.0
 
       # resize the peaks to keep the correct ratio
       x = abs(self.pixelX)
@@ -1160,9 +1169,9 @@ void main()
       # find the correct scale to draw square pixels
       # don't forget to change when the axes change
 
-      symbolType = self._parent.application.preferences.general.peakSymbolType
-      symbolWidth = self._parent.application.preferences.general.peakSymbolSize / 2.0
-      lineThickness = self._parent.application.preferences.general.peakSymbolThickness / 2.0
+      symbolType = self._preferences.peakSymbolType
+      symbolWidth = self._preferences.peakSymbolSize / 2.0
+      lineThickness = self._preferences.peakSymbolThickness / 2.0
 
       x = abs(self.pixelX)
       y = abs(self.pixelY)
@@ -1446,10 +1455,14 @@ void main()
     # self._shaderProgram1.setParameterList(self._parameterList)
 
     self.drawSelectionBox()
-    self.drawCursors()
+    
+    if self._crossHairVisible:
+      self.drawCursors()
 
     currentShader = self._shaderProgramTex.makeCurrent()
-    self.drawMouseCoords()
+
+    if self._crossHairVisible:
+      self.drawMouseCoords()
 
     self.drawOverlayText()
 
@@ -1566,7 +1579,7 @@ void main()
     if self._parent.isDeleted:
       return
 
-    lineThickness = self._parent.application.preferences.general.peakSymbolThickness
+    lineThickness = self._preferences.peakSymbolThickness
 
     GL.glLineWidth(1.0)
     GL.glDisable(GL.GL_BLEND)
@@ -1693,19 +1706,22 @@ void main()
 
     self.buildGrid()
     GL.glEnable(GL.GL_BLEND)
-    self.viewports.setViewport('mainView')
-    # self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
-    self.gridList[0].drawIndexArray()
 
-    # draw the grid marks for the right axis
-    self.viewports.setViewport('rightAxis')
-    # self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
-    self.gridList[1].drawIndexArray()
+    if self._gridVisible:
+      self.viewports.setViewport('mainView')
+      # self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
+      self.gridList[0].drawIndexArray()
 
-    # draw the grid marks for the bottom axis
-    self.viewports.setViewport('bottomAxis')
-    # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
-    self.gridList[2].drawIndexArray()
+    if self._axesVisible:
+      # draw the grid marks for the right axis
+      self.viewports.setViewport('rightAxis')
+      # self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
+      self.gridList[1].drawIndexArray()
+
+      # draw the grid marks for the bottom axis
+      self.viewports.setViewport('bottomAxis')
+      # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
+      self.gridList[2].drawIndexArray()
 
   def buildAxisLabels(self, refresh=False):
     # build axes labelling
@@ -1762,29 +1778,30 @@ void main()
   def drawAxisLabels(self):
     # draw axes labelling
 
-    self.buildAxisLabels()
+    if self._axesVisible:
+      self.buildAxisLabels()
 
-    # put the axis labels into the bottom bar
-    self.viewports.setViewport('bottomAxisBar')
-    self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
-    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
-                                             AXIS_MARGINBOTTOM, -1.0, 1.0)
-    self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      # put the axis labels into the bottom bar
+      self.viewports.setViewport('bottomAxisBar')
+      self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
+      self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+      self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
+                                               AXIS_MARGINBOTTOM, -1.0, 1.0)
+      self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
-    for lb in self._axisXLabelling:
-      lb.drawTextArray()
+      for lb in self._axisXLabelling:
+        lb.drawTextArray()
 
-    # put the axis labels into the right bar
-    self.viewports.setViewport('rightAxisBar')
-    self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
-    self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-    self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT
-                                             , self.axisB, self.axisT, -1.0, 1.0)
-    self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      # put the axis labels into the right bar
+      self.viewports.setViewport('rightAxisBar')
+      self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
+      self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+      self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT
+                                               , self.axisB, self.axisT, -1.0, 1.0)
+      self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
-    for lb in self._axisYLabelling:
-      lb.drawTextArray()
+      for lb in self._axisYLabelling:
+        lb.drawTextArray()
 
   def drawMarks(self):
     pass
@@ -1974,6 +1991,46 @@ void main()
 
     # draw the strikp ID to the screen
     self.stripIDString.drawTextArray()
+
+  @property
+  def axesVisible(self):
+    return self._axesVisible
+
+  @axesVisible.setter
+  def axesVisible(self, visible):
+    self._axesVisible = visible
+    self.update()
+
+  def toggleAxes(self):
+    self._axesVisible = not self._axesVisible
+    self.update()
+
+  @property
+  def gridVisible(self):
+    return self._gridVisible
+
+  @gridVisible.setter  
+  def gridVisible(self, visible):
+    self._gridVisible = visible
+    self.update()
+
+  def toggleGrid(self):
+    self._gridVisible = not self._gridVisible
+    self.update()
+
+  # TODO:ED check - two cursors are needed
+  @property
+  def crossHairVisible(self):
+    return self._crossHairVisible
+
+  @crossHairVisible.setter
+  def crossHairVisible(self, visible):
+    self._crossHairVisible = visible
+    self.update()
+
+  def toggleCrossHair(self):
+    self._crossHairVisible = not self._crossHairVisible
+    self.update()
 
   @property
   def axisOrder(self):
@@ -2556,8 +2613,15 @@ void main()
 
       # cursorPosition = self.cursorCoordinates
       for n, axis in enumerate(self._axisOrder[:2]):
-        if axis in mouseMovedDict.keys():
-          self.cursorCoordinate[n] = mouseMovedDict[axis]
+        if self._preferences.matchAxisCode == 0:       # default - match atom type
+          for ax in mouseMovedDict.keys():
+            if ax and axis and ax[0] == axis[0]:
+              self.cursorCoordinate[n] = mouseMovedDict[ax]
+              break
+
+        elif self._preferences.matchAxisCode == 1:     # match full code
+          if axis in mouseMovedDict.keys():
+            self.cursorCoordinate[n] = mouseMovedDict[axis]
 
       # if cursorPosition:
       #   position = list(cursorPosition)
@@ -2566,8 +2630,11 @@ void main()
       #   for axis in self._orderedAxes[2:]:
       #     position.append(axis.position)
 
-        # self.cursorCoordinate = (cursorPosition[0], cursorPosition[1])
-        self._parent.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+      # self.cursorCoordinate = (cursorPosition[0], cursorPosition[1])
+      self._parent.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+
+      # only need to redraw if we can see the cursor
+      if self._crossHairVisible:
         self.update()
 
 

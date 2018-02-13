@@ -322,6 +322,26 @@ class PreferencesPopup(CcpnDialog):
     self.zoomPercentData.editingFinished.connect(self._setZoomPercent)
 
     row += 1
+    stripWidthZoomPercent = self.preferences.general.stripWidthZoomPercent
+    self.stripWidthZoomPercentLabel = Label(parent, text="Strip Width Zoom (%)", grid=(row, 0))
+    self.stripWidthZoomPercentData = DoubleSpinbox(parent, step=1
+                                            , min=1, max=100, grid=(row, 1), hAlign='l')
+    self.stripWidthZoomPercentData.setValue(int(stripWidthZoomPercent))
+    self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
+    self.stripWidthZoomPercentData.editingFinished.connect(self._setStripWidthZoomPercent)
+
+    row += 1
+    self.matchAxisCodeLabel = Label(parent, text="Match Axis Codes", grid=(row, 0))
+    matchAxisCode = self.preferences.general.matchAxisCode
+    self.matchAxisCode = RadioButtons(parent, texts=['Atom Type', 'Full Axis Code'],
+                                    selectedInd=matchAxisCode,
+                                    callback=self._setMatchAxisCode,
+                                    direction='v',
+                                    grid=(row, 1), hAlign='l',
+                                    tipTexts=None,
+                                    )
+
+    row += 1
     self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
     self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
     self.showGridBox.toggled.connect(partial(self._toggleGeneralOptions, 'showGrid'))
@@ -556,7 +576,7 @@ class PreferencesPopup(CcpnDialog):
 
   def _setZoomCentre(self):
     """
-    Set the zom centring method to either mouse position or centre of the screen
+    Set the zoom centring method to either mouse position or centre of the screen
     """
     try:
       zoomCentre = self.zoomCentre.getIndex()
@@ -573,4 +593,25 @@ class PreferencesPopup(CcpnDialog):
     except:
       return
     self.preferences.general.zoomPercent = zoomPercent
+
+  def _setStripWidthZoomPercent(self):
+    """
+    Set the value for increasing/decreasing width of strips
+    """
+    try:
+      stripWidthZoomPercent = float(self.stripWidthZoomPercentData.text())
+    except:
+      return
+    self.preferences.general.stripWidthZoomPercent = stripWidthZoomPercent
+
+  def _setMatchAxisCode(self):
+    """
+    Set the matching of the axis codes across different strips
+    """
+    try:
+      matchAxisCode = self.matchAxisCode.getIndex()
+    except:
+      return
+    self.preferences.general.matchAxisCode = matchAxisCode
+
 

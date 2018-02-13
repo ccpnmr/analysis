@@ -564,7 +564,7 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
   try:
     display.strips[0]._testCcpnOpenGLWidget.initialiseAxes(display=display)
   except:
-    getLogger().warning('Error: OpenGL widget not instantiated for %s' % display)
+    getLogger().debug('Error: OpenGL widget not instantiated for %s' % display)
 
   return display
 Window.createSpectrumDisplay = _createSpectrumDisplay

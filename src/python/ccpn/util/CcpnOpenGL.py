@@ -216,7 +216,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._gridVisible = self._preferences.showGrid
 
     # set a minimum size so that the strips resize nicely
-    self.setMinimumSize(150, 150)
+    self.setMinimumSize(150, 100)
 
   def close(self):
     self._GLSignals.externalXAxisChanged.disconnect()
@@ -610,8 +610,8 @@ void main()
                     // character_pos              world_coord
                       
   // centre on the nearest pixel in NDC - shouldn't be needed but textures not correct yet
-  gl_Position = vec4( floor(0.5 + viewport.x*pos.x) / viewport.x,
-                      floor(0.5 + viewport.y*pos.y) / viewport.y,
+  gl_Position = vec4( pos.x,        //floor(0.5 + viewport.x*pos.x) / viewport.x,
+                      pos.y,        //floor(0.5 + viewport.y*pos.y) / viewport.y,
                       pos.zw );
                
   gl_TexCoord[0] = gl_MultiTexCoord0;
@@ -797,7 +797,7 @@ void main()
     self._buildTextFlag = True
 
     self._buildMouse = True
-    self._mouseCoords = ''
+    self._mouseCoords = [-1.0, -1.0]
     self.mouseString = None
     self.peakLabelling = 0
 
@@ -1228,64 +1228,67 @@ void main()
           colB = int(colour.strip('# ')[4:6], 16)/255.0
 
           # get the correct coordinates based on the axisCodes
-          p0 = [0.0] * len(self.axisOrder)
-          lineWidths = [0.0] * len(self.axisOrder)
-          frequency = [0.0] * len(self.axisOrder)
-          for ps, psCode in enumerate(self.axisOrder):
+          p0 = [0.0] * 2            #len(self.axisOrder)
+          lineWidths = [None] * 2    #len(self.axisOrder)
+          frequency = [0.0] * 2     #len(self.axisOrder)
+          axisCount = 0
+          for ps, psCode in enumerate(self.axisOrder[0:2]):
             for pp, ppCode in enumerate(peak.axisCodes):
               if ppCode == psCode:
                 p0[ps] = peak.position[pp]
                 lineWidths[ps] = peak.lineWidths[pp]
                 frequency[ps] = spectrumFrequency[pp]
+                axisCount += 1
 
-          # p0 = (peak.position[self._axisOrder[0]], peak.position[self._axisOrder[1]])
+          if axisCount != 2:
+            getLogger().debug('Bad peak.axisCodes: %s - %s' % (peak.pid, peak.axisCodes))
+          else:
+            if symbolType == 0:
+              # draw a cross
+              # keep the cross square at 0.1ppm
+              drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+              drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
+                                                                , p0[0]+r, p0[1]+w
+                                                                , p0[0]+r, p0[1]-w
+                                                                , p0[0]-r, p0[1]+w])
+              drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+              drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
+                                                              ,p0[0], p0[1]
+                                                              ,p0[0], p0[1]
+                                                              ,p0[0], p0[1]])
+              index += 4
+              drawList.numVertices += 4
 
-          if symbolType == 0:
-            # draw a cross
-            # keep the cross square at 0.1ppm
-            drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
-            drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
-                                                              , p0[0]+r, p0[1]+w
-                                                              , p0[0]+r, p0[1]-w
-                                                              , p0[0]-r, p0[1]+w])
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
-            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
-                                                            ,p0[0], p0[1]
-                                                            ,p0[0], p0[1]
-                                                            ,p0[0], p0[1]])
-            index += 4
-            drawList.numVertices += 4
+            if symbolType == 1 or symbolType == 2:  # draw an ellipse at lineWidth
+              if lineWidths[0] and lineWidths[1]:
 
-          if symbolType == 1 or symbolType == 2:  # draw an ellipse at lineWidth
-            if lineWidths[0] and lineWidths[1]:
+                # draw 24 connected segments
+                r = 0.5 * lineWidths[0] / frequency[0]
+                w = 0.5 * lineWidths[1] / frequency[1]
+                numPoints = 24
+                angPlus = 2 * np.pi
+                skip = 1
+              else:
+                # draw 12 disconnected segments (dotted)
+                r = symbolWidth
+                w = symbolWidth
+                numPoints = 12
+                angPlus = 1.0 * np.pi
+                skip = 2
 
-              # draw 24 connected segments
-              r = 0.5 * lineWidths[0] / frequency[0]
-              w = 0.5 * lineWidths[1] / frequency[1]
-              numPoints = 24
-              angPlus = 2 * np.pi
-              skip = 1
-            else:
-              # draw 12 disconnected segments (dotted)
-              r = symbolWidth
-              w = symbolWidth
-              numPoints = 12
-              angPlus = 1.0 * np.pi
-              skip = 2
+              # draw an ellipse at lineWidth
+              ang = list(range(numPoints))
+              drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
+              drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(skip*an*angPlus/numPoints)
+                                                                , p0[1]-w*math.cos(skip*an*angPlus/numPoints)
+                                                                , p0[0]-r*math.sin((skip*an+1)*angPlus/numPoints)
+                                                                , p0[1]-w*math.cos((skip*an+1)*angPlus/numPoints)] for an in ang])
+              drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
+              drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
+              index += (numPoints * 2)
+              drawList.numVertices += (numPoints * 2)
 
-            # draw an ellipse at lineWidth
-            ang = list(range(numPoints))
-            drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
-            drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(skip*an*angPlus/numPoints)
-                                                              , p0[1]-w*math.cos(skip*an*angPlus/numPoints)
-                                                              , p0[0]-r*math.sin((skip*an+1)*angPlus/numPoints)
-                                                              , p0[1]-w*math.cos((skip*an+1)*angPlus/numPoints)] for an in ang])
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
-            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
-            index += (numPoints * 2)
-            drawList.numVertices += (numPoints * 2)
-
-            # TODO:ED filled ellipse
+              # TODO:ED filled ellipse
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -1310,42 +1313,45 @@ void main()
         for peak in pls.peaks:
 
           # get the correct coordinates based on the axisCodes
-          p0 = [0.0] * len(self.axisOrder)
-          for ps, psCode in enumerate(self.axisOrder):
+          p0 = [0.0] * 2            #len(self.axisOrder)
+          axisCount = 0
+          for ps, psCode in enumerate(self.axisOrder[0:2]):
             for pp, ppCode in enumerate(peak.axisCodes):
               if ppCode == psCode:
                 p0[ps] = peak.position[pp]
+                axisCount += 1
 
-          # TODO:ED display the required peaks
-          strip = spectrumView.strip
-          _isInPlane = strip.peakIsInPlane(peak)
-          if not _isInPlane:
-            _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-          else:
-            _isInFlankingPlane = None
+          if axisCount == 2:
+            # TODO:ED display the required peaks
+            strip = spectrumView.strip
+            _isInPlane = strip.peakIsInPlane(peak)
+            if not _isInPlane:
+              _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+            else:
+              _isInFlankingPlane = None
 
-          if not _isInPlane and not _isInFlankingPlane:
-            continue
+            if not _isInPlane and not _isInFlankingPlane:
+              continue
 
-          colour = pls.textColour
-          colR = int(colour.strip('# ')[0:2], 16)/255.0
-          colG = int(colour.strip('# ')[2:4], 16)/255.0
-          colB = int(colour.strip('# ')[4:6], 16)/255.0
+            colour = pls.textColour
+            colR = int(colour.strip('# ')[0:2], 16)/255.0
+            colG = int(colour.strip('# ')[2:4], 16)/255.0
+            colB = int(colour.strip('# ')[4:6], 16)/255.0
 
-          if self.peakLabelling == 0:
-            text = _getScreenPeakAnnotation(peak, useShortCode=False)
-          elif self._parentWidget().strip.peakLabelling == 1:
-            text = _getScreenPeakAnnotation(peak, useShortCode=True)
-          else:
-            text = _getPeakAnnotation(peak)  # original 'pid'
+            if self.peakLabelling == 0:
+              text = _getScreenPeakAnnotation(peak, useShortCode=False)
+            elif self._parentWidget().strip.peakLabelling == 1:
+              text = _getScreenPeakAnnotation(peak, useShortCode=True)
+            else:
+              text = _getPeakAnnotation(peak)  # original 'pid'
 
-          # TODO:ED check axisCodes and ordering
-          drawList.stringList.append(GLString(text=text
-                                      , font=self.firstFont
-                                      , x=p0[0], y=p0[1]
-                                      # , x=self._screenZero[0], y=self._screenZero[1]
-                                      , color=(colR, colG, colB, 1.0), GLContext=self
-                                      , pid=peak.pid))
+            # TODO:ED check axisCodes and ordering
+            drawList.stringList.append(GLString(text=text
+                                        , font=self.firstFont
+                                        , x=p0[0], y=p0[1]
+                                        # , x=self._screenZero[0], y=self._screenZero[1]
+                                        , color=(colR, colG, colB, 1.0), GLContext=self
+                                        , pid=peak.pid))
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -2073,20 +2079,18 @@ void main()
       self.mouseFormat = " %s: %.3f  %s: %.4g"
 
   def drawMouseCoords(self):
-    # newCoords = " "+str(self._isSHIFT)+str(self._isCTRL)+str(self._key)+"\n "\
-    #           +str(round(self.cursorCoordinate[0], 3))\
-    #           +"\n "+str(round(self.cursorCoordinate[1], 3))
+    if self._widthsChangedEnough(self.cursorCoordinate, self._mouseCoords):
 
-    newCoords = self.mouseFormat % (self._axisOrder[0], self.cursorCoordinate[0], self._axisOrder[1], self.cursorCoordinate[1])
+      newCoords = self.mouseFormat % (self._axisOrder[0], self.cursorCoordinate[0]
+                                      , self._axisOrder[1], self.cursorCoordinate[1])
 
-    if newCoords != self._mouseCoords:
       self.mouseString = GLString(text=newCoords
                                   , font=self.firstFont
                                   , x=self.cursorCoordinate[0], y=self.cursorCoordinate[1]
                                   # self._screenZero[0], y=self._screenZero[1]
                                   , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
                                   , pid=None)
-      self._mouseCoords = newCoords
+      self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
     # draw the mouse coordinates to the screen
     self.mouseString.drawTextArray()
@@ -2730,7 +2734,7 @@ class CcpnGLFont():
 
               # calculate the coordinated within the texture
               x = a0#+0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
-              y = b0-0.1           # self.fontGlyph[chrNum][GlyphYpos])
+              y = b0-0.005           # self.fontGlyph[chrNum][GlyphYpos])
               px = e0           # self.fontGlyph[chrNum][GlyphXoffset]
               py = f0           # self.fontGlyph[chrNum][GlyphYoffset]
               w = c0#-1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
@@ -2984,7 +2988,7 @@ class GLViewports(object):
       wi = setVal(thisView[3], w, h, l)
       he = setVal(thisView[4], w, h, 0)
 
-      GL.glViewport(l, b, wi, he)
+      GL.glViewport(l, b-1, wi, he)
                     # , w-thisView[3]-thisView[1], h-thisView[4]-thisView[2])
     else:
       raise RuntimeError('Error: viewport %s does not exist' % name)

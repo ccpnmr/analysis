@@ -178,7 +178,7 @@ class GuiStripNd(GuiStrip):
     #   self._widgets.append(layout.takeAt(0).widget())
     # self._widgets.insert(currentIndex, self)
 
-    self._printWidgets(self)
+    # self._printWidgets(self)
 
     # self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
     self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)

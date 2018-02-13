@@ -515,6 +515,24 @@ class GuiSpectrumDisplay(CcpnModule):
 
       self.setColumnStretches(True)
 
+  def increaseStripWidth(self):
+    currentWidth = self.strips[0].width() * (100.0+self.application.preferences.general.stripWidthZoomPercent) / 100.0
+    for strip in self.strips:
+      strip.hide()
+      strip.setMinimumWidth(currentWidth)
+      strip.show()
+
+  def decreaseStripWidth(self):
+    currentWidth = self.strips[0].width() * 100.0 / (100.0+self.application.preferences.general.stripWidthZoomPercent)
+    for strip in self.strips:
+      strip.hide()
+      strip.setMinimumWidth(currentWidth)
+      strip.show()
+
+    # cols = self.stripFrame.layout().columnCount()
+    # for col in range(cols):
+    #   self.stripFrame.layout().setColumnMinimumWidth(col, 50)
+
   def addStrip(self) -> 'GuiStripNd':
     """
     Creates a new strip by cloning strip with index (default the last) in the display.
@@ -559,6 +577,7 @@ class GuiSpectrumDisplay(CcpnModule):
     if widgets:
       thisLayout = self.stripFrame.layout()
       thisLayoutWidth = self.stripFrame.width()
+      firstStripWidth = thisLayout.itemAt(0).widget().width()
 
       # TODO:ED doesn't update when resizing
       if not self.lastAxisOnly or True:
@@ -570,6 +589,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         for col in range(0, maxCol+1):
           thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
+          thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
       else:
         maxCol = 0
         for wid in widgets[1:]:
@@ -581,7 +601,10 @@ class GuiSpectrumDisplay(CcpnModule):
         endWidth = leftWidth + AXIS_WIDTH
         for col in range(0, maxCol):
           thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
+          thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
+
         thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
+        thisLayout.itemAt(maxCol).widget().setMinimumWidth(firstStripWidth)
 
   def resetYZooms(self):
     """Zooms Y axis of current strip to show entire region"""

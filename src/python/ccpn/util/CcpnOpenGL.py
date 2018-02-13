@@ -215,6 +215,9 @@ class CcpnGLWidget(QOpenGLWidget):
     self._peakLabelling = self._preferences.annotationType
     self._gridVisible = self._preferences.showGrid
 
+    # set a minimum size so that the strips resize nicely
+    self.setMinimumSize(150, 150)
+
   def close(self):
     self._GLSignals.externalXAxisChanged.disconnect()
     self._GLSignals.externalYAxisChanged.disconnect()

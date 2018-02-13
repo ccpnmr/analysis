@@ -168,6 +168,33 @@ class GuiStripNd(GuiStrip):
 
     self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
 
+    self.setMinimumWidth(50)
+    self.setMinimumHeight(150)
+
+    # self.planeToolbar.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
+
+    # self._widgets = []
+    # while layout.count():  # clear the layout and store
+    #   self._widgets.append(layout.takeAt(0).widget())
+    # self._widgets.insert(currentIndex, self)
+
+    self._printWidgets(self)
+
+    # self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
+    self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
+
+  def _printWidgets(self, wid, level=0):
+    try:
+      print ('  ' * level, '>>>', wid)
+      layout = wid.layout()
+
+      for ww in range(layout.count()):
+        wid = layout.itemAt(ww).widget()
+        self._printWidgets(wid, level+1)
+        wid.setMinimumWidth(10)
+    except Exception as es:
+      pass
+
   def _rebuildStripContours(self):
     # TODO:ED need to rebuild the contours here
 

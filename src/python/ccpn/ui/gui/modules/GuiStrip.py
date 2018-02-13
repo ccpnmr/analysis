@@ -84,12 +84,12 @@ class GuiStrip(Frame):
     #self.setContentsMargins(5, 0, 5, 0)
     self.setContentsMargins(0, 0, 0, 0)
     #self.setMinimumWidth(250)
-    self.setMinimumWidth(75)
+    self.setMinimumWidth(50)
     self.setMinimumHeight(150)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
     #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
-    self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+    self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
     # GWV: plotWidget appears not to be responsive to contentsMargins
     self.plotWidget.setContentsMargins(10, 30, 10, 30)
     self.getLayout().addWidget(self.plotWidget, 1, 0)
@@ -107,7 +107,8 @@ class GuiStrip(Frame):
 
       self._testCcpnOpenGLWidget = CcpnGLWidget(parent=self, mainWindow=self.mainWindow)
       self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)    # (3,0) if not hiding plotWidget
-      self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+      self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding
+                                               , QtWidgets.QSizePolicy.Expanding)
 
       # set the ID label in the new widget
       self._testCcpnOpenGLWidget.stripIDLabel = '.'.join(self.id.split('.'))
@@ -233,6 +234,10 @@ class GuiStrip(Frame):
       self._testCcpnOpenGLWidget.setGridVisible(self.application.preferences.general.showGrid)
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
+
+    self._stripToolBarWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
+    self._labelWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+    self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
     self.show()
 

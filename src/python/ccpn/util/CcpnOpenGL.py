@@ -1227,11 +1227,13 @@ void main()
           # get the correct coordinates based on the axisCodes
           p0 = [0.0] * len(self.axisOrder)
           lineWidths = [0.0] * len(self.axisOrder)
+          frequency = [0.0] * len(self.axisOrder)
           for ps, psCode in enumerate(self.axisOrder):
             for pp, ppCode in enumerate(peak.axisCodes):
               if ppCode == psCode:
                 p0[ps] = peak.position[pp]
                 lineWidths[ps] = peak.lineWidths[pp]
+                frequency[ps] = spectrumFrequency[pp]
 
           # p0 = (peak.position[self._axisOrder[0]], peak.position[self._axisOrder[1]])
 
@@ -1255,8 +1257,8 @@ void main()
             if lineWidths[0] and lineWidths[1]:
 
               # draw 24 connected segments
-              r = 0.5 * lineWidths[0] / spectrumFrequency[0]
-              w = 0.5 * lineWidths[1] / spectrumFrequency[1]
+              r = 0.5 * lineWidths[0] / frequency[0]
+              w = 0.5 * lineWidths[1] / frequency[1]
               numPoints = 24
               angPlus = 2 * np.pi
               skip = 1
@@ -1740,9 +1742,13 @@ void main()
 
         self._axisXLabelling.append(GLString(text=axisXText
                                   , font=self.firstFont
-                                  , angle=np.pi/2.0
-                                  , x=axisX-(10.0*self.pixelX) #*len(str(axisX)))
-                                  , y=AXIS_MARGINBOTTOM-AXIS_LINE
+                                  # , angle=np.pi/2.0
+                                  # , x=axisX-(10.0*self.pixelX) #*len(str(axisX)))
+                                  # , y=AXIS_MARGINBOTTOM-AXIS_LINE
+
+                                  , x=axisX-(0.4*self.firstFont.width*self.pixelX*len(axisXText)) #*len(str(axisX)))
+                                  , y=AXIS_MARGINBOTTOM-AXIS_LINE-self.firstFont.height
+
                                   , color=labelColour, GLContext=self
                                   , pid=None))
 
@@ -2471,11 +2477,21 @@ void main()
             index += 2
 
       # restrict the labelling to the maximum without overlap
-      for ll in labelling.keys():
-        lStrings = labelling[ll]
-        if len(lStrings) > 16:
-          #restrict
-          labelling[ll] = [ls for ls in lStrings if check(ls)]
+      while len(labelling['0']) > 6:
+        #restrict X axis labelling
+        lStrings = labelling['0']
+        if check(lStrings[0]):
+          labelling['0'] = lStrings[0::2]     # [ls for ls in lStrings if check(ls)]
+        else:
+          labelling['0'] = lStrings[1::2]     # [ls for ls in lStrings if check(ls)]
+
+      while len(labelling['1']) > 12:
+        #restrict Y axis labelling
+        lStrings = labelling['1']
+        if check(lStrings[0]):
+          labelling['1'] = lStrings[0::2]     # [ls for ls in lStrings if check(ls)]
+        else:
+          labelling['1'] = lStrings[1::2]     # [ls for ls in lStrings if check(ls)]
 
     return labelling, labelsChanged
 

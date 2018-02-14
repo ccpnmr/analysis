@@ -195,6 +195,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._oldStripIDLabel = None
     self.stripIDLabel = stripIDLabel if stripIDLabel else ''
     self.stripIDString = None
+    self._spectrumSettings = {}
 
     # TODO:ED fix this to get the correct colours
     if self._parent.spectrumDisplay.mainWindow.application.colourScheme == 'light':
@@ -244,18 +245,18 @@ class CcpnGLWidget(QOpenGLWidget):
     currentShader.setViewportMatrix(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, 0, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
-    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                            0.0, 1.0, 0.0, 0.0,
-                            0.0, 0.0, 1.0, 0.0,
-                            0.0, 0.0, 0.0, 1.0]     # set to identity matrix
-    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    #                         0.0, 1.0, 0.0, 0.0,
+    #                         0.0, 0.0, 1.0, 0.0,
+    #                         0.0, 0.0, 0.0, 1.0]     # set to identity matrix
+    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
     # map mouse coordinates to world coordinates - only needs to change on resize, move soon
     currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
                                            self.axisT, -1.0, 1.0)
 
     self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))     # projection
-    self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))   # modelView
+    # self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))   # modelView
     self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))     # viewport
     self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
 
@@ -294,6 +295,34 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # TODO:ED marks and horizontal/vertical traces
     self._rescaleOverlayText()
+
+  def rescaleSpectra(self):
+    # rescale the matrices each spectrumView
+    for spectrumView in self._parent.spectrumViews:
+      self._spectrumSettings[spectrumView] = {}
+
+      self._spectrumValues = spectrumView._getValues()
+      # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
+      # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
+
+      dx = self.sign(self.axisR - self.axisL)
+      dy = self.sign(self.axisT - self.axisB)
+
+      # get the bounding box of the spectra
+      fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+      fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+      dxAF = fx0 - fx1
+      dyAF = fy0 - fy1
+      xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
+      yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+
+      # create modelview matrix for the spectrum to be drawn
+      self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
+
+      self._spectrumSettings[spectrumView][SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
+                                                                     0.0, yScale, 0.0, 0.0,
+                                                                     0.0, 0.0, 1.0, 0.0,
+                                                                     fx0, fy0, 0.0, 1.0]
 
   def resizeGL(self, w, h):
     self.w = w
@@ -865,6 +894,12 @@ void main()
     self._uMVMatrix = np.zeros((16,), dtype=np.float32)
     self._uVMatrix = np.zeros((16,), dtype=np.float32)
     self._aMatrix = np.zeros((16,), dtype=np.float32)
+    self._IMatrix = np.zeros((16,), dtype=np.float32)
+    self._IMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                           0.0, 1.0, 0.0, 0.0,
+                           0.0, 0.0, 1.0, 0.0,
+                           0.0, 0.0, 0.0, 1.0]
+
     self._useTexture = np.zeros((1,), dtype=np.int)
     self._axisScale = np.zeros((4,), dtype=np.float32)
     self._background = np.zeros((4,), dtype=np.float32)
@@ -1234,11 +1269,20 @@ void main()
           axisCount = 0
           for ps, psCode in enumerate(self.axisOrder[0:2]):
             for pp, ppCode in enumerate(peak.axisCodes):
-              if ppCode == psCode:
-                p0[ps] = peak.position[pp]
-                lineWidths[ps] = peak.lineWidths[pp]
-                frequency[ps] = spectrumFrequency[pp]
-                axisCount += 1
+
+              if self._preferences.matchAxisCode == 0:  # default - match atom type
+                if ppCode[0] == psCode[0]:
+                  p0[ps] = peak.position[pp]
+                  lineWidths[ps] = peak.lineWidths[pp]
+                  frequency[ps] = spectrumFrequency[pp]
+                  axisCount += 1
+
+              elif self._preferences.matchAxisCode == 1:  # match full code
+                if ppCode == psCode:
+                  p0[ps] = peak.position[pp]
+                  lineWidths[ps] = peak.lineWidths[pp]
+                  frequency[ps] = spectrumFrequency[pp]
+                  axisCount += 1
 
           if axisCount != 2:
             getLogger().debug('Bad peak.axisCodes: %s - %s' % (peak.pid, peak.axisCodes))
@@ -1317,9 +1361,16 @@ void main()
           axisCount = 0
           for ps, psCode in enumerate(self.axisOrder[0:2]):
             for pp, ppCode in enumerate(peak.axisCodes):
-              if ppCode == psCode:
-                p0[ps] = peak.position[pp]
-                axisCount += 1
+
+              if self._preferences.matchAxisCode == 0:  # default - match atom type
+                if ppCode[0] == psCode[0]:
+                  p0[ps] = peak.position[pp]
+                  axisCount += 1
+
+              elif self._preferences.matchAxisCode == 1:  # match full code
+                if ppCode == psCode:
+                  p0[ps] = peak.position[pp]
+                  axisCount += 1
 
           if axisCount == 2:
             # TODO:ED display the required peaks
@@ -1338,9 +1389,9 @@ void main()
             colG = int(colour.strip('# ')[2:4], 16)/255.0
             colB = int(colour.strip('# ')[4:6], 16)/255.0
 
-            if self.peakLabelling == 0:
+            if self._parent.peakLabelling == 0:
               text = _getScreenPeakAnnotation(peak, useShortCode=False)
-            elif self._parentWidget().strip.peakLabelling == 1:
+            elif self._parent.peakLabelling == 1:
               text = _getScreenPeakAnnotation(peak, useShortCode=True)
             else:
               text = _getPeakAnnotation(peak)  # original 'pid'
@@ -1444,6 +1495,7 @@ void main()
     # draw the spectra, need to reset the viewport
     self.viewports.setViewport('mainView')
     self.drawSpectra()
+    self.drawPeakLists()
 
     # change to the text shader
     currentShader = self._shaderProgramTex.makeCurrent()
@@ -1455,7 +1507,9 @@ void main()
     currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
 
     self.enableTexture()
-    self.drawLabels()
+
+    # self.drawLabels()
+    self.drawPeakListLabels()
 
     # # draw test string
     # for tt in self._testStrings:
@@ -1486,11 +1540,12 @@ void main()
     currentShader.setProjectionAxes(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, -1, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
     self.viewports.setViewport('mainView')
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
-    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0,
-                             0.0, 0.0, 0.0, 1.0]
-    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+
+    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    #                          0.0, 1.0, 0.0, 0.0,
+    #                          0.0, 0.0, 1.0, 0.0,
+    #                          0.0, 0.0, 0.0, 1.0]
+    currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
     # cheat for the moment
     if self.highlighted:
@@ -1537,120 +1592,162 @@ void main()
     if self._parent.isDeleted:
       return
 
-    self._spectrumSettings = {}
+    # self._spectrumSettings = {}
     for spectrumView in self._parent.spectrumViews:
-      try:
 
-        self._spectrumSettings[spectrumView] = {}
+      if spectrumView.buildContours:
+        spectrumView.buildContours = False  # set to false, as we have rebuilt
 
-        if spectrumView.buildContours:
-          spectrumView._buildContours(None)  # need to trigger these changes now
-          spectrumView.buildContours = False  # set to false, as we have rebuilt
+        # flag the peaks for rebuilding
+        spectrumView.buildPeakLists = True
+        spectrumView.buildPeakListLabels = True
 
-          # TODO:ED check how to efficiently trigger a rebuild of the peaklists
-          if spectrumView.spectrum.pid in self._GLPeakLists.keys():
-            self._GLPeakLists[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
-          if spectrumView.spectrum.pid in self._GLPeakListLabels.keys():
-            self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+        # rebuild the contours
+        spectrumView._buildContours(None)
+
+        # # TODO:ED check how to efficiently trigger a rebuild of the peaklists
+        # if spectrumView.spectrum.pid in self._GLPeakLists.keys():
+        #   self._GLPeakLists[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+        # if spectrumView.spectrum.pid in self._GLPeakListLabels.keys():
+        #   self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+
+    self.rescaleSpectra()
 
         # build spectrum settings for speed
 
-        self._spectrumValues = spectrumView._getValues()
-        # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
-        # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
+      # # should be in resize
+      # self._spectrumValues = spectrumView._getValues()
+      # # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
+      # # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
+      #
+      # dx = self.sign(self.axisR - self.axisL)
+      # dy = self.sign(self.axisT - self.axisB)
+      #
+      # # get the bounding box of the spectra
+      # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+      # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+      # dxAF = fx0 - fx1
+      # dyAF = fy0 - fy1
+      # xScale = dx*dxAF/self._spectrumValues[0].totalPointCount
+      # yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
+      #
+      # # create modelview matrix for the spectrum to be drawn
+      #
+      # self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
+      #
+      # self._spectrumSettings[spectrumView][SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
+      #                                                                0.0, yScale, 0.0, 0.0,
+      #                                                                0.0, 0.0, 1.0, 0.0,
+      #                                                                fx0, fy0, 0.0, 1.0]
 
-        dx = self.sign(self.axisR - self.axisL)
-        dy = self.sign(self.axisT - self.axisB)
+      # if spectrumView.buildPeakLists:
+      #   # spectrumView._buildContours(None)  # need to trigger these changes now
+      #   spectrumView.buildPeakLists = False  # set to false, as we have rebuilt
+      #
+      #   if spectrumView.spectrum.pid in self._GLPeakLists.keys():
+      #     self._GLPeakLists[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+      #   if spectrumView.spectrum.pid in self._GLPeakListLabels.keys():
+      #     self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+      #
+      #   self._buildPeakLists(spectrumView)  # should include rescaling
 
-        # get the bounding box of the spectra
-        fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-        fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
-        dxAF = fx0 - fx1
-        dyAF = fy0 - fy1
-        xScale = dx*dxAF/self._spectrumValues[0].totalPointCount
-        yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
-
-        # create modelview matrix for the spectrum to be drawn
-
-        self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
-
-        self._spectrumSettings[spectrumView][SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
-                                                                       0.0, yScale, 0.0, 0.0,
-                                                                       0.0, 0.0, 1.0, 0.0,
-                                                                       fx0, fy0, 0.0, 1.0]
-
-        self._buildPeakLists(spectrumView)  # should include rescaling
-
-      except Exception as es:
-        raise es
-
-  def drawSpectra(self):
-    self.buildSpectra()
-
+  def buildPeakLists(self):
     if self._parent.isDeleted:
       return
 
+    for spectrumView in self._parent.spectrumViews:
+
+      if spectrumView.buildPeakLists:
+        spectrumView.buildPeakLists = False
+
+        if spectrumView.spectrum.pid in self._GLPeakLists.keys():
+          self._GLPeakLists[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+
+        self._buildPeakLists(spectrumView)  # should include rescaling
+
+  def buildPeakListLabels(self):
+    if self._parent.isDeleted:
+      return
+
+    for spectrumView in self._parent.spectrumViews:
+
+      if spectrumView.buildPeakListLabels:
+        spectrumView.buildPeakListLabels = False
+
+        if spectrumView.spectrum.pid in self._GLPeakListLabels.keys():
+          self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+
+        self._buildPeakListLabels(spectrumView)  # should include rescaling
+
+  def drawPeakLists(self):
+    if self._parent.isDeleted:
+      return
+
+    self.buildPeakLists()
+
     lineThickness = self._preferences.peakSymbolThickness
+
+    GL.glDisable(GL.GL_BLEND)
+    for spectrumView in self._parent.spectrumViews:
+
+      GL.glLineWidth(lineThickness)
+      self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
+      GL.glLineWidth(1.0)
+
+  def drawLabels(self):
+    if self._parent.isDeleted:
+      return
+
+    for spectrumView in self._parent.spectrumViews:
+
+      if spectrumView.buildPeakListLabels:
+        spectrumView.buildPeakListLabels = False
+
+        self._buildPeakListLabels(spectrumView)      # should include rescaling
+
+      self._drawPeakListLabels(spectrumView)
+
+  def drawPeakListLabels(self):
+    if self._parent.isDeleted:
+      return
+
+    self.buildPeakListLabels()
+
+    for spectrumView in self._parent.spectrumViews:
+      self._drawPeakListLabels(spectrumView)
+
+  def drawSpectra(self):
+    if self._parent.isDeleted:
+      return
+
+    self.buildSpectra()
 
     GL.glLineWidth(1.0)
     GL.glDisable(GL.GL_BLEND)
 
     for spectrumView in self._parent.spectrumViews:
-      try:
-        # # could put a signal on buildContours
-        #
-        # # if spectrumView.buildContours:
-        # #   spectrumView._buildContours(None)  # need to trigger these changes now
-        # #   spectrumView.buildContours = False  # set to false, as we have rebuilt
-        #
-        #   # set to True and update() will rebuild the contours
-        #   # can be done with a call to self.rebuildContours()
-        #
-        # self._spectrumValues = spectrumView._getValues()
-        # # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
-        # # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
-        #
-        # dx = self.sign(self.axisR - self.axisL)
-        # dy = self.sign(self.axisT - self.axisB)
-        #
-        # # get the bounding box of the spectra
-        # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-        # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
-        # dxAF = fx0 - fx1
-        # dyAF = fy0 - fy1
-        # xScale = dx*dxAF/self._spectrumValues[0].totalPointCount
-        # yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
-        #
-        # # create modelview matrix for the spectrum to be drawn
-        # self._uMVMatrix[0:16] = [xScale, 0.0, 0.0, 0.0,
-        #                          0.0, yScale, 0.0, 0.0,
-        #                          0.0, 0.0, 1.0, 0.0,
-        #                          fx0, fy0, 0.0, 1.0]
-        # self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
-        # set the scale matrix
-        self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
-                                                   , 1, GL.GL_FALSE
-                                                   , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
+      # set the scale matrix
+      self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
+                                                 , 1, GL.GL_FALSE
+                                                 , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
-        # draw the spectrum - call the existing glCallList
-        spectrumView._paintContoursNoClip()
+      # draw the spectrum - call the existing glCallList
+      spectrumView._paintContoursNoClip()
 
-        # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
-        #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW
-        #
-        #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
-
-      except Exception as es:
-        raise es
+      # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
+      #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW
+      #
+      #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
     # reset the modelview matrix
-    self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0,
-                             0.0, 0.0, 1.0, 0.0,
-                             0.0, 0.0, 0.0, 1.0]
-    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+    #                          0.0, 1.0, 0.0, 0.0,
+    #                          0.0, 0.0, 1.0, 0.0,
+    #                          0.0, 0.0, 0.0, 1.0]
+    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
+    # draw the bounding boxes
     GL.glEnable(GL.GL_BLEND)
     for spectrumView in self._parent.spectrumViews:
       try:
@@ -1679,9 +1776,9 @@ void main()
 
         # self._buildPeakLists(spectrumView)      # should include rescaling
 
-        GL.glLineWidth(lineThickness)
-        self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
-        GL.glLineWidth(1.0)
+        # GL.glLineWidth(lineThickness)
+        # self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
+        # GL.glLineWidth(1.0)
         # self._drawPeakListVertices(spectrumView)
 
         # self._buildPeakListLabels(spectrumView)      # should include rescaling
@@ -1820,18 +1917,6 @@ void main()
 
   def drawMarks(self):
     pass
-
-  def drawLabels(self):
-    if self._parent.isDeleted:
-      return
-
-    for spectrumView in self._parent.spectrumViews:
-      try:
-        self._buildPeakListLabels(spectrumView)      # should include rescaling
-        self._drawPeakListLabels(spectrumView)
-
-      except Exception as es:
-        raise es
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # new bit

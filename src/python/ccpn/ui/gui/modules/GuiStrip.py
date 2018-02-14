@@ -585,6 +585,10 @@ class GuiStrip(Frame):
           if peakListView:
             peakListView._changedPeakListView()
 
+        # new for the OpenGL widget - emit a signal?
+        sV.buildPeakLists = True
+        sV.buildPeakListLabels = True
+
   def _crosshairCode(self, axisCode):
     # determines what axisCodes are compatible as far as drawing crosshair is concerned
     # TBD: the naive approach below should be improved

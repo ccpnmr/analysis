@@ -67,19 +67,20 @@ GLREFRESHMODE_NEVER = 0
 GLREFRESHMODE_ALWAYS = 1
 GLREFRESHMODE_REBUILD = 2
 
-GLSOURCE = 'source'
-GLAXISVALUES = 'axisValues'
-GLMOUSECOORDS = 'mouseCoords'
-GLMOUSEMOVEDDICT = 'mouseMovedict'
-GLSPECTRUMDISPLAY = 'spectrumDisplay'
-GLBOTTOMAXISVALUE = 'bottomAxis'
-GLTOPAXISVALUE = 'topAxis'
-GLLEFTAXISVALUE = 'leftAxis'
-GLRIGHTAXISVALUE = 'rightAxis'
-updateContours = False, updatePeakLists = False, updatePeakListLabels = False,
-updateGrid = False, updateAxes = False, updateCursor = False, updateAny = False):
-
 SPECTRUM_MATRIX = 'spectrumMatrix'
+
+MAINVIEW = 'mainView'
+MAINVIEWFULLWIDTH = 'mainViewFullWidth'
+MAINVIEWFULLHEIGHT = 'mainViewFullHeight'
+RIGHTAXIS = 'rightAxis'
+RIGHTAXISBAR = 'rightAxisBar'
+FULLRIGHTAXIS = 'fullRightAxis'
+FULLRIGHTAXISBAR = 'fullRightAxisBar'
+BOTTOMAXIS = 'bottomAxis'
+BOTTOMAXISBAR = 'bottomAxisBar'
+FULLBOTTOMAXIS = 'fullBottomAxis'
+FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
+FULLVIEW = 'fullView'
 
 
 def singleton(cls):
@@ -108,75 +109,86 @@ def singleton(cls):
 
 
 @singleton
-class GLSignalClass(QtWidgets.QWidget):
+class GLNotifier(QtWidgets.QWidget):
   """
   Class to control the communication between different strips
   """
-  externalXAxisChanged = pyqtSignal(dict)
-  externalYAxisChanged = pyqtSignal(dict)
-  externalAllAxesChanged = pyqtSignal(dict)
-  externalMouseMoved = pyqtSignal(dict)
-  externalPeakListChange = pyqtSignal(dict)
+  GLSOURCE = 'source'
+  GLAXISVALUES = 'axisValues'
+  GLMOUSECOORDS = 'mouseCoords'
+  GLMOUSEMOVEDDICT = 'mouseMovedict'
+  GLSPECTRUMDISPLAY = 'spectrumDisplay'
+  GLBOTTOMAXISVALUE = 'bottomAxis'
+  GLTOPAXISVALUE = 'topAxis'
+  GLLEFTAXISVALUE = 'leftAxis'
+  GLRIGHTAXISVALUE = 'rightAxis'
+  GLCONTOURS = 'updateContours'
+  GLPEAKLISTS = 'GLupdatePeakLists'
+  GLPEAKLISTLABELS = 'GLupdatePeakListLabels'
+  GLGRID = 'GLupdateGrid'
+  GLAXES = 'GLupdateAxes'
+  GLCURSOR = 'GLupdateCursor'
+  GLANY = 'GLupdateAny'
+  GLVALUES = 'glValues'
 
-  def __init__(self):
-    super(GLSignalClass, self).__init__()
+  _triggerKeywords = (GLANY, GLAXES, GLCONTOURS, GLCURSOR, GLGRID, GLPEAKLISTS, GLPEAKLISTLABELS)
 
-  def emitBuildContours(self):
-    pass
+  glXAxisChanged = pyqtSignal(dict)
+  glYAxisChanged = pyqtSignal(dict)
+  glAllAxesChanged = pyqtSignal(dict)
+  glMouseMoved = pyqtSignal(dict)
+  glEvent = pyqtSignal(dict)
 
-  def emitBuildPeakLists(self):
-    pass
+  def __init__(self, parent=None, strip=None):
+    super(GLNotifier, self).__init__()
+    self._parent = parent
+    self._strip = strip
 
-  def emitEvent(self, source=None, display=None,
-                updateContours=False, updatePeakLists=False, updatePeakListLabels=False,
-                updateGrid=False, updateAxes=False, updateCursor=False, updateAny=False):
-    aDict = {GLSOURCE: source,
-              GLSPECTRUMDISPLAY: display,
-              GLAXISVALUES: {GLBOTTOMAXISVALUE: axisB,
-                              GLTOPAXISVALUE: axisT,
-                              GLLEFTAXISVALUE: axisL,
-                              GLRIGHTAXISVALUE: axisR}
+  def emitEvent(self, source=None, display=None, updateList=[]):
+    aDict = {GLNotifier.GLSOURCE: source,
+             GLNotifier.GLSPECTRUMDISPLAY: display,
+             GLNotifier.GLVALUES: tuple(updateList)
              }
-    self.externalAllAxesChanged.emit(aDict)
+    self.glAllAxesChanged.emit(aDict)
 
   def emitAllAxesChanged(self, source=None, display=None,
                          axisB=None, axisT=None, axisL=None, axisR=None):
-    aDict = {GLSOURCE: source,
-              GLSPECTRUMDISPLAY: display,
-              GLAXISVALUES: {GLBOTTOMAXISVALUE: axisB,
-                              GLTOPAXISVALUE: axisT,
-                              GLLEFTAXISVALUE: axisL,
-                              GLRIGHTAXISVALUE: axisR}
+    aDict = {GLNotifier.GLSOURCE: source,
+             GLNotifier.GLSPECTRUMDISPLAY: display,
+             GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+                                       GLNotifier.GLTOPAXISVALUE: axisT,
+                                       GLNotifier.GLLEFTAXISVALUE: axisL,
+                                       GLNotifier.GLRIGHTAXISVALUE: axisR}
              }
-    self.externalAllAxesChanged.emit(aDict)
+    self.glAllAxesChanged.emit(aDict)
 
   def emitXAxisChanged(self, source=None, display=None,
                          axisB=None, axisT=None, axisL=None, axisR=None):
-    aDict = {GLSOURCE: source,
-              GLSPECTRUMDISPLAY: display,
-              GLAXISVALUES: {GLBOTTOMAXISVALUE: axisB,
-                              GLTOPAXISVALUE: axisT,
-                              GLLEFTAXISVALUE: axisL,
-                              GLRIGHTAXISVALUE: axisR}
+    aDict = {GLNotifier.GLSOURCE: source,
+             GLNotifier.GLSPECTRUMDISPLAY: display,
+             GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+                                       GLNotifier.GLTOPAXISVALUE: axisT,
+                                       GLNotifier.GLLEFTAXISVALUE: axisL,
+                                       GLNotifier.GLRIGHTAXISVALUE: axisR}
              }
-    self.externalXAxisChanged.emit(aDict)
+    self.glXAxisChanged.emit(aDict)
 
   def emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None):
-    aDict = { GLSOURCE: source,
-              GLMOUSECOORDS: coords,
-              GLMOUSEMOVEDDICT: mouseMovedDict }
-    self.externalMouseMoved.emit(aDict)
+    aDict = { GLNotifier.GLSOURCE: source,
+              GLNotifier.GLMOUSECOORDS: coords,
+              GLNotifier.GLMOUSEMOVEDDICT: mouseMovedDict }
+    self.glMouseMoved.emit(aDict)
 
   def emitYAxisChanged(self, source=None, display=None,
                          axisB=None, axisT=None, axisL=None, axisR=None):
-    aDict = {GLSOURCE: source,
-              GLSPECTRUMDISPLAY: display,
-              GLAXISVALUES: {GLBOTTOMAXISVALUE: axisB,
-                              GLTOPAXISVALUE: axisT,
-                              GLLEFTAXISVALUE: axisL,
-                              GLRIGHTAXISVALUE: axisR}
+    aDict = {GLNotifier.GLSOURCE: source,
+             GLNotifier.GLSPECTRUMDISPLAY: display,
+             GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+                                       GLNotifier.GLTOPAXISVALUE: axisT,
+                                       GLNotifier.GLLEFTAXISVALUE: axisL,
+                                       GLNotifier.GLRIGHTAXISVALUE: axisR}
              }
-    self.externalYAxisChanged.emit(aDict)
+    self.glYAxisChanged.emit(aDict)
 
 
 class CcpnGLWidget(QOpenGLWidget):
@@ -186,12 +198,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # flag to display paintGL but keep an empty screen
     self._blankDisplay = False
-
-    self.GLSignals = GLSignalClass()
-    self.GLSignals.externalXAxisChanged.connect(self._externalXAxisChanged)
-    self.GLSignals.externalYAxisChanged.connect(self._externalYAxisChanged)
-    self.GLSignals.externalAllAxesChanged.connect(self._externalAllAxesChanged)
-    self.GLSignals.externalMouseMoved.connect(self._externalMouseMoved)
 
     self._rightMenu = rightMenu
     if not parent:        # don't initialise if nothing there
@@ -246,10 +252,21 @@ class CcpnGLWidget(QOpenGLWidget):
     self._orderedAxes = None
     self._axisOrder = None
     self._axisCodes = None
-    
+    self._refreshMouse = False
+
     self._gridVisible = True
     self._crossHairVisible = True
     self._axesVisible = True
+
+    self._drawRightAxis = True
+    self._drawBottomAxis = True
+
+    # here for completeness, although they should be updated in rescale
+    self._currentView = MAINVIEW
+    self._currentRightAxisView = RIGHTAXIS
+    self._currentRightAxisBarView = RIGHTAXISBAR
+    self._currentBottomAxisView = BOTTOMAXIS
+    self._currentBottomAxisBarView = BOTTOMAXISBAR
 
     self._oldStripIDLabel = None
     self.stripIDLabel = stripIDLabel if stripIDLabel else ''
@@ -278,11 +295,19 @@ class CcpnGLWidget(QOpenGLWidget):
     # set a minimum size so that the strips resize nicely
     self.setMinimumSize(150, 100)
 
+    # set the pyqtsignal responders
+    self.GLSignals = GLNotifier(parent=self, strip=parent)
+    self.GLSignals.glXAxisChanged.connect(self._glXAxisChanged)
+    self.GLSignals.glYAxisChanged.connect(self._glYAxisChanged)
+    self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
+    self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
+    self.GLSignals.glEvent.connect(self._glEvent)
+
   def close(self):
-    self.GLSignals.externalXAxisChanged.disconnect()
-    self.GLSignals.externalYAxisChanged.disconnect()
-    self.GLSignals.externalAllAxesChanged.disconnect()
-    self.GLSignals.externalMouseMoved.disconnect()
+    self.GLSignals.glXAxisChanged.disconnect()
+    self.GLSignals.glYAxisChanged.disconnect()
+    self.GLSignals.glAllAxesChanged.disconnect()
+    self.GLSignals.glMouseMoved.disconnect()
 
   def rescale(self):
     """
@@ -299,10 +324,45 @@ class CcpnGLWidget(QOpenGLWidget):
     # set projection to axis coordinates
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                     self.axisT, -1.0, 1.0)
+    currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
     # needs to be offset from (0,0) for mouse scaling
-    currentShader.setViewportMatrix(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, 0, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
-    currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    if self._drawRightAxis and self._drawBottomAxis:
+
+      self._currentView = MAINVIEW
+      self._currentRightAxisView = RIGHTAXIS
+      self._currentRightAxisBarView = RIGHTAXISBAR
+      self._currentBottomAxisView = BOTTOMAXIS
+      self._currentBottomAxisBarView = BOTTOMAXISBAR
+
+      currentShader.setViewportMatrix(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, 0, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
+      self.pixelX = (self.axisR - self.axisL) / (w - AXIS_MARGINRIGHT)
+      self.pixelY = (self.axisT - self.axisB) / (h - AXIS_MARGINBOTTOM)
+    elif self._drawRightAxis and not self._drawBottomAxis:
+
+      self._currentView = MAINVIEWFULLHEIGHT
+      self._currentRightAxisView = FULLRIGHTAXIS
+      self._currentRightAxisBarView = FULLRIGHTAXISBAR
+
+      currentShader.setViewportMatrix(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
+      self.pixelX = (self.axisR - self.axisL) / (w - AXIS_MARGINRIGHT)
+      self.pixelY = (self.axisT - self.axisB) / h
+    elif not self._drawRightAxis and self._drawBottomAxis:
+
+      self._currentView = MAINVIEWFULLWIDTH
+      self._currentBottomAxisView = FULLBOTTOMAXIS
+      self._currentBottomAxisBarView = FULLBOTTOMAXISBAR
+
+      currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - AXIS_MARGINBOTTOM, -1.0, 1.0)
+      self.pixelX = (self.axisR - self.axisL) / w
+      self.pixelY = (self.axisT - self.axisB) / (h - AXIS_MARGINBOTTOM)
+    else:
+
+      self._currentView = FULLVIEW
+
+      currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
+      self.pixelX = (self.axisR - self.axisL) / w
+      self.pixelY = (self.axisT - self.axisB) / h
 
     # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
     #                         0.0, 1.0, 0.0, 0.0,
@@ -319,15 +379,11 @@ class CcpnGLWidget(QOpenGLWidget):
     self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))     # viewport
     self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
 
-    # calculate the size of the screen pixels in axis coordinates
-    self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
-    self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
-    self.pixelX = self._pointOne[0]-self._pointZero[0]
-    self.pixelY = self._pointOne[1]-self._pointZero[1]
-
-    self.pixelX = (self.axisR - self.axisL) / (w - AXIS_MARGINRIGHT)
-    self.pixelY = (self.axisT - self.axisB) / (h - AXIS_MARGINBOTTOM)
-
+    # # calculate the size of the screen pixels in axis coordinates
+    # self._pointZero = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([0,0,0,1]))
+    # self._pointOne = self._aMatrix.reshape((4, 4)).dot(self.vInv.dot([1,1,0,1]))
+    # self.pixelX = self._pointOne[0]-self._pointZero[0]
+    # self.pixelY = self._pointOne[1]-self._pointZero[1]
 
     self.modelViewMatrix = (GL.GLdouble * 16)()
     self.projectionMatrix = (GL.GLdouble * 16)()
@@ -446,6 +502,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     mx = event.pos().x()
     my = self.height() - event.pos().y()
+
     updateX = False
     updateY = False
 
@@ -484,6 +541,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                          axisL=self.axisL, axisR=self.axisR)
 
       self._rescaleAllAxes()
+      # self.buildMouseCoords(refresh=True)
 
       # spawn rebuild event for the grid
       for li in self.gridList:
@@ -510,6 +568,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                        axisL=self.axisL, axisR=self.axisR)
 
       self._rescaleXAxis()
+      # self.buildMouseCoords(refresh=True)
 
     elif between(mx, ra[0], ra[2]) and between(my, ra[1], ra[3]):
       # in the rightAxisBar
@@ -531,6 +590,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                        axisB=self.axisB, axisT=self.axisT,
                                        axisL=self.axisL, axisR=self.axisR)
       self._rescaleYAxis()
+      # self.buildMouseCoords(refresh=True)
 
     event.accept()
 
@@ -968,26 +1028,47 @@ void main()
     self.viewports = GLViewports()
 
     # TODO:ED error here when calulating the top offset, FOUND
-    self.viewports.addViewport('mainView', self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
+
+    # define the main viewports
+    self.viewports.addViewport(MAINVIEW, self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
                                                 , (-AXIS_MARGINRIGHT, 'w'), (-AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport('mainViewFullWidth', self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
+    self.viewports.addViewport(MAINVIEWFULLWIDTH, self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
                                                         , (0, 'w'), (-AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport('rightAxis', self, (-(AXIS_MARGINRIGHT+AXIS_LINE), 'w')
+    self.viewports.addViewport(MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a')
+                                                , (-AXIS_MARGINRIGHT, 'w'), (0, 'h'))
+
+    # define the viewports for the right axis bar
+    self.viewports.addViewport(RIGHTAXIS, self, (-(AXIS_MARGINRIGHT+AXIS_LINE), 'w')
                                                   , (AXIS_MARGINBOTTOM, 'a')
                                                   , (AXIS_LINE, 'a'), (-AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport('rightAxisBar', self, (-AXIS_MARGINRIGHT, 'w'), (AXIS_MARGINBOTTOM, 'a')
+    self.viewports.addViewport(RIGHTAXISBAR, self, (-AXIS_MARGINRIGHT, 'w'), (AXIS_MARGINBOTTOM, 'a')
                                                     , (0, 'w'), (-AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport('bottomAxis', self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
+    self.viewports.addViewport(FULLRIGHTAXIS, self, (-(AXIS_MARGINRIGHT+AXIS_LINE), 'w')
+                                                  , (0, 'a')
+                                                  , (AXIS_LINE, 'a'), (0, 'h'))
+
+    self.viewports.addViewport(FULLRIGHTAXISBAR, self, (-AXIS_MARGINRIGHT, 'w'), (0, 'a')
+                                                    , (0, 'w'), (0, 'h'))
+
+    # define the viewports for the bottom axis bar
+    self.viewports.addViewport(BOTTOMAXIS, self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
                                                   , (-AXIS_MARGINRIGHT, 'w'), (AXIS_LINE, 'a'))
 
-    self.viewports.addViewport('bottomAxisBar', self, (0, 'a'), (0, 'a')
+    self.viewports.addViewport(BOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
                                                     , (-AXIS_MARGINRIGHT, 'w'), (AXIS_MARGINBOTTOM, 'a'))
 
-    self.viewports.addViewport('fullView', self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
+    self.viewports.addViewport(FULLBOTTOMAXIS, self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
+                                                  , (0, 'w'), (AXIS_LINE, 'a'))
+
+    self.viewports.addViewport(FULLBOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
+                                                    , (0, 'w'), (AXIS_MARGINBOTTOM, 'a'))
+
+    # define the full viewport
+    self.viewports.addViewport(FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
 
     # def set2DProjection                GL.glViewport(0, 35, w - 35, h - 35)
     # def set2DProjectionRightAxis       GL.glViewport(w - 35 - axisLine, 35, axisLine, h - 35)
@@ -1086,7 +1167,10 @@ void main()
 
     # calculate mouse coordinate within the mainView
     self._mouseX = event.pos().x()
-    self._mouseY = self.height() - event.pos().y() - AXIS_MARGINBOTTOM
+    if self._drawBottomAxis:
+      self._mouseY = self.height() - event.pos().y() - AXIS_MARGINBOTTOM
+    else:
+      self._mouseY = self.height() - event.pos().y()
 
     # translate mouse to NDC
     vect = self.vInv.dot([self._mouseX, self._mouseY, 0.0, 1.0])
@@ -1530,7 +1614,7 @@ void main()
     self.drawGrid()
 
     # draw the spectra, need to reset the viewport
-    self.viewports.setViewport('mainView')
+    self.viewports.setViewport(self._currentView)
     self.drawSpectra()
     self.drawPeakLists()
 
@@ -1575,7 +1659,8 @@ void main()
     # use the current viewport matrix to display the last bit of the axes
     currentShader = self._shaderProgram1.makeCurrent()
     currentShader.setProjectionAxes(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, -1, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
-    self.viewports.setViewport('mainView')
+
+    self.viewports.setViewport(self._currentView)
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
 
     # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
@@ -1595,10 +1680,13 @@ void main()
     GL.glColor4f(*colour)
     GL.glBegin(GL.GL_LINES)
 
-    GL.glVertex2d(0,0)
-    GL.glVertex2d(w-AXIS_MARGINRIGHT, 0)
-    GL.glVertex2d(w-AXIS_MARGINRIGHT, 0)
-    GL.glVertex2d(w-AXIS_MARGINRIGHT, h-AXIS_MARGINBOTTOM)
+    if self._drawBottomAxis:
+      GL.glVertex2d(0,0)
+      GL.glVertex2d(w-AXIS_MARGINRIGHT, 0)
+
+    if self._drawRightAxis:
+      GL.glVertex2d(w-AXIS_MARGINRIGHT, 0)
+      GL.glVertex2d(w-AXIS_MARGINRIGHT, h-AXIS_MARGINBOTTOM)
 
     # GL.glVertex2d(-.1,0)
     # GL.glVertex2d(.1, 0)
@@ -1857,20 +1945,22 @@ void main()
     GL.glEnable(GL.GL_BLEND)
 
     if self._gridVisible:
-      self.viewports.setViewport('mainView')
+      self.viewports.setViewport(self._currentView)
       # self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
       self.gridList[0].drawIndexArray()
 
     if self._axesVisible:
-      # draw the grid marks for the right axis
-      self.viewports.setViewport('rightAxis')
-      # self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
-      self.gridList[1].drawIndexArray()
+      if self._drawRightAxis:
+        # draw the grid marks for the right axis
+        self.viewports.setViewport(self._currentRightAxisView)
+        # self._buildAxes(self.gridList[1], axisList=[1], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
+        self.gridList[1].drawIndexArray()
 
-      # draw the grid marks for the bottom axis
-      self.viewports.setViewport('bottomAxis')
-      # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
-      self.gridList[2].drawIndexArray()
+      if self._drawBottomAxis:
+        # draw the grid marks for the bottom axis
+        self.viewports.setViewport(self._currentBottomAxisView)
+        # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
+        self.gridList[2].drawIndexArray()
 
   def buildAxisLabels(self, refresh=False):
     # build axes labelling
@@ -1934,27 +2024,29 @@ void main()
     if self._axesVisible:
       self.buildAxisLabels()
 
-      # put the axis labels into the bottom bar
-      self.viewports.setViewport('bottomAxisBar')
-      self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
-      self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-      self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
-                                               AXIS_MARGINBOTTOM, -1.0, 1.0)
-      self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      if self._drawBottomAxis:
+        # put the axis labels into the bottom bar
+        self.viewports.setViewport(self._currentBottomAxisBarView)
+        self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
+        self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+        self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
+                                                 AXIS_MARGINBOTTOM, -1.0, 1.0)
+        self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
-      for lb in self._axisXLabelling:
-        lb.drawTextArray()
+        for lb in self._axisXLabelling:
+          lb.drawTextArray()
 
-      # put the axis labels into the right bar
-      self.viewports.setViewport('rightAxisBar')
-      self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
-      self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-      self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT
-                                               , self.axisB, self.axisT, -1.0, 1.0)
-      self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      if self._drawRightAxis:
+        # put the axis labels into the right bar
+        self.viewports.setViewport(self._currentRightAxisBarView)
+        self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
+        self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+        self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT
+                                                 , self.axisB, self.axisT, -1.0, 1.0)
+        self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
-      for lb in self._axisYLabelling:
-        lb.drawTextArray()
+        for lb in self._axisYLabelling:
+          lb.drawTextArray()
 
   def drawMarks(self):
     pass
@@ -2204,8 +2296,8 @@ void main()
     except:
       self.mouseFormat = " %s: %.3f  %s: %.4g"
 
-  def drawMouseCoords(self):
-    if self._widthsChangedEnough(self.cursorCoordinate, self._mouseCoords):
+  def buildMouseCoords(self, refresh=False):
+    if refresh or self._widthsChangedEnough(self.cursorCoordinate, self._mouseCoords):
 
       newCoords = self.mouseFormat % (self._axisOrder[0], self.cursorCoordinate[0]
                                       , self._axisOrder[1], self.cursorCoordinate[1])
@@ -2218,6 +2310,8 @@ void main()
                                   , pid=None)
       self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
+  def drawMouseCoords(self):
+    self.buildMouseCoords()
     # draw the mouse coordinates to the screen
     self.mouseString.drawTextArray()
 
@@ -2636,15 +2730,15 @@ void main()
     return (minDiff > tol) or (maxDiff > tol)
 
   @pyqtSlot(dict)
-  def _externalXAxisChanged(self, aDict):
+  def _glXAxisChanged(self, aDict):
     if self._parent.isDeleted:
       return
 
-    if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+    if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
 
       # match only the scale for the X axis
-      axisL = aDict[GLAXISVALUES][GLLEFTAXISVALUE]
-      axisR = aDict[GLAXISVALUES][GLRIGHTAXISVALUE]
+      axisL = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLLEFTAXISVALUE]
+      axisR = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLRIGHTAXISVALUE]
 
       if self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
         diff = (axisR - axisL) / 2.0
@@ -2705,15 +2799,15 @@ void main()
       self._rescaleYAxis(update=update)
 
   @pyqtSlot(dict)
-  def _externalYAxisChanged(self, aDict):
+  def _glYAxisChanged(self, aDict):
     if self._parent.isDeleted:
       return
 
-    if aDict[GLSOURCE] != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+    if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
 
       # match the Y axis
-      axisB = aDict[GLAXISVALUES][GLBOTTOMAXISVALUE]
-      axisT = aDict[GLAXISVALUES][GLTOPAXISVALUE]
+      axisB = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLBOTTOMAXISVALUE]
+      axisT = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLTOPAXISVALUE]
 
       if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]):
         self.axisB = axisB
@@ -2721,20 +2815,20 @@ void main()
         self._rescaleYAxis()
 
   @pyqtSlot(dict)
-  def _externalAllAxesChanged(self, aDict):
+  def _glAllAxesChanged(self, aDict):
     if self._parent.isDeleted:
       return
 
-    sDisplay = aDict[GLSPECTRUMDISPLAY]
-    source = aDict[GLSOURCE]
+    sDisplay = aDict[GLNotifier.GLSPECTRUMDISPLAY]
+    source = aDict[GLNotifier.GLSOURCE]
 
-    if source != self and aDict[GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+    if source != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
 
       # match the values for the Y axis, and scale for the X axis
-      axisB = aDict[GLAXISVALUES][GLBOTTOMAXISVALUE]
-      axisT = aDict[GLAXISVALUES][GLTOPAXISVALUE]
-      axisL = aDict[GLAXISVALUES][GLLEFTAXISVALUE]
-      axisR = aDict[GLAXISVALUES][GLRIGHTAXISVALUE]
+      axisB = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLBOTTOMAXISVALUE]
+      axisT = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLTOPAXISVALUE]
+      axisL = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLLEFTAXISVALUE]
+      axisR = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLRIGHTAXISVALUE]
 
       if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and\
         self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
@@ -2748,15 +2842,15 @@ void main()
         self._rescaleAllAxes()
 
   @pyqtSlot(dict)
-  def _externalMouseMoved(self, aDict):
+  def _glMouseMoved(self, aDict):
     if self._parent.isDeleted:
       return
 
-    if aDict[GLSOURCE] != self:
+    if aDict[GLNotifier.GLSOURCE] != self:
       # self.cursorCoordinate = aDict[GLMOUSECOORDS]
       # self.update()
 
-      mouseMovedDict = aDict[GLMOUSEMOVEDDICT]
+      mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
 
       currentPos = self._parent.current.cursorPosition
 
@@ -2785,6 +2879,22 @@ void main()
       # only need to redraw if we can see the cursor
       if self._crossHairVisible:
         self.update()
+
+  @pyqtSlot(dict)
+  def _glEvent(self, aDict):
+    """
+    proces events from the application and other strips
+    :param aDict - dictionary containing event flags:
+    """
+    if self._parent.isDeleted:
+      return
+
+    if aDict[GLNotifier.GLSOURCE] != self:
+
+      params = aDict[GLNotifier.GLVALUES]
+
+      # check the params for actions
+      pass
 
 
 GlyphXpos = 'Xpos'

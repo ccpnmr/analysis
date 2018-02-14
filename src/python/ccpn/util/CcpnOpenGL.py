@@ -76,6 +76,8 @@ GLBOTTOMAXISVALUE = 'bottomAxis'
 GLTOPAXISVALUE = 'topAxis'
 GLLEFTAXISVALUE = 'leftAxis'
 GLRIGHTAXISVALUE = 'rightAxis'
+updateContours = False, updatePeakLists = False, updatePeakListLabels = False,
+updateGrid = False, updateAxes = False, updateCursor = False, updateAny = False):
 
 SPECTRUM_MATRIX = 'spectrumMatrix'
 
@@ -106,8 +108,10 @@ def singleton(cls):
 
 
 @singleton
-class _GLSignalClass(QtWidgets.QWidget):
-
+class GLSignalClass(QtWidgets.QWidget):
+  """
+  Class to control the communication between different strips
+  """
   externalXAxisChanged = pyqtSignal(dict)
   externalYAxisChanged = pyqtSignal(dict)
   externalAllAxesChanged = pyqtSignal(dict)
@@ -115,13 +119,65 @@ class _GLSignalClass(QtWidgets.QWidget):
   externalPeakListChange = pyqtSignal(dict)
 
   def __init__(self):
-    super(_GLSignalClass, self).__init__()
+    super(GLSignalClass, self).__init__()
 
-  def _emitSignal(self, value):
-    self.externalXAxisChanged.emit(value)
-
-  def _emitBuildContours(self):
+  def emitBuildContours(self):
     pass
+
+  def emitBuildPeakLists(self):
+    pass
+
+  def emitEvent(self, source=None, display=None,
+                updateContours=False, updatePeakLists=False, updatePeakListLabels=False,
+                updateGrid=False, updateAxes=False, updateCursor=False, updateAny=False):
+    aDict = {GLSOURCE: source,
+              GLSPECTRUMDISPLAY: display,
+              GLAXISVALUES: {GLBOTTOMAXISVALUE: axisB,
+                              GLTOPAXISVALUE: axisT,
+                              GLLEFTAXISVALUE: axisL,
+                              GLRIGHTAXISVALUE: axisR}
+             }
+    self.externalAllAxesChanged.emit(aDict)
+
+  def emitAllAxesChanged(self, source=None, display=None,
+                         axisB=None, axisT=None, axisL=None, axisR=None):
+    aDict = {GLSOURCE: source,
+              GLSPECTRUMDISPLAY: display,
+              GLAXISVALUES: {GLBOTTOMAXISVALUE: axisB,
+                              GLTOPAXISVALUE: axisT,
+                              GLLEFTAXISVALUE: axisL,
+                              GLRIGHTAXISVALUE: axisR}
+             }
+    self.externalAllAxesChanged.emit(aDict)
+
+  def emitXAxisChanged(self, source=None, display=None,
+                         axisB=None, axisT=None, axisL=None, axisR=None):
+    aDict = {GLSOURCE: source,
+              GLSPECTRUMDISPLAY: display,
+              GLAXISVALUES: {GLBOTTOMAXISVALUE: axisB,
+                              GLTOPAXISVALUE: axisT,
+                              GLLEFTAXISVALUE: axisL,
+                              GLRIGHTAXISVALUE: axisR}
+             }
+    self.externalXAxisChanged.emit(aDict)
+
+  def emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None):
+    aDict = { GLSOURCE: source,
+              GLMOUSECOORDS: coords,
+              GLMOUSEMOVEDDICT: mouseMovedDict }
+    self.externalMouseMoved.emit(aDict)
+
+  def emitYAxisChanged(self, source=None, display=None,
+                         axisB=None, axisT=None, axisL=None, axisR=None):
+    aDict = {GLSOURCE: source,
+              GLSPECTRUMDISPLAY: display,
+              GLAXISVALUES: {GLBOTTOMAXISVALUE: axisB,
+                              GLTOPAXISVALUE: axisT,
+                              GLLEFTAXISVALUE: axisL,
+                              GLRIGHTAXISVALUE: axisR}
+             }
+    self.externalYAxisChanged.emit(aDict)
+
 
 class CcpnGLWidget(QOpenGLWidget):
 
@@ -131,11 +187,11 @@ class CcpnGLWidget(QOpenGLWidget):
     # flag to display paintGL but keep an empty screen
     self._blankDisplay = False
 
-    self._GLSignals = _GLSignalClass()
-    self._GLSignals.externalXAxisChanged.connect(self._externalXAxisChanged)
-    self._GLSignals.externalYAxisChanged.connect(self._externalYAxisChanged)
-    self._GLSignals.externalAllAxesChanged.connect(self._externalAllAxesChanged)
-    self._GLSignals.externalMouseMoved.connect(self._externalMouseMoved)
+    self.GLSignals = GLSignalClass()
+    self.GLSignals.externalXAxisChanged.connect(self._externalXAxisChanged)
+    self.GLSignals.externalYAxisChanged.connect(self._externalYAxisChanged)
+    self.GLSignals.externalAllAxesChanged.connect(self._externalAllAxesChanged)
+    self.GLSignals.externalMouseMoved.connect(self._externalMouseMoved)
 
     self._rightMenu = rightMenu
     if not parent:        # don't initialise if nothing there
@@ -223,10 +279,10 @@ class CcpnGLWidget(QOpenGLWidget):
     self.setMinimumSize(150, 100)
 
   def close(self):
-    self._GLSignals.externalXAxisChanged.disconnect()
-    self._GLSignals.externalYAxisChanged.disconnect()
-    self._GLSignals.externalAllAxesChanged.disconnect()
-    self._GLSignals.externalMouseMoved.disconnect()
+    self.GLSignals.externalXAxisChanged.disconnect()
+    self.GLSignals.externalYAxisChanged.disconnect()
+    self.GLSignals.externalAllAxesChanged.disconnect()
+    self.GLSignals.externalMouseMoved.disconnect()
 
   def rescale(self):
     """
@@ -423,14 +479,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + zoomOut * (self.axisB - mby)
         self.axisT = mby - zoomOut * (mby - self.axisT)
 
-      aDict = { GLSOURCE: self
-                , GLSPECTRUMDISPLAY: self._parent.spectrumDisplay
-                , GLAXISVALUES: { GLBOTTOMAXISVALUE: self.axisB
-                                , GLTOPAXISVALUE: self.axisT
-                                , GLLEFTAXISVALUE: self.axisL
-                                , GLRIGHTAXISVALUE: self.axisR}
-              }
-      self._GLSignals.externalAllAxesChanged.emit(aDict)
+      self.GLSignals.emitAllAxesChanged(source=self, display=self._parent.spectrumDisplay,
+                                         axisB=self.axisB, axisT=self.axisT,
+                                         axisL=self.axisL, axisR=self.axisR)
+
       self._rescaleAllAxes()
 
       # spawn rebuild event for the grid
@@ -453,14 +505,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisL = mbx + zoomOut * (self.axisL - mbx)
         self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
-      aDict = { GLSOURCE: self
-                , GLSPECTRUMDISPLAY: self._parent.spectrumDisplay
-                , GLAXISVALUES: { GLBOTTOMAXISVALUE: self.axisB
-                                , GLTOPAXISVALUE: self.axisT
-                                , GLLEFTAXISVALUE: self.axisL
-                                , GLRIGHTAXISVALUE: self.axisR}
-              }
-      self._GLSignals.externalXAxisChanged.emit(aDict)
+      self.GLSignals.emitXAxisChanged(source=self, display=self._parent.spectrumDisplay,
+                                       axisB=self.axisB, axisT=self.axisT,
+                                       axisL=self.axisL, axisR=self.axisR)
+
       self._rescaleXAxis()
 
     elif between(mx, ra[0], ra[2]) and between(my, ra[1], ra[3]):
@@ -479,14 +527,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + zoomOut * (self.axisB - mby)
         self.axisT = mby - zoomOut * (mby - self.axisT)
 
-      aDict = { GLSOURCE: self
-                , GLSPECTRUMDISPLAY: self._parent.spectrumDisplay
-                , GLAXISVALUES: { GLBOTTOMAXISVALUE: self.axisB
-                                , GLTOPAXISVALUE: self.axisT
-                                , GLLEFTAXISVALUE: self.axisL
-                                , GLRIGHTAXISVALUE: self.axisR}
-              }
-      self._GLSignals.externalYAxisChanged.emit(aDict)
+      self.GLSignals.emitYAxisChanged(source=self, display=self._parent.spectrumDisplay,
+                                       axisB=self.axisB, axisT=self.axisT,
+                                       axisL=self.axisL, axisR=self.axisR)
       self._rescaleYAxis()
 
     event.accept()
@@ -1093,21 +1136,12 @@ void main()
         self.axisR -= dx * self.pixelX
         self.axisT += dy * self.pixelY
         self.axisB += dy * self.pixelY
-
-        aDict = {GLSOURCE:self
-            , GLSPECTRUMDISPLAY:self._parent.spectrumDisplay
-            , GLAXISVALUES:{GLBOTTOMAXISVALUE:self.axisB
-            , GLTOPAXISVALUE:self.axisT
-            , GLLEFTAXISVALUE:self.axisL
-            , GLRIGHTAXISVALUE:self.axisR}
-                 }
-        self._GLSignals.externalAllAxesChanged.emit(aDict)
+        self.GLSignals.emitAllAxesChanged(source=self, display=self._parent.spectrumDisplay,
+                                           axisB=self.axisB, axisT=self.axisT,
+                                           axisL=self.axisL, axisR=self.axisR)
         self._rescaleAllAxes()
 
-    aDict = { GLSOURCE: self
-            , GLMOUSECOORDS: self.cursorCoordinate
-            , GLMOUSEMOVEDDICT: mouseMovedDict }
-    self._GLSignals.externalMouseMoved.emit(aDict)
+    self.GLSignals.emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
 
     self.update()
 

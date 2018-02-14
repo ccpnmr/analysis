@@ -112,6 +112,7 @@ class _GLSignalClass(QtWidgets.QWidget):
   externalYAxisChanged = pyqtSignal(dict)
   externalAllAxesChanged = pyqtSignal(dict)
   externalMouseMoved = pyqtSignal(dict)
+  externalPeakListChange = pyqtSignal(dict)
 
   def __init__(self):
     super(_GLSignalClass, self).__init__()
@@ -119,6 +120,8 @@ class _GLSignalClass(QtWidgets.QWidget):
   def _emitSignal(self, value):
     self.externalXAxisChanged.emit(value)
 
+  def _emitBuildContours(self):
+    pass
 
 class CcpnGLWidget(QOpenGLWidget):
 
@@ -1656,6 +1659,10 @@ void main()
       return
 
     for spectrumView in self._parent.spectrumViews:
+
+      if spectrumView.spectrum.pid in self._GLPeakLists.keys():
+        if self._GLPeakLists[spectrumView.spectrum.pid].renderMode == GLRENDERMODE_RESCALE:
+          self._buildPeakLists(spectrumView)
 
       if spectrumView.buildPeakLists:
         spectrumView.buildPeakLists = False

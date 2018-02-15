@@ -2148,7 +2148,9 @@ void main()
                                         color=(colR, colG, colB, 1.0),
                                         GLContext=self,
                                         pid=None))
+            # this is in the attribs
             self._marksAxisCodes[-1].axisIndex = axisIndex
+            self._marksAxisCodes[-1].axisPosition = pos
 
             index += 2
             drawList.numVertices += 2
@@ -2173,7 +2175,7 @@ void main()
       return
 
     # strings are generated when the marksRulers are modified
-    self.buildMarksAxisCodes()
+    # self.buildMarksAxisCodes()
     for mark in self._marksAxisCodes:
       mark.drawTextArray()
 
@@ -2351,26 +2353,47 @@ void main()
     # draw the strikp ID to the screen
     self.stripIDString.drawTextArray()
 
+  def _rescaleMarksAxisCode(self, mark):
+    vertices = mark.numVertices
+
+    # mark.attribs[0][0] = axisIndex
+    # mark.attribs[0][1] = axisPosition
+    if vertices:
+      if mark.axisIndex == 0:
+        offsets = [mark.axisPosition + (3.0 * self.pixelX),
+                   self.axisB + (3.0 * self.pixelY)]
+      else:
+        offsets = [self.axisL + (3.0 * self.pixelX),
+                   mark.axisPosition + (3.0 * self.pixelY)]
+
+      for pp in range(0, vertices):
+        mark.attribs[pp] = offsets
+
   def _rescaleMarksRulers(self):
     for mark in self._marksAxisCodes:
-      vertices = mark.numVertices
+      # mark.renderMode = GLRENDERMODE_RESCALE
 
-      if vertices:
-        if mark.axisIndex == 0:
-          offsets = [mark.attribs[0][0],
-                      self.axisB + (3.0 * self.pixelY)]
-        else:
-          offsets = [self.axisL + (3.0 * self.pixelX),
-                     mark.attribs[0][1]]
-
-        for pp in range(0, vertices):
-          mark.attribs[pp] = offsets
+      # vertices = mark.numVertices
+      #
+      self._rescaleMarksAxisCode(mark)
+      # # # mark.attribs[0][0] = axisIndex
+      # # # mark.attribs[0][1] = axisPosition
+      # # if vertices:
+      # #   if mark.attribs[0][0] == 0:       # mark.axisIndex == 0:
+      # #     offsets = [mark.attribs[0][1],
+      # #                 self.axisB + (3.0 * self.pixelY)]
+      # #   else:
+      # #     offsets = [self.axisL + (3.0 * self.pixelX),
+      # #                mark.attribs[0][1]]
+      # #
+      # #   for pp in range(0, vertices):
+      # #     mark.attribs[pp] = offsets
 
   def buildMarksAxisCodes(self, refresh=False):
-    return
     for mark in self._marksAxisCodes:
       if mark.renderMode == GLRENDERMODE_RESCALE:
-        self._buildMarkAxisCode(mark)
+        mark.renderMode = GLRENDERMODE_DRAW
+        self._rescaleMarksAxisCode(mark)
 
   @property
   def axesVisible(self):

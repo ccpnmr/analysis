@@ -2899,7 +2899,7 @@ void main()
   @pyqtSlot(dict)
   def _glEvent(self, aDict):
     """
-    process events from the application and other strips
+    process events from the application/popups and other strips
     :param aDict - dictionary containing event flags:
     """
     if self._parent.isDeleted:
@@ -2910,15 +2910,20 @@ void main()
 
         # check the params for actions and update the display
         triggers = aDict[GLNotifier.GLTRIGGERS]
+        targets = aDict[GLNotifier.GLTARGETS]
 
         if GLNotifier.GLPEAKLISTS in triggers:
           for spectrumView in self._parent.spectrumViews:
-            spectrumView.buildPeakLists = True
+            for peakList in targets:
+              if peakList in spectrumView.spectrum.peakLists:
+                spectrumView.buildPeakLists = True
           self.buildPeakLists()
 
         if GLNotifier.GLPEAKLISTLABELS in triggers:
           for spectrumView in self._parent.spectrumViews:
-            spectrumView.buildPeakListLabels = True
+            for peakList in targets:
+              if peakList in spectrumView.spectrum.peakLists:
+                spectrumView.buildPeakListLabels = True
           self.buildPeakListLabels()
 
     # repaint

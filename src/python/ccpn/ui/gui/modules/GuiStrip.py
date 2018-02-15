@@ -220,6 +220,10 @@ class GuiStrip(Frame):
     #self._stripNotifier.setDebug(True)
     #self._peakNotifier.setDebug(True)
 
+    self._marksNotifier = Notifier(self.project, [Notifier.CREATE,
+                                                  Notifier.DELETE,
+                                                  Notifier.CHANGE], 'Mark', self._updateDisplayedMarks)
+
     # For now, all dropevents are not strip specific, use spectrumDisplay's
     # handling
     self._droppedNotifier = GuiNotifier(self,
@@ -294,6 +298,11 @@ class GuiStrip(Frame):
     if callbackDict['oldPid'] == text:
       self.setStripLabelText(callbackDict['object'].pid)
 
+    try:
+      self._testCcpnOpenGLWidget.stripIDString(callbackDict['object'].pid)
+    except Exception as es:
+      getLogger().debug('OpenGL widget not instantiated')
+
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()
     self._peakNotifier.unRegister()
@@ -303,6 +312,17 @@ class GuiStrip(Frame):
   def _updateDisplayedPeaks(self, data):
     "Callback when peaks have changed"
     self.showPeaks(data['object'].peakList)
+
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKS])
+
+  def _updateDisplayedMarks(self, data):
+    "Callback when marks have changed"
+
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitEvent(triggers=[GLNotifier.GLMARKS])
 
   def _highlightCurrentStrip(self, data):
     "Callback to highlight the axes of current strip"

@@ -125,12 +125,14 @@ class GLNotifier(QtWidgets.QWidget):
   GLLEFTAXISVALUE = 'leftAxis'
   GLRIGHTAXISVALUE = 'rightAxis'
   GLCONTOURS = 'updateContours'
+  GLPEAKS = 'glUpdatePeaks'
   GLPEAKLISTS = 'glUpdatePeakLists'
   GLPEAKLISTLABELS = 'glUpdatePeakListLabels'
   GLGRID = 'glUpdateGrid'
   GLAXES = 'glUpdateAxes'
   GLCURSOR = 'glUpdateCursor'
   GLANY = 'glUpdateAny'
+  GLMARKS = 'glUpdateMarks'
   GLTARGETS = 'glTargets'
   GLTRIGGERS = 'glTriggers'
   GLVALUES = 'glValues'
@@ -434,6 +436,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # TODO:ED marks and horizontal/vertical traces
     self._rescaleOverlayText()
+    self._rescaleMarksRulers()
 
   def rescaleSpectra(self):
     # rescale the matrices each spectrumView
@@ -644,6 +647,19 @@ class CcpnGLWidget(QOpenGLWidget):
     # ratios have changed so rescale the peaks symbols
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
+
+    self._rescaleOverlayText()
+
+    if update:
+      self.update()
+
+  def _rebuildMarks(self, update=True):
+    self.rescale()
+
+    # spawn rebuild event for the grid
+    for li in self.gridList:
+      li.renderMode = GLRENDERMODE_REBUILD
+    self._marksList.renderMode = GLRENDERMODE_REBUILD
 
     self._rescaleOverlayText()
 
@@ -951,6 +967,7 @@ void main()
 
     self._GLPeakLists = {}
     self._GLPeakListLabels = {}
+    self._marksAxisCodes = []
 
     self.firstFont = CcpnGLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
     self._buildTextFlag = True
@@ -960,30 +977,30 @@ void main()
     self.mouseString = None
     self.peakLabelling = 0
 
-    self._contourList = GLVertexArray(numLists=1
-                                      , renderMode=GLRENDERMODE_REBUILD
-                                      , blendMode=True
-                                      , drawMode=GL.GL_TRIANGLES
-                                      , dimension=3
-                                      , GLContext=self)
-    self._selectionBox = GLVertexArray(numLists=1
-                                      , renderMode=GLRENDERMODE_REBUILD
-                                      , blendMode=True
-                                      , drawMode=GL.GL_QUADS
-                                      , dimension=3
-                                      , GLContext=self)
-    self._selectionOutline = GLVertexArray(numLists=1
-                                      , renderMode=GLRENDERMODE_REBUILD
-                                      , blendMode=True
-                                      , drawMode=GL.GL_LINES
-                                      , dimension=3
-                                      , GLContext=self)
-    self._marksList = GLVertexArray(numLists=1
-                                      , renderMode=GLRENDERMODE_REBUILD
-                                      , blendMode=True
-                                      , drawMode=GL.GL_LINES
-                                      , dimension=3
-                                      , GLContext=self)
+    self._contourList = GLVertexArray(numLists=1,
+                                      renderMode=GLRENDERMODE_REBUILD,
+                                      blendMode=True,
+                                      drawMode=GL.GL_TRIANGLES,
+                                      dimension=3,
+                                      GLContext=self)
+    self._selectionBox = GLVertexArray(numLists=1,
+                                      renderMode=GLRENDERMODE_REBUILD,
+                                      blendMode=True,
+                                      drawMode=GL.GL_QUADS,
+                                      dimension=3,
+                                      GLContext=self)
+    self._selectionOutline = GLVertexArray(numLists=1,
+                                      renderMode=GLRENDERMODE_REBUILD,
+                                      blendMode=True,
+                                      drawMode=GL.GL_LINES,
+                                      dimension=3,
+                                      GLContext=self)
+    self._marksList = GLVertexArray(numLists=1,
+                                    renderMode=GLRENDERMODE_REBUILD,
+                                    blendMode=False,
+                                    drawMode=GL.GL_LINES,
+                                    dimension=2,
+                                    GLContext=self)
 
     # self._axisLabels = GLVertexArray(numLists=1
     #                                   , renderMode=GLRENDERMODE_REBUILD
@@ -1641,6 +1658,7 @@ void main()
     self.viewports.setViewport(self._currentView)
     self.drawSpectra()
     self.drawPeakLists()
+    self.drawMarksRulers()
 
     # change to the text shader
     currentShader = self._shaderProgramTex.makeCurrent()
@@ -1652,6 +1670,7 @@ void main()
     currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
 
     self.enableTexture()
+    self.drawMarksAxisCodes()
     self.drawPeakListLabels()
 
     currentShader = self._shaderProgram1.makeCurrent()
@@ -2064,8 +2083,97 @@ void main()
         for lb in self._axisYLabelling:
           lb.drawTextArray()
 
-  def drawMarks(self):
+  def buildMarksRulers(self):
+    drawList = self._marksList
+
+    if drawList.renderMode == GLRENDERMODE_REBUILD:
+      drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+      drawList.refreshMode = GLREFRESHMODE_REBUILD
+      drawList.clearArrays()
+
+      # clear the attached strings
+      self._marksAxisCodes = []
+
+      # build the marks VBO
+      index=0
+      for mark in self.project.marks:
+
+        for rr in mark.rulerData:
+
+          axisIndex = 2
+          for ps, psCode in enumerate(self.axisOrder[0:2]):
+            if self._preferences.matchAxisCode == 0:  # default - match atom type
+              if rr.axisCode[0] == psCode[0]:
+                axisIndex = ps
+            elif self._preferences.matchAxisCode == 1:  # match full code
+              if rr.axisCode == psCode:
+                axisIndex = ps
+
+          if axisIndex < 2:
+
+            # TODO:ED check axis units - assume 'ppm' for the minute
+
+            if axisIndex == 0:
+              # vertical ruler
+              pos = x0 = x1 = rr.position
+              y0 = 200.0
+              y1 = 0.0
+              textX = pos + (3.0 * self.pixelX)
+              textY = self.axisB + (3.0 * self.pixelY)
+            else:
+              # horizontal ruler
+              pos = y0 = y1 = rr.position
+              x0 = 200.0
+              x1 = 0.0
+              textX = self.axisL + (3.0 * self.pixelX)
+              textY = pos + (3.0 * self.pixelY)
+
+            colour = mark.colour
+            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            colG = int(colour.strip('# ')[2:4], 16) / 255.0
+            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+            drawList.indices = np.append(drawList.indices, [index, index + 1])
+            drawList.vertices = np.append(drawList.vertices, [x0, y0, x1, y1])
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 2)
+            drawList.attribs = np.append(drawList.attribs, [axisIndex, pos, axisIndex, pos])
+
+            # TODO:ED build the string and add the extra axis code
+            self._marksAxisCodes.append(GLString(text=rr.label,
+                                        font=self.firstFont,
+                                        x=textX,
+                                        y=textY,
+                                        color=(colR, colG, colB, 1.0),
+                                        GLContext=self,
+                                        pid=None))
+            self._marksAxisCodes[-1].axisIndex = axisIndex
+
+            index += 2
+            drawList.numVertices += 2
+
+    elif drawList.renderMode == GLRENDERMODE_RESCALE:
+      drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+
+      # currently the lines are just very long
+      # self._rescaleMarksRulers()
+
     pass
+
+  def drawMarksRulers(self):
+    if self._parent.isDeleted:
+      return
+
+    self.buildMarksRulers()
+    self._marksList.drawIndexArray()
+
+  def drawMarksAxisCodes(self):
+    if self._parent.isDeleted:
+      return
+
+    # strings are generated when the marksRulers are modified
+    self.buildMarksAxisCodes()
+    for mark in self._marksAxisCodes:
+      mark.drawTextArray()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # new bit
@@ -2240,6 +2348,27 @@ void main()
 
     # draw the strikp ID to the screen
     self.stripIDString.drawTextArray()
+
+  def _rescaleMarksRulers(self):
+    for mark in self._marksAxisCodes:
+      vertices = mark.numVertices
+
+      if vertices:
+        if mark.axisIndex == 0:
+          offsets = [mark.attribs[0][0],
+                      self.axisB + (3.0 * self.pixelY)]
+        else:
+          offsets = [self.axisL + (3.0 * self.pixelX),
+                     mark.attribs[0][1]]
+
+        for pp in range(0, vertices):
+          mark.attribs[pp] = offsets
+
+  def buildMarksAxisCodes(self, refresh=False):
+    return
+    for mark in self._marksAxisCodes:
+      if mark.renderMode == GLRENDERMODE_RESCALE:
+        self._buildMarkAxisCode(mark)
 
   @property
   def axesVisible(self):
@@ -2926,6 +3055,9 @@ void main()
                 spectrumView.buildPeakListLabels = True
           self.buildPeakListLabels()
 
+        if GLNotifier.GLMARKS in triggers:
+          self._marksList.renderMode = GLRENDERMODE_REBUILD
+
     # repaint
     self.update()
 
@@ -3497,7 +3629,7 @@ class GLVertexArray():
     self.numVertices = 0
 
   def drawIndexArray(self):
-    self._GLContext.makeCurrent()
+    # self._GLContext.makeCurrent()
 
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
@@ -3543,7 +3675,7 @@ class GLVertexArray():
       GL.glDisable(GL.GL_BLEND)
 
   def drawTextArray(self):
-    self._GLContext.makeCurrent()
+    # self._GLContext.makeCurrent()
 
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)

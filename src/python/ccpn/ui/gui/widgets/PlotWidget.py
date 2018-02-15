@@ -218,8 +218,6 @@ class PlotWidget(pg.PlotWidget):
     #print('>>', strip, xPos, yPos)
     self.crossHair1.setPosition(xPos, yPos)
 
-    return
-
     strip.axisPositionDict[axes[0].code] = xPos
     strip.axisPositionDict[axes[1].code] = yPos
 

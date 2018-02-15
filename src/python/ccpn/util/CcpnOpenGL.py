@@ -1660,6 +1660,8 @@ void main()
     self.drawPeakLists()
     self.drawMarksRulers()
 
+    # draw the phase plots of the mouse is in the current window
+
     # change to the text shader
     currentShader = self._shaderProgramTex.makeCurrent()
 

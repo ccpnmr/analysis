@@ -171,9 +171,16 @@ class PeakListPropertiesPopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+
     self.project._startCommandEchoBlock('_applyChanges')
     try:
       self._changeColours()
+
+      # repaint
+      GLSignals.emitEvent(targets=[self.peakList], triggers=[GLNotifier.GLPEAKLISTS,
+                                                             GLNotifier.GLPEAKLISTLABELS])
 
       applyAccept = True
     except Exception as es:

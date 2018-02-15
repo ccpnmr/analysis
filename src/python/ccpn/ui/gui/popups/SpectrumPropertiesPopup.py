@@ -133,16 +133,23 @@ class SpectrumPropertiesPopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+
     self.project._startCommandEchoBlock('_applyChanges')
     try:
       for t in tabs:
         if t is not None:
           changes = t._changes
           self._applyAllChanges(changes)
-          if self.spectrum:
-            for specViews in self.spectrum.spectrumViews:
-              specViews.buildContours = True
-              specViews.update()
+
+      if self.spectrum:
+        for specViews in self.spectrum.spectrumViews:
+
+          specViews.buildContours = True
+
+      # repaint
+      GLSignals.emitPaintEvent()
 
       applyAccept = True
     except Exception as es:
@@ -1072,16 +1079,23 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+
     self.project._startCommandEchoBlock('_applyChanges')
     try:
       for t in tabs:
         if t is not None:
           changes = t._changes
           self._applyAllChanges(changes)
-          for specNum, thisSpec in enumerate(self.orderedSpectra):
-            for specViews in thisSpec.spectrumViews:
-              specViews.buildContours = True
-              specViews.update()
+
+      for specNum, thisSpec in enumerate(self.orderedSpectra):
+        for specViews in thisSpec.spectrumViews:
+
+          specViews.buildContours = True
+
+      # repaint
+      GLSignals.emitPaintEvent()
 
       applyAccept = True
     except Exception as es:

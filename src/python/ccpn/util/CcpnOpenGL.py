@@ -43,6 +43,7 @@ import numpy as np
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
+from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 
 try:
@@ -118,18 +119,22 @@ class GLNotifier(QtWidgets.QWidget):
   GLMOUSECOORDS = 'mouseCoords'
   GLMOUSEMOVEDDICT = 'mouseMovedict'
   GLSPECTRUMDISPLAY = 'spectrumDisplay'
+  GLSTRIP = 'strip'
   GLBOTTOMAXISVALUE = 'bottomAxis'
   GLTOPAXISVALUE = 'topAxis'
   GLLEFTAXISVALUE = 'leftAxis'
   GLRIGHTAXISVALUE = 'rightAxis'
   GLCONTOURS = 'updateContours'
-  GLPEAKLISTS = 'GLupdatePeakLists'
-  GLPEAKLISTLABELS = 'GLupdatePeakListLabels'
-  GLGRID = 'GLupdateGrid'
-  GLAXES = 'GLupdateAxes'
-  GLCURSOR = 'GLupdateCursor'
-  GLANY = 'GLupdateAny'
+  GLPEAKLISTS = 'glUpdatePeakLists'
+  GLPEAKLISTLABELS = 'glUpdatePeakListLabels'
+  GLGRID = 'glUpdateGrid'
+  GLAXES = 'glUpdateAxes'
+  GLCURSOR = 'glUpdateCursor'
+  GLANY = 'glUpdateAny'
+  GLTARGETS = 'glTargets'
+  GLTRIGGERS = 'glTriggers'
   GLVALUES = 'glValues'
+  GLDATA = 'glData'
 
   _triggerKeywords = (GLANY, GLAXES, GLCONTOURS, GLCURSOR, GLGRID, GLPEAKLISTS, GLPEAKLISTLABELS)
 
@@ -144,17 +149,34 @@ class GLNotifier(QtWidgets.QWidget):
     self._parent = parent
     self._strip = strip
 
-  def emitEvent(self, source=None, display=None, updateList=[]):
-    aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSPECTRUMDISPLAY: display,
-             GLNotifier.GLVALUES: tuple(updateList)
-             }
-    self.glAllAxesChanged.emit(aDict)
+  def emitPaintEvent(self):
+    self.glEvent.emit({})
 
-  def emitAllAxesChanged(self, source=None, display=None,
+  def emitEvent(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
+    aDict = {GLNotifier.GLSOURCE: source,
+             GLNotifier.GLSTRIP: strip,
+             GLNotifier.GLSPECTRUMDISPLAY: display,
+             GLNotifier.GLTARGETS: tuple(targets),
+             GLNotifier.GLTRIGGERS: tuple(triggers),
+             GLNotifier.GLVALUES: values,
+             }
+    self.glEvent.emit(aDict)
+
+  def emitEventToSpectrumDisplay(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
+    aDict = {GLNotifier.GLSOURCE: source,
+             GLNotifier.GLSTRIP: strip,
+             GLNotifier.GLSPECTRUMDISPLAY: display,
+             GLNotifier.GLTARGETS: tuple(targets),
+             GLNotifier.GLTRIGGERS: tuple(triggers),
+             GLNotifier.GLVALUES: values,
+             }
+    self.glEvent.emit(aDict)
+
+  def _emitAllAxesChanged(self, source=None, strip=None,
                          axisB=None, axisT=None, axisL=None, axisR=None):
     aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSPECTRUMDISPLAY: display,
+             GLNotifier.GLSTRIP: strip,
+             GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
              GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
                                        GLNotifier.GLTOPAXISVALUE: axisT,
                                        GLNotifier.GLLEFTAXISVALUE: axisL,
@@ -162,10 +184,11 @@ class GLNotifier(QtWidgets.QWidget):
              }
     self.glAllAxesChanged.emit(aDict)
 
-  def emitXAxisChanged(self, source=None, display=None,
+  def _emitXAxisChanged(self, source=None, strip=None,
                          axisB=None, axisT=None, axisL=None, axisR=None):
     aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSPECTRUMDISPLAY: display,
+             GLNotifier.GLSTRIP: strip,
+             GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
              GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
                                        GLNotifier.GLTOPAXISVALUE: axisT,
                                        GLNotifier.GLLEFTAXISVALUE: axisL,
@@ -173,16 +196,17 @@ class GLNotifier(QtWidgets.QWidget):
              }
     self.glXAxisChanged.emit(aDict)
 
-  def emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None):
+  def _emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None):
     aDict = { GLNotifier.GLSOURCE: source,
               GLNotifier.GLMOUSECOORDS: coords,
               GLNotifier.GLMOUSEMOVEDDICT: mouseMovedDict }
     self.glMouseMoved.emit(aDict)
 
-  def emitYAxisChanged(self, source=None, display=None,
+  def _emitYAxisChanged(self, source=None, strip=None,
                          axisB=None, axisT=None, axisL=None, axisR=None):
     aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSPECTRUMDISPLAY: display,
+             GLNotifier.GLSTRIP: strip,
+             GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
              GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
                                        GLNotifier.GLTOPAXISVALUE: axisT,
                                        GLNotifier.GLLEFTAXISVALUE: axisL,
@@ -536,7 +560,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + zoomOut * (self.axisB - mby)
         self.axisT = mby - zoomOut * (mby - self.axisT)
 
-      self.GLSignals.emitAllAxesChanged(source=self, display=self._parent.spectrumDisplay,
+      self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
                                          axisB=self.axisB, axisT=self.axisT,
                                          axisL=self.axisL, axisR=self.axisR)
 
@@ -563,7 +587,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisL = mbx + zoomOut * (self.axisL - mbx)
         self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
-      self.GLSignals.emitXAxisChanged(source=self, display=self._parent.spectrumDisplay,
+      self.GLSignals._emitXAxisChanged(source=self, strip=self._parent,
                                        axisB=self.axisB, axisT=self.axisT,
                                        axisL=self.axisL, axisR=self.axisR)
 
@@ -586,7 +610,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + zoomOut * (self.axisB - mby)
         self.axisT = mby - zoomOut * (mby - self.axisT)
 
-      self.GLSignals.emitYAxisChanged(source=self, display=self._parent.spectrumDisplay,
+      self.GLSignals._emitYAxisChanged(source=self, strip=self._parent,
                                        axisB=self.axisB, axisT=self.axisT,
                                        axisL=self.axisL, axisR=self.axisR)
       self._rescaleYAxis()
@@ -1220,12 +1244,12 @@ void main()
         self.axisR -= dx * self.pixelX
         self.axisT += dy * self.pixelY
         self.axisB += dy * self.pixelY
-        self.GLSignals.emitAllAxesChanged(source=self, display=self._parent.spectrumDisplay,
+        self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
                                            axisB=self.axisB, axisT=self.axisT,
                                            axisL=self.axisL, axisR=self.axisR)
         self._rescaleAllAxes()
 
-    self.GLSignals.emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
+    self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
 
     self.update()
 
@@ -1600,7 +1624,7 @@ void main()
     w = self.w
     h = self.h
 
-    GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+    GL.glClear(GL.GL_COLOR_BUFFER_BIT)
 
     if self._blankDisplay:
       return
@@ -1628,17 +1652,9 @@ void main()
     currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
 
     self.enableTexture()
-
-    # self.drawLabels()
     self.drawPeakListLabels()
 
-    # # draw test string
-    # for tt in self._testStrings:
-    #   tt.drawTextArray()
-
     currentShader = self._shaderProgram1.makeCurrent()
-    # self._parameterList[0:4] = [0, 0, 0, 0]
-    # self._shaderProgram1.setParameterList(self._parameterList)
 
     self.drawSelectionBox()
     
@@ -2883,18 +2899,30 @@ void main()
   @pyqtSlot(dict)
   def _glEvent(self, aDict):
     """
-    proces events from the application and other strips
+    process events from the application and other strips
     :param aDict - dictionary containing event flags:
     """
     if self._parent.isDeleted:
       return
 
-    if aDict[GLNotifier.GLSOURCE] != self:
+    if aDict:
+      if aDict[GLNotifier.GLSOURCE] != self:
 
-      params = aDict[GLNotifier.GLVALUES]
+        # check the params for actions and update the display
+        triggers = aDict[GLNotifier.GLTRIGGERS]
 
-      # check the params for actions
-      pass
+        if GLNotifier.GLPEAKLISTS in triggers:
+          for spectrumView in self._parent.spectrumViews:
+            spectrumView.buildPeakLists = True
+          self.buildPeakLists()
+
+        if GLNotifier.GLPEAKLISTLABELS in triggers:
+          for spectrumView in self._parent.spectrumViews:
+            spectrumView.buildPeakListLabels = True
+          self.buildPeakListLabels()
+
+    # repaint
+    self.update()
 
 
 GlyphXpos = 'Xpos'

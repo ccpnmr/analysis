@@ -92,6 +92,11 @@ class Gui(Ui):
 
     project.registerNotifier('Axis', 'change', GuiStrip._axisRegionChanged)
 
+    # TODO:ED not sure this is the best place
+    project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks)
+    project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks)
+    project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks)
+
     from ccpn.ui.gui.modules import GuiSpectrumDisplay
     project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
     project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)

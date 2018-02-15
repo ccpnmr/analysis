@@ -220,9 +220,9 @@ class GuiStrip(Frame):
     #self._stripNotifier.setDebug(True)
     #self._peakNotifier.setDebug(True)
 
-    self._marksNotifier = Notifier(self.project, [Notifier.CREATE,
-                                                  Notifier.DELETE,
-                                                  Notifier.CHANGE], 'Mark', self._updateDisplayedMarks)
+    # self._marksNotifier = Notifier(self.project, [Notifier.CREATE,
+    #                                               Notifier.DELETE,
+    #                                               Notifier.CHANGE], 'Mark', self._updateDisplayedMarks)
 
     # For now, all dropevents are not strip specific, use spectrumDisplay's
     # handling
@@ -316,13 +316,6 @@ class GuiStrip(Frame):
     from ccpn.util.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKS])
-
-  def _updateDisplayedMarks(self, data):
-    "Callback when marks have changed"
-
-    from ccpn.util.CcpnOpenGL import GLNotifier
-    GLSignals = GLNotifier(parent=self)
-    GLSignals.emitEvent(triggers=[GLNotifier.GLMARKS])
 
   def _highlightCurrentStrip(self, data):
     "Callback to highlight the axes of current strip"
@@ -893,6 +886,13 @@ class GuiStrip(Frame):
 
 
 # Notifiers:
+def _updateDisplayedMarks(data):
+  "Callback when marks have changed"
+
+  from ccpn.util.CcpnOpenGL import GLNotifier
+  GLSignals = GLNotifier(parent=None)
+  GLSignals.emitEvent(triggers=[GLNotifier.GLMARKS])
+
 def _axisRegionChanged(axis:'Axis'):
   """Notifier function: Update strips etc. for when axis position or width changes"""
 

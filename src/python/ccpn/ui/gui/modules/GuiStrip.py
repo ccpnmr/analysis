@@ -235,7 +235,7 @@ class GuiStrip(Frame):
     self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
 
     try:
-      self._testCcpnOpenGLWidget.setGridVisible(self.application.preferences.general.showGrid)
+      self._testCcpnOpenGLWidget.gridVisible = self.application.preferences.general.showGrid
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 

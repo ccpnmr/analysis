@@ -247,6 +247,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self.lastPos = QPoint()
     self._mouseX = 0
     self._mouseY = 0
+    self.w = self.width()
+    self.h = self.height()
 
     # self.eventFilter = self._eventFilter
     # self.installEventFilter(self)
@@ -2388,6 +2390,16 @@ void main()
     self._rescaleMarksRulers()
     for mark in self._marksAxisCodes:
       self._rescaleMarksAxisCode(mark)
+
+  def setRightAxisVisible(self, axisVisible=True):
+    self._drawRightAxis = axisVisible
+    self.rescale()
+    self.update()
+
+  def setBottomAxisVisible(self, axisVisible=True):
+    self._drawBottomAxis = axisVisible
+    self.rescale()
+    self.update()
 
   @property
   def axesVisible(self):

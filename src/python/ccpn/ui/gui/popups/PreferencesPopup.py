@@ -352,6 +352,11 @@ class PreferencesPopup(CcpnDialog):
     self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
     self.showGridBox.toggled.connect(partial(self._toggleGeneralOptions, 'showGrid'))
 
+    row += 1
+    self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
+    self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lastAxisOnly)
+    self.showLastAxisOnlyBox.toggled.connect(partial(self._toggleGeneralOptions, 'lastAxisOnly'))
+
   def _setExternalProgramsTabWidgets(self, parent):
     ''' 
     Insert a widget in here to appear in the externalPrograms Tab 

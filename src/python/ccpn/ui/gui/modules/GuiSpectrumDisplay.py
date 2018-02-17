@@ -508,10 +508,25 @@ class GuiSpectrumDisplay(CcpnModule):
       if self.lastAxisOnly:
         for ss in self.strips[:-1]:
           ss.plotWidget.plotItem.axes['right']['item'].hide()
+          try:
+            ss._testCcpnOpenGLWidget.setRightAxisVisible(axisVisible=False)
+          except Exception as es:
+            getLogger().debug('Error: OpenGL widget not instantiated')
+
         self.strips[-1].plotWidget.plotItem.axes['right']['item'].show()
+
+        try:
+          self.strips[-1]._testCcpnOpenGLWidget.setRightAxisVisible(axisVisible=True)
+        except Exception as es:
+          getLogger().debug('Error: OpenGL widget not instantiated')
+
       else:
         for ss in self.strips:
           ss.plotWidget.plotItem.axes['right']['item'].show()
+          try:
+            ss._testCcpnOpenGLWidget.setRightAxisVisible(axisVisible=True)
+          except Exception as es:
+            getLogger().debug('Error: OpenGL widget not instantiated')
 
       self.setColumnStretches(True)
 

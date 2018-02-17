@@ -436,7 +436,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # TODO:ED marks and horizontal/vertical traces
     self._rescaleOverlayText()
-    self._rescaleMarksRulers()
+    self.rescaleMarksRulers()
 
   def rescaleSpectra(self):
     # rescale the matrices each spectrumView
@@ -2159,7 +2159,7 @@ void main()
       drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
 
       # currently the lines are just very long
-      # self._rescaleMarksRulers()
+      # self.rescaleMarksRulers()
 
     pass
 
@@ -2175,7 +2175,6 @@ void main()
       return
 
     # strings are generated when the marksRulers are modified
-    # self.buildMarksAxisCodes()
     for mark in self._marksAxisCodes:
       mark.drawTextArray()
 
@@ -2353,6 +2352,22 @@ void main()
     # draw the strikp ID to the screen
     self.stripIDString.drawTextArray()
 
+  def _rescaleMarksRulers(self):
+    vertices = self._marksList.numVertices
+
+    if vertices:
+      for pp in range(0, 2*vertices, 4):
+        axisIndex = int(self._marksList.attribs[pp])
+        axisPosition = self._marksList.attribs[pp+1]
+
+        if axisIndex == 0:
+          offsets = [axisPosition, self.axisT,
+                     axisPosition, self.axisB]
+        else:
+          offsets = [self.axisL, axisPosition,
+                     self.axisR, axisPosition]
+        self._marksList.vertices[pp:pp+4] = offsets
+
   def _rescaleMarksAxisCode(self, mark):
     vertices = mark.numVertices
 
@@ -2369,31 +2384,10 @@ void main()
       for pp in range(0, vertices):
         mark.attribs[pp] = offsets
 
-  def _rescaleMarksRulers(self):
+  def rescaleMarksRulers(self):
+    self._rescaleMarksRulers()
     for mark in self._marksAxisCodes:
-      # mark.renderMode = GLRENDERMODE_RESCALE
-
-      # vertices = mark.numVertices
-      #
       self._rescaleMarksAxisCode(mark)
-      # # # mark.attribs[0][0] = axisIndex
-      # # # mark.attribs[0][1] = axisPosition
-      # # if vertices:
-      # #   if mark.attribs[0][0] == 0:       # mark.axisIndex == 0:
-      # #     offsets = [mark.attribs[0][1],
-      # #                 self.axisB + (3.0 * self.pixelY)]
-      # #   else:
-      # #     offsets = [self.axisL + (3.0 * self.pixelX),
-      # #                mark.attribs[0][1]]
-      # #
-      # #   for pp in range(0, vertices):
-      # #     mark.attribs[pp] = offsets
-
-  def buildMarksAxisCodes(self, refresh=False):
-    for mark in self._marksAxisCodes:
-      if mark.renderMode == GLRENDERMODE_RESCALE:
-        mark.renderMode = GLRENDERMODE_DRAW
-        self._rescaleMarksAxisCode(mark)
 
   @property
   def axesVisible(self):
@@ -3160,11 +3154,11 @@ class CcpnGLFont():
 
               # calculate the coordinated within the texture
               x = a0#+0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
-              y = b0-0.005           # self.fontGlyph[chrNum][GlyphYpos])
+              y = b0#-0.005           # self.fontGlyph[chrNum][GlyphYpos])
               px = e0           # self.fontGlyph[chrNum][GlyphXoffset]
               py = f0           # self.fontGlyph[chrNum][GlyphYoffset]
               w = c0#-1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
-              h = d0#+0.5           # self.fontGlyph[chrNum][GlyphHeight]+1
+              h = d0+0.5           # self.fontGlyph[chrNum][GlyphHeight]+1
               gw = g0           # self.fontGlyph[chrNum][GlyphOrigW]
               gh = h0           # self.fontGlyph[chrNum][GlyphOrigH]
 

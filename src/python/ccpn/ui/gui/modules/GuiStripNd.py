@@ -424,6 +424,14 @@ class GuiStripNd(GuiStrip):
 
   def _updateTraces(self):
 
+    try:
+      self._testCcpnOpenGLWidget.updateHTrace = self.hTraceAction.isChecked()
+      self._testCcpnOpenGLWidget.updateVTrace = self.vTraceAction.isChecked()
+    except Exception as es:
+      getLogger().debug('OpenGL widget not instantiated')
+
+    return
+
     cursorPosition = self.current.cursorPosition
     if cursorPosition:
       position = list(cursorPosition)

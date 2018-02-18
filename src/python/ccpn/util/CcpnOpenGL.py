@@ -328,6 +328,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self._peakLabelling = self._preferences.annotationType
     self._gridVisible = self._preferences.showGrid
+    self._updateHTrace = False
+    self._updateVTrace = False
 
     # set a minimum size so that the strips resize nicely
     self.setMinimumSize(150, 100)
@@ -1290,6 +1292,8 @@ void main()
 
     self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
 
+    if self._updateHTrace or self._updateVTrace:
+      self.updateTraces()
     self.update()
 
   @pyqtSlot(bool)
@@ -2492,6 +2496,22 @@ void main()
     except:
       self.mouseFormat = " %s: %.3f  %s: %.4g"
 
+  @property
+  def updateHTrace(self):
+    return self._updateHTrace
+
+  @updateHTrace.setter
+  def updateHTrace(self, visible):
+    self._updateHTrace = visible
+
+  @property
+  def updateVTrace(self):
+    return self._updateVTrace
+
+  @updateVTrace.setter
+  def updateVTrace(self, visible):
+    self._updateVTrace = visible
+
   def buildMouseCoords(self, refresh=False):
     if refresh or self._widthsChangedEnough(self.cursorCoordinate, self._mouseCoords):
 
@@ -2549,74 +2569,35 @@ void main()
       GL.glEnd()
       GL.glDisable(GL.GL_BLEND)
 
-  def _updateHTraceData(self, spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, hTrace,
+  def _updateHTraceData(self, spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
                         ph0=None, ph1=None, pivot=None):
-
-    # unfortunately it looks like we have to work in pixels, not ppm, yuck
-    # strip = self._parent
-    # plotWidget = strip.plotWidget
-    # plotItem = plotWidget.plotItem
-    # viewBox = strip.viewBox
-    # viewRegion = plotWidget.viewRange()
 
     pointInt = [1 + int(pnt + 0.5) for pnt in point]
     data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
     if ph0 is not None and ph1 is not None and pivot is not None:
       data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+
     x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
+    y = positionPixel[1] - spectrumView._traceScale * (self.axisT-self.axisB) * \
+        np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
-    # generate y values
+    # now change into a vertex array for plotting and flag for paint
+    pass
 
-
-    # # scale from ppm to pixels
-    # pixelViewBox0 = plotItem.getAxis('left').width()
-    # pixelViewBox1 = pixelViewBox0 + viewBox.width()
-    # region1, region0 = viewRegion[0]
-    # x -= region0
-    # x *= (pixelViewBox1 - pixelViewBox0) / (region1 - region0)
-    # x += pixelViewBox0
-    #
-    # pixelViewBox0 = plotItem.getAxis('bottom').height()
-    # pixelViewBox1 = pixelViewBox0 + viewBox.height()
-    # # - sign below because ppm scale is backwards
-    # v = positionPixel[1] - self._traceScale * (pixelViewBox1 - pixelViewBox0) * numpy.array(
-    #   [data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
-    #
-    # hTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
-    # hTrace.setData(x, v)
-
-  def _updateVTraceData(self, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, vTrace,
+  def _updateVTraceData(self, spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel,
                         ph0=None, ph1=None, pivot=None):
 
-    # unfortunately it looks like we have to work in pixels, not ppm, yuck
-    strip = self.strip
-    plotWidget = strip.plotWidget
-    plotItem = plotWidget.plotItem
-    viewBox = strip.viewBox
-    viewRegion = plotWidget.viewRange()
-
     pointInt = [1 + int(pnt + 0.5) for pnt in point]
-    data = self.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
+    data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
     if ph0 is not None and ph1 is not None and pivot is not None:
       data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+
     y = np.array([yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
-    # scale from ppm to pixels
-    pixelViewBox0 = plotItem.getAxis('bottom').height()
-    pixelViewBox1 = pixelViewBox0 + viewBox.height()
-    region0, region1 = viewRegion[1]
-    y -= region0
-    y *= (pixelViewBox1 - pixelViewBox0) / (region1 - region0)
-    ###y += pixelViewBox0  # not sure why this should be commented out...
+    x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
+        np.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
 
-    pixelViewBox0 = plotItem.getAxis('left').width()
-    pixelViewBox1 = pixelViewBox0 + viewBox.width()
-    # no - sign below because ppm scale is backwards and pixel y scale is also backwards
-    # (assuming that we want positive signal to point towards the right)
-    v = positionPixel[0] + self._traceScale * (pixelViewBox1 - pixelViewBox0) * np.array(
-      [data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
-
-    vTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
-    vTrace.setData(v, y)
+    # now change into a vertex array for plotting and flag for paint
+    pass
 
   def updateTraces(self):
 
@@ -2627,33 +2608,18 @@ void main()
         position.append(axis.position)
 
       positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
-      updateHTrace = self.hTraceAction.isChecked()
-      updateVTrace = self.vTraceAction.isChecked()
 
-      for spectrumView in self.spectrumViews:
-        # spectrumView._updateTrace(position, cursorPixel, updateHTrace, updateVTrace)
-
-        if not (updateHTrace or updateVTrace) or not self.isVisible():
-          # empty traces
-          return
+      for spectrumView in self._parent.spectrumViews:
 
         inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints = spectrumView._getTraceParams(
           position)
         # xDataDim and yDataDim should always be set here, because all spectra in strip should at least match in x, y
 
-        if inRange and updateHTrace:
-          self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, self.hTrace)
-        else:
-          # empty H trace
-          pass
+        # if self._updateHTrace:
+        #   self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
 
-        # if inRange and updateVTrace:
-        #   self._updateVTraceData(point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, self.vTrace)
-        # else:
-        #   empty V trace
-          # pass
-        #
-        # self.update()
+        # if self._updateVTrace:
+        #   self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
 
   def initialiseTraces(self):
     # set up the arrays and dimension for showing the horizontal/vertical traces

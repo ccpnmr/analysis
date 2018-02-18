@@ -45,6 +45,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
+import ccpn.util.Phasing as Phasing
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -69,6 +70,14 @@ GLREFRESHMODE_ALWAYS = 1
 GLREFRESHMODE_REBUILD = 2
 
 SPECTRUM_MATRIX = 'spectrumMatrix'
+SPECTRUM_MAXXALIAS = 'maxXAlias'
+SPECTRUM_MINXALIAS = 'minXAlias'
+SPECTRUM_MAXYALIAS = 'maxYAlias'
+SPECTRUM_MINYALIAS = 'minYAlias'
+SPECTRUM_DXAF = 'dxAF'
+SPECTRUM_DYAF = 'dyAF'
+SPECTRUM_XSCALE = 'xScale'
+SPECTRUM_YSCALE = 'yScale'
 
 MAINVIEW = 'mainView'
 MAINVIEWFULLWIDTH = 'mainViewFullWidth'
@@ -439,6 +448,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # TODO:ED marks and horizontal/vertical traces
     self._rescaleOverlayText()
     self.rescaleMarksRulers()
+    self.rescaleSpectra()
 
   def rescaleSpectra(self):
     # rescale the matrices each spectrumView
@@ -467,6 +477,15 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                      0.0, yScale, 0.0, 0.0,
                                                                      0.0, 0.0, 1.0, 0.0,
                                                                      fx0, fy0, 0.0, 1.0]
+      # setup information for the horizontal/vertical traces
+      self._spectrumSettings[spectrumView][SPECTRUM_MAXXALIAS] = fx0
+      self._spectrumSettings[spectrumView][SPECTRUM_MINXALIAS] = fx1
+      self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS] = fy0
+      self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS] = fy1
+      self._spectrumSettings[spectrumView][SPECTRUM_DXAF] = dxAF
+      self._spectrumSettings[spectrumView][SPECTRUM_DYAF] = dyAF
+      self._spectrumSettings[spectrumView][SPECTRUM_XSCALE] = xScale
+      self._spectrumSettings[spectrumView][SPECTRUM_YSCALE] = yScale
 
   def resizeGL(self, w, h):
     self.w = w
@@ -1132,6 +1151,7 @@ void main()
     self.orderedAxes = self._parent.orderedAxes
     self.axisOrder = self._parent.axisOrder
     self.axisCodes = self._parent.axisCodes
+    self.initialiseTraces()
 
   def setBackgroundColour(self, col):
     """
@@ -1775,7 +1795,7 @@ void main()
         # if spectrumView.spectrum.pid in self._GLPeakListLabels.keys():
         #   self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
 
-    self.rescaleSpectra()
+    # self.rescaleSpectra()
 
         # build spectrum settings for speed
 
@@ -2528,6 +2548,151 @@ void main()
       GL.glVertex2d(self._dragStart[0], self._dragStart[1])
       GL.glEnd()
       GL.glDisable(GL.GL_BLEND)
+
+  def _updateHTraceData(self, spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, hTrace,
+                        ph0=None, ph1=None, pivot=None):
+
+    # unfortunately it looks like we have to work in pixels, not ppm, yuck
+    # strip = self._parent
+    # plotWidget = strip.plotWidget
+    # plotItem = plotWidget.plotItem
+    # viewBox = strip.viewBox
+    # viewRegion = plotWidget.viewRange()
+
+    pointInt = [1 + int(pnt + 0.5) for pnt in point]
+    data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
+    if ph0 is not None and ph1 is not None and pivot is not None:
+      data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+    x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
+
+    # generate y values
+
+
+    # # scale from ppm to pixels
+    # pixelViewBox0 = plotItem.getAxis('left').width()
+    # pixelViewBox1 = pixelViewBox0 + viewBox.width()
+    # region1, region0 = viewRegion[0]
+    # x -= region0
+    # x *= (pixelViewBox1 - pixelViewBox0) / (region1 - region0)
+    # x += pixelViewBox0
+    #
+    # pixelViewBox0 = plotItem.getAxis('bottom').height()
+    # pixelViewBox1 = pixelViewBox0 + viewBox.height()
+    # # - sign below because ppm scale is backwards
+    # v = positionPixel[1] - self._traceScale * (pixelViewBox1 - pixelViewBox0) * numpy.array(
+    #   [data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
+    #
+    # hTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
+    # hTrace.setData(x, v)
+
+  def _updateVTraceData(self, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, vTrace,
+                        ph0=None, ph1=None, pivot=None):
+
+    # unfortunately it looks like we have to work in pixels, not ppm, yuck
+    strip = self.strip
+    plotWidget = strip.plotWidget
+    plotItem = plotWidget.plotItem
+    viewBox = strip.viewBox
+    viewRegion = plotWidget.viewRange()
+
+    pointInt = [1 + int(pnt + 0.5) for pnt in point]
+    data = self.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
+    if ph0 is not None and ph1 is not None and pivot is not None:
+      data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+    y = np.array([yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
+    # scale from ppm to pixels
+    pixelViewBox0 = plotItem.getAxis('bottom').height()
+    pixelViewBox1 = pixelViewBox0 + viewBox.height()
+    region0, region1 = viewRegion[1]
+    y -= region0
+    y *= (pixelViewBox1 - pixelViewBox0) / (region1 - region0)
+    ###y += pixelViewBox0  # not sure why this should be commented out...
+
+    pixelViewBox0 = plotItem.getAxis('left').width()
+    pixelViewBox1 = pixelViewBox0 + viewBox.width()
+    # no - sign below because ppm scale is backwards and pixel y scale is also backwards
+    # (assuming that we want positive signal to point towards the right)
+    v = positionPixel[0] + self._traceScale * (pixelViewBox1 - pixelViewBox0) * np.array(
+      [data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
+
+    vTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
+    vTrace.setData(v, y)
+
+  def updateTraces(self):
+
+    cursorPosition = self.current.cursorPosition
+    if cursorPosition:
+      position = list(cursorPosition)
+      for axis in self.orderedAxes[2:]:
+        position.append(axis.position)
+
+      positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+      updateHTrace = self.hTraceAction.isChecked()
+      updateVTrace = self.vTraceAction.isChecked()
+
+      for spectrumView in self.spectrumViews:
+        # spectrumView._updateTrace(position, cursorPixel, updateHTrace, updateVTrace)
+
+        if not (updateHTrace or updateVTrace) or not self.isVisible():
+          # empty traces
+          return
+
+        inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints = spectrumView._getTraceParams(
+          position)
+        # xDataDim and yDataDim should always be set here, because all spectra in strip should at least match in x, y
+
+        if inRange and updateHTrace:
+          self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, self.hTrace)
+        else:
+          # empty H trace
+          pass
+
+        # if inRange and updateVTrace:
+        #   self._updateVTraceData(point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, self.vTrace)
+        # else:
+        #   empty V trace
+          # pass
+        #
+        # self.update()
+
+  def initialiseTraces(self):
+    # set up the arrays and dimension for showing the horizontal/vertical traces
+    for spectrumView in self._parent.spectrumViews:
+      self._spectrumSettings[spectrumView] = {}
+
+      self._spectrumValues = spectrumView._getValues()
+      dx = self.sign(self.axisR - self.axisL)
+      dy = self.sign(self.axisT - self.axisB)
+
+      # get the bounding box of the spectra
+      fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+      fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+      dxAF = fx0 - fx1
+      dyAF = fy0 - fy1
+      xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
+      yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+
+      # create modelview matrix for the spectrum to be drawn
+      self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
+
+      self._spectrumSettings[spectrumView][SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
+                                                                     0.0, yScale, 0.0, 0.0,
+                                                                     0.0, 0.0, 1.0, 0.0,
+                                                                     fx0, fy0, 0.0, 1.0]
+      # setup information for the horizontal/vertical traces
+      self._spectrumSettings[spectrumView][SPECTRUM_MAXXALIAS] = fx0
+      self._spectrumSettings[spectrumView][SPECTRUM_MINXALIAS] = fx1
+      self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS] = fy0
+      self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS] = fy1
+      self._spectrumSettings[spectrumView][SPECTRUM_DXAF] = dxAF
+      self._spectrumSettings[spectrumView][SPECTRUM_DYAF] = dyAF
+      self._spectrumSettings[spectrumView][SPECTRUM_XSCALE] = xScale
+      self._spectrumSettings[spectrumView][SPECTRUM_YSCALE] = yScale
+
+    # for position, dataArray in spectrumView._getPlaneData():
+      #
+      #   # read into the existing dict
+      #   self._spectrumSettings[spectrumView]['dataArray'] = dataArray
 
   def _makeSpectrumArray(self, spectrumView, drawList):
     drawList.renderMode = GLRENDERMODE_DRAW

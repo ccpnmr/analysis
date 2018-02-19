@@ -2598,106 +2598,97 @@ void main()
 
     pointInt = [1 + int(pnt + 0.5) for pnt in point]
     data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
-    if ph0 is not None and ph1 is not None and pivot is not None:
-      data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+    # if ph0 is not None and ph1 is not None and pivot is not None:
+    #   data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
-    x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
-    y = positionPixel[1] - spectrumView._traceScale * (self.axisT-self.axisB) * \
-        np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
+    try:
+      x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
+      y = positionPixel[1] - spectrumView._traceScale * (self.axisT-self.axisB) * \
+          np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
-    colour = spectrumView._getColour('sliceColour', '#aaaaaa')
-    colR = int(colour.strip('# ')[0:2], 16) / 255.0
-    colG = int(colour.strip('# ')[2:4], 16) / 255.0
-    colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-    numVertices = len(x)
-    hSpectrum = self._hTraces[spectrumView.pid]
-    hSpectrum.indices = numVertices
-    hSpectrum.numVertices = numVertices
-    hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-    hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
-    hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
-    hSpectrum.vertices[::2] = x
-    hSpectrum.vertices[1::2] = y
+      if spectrumView.pid not in self._hTraces.keys():
+        self._hTraces[spectrumView.pid] = GLVertexArray(numLists=1,
+                                                        renderMode=GLRENDERMODE_REBUILD,
+                                                        blendMode=False,
+                                                        drawMode=GL.GL_LINE_STRIP,
+                                                        dimension=2,
+                                                        GLContext=self)
+
+      numVertices = len(x)
+      hSpectrum = self._hTraces[spectrumView.pid]
+      hSpectrum.indices = numVertices
+      hSpectrum.numVertices = numVertices
+      hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+      hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+      hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+      hSpectrum.vertices[::2] = x
+      hSpectrum.vertices[1::2] = y
+    except Exception as es:
+      self._hTraces[spectrumView.pid].clearArrays()
 
   def _updateVTraceData(self, spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel,
                         ph0=None, ph1=None, pivot=None):
 
-    pointInt = [1 + int(pnt + 0.5) for pnt in point]
-    data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
-    if ph0 is not None and ph1 is not None and pivot is not None:
-      data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+    try:
+      pointInt = [1 + int(pnt + 0.5) for pnt in point]
+      data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
+      # if ph0 is not None and ph1 is not None and pivot is not None:
+      #   data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
-    y = np.array([yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
-    x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
-        np.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
+      y = np.array([yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
+      x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
+          np.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
 
-    colour = spectrumView._getColour('sliceColour', '#aaaaaa')
-    colR = int(colour.strip('# ')[0:2], 16) / 255.0
-    colG = int(colour.strip('# ')[2:4], 16) / 255.0
-    colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-    numVertices = len(x)
-    vSpectrum = self._vTraces[spectrumView.pid]
-    vSpectrum.indices = numVertices
-    vSpectrum.numVertices = numVertices
-    vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-    vSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
-    vSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
-    vSpectrum.vertices[::2] = x
-    vSpectrum.vertices[1::2] = y
+      if spectrumView.pid not in self._vTraces.keys():
+        self._vTraces[spectrumView.pid] = GLVertexArray(numLists=1,
+                                                        renderMode=GLRENDERMODE_REBUILD,
+                                                        blendMode=False,
+                                                        drawMode=GL.GL_LINE_STRIP,
+                                                        dimension=2,
+                                                        GLContext=self)
+
+      numVertices = len(x)
+      vSpectrum = self._vTraces[spectrumView.pid]
+      vSpectrum.indices = numVertices
+      vSpectrum.numVertices = numVertices
+      vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+      vSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+      vSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+      vSpectrum.vertices[::2] = x
+      vSpectrum.vertices[1::2] = y
+    except Exception as es:
+      self._hTraces[spectrumView.pid].clearArrays()
 
   def updateTraces(self):
     if self._parent.isDeleted:
       return
 
-    cursorPosition = self.current.cursorPosition
-    if cursorPosition:
-      position = list(cursorPosition)
-      for axis in self.orderedAxes[2:]:
-        position.append(axis.position)
+    # cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+    # if cursorPosition:
 
-      positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+    position = [self.cursorCoordinate[0], self.cursorCoordinate[1]]     #list(cursorPosition)
+    for axis in self._orderedAxes[2:]:
+      position.append(axis.position)
 
-      for spectrumView in self._parent.spectrumViews:
+    positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
-          = spectrumView._getTraceParams(position)
+    for spectrumView in self._parent.spectrumViews:
 
-        # create the lists if they don't exist
-        if spectrumView.pid not in self._hTraces.keys():
-          self._hTraces[spectrumView.pid] = GLVertexArray(numLists=1,
-                                          renderMode=GLRENDERMODE_REBUILD,
-                                          blendMode=False,
-                                          drawMode=GL.GL_LINE_STRIP,
-                                          dimension=2,
-                                          GLContext=self)
+      inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
+        = spectrumView._getTraceParams(position)
 
-        if spectrumView.pid not in self._vTraces.keys():
-          self._vTraces[spectrumView.pid] = GLVertexArray(numLists=1,
-                                          renderMode=GLRENDERMODE_REBUILD,
-                                          blendMode=False,
-                                          drawMode=GL.GL_LINE_STRIP,
-                                          dimension=2,
-                                          GLContext=self)
-
-        # if self._updateHTrace == GLRENDERMODE_REBUILD:
-        self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
-        self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
-        # self._hTraces[spectrumView].renderMode = GLRENDERMODE_DRAW
-
-        # if self._updateVTrace:
-        # self._vTraces[spectrumView].renderMode = GLRENDERMODE_DRAW
-
-  # def buildTraces(self):
-  #   if self._hTrace.renderMode == GLRENDERMODE_REBUILD:
-  #     self._hTrace.clearArrays()
-  #
-  #   if self._vTrace.renderMode == GLRENDERMODE_REBUILD:
-  #     self._vTrace.clearArrays()
-  #
-  #   if self._hTrace.renderMode == GLRENDERMODE_REBUILD or self._vTrace.renderMode == GLRENDERMODE_REBUILD:
-  #     self.updateTraces()
+      self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
+      self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
 
   def drawTraces(self):
     # only paint if mouse is in the window

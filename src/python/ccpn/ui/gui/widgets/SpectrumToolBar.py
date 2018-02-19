@@ -89,8 +89,16 @@ class SpectrumToolBar(ToolBar):
         # else:
         #   allPlAction.setChecked(False)
         action.toggled.connect(peakListView.setVisible)
+
+        # TODO:ED check this is okay for each spectrum
+        action.toggled.connect(partial(self._updateVisiblePeakLists, peakListView.spectrumView))
+
     contextMenu.addAction('Remove SP', partial(self._removeSpectrum, button))
     return contextMenu
+
+  def _updateVisiblePeakLists(self, spectrumView, visible):
+    print ('>>>', spectrumView)
+    pass
 
   def _allPeakLists(self, contextMenu, button):
     key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]

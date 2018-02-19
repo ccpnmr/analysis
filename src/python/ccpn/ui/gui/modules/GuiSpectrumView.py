@@ -117,6 +117,13 @@ class GuiSpectrumView(QtWidgets.QGraphicsItem):
     except:
       getLogger().warning('No visible peaklists')
 
+    # repaint all displays - this is called for each spectrumView in the spectrumDisplay
+    # all are attached to the same click
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
+
+
   """
   def setDimMapping(self, dimMapping=None):
     

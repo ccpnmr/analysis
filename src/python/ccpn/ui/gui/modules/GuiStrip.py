@@ -772,6 +772,11 @@ class GuiStrip(Frame):
     if not self._finaliseDone: return
     self.storedZooms.append(self.viewBox.viewRange())
 
+    try:
+      self._testCcpnOpenGLWidget.storeZoom()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
   def _restoreZoom(self):
     """
     Restores last saved region to the zoom stack for the strip.
@@ -784,6 +789,11 @@ class GuiStrip(Frame):
       self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1], padding=padding)
     else:
       self.resetZoom()
+
+    try:
+      self._testCcpnOpenGLWidget.restoreZoom()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
   def _zoomIn(self):
     """
@@ -806,6 +816,11 @@ class GuiStrip(Frame):
     self.plotWidget.setXRange(nl, nr, padding=padding)
     self.plotWidget.setYRange(nb, nt, padding=padding)
 
+    try:
+      self._testCcpnOpenGLWidget.zoomIn()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
   def _zoomOut(self):
     """
     zoom out of the strip.
@@ -826,6 +841,11 @@ class GuiStrip(Frame):
     nb = b-zoomPercent*dy
     self.plotWidget.setXRange(nl, nr, padding=padding)
     self.plotWidget.setYRange(nb, nt, padding=padding)
+
+    try:
+      self._testCcpnOpenGLWidget.zoomOut()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
   def showPeaks(self, peakList:PeakList, peaks:typing.List[Peak]=None):
     ###from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
@@ -892,6 +912,13 @@ def _updateDisplayedMarks(data):
   from ccpn.util.CcpnOpenGL import GLNotifier
   GLSignals = GLNotifier(parent=None)
   GLSignals.emitEvent(triggers=[GLNotifier.GLMARKS])
+
+def _updateSelectedPeaks(data):
+  "Callback when marks have changed"
+
+  from ccpn.util.CcpnOpenGL import GLNotifier
+  GLSignals = GLNotifier(parent=None)
+  GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKS], targets=data[Notifier.OBJECT].peaks)
 
 def _axisRegionChanged(axis:'Axis'):
   """Notifier function: Update strips etc. for when axis position or width changes"""

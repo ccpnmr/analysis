@@ -285,6 +285,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisR = 4
     self.axisT = 20
     self.axisB = 80
+    self.storedZooms = []
 
     self._orderedAxes = None
     self._axisOrder = None
@@ -749,6 +750,60 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisT = axis.region[0]
     self.axisB = axis.region[1]
     self.update()
+
+  def storeZoom(self):
+    self.storedZooms.append((self.axisL, self.axisR, self.axisB, self.axisT))
+
+  def restoreZoom(self):
+    if self.storedZooms:
+      restoredZooms = self.storedZooms.pop()
+      self.axisL, self.axisR, self.axisB, self.axisT = restoredZooms[0], restoredZooms[1], restoredZooms[2], restoredZooms[3]
+    else:
+      self._resetAxisRange()
+
+    self._rescaleAllAxes()
+
+  def zoomIn(self):
+    zoomPercent = -self._preferences.zoomPercent/100.0
+    dx = (self.axisR-self.axisL)/2.0
+    dy = (self.axisT-self.axisB)/2.0
+    self.axisL -= zoomPercent*dx
+    self.axisR += zoomPercent*dx
+    self.axisT += zoomPercent*dy
+    self.axisB -= zoomPercent*dy
+
+    self._rescaleAllAxes()
+
+  def zoomOut(self):
+    zoomPercent = self._preferences.zoomPercent / 100.0
+    dx = (self.axisR - self.axisL) / 2.0
+    dy = (self.axisT - self.axisB) / 2.0
+    self.axisL -= zoomPercent * dx
+    self.axisR += zoomPercent * dx
+    self.axisT += zoomPercent * dy
+    self.axisB -= zoomPercent * dy
+
+    self._rescaleAllAxes()
+
+  def _resetAxisRange(self):
+    """
+    reset the axes to the limits of the spectra in this view
+    """
+    axisLimits = []
+
+    for spectrumView in self._parent.spectrumViews:
+      if not axisLimits:
+        axisLimits = [self._spectrumSettings[spectrumView][SPECTRUM_MAXXALIAS],
+                      self._spectrumSettings[spectrumView][SPECTRUM_MINXALIAS],
+                      self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS],
+                      self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS]]
+      else:
+        axisLimits[0] = max(axisLimits[0], self._spectrumSettings[spectrumView][SPECTRUM_MAXXALIAS])
+        axisLimits[1] = min(axisLimits[1], self._spectrumSettings[spectrumView][SPECTRUM_MINXALIAS])
+        axisLimits[2] = max(axisLimits[2], self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS])
+        axisLimits[3] = min(axisLimits[3], self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS])
+
+    self.axisL, self.axisR, self.axisB, self.axisT = axisLimits
 
   def initializeGL(self):
 
@@ -1399,6 +1454,53 @@ void main()
       for pp in range(0, 2*drawList.numVertices, 8):
         drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
 
+  def _updateHighlightedPeaks(self, spectrumView):
+    spectrum = spectrumView.spectrum
+    strip = self._parent
+
+    symbolType = self._preferences.peakSymbolType
+    symbolWidth = self._preferences.peakSymbolSize / 2.0
+    lineThickness = self._preferences.peakSymbolThickness / 2.0
+
+    drawList = self._GLPeakLists[spectrum.pid]
+    drawList.indices = np.zeros(2000, dtype=np.uint)
+
+    index = 0
+    if symbolType == 0:
+
+      # for peak in pls.peaks:
+      for pp in range(0, len(drawList.pids), 8):
+        peak = drawList.pids[pp]
+        offset = drawList.pids[pp+1]
+
+        _isInPlane = strip.peakIsInPlane(peak)
+        if not _isInPlane:
+          _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        else:
+          _isInFlankingPlane = None
+
+        if _isInPlane or _isInFlankingPlane:
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            colR, colG, colB = self.highlightColour[:3]
+            drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3,])
+                                                            # index, index+2, index+2, index+1,
+                                                            # index, index+3, index+3, index+1])
+          else:
+            colour = peak.peakList.symbolColour
+            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            colG = int(colour.strip('# ')[2:4], 16) / 255.0
+            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+            drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+
+          # try:
+          drawList.colors[offset*4:offset*4+16] = [colR, colG, colB, 1.0] * 4
+          # except Exception as es:
+          #   pass
+        else:
+          pass
+
+        index += 4
+
   def _buildPeakLists(self, spectrumView):
     spectrum = spectrumView.spectrum
 
@@ -1462,17 +1564,16 @@ void main()
           else:
             _isInFlankingPlane = None
 
-          if not _isInPlane and not _isInFlankingPlane:
-            continue
+          # if not _isInPlane and not _isInFlankingPlane:
+          #   continue
 
           if hasattr(peak, '_isSelected') and peak._isSelected:
-            colour = self.highlightColour
+            colR, colG, colB = self.highlightColour[:3]
           else:
             colour = pls.symbolColour
-
-          colR = int(colour.strip('# ')[0:2], 16)/255.0
-          colG = int(colour.strip('# ')[2:4], 16)/255.0
-          colB = int(colour.strip('# ')[4:6], 16)/255.0
+            colR = int(colour.strip('# ')[0:2], 16)/255.0
+            colG = int(colour.strip('# ')[2:4], 16)/255.0
+            colB = int(colour.strip('# ')[4:6], 16)/255.0
 
           # get the correct coordinates based on the axisCodes
           p0 = [0.0] * 2            #len(self.axisOrder)
@@ -1502,7 +1603,16 @@ void main()
             if symbolType == 0:
               # draw a cross
               # keep the cross square at 0.1ppm
-              drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+
+              # unselected
+              if _isInPlane or _isInFlankingPlane:
+                if peak._isSelected:
+                  drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3,
+                                                                  index, index+2, index+2, index+1,
+                                                                  index, index+3, index+3, index+1])
+                else:
+                  drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+
               drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
                                                                 , p0[0]+r, p0[1]+w
                                                                 , p0[0]+r, p0[1]-w
@@ -1512,6 +1622,10 @@ void main()
                                                               ,p0[0], p0[1]
                                                               ,p0[0], p0[1]
                                                               ,p0[0], p0[1]])
+
+              # keep a pointer to the peak
+              drawList.pids = np.append(drawList.pids, [peak, index, 4, _isInPlane, _isInFlankingPlane, peak._isSelected, 0, 0])
+
               index += 4
               drawList.numVertices += 4
 
@@ -1906,23 +2020,23 @@ void main()
 
     # GL.glDisable(GL.GL_BLEND)
     for spectrumView in self._parent.spectrumViews:
+      if spectrumView.isVisible():
+        GL.glLineWidth(lineThickness)
+        self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
+        GL.glLineWidth(1.0)
 
-      GL.glLineWidth(lineThickness)
-      self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
-      GL.glLineWidth(1.0)
-
-  def drawLabels(self):
-    if self._parent.isDeleted:
-      return
-
-    for spectrumView in self._parent.spectrumViews:
-
-      if spectrumView.buildPeakListLabels:
-        spectrumView.buildPeakListLabels = False
-
-        self._buildPeakListLabels(spectrumView)      # should include rescaling
-
-      self._drawPeakListLabels(spectrumView)
+  # def drawLabels(self):
+  #   if self._parent.isDeleted:
+  #     return
+  #
+  #   for spectrumView in self._parent.spectrumViews:
+  #     if spectrumView.isVisible():
+  #       if spectrumView.buildPeakListLabels:
+  #         spectrumView.buildPeakListLabels = False
+  #
+  #         self._buildPeakListLabels(spectrumView)      # should include rescaling
+  #
+  #       self._drawPeakListLabels(spectrumView)
 
   def drawPeakListLabels(self):
     if self._parent.isDeleted:
@@ -1931,7 +2045,8 @@ void main()
     self.buildPeakListLabels()
 
     for spectrumView in self._parent.spectrumViews:
-      self._drawPeakListLabels(spectrumView)
+      if spectrumView.isVisible():
+        self._drawPeakListLabels(spectrumView)
 
   def drawSpectra(self):
     if self._parent.isDeleted:
@@ -1967,41 +2082,20 @@ void main()
     # draw the bounding boxes
     GL.glEnable(GL.GL_BLEND)
     for spectrumView in self._parent.spectrumViews:
-      try:
+      if spectrumView.isVisible() and self._preferences.showSpectrumBorder:
         self._spectrumValues = spectrumView._getValues()
-        # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
-        # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
 
         # get the bounding box of the spectra
         fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
         fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
 
-        # draw the bounding box
-        # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-
         GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
-        # GL.glLineStipple(1, 0xAAAA)
-        # GL.glEnable(GL.GL_LINE_STIPPLE)
         GL.glBegin(GL.GL_LINE_LOOP)
         GL.glVertex2d(fx0, fy0)
         GL.glVertex2d(fx0, fy1)
         GL.glVertex2d(fx1, fy1)
         GL.glVertex2d(fx1, fy0)
         GL.glEnd()
-
-        # draw the peak List, labelling, marks
-
-        # self._buildPeakLists(spectrumView)      # should include rescaling
-
-        # GL.glLineWidth(lineThickness)
-        # self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
-        # GL.glLineWidth(1.0)
-        # self._drawPeakListVertices(spectrumView)
-
-        # self._buildPeakListLabels(spectrumView)      # should include rescaling
-        # self._drawPeakListLabels(spectrumView)
-      except Exception as es:
-        raise es
 
   def buildGrid(self):
     self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],
@@ -2597,12 +2691,13 @@ void main()
   def _updateHTraceData(self, spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
                         ph0=None, ph1=None, pivot=None):
 
-    pointInt = [1 + int(pnt + 0.5) for pnt in point]
-    data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
-    # if ph0 is not None and ph1 is not None and pivot is not None:
-    #   data = Phasing.phaseRealData(data, ph0, ph1, pivot)
-
     try:
+      pointInt = [1 + int(pnt + 0.5) for pnt in point]
+      data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
+
+      if ph0 is not None and ph1 is not None and pivot is not None:
+        data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+
       x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
       y = positionPixel[1] - spectrumView._traceScale * (self.axisT-self.axisB) * \
           np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
@@ -2638,8 +2733,9 @@ void main()
     try:
       pointInt = [1 + int(pnt + 0.5) for pnt in point]
       data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
-      # if ph0 is not None and ph1 is not None and pivot is not None:
-      #   data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+
+      if ph0 is not None and ph1 is not None and pivot is not None:
+        data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
       y = np.array([yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
       x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
@@ -2688,6 +2784,7 @@ void main()
       inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
         = spectrumView._getTraceParams(position)
 
+      # TODO:ED add on the parameters from the phasingFrame
       self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
       self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
 
@@ -3303,6 +3400,13 @@ void main()
         if GLNotifier.GLMARKS in triggers:
           self._marksList.renderMode = GLRENDERMODE_REBUILD
 
+        if GLNotifier.GLPEAKS in triggers:
+          for spectrumView in self._parent.spectrumViews:
+            self._updateHighlightedPeaks(spectrumView)
+
+            # spectrumView.buildPeakLists = True
+          # self.buildPeakLists()
+
     # repaint
     self.update()
 
@@ -3849,6 +3953,8 @@ class GLVertexArray():
     self.colors = np.array([], dtype=np.float32)      #np.zeros((len(text)*4,4), dtype=np.float32)
     self.texcoords= np.array([], dtype=np.float32)    #np.zeros((len(text)*4,2), dtype=np.float32)
     self.attribs = np.array([], dtype=np.float32)     #np.zeros((len(text)*4,1), dtype=np.float32)
+    self.pids = np.array([], dtype=np.object_)     #np.zeros((len(text)*4,1), dtype=np.object_)
+
     self.numVertices = 0
 
     self.numLists = numLists

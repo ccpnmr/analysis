@@ -96,6 +96,8 @@ class Gui(Ui):
     project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks)
     project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks)
     project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks)
+    # TODO:ED sorry - don't actually want _appBase
+    self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
 
     from ccpn.ui.gui.modules import GuiSpectrumDisplay
     project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)

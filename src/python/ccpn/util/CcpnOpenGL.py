@@ -1025,6 +1025,22 @@ void main()
                                     dimension=2,
                                     GLContext=self)
 
+    self._hTraces = {}
+    self._vTraces = {}
+
+    # self._hTrace = GLVertexArray(numLists=1,
+    #                                 renderMode=GLRENDERMODE_IGNORE,
+    #                                 blendMode=False,
+    #                                 drawMode=GL.GL_LINE_STRIP,
+    #                                 dimension=2,
+    #                                 GLContext=self)
+    # self._vTrace = GLVertexArray(numLists=1,
+    #                                 renderMode=GLRENDERMODE_IGNORE,
+    #                                 blendMode=False,
+    #                                 drawMode=GL.GL_LINE_STRIP,
+    #                                 dimension=2,
+    #                                 GLContext=self)
+
     # self._axisLabels = GLVertexArray(numLists=1
     #                                   , renderMode=GLRENDERMODE_REBUILD
     #                                   , blendMode=True
@@ -1224,6 +1240,10 @@ void main()
     """
     self.current.strip = self.strip
 
+  def leaveEvent(self, ev: QtCore.QEvent):
+    super(CcpnGLWidget, self).leaveEvent(ev)
+    self.update()
+
   def mouseMoveEvent(self, event):
     self.setFocus()
     dx = event.pos().x() - self.lastPos.x()
@@ -1292,12 +1312,15 @@ void main()
 
     self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
 
+    # spawn rebuild/paint of traces
     if self._updateHTrace or self._updateVTrace:
       self.updateTraces()
+
     self.update()
 
   @pyqtSlot(bool)
   def paintGLsignal(self, bool):
+    # TODO:ED is this needed?
     # my signal to update the screen after the spectra have changed
     if bool:
       self.update()
@@ -1529,7 +1552,7 @@ void main()
   def _buildPeakListLabels(self, spectrumView):
     spectrum = spectrumView.spectrum
 
-    if spectrum.pid not in self._GLPeakListLabels:
+    if spectrum.pid not in self._GLPeakListLabels.keys():
       self._GLPeakListLabels[spectrum.pid] = GLVertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
                                                       , blendMode=False, drawMode=GL.GL_LINES
                                                       , dimension=2, GLContext=self)
@@ -1708,15 +1731,16 @@ void main()
     if self._crossHairVisible:
       self.drawCursors()
 
+    if not self._drawSelectionBox:
+      self.drawTraces()
+
     currentShader = self._shaderProgramTex.makeCurrent()
 
     if self._crossHairVisible:
       self.drawMouseCoords()
 
     self.drawOverlayText()
-
     self.drawAxisLabels()
-
     self.disableTexture()
 
     # use the current viewport matrix to display the last bit of the axes
@@ -1879,7 +1903,7 @@ void main()
 
     lineThickness = self._preferences.peakSymbolThickness
 
-    GL.glDisable(GL.GL_BLEND)
+    # GL.glDisable(GL.GL_BLEND)
     for spectrumView in self._parent.spectrumViews:
 
       GL.glLineWidth(lineThickness)
@@ -2581,8 +2605,20 @@ void main()
     y = positionPixel[1] - spectrumView._traceScale * (self.axisT-self.axisB) * \
         np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
-    # now change into a vertex array for plotting and flag for paint
-    pass
+    colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+    colR = int(colour.strip('# ')[0:2], 16) / 255.0
+    colG = int(colour.strip('# ')[2:4], 16) / 255.0
+    colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+    numVertices = len(x)
+    hSpectrum = self._hTraces[spectrumView.pid]
+    hSpectrum.indices = numVertices
+    hSpectrum.numVertices = numVertices
+    hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+    hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+    hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+    hSpectrum.vertices[::2] = x
+    hSpectrum.vertices[1::2] = y
 
   def _updateVTraceData(self, spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel,
                         ph0=None, ph1=None, pivot=None):
@@ -2596,10 +2632,24 @@ void main()
     x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
         np.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
 
-    # now change into a vertex array for plotting and flag for paint
-    pass
+    colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+    colR = int(colour.strip('# ')[0:2], 16) / 255.0
+    colG = int(colour.strip('# ')[2:4], 16) / 255.0
+    colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+    numVertices = len(x)
+    vSpectrum = self._vTraces[spectrumView.pid]
+    vSpectrum.indices = numVertices
+    vSpectrum.numVertices = numVertices
+    vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+    vSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+    vSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+    vSpectrum.vertices[::2] = x
+    vSpectrum.vertices[1::2] = y
 
   def updateTraces(self):
+    if self._parent.isDeleted:
+      return
 
     cursorPosition = self.current.cursorPosition
     if cursorPosition:
@@ -2611,15 +2661,56 @@ void main()
 
       for spectrumView in self._parent.spectrumViews:
 
-        inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints = spectrumView._getTraceParams(
-          position)
-        # xDataDim and yDataDim should always be set here, because all spectra in strip should at least match in x, y
+        inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
+          = spectrumView._getTraceParams(position)
 
-        # if self._updateHTrace:
-        #   self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
+        # create the lists if they don't exist
+        if spectrumView.pid not in self._hTraces.keys():
+          self._hTraces[spectrumView.pid] = GLVertexArray(numLists=1,
+                                          renderMode=GLRENDERMODE_REBUILD,
+                                          blendMode=False,
+                                          drawMode=GL.GL_LINE_STRIP,
+                                          dimension=2,
+                                          GLContext=self)
+
+        if spectrumView.pid not in self._vTraces.keys():
+          self._vTraces[spectrumView.pid] = GLVertexArray(numLists=1,
+                                          renderMode=GLRENDERMODE_REBUILD,
+                                          blendMode=False,
+                                          drawMode=GL.GL_LINE_STRIP,
+                                          dimension=2,
+                                          GLContext=self)
+
+        # if self._updateHTrace == GLRENDERMODE_REBUILD:
+        self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
+        self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
+        # self._hTraces[spectrumView].renderMode = GLRENDERMODE_DRAW
 
         # if self._updateVTrace:
-        #   self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
+        # self._vTraces[spectrumView].renderMode = GLRENDERMODE_DRAW
+
+  # def buildTraces(self):
+  #   if self._hTrace.renderMode == GLRENDERMODE_REBUILD:
+  #     self._hTrace.clearArrays()
+  #
+  #   if self._vTrace.renderMode == GLRENDERMODE_REBUILD:
+  #     self._vTrace.clearArrays()
+  #
+  #   if self._hTrace.renderMode == GLRENDERMODE_REBUILD or self._vTrace.renderMode == GLRENDERMODE_REBUILD:
+  #     self.updateTraces()
+
+  def drawTraces(self):
+    # only paint if mouse is in the window
+    if self.underMouse():
+      # self.updateTraces()
+
+      if self._updateHTrace:
+        for hTrace in self._hTraces.keys():
+          self._hTraces[hTrace].drawIndexArray()
+
+      if self._updateVTrace:
+        for vTrace in self._vTraces.keys():
+          self._vTraces[vTrace].drawIndexArray()
 
   def initialiseTraces(self):
     # set up the arrays and dimension for showing the horizontal/vertical traces

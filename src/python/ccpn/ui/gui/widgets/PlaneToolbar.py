@@ -261,9 +261,4 @@ class PlaneToolbar(ToolBar):
       if self.nextPlaneCallback:
         self.nextPlaneCallback(n)
 
-    # TODO:ED need to rebuild the contours here
-
-    # redraw the contours
-    for specNum, thisSpecView in enumerate(self.strip.spectrumDisplay.spectrumViews):
-      thisSpecView.buildContours = True
-      thisSpecView.update()
+    self.strip._rebuildContours()

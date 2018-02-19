@@ -1242,6 +1242,7 @@ void main()
 
   def leaveEvent(self, ev: QtCore.QEvent):
     super(CcpnGLWidget, self).leaveEvent(ev)
+    self._drawSelectionBox = False
     self.update()
 
   def mouseMoveEvent(self, event):
@@ -1942,19 +1943,19 @@ void main()
     GL.glDisable(GL.GL_BLEND)
 
     for spectrumView in self._parent.spectrumViews:
+      if spectrumView.isVisible():
+        # set the scale matrix
+        self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
+                                                   , 1, GL.GL_FALSE
+                                                   , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
-      # set the scale matrix
-      self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
-                                                 , 1, GL.GL_FALSE
-                                                 , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
+        # draw the spectrum - call the existing glCallList
+        spectrumView._paintContoursNoClip()
 
-      # draw the spectrum - call the existing glCallList
-      spectrumView._paintContoursNoClip()
-
-      # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
-      #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW
-      #
-      #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
+        # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
+        #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW
+        #
+        #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
     # reset the modelview matrix
     # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,

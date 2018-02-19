@@ -196,12 +196,16 @@ class GuiStripNd(GuiStrip):
       pass
 
   def _rebuildStripContours(self):
-    # TODO:ED need to rebuild the contours here
+    # self._rebuildContours()
 
     # redraw the contours
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+
     for specNum, thisSpecView in enumerate(self.spectrumDisplay.spectrumViews):
       thisSpecView.buildContours = True
-      thisSpecView.update()
+
+    GLSignals.emitPaintEvent()
 
   def _get2dContextMenu(self) -> Menu:
     """

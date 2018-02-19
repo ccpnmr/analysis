@@ -101,6 +101,16 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         action.setIcon(ic)
       self._spectrumUtilActions[aName] = action
 
+  def _rebuildContours(self):
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+
+    for specViews in self.spectrumViews:
+      specViews.buildContours = True
+
+    # repaint
+    GLSignals.emitPaintEvent()
+
   def raiseContourBase(self):
     """
     Increases contour base level for all spectra visible in the display.
@@ -142,7 +152,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           # Display has custom contour base - change that one only
           spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
 
-        spectrumView.rebuildContours()
+        # spectrumView.rebuildContours()
         # spectrumView.update()
 
         mainWindow = self.mainWindow
@@ -153,6 +163,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
         getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
         getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
+
+    self._rebuildContours()
 
   def lowerContourBase(self):
     """
@@ -195,7 +207,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           # Display has custom contour base - change that one only
           spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
 
-        spectrumView.rebuildContours()
+        # spectrumView.rebuildContours()
         # spectrumView.update()
 
         mainWindow = self.mainWindow
@@ -206,6 +218,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
         getLogger().info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
         getLogger().info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
+
+    self._rebuildContours()
 
   def addContourLevel(self):
     """
@@ -246,7 +260,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           # Display has custom contour count - change that one only
           spectrumView.negativeContourCount += 1
 
-        spectrumView.rebuildContours()
+        # spectrumView.rebuildContours()
         # spectrumView.update()
 
         mainWindow = self.mainWindow
@@ -257,6 +271,8 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
         getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
         getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
+
+    self._rebuildContours()
 
   def removeContourLevel(self):
     """
@@ -301,7 +317,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
           if spectrumView.negativeContourCount:
             spectrumView.negativeContourCount -= 1
 
-        spectrumView.rebuildContours()
+        # spectrumView.rebuildContours()
         # spectrumView.update()
 
         mainWindow = self.mainWindow
@@ -312,7 +328,9 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         getLogger().info("spectrum = project.getByPid(%s)" % spectrum.pid)
         getLogger().info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
         getLogger().info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
-    
+
+    self._rebuildContours()
+
   def adjustContours(self):
     # insert popup to modify contours
     popup = SpectrumDisplayPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, orderedSpectra=self.orderedSpectra())

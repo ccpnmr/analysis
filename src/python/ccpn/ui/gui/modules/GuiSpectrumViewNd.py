@@ -650,12 +650,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   # NBNB TBD internal functions should start with UNDERSCORE!
   # REFACTOR
 
-  def rebuildContours(self):
-    # trigger a rebuild of the contours, and a refresh of the screen
-    self.buildContours = True
-    self.update()   # only seems to work from the buttons
-
-    self._buildSignal._emitSignal(self.buildContours)
+  # def rebuildContours(self):
+  #   # trigger a rebuild of the contours, and a refresh of the screen
+  #   self.buildContours = True
+  #   self.update()   # only seems to work from the buttons
+  #
+  #   self._buildSignal._emitSignal(self.buildContours)
 
   #def drawContours(self, painter, guiStrip):
   def _buildContours(self, painter):

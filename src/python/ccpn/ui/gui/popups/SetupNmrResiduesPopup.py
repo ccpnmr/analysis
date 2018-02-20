@@ -45,6 +45,7 @@ class SetupNmrResiduesPopup(CcpnDialog):
     self.project = self.mainWindow.project
 
     label1a = Label(self, text="Source PeakList ", grid=(0, 0))
+    # Fixme , needs notifier for this pulldown. 
     self.peakListPulldown = PulldownList(self, grid=(0, 1))
     self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
       if peakList.spectrum.experimentType == 'H[N]' or peakList.spectrum.experimentType == 'H[N[CO]]'])
@@ -64,7 +65,7 @@ class SetupNmrResiduesPopup(CcpnDialog):
 
 
   def _setupNmrResidues(self):
-    # FIXME Why just 15N ?
+    # FIXME This is broken! remove all hardcoded str
     self.project._startCommandEchoBlock('_setupNmrResidues')
     try:
       peakList = self.project.getByPid(self.peakListPulldown.currentText())

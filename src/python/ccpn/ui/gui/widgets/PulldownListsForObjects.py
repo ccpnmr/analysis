@@ -125,6 +125,11 @@ class NmrChainPulldown(_Pulldown):
     attributeName = 'nmrChains'
 
 
+class ChainPulldown(_Pulldown):
+  className = 'Chain'
+  attributeName = 'chains'
+
+
 class StructurePulldown(_Pulldown):
   className = 'StructureEnsemble'
   attributeName = 'structureEnsembles'

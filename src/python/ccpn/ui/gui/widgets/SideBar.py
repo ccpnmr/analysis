@@ -155,7 +155,7 @@ def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
   getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
   getLogger().info('application.createSpectrumDisplay(spectrum)')
 
-def _openSpectrumGroup(mainWindow, spectrumGroup):
+def _openSpectrumGroup(mainWindow, spectrumGroup, relativeTo=None):
   '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
   Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
 

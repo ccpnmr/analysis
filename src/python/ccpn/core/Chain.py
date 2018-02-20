@@ -261,9 +261,18 @@ class Chain(AbstractWrapperObject):
 
   def _toNmrChain(self):
     ''' Makes an Nmr Chain from the chain '''
-    nmrChain = self.project.fetchNmrChain()
-    for residue in self.residues:
-      nmrChain.fetchNmrResidue(sequenceCode= residue.sequenceCode, residueType = residue.residueType)
+    try:
+      nmrChain = self.project.newNmrChain(isConnected=True)
+      for residue in self.residues:
+        nmrResidue = nmrChain.newNmrResidue(sequenceCode= residue.sequenceCode, residueType = residue.residueType)
+        atomNames = [atom.name for atom in residue.atoms]
+        for atomName in atomNames:
+          if atomName:
+            nmrResidue.newNmrAtom(atomName)
+    except Exception as e:
+      self.project._logger.warning("Error in creating an NmrChain from Chain: %s"
+                                    % e)
+
 
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:

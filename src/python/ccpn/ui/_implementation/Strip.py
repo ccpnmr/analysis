@@ -707,29 +707,26 @@ class Strip(AbstractWrapperObject):
     try:
       for spectrumView in self.spectrumViews:
 
-        # if not spectrumView.peakListViews: # this can happen if no peakLists, so create one
-        #   self._project.unblankNotification() # need this otherwise SideBar does not get updated
-        #   spectrumView.spectrum.newPeakList()
-        #   self._project.blankNotification()
-        # peakListView = spectrumView.peakListViews[0]
-        # # TODO: is there some way of specifying which peakListView
-        # if not peakListView.isVisible():
-        #   continue
-        # peakList = peakListView.peakList
-
-        if not spectrumView.spectrum.peakLists:
+        if not spectrumView.peakListViews: # this can happen if no peakLists, so create one
           self._project.unblankNotification() # need this otherwise SideBar does not get updated
           spectrumView.spectrum.newPeakList()
           self._project.blankNotification()
 
-        peakList = spectrumView.spectrum.peakLists[0]
+        for peakListView in spectrumView.peakListViews:
 
-        peak = peakList.newPeak(position=position)
-        # note, the height below is not derived from any fitting
-        # but is a weighted average of the values at the neighbouring grid points
-        peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-        result.append(peak)
-        peakLists.append(peakList)
+            # find the first visible peakList
+            if not peakListView.isVisible() or not spectrumView.isVisible():
+              continue
+
+            peakList = peakListView.peakList
+            peak = peakList.newPeak(position=position)
+
+            # note, the height below is not derived from any fitting
+            # but is a weighted average of the values at the neighbouring grid points
+            peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+            result.append(peak)
+            peakLists.append(peakList)
+
 
     finally:
       self._endCommandEchoBlock()
@@ -764,6 +761,76 @@ class Strip(AbstractWrapperObject):
         if not peakListView.isVisible():
           continue
         peakList = peakListView.peakList
+
+        if spectrumView.spectrum.dimensionCount > 1:
+          sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
+          spectrumAxisCodes = spectrumView.spectrum.axisCodes
+          stripAxisCodes = self.axisCodes
+          sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+
+          remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+          for n, axisCode in enumerate(spectrumAxisCodes):
+            # idx = stripAxisCodes.index(axisCode)
+            idx = remapIndices[n]
+            sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+          newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
+                                          doPos=spectrumView.displayPositiveContours,
+                                          doNeg=spectrumView.displayNegativeContours,
+                                          fitMethod='gaussian', minDropfactor=minDropfactor)
+        else:
+          # 1D's
+          # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
+          newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]))
+          # y0 = startPosition.y()
+          # y1 = endPosition.y()
+          # y0, y1 = min(y0, y1), max(y0, y1)
+          # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
+
+        result.extend(newPeaks)
+
+        # # Add the new peaks to selection
+        # for peak in newPeaks:
+        #   # peak.isSelected = True
+        #   self.current.addPeak(peak)
+
+        # for window in project.windows:
+        #   for spectrumDisplay in window.spectrumDisplays:
+        #     for strip in spectrumDisplay.strips:
+        #       spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews]
+        #       if peakList.spectrum in spectra:
+        #               strip.showPeaks(peakList)
+
+    finally:
+      self._endCommandEchoBlock()
+      self._project.unblankNotification()
+
+    for peak in result:
+      peak._finaliseAction('create')
+    #
+    return tuple(result)
+
+  def glPeakPickRegion(self, selectedRegion:List[List[float]]) -> Tuple[Peak]:
+    """Peak pick all spectra currently displayed in strip in selectedRegion """
+
+    result = []
+
+    project = self.project
+    minDropfactor = project._appBase.preferences.general.peakDropFactor
+
+    self._startCommandEchoBlock('peakPickRegion', selectedRegion)
+    self._project.blankNotification()
+    try:
+
+      for spectrumView in self.spectrumViews:
+        if not spectrumView.isVisible():
+          continue
+
+        if not spectrumView.spectrum.peakLists:
+          self._project.unblankNotification() # need this otherwise SideBar does not get updated
+          spectrumView.spectrum.newPeakList()
+          self._project.blankNotification()
+
+        peakList = spectrumView.spectrum.peakLists[0]
 
         if spectrumView.spectrum.dimensionCount > 1:
           sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]

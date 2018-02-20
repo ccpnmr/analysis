@@ -592,15 +592,21 @@ class GuiStrip(Frame):
 
     if self.spectrumViews:
       for sV in self.spectrumViews:
-        for peakList in sV.spectrum.peakLists:
 
-          peakListView = self._findPeakListView(peakList)
-          if peakListView:
-            peakListView._changedPeakListView()
+        for peakListView in sV.peakListViews:
+          peakListView.buildPeakLists = True
+          peakListView.buildPeakListLabels = True
 
-        # new for the OpenGL widget - emit a signal?
-        sV.buildPeakLists = True
-        sV.buildPeakListLabels = True
+      # old code from plotWidget
+        # for peakList in sV.spectrum.peakLists:
+        #
+        #   peakListView = self._findPeakListView(peakList)
+        #   if peakListView:
+        #     peakListView._changedPeakListView()
+        #
+        # # new for the OpenGL widget - emit a signal?
+        # sV.buildPeakLists = True
+        # sV.buildPeakListLabels = True
 
   def _crosshairCode(self, axisCode):
     # determines what axisCodes are compatible as far as drawing crosshair is concerned

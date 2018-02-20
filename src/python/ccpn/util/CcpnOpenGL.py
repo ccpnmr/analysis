@@ -771,7 +771,8 @@ class CcpnGLWidget(QOpenGLWidget):
     else:
       self._resetAxisRange()
 
-    self._rescaleAllAxes()
+    # use this because it rescales all the symbols
+    self._rescaleXAxis()
 
   def zoomIn(self):
     zoomPercent = -self._preferences.zoomPercent/100.0
@@ -1288,6 +1289,8 @@ void main()
 
     else:
       if self._selectionMode != 0:
+
+        # end of drag event
         self._mouseDragEvent(ev)
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
@@ -1346,7 +1349,7 @@ void main()
     # axisCodes = strip.axisCodes
     # orderedAxes = strip.orderedAxes
 
-    currentPos = self._parent.current.cursorPosition
+    currentPos = self.current.cursorPosition
     mouseMovedDict = dict(strip=self._parent)   #strip)
     xPos = yPos = 0
     for n, axisCode in enumerate(self._axisCodes):
@@ -1362,7 +1365,7 @@ void main()
           pos = 0
       mouseMovedDict[axisCode] = pos
 
-    self._parent.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
+    self.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
 
     if event.buttons() & Qt.LeftButton:
       # do the complicated keypresses first
@@ -1430,8 +1433,8 @@ void main()
 
     GL.glCallList(self.GLMarkList[0])
 
-  def _rescalePeakListLabels(self, spectrumView):
-    drawList = self._GLPeakLists[spectrumView.spectrum.pid]
+  def _rescalePeakListLabels(self, spectrumView, peakListView):
+    drawList = self._GLPeakLists[peakListView.pid]
     symbolWidth = self._preferences.peakSymbolSize / 2.0
 
     x = abs(self.pixelX)
@@ -1457,8 +1460,8 @@ void main()
       for pp in range(0, vertices):
         self.stripIDString.attribs[pp] = offsets
 
-  def _rescalePeakList(self, spectrumView):
-    drawList = self._GLPeakLists[spectrumView.spectrum.pid]
+  def _rescalePeakList(self, spectrumView, peakListView):
+    drawList = self._GLPeakLists[peakListView.pid]
 
     if drawList.refreshMode == GLREFRESHMODE_REBUILD:
       symbolWidth = self._preferences.peakSymbolSize / 2.0
@@ -1479,7 +1482,7 @@ void main()
       for pp in range(0, 2*drawList.numVertices, 8):
         drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
 
-  def _updateHighlightedPeaks(self, spectrumView):
+  def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
     strip = self._parent
 
@@ -1487,7 +1490,7 @@ void main()
     symbolWidth = self._preferences.peakSymbolSize / 2.0
     lineThickness = self._preferences.peakSymbolThickness / 2.0
 
-    drawList = self._GLPeakLists[spectrum.pid]
+    drawList = self._GLPeakLists[peakListView.pid]
     drawList.indices = np.empty(0, dtype=np.uint)
 
     index = 0
@@ -1526,15 +1529,15 @@ void main()
 
         index += 4
 
-  def _buildPeakLists(self, spectrumView):
+  def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
 
-    if spectrum.pid not in self._GLPeakLists:
-      self._GLPeakLists[spectrum.pid] = GLVertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
+    if peakListView.pid not in self._GLPeakLists:
+      self._GLPeakLists[peakListView.pid] = GLVertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
                                                       , blendMode=False, drawMode=GL.GL_LINES
                                                       , dimension=2, GLContext=self)
 
-    drawList = self._GLPeakLists[spectrum.pid]
+    drawList = self._GLPeakLists[peakListView.pid]
 
     if drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -1576,12 +1579,163 @@ void main()
 
       # build the peaks VBO
       index=0
-      for pls in spectrum.peakLists:
-        spectrumFrequency = spectrum.spectrometerFrequencies
+      # for pls in spectrum.peakLists:
 
-        for peak in pls.peaks:
+      pls = peakListView.peakList
 
-          # TODO:ED display the required peaks - possibly build all then on draw selected later
+      spectrumFrequency = spectrum.spectrometerFrequencies
+
+      for peak in pls.peaks:
+
+        # TODO:ED display the required peaks - possibly build all then on draw selected later
+        strip = spectrumView.strip
+        _isInPlane = strip.peakIsInPlane(peak)
+        if not _isInPlane:
+          _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        else:
+          _isInFlankingPlane = None
+
+        # if not _isInPlane and not _isInFlankingPlane:
+        #   continue
+
+        if hasattr(peak, '_isSelected') and peak._isSelected:
+          colR, colG, colB = self.highlightColour[:3]
+        else:
+          colour = pls.symbolColour
+          colR = int(colour.strip('# ')[0:2], 16)/255.0
+          colG = int(colour.strip('# ')[2:4], 16)/255.0
+          colB = int(colour.strip('# ')[4:6], 16)/255.0
+
+        # get the correct coordinates based on the axisCodes
+        p0 = [0.0] * 2            #len(self.axisOrder)
+        lineWidths = [None] * 2    #len(self.axisOrder)
+        frequency = [0.0] * 2     #len(self.axisOrder)
+        axisCount = 0
+        for ps, psCode in enumerate(self.axisOrder[0:2]):
+          for pp, ppCode in enumerate(peak.axisCodes):
+
+            if self._preferences.matchAxisCode == 0:  # default - match atom type
+              if ppCode[0] == psCode[0]:
+                p0[ps] = peak.position[pp]
+                lineWidths[ps] = peak.lineWidths[pp]
+                frequency[ps] = spectrumFrequency[pp]
+                axisCount += 1
+
+            elif self._preferences.matchAxisCode == 1:  # match full code
+              if ppCode == psCode:
+                p0[ps] = peak.position[pp]
+                lineWidths[ps] = peak.lineWidths[pp]
+                frequency[ps] = spectrumFrequency[pp]
+                axisCount += 1
+
+        if axisCount != 2:
+          getLogger().debug('Bad peak.axisCodes: %s - %s' % (peak.pid, peak.axisCodes))
+        else:
+          if symbolType == 0:
+            # draw a cross
+            # keep the cross square at 0.1ppm
+
+            _isSelected = False
+            # unselected
+            if _isInPlane or _isInFlankingPlane:
+              if hasattr(peak, '_isSelected') and peak._isSelected:
+                _isSelected = True
+                drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3,
+                                                                index, index+2, index+2, index+1,
+                                                                index, index+3, index+3, index+1])
+              else:
+                drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+
+            drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
+                                                              , p0[0]+r, p0[1]+w
+                                                              , p0[0]+r, p0[1]-w
+                                                              , p0[0]-r, p0[1]+w])
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
+                                                            ,p0[0], p0[1]
+                                                            ,p0[0], p0[1]
+                                                            ,p0[0], p0[1]])
+
+            # keep a pointer to the peak
+            drawList.pids = np.append(drawList.pids, [peak, index, 4, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+
+            index += 4
+            drawList.numVertices += 4
+
+          if symbolType == 1 or symbolType == 2:  # draw an ellipse at lineWidth
+            if lineWidths[0] and lineWidths[1]:
+
+              # draw 24 connected segments
+              r = 0.5 * lineWidths[0] / frequency[0]
+              w = 0.5 * lineWidths[1] / frequency[1]
+              numPoints = 24
+              angPlus = 2 * np.pi
+              skip = 1
+            else:
+              # draw 12 disconnected segments (dotted)
+              r = symbolWidth
+              w = symbolWidth
+              numPoints = 12
+              angPlus = 1.0 * np.pi
+              skip = 2
+
+            # draw an ellipse at lineWidth
+            ang = list(range(numPoints))
+            drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
+            drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(skip*an*angPlus/numPoints)
+                                                              , p0[1]-w*math.cos(skip*an*angPlus/numPoints)
+                                                              , p0[0]-r*math.sin((skip*an+1)*angPlus/numPoints)
+                                                              , p0[1]-w*math.cos((skip*an+1)*angPlus/numPoints)] for an in ang])
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
+            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
+            index += (numPoints * 2)
+            drawList.numVertices += (numPoints * 2)
+
+            # TODO:ED filled ellipse
+
+    elif drawList.renderMode == GLRENDERMODE_RESCALE:
+      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
+      self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
+
+  def _buildPeakListLabels(self, spectrumView, peakListView):
+    spectrum = spectrumView.spectrum
+
+    if peakListView.pid not in self._GLPeakListLabels.keys():
+      self._GLPeakListLabels[peakListView.pid] = GLVertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
+                                                      , blendMode=False, drawMode=GL.GL_LINES
+                                                      , dimension=2, GLContext=self)
+
+    drawList = self._GLPeakListLabels[peakListView.pid]
+    if drawList.renderMode == GLRENDERMODE_REBUILD:
+      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
+
+      drawList.clearArrays()
+      drawList.stringList = []
+
+      # for pls in spectrum.peakLists:
+
+      pls = peakListView.peakList
+
+      for peak in pls.peaks:
+
+        # get the correct coordinates based on the axisCodes
+        p0 = [0.0] * 2            #len(self.axisOrder)
+        axisCount = 0
+        for ps, psCode in enumerate(self.axisOrder[0:2]):
+          for pp, ppCode in enumerate(peak.axisCodes):
+
+            if self._preferences.matchAxisCode == 0:  # default - match atom type
+              if ppCode[0] == psCode[0]:
+                p0[ps] = peak.position[pp]
+                axisCount += 1
+
+            elif self._preferences.matchAxisCode == 1:  # match full code
+              if ppCode == psCode:
+                p0[ps] = peak.position[pp]
+                axisCount += 1
+
+        if axisCount == 2:
+          # TODO:ED display the required peaks
           strip = spectrumView.strip
           _isInPlane = strip.peakIsInPlane(peak)
           if not _isInPlane:
@@ -1589,173 +1743,28 @@ void main()
           else:
             _isInFlankingPlane = None
 
-          # if not _isInPlane and not _isInFlankingPlane:
-          #   continue
+          if not _isInPlane and not _isInFlankingPlane:
+            continue
 
-          if hasattr(peak, '_isSelected') and peak._isSelected:
-            colR, colG, colB = self.highlightColour[:3]
+          colour = pls.textColour
+          colR = int(colour.strip('# ')[0:2], 16)/255.0
+          colG = int(colour.strip('# ')[2:4], 16)/255.0
+          colB = int(colour.strip('# ')[4:6], 16)/255.0
+
+          if self._parent.peakLabelling == 0:
+            text = _getScreenPeakAnnotation(peak, useShortCode=True)
+          elif self._parent.peakLabelling == 1:
+            text = _getScreenPeakAnnotation(peak, useShortCode=False)
           else:
-            colour = pls.symbolColour
-            colR = int(colour.strip('# ')[0:2], 16)/255.0
-            colG = int(colour.strip('# ')[2:4], 16)/255.0
-            colB = int(colour.strip('# ')[4:6], 16)/255.0
+            text = _getPeakAnnotation(peak)  # original 'pid'
 
-          # get the correct coordinates based on the axisCodes
-          p0 = [0.0] * 2            #len(self.axisOrder)
-          lineWidths = [None] * 2    #len(self.axisOrder)
-          frequency = [0.0] * 2     #len(self.axisOrder)
-          axisCount = 0
-          for ps, psCode in enumerate(self.axisOrder[0:2]):
-            for pp, ppCode in enumerate(peak.axisCodes):
-
-              if self._preferences.matchAxisCode == 0:  # default - match atom type
-                if ppCode[0] == psCode[0]:
-                  p0[ps] = peak.position[pp]
-                  lineWidths[ps] = peak.lineWidths[pp]
-                  frequency[ps] = spectrumFrequency[pp]
-                  axisCount += 1
-
-              elif self._preferences.matchAxisCode == 1:  # match full code
-                if ppCode == psCode:
-                  p0[ps] = peak.position[pp]
-                  lineWidths[ps] = peak.lineWidths[pp]
-                  frequency[ps] = spectrumFrequency[pp]
-                  axisCount += 1
-
-          if axisCount != 2:
-            getLogger().debug('Bad peak.axisCodes: %s - %s' % (peak.pid, peak.axisCodes))
-          else:
-            if symbolType == 0:
-              # draw a cross
-              # keep the cross square at 0.1ppm
-
-              _isSelected = False
-              # unselected
-              if _isInPlane or _isInFlankingPlane:
-                if hasattr(peak, '_isSelected') and peak._isSelected:
-                  _isSelected = True
-                  drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3,
-                                                                  index, index+2, index+2, index+1,
-                                                                  index, index+3, index+3, index+1])
-                else:
-                  drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
-
-              drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
-                                                                , p0[0]+r, p0[1]+w
-                                                                , p0[0]+r, p0[1]-w
-                                                                , p0[0]-r, p0[1]+w])
-              drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
-              drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
-                                                              ,p0[0], p0[1]
-                                                              ,p0[0], p0[1]
-                                                              ,p0[0], p0[1]])
-
-              # keep a pointer to the peak
-              drawList.pids = np.append(drawList.pids, [peak, index, 4, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
-
-              index += 4
-              drawList.numVertices += 4
-
-            if symbolType == 1 or symbolType == 2:  # draw an ellipse at lineWidth
-              if lineWidths[0] and lineWidths[1]:
-
-                # draw 24 connected segments
-                r = 0.5 * lineWidths[0] / frequency[0]
-                w = 0.5 * lineWidths[1] / frequency[1]
-                numPoints = 24
-                angPlus = 2 * np.pi
-                skip = 1
-              else:
-                # draw 12 disconnected segments (dotted)
-                r = symbolWidth
-                w = symbolWidth
-                numPoints = 12
-                angPlus = 1.0 * np.pi
-                skip = 2
-
-              # draw an ellipse at lineWidth
-              ang = list(range(numPoints))
-              drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
-              drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(skip*an*angPlus/numPoints)
-                                                                , p0[1]-w*math.cos(skip*an*angPlus/numPoints)
-                                                                , p0[0]-r*math.sin((skip*an+1)*angPlus/numPoints)
-                                                                , p0[1]-w*math.cos((skip*an+1)*angPlus/numPoints)] for an in ang])
-              drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
-              drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
-              index += (numPoints * 2)
-              drawList.numVertices += (numPoints * 2)
-
-              # TODO:ED filled ellipse
-
-    elif drawList.renderMode == GLRENDERMODE_RESCALE:
-      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
-      self._rescalePeakList(spectrumView=spectrumView)
-
-  def _buildPeakListLabels(self, spectrumView):
-    spectrum = spectrumView.spectrum
-
-    if spectrum.pid not in self._GLPeakListLabels.keys():
-      self._GLPeakListLabels[spectrum.pid] = GLVertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
-                                                      , blendMode=False, drawMode=GL.GL_LINES
-                                                      , dimension=2, GLContext=self)
-
-    drawList = self._GLPeakListLabels[spectrum.pid]
-    if drawList.renderMode == GLRENDERMODE_REBUILD:
-      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
-
-      drawList.clearArrays()
-      drawList.stringList = []
-
-      for pls in spectrum.peakLists:
-        for peak in pls.peaks:
-
-          # get the correct coordinates based on the axisCodes
-          p0 = [0.0] * 2            #len(self.axisOrder)
-          axisCount = 0
-          for ps, psCode in enumerate(self.axisOrder[0:2]):
-            for pp, ppCode in enumerate(peak.axisCodes):
-
-              if self._preferences.matchAxisCode == 0:  # default - match atom type
-                if ppCode[0] == psCode[0]:
-                  p0[ps] = peak.position[pp]
-                  axisCount += 1
-
-              elif self._preferences.matchAxisCode == 1:  # match full code
-                if ppCode == psCode:
-                  p0[ps] = peak.position[pp]
-                  axisCount += 1
-
-          if axisCount == 2:
-            # TODO:ED display the required peaks
-            strip = spectrumView.strip
-            _isInPlane = strip.peakIsInPlane(peak)
-            if not _isInPlane:
-              _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-            else:
-              _isInFlankingPlane = None
-
-            if not _isInPlane and not _isInFlankingPlane:
-              continue
-
-            colour = pls.textColour
-            colR = int(colour.strip('# ')[0:2], 16)/255.0
-            colG = int(colour.strip('# ')[2:4], 16)/255.0
-            colB = int(colour.strip('# ')[4:6], 16)/255.0
-
-            if self._parent.peakLabelling == 0:
-              text = _getScreenPeakAnnotation(peak, useShortCode=True)
-            elif self._parent.peakLabelling == 1:
-              text = _getScreenPeakAnnotation(peak, useShortCode=False)
-            else:
-              text = _getPeakAnnotation(peak)  # original 'pid'
-
-            # TODO:ED check axisCodes and ordering
-            drawList.stringList.append(GLString(text=text
-                                        , font=self.firstFont
-                                        , x=p0[0], y=p0[1]
-                                        # , x=self._screenZero[0], y=self._screenZero[1]
-                                        , color=(colR, colG, colB, 1.0), GLContext=self
-                                        , pid=peak.pid))
+          # TODO:ED check axisCodes and ordering
+          drawList.stringList.append(GLString(text=text
+                                      , font=self.firstFont
+                                      , x=p0[0], y=p0[1]
+                                      # , x=self._screenZero[0], y=self._screenZero[1]
+                                      , color=(colR, colG, colB, 1.0), GLContext=self
+                                      , pid=peak.pid))
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -1772,8 +1781,8 @@ void main()
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
-  def _drawPeakListVertices(self, spectrumView):
-    drawList = self._GLPeakLists[spectrumView.spectrum.pid]
+  def _drawPeakListVertices(self, spectrumView, peakListView):
+    drawList = self._GLPeakLists[peakListView.pid]
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
@@ -1796,31 +1805,11 @@ void main()
 
     GL.glDisable(GL.GL_BLEND)
 
-  def _drawPeakListLabels(self, spectrumView):
-    drawList = self._GLPeakListLabels[spectrumView.spectrum.pid]
+  def _drawPeakListLabels(self, spectrumView, peakListView):
+    drawList = self._GLPeakListLabels[peakListView.pid]
 
     for drawString in drawList.stringList:
       drawString.drawTextArray()
-
-    return
-
-    # new bit to use a vertex array to draw the peaks, very fast and easy
-    GL.glEnable(GL.GL_BLEND)
-
-    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-    GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-
-    GL.glVertexPointer(2, GL.GL_FLOAT, 0, drawList[2])
-    GL.glColorPointer(4, GL.GL_FLOAT, 0, drawList[3])
-    GL.glTexCoordPointer(4, GL.GL_FLOAT, 0, drawList[4])
-    GL.glDrawArrays(GL.GL_LINES, 0, drawList[5])
-
-    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-    GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-
-    GL.glDisable(GL.GL_BLEND)
 
   def _round_sig(self, x, sig=6, small_value=1.0e-9):
     return 0 if x==0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
@@ -1956,8 +1945,9 @@ void main()
         spectrumView.buildContours = False  # set to false, as we have rebuilt
 
         # flag the peaks for rebuilding
-        spectrumView.buildPeakLists = True
-        spectrumView.buildPeakListLabels = True
+        for peakListView in spectrumView.peakListViews:
+          peakListView.buildPeakLists = True
+          peakListView.buildPeakListLabels = True
 
         # rebuild the contours
         spectrumView._buildContours(None)
@@ -2014,31 +2004,33 @@ void main()
 
     for spectrumView in self._parent.spectrumViews:
 
-      if spectrumView.spectrum.pid in self._GLPeakLists.keys():
-        if self._GLPeakLists[spectrumView.spectrum.pid].renderMode == GLRENDERMODE_RESCALE:
-          self._buildPeakLists(spectrumView)
+      for peakListView in spectrumView.peakListViews:
+        if peakListView.pid in self._GLPeakLists.keys():
+          if self._GLPeakLists[peakListView.pid].renderMode == GLRENDERMODE_RESCALE:
+            self._buildPeakLists(spectrumView, peakListView)
 
-      if spectrumView.buildPeakLists:
-        spectrumView.buildPeakLists = False
+        if peakListView.buildPeakLists:
+          peakListView.buildPeakLists = False
 
-        if spectrumView.spectrum.pid in self._GLPeakLists.keys():
-          self._GLPeakLists[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+          if peakListView.pid in self._GLPeakLists.keys():
+            self._GLPeakLists[peakListView.pid].renderMode = GLRENDERMODE_REBUILD
 
-        self._buildPeakLists(spectrumView)  # should include rescaling
+          self._buildPeakLists(spectrumView, peakListView)
 
   def buildPeakListLabels(self):
     if self._parent.isDeleted:
       return
 
     for spectrumView in self._parent.spectrumViews:
+      for peakListView in spectrumView.peakListViews:
 
-      if spectrumView.buildPeakListLabels:
-        spectrumView.buildPeakListLabels = False
+        if peakListView.buildPeakListLabels:
+          peakListView.buildPeakListLabels = False
 
-        if spectrumView.spectrum.pid in self._GLPeakListLabels.keys():
-          self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
+          if peakListView.pid in self._GLPeakListLabels.keys():
+            self._GLPeakListLabels[peakListView.pid].renderMode = GLRENDERMODE_REBUILD
 
-        self._buildPeakListLabels(spectrumView)  # should include rescaling
+          self._buildPeakListLabels(spectrumView, peakListView)
 
   def drawPeakLists(self):
     if self._parent.isDeleted:
@@ -2050,10 +2042,12 @@ void main()
 
     # GL.glDisable(GL.GL_BLEND)
     for spectrumView in self._parent.spectrumViews:
-      if spectrumView.isVisible():
-        GL.glLineWidth(lineThickness)
-        self._GLPeakLists[spectrumView.spectrum.pid].drawIndexArray()
-        GL.glLineWidth(1.0)
+      for peakListView in spectrumView.peakListViews:
+
+        if spectrumView.isVisible() and peakListView.isVisible():
+          GL.glLineWidth(lineThickness)
+          self._GLPeakLists[peakListView.pid].drawIndexArray()
+          GL.glLineWidth(1.0)
 
   # def drawLabels(self):
   #   if self._parent.isDeleted:
@@ -2075,8 +2069,10 @@ void main()
     self.buildPeakListLabels()
 
     for spectrumView in self._parent.spectrumViews:
-      if spectrumView.isVisible():
-        self._drawPeakListLabels(spectrumView)
+      for peakListView in spectrumView.peakListViews:
+
+        if spectrumView.isVisible() and peakListView.isVisible():
+          self._drawPeakListLabels(spectrumView, peakListView)
 
   def drawSpectra(self):
     if self._parent.isDeleted:
@@ -3388,7 +3384,7 @@ void main()
 
       mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
 
-      currentPos = self._parent.current.cursorPosition
+      currentPos = self.current.cursorPosition
 
       # cursorPosition = self.cursorCoordinates
       for n, axis in enumerate(self._axisOrder[:2]):
@@ -3410,7 +3406,7 @@ void main()
       #     position.append(axis.position)
 
       # self.cursorCoordinate = (cursorPosition[0], cursorPosition[1])
-      self._parent.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+      self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
       # only need to redraw if we can see the cursor
       if self._crossHairVisible:
@@ -3434,26 +3430,37 @@ void main()
 
         if GLNotifier.GLPEAKLISTS in triggers:
           for spectrumView in self._parent.spectrumViews:
-            for peakList in targets:
-              if peakList in spectrumView.spectrum.peakLists:
-                spectrumView.buildPeakLists = True
+            for peakListView in spectrumView.peakListViews:
+              for peakList in targets:
+                if peakList == peakListView.peakList:
+                  peakListView.buildPeakLists = True
           self.buildPeakLists()
 
         if GLNotifier.GLPEAKLISTLABELS in triggers:
           for spectrumView in self._parent.spectrumViews:
-            for peakList in targets:
-              if peakList in spectrumView.spectrum.peakLists:
-                spectrumView.buildPeakListLabels = True
+            for peakListView in spectrumView.peakListViews:
+              for peakList in targets:
+                if peakList == peakListView.peakList:
+                  peakListView.buildPeakListLabels = True
           self.buildPeakListLabels()
 
         if GLNotifier.GLMARKS in triggers:
           self._marksList.renderMode = GLRENDERMODE_REBUILD
 
+        # TODO:ED test trigger for the minute
         if GLNotifier.GLPEAKS in triggers:
           for spectrumView in self._parent.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+
+              peakListView.buildPeakLists = True
+              peakListView.buildPeakListLabels = True
+
             # self._updateHighlightedPeaks(spectrumView)
-            spectrumView.buildPeakLists = True
+
+            # spectrumView.buildPeakLists = True
+            # spectrumView.buildPeakListLabels = True
           self.buildPeakLists()
+          self.buildPeakListLabels()
 
         if GLNotifier.GLANY in targets:
           self._rescaleXAxis(update=False)
@@ -3478,9 +3485,9 @@ void main()
     yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
     xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
     yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
-    if len(self.current.strip.orderedAxes) > 2:
+    if len(self._orderedAxes) > 2:
       # NBNB TBD FIXME what about 4D peaks?
-      zPositions = self._parent.orderedAxes[2].region
+      zPositions = self._orderedAxes[2].region
     else:
       zPositions = None
 
@@ -3498,9 +3505,9 @@ void main()
               if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
                 #print(">>found peak", peak, peak.isSelected, peak in self.current.peaks)
                 if peak in self.current.peaks:
-                  self._parent.current._peaks.remove(peak)
+                  self.current._peaks.remove(peak)
                 else:
-                  self._parent.current.addPeak(peak)
+                  self.current.addPeak(peak)
 
   def _pickAtMousePosition(self, event):
     """
@@ -3511,20 +3518,24 @@ void main()
 
     mousePosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
     position = [mousePosition[0], mousePosition[1]]
-    orderedAxes = self.current.strip.orderedAxes
     for orderedAxis in self._orderedAxes[2:]:
       position.append(orderedAxis.position)
 
-    newPeaks, peakLists = self.current.strip.glPeakPickPosition(position)
+    newPeaks, peakLists = self._parent.glPeakPickPosition(position)
 
     # should fire peak notifier
-    self.GLSignals.emitEvent(targets=peakLists, triggers=[GLNotifier.GLPEAKLISTS,
-                                                          GLNotifier.GLPEAKLISTLABELS])
+    # self.GLSignals.emitEvent(targets=peakLists, triggers=[GLNotifier.GLPEAKLISTS,
+    #                                                       GLNotifier.GLPEAKLISTLABELS])
 
-    # self._parent.current.peaks = newPeaks
+    self.current.peaks = newPeaks
+
+  def _clearIntegralRegions(self):
+    # if self.integralRegions in self.addedItems:
+    #   self.removeItem(self.integralRegions)
+    getLogger().info('not implemented yet')
 
   def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
-    self._parent.current.strip = self._parent
+    self.current.strip = self._parent
     xPosition = self.cursorCoordinate[0]          # self.mapSceneToView(event.pos()).x()
     yPosition = self.cursorCoordinate[1]          # self.mapSceneToView(event.pos()).y()
     self.current.positions = [xPosition, yPosition]
@@ -3553,8 +3564,8 @@ void main()
       self.current.clearIntegrals()
 
       # TODO:ED check integrals
-      # self._clearIntegralRegions()
-      # self._selectPeak(xPosition, yPosition)
+      self._clearIntegralRegions()
+      self._selectPeak(xPosition, yPosition)
 
     elif shiftRightMouse(event):
       # Two successive shift-right-clicks: define zoombox
@@ -3572,7 +3583,9 @@ void main()
 
         self._resetBoxes()
         self._successiveClicks = None
-        self._rescaleXAxis(update=True)
+
+        # this also rescales the peaks
+        self._rescaleXAxis()
 
     elif rightMouse(event) and axis is None:
       # right click on canvas, not the axes
@@ -3592,9 +3605,165 @@ void main()
       self._resetBoxes()
       event.ignore()
 
-
   def _mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
-    pass
+    if controlShiftLeftMouse(event):
+      # Control(Cmd)+shift+left drag: Peak-picking
+      event.accept()
+
+      # if not event.isFinish():
+      #   # not isFinish() is not the same as isStart() in behavior; The latter will fire for every move, the former only
+      #   # at the end of the move
+      #   self._resetBoxes()
+      #   self._updatePickBox(event.buttonDownPos(), event.pos())
+      # else:
+
+      self._resetBoxes()
+      # startPosition = self.mapSceneToView(event.buttonDownPos())
+      # endPosition = self.mapSceneToView(event.pos())
+      # orderedAxes = self.current.strip.orderedAxes
+
+      selectedRegion = [[round(self._startCoordinate[0], 3), round(self._endCoordinate[0], 3)],
+                        [round(self._startCoordinate[1], 3), round(self._endCoordinate[1], 3)]]
+      # if len(self._orderedAxes) > 2:
+
+      for n in self._orderedAxes[2:]:
+        selectedRegion.append((n.region[0], n.region[1]))
+
+      # TBD: Should be using onceOnly=True notifiers and suspend/resumeNotification but that is not working.
+      # So instead turn off notifications (so that they all get ignored) with blankNotification, and then
+      # at the end turn them back on again. This means have to update the relevant parts of the code which
+      # needs to know about new peaks. This is not a good way to do it.
+
+      # project = self.current.strip.project
+      self.project.blankNotification()
+
+      try:
+        peaks = self._parent.glPeakPickRegion(selectedRegion)
+      finally:
+        self.project.unblankNotification()
+
+      # hide all the messages from the peak annotation generation
+      self.project._startCommandEchoBlock('mousePeakPicking')
+      # update strips which have the above peaks in them
+      # (could check for visibility...)
+
+      # peakLists = set([peak.peakList for peak in peaks])
+      # for peakList in peakLists:
+      #   for peakListView in peakList.peakListViews:
+      #     peakListView.spectrumView.strip.showPeaks(peakList)
+
+      self.project._endCommandEchoBlock()
+
+      # update peak table
+      # limitation: this will only update the first peak table
+      # if hasattr(self.current.strip.spectrumDisplay.mainWindow.application, 'peakTableModule'):
+      #   self.current.strip.spectrumDisplay.mainWindow.application.peakTableModule.peakListTable._updateTable()
+
+      self.current.peaks = peaks
+
+    elif controlLeftMouse(event):
+      # Control(Cmd)+left drag: selects peaks
+      event.accept()
+
+      self._resetBoxes()
+      # endPosition = self.mapSceneToView(event.pos())
+      # startPosition = self.mapSceneToView(event.buttonDownPos())
+      xPositions = sorted([self._startCoordinate[0], self._endCoordinate[0]])
+      yPositions = sorted([self._startCoordinate[1], self._endCoordinate[1]])
+
+      if len(self._orderedAxes) > 2:
+        zPositions = self._orderedAxes[2].region
+      else:
+        zPositions = None
+
+      peaks = list(self.current.peaks)
+
+      for spectrumView in self._parent.spectrumViews:
+        for peakListView in spectrumView.peakListViews:
+          if not peakListView.isVisible() or not spectrumView.isVisible():
+            continue
+
+          peakList = peakListView.peakList
+          if not isinstance(peakList, PeakList):  # it could be an IntegralList
+            continue
+
+          # TODO: Special casing 1D here, seems like a hack.
+          if len(spectrumView.spectrum.axisCodes) == 1:
+
+            y0 = self._startCoordinate[1]
+            y1 = self._endCoordinate[1]
+            y0, y1 = min(y0, y1), max(y0, y1)
+            xAxis = 0
+            # scale = peakList.spectrum.scale  # peak height now contains scale in it (so no scaling below)
+            for peak in peakList.peaks:
+              height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
+              if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
+                # peak.isSelected = True
+                # self.current.addPeak(peak)
+                peaks.append(peak)
+
+          else:
+            # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
+            # Fixed 13/3/2016 Rasmus Fogh
+            # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
+            spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+            xAxis = spectrumIndices[0]
+            yAxis = spectrumIndices[1]
+            # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
+            # xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
+            # yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
+            for peak in peakList.peaks:
+              if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                      and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+                if zPositions is not None:
+                  zAxis = spectrumIndices[2]
+                  # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+                  if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                    # peak.isSelected = True
+                    # self.current.addPeak(peak)
+                    peaks.append(peak)
+                else:
+                  # peak.isSelected = True
+                  # self.current.addPeak(peak)
+                  peaks.append(peak)
+
+      self.current.peaks = peaks
+
+    # elif middleMouse(event):
+    #   # middle drag: moves a selected peak
+    #   event.accept()
+    #   self.setMouseEnabled(False, False)
+    #   refPosition = (self.mapSceneToView(event.buttonDownPos()).x(), self.mapSceneToView(event.buttonDownPos()).y())
+    #
+    #   peaks = self.current.peaks
+    #   if not peaks:
+    #     return
+    #
+    #   deltaPosition = np.subtract(self.current.cursorPosition, refPosition)
+    #   for peak in peaks:
+    #     peak.startPosition = peak.position
+    #
+    #   if event.isFinish():
+    #     for peak in peaks:
+    #       oldPosition = peak.position
+    #       peak.position = oldPosition + deltaPosition
+    #       peak._finaliseAction('change')
+    #       self.setMouseEnabled(True, True)
+    #       self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
+    #         ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
+    #     self.current.peaks = peaks
+    #   else:  # this is when is being dragged
+    #     pass
+    #     # for peak in peaks:
+    #     #   # print(peak.position , deltaPosition)
+    #     #   peak.position =  (peak.position[0] + deltaPosition[0],peak.position[1] + deltaPosition[1] )
+
+    elif shiftLeftMouse(event) or shiftMiddleMouse(event) or shiftRightMouse(event):
+      pass
+
+    else:
+      event.ignore()
+
 
 GlyphXpos = 'Xpos'
 GlyphYpos = 'Ypos'
@@ -4274,7 +4443,7 @@ class GLString(GLVertexArray):
     pen = [0, 0]              # offset the string from (0,0) and use (x,y) in shader
     prev = None
 
-    cs, sn = math.cos(angle), math.sin(angle)
+    # cs, sn = math.cos(angle), math.sin(angle)
     # rotate = np.matrix([[cs, sn], [-sn, cs]])
 
     for i, charCode in enumerate(text):
@@ -4306,15 +4475,15 @@ class GLString(GLVertexArray):
           u1 = glyph[GlyphTX1]          # glyph.texcoords[2]
           v1 = glyph[GlyphTY1]          # glyph.texcoords[3]
 
-          # apply rotation to the text
-          xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
-          xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
-          xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
-          xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
+          # # apply rotation to the text
+          # xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
+          # xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
+          # xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
+          # xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
 
           index = i * 4
           indices = [index, index + 1, index + 2, index, index + 2, index + 3]
-          vertices = [[xbl, ybl], [xtl, ytl], [xtr, ytr], [xbr, ybr]]
+          vertices = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
           texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
           colors = [color, ] * 4
           attribs = [[x, y], [x, y], [x, y], [x, y]]

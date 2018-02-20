@@ -85,7 +85,7 @@ class PreferencesPopup(CcpnDialog):
     from ccpn.util.CcpnOpenGL import GLNotifier
 
     GLSignals = GLNotifier(parent=self)
-    GLSignals.emitEvent(targets=[GLNotifier.GLANY])
+    GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKS])
     self.accept()
 
   def _setTabs(self):

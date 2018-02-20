@@ -46,6 +46,10 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 import ccpn.util.Phasing as Phasing
+from ccpn.ui.gui.lib.mouseEvents import \
+  leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
+  middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
+  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -258,6 +262,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._mouseY = 0
     self.w = self.width()
     self.h = self.height()
+    self.peakWidthPixels = 16
 
     # self.eventFilter = self._eventFilter
     # self.installEventFilter(self)
@@ -293,6 +298,9 @@ class CcpnGLWidget(QOpenGLWidget):
     self._axisOrder = None
     self._axisCodes = None
     self._refreshMouse = False
+    self._successiveClicks = None  # GWV: Store successive click events for zooming; None means first click not set
+    self._dottedCursorCoordinate = None
+    self._dottedCursorVisible = None
 
     self._gridVisible = True
     self._crossHairVisible = True
@@ -1272,16 +1280,15 @@ void main()
 
     # TODO:ED test the current viewBox mouse press event :)
 
-    # add a 2 pixel tolerance to the click event
+    # add a 2-pixel tolerance to the click event
     if not self._widthsChangedEnough(self._mouseStart, self._mouseEnd, tol=2):
 
       # this needs copying here
-      self._parent.viewBox._mouseClickEvent(ev)
+      self._mouseClickEvent(ev)
 
     else:
       if self._selectionMode != 0:
-        # self._parent.viewBox.mouseDragEvent(ev)
-        pass
+        self._mouseDragEvent(ev)
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()
@@ -1295,14 +1302,11 @@ void main()
     if keyMod == Qt.MetaModifier:
       self._isMETA = 'M'
 
-    print ('>>>', self._isSHIFT, self._isCTRL, self._isALT, self._isMETA)
+    # print ('>>>', self._isSHIFT, self._isCTRL, self._isALT, self._isMETA)
     # if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_A:
     #   self._key = 'A'
     # if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_S:
     #   self._key = 'S'
-
-    # spawn a repaint event - otherwise cursor will not update
-    # self.update()
 
   def keyReleaseEvent(self, event: QtGui.QKeyEvent):
     self._key = ''
@@ -1313,13 +1317,6 @@ void main()
 
     # spawn a repaint event - otherwise cursor will not update
     self.update()
-
-  def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
-    """
-    Re-implementation of PyQtGraph mouse click event to allow custom actions
-    for different mouse click events.
-    """
-    self.current.strip = self.strip
 
   def leaveEvent(self, ev: QtCore.QEvent):
     super(CcpnGLWidget, self).leaveEvent(ev)
@@ -1498,9 +1495,12 @@ void main()
 
       # for peak in pls.peaks:
       for pp in range(0, len(drawList.pids), 8):
+
+        # check whether the peaks still exists
         peak = drawList.pids[pp]
         offset = drawList.pids[pp+1]
 
+        _isSelected = False
         _isInPlane = strip.peakIsInPlane(peak)
         if not _isInPlane:
           _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
@@ -1509,6 +1509,7 @@ void main()
 
         if _isInPlane or _isInFlankingPlane:
           if hasattr(peak, '_isSelected') and peak._isSelected:
+            _isSelected = True
             colR, colG, colB = self.highlightColour[:3]
             drawList.indices = np.append(drawList.indices, np.array([index, index+1, index+2, index+3,
                                                                     index, index+2, index+2, index+1,
@@ -1628,9 +1629,11 @@ void main()
               # draw a cross
               # keep the cross square at 0.1ppm
 
+              _isSelected = False
               # unselected
               if _isInPlane or _isInFlankingPlane:
-                if peak._isSelected:
+                if hasattr(peak, '_isSelected') and peak._isSelected:
+                  _isSelected = True
                   drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3,
                                                                   index, index+2, index+2, index+1,
                                                                   index, index+3, index+3, index+1])
@@ -1648,7 +1651,7 @@ void main()
                                                               ,p0[0], p0[1]])
 
               # keep a pointer to the peak
-              drawList.pids = np.append(drawList.pids, [peak, index, 4, _isInPlane, _isInFlankingPlane, peak._isSelected, 0, 0])
+              drawList.pids = np.append(drawList.pids, [peak, index, 4, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
 
               index += 4
               drawList.numVertices += 4
@@ -1869,6 +1872,9 @@ void main()
     
     if self._crossHairVisible:
       self.drawCursors()
+
+    if self._successiveClicks:
+      self.drawDottedCursor()
 
     if not self._drawSelectionBox:
       self.drawTraces()
@@ -2497,6 +2503,25 @@ void main()
     GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
 
     GL.glEnd()
+
+  def drawDottedCursor(self):
+    # draw the cursors
+    # need to change to VBOs
+
+    # add cursors to marks?
+
+    GL.glColor4f(1.0, 0.9, 0.1, 1.0)
+    GL.glLineStipple(1, 0xF0F0)
+    GL.glEnable(GL.GL_LINE_STIPPLE)
+
+    GL.glBegin(GL.GL_LINES)
+    GL.glVertex2d(self._successiveClicks[0], self.axisT)
+    GL.glVertex2d(self._successiveClicks[0], self.axisB)
+    GL.glVertex2d(self.axisL, self._successiveClicks[1])
+    GL.glVertex2d(self.axisR, self._successiveClicks[1])
+    GL.glEnd()
+
+    GL.glDisable(GL.GL_LINE_STIPPLE)
 
   def drawOverlayText(self, refresh=False):
     """
@@ -3426,9 +3451,9 @@ void main()
 
         if GLNotifier.GLPEAKS in triggers:
           for spectrumView in self._parent.spectrumViews:
-            self._updateHighlightedPeaks(spectrumView)
-            # spectrumView.buildPeakLists = True
-          # self.buildPeakLists()
+            # self._updateHighlightedPeaks(spectrumView)
+            spectrumView.buildPeakLists = True
+          self.buildPeakLists()
 
         if GLNotifier.GLANY in targets:
           self._rescaleXAxis(update=False)
@@ -3436,6 +3461,140 @@ void main()
     # repaint
     self.update()
 
+  def _resetBoxes(self):
+    "Reset/Hide the boxes "
+    self._successiveClicks = None
+    # self.selectionBox.hide()
+    # self.pickBox.hide()
+    # self.rbScaleBox.hide()
+    # self.crossHair.hide()
+
+  def _selectPeak(self, xPosition, yPosition):
+    """
+    (de-)Select first peak near cursor xPosition, yPosition
+    if peak already was selected, de-select it
+    """
+    xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
+    yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
+    xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
+    yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
+    if len(self.current.strip.orderedAxes) > 2:
+      # NBNB TBD FIXME what about 4D peaks?
+      zPositions = self._parent.orderedAxes[2].region
+    else:
+      zPositions = None
+
+    # now select (take first one within range)
+    for spectrumView in self._parent.spectrumViews:
+      if spectrumView.spectrum.dimensionCount == 1:
+        continue
+
+      # TODO:ED could change this to actually use the pids in the drawList
+      if spectrumView.isVisible():
+        for peakList in spectrumView.spectrum.peakLists:
+          for peak in peakList.peaks:
+            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+              and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+              if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
+                #print(">>found peak", peak, peak.isSelected, peak in self.current.peaks)
+                if peak in self.current.peaks:
+                  self._parent.current._peaks.remove(peak)
+                else:
+                  self._parent.current.addPeak(peak)
+
+  def _pickAtMousePosition(self, event):
+    """
+    pick the peaks at the mouse position
+    """
+    event.accept()
+    self._resetBoxes()
+
+    mousePosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+    position = [mousePosition[0], mousePosition[1]]
+    orderedAxes = self.current.strip.orderedAxes
+    for orderedAxis in self._orderedAxes[2:]:
+      position.append(orderedAxis.position)
+
+    newPeaks, peakLists = self.current.strip.glPeakPickPosition(position)
+
+    # should fire peak notifier
+    self.GLSignals.emitEvent(targets=peakLists, triggers=[GLNotifier.GLPEAKLISTS,
+                                                          GLNotifier.GLPEAKLISTLABELS])
+
+    # self._parent.current.peaks = newPeaks
+
+  def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
+    self._parent.current.strip = self._parent
+    xPosition = self.cursorCoordinate[0]          # self.mapSceneToView(event.pos()).x()
+    yPosition = self.cursorCoordinate[1]          # self.mapSceneToView(event.pos()).y()
+    self.current.positions = [xPosition, yPosition]
+
+    # This is the correct future style for cursorPosition handling
+    self.current.cursorPosition = (xPosition, yPosition)
+
+    if self.application.ui.mainWindow.mouseMode == PICK:
+      self._pickAtMousePosition(event)
+
+    if controlShiftLeftMouse(event):
+      # Control-Shift-left-click: pick peak
+      self._pickAtMousePosition(event)
+
+    elif controlLeftMouse(event):
+      # Control-left-click; (de-)select peak and add/remove to selection
+      event.accept()
+      self._resetBoxes()
+      self._selectPeak(xPosition, yPosition)
+
+    elif leftMouse(event):
+      # Left-click; select peak, deselecting others
+      event.accept()
+      self._resetBoxes()
+      self.current.clearPeaks()
+      self.current.clearIntegrals()
+
+      # TODO:ED check integrals
+      # self._clearIntegralRegions()
+      # self._selectPeak(xPosition, yPosition)
+
+    elif shiftRightMouse(event):
+      # Two successive shift-right-clicks: define zoombox
+      event.accept()
+      if self._successiveClicks is None:
+        self._resetBoxes()
+        self._successiveClicks = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+      else:
+
+        # TODO:ED check direction of the axes
+        self.axisL = max(self.cursorCoordinate[0], self._successiveClicks[0])
+        self.axisR = min(self.cursorCoordinate[0], self._successiveClicks[0])
+        self.axisB = max(self.cursorCoordinate[1], self._successiveClicks[1])
+        self.axisT = min(self.cursorCoordinate[1], self._successiveClicks[1])
+
+        self._resetBoxes()
+        self._successiveClicks = None
+        self._rescaleXAxis(update=True)
+
+    elif rightMouse(event) and axis is None:
+      # right click on canvas, not the axes
+      event.accept()
+      self._resetBoxes()
+      self._parent.viewBox._raiseContextMenu(event)
+
+    elif controlRightMouse(event) and axis is None:
+      # control-right-mouse click: reset the zoom
+      event.accept()
+      self._resetBoxes()
+      self._resetAxisRange()
+      self._rescaleXAxis(update=True)
+
+    else:
+      # reset and hide all for all other clicks
+      self._resetBoxes()
+      event.ignore()
+
+
+  def _mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
+    pass
 
 GlyphXpos = 'Xpos'
 GlyphYpos = 'Ypos'

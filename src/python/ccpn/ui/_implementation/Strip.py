@@ -695,6 +695,51 @@ class Strip(AbstractWrapperObject):
     #
     return tuple(result)
 
+  def glPeakPickPosition(self, position:List[float]) -> Tuple[Peak]:
+    """
+    Pick peak at position for all spectra currently displayed in strip
+    """
+    result = []
+    peakLists = []
+
+    self._startCommandEchoBlock('peakPickPosition', position)
+    self._project.blankNotification()
+    try:
+      for spectrumView in self.spectrumViews:
+
+        # if not spectrumView.peakListViews: # this can happen if no peakLists, so create one
+        #   self._project.unblankNotification() # need this otherwise SideBar does not get updated
+        #   spectrumView.spectrum.newPeakList()
+        #   self._project.blankNotification()
+        # peakListView = spectrumView.peakListViews[0]
+        # # TODO: is there some way of specifying which peakListView
+        # if not peakListView.isVisible():
+        #   continue
+        # peakList = peakListView.peakList
+
+        if not spectrumView.spectrum.peakLists:
+          self._project.unblankNotification() # need this otherwise SideBar does not get updated
+          spectrumView.spectrum.newPeakList()
+          self._project.blankNotification()
+
+        peakList = spectrumView.spectrum.peakLists[0]
+
+        peak = peakList.newPeak(position=position)
+        # note, the height below is not derived from any fitting
+        # but is a weighted average of the values at the neighbouring grid points
+        peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+        result.append(peak)
+        peakLists.append(peakList)
+
+    finally:
+      self._endCommandEchoBlock()
+      self._project.unblankNotification()
+
+    for peak in result:
+      peak._finaliseAction('create')
+
+    return tuple(result), tuple(peakLists)
+
   def peakPickRegion(self, selectedRegion:List[List[float]]) -> Tuple[Peak]:
     """Peak pick all spectra currently displayed in strip in selectedRegion """
 

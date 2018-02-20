@@ -273,9 +273,11 @@ class CcpnGLWidget(QOpenGLWidget):
     self._endCoordinate = None
     self._shift = False
     self._command = False
-    self._key = ' '
-    self._isSHIFT = ' '
-    self._isCTRL = ' '
+    self._key = ''
+    self._isSHIFT = ''
+    self._isCTRL = ''
+    self._isALT = ''
+    self._isMETA = ''
 
     # always respond to mouse events
     self.setFocusPolicy(Qt.StrongFocus)
@@ -1242,12 +1244,16 @@ void main()
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
 
-    # self._startCoordinate = [ev.pos().x(), self.height() - ev.pos().y()]
-
+    # TODO:ED take into account whether axis is visible
     mx = ev.pos().x()
-    my = self.height() - ev.pos().y() - AXIS_MARGINBOTTOM
-    
+    if self._drawBottomAxis:
+      my = self.height() - ev.pos().y() - AXIS_MARGINBOTTOM
+    else:
+      my = self.height() - ev.pos().y()
+    self._mouseStart = (mx, my)
+
     vect = self.vInv.dot([mx, my, 0.0, 1.0])
+    self._mouseStart = (mx, my)
     self._startCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
 
     self._endCoordinate = self._startCoordinate
@@ -1257,12 +1263,25 @@ void main()
     self._drawSelectionBox = False
     self._lastButtonReleased = ev.button()
 
-    # TODO:ED test the current viewBox mouse press event :)
-    self._parent.viewBox._mouseClickEvent(ev)
+    mx = ev.pos().x()
+    if self._drawBottomAxis:
+      my = self.height() - ev.pos().y() - AXIS_MARGINBOTTOM
+    else:
+      my = self.height() - ev.pos().y()
+    self._mouseEnd = (mx, my)
 
-    # if self._lastButtonReleased == Qt.RightButton:
-    #   # raise right-button context menu
-    #   self._parent.viewBox.menu.exec(self.mapToGlobal(ev.pos()))
+    # TODO:ED test the current viewBox mouse press event :)
+
+    # add a 2 pixel tolerance to the click event
+    if not self._widthsChangedEnough(self._mouseStart, self._mouseEnd, tol=2):
+
+      # this needs copying here
+      self._parent.viewBox._mouseClickEvent(ev)
+
+    else:
+      if self._selectionMode != 0:
+        # self._parent.viewBox.mouseDragEvent(ev)
+        pass
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()
@@ -1271,19 +1290,26 @@ void main()
       self._isSHIFT = 'S'
     if keyMod == Qt.ControlModifier:
       self._isCTRL = 'C'
+    if keyMod == Qt.AltModifier:
+      self._isALT = 'A'
+    if keyMod == Qt.MetaModifier:
+      self._isMETA = 'M'
 
+    print ('>>>', self._isSHIFT, self._isCTRL, self._isALT, self._isMETA)
     # if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_A:
     #   self._key = 'A'
     # if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_S:
     #   self._key = 'S'
 
     # spawn a repaint event - otherwise cursor will not update
-    self.update()
+    # self.update()
 
   def keyReleaseEvent(self, event: QtGui.QKeyEvent):
-    self._key = ' '
-    self._isSHIFT = ' '
-    self._isCTRL = ' '
+    self._key = ''
+    self._isSHIFT = ''
+    self._isCTRL = ''
+    self._isALT = ''
+    self._isMETA = ''
 
     # spawn a repaint event - otherwise cursor will not update
     self.update()
@@ -1343,6 +1369,7 @@ void main()
 
     if event.buttons() & Qt.LeftButton:
       # do the complicated keypresses first
+      # other keys are: Key_Alt, Key_Meta, and _isALT, _isMETA
       if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
           (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
         self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
@@ -1364,6 +1391,7 @@ void main()
         self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
                                            axisB=self.axisB, axisT=self.axisT,
                                            axisL=self.axisL, axisR=self.axisR)
+        self._selectionMode = 0
         self._rescaleAllAxes()
 
     self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
@@ -1463,7 +1491,7 @@ void main()
     lineThickness = self._preferences.peakSymbolThickness / 2.0
 
     drawList = self._GLPeakLists[spectrum.pid]
-    drawList.indices = np.zeros(2000, dtype=np.uint)
+    drawList.indices = np.empty(0, dtype=np.uint)
 
     index = 0
     if symbolType == 0:
@@ -1482,22 +1510,18 @@ void main()
         if _isInPlane or _isInFlankingPlane:
           if hasattr(peak, '_isSelected') and peak._isSelected:
             colR, colG, colB = self.highlightColour[:3]
-            drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3,])
-                                                            # index, index+2, index+2, index+1,
-                                                            # index, index+3, index+3, index+1])
+            drawList.indices = np.append(drawList.indices, np.array([index, index+1, index+2, index+3,
+                                                                    index, index+2, index+2, index+1,
+                                                                    index, index+3, index+3, index+1], dtype=np.uint))
           else:
             colour = peak.peakList.symbolColour
             colR = int(colour.strip('# ')[0:2], 16) / 255.0
             colG = int(colour.strip('# ')[2:4], 16) / 255.0
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
-            drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+            drawList.indices = np.append(drawList.indices,
+                                         np.array([index, index+1, index+2, index+3], dtype=np.uint))
 
-          # try:
           drawList.colors[offset*4:offset*4+16] = [colR, colG, colB, 1.0] * 4
-          # except Exception as es:
-          #   pass
-        else:
-          pass
 
         index += 4
 
@@ -1716,9 +1740,9 @@ void main()
             colB = int(colour.strip('# ')[4:6], 16)/255.0
 
             if self._parent.peakLabelling == 0:
-              text = _getScreenPeakAnnotation(peak, useShortCode=False)
-            elif self._parent.peakLabelling == 1:
               text = _getScreenPeakAnnotation(peak, useShortCode=True)
+            elif self._parent.peakLabelling == 1:
+              text = _getScreenPeakAnnotation(peak, useShortCode=False)
             else:
               text = _getPeakAnnotation(peak)  # original 'pid'
 
@@ -3403,9 +3427,11 @@ void main()
         if GLNotifier.GLPEAKS in triggers:
           for spectrumView in self._parent.spectrumViews:
             self._updateHighlightedPeaks(spectrumView)
-
             # spectrumView.buildPeakLists = True
           # self.buildPeakLists()
+
+        if GLNotifier.GLANY in targets:
+          self._rescaleXAxis(update=False)
 
     # repaint
     self.update()
@@ -3948,12 +3974,12 @@ class GLVertexArray():
 
     self.renderMode = renderMode
     self.refreshMode = refreshMode
-    self.vertices = np.array([], dtype=np.float32)    #np.zeros((len(text)*4,3), dtype=np.float32)
-    self.indices = np.array([], dtype=np.uint)        #np.zeros((len(text)*6, ), dtype=np.uint)
-    self.colors = np.array([], dtype=np.float32)      #np.zeros((len(text)*4,4), dtype=np.float32)
-    self.texcoords= np.array([], dtype=np.float32)    #np.zeros((len(text)*4,2), dtype=np.float32)
-    self.attribs = np.array([], dtype=np.float32)     #np.zeros((len(text)*4,1), dtype=np.float32)
-    self.pids = np.array([], dtype=np.object_)     #np.zeros((len(text)*4,1), dtype=np.object_)
+    self.vertices = np.empty(0, dtype=np.float32)    #np.zeros((len(text)*4,3), dtype=np.float32)
+    self.indices = np.empty(0, dtype=np.uint)        #np.zeros((len(text)*6, ), dtype=np.uint)
+    self.colors = np.empty(0, dtype=np.float32)      #np.zeros((len(text)*4,4), dtype=np.float32)
+    self.texcoords= np.empty(0, dtype=np.float32)    #np.zeros((len(text)*4,2), dtype=np.float32)
+    self.attribs = np.empty(0, dtype=np.float32)     #np.zeros((len(text)*4,1), dtype=np.float32)
+    self.pids = np.empty(0, dtype=np.object_)     #np.zeros((len(text)*4,1), dtype=np.object_)
 
     self.numVertices = 0
 

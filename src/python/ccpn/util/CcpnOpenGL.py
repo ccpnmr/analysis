@@ -1582,7 +1582,6 @@ void main()
       # for pls in spectrum.peakLists:
 
       pls = peakListView.peakList
-
       spectrumFrequency = spectrum.spectrometerFrequencies
 
       for peak in pls.peaks:
@@ -1662,9 +1661,9 @@ void main()
             index += 4
             drawList.numVertices += 4
 
-          if symbolType == 1 or symbolType == 2:  # draw an ellipse at lineWidth
-            if lineWidths[0] and lineWidths[1]:
+          elif symbolType == 1:                       # draw an ellipse at lineWidth
 
+            if lineWidths[0] and lineWidths[1]:
               # draw 24 connected segments
               r = 0.5 * lineWidths[0] / frequency[0]
               w = 0.5 * lineWidths[1] / frequency[1]
@@ -1679,19 +1678,42 @@ void main()
               angPlus = 1.0 * np.pi
               skip = 2
 
-            # draw an ellipse at lineWidth
+            np2 = 2*numPoints
             ang = list(range(numPoints))
-            drawList.indices = np.append(drawList.indices, [[index+(2*an), index+(2*an)+1] for an in ang])
+            _isSelected = False
+
+            if _isInPlane or _isInFlankingPlane:
+              if hasattr(peak, '_isSelected') and peak._isSelected:
+                _isSelected = True
+                drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+                drawList.indices = np.append(drawList.indices, [index+np2, index+np2+2,
+                                                                 index+np2+2, index+np2+1,
+                                                                 index+np2, index+np2+3,
+                                                                 index+np2+3, index+np2+1])
+              else:
+                drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+
+            # draw an ellipse at lineWidth
             drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(skip*an*angPlus/numPoints)
                                                               , p0[1]-w*math.cos(skip*an*angPlus/numPoints)
                                                               , p0[0]-r*math.sin((skip*an+1)*angPlus/numPoints)
                                                               , p0[1]-w*math.cos((skip*an+1)*angPlus/numPoints)] for an in ang])
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * numPoints * 2)
-            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * numPoints * 2)
-            index += (numPoints * 2)
-            drawList.numVertices += (numPoints * 2)
+            drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
+                                                              , p0[0] + r, p0[1] + w
+                                                              , p0[0] + r, p0[1] - w
+                                                              , p0[0] - r, p0[1] + w])
+
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2+4))
+            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+4))
+            index += np2 + 4
+            drawList.numVertices += np2 + 4
+
+            drawList.pids = np.append(drawList.pids, [peak, index, np2+4, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+
+          elif symbolType == 2:  # draw an ellipse at lineWidth
 
             # TODO:ED filled ellipse
+            pass
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode

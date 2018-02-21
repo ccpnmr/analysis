@@ -1481,6 +1481,7 @@ void main()
 
     if drawList.refreshMode == GLREFRESHMODE_REBUILD:
       symbolWidth = self._preferences.peakSymbolSize / 2.0
+      symbolType = self._preferences.peakSymbolType
 
       # resize the peaks to keep the correct ratio
       x = abs(self.pixelX)
@@ -1492,11 +1493,20 @@ void main()
         w = symbolWidth
         r = symbolWidth * x / y
 
+      if symbolType == 0:  # a cross
+        getLogger().info('rescale cross')
+
+      elif symbolType == 1:  # an ellipse
+        getLogger().info('rescale ellipse')
+
+      elif symbolType == 2:  # filled ellipse
+        getLogger().info('rescale filled ellipse')
+
       # drawList.clearVertices()
       # drawList.vertices = drawList.attribs
-      offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
-      for pp in range(0, 2*drawList.numVertices, 8):
-        drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
+      # offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
+      # for pp in range(0, 2*drawList.numVertices, 8):
+      #   drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
 
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -1511,7 +1521,7 @@ void main()
 
     index = 0
     if symbolType == 0:
-
+      getLogger().info('>>highlight cross')
       # for peak in pls.peaks:
       for pp in range(0, len(drawList.pids), 8):
 
@@ -1552,6 +1562,7 @@ void main()
         index += numPoints
 
     elif symbolType == 1:
+      getLogger().info('>>highlight ellipse')
 
       # for peak in pls.peaks:
       for pp in range(0, len(drawList.pids), 8):
@@ -1587,12 +1598,16 @@ void main()
               colG = int(colour.strip('# ')[2:4], 16) / 255.0
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            drawList.colors[offset*4:(offset+np2+4)*4] = [colR, colG, colB, 1.0] * (np2+4)
+            try:
+              drawList.colors[offset*4:(offset+np2+4)*4] = [colR, colG, colB, 1.0] * (np2+4)
+            except Exception as es:
+              pass
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
         index += np2+4
 
     elif symbolType == 2:
+      getLogger().info('>>highlight filled')
 
       # for peak in pls.peaks:
       for pp in range(0, len(drawList.pids), 8):
@@ -1624,7 +1639,11 @@ void main()
               colG = int(colour.strip('# ')[2:4], 16) / 255.0
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            drawList.colors[offset * 4:(offset + np2 + 1) * 4] = [colR, colG, colB, 1.0] * (np2 + 1)
+            try:
+              drawList.colors[offset * 4:(offset + np2 + 1) * 4] = [colR, colG, colB, 1.0] * (np2 + 1)
+            except Exception as es:
+              pass
+
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
         index += np2 + 1
@@ -1642,7 +1661,7 @@ void main()
     if drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
-      drawList.refreshMode = GLRENDERMODE_DRAW
+      # drawList.refreshMode = GLRENDERMODE_DRAW
 
       drawList.clearArrays()
 
@@ -1742,6 +1761,9 @@ void main()
           getLogger().debug('Bad peak.axisCodes: %s - %s' % (peak.pid, peak.axisCodes))
         else:
           if symbolType == 0:
+
+            getLogger().info('>>build cross')
+
             # draw a cross
             # keep the cross square at 0.1ppm
 
@@ -1771,6 +1793,8 @@ void main()
             drawList.numVertices += 4
 
           elif symbolType == 1:                       # draw an ellipse at lineWidth
+
+            getLogger().info('>>build ellipse')
 
             if lineWidths[0] and lineWidths[1]:
               # draw 24 connected segments
@@ -1820,6 +1844,8 @@ void main()
             drawList.numVertices += np2 + 4
 
           elif symbolType == 2:  # draw a filled ellipse at lineWidth
+
+            getLogger().info('>>build filled')
 
             if lineWidths[0] and lineWidths[1]:
               # draw 24 connected segments
@@ -1930,7 +1956,7 @@ void main()
                                       , x=p0[0], y=p0[1]
                                       # , x=self._screenZero[0], y=self._screenZero[1]
                                       , color=(colR, colG, colB, 1.0), GLContext=self
-                                      , pid=peak.pid))
+                                      , object=peak))
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -2361,7 +2387,7 @@ void main()
                                   , y=AXIS_MARGINBOTTOM-AXIS_LINE-self.firstFont.height
 
                                   , color=labelColour, GLContext=self
-                                  , pid=None))
+                                  , object=None))
 
       # append the axisCode to the end
       self._axisXLabelling.append(GLString(text=self.axisCodes[0]
@@ -2369,7 +2395,7 @@ void main()
                                 , x=self.axisL+(5*self.pixelX)
                                 , y=AXIS_LINE
                                 , color=labelColour, GLContext=self
-                                , pid=None))
+                                , object=None))
 
       self._axisYLabelling = []
 
@@ -2382,7 +2408,7 @@ void main()
                                   , x=AXIS_LINE
                                   , y=axisY-(10.0*self.pixelY)
                                   , color=labelColour, GLContext=self
-                                  , pid=None))
+                                  , object=None))
 
       # append the axisCode to the end
       self._axisYLabelling.append(GLString(text=self.axisCodes[1]
@@ -2390,7 +2416,7 @@ void main()
                                 , x=AXIS_LINE
                                 , y=self.axisT-(1.5*self.firstFont.height*self.pixelY)
                                 , color=labelColour, GLContext=self
-                                , pid=None))
+                                , object=None))
 
   def drawAxisLabels(self):
     # draw axes labelling
@@ -2484,7 +2510,7 @@ void main()
                                         y=textY,
                                         color=(colR, colG, colB, 1.0),
                                         GLContext=self,
-                                        pid=None))
+                                        object=None))
             # this is in the attribs
             self._marksAxisCodes[-1].axisIndex = axisIndex
             self._marksAxisCodes[-1].axisPosition = pos
@@ -2702,7 +2728,7 @@ void main()
                                   , y=self.axisT-(1.5*self.firstFont.height*self.pixelY)
                                   # self._screenZero[0], y=self._screenZero[1]
                                   , color=colour, GLContext=self
-                                  , pid=None)
+                                  , object=None)
       self._oldStripIDLabel = self.stripIDLabel
 
     # draw the strikp ID to the screen
@@ -2853,7 +2879,7 @@ void main()
                                   , x=self.cursorCoordinate[0], y=self.cursorCoordinate[1]
                                   # self._screenZero[0], y=self._screenZero[1]
                                   , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
-                                  , pid=None)
+                                  , object=None)
       self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
   def drawMouseCoords(self):
@@ -4496,7 +4522,7 @@ class GLVertexArray():
     self.colors = np.empty(0, dtype=np.float32)      #np.zeros((len(text)*4,4), dtype=np.float32)
     self.texcoords= np.empty(0, dtype=np.float32)    #np.zeros((len(text)*4,2), dtype=np.float32)
     self.attribs = np.empty(0, dtype=np.float32)     #np.zeros((len(text)*4,1), dtype=np.float32)
-    self.pids = np.empty(0, dtype=np.object_)     #np.zeros((len(text)*4,1), dtype=np.object_)
+    self.pids = np.empty(0)   #, dtype=np.object_)     #np.zeros((len(text)*4,1), dtype=np.object_)
 
     self.numVertices = 0
 
@@ -4618,14 +4644,15 @@ class GLVertexArray():
 
 
 class GLString(GLVertexArray):
-  def __init__(self, text=None, font=None, pid=None, color=(1.0, 1.0, 1.0, 1.0), x=0.0, y=0.0,
+  def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0), x=0.0, y=0.0,
                angle=0.0, width=None, height=None, GLContext=None):
     super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=True
                                    , GLContext=GLContext, drawMode=GL.GL_TRIANGLES
                                    , dimension=2)
     self.text = text
     self.font = font
-    self.pid = pid
+    self.object = object
+    self.pid = object.pid if hasattr(object, 'pid') else None
     self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
     self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
     self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)

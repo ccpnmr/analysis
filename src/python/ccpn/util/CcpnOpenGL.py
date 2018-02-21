@@ -1501,7 +1501,11 @@ void main()
 
         # check whether the peaks still exists
         peak = drawList.pids[pp]
+        if peak.isDeleted:
+          continue
+
         offset = drawList.pids[pp+1]
+        numPoints = drawList.pids[pp+2]
 
         _isSelected = False
         _isInPlane = strip.peakIsInPlane(peak)
@@ -1525,9 +1529,89 @@ void main()
             drawList.indices = np.append(drawList.indices,
                                          np.array([index, index+1, index+2, index+3], dtype=np.uint))
 
-          drawList.colors[offset*4:offset*4+16] = [colR, colG, colB, 1.0] * 4
+          drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
 
-        index += 4
+        index += numPoints
+
+    elif symbolType == 1:
+
+      # for peak in pls.peaks:
+      for pp in range(0, len(drawList.pids), 8):
+
+        # check whether the peaks still exists
+        peak = drawList.pids[pp]
+        if peak.isDeleted:
+          continue
+
+        offset = drawList.pids[pp + 1]
+        numPoints = drawList.pids[pp+2]
+        np2 = 2*numPoints
+
+        ang = list(range(numPoints))
+
+        _isSelected = False
+        _isInPlane = strip.peakIsInPlane(peak)
+        if not _isInPlane:
+          _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        else:
+          _isInFlankingPlane = None
+
+        if _isInPlane or _isInFlankingPlane:
+          drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            _isSelected = True
+            colR, colG, colB = self.highlightColour[:3]
+            drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
+                                                            index + np2 + 2, index + np2 + 1,
+                                                            index + np2, index + np2 + 3,
+                                                            index + np2 + 3, index + np2 + 1])
+          else:
+            colour = peak.peakList.symbolColour
+            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            colG = int(colour.strip('# ')[2:4], 16) / 255.0
+            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+          drawList.colors[offset*4:(offset+np2+4)*4] = [colR, colG, colB, 1.0] * (np2+4)
+
+        index += np2+4
+
+    elif symbolType == 2:
+
+      # for peak in pls.peaks:
+      for pp in range(0, len(drawList.pids), 8):
+
+        # check whether the peaks still exists
+        peak = drawList.pids[pp]
+        if peak.isDeleted:
+          continue
+
+        offset = drawList.pids[pp + 1]
+        numPoints = drawList.pids[pp + 2]
+        np2 = 2 * numPoints
+
+        ang = list(range(numPoints))
+
+        _isSelected = False
+        _isInPlane = strip.peakIsInPlane(peak)
+        if not _isInPlane:
+          _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        else:
+          _isInFlankingPlane = None
+
+        if _isInPlane or _isInFlankingPlane:
+          drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index + np2] for an in ang])
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            _isSelected = True
+            colR, colG, colB = self.highlightColour[:3]
+          else:
+            colour = peak.peakList.symbolColour
+            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            colG = int(colour.strip('# ')[2:4], 16) / 255.0
+            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+          drawList.colors[offset * 4:(offset + np2 + 1) * 4] = [colR, colG, colB, 1.0] * (np2 + 1)
+
+        index += np2 + 1
 
   def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -1571,11 +1655,22 @@ void main()
 
         # change the ratio on resize
         drawList.refreshMode = GLREFRESHMODE_REBUILD
+        drawList.drawMode = GL.GL_LINES
+        drawList.fillMode = None
 
-      if symbolType == 1 or symbolType == 2:  # draw an ellipse at lineWidth
+      elif symbolType == 1:  # draw an ellipse at lineWidth
 
         # fix the size to the axes
         drawList.refreshMode = GLREFRESHMODE_NEVER
+        drawList.drawMode = GL.GL_LINES
+        drawList.fillMode = None
+
+      elif symbolType == 2:  # draw a filled ellipse at lineWidth
+
+        # fix the size to the axes
+        drawList.refreshMode = GLREFRESHMODE_NEVER
+        drawList.drawMode = GL.GL_TRIANGLES
+        drawList.fillMode = GL.GL_FILL
 
       # build the peaks VBO
       index=0
@@ -1637,13 +1732,11 @@ void main()
             _isSelected = False
             # unselected
             if _isInPlane or _isInFlankingPlane:
+              drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
               if hasattr(peak, '_isSelected') and peak._isSelected:
                 _isSelected = True
-                drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3,
-                                                                index, index+2, index+2, index+1,
+                drawList.indices = np.append(drawList.indices, [index, index+2, index+2, index+1,
                                                                 index, index+3, index+3, index+1])
-              else:
-                drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
 
             drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
                                                               , p0[0]+r, p0[1]+w
@@ -1683,15 +1776,13 @@ void main()
             _isSelected = False
 
             if _isInPlane or _isInFlankingPlane:
+              drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
               if hasattr(peak, '_isSelected') and peak._isSelected:
                 _isSelected = True
-                drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
                 drawList.indices = np.append(drawList.indices, [index+np2, index+np2+2,
                                                                  index+np2+2, index+np2+1,
                                                                  index+np2, index+np2+3,
                                                                  index+np2+3, index+np2+1])
-              else:
-                drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
 
             # draw an ellipse at lineWidth
             drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(skip*an*angPlus/numPoints)
@@ -1705,15 +1796,52 @@ void main()
 
             drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2+4))
             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+4))
+
+            # keep a pointer to the peak
+            drawList.pids = np.append(drawList.pids, [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+
             index += np2 + 4
             drawList.numVertices += np2 + 4
 
-            drawList.pids = np.append(drawList.pids, [peak, index, np2+4, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+          elif symbolType == 2:  # draw a filled ellipse at lineWidth
 
-          elif symbolType == 2:  # draw an ellipse at lineWidth
+            if lineWidths[0] and lineWidths[1]:
+              # draw 24 connected segments
+              r = 0.5 * lineWidths[0] / frequency[0]
+              w = 0.5 * lineWidths[1] / frequency[1]
+              numPoints = 24
+              angPlus = 2 * np.pi
+              skip = 1
+            else:
+              # draw 12 disconnected segments (dotted)
+              r = symbolWidth
+              w = symbolWidth
+              numPoints = 12
+              angPlus = 1.0 * np.pi
+              skip = 2
 
-            # TODO:ED filled ellipse
-            pass
+            np2 = 2*numPoints
+            ang = list(range(numPoints))
+            _isSelected = False
+
+            if _isInPlane or _isInFlankingPlane:
+              drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index+np2] for an in ang])
+
+            # draw an ellipse at lineWidth
+            drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(skip*an*angPlus/numPoints)
+                                                              , p0[1]-w*math.cos(skip*an*angPlus/numPoints)
+                                                              , p0[0]-r*math.sin((skip*an+1)*angPlus/numPoints)
+                                                              , p0[1]-w*math.cos((skip*an+1)*angPlus/numPoints)] for an in ang])
+            drawList.vertices = np.append(drawList.vertices, [p0[0], p0[1]])
+
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2+1))
+            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+1))
+
+            # keep a pointer to the peak
+            drawList.pids = np.append(drawList.pids, [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+
+            index += np2 + 1
+            drawList.numVertices += np2 + 1
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -3474,15 +3602,12 @@ void main()
           for spectrumView in self._parent.spectrumViews:
             for peakListView in spectrumView.peakListViews:
 
-              peakListView.buildPeakLists = True
-              peakListView.buildPeakListLabels = True
+              self._updateHighlightedPeaks(spectrumView, peakListView)
 
-            # self._updateHighlightedPeaks(spectrumView)
-
-            # spectrumView.buildPeakLists = True
-            # spectrumView.buildPeakListLabels = True
-          self.buildPeakLists()
-          self.buildPeakListLabels()
+          #     peakListView.buildPeakLists = True
+          #     peakListView.buildPeakListLabels = True
+          # self.buildPeakLists()
+          # self.buildPeakListLabels()
 
         if GLNotifier.GLANY in targets:
           self._rescaleXAxis(update=False)
@@ -4310,17 +4435,23 @@ class ShaderProgram(object):
 
 
 class GLVertexArray():
-  def __init__(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
-               , refreshMode = GLREFRESHMODE_NEVER
-               , blendMode=False, drawMode=GL.GL_LINES, dimension=3, GLContext=None):
+  def __init__(self, numLists=1,
+               renderMode=GLRENDERMODE_IGNORE,
+               refreshMode = GLREFRESHMODE_NEVER,
+               blendMode=False,
+               drawMode=GL.GL_LINES,
+               fillMode=None,
+               dimension=3,
+               GLContext=None):
 
     self.initialise(numLists=numLists, renderMode=renderMode, refreshMode = refreshMode
-                    , blendMode=blendMode, drawMode=drawMode, dimension=dimension, GLContext=GLContext)
+                    , blendMode=blendMode, drawMode=drawMode, fillMode=fillMode, dimension=dimension, GLContext=GLContext)
 
-  def initialise(self, numLists=1, renderMode=GLRENDERMODE_IGNORE
-                , refreshMode=GLREFRESHMODE_NEVER
-                , blendMode=False, drawMode=GL.GL_LINES, dimension=3
-                , GLContext=None):
+  def initialise(self, numLists=1, renderMode=GLRENDERMODE_IGNORE,
+                refreshMode=GLREFRESHMODE_NEVER,
+                blendMode=False, drawMode=GL.GL_LINES, fillMode=None,
+                dimension=3,
+                GLContext=None):
 
     self.renderMode = renderMode
     self.refreshMode = refreshMode
@@ -4336,6 +4467,7 @@ class GLVertexArray():
     self.numLists = numLists
     self.blendMode = blendMode
     self.drawMode = drawMode
+    self.fillMode = fillMode
     self.dimension = int(dimension)
     self._GLContext = GLContext
 
@@ -4360,6 +4492,8 @@ class GLVertexArray():
 
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
+    if self.fillMode is not None:
+      GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
 
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)

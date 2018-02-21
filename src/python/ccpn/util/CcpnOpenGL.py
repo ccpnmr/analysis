@@ -1272,6 +1272,7 @@ void main()
   def mouseReleaseEvent(self, ev):
     self._drawSelectionBox = False
     self._lastButtonReleased = ev.button()
+    self._checkKeys(ev)
 
     mx = ev.pos().x()
     if self._drawBottomAxis:
@@ -1282,17 +1283,28 @@ void main()
 
     # TODO:ED test the current viewBox mouse press event :)
 
-    # add a 2-pixel tolerance to the click event
+    # add a 2-pixel tolerance to the click event - in case of a small wiggle on coordinates
     if not self._widthsChangedEnough(self._mouseStart, self._mouseEnd, tol=2):
 
-      # this needs copying here
+      # perform click action
       self._mouseClickEvent(ev)
 
     else:
       if self._selectionMode != 0:
 
-        # end of drag event
+        # end of drag event - perform action
         self._mouseDragEvent(ev)
+
+  def _checkKeys(self, ev):
+    keyMod = QApplication.keyboardModifiers()
+    if keyMod == Qt.ShiftModifier:
+      self._isSHIFT = 'S'
+    if keyMod == Qt.ControlModifier:
+      self._isCTRL = 'C'
+    if keyMod == Qt.AltModifier:
+      self._isALT = 'A'
+    if keyMod == Qt.MetaModifier:
+      self._isMETA = 'M'
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()
@@ -1306,18 +1318,16 @@ void main()
     if keyMod == Qt.MetaModifier:
       self._isMETA = 'M'
 
-    # print ('>>>', self._isSHIFT, self._isCTRL, self._isALT, self._isMETA)
-    # if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_A:
-    #   self._key = 'A'
-    # if type(event) == QtGui.QKeyEvent and event.key() == QtCore.Qt.Key_S:
-    #   self._key = 'S'
-
-  def keyReleaseEvent(self, event: QtGui.QKeyEvent):
+  def _clearKeys(self):
     self._key = ''
     self._isSHIFT = ''
     self._isCTRL = ''
     self._isALT = ''
     self._isMETA = ''
+
+  def keyReleaseEvent(self, event: QtGui.QKeyEvent):
+    self._clearKeys()
+    self._drawSelectionBox = False
 
     # spawn a repaint event - otherwise cursor will not update
     self.update()

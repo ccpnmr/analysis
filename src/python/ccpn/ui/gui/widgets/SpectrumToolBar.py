@@ -96,9 +96,10 @@ class SpectrumToolBar(ToolBar):
     contextMenu.addAction('Remove SP', partial(self._removeSpectrum, button))
     return contextMenu
 
-  def _updateVisiblePeakLists(self, spectrumView, visible):
-    print ('>>>', spectrumView)
-    pass
+  def _updateVisiblePeakLists(self, spectrumView=None, visible=True):
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
 
   def _allPeakLists(self, contextMenu, button):
     key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
@@ -109,6 +110,7 @@ class SpectrumToolBar(ToolBar):
             if not action.isChecked():
               action.setChecked(True)
               action.toggled.connect(peakListView.setVisible)
+    self._updateVisiblePeakLists()
 
   def _noPeakLists(self, contextMenu, button):
     key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
@@ -119,6 +121,7 @@ class SpectrumToolBar(ToolBar):
             if action.isChecked():
               action.setChecked(False)
               action.toggled.connect(peakListView.setVisible)
+    self._updateVisiblePeakLists()
 
   def _removeSpectrum(self, button:QtWidgets.QToolButton):
     """

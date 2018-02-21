@@ -138,7 +138,8 @@ class GLNotifier(QtWidgets.QWidget):
   GLLEFTAXISVALUE = 'leftAxis'
   GLRIGHTAXISVALUE = 'rightAxis'
   GLCONTOURS = 'updateContours'
-  GLPEAKS = 'glUpdatePeaks'
+  GLHIGHLIGHTPEAKS = 'glHighlightPeaks'
+  GLALLPEAKS = 'glAllPeaks'
   GLPEAKLISTS = 'glUpdatePeakLists'
   GLPEAKLISTLABELS = 'glUpdatePeakListLabels'
   GLGRID = 'glUpdateGrid'
@@ -1321,6 +1322,11 @@ void main()
     # spawn a repaint event - otherwise cursor will not update
     self.update()
 
+  def enterEvent(self, ev: QtCore.QEvent):
+    super(CcpnGLWidget, self).enterEvent(ev)
+    self._drawSelectionBox = False
+    self.update()
+
   def leaveEvent(self, ev: QtCore.QEvent):
     super(CcpnGLWidget, self).leaveEvent(ev)
     self._drawSelectionBox = False
@@ -1501,35 +1507,37 @@ void main()
 
         # check whether the peaks still exists
         peak = drawList.pids[pp]
-        if peak.isDeleted:
-          continue
-
         offset = drawList.pids[pp+1]
         numPoints = drawList.pids[pp+2]
 
-        _isSelected = False
-        _isInPlane = strip.peakIsInPlane(peak)
-        if not _isInPlane:
-          _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-        else:
-          _isInFlankingPlane = None
-
-        if _isInPlane or _isInFlankingPlane:
-          if hasattr(peak, '_isSelected') and peak._isSelected:
-            _isSelected = True
-            colR, colG, colB = self.highlightColour[:3]
-            drawList.indices = np.append(drawList.indices, np.array([index, index+1, index+2, index+3,
-                                                                    index, index+2, index+2, index+1,
-                                                                    index, index+3, index+3, index+1], dtype=np.uint))
+        if not peak.isDeleted:
+          _isSelected = False
+          _isInPlane = strip.peakIsInPlane(peak)
+          if not _isInPlane:
+            _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
           else:
-            colour = peak.peakList.symbolColour
-            colR = int(colour.strip('# ')[0:2], 16) / 255.0
-            colG = int(colour.strip('# ')[2:4], 16) / 255.0
-            colB = int(colour.strip('# ')[4:6], 16) / 255.0
-            drawList.indices = np.append(drawList.indices,
-                                         np.array([index, index+1, index+2, index+3], dtype=np.uint))
+            _isInFlankingPlane = None
 
-          drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
+          if _isInPlane or _isInFlankingPlane:
+            if hasattr(peak, '_isSelected') and peak._isSelected:
+              _isSelected = True
+              colR, colG, colB = self.highlightColour[:3]
+              drawList.indices = np.append(drawList.indices, np.array([index, index+1, index+2, index+3,
+                                                                      index, index+2, index+2, index+1,
+                                                                      index, index+3, index+3, index+1], dtype=np.uint))
+            else:
+              colour = peak.peakList.symbolColour
+              colR = int(colour.strip('# ')[0:2], 16) / 255.0
+              colG = int(colour.strip('# ')[2:4], 16) / 255.0
+              colB = int(colour.strip('# ')[4:6], 16) / 255.0
+              drawList.indices = np.append(drawList.indices,
+                                           np.array([index, index+1, index+2, index+3], dtype=np.uint))
+            try:
+              drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
+            except Exception as es:
+              pass
+
+          drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
         index += numPoints
 
@@ -1540,38 +1548,37 @@ void main()
 
         # check whether the peaks still exists
         peak = drawList.pids[pp]
-        if peak.isDeleted:
-          continue
-
         offset = drawList.pids[pp + 1]
         numPoints = drawList.pids[pp+2]
         np2 = 2*numPoints
 
-        ang = list(range(numPoints))
+        if not peak.isDeleted:
+          ang = list(range(numPoints))
 
-        _isSelected = False
-        _isInPlane = strip.peakIsInPlane(peak)
-        if not _isInPlane:
-          _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-        else:
-          _isInFlankingPlane = None
-
-        if _isInPlane or _isInFlankingPlane:
-          drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
-          if hasattr(peak, '_isSelected') and peak._isSelected:
-            _isSelected = True
-            colR, colG, colB = self.highlightColour[:3]
-            drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
-                                                            index + np2 + 2, index + np2 + 1,
-                                                            index + np2, index + np2 + 3,
-                                                            index + np2 + 3, index + np2 + 1])
+          _isSelected = False
+          _isInPlane = strip.peakIsInPlane(peak)
+          if not _isInPlane:
+            _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
           else:
-            colour = peak.peakList.symbolColour
-            colR = int(colour.strip('# ')[0:2], 16) / 255.0
-            colG = int(colour.strip('# ')[2:4], 16) / 255.0
-            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+            _isInFlankingPlane = None
 
-          drawList.colors[offset*4:(offset+np2+4)*4] = [colR, colG, colB, 1.0] * (np2+4)
+          if _isInPlane or _isInFlankingPlane:
+            drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+            if hasattr(peak, '_isSelected') and peak._isSelected:
+              _isSelected = True
+              colR, colG, colB = self.highlightColour[:3]
+              drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
+                                                              index + np2 + 2, index + np2 + 1,
+                                                              index + np2, index + np2 + 3,
+                                                              index + np2 + 3, index + np2 + 1])
+            else:
+              colour = peak.peakList.symbolColour
+              colR = int(colour.strip('# ')[0:2], 16) / 255.0
+              colG = int(colour.strip('# ')[2:4], 16) / 255.0
+              colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+            drawList.colors[offset*4:(offset+np2+4)*4] = [colR, colG, colB, 1.0] * (np2+4)
+          drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
         index += np2+4
 
@@ -1582,34 +1589,33 @@ void main()
 
         # check whether the peaks still exists
         peak = drawList.pids[pp]
-        if peak.isDeleted:
-          continue
-
         offset = drawList.pids[pp + 1]
         numPoints = drawList.pids[pp + 2]
         np2 = 2 * numPoints
 
-        ang = list(range(numPoints))
+        if not peak.isDeleted:
+          ang = list(range(numPoints))
 
-        _isSelected = False
-        _isInPlane = strip.peakIsInPlane(peak)
-        if not _isInPlane:
-          _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-        else:
-          _isInFlankingPlane = None
-
-        if _isInPlane or _isInFlankingPlane:
-          drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index + np2] for an in ang])
-          if hasattr(peak, '_isSelected') and peak._isSelected:
-            _isSelected = True
-            colR, colG, colB = self.highlightColour[:3]
+          _isSelected = False
+          _isInPlane = strip.peakIsInPlane(peak)
+          if not _isInPlane:
+            _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
           else:
-            colour = peak.peakList.symbolColour
-            colR = int(colour.strip('# ')[0:2], 16) / 255.0
-            colG = int(colour.strip('# ')[2:4], 16) / 255.0
-            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+            _isInFlankingPlane = None
 
-          drawList.colors[offset * 4:(offset + np2 + 1) * 4] = [colR, colG, colB, 1.0] * (np2 + 1)
+          if _isInPlane or _isInFlankingPlane:
+            drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index + np2] for an in ang])
+            if hasattr(peak, '_isSelected') and peak._isSelected:
+              _isSelected = True
+              colR, colG, colB = self.highlightColour[:3]
+            else:
+              colour = peak.peakList.symbolColour
+              colR = int(colour.strip('# ')[0:2], 16) / 255.0
+              colG = int(colour.strip('# ')[2:4], 16) / 255.0
+              colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+            drawList.colors[offset * 4:(offset + np2 + 1) * 4] = [colR, colG, colB, 1.0] * (np2 + 1)
+          drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
         index += np2 + 1
 
@@ -3598,7 +3604,7 @@ void main()
           self._marksList.renderMode = GLRENDERMODE_REBUILD
 
         # TODO:ED test trigger for the minute
-        if GLNotifier.GLPEAKS in triggers:
+        if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
           for spectrumView in self._parent.spectrumViews:
             for peakListView in spectrumView.peakListViews:
 
@@ -3608,6 +3614,14 @@ void main()
           #     peakListView.buildPeakListLabels = True
           # self.buildPeakLists()
           # self.buildPeakListLabels()
+
+        if GLNotifier.GLALLPEAKS in triggers:
+          for spectrumView in self._parent.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+              peakListView.buildPeakLists = True
+              peakListView.buildPeakListLabels = True
+          self.buildPeakLists()
+          self.buildPeakListLabels()
 
         if GLNotifier.GLANY in targets:
           self._rescaleXAxis(update=False)
@@ -3905,7 +3919,19 @@ void main()
     #     #   # print(peak.position , deltaPosition)
     #     #   peak.position =  (peak.position[0] + deltaPosition[0],peak.position[1] + deltaPosition[1] )
 
-    elif shiftLeftMouse(event) or shiftMiddleMouse(event) or shiftRightMouse(event):
+    elif shiftLeftMouse(event):
+      # zoom into the region
+      self.axisL = max(self._startCoordinate[0], self._endCoordinate[0])
+      self.axisR = min(self._startCoordinate[0], self._endCoordinate[0])
+      self.axisB = max(self._startCoordinate[1], self._endCoordinate[1])
+      self.axisT = min(self._startCoordinate[1], self._endCoordinate[1])
+
+      self._resetBoxes()
+
+      # this also rescales the peaks
+      self._rescaleXAxis()
+
+    elif shiftMiddleMouse(event) or shiftRightMouse(event):
       pass
 
     else:

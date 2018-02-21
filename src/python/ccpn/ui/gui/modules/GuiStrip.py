@@ -315,7 +315,7 @@ class GuiStrip(Frame):
 
     from ccpn.util.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
-    GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKS])
+    GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS])
 
   def _highlightCurrentStrip(self, data):
     "Callback to highlight the axes of current strip"
@@ -920,11 +920,11 @@ def _updateDisplayedMarks(data):
   GLSignals.emitEvent(triggers=[GLNotifier.GLMARKS])
 
 def _updateSelectedPeaks(data):
-  "Callback when marks have changed"
+  "Callback when peaks have changed"
 
   from ccpn.util.CcpnOpenGL import GLNotifier
   GLSignals = GLNotifier(parent=None)
-  GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKS], targets=data[Notifier.OBJECT].peaks)
+  GLSignals.emitEvent(triggers=[GLNotifier.GLHIGHLIGHTPEAKS], targets=data[Notifier.OBJECT].peaks)
 
 def _axisRegionChanged(axis:'Axis'):
   """Notifier function: Update strips etc. for when axis position or width changes"""

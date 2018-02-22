@@ -214,7 +214,10 @@ class GuiStrip(Frame):
     # notifier for highlighting the strip
     self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
     # Notifier for updating the peaks
-    self._peakNotifier = Notifier(self.project, [Notifier.CREATE], 'Peak', self._updateDisplayedPeaks)
+    self._peakNotifier = Notifier(self.project, [Notifier.CREATE,
+                                                 Notifier.DELETE,
+                                                 Notifier.CHANGE], 'Peak', self._updateDisplayedPeaks,
+                                  onceOnly=True)
     # Notifier for change of stripLabel
     self._stripLabelNotifier = Notifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
     #self._stripNotifier.setDebug(True)
@@ -311,11 +314,16 @@ class GuiStrip(Frame):
 
   def _updateDisplayedPeaks(self, data):
     "Callback when peaks have changed"
-    self.showPeaks(data['object'].peakList)
+    # self.showPeaks(data['object'].peakList)
 
-    from ccpn.util.CcpnOpenGL import GLNotifier
-    GLSignals = GLNotifier(parent=self)
-    GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS])
+    # from ccpn.util.CcpnOpenGL import GLNotifier
+    # GLSignals = GLNotifier(parent=self)
+    # GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKNOTIFY], targets=data)
+    #
+    try:
+      self._testCcpnOpenGLWidget._processPeakNotifier(data)
+    except Exception as es:
+      getLogger().debug('OpenGL widget not instantiated')
 
   def _highlightCurrentStrip(self, data):
     "Callback to highlight the axes of current strip"
@@ -859,6 +867,7 @@ class GuiStrip(Frame):
     # NBNB TBD 2) This should not be called for each strip
 
     if not self._finaliseDone: return
+
     if not peaks:
       peaks = peakList.peaks
 
@@ -1026,6 +1035,6 @@ def _setupGuiStrip(project:Project, apiStrip):
   strip.viewBox.sigYRangeChanged.connect(strip._updateYRegion)
 
   try:
-    strip._testCcpnOpenGLWidget.initialiseAxes(display=strip.spectrumDisplay)
+    strip._testCcpnOpenGLWidget.initialiseAxes(strip=strip)
   except:
     getLogger().debug('Error: OpenGL widget not instantiated for %s' % strip)

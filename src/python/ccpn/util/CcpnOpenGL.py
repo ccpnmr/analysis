@@ -50,6 +50,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
   leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
   middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
   rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
+from ccpn.core.lib.Notifiers import Notifier
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -140,6 +141,7 @@ class GLNotifier(QtWidgets.QWidget):
   GLCONTOURS = 'updateContours'
   GLHIGHLIGHTPEAKS = 'glHighlightPeaks'
   GLALLPEAKS = 'glAllPeaks'
+  GLPEAKNOTIFY = 'glPeakNotify'
   GLPEAKLISTS = 'glUpdatePeakLists'
   GLPEAKLISTLABELS = 'glUpdatePeakListLabels'
   GLGRID = 'glUpdateGrid'
@@ -152,7 +154,9 @@ class GLNotifier(QtWidgets.QWidget):
   GLVALUES = 'glValues'
   GLDATA = 'glData'
 
-  _triggerKeywords = (GLANY, GLAXES, GLCONTOURS, GLCURSOR, GLGRID, GLPEAKLISTS, GLPEAKLISTLABELS)
+  _triggerKeywords = (GLHIGHLIGHTPEAKS, GLALLPEAKS,
+                      GLPEAKNOTIFY, GLPEAKLISTS, GLPEAKLISTLABELS, GLGRID, GLAXES,
+                      GLCURSOR, GLANY, GLMARKS, GLTARGETS, GLTRIGGERS, GLVALUES, GLDATA)
 
   glXAxisChanged = pyqtSignal(dict)
   glYAxisChanged = pyqtSignal(dict)
@@ -743,15 +747,15 @@ class CcpnGLWidget(QOpenGLWidget):
     if angle != self.zRot:
       self.zRot = angle
 
-  def initialiseAxes(self, display=None):
+  def initialiseAxes(self, strip=None):
     """
     setup the correct axis range and padding
     :param axes - list of axis objects:
     :param padding - x, y padding values:
     """
-    self.orderedAxes = display.axes
-    self._axisCodes = display.axisCodes
-    self._axisOrder = display.axisOrder
+    self.orderedAxes = strip.axes
+    self._axisCodes = strip.axisCodes
+    self._axisOrder = strip.axisOrder
 
     axis = self._orderedAxes[0]
     self.axisL = axis.region[1]
@@ -1926,6 +1930,22 @@ void main()
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
       self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
       self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
+
+  def _deletePeakListLabel(self, spectrumView, peak):
+    spectrum = spectrumView.spectrum
+
+    for peakListView in peak.peakListViews:
+      drawList = self._GLPeakListLabels[peakListView.pid]
+
+      for drawStr in drawList:
+        if drawStr.object == peak:
+          print ('>>>delete', peakListView, peak)
+
+  def _processPeakNotifier(self, data):
+    if self._parent.isDeleted:
+      return
+
+    print (data[Notifier.OBJECT], data[Notifier.TRIGGER], data[Notifier.OBJECT].isDeleted)
 
   def _buildPeakListLabels(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -3737,6 +3757,9 @@ void main()
 
         if GLNotifier.GLANY in targets:
           self._rescaleXAxis(update=False)
+
+        if GLNotifier.GLPEAKNOTIFY in targets:
+          self._processPeakNotifier(targets)
 
     # repaint
     self.update()

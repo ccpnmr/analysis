@@ -683,8 +683,12 @@ class Project(AbstractWrapperObject):
     undo = self._undo
     if undo:
       # set undo step
-      undo.newWaypoint()                      # DO NOT CHANGE TH
+      undo.newWaypoint()                      # DO NOT CHANGE THIS
       undo.increaseWaypointBlocking()
+
+      # TODO:ED check this!
+      # self.suspendNotification()
+
     if not self._appBase._echoBlocking:
 
       getDataObj =  self._data2Obj.get
@@ -706,6 +710,9 @@ class Project(AbstractWrapperObject):
     MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called"""
     undo = self._undo
     if undo:
+
+      # TODO:ED check this!
+      # self.resumeNotification()
       undo.decreaseWaypointBlocking()
 
     if self._appBase._echoBlocking > 0:

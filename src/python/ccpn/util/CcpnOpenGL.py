@@ -1704,6 +1704,7 @@ void main()
           numPoints = drawList.pids[pp + 2]
 
           # delete here
+          print('>>>delete0', peak)
           index += numPoints
 
     elif symbolType == 1:
@@ -1720,6 +1721,7 @@ void main()
           np2 = 2 * numPoints
 
           # delete here
+          print('>>>delete1', peak)
           index += np2 + 5
 
     elif symbolType == 2:
@@ -1736,6 +1738,7 @@ void main()
           np2 = 2 * numPoints
 
           # delete here
+          print('>>>delete2', peak)
           index += np2 + 5
 
   def _appendPeakListItem(self, spectrumView, peakListView, peak):
@@ -2226,9 +2229,7 @@ void main()
         for spectrumView in spectrum.spectrumViews:
           if spectrumView in self._parent.spectrumViews:
 
-            drawList = self._GLPeakLists[peakListView.pid]
-
-            print ('>>>delete here')
+            self._removePeakListItem(spectrumView, peakListView, peak)
             self._updateHighlightedPeaks(spectrumView, peakListView)
 
   def _createPeakListItem(self, peak):

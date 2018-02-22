@@ -1931,21 +1931,27 @@ void main()
       self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
       self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
 
-  def _deletePeakListLabel(self, spectrumView, peak):
-    spectrum = spectrumView.spectrum
+  def _deletePeakListLabel(self, peak):
+    for pid in self._GLPeakListLabels.keys():
+      drawList = self._GLPeakListLabels[pid]
 
-    for peakListView in peak.peakListViews:
-      drawList = self._GLPeakListLabels[peakListView.pid]
-
-      for drawStr in drawList:
+      for drawStr in drawList.stringList:
         if drawStr.object == peak:
-          print ('>>>delete', peakListView, peak)
+          drawList.stringList.remove(drawStr)
+          break
 
   def _processPeakNotifier(self, data):
-    if self._parent.isDeleted:
-      return
 
-    print (data[Notifier.OBJECT], data[Notifier.TRIGGER], data[Notifier.OBJECT].isDeleted)
+    triggers = data[Notifier.TRIGGER]
+    peak = data[Notifier.OBJECT]
+
+    if Notifier.DELETE in triggers:
+
+      # delete peakSymbol
+
+      self._deletePeakListLabel(peak)
+
+    self.update()
 
   def _buildPeakListLabels(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum

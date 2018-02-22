@@ -1686,6 +1686,292 @@ void main()
 
         index += np2 + 5
 
+  def _removePeakListItem(self, spectrumView, peakListView, delPeak):
+    symbolType = self._preferences.peakSymbolType
+
+    drawList = self._GLPeakLists[peakListView.pid]
+
+    index = 0
+    if symbolType == 0:
+      # for peak in pls.peaks:
+      for pp in range(0, len(drawList.pids), 8):
+
+        # check whether the peaks still exists
+        peak = drawList.pids[pp]
+
+        if peak == delPeak:
+          offset = drawList.pids[pp + 1]
+          numPoints = drawList.pids[pp + 2]
+
+          # delete here
+          index += numPoints
+
+    elif symbolType == 1:
+
+      # for peak in pls.peaks:
+      for pp in range(0, len(drawList.pids), 8):
+
+        # check whether the peaks still exists
+        peak = drawList.pids[pp]
+
+        if peak == delPeak:
+          offset = drawList.pids[pp + 1]
+          numPoints = drawList.pids[pp + 2]
+          np2 = 2 * numPoints
+
+          # delete here
+          index += np2 + 5
+
+    elif symbolType == 2:
+
+      # for peak in pls.peaks:
+      for pp in range(0, len(drawList.pids), 8):
+
+        # check whether the peaks still exists
+        peak = drawList.pids[pp]
+
+        if peak == delPeak:
+          offset = drawList.pids[pp + 1]
+          numPoints = drawList.pids[pp + 2]
+          np2 = 2 * numPoints
+
+          # delete here
+          index += np2 + 5
+
+  def _appendPeakListItem(self, spectrumView, peakListView, peak):
+    spectrum = spectrumView.spectrum
+    drawList = self._GLPeakLists[peakListView.pid]
+
+    # find the correct scale to draw square pixels
+    # don't forget to change when the axes change
+
+    symbolType = self._preferences.peakSymbolType
+    symbolWidth = self._preferences.peakSymbolSize / 2.0
+    lineThickness = self._preferences.peakSymbolThickness / 2.0
+
+    x = abs(self.pixelX)
+    y = abs(self.pixelY)
+
+    if symbolType == 0:  # a cross
+      # fix the aspect ratio of the cross to match the screen
+      minIndex = 0 if x <= y else 1
+      pos = [symbolWidth, symbolWidth * y / x]
+      w = r = pos[minIndex]
+
+      if x <= y:
+        r = symbolWidth
+        w = symbolWidth * y / x
+      else:
+        w = symbolWidth
+        r = symbolWidth * x / y
+
+      # change the ratio on resize
+      drawList.refreshMode = GLREFRESHMODE_REBUILD
+      drawList.drawMode = GL.GL_LINES
+      drawList.fillMode = None
+
+    elif symbolType == 1:  # draw an ellipse at lineWidth
+
+      # fix the size to the axes
+      drawList.refreshMode = GLREFRESHMODE_NEVER
+      drawList.drawMode = GL.GL_LINES
+      drawList.fillMode = None
+
+    elif symbolType == 2:  # draw a filled ellipse at lineWidth
+
+      # fix the size to the axes
+      drawList.refreshMode = GLREFRESHMODE_NEVER
+      drawList.drawMode = GL.GL_TRIANGLES
+      drawList.fillMode = GL.GL_FILL
+
+    # build the peaks VBO
+    index = 0
+    # for pls in spectrum.peakLists:
+
+    pls = peakListView.peakList
+    spectrumFrequency = spectrum.spectrometerFrequencies
+
+    # TODO:ED display the required peaks - possibly build all then on draw selected later
+    strip = spectrumView.strip
+    _isInPlane = strip.peakIsInPlane(peak)
+    if not _isInPlane:
+      _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+    else:
+      _isInFlankingPlane = None
+
+    # if not _isInPlane and not _isInFlankingPlane:
+    #   continue
+
+    if hasattr(peak, '_isSelected') and peak._isSelected:
+      colR, colG, colB = self.highlightColour[:3]
+    else:
+      colour = pls.symbolColour
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+    # get the correct coordinates based on the axisCodes
+    p0 = [0.0] * 2  # len(self.axisOrder)
+    lineWidths = [None] * 2  # len(self.axisOrder)
+    frequency = [0.0] * 2  # len(self.axisOrder)
+    axisCount = 0
+    for ps, psCode in enumerate(self.axisOrder[0:2]):
+      for pp, ppCode in enumerate(peak.axisCodes):
+
+        if self._preferences.matchAxisCode == 0:  # default - match atom type
+          if ppCode[0] == psCode[0]:
+            p0[ps] = peak.position[pp]
+            lineWidths[ps] = peak.lineWidths[pp]
+            frequency[ps] = spectrumFrequency[pp]
+            axisCount += 1
+
+        elif self._preferences.matchAxisCode == 1:  # match full code
+          if ppCode == psCode:
+            p0[ps] = peak.position[pp]
+            lineWidths[ps] = peak.lineWidths[pp]
+            frequency[ps] = spectrumFrequency[pp]
+            axisCount += 1
+
+    if axisCount != 2:
+      getLogger().debug('Bad peak.axisCodes: %s - %s' % (peak.pid, peak.axisCodes))
+    else:
+      if symbolType == 0:
+
+        # draw a cross
+        # keep the cross square at 0.1ppm
+
+        _isSelected = False
+        # unselected
+        if _isInPlane or _isInFlankingPlane:
+          drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            _isSelected = True
+            drawList.indices = np.append(drawList.indices, [index, index + 2, index + 2, index + 1,
+                                                            index, index + 3, index + 3, index + 1])
+
+        drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
+          , p0[0] + r, p0[1] + w
+          , p0[0] + r, p0[1] - w
+          , p0[0] - r, p0[1] + w])
+        drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+        drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
+          , p0[0], p0[1]
+          , p0[0], p0[1]
+          , p0[0], p0[1]])
+
+        # keep a pointer to the peak
+        drawList.pids = np.append(drawList.pids, [peak, index, 4, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+
+        index += 4
+        drawList.numVertices += 4
+
+      elif symbolType == 1:  # draw an ellipse at lineWidth
+
+        if lineWidths[0] and lineWidths[1]:
+          # draw 24 connected segments
+          r = 0.5 * lineWidths[0] / frequency[0]
+          w = 0.5 * lineWidths[1] / frequency[1]
+          numPoints = 24
+          angPlus = 2 * np.pi
+          skip = 1
+        else:
+          # draw 12 disconnected segments (dotted)
+          r = symbolWidth
+          w = symbolWidth
+          numPoints = 12
+          angPlus = 1.0 * np.pi
+          skip = 2
+
+        np2 = 2 * numPoints
+        ang = list(range(numPoints))
+        _isSelected = False
+
+        if _isInPlane or _isInFlankingPlane:
+          drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            _isSelected = True
+            drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
+                                                            index + np2 + 2, index + np2 + 1,
+                                                            index + np2, index + np2 + 3,
+                                                            index + np2 + 3, index + np2 + 1])
+
+        # draw an ellipse at lineWidth
+        drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints)
+                                                            , p0[1] - w * math.cos(skip * an * angPlus / numPoints)
+                                                            ,
+                                                           p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints)
+                                                            ,
+                                                           p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
+                                                          for an in ang])
+        drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
+          , p0[0] + r, p0[1] + w
+          , p0[0] + r, p0[1] - w
+          , p0[0] - r, p0[1] + w
+          , p0[0], p0[1]])
+
+        drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2 + 5))
+        drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
+        drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
+        drawList.lineWidths = (r, w)
+
+        # keep a pointer to the peak
+        drawList.pids = np.append(drawList.pids,
+                                  [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, skip, 0])
+
+        index += np2 + 5
+        drawList.numVertices += np2 + 5
+
+      elif symbolType == 2:  # draw a filled ellipse at lineWidth
+
+        if lineWidths[0] and lineWidths[1]:
+          # draw 24 connected segments
+          r = 0.5 * lineWidths[0] / frequency[0]
+          w = 0.5 * lineWidths[1] / frequency[1]
+          numPoints = 24
+          angPlus = 2 * np.pi
+          skip = 1
+        else:
+          # draw 12 disconnected segments (dotted)
+          r = symbolWidth
+          w = symbolWidth
+          numPoints = 12
+          angPlus = 1.0 * np.pi
+          skip = 2
+
+        np2 = 2 * numPoints
+        ang = list(range(numPoints))
+        _isSelected = False
+
+        if _isInPlane or _isInFlankingPlane:
+          drawList.indices = np.append(drawList.indices,
+                                       [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4] for an in ang])
+
+        # draw an ellipse at lineWidth
+        drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints)
+                                                            , p0[1] - w * math.cos(skip * an * angPlus / numPoints)
+                                                            ,
+                                                           p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints)
+                                                            ,
+                                                           p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
+                                                          for an in ang])
+        drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
+          , p0[0] + r, p0[1] + w
+          , p0[0] + r, p0[1] - w
+          , p0[0] - r, p0[1] + w
+          , p0[0], p0[1]])
+
+        drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2 + 5))
+        drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
+        drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
+        drawList.lineWidths = (r, w)
+
+        # keep a pointer to the peak
+        drawList.pids = np.append(drawList.pids,
+                                  [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, skip, 0])
+
+        index += np2 + 5
+        drawList.numVertices += np2 + 5
+
   def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
 
@@ -1931,6 +2217,31 @@ void main()
       self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
       self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
 
+  def _deletePeakListItem(self, peak):
+    pls = peak.peakList
+    spectrum = pls.spectrum
+
+    for peakListView in pls.peakListViews:
+      if peakListView.pid in self._GLPeakListLabels.keys():
+        for spectrumView in spectrum.spectrumViews:
+          if spectrumView in self._parent.spectrumViews:
+
+            drawList = self._GLPeakLists[peakListView.pid]
+
+            print ('>>>delete here')
+            self._updateHighlightedPeaks(spectrumView, peakListView)
+
+  def _createPeakListItem(self, peak):
+    pls = peak.peakList
+    spectrum = pls.spectrum
+
+    for peakListView in pls.peakListViews:
+      if peakListView.pid in self._GLPeakListLabels.keys():
+        for spectrumView in spectrum.spectrumViews:
+          if spectrumView in self._parent.spectrumViews:
+
+            self._appendPeakListItem(spectrumView, peakListView, peak)
+
   def _deletePeakListLabel(self, peak):
     for pid in self._GLPeakListLabels.keys():
       drawList = self._GLPeakListLabels[pid]
@@ -1940,6 +2251,18 @@ void main()
           drawList.stringList.remove(drawStr)
           break
 
+  def _createPeakListLabel(self, peak):
+    pls = peak.peakList
+    spectrum = pls.spectrum
+
+    for peakListView in pls.peakListViews:
+      if peakListView.pid in self._GLPeakListLabels.keys():
+        for spectrumView in spectrum.spectrumViews:
+          if spectrumView in self._parent.spectrumViews:
+            drawList = self._GLPeakListLabels[peakListView.pid]
+            self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
+            self._rescalePeakListLabels(spectrumView, peakListView)
+
   def _processPeakNotifier(self, data):
 
     triggers = data[Notifier.TRIGGER]
@@ -1947,11 +2270,89 @@ void main()
 
     if Notifier.DELETE in triggers:
 
-      # delete peakSymbol
-
+      self._deletePeakListItem(peak)
       self._deletePeakListLabel(peak)
 
-    self.update()
+    if Notifier.CREATE in triggers:
+
+      self._createPeakListItem(peak)
+      self._createPeakListLabel(peak)
+
+    self._clearKeys()
+
+  def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
+    # get the correct coordinates based on the axisCodes
+
+    spectrum = spectrumView.spectrum
+    spectrumFrequency = spectrum.spectrometerFrequencies
+    pls = peakListView.peakList
+
+    symbolWidth = self._preferences.peakSymbolSize / 2.0
+
+    p0 = [0.0] * 2  # len(self.axisOrder)
+    lineWidths = [None] * 2  # len(self.axisOrder)
+    frequency = [0.0] * 2  # len(self.axisOrder)
+    axisCount = 0
+    for ps, psCode in enumerate(self.axisOrder[0:2]):
+      for pp, ppCode in enumerate(peak.axisCodes):
+
+        if self._preferences.matchAxisCode == 0:  # default - match atom type
+          if ppCode[0] == psCode[0]:
+            p0[ps] = peak.position[pp]
+            lineWidths[ps] = peak.lineWidths[pp]
+            frequency[ps] = spectrumFrequency[pp]
+            axisCount += 1
+
+        elif self._preferences.matchAxisCode == 1:  # match full code
+          if ppCode == psCode:
+            p0[ps] = peak.position[pp]
+            lineWidths[ps] = peak.lineWidths[pp]
+            frequency[ps] = spectrumFrequency[pp]
+            axisCount += 1
+
+    if lineWidths[0] and lineWidths[1]:
+      # draw 24 connected segments
+      r = 0.5 * lineWidths[0] / frequency[0]
+      w = 0.5 * lineWidths[1] / frequency[1]
+    else:
+      r = symbolWidth
+      w = symbolWidth
+
+    if axisCount == 2:
+      # TODO:ED display the required peaks
+      strip = spectrumView.strip
+      _isInPlane = strip.peakIsInPlane(peak)
+      if not _isInPlane:
+        _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+      else:
+        _isInFlankingPlane = None
+
+      if not _isInPlane and not _isInFlankingPlane:
+        return
+
+      if hasattr(peak, '_isSelected') and peak._isSelected:
+        colR, colG, colB = self.highlightColour[:3]
+      else:
+        colour = pls.textColour
+        colR = int(colour.strip('# ')[0:2], 16) / 255.0
+        colG = int(colour.strip('# ')[2:4], 16) / 255.0
+        colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+      if self._parent.peakLabelling == 0:
+        text = _getScreenPeakAnnotation(peak, useShortCode=True)
+      elif self._parent.peakLabelling == 1:
+        text = _getScreenPeakAnnotation(peak, useShortCode=False)
+      else:
+        text = _getPeakAnnotation(peak)  # original 'pid'
+
+      # TODO:ED check axisCodes and ordering
+      stringList.append(GLString(text=text,
+                                  font=self.firstFont,
+                                  x=p0[0], y=p0[1],
+                                  ox=r, oy=w,
+                                  # x=self._screenZero[0], y=self._screenZero[1]
+                                  color=(colR, colG, colB, 1.0), GLContext=self,
+                                  object=peak))
 
   def _buildPeakListLabels(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -1968,7 +2369,6 @@ void main()
       drawList.clearArrays()
       drawList.stringList = []
 
-      symbolType = self._preferences.peakSymbolType
       symbolWidth = self._preferences.peakSymbolSize / 2.0
 
       pls = peakListView.peakList
@@ -1992,71 +2392,73 @@ void main()
         #         p0[ps] = peak.position[pp]
         #         axisCount += 1
 
-        # get the correct coordinates based on the axisCodes
-        p0 = [0.0] * 2            #len(self.axisOrder)
-        lineWidths = [None] * 2    #len(self.axisOrder)
-        frequency = [0.0] * 2     #len(self.axisOrder)
-        axisCount = 0
-        for ps, psCode in enumerate(self.axisOrder[0:2]):
-          for pp, ppCode in enumerate(peak.axisCodes):
+        # # get the correct coordinates based on the axisCodes
+        # p0 = [0.0] * 2            #len(self.axisOrder)
+        # lineWidths = [None] * 2    #len(self.axisOrder)
+        # frequency = [0.0] * 2     #len(self.axisOrder)
+        # axisCount = 0
+        # for ps, psCode in enumerate(self.axisOrder[0:2]):
+        #   for pp, ppCode in enumerate(peak.axisCodes):
+        #
+        #     if self._preferences.matchAxisCode == 0:  # default - match atom type
+        #       if ppCode[0] == psCode[0]:
+        #         p0[ps] = peak.position[pp]
+        #         lineWidths[ps] = peak.lineWidths[pp]
+        #         frequency[ps] = spectrumFrequency[pp]
+        #         axisCount += 1
+        #
+        #     elif self._preferences.matchAxisCode == 1:  # match full code
+        #       if ppCode == psCode:
+        #         p0[ps] = peak.position[pp]
+        #         lineWidths[ps] = peak.lineWidths[pp]
+        #         frequency[ps] = spectrumFrequency[pp]
+        #         axisCount += 1
+        #
+        # if lineWidths[0] and lineWidths[1]:
+        #   # draw 24 connected segments
+        #   r = 0.5 * lineWidths[0] / frequency[0]
+        #   w = 0.5 * lineWidths[1] / frequency[1]
+        # else:
+        #   r = symbolWidth
+        #   w = symbolWidth
+        #
+        # if axisCount == 2:
+        #   # TODO:ED display the required peaks
+        #   strip = spectrumView.strip
+        #   _isInPlane = strip.peakIsInPlane(peak)
+        #   if not _isInPlane:
+        #     _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        #   else:
+        #     _isInFlankingPlane = None
+        #
+        #   if not _isInPlane and not _isInFlankingPlane:
+        #     continue
+        #
+        #   if hasattr(peak, '_isSelected') and peak._isSelected:
+        #     colR, colG, colB = self.highlightColour[:3]
+        #   else:
+        #     colour = pls.textColour
+        #     colR = int(colour.strip('# ')[0:2], 16)/255.0
+        #     colG = int(colour.strip('# ')[2:4], 16)/255.0
+        #     colB = int(colour.strip('# ')[4:6], 16)/255.0
+        #
+        #   if self._parent.peakLabelling == 0:
+        #     text = _getScreenPeakAnnotation(peak, useShortCode=True)
+        #   elif self._parent.peakLabelling == 1:
+        #     text = _getScreenPeakAnnotation(peak, useShortCode=False)
+        #   else:
+        #     text = _getPeakAnnotation(peak)  # original 'pid'
+        #
+        #   # TODO:ED check axisCodes and ordering
+        #   drawList.stringList.append(GLString(text=text,
+        #                               font=self.firstFont,
+        #                               x=p0[0], y=p0[1],
+        #                               ox=r, oy=w,
+        #                               # x=self._screenZero[0], y=self._screenZero[1]
+        #                               color=(colR, colG, colB, 1.0), GLContext=self,
+        #                               object=peak))
 
-            if self._preferences.matchAxisCode == 0:  # default - match atom type
-              if ppCode[0] == psCode[0]:
-                p0[ps] = peak.position[pp]
-                lineWidths[ps] = peak.lineWidths[pp]
-                frequency[ps] = spectrumFrequency[pp]
-                axisCount += 1
-
-            elif self._preferences.matchAxisCode == 1:  # match full code
-              if ppCode == psCode:
-                p0[ps] = peak.position[pp]
-                lineWidths[ps] = peak.lineWidths[pp]
-                frequency[ps] = spectrumFrequency[pp]
-                axisCount += 1
-
-        if lineWidths[0] and lineWidths[1]:
-          # draw 24 connected segments
-          r = 0.5 * lineWidths[0] / frequency[0]
-          w = 0.5 * lineWidths[1] / frequency[1]
-        else:
-          r = symbolWidth
-          w = symbolWidth
-
-        if axisCount == 2:
-          # TODO:ED display the required peaks
-          strip = spectrumView.strip
-          _isInPlane = strip.peakIsInPlane(peak)
-          if not _isInPlane:
-            _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-          else:
-            _isInFlankingPlane = None
-
-          if not _isInPlane and not _isInFlankingPlane:
-            continue
-
-          if hasattr(peak, '_isSelected') and peak._isSelected:
-            colR, colG, colB = self.highlightColour[:3]
-          else:
-            colour = pls.textColour
-            colR = int(colour.strip('# ')[0:2], 16)/255.0
-            colG = int(colour.strip('# ')[2:4], 16)/255.0
-            colB = int(colour.strip('# ')[4:6], 16)/255.0
-
-          if self._parent.peakLabelling == 0:
-            text = _getScreenPeakAnnotation(peak, useShortCode=True)
-          elif self._parent.peakLabelling == 1:
-            text = _getScreenPeakAnnotation(peak, useShortCode=False)
-          else:
-            text = _getPeakAnnotation(peak)  # original 'pid'
-
-          # TODO:ED check axisCodes and ordering
-          drawList.stringList.append(GLString(text=text,
-                                      font=self.firstFont,
-                                      x=p0[0], y=p0[1],
-                                      ox=r, oy=w,
-                                      # x=self._screenZero[0], y=self._screenZero[1]
-                                      color=(colR, colG, colB, 1.0), GLContext=self,
-                                      object=peak))
+          self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode

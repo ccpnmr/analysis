@@ -1463,7 +1463,6 @@ void main()
       # fix the aspect ratio of the cross to match the screen
       minIndex = 0 if x <= y else 1
       pos = [symbolWidth, symbolWidth * y / x]
-      w = r = pos[minIndex]
 
       if x <= y:
         r = symbolWidth
@@ -1473,13 +1472,17 @@ void main()
         r = symbolWidth * x / y
 
       for drawStr in drawList.stringList:
-        drawStr.setStringOffset((r, w))
+        drawStr.setStringOffset((r * np.sign(self.pixelX), w * np.sign(self.pixelY)))
 
     elif symbolType == 1:
-      pass
+      for drawStr in drawList.stringList:
+        r, w = 0.7 * drawStr.lineWidths[0], 0.7 * drawStr.lineWidths[1]
+        drawStr.setStringOffset((r * np.sign(self.pixelX), w * np.sign(self.pixelY)))
 
     elif symbolType == 2:
-      pass
+      for drawStr in drawList.stringList:
+        r, w = 0.7 * drawStr.lineWidths[0], 0.7 * drawStr.lineWidths[1]
+        drawStr.setStringOffset((r * np.sign(self.pixelX), w * np.sign(self.pixelY)))
 
   def _rescaleOverlayText(self):
     if self.stripIDString:
@@ -1637,10 +1640,10 @@ void main()
               colG = int(colour.strip('# ')[2:4], 16) / 255.0
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            drawList.colors[offset*4:(offset+np2+4)*4] = [colR, colG, colB, 1.0] * (np2+4)
+            drawList.colors[offset*4:(offset+np2+5)*4] = [colR, colG, colB, 1.0] * (np2+5)
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
-        index += np2+4
+        index += np2+5
 
     elif symbolType == 2:
 
@@ -1664,7 +1667,7 @@ void main()
             _isInFlankingPlane = None
 
           if _isInPlane or _isInFlankingPlane:
-            drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index + np2] for an in ang])
+            drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4] for an in ang])
             if hasattr(peak, '_isSelected') and peak._isSelected:
               _isSelected = True
               colR, colG, colB = self.highlightColour[:3]
@@ -1674,10 +1677,10 @@ void main()
               colG = int(colour.strip('# ')[2:4], 16) / 255.0
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            drawList.colors[offset * 4:(offset + np2 + 1) * 4] = [colR, colG, colB, 1.0] * (np2 + 1)
+            drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [colR, colG, colB, 1.0] * (np2 + 5)
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
-        index += np2 + 1
+        index += np2 + 5
 
   def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -1859,16 +1862,19 @@ void main()
             drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
                                                               , p0[0] + r, p0[1] + w
                                                               , p0[0] + r, p0[1] - w
-                                                              , p0[0] - r, p0[1] + w])
+                                                              , p0[0] - r, p0[1] + w
+                                                              , p0[0], p0[1]])
 
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2+4))
-            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+4))
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2+5))
+            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+5))
+            drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2+5))
+            drawList.lineWidths = (r, w)
 
             # keep a pointer to the peak
-            drawList.pids = np.append(drawList.pids, [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+            drawList.pids = np.append(drawList.pids, [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, skip, 0])
 
-            index += np2 + 4
-            drawList.numVertices += np2 + 4
+            index += np2 + 5
+            drawList.numVertices += np2 + 5
 
           elif symbolType == 2:  # draw a filled ellipse at lineWidth
 
@@ -1892,30 +1898,34 @@ void main()
             _isSelected = False
 
             if _isInPlane or _isInFlankingPlane:
-              drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index+np2] for an in ang])
+              drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index+np2+4] for an in ang])
 
             # draw an ellipse at lineWidth
             drawList.vertices = np.append(drawList.vertices, [[p0[0]-r*math.sin(skip*an*angPlus/numPoints)
                                                               , p0[1]-w*math.cos(skip*an*angPlus/numPoints)
                                                               , p0[0]-r*math.sin((skip*an+1)*angPlus/numPoints)
                                                               , p0[1]-w*math.cos((skip*an+1)*angPlus/numPoints)] for an in ang])
-            drawList.vertices = np.append(drawList.vertices, [p0[0], p0[1]])
+            drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
+                                                              , p0[0] + r, p0[1] + w
+                                                              , p0[0] + r, p0[1] - w
+                                                              , p0[0] - r, p0[1] + w
+                                                              , p0[0], p0[1]])
 
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2+1))
-            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+1))
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2+5))
+            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+5))
+            drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2+5))
+            drawList.lineWidths = (r, w)
 
             # keep a pointer to the peak
-            drawList.pids = np.append(drawList.pids, [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+            drawList.pids = np.append(drawList.pids, [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, skip, 0])
 
-            index += np2 + 1
-            drawList.numVertices += np2 + 1
+            index += np2 + 5
+            drawList.numVertices += np2 + 5
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
       self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
-
-      # not sure about this yet
-      # self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
+      self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
 
   def _buildPeakListLabels(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -1932,14 +1942,34 @@ void main()
       drawList.clearArrays()
       drawList.stringList = []
 
-      # for pls in spectrum.peakLists:
+      symbolType = self._preferences.peakSymbolType
+      symbolWidth = self._preferences.peakSymbolSize / 2.0
 
       pls = peakListView.peakList
+      spectrumFrequency = spectrum.spectrometerFrequencies
 
       for peak in pls.peaks:
 
         # get the correct coordinates based on the axisCodes
+        # p0 = [0.0] * 2            #len(self.axisOrder)
+        # axisCount = 0
+        # for ps, psCode in enumerate(self.axisOrder[0:2]):
+        #   for pp, ppCode in enumerate(peak.axisCodes):
+        #
+        #     if self._preferences.matchAxisCode == 0:  # default - match atom type
+        #       if ppCode[0] == psCode[0]:
+        #         p0[ps] = peak.position[pp]
+        #         axisCount += 1
+        #
+        #     elif self._preferences.matchAxisCode == 1:  # match full code
+        #       if ppCode == psCode:
+        #         p0[ps] = peak.position[pp]
+        #         axisCount += 1
+
+        # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2            #len(self.axisOrder)
+        lineWidths = [None] * 2    #len(self.axisOrder)
+        frequency = [0.0] * 2     #len(self.axisOrder)
         axisCount = 0
         for ps, psCode in enumerate(self.axisOrder[0:2]):
           for pp, ppCode in enumerate(peak.axisCodes):
@@ -1947,12 +1977,24 @@ void main()
             if self._preferences.matchAxisCode == 0:  # default - match atom type
               if ppCode[0] == psCode[0]:
                 p0[ps] = peak.position[pp]
+                lineWidths[ps] = peak.lineWidths[pp]
+                frequency[ps] = spectrumFrequency[pp]
                 axisCount += 1
 
             elif self._preferences.matchAxisCode == 1:  # match full code
               if ppCode == psCode:
                 p0[ps] = peak.position[pp]
+                lineWidths[ps] = peak.lineWidths[pp]
+                frequency[ps] = spectrumFrequency[pp]
                 axisCount += 1
+
+        if lineWidths[0] and lineWidths[1]:
+          # draw 24 connected segments
+          r = 0.5 * lineWidths[0] / frequency[0]
+          w = 0.5 * lineWidths[1] / frequency[1]
+        else:
+          r = symbolWidth
+          w = symbolWidth
 
         if axisCount == 2:
           # TODO:ED display the required peaks
@@ -1982,12 +2024,13 @@ void main()
             text = _getPeakAnnotation(peak)  # original 'pid'
 
           # TODO:ED check axisCodes and ordering
-          drawList.stringList.append(GLString(text=text
-                                      , font=self.firstFont
-                                      , x=p0[0], y=p0[1]
-                                      # , x=self._screenZero[0], y=self._screenZero[1]
-                                      , color=(colR, colG, colB, 1.0), GLContext=self
-                                      , object=peak))
+          drawList.stringList.append(GLString(text=text,
+                                      font=self.firstFont,
+                                      x=p0[0], y=p0[1],
+                                      ox=r, oy=w,
+                                      # x=self._screenZero[0], y=self._screenZero[1]
+                                      color=(colR, colG, colB, 1.0), GLContext=self,
+                                      object=peak))
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -2254,6 +2297,7 @@ void main()
             self._GLPeakListLabels[peakListView.pid].renderMode = GLRENDERMODE_REBUILD
 
           self._buildPeakListLabels(spectrumView, peakListView)
+          self._rescalePeakListLabels(spectrumView, peakListView)
 
   def drawPeakLists(self):
     if self._parent.isDeleted:
@@ -4549,12 +4593,14 @@ class GLVertexArray():
 
     self.renderMode = renderMode
     self.refreshMode = refreshMode
-    self.vertices = np.empty(0, dtype=np.float32)    #np.zeros((len(text)*4,3), dtype=np.float32)
-    self.indices = np.empty(0, dtype=np.uint)        #np.zeros((len(text)*6, ), dtype=np.uint)
-    self.colors = np.empty(0, dtype=np.float32)      #np.zeros((len(text)*4,4), dtype=np.float32)
-    self.texcoords= np.empty(0, dtype=np.float32)    #np.zeros((len(text)*4,2), dtype=np.float32)
-    self.attribs = np.empty(0, dtype=np.float32)     #np.zeros((len(text)*4,1), dtype=np.float32)
-    self.pids = np.empty(0, dtype=np.object_)     #np.zeros((len(text)*4,1), dtype=np.object_)
+    self.vertices = np.empty(0, dtype=np.float32)
+    self.indices = np.empty(0, dtype=np.uint)
+    self.colors = np.empty(0, dtype=np.float32)
+    self.texcoords= np.empty(0, dtype=np.float32)
+    self.attribs = np.empty(0, dtype=np.float32)
+    self.offsets = np.empty(0, dtype=np.float32)
+    self.pids = np.empty(0, dtype=np.object_)
+    self.lineWidths = [0.0, 0.0]
 
     self.numVertices = 0
 
@@ -4575,6 +4621,7 @@ class GLVertexArray():
     self.colors = np.empty(0, dtype=np.float32)
     self.texcoords= np.empty(0, dtype=np.float32)
     self.attribs = np.empty(0, dtype=np.float32)
+    self.offsets = np.empty(0, dtype=np.float32)
     self.pids = np.empty(0, dtype=np.object_)
     self.numVertices = 0
 
@@ -4677,7 +4724,9 @@ class GLVertexArray():
 
 
 class GLString(GLVertexArray):
-  def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0), x=0.0, y=0.0,
+  def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0),
+               x=0.0, y=0.0,
+               ox=0.0, oy=0.0,
                angle=0.0, width=None, height=None, GLContext=None):
     super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=True
                                    , GLContext=GLContext, drawMode=GL.GL_TRIANGLES
@@ -4754,8 +4803,9 @@ class GLString(GLVertexArray):
           prev = charCode
 
       self.numVertices = len(self.vertices)
-      self.attribs = np.array([[x, y]] * self.numVertices, dtype=np.float32)
+      self.attribs = np.array([[x+ox, y+oy]] * self.numVertices, dtype=np.float32)
       self.offsets = np.array([[x, y]] * self.numVertices, dtype=np.float32)
+      self.lineWidths = [ox, oy]
 
     # total width of text - probably don't need
     # width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]
@@ -4764,7 +4814,7 @@ class GLString(GLVertexArray):
     self.colors = np.array(col*self.numVertices, dtype=np.float32)
 
   def setStringOffset(self, attrib):
-    self.attribs = self.offsets - np.array([attrib]*self.numVertices, dtype=np.float32)
+    self.attribs = self.offsets + np.array([attrib]*self.numVertices, dtype=np.float32)
 
 if __name__ == '__main__':
 

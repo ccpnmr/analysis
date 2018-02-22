@@ -1480,12 +1480,17 @@ void main()
     drawList = self._GLPeakLists[peakListView.pid]
 
     if drawList.refreshMode == GLREFRESHMODE_REBUILD:
-      symbolWidth = self._preferences.peakSymbolSize / 2.0
-      symbolType = self._preferences.peakSymbolType
 
-      # resize the peaks to keep the correct ratio
+      symbolType = self._preferences.peakSymbolType
+      symbolWidth = self._preferences.peakSymbolSize / 2.0
       x = abs(self.pixelX)
       y = abs(self.pixelY)
+
+      # fix the aspect ratio of the cross to match the screen
+      minIndex = 0 if x <= y else 1
+      pos = [symbolWidth, symbolWidth * y / x]
+      w = r = pos[minIndex]
+
       if x <= y:
         r = symbolWidth
         w = symbolWidth * y / x
@@ -1494,19 +1499,47 @@ void main()
         r = symbolWidth * x / y
 
       if symbolType == 0:  # a cross
-        getLogger().info('rescale cross')
+        # drawList.clearVertices()
+        # drawList.vertices.copy(drawList.attribs)
+        offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
+        for pp in range(0, 2*drawList.numVertices, 8):
+          drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
 
       elif symbolType == 1:  # an ellipse
-        getLogger().info('rescale ellipse')
+        pass
 
       elif symbolType == 2:  # filled ellipse
-        getLogger().info('rescale filled ellipse')
+        pass
 
-      # drawList.clearVertices()
-      # drawList.vertices = drawList.attribs
-      # offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
-      # for pp in range(0, 2*drawList.numVertices, 8):
-      #   drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
+
+  def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
+    drawList = self._GLPeakListLabels[peakListView.pid]
+    strip = self._parent
+
+    pls = peakListView.peakList
+    for drawStr in drawList.stringList:
+
+      peak = drawStr.object
+
+      if peak and not peak.isDeleted:
+        _isSelected = False
+        _isInPlane = strip.peakIsInPlane(peak)
+        if not _isInPlane:
+          _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        else:
+          _isInFlankingPlane = None
+
+        if _isInPlane or _isInFlankingPlane:
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            _isSelected = True
+            colR, colG, colB = self.highlightColour[:3]
+          else:
+            colour = pls.textColour
+            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            colG = int(colour.strip('# ')[2:4], 16) / 255.0
+            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+        drawStr.setColour((colR, colG, colB, 1.0))
 
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -1521,7 +1554,6 @@ void main()
 
     index = 0
     if symbolType == 0:
-      getLogger().info('>>highlight cross')
       # for peak in pls.peaks:
       for pp in range(0, len(drawList.pids), 8):
 
@@ -1552,17 +1584,12 @@ void main()
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
               drawList.indices = np.append(drawList.indices,
                                            np.array([index, index+1, index+2, index+3], dtype=np.uint))
-            try:
-              drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
-            except Exception as es:
-              pass
-
+            drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
         index += numPoints
 
     elif symbolType == 1:
-      getLogger().info('>>highlight ellipse')
 
       # for peak in pls.peaks:
       for pp in range(0, len(drawList.pids), 8):
@@ -1598,16 +1625,12 @@ void main()
               colG = int(colour.strip('# ')[2:4], 16) / 255.0
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            try:
-              drawList.colors[offset*4:(offset+np2+4)*4] = [colR, colG, colB, 1.0] * (np2+4)
-            except Exception as es:
-              pass
+            drawList.colors[offset*4:(offset+np2+4)*4] = [colR, colG, colB, 1.0] * (np2+4)
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
         index += np2+4
 
     elif symbolType == 2:
-      getLogger().info('>>highlight filled')
 
       # for peak in pls.peaks:
       for pp in range(0, len(drawList.pids), 8):
@@ -1639,11 +1662,7 @@ void main()
               colG = int(colour.strip('# ')[2:4], 16) / 255.0
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            try:
-              drawList.colors[offset * 4:(offset + np2 + 1) * 4] = [colR, colG, colB, 1.0] * (np2 + 1)
-            except Exception as es:
-              pass
-
+            drawList.colors[offset * 4:(offset + np2 + 1) * 4] = [colR, colG, colB, 1.0] * (np2 + 1)
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
 
         index += np2 + 1
@@ -1762,8 +1781,6 @@ void main()
         else:
           if symbolType == 0:
 
-            getLogger().info('>>build cross')
-
             # draw a cross
             # keep the cross square at 0.1ppm
 
@@ -1793,8 +1810,6 @@ void main()
             drawList.numVertices += 4
 
           elif symbolType == 1:                       # draw an ellipse at lineWidth
-
-            getLogger().info('>>build ellipse')
 
             if lineWidths[0] and lineWidths[1]:
               # draw 24 connected segments
@@ -1844,8 +1859,6 @@ void main()
             drawList.numVertices += np2 + 4
 
           elif symbolType == 2:  # draw a filled ellipse at lineWidth
-
-            getLogger().info('>>build filled')
 
             if lineWidths[0] and lineWidths[1]:
               # draw 24 connected segments
@@ -1938,10 +1951,13 @@ void main()
           if not _isInPlane and not _isInFlankingPlane:
             continue
 
-          colour = pls.textColour
-          colR = int(colour.strip('# ')[0:2], 16)/255.0
-          colG = int(colour.strip('# ')[2:4], 16)/255.0
-          colB = int(colour.strip('# ')[4:6], 16)/255.0
+          if hasattr(peak, '_isSelected') and peak._isSelected:
+            colR, colG, colB = self.highlightColour[:3]
+          else:
+            colour = pls.textColour
+            colR = int(colour.strip('# ')[0:2], 16)/255.0
+            colG = int(colour.strip('# ')[2:4], 16)/255.0
+            colB = int(colour.strip('# ')[4:6], 16)/255.0
 
           if self._parent.peakLabelling == 0:
             text = _getScreenPeakAnnotation(peak, useShortCode=True)
@@ -3645,6 +3661,7 @@ void main()
             for peakListView in spectrumView.peakListViews:
 
               self._updateHighlightedPeaks(spectrumView, peakListView)
+              self._updateHighlightedPeakLabels(spectrumView, peakListView)
 
           #     peakListView.buildPeakLists = True
           #     peakListView.buildPeakListLabels = True
@@ -3700,7 +3717,7 @@ void main()
             if (xPositions[0] < float(peak.position[0]) < xPositions[1]
               and yPositions[0] < float(peak.position[1]) < yPositions[1]):
               if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
-                #print(">>found peak", peak, peak.isSelected, peak in self.current.peaks)
+
                 if peak in self.current.peaks:
                   self.current._peaks.remove(peak)
                 else:
@@ -4522,7 +4539,7 @@ class GLVertexArray():
     self.colors = np.empty(0, dtype=np.float32)      #np.zeros((len(text)*4,4), dtype=np.float32)
     self.texcoords= np.empty(0, dtype=np.float32)    #np.zeros((len(text)*4,2), dtype=np.float32)
     self.attribs = np.empty(0, dtype=np.float32)     #np.zeros((len(text)*4,1), dtype=np.float32)
-    self.pids = np.empty(0)   #, dtype=np.object_)     #np.zeros((len(text)*4,1), dtype=np.object_)
+    self.pids = np.empty(0, dtype=np.object_)     #np.zeros((len(text)*4,1), dtype=np.object_)
 
     self.numVertices = 0
 
@@ -4538,15 +4555,16 @@ class GLVertexArray():
     pass
 
   def clearArrays(self):
-    self.vertices = np.array([], dtype=np.float32)
-    self.indices = np.array([], dtype=np.uint)
-    self.colors = np.array([], dtype=np.float32)
-    self.texcoords= np.array([], dtype=np.float32)
-    self.attribs = np.array([], dtype=np.float32)
+    self.vertices = np.empty(0, dtype=np.float32)
+    self.indices = np.empty(0, dtype=np.uint)
+    self.colors = np.empty(0, dtype=np.float32)
+    self.texcoords= np.empty(0, dtype=np.float32)
+    self.attribs = np.empty(0, dtype=np.float32)
+    self.pids = np.empty(0, dtype=np.object_)
     self.numVertices = 0
 
   def clearVertices(self):
-    self.vertices = np.array([], dtype=np.float32)
+    self.vertices = np.empty(0, dtype=np.float32)
     self.numVertices = 0
 
   def drawIndexArray(self):
@@ -4721,6 +4739,8 @@ class GLString(GLVertexArray):
     # total width of text - probably don't need
     # width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]
 
+  def setColour(self, col):
+    self.colors = np.array(col*self.numVertices, dtype=np.float32)
 
 if __name__ == '__main__':
 

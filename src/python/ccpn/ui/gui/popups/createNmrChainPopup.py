@@ -115,10 +115,11 @@ class createNmrChainPopup(CcpnDialog):
     addBackboneAtoms =  self.checkboxBackboneAtoms.get()
     addSideChainAtoms = self.checkboxSideChainsAtoms.get()
 
-    if self.project:
-      newNmrChain = self.project.newNmrChain(shortName=name)
-      for i, item in enumerate(sequence):
-        nmrResidue = newNmrChain.newNmrResidue(sequenceCode=i, residueType=item)
+    # if self.project:
+      # newNmrChain = self.project.newNmrChain(shortName=name)
+      # for i, item in enumerate(sequence):
+      #   nmrResidue = newNmrChain.newNmrResidue(sequenceCode=i, residueType=item)
+
     print('sequence: %s @, name: %s @, addBackboneAtoms: %s @, addSideChainAtoms:%s @' %(sequence, name, addBackboneAtoms, addSideChainAtoms))
 
   def _populateWidgets(self, selected):
@@ -129,11 +130,13 @@ class createNmrChainPopup(CcpnDialog):
       self.nameLineEdit.setText(obj.shortName)
       self.sequenceEditor.setText(''.join([r.shortName for r in obj.nmrResidues]))
 
+
     if isinstance(obj, Chain):
       self.nameLineEdit.clear()
       self.sequenceEditor.clear()
       self.nameLineEdit.setText(obj.shortName)
       self.sequenceEditor.setText(''.join([r.shortName for r in obj.residues]))
+      self.nmrChainType = obj.molType
 
 
   def _activateOptions(self):

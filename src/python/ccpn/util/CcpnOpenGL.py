@@ -1450,23 +1450,36 @@ void main()
     GL.glCallList(self.GLMarkList[0])
 
   def _rescalePeakListLabels(self, spectrumView, peakListView):
-    drawList = self._GLPeakLists[peakListView.pid]
-    symbolWidth = self._preferences.peakSymbolSize / 2.0
+    drawList = self._GLPeakListLabels[peakListView.pid]
+    strip = self._parent
 
+    pls = peakListView.peakList
+    symbolType = self._preferences.peakSymbolType
+    symbolWidth = self._preferences.peakSymbolSize / 2.0
     x = abs(self.pixelX)
     y = abs(self.pixelY)
-    if x <= y:
-      r = symbolWidth
-      w = symbolWidth * y / x
-    else:
-      w = symbolWidth
-      r = symbolWidth * x / y
 
-    # drawList.clearVertices()
-    # drawList.vertices = drawList.attribs
-    offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
-    for pp in range(0, 2*drawList.numVertices, 8):
-      drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
+    if symbolType == 0:  # a cross
+      # fix the aspect ratio of the cross to match the screen
+      minIndex = 0 if x <= y else 1
+      pos = [symbolWidth, symbolWidth * y / x]
+      w = r = pos[minIndex]
+
+      if x <= y:
+        r = symbolWidth
+        w = symbolWidth * y / x
+      else:
+        w = symbolWidth
+        r = symbolWidth * x / y
+
+      for drawStr in drawList.stringList:
+        drawStr.setStringOffset((r, w))
+
+    elif symbolType == 1:
+      pass
+
+    elif symbolType == 2:
+      pass
 
   def _rescaleOverlayText(self):
     if self.stripIDString:
@@ -1510,7 +1523,6 @@ void main()
 
       elif symbolType == 2:  # filled ellipse
         pass
-
 
   def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
     drawList = self._GLPeakListLabels[peakListView.pid]
@@ -1901,6 +1913,9 @@ void main()
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
       self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
+
+      # not sure about this yet
+      # self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
 
   def _buildPeakListLabels(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -4675,7 +4690,8 @@ class GLString(GLVertexArray):
     self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
     self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
     self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
-    self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
+    # self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
+    # self.offsets = np.zeros((len(text) * 4, 2), dtype=np.float32)
     self.indexOffset = 0
     pen = [0, 0]              # offset the string from (0,0) and use (x,y) in shader
     prev = None
@@ -4723,24 +4739,32 @@ class GLString(GLVertexArray):
           vertices = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
           texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
           colors = [color, ] * 4
-          attribs = [[x, y], [x, y], [x, y], [x, y]]
+          # attribs = [[x, y], [x, y], [x, y], [x, y]]
+          # offsets = [[x, y], [x, y], [x, y], [x, y]]
 
           self.vertices[i * 4:i * 4 + 4] = vertices
           self.indices[i * 6:i * 6 + 6] = indices
           self.texcoords[i * 4:i * 4 + 4] = texcoords
           self.colors[i * 4:i * 4 + 4] = colors
-          self.attribs[i * 4:i * 4 + 4] = attribs
+          # self.attribs[i * 4:i * 4 + 4] = attribs
+          # self.offsets[i * 4:i * 4 + 4] = offsets
+
           pen[0] = pen[0] + glyph[GlyphOrigW] + kerning
           # pen[1] = pen[1] + glyph[GlyphHeight]
           prev = charCode
 
       self.numVertices = len(self.vertices)
+      self.attribs = np.array([[x, y]] * self.numVertices, dtype=np.float32)
+      self.offsets = np.array([[x, y]] * self.numVertices, dtype=np.float32)
 
     # total width of text - probably don't need
     # width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]
 
   def setColour(self, col):
     self.colors = np.array(col*self.numVertices, dtype=np.float32)
+
+  def setStringOffset(self, attrib):
+    self.attribs = self.offsets - np.array([attrib]*self.numVertices, dtype=np.float32)
 
 if __name__ == '__main__':
 

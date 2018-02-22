@@ -539,6 +539,49 @@ class Peak1dAnnotation(QtWidgets.QGraphicsSimpleTextItem):
     self.setupPeakAnnotation(peakItem)
 
 
+  def setupPeakAnnotationItem(self, peakItem, clearLabel=False):
+
+    self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
+    self.setParentItem(peakItem)
+    colour = peakItem.peakListView.peakList.textColour
+    self.setBrush(QtGui.QColor(colour))
+
+    if self.parentWidget():
+      if self.parentWidget().strip.peakLabelling == 1:
+        text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=False)  # full
+      elif self.parentWidget().strip.peakLabelling == 0:
+        text = _getScreenPeakAnnotation(peakItem.peak, useShortCode=True)   # short
+      else:
+        text = _getPeakAnnotation(peakItem.peak)                            # original 'pid'
+
+      # self.setText(text)
+
+      project = peakItem.peak.project
+      project._startCommandEchoBlock('setupPeakAnnotationItem', peakItem, quiet=True)
+      undo = project._undo
+      if undo is not None:
+        undo.increaseBlocking()
+      try:
+        # TODO:ED can't remember why I did this
+        if clearLabel:
+          self.setText(text)
+        else:
+          self.setText(text)
+
+        # undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+        #              redoArgs=(peakItem, clearLabel))
+
+      finally:
+        if undo is not None:
+          undo.decreaseBlocking()
+        project._endCommandEchoBlock()
+
+      # TODO:ED check why this is updating in wrong correct place
+      undo.newItem(self.setupPeakAnnotationItem, self.setupPeakAnnotationItem, undoArgs=(peakItem,),
+                   redoArgs=(peakItem, clearLabel))
+
+      # project._endCommandEchoBlock()
+
   def sceneEventFilter(self, watched, event):
     print(event)
 

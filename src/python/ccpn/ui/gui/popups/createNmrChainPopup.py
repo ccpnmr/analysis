@@ -37,11 +37,13 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, ChainPulldown
-
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, ChainPulldown, SELECT
+from ccpn.core.NmrChain import NmrChain
+from ccpn.core.Chain import Chain
 
 New, FromChain, FromNmrChain, = 'Empty', 'Chain', 'NmrChain'
 SelectionOptions = [New, FromChain, FromNmrChain]
+
 
 class createNmrChainPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None
@@ -68,8 +70,15 @@ class createNmrChainPopup(CcpnDialog):
     vGrid += 1
 
 
-    self.availableChainsPD = ChainPulldown(self, self.project, labelText='', grid=(vGrid, 1))
+    self.availableChainsPD = ChainPulldown(self, self.project,showSelectName=True, callback=self._populateWidgets, labelText='', grid=(vGrid, 1))
     self.availableChainsPD.label.hide()
+    self.availableChainsPD.hide()
+    vGrid += 1
+    self.availableNmrChainsPD = NmrChainPulldown(self, self.project,showSelectName=True, callback=self._populateWidgets, labelText='', grid=(vGrid, 1))
+    self.availableNmrChainsPD.label.hide()
+    self.availableNmrChainsPD.hide()
+
+    self.pulldownsOptions = {FromNmrChain:self.availableNmrChainsPD, FromChain:self.availableChainsPD}
 
     vGrid += 1
     self.labelName = Label(self, text="Name", grid=(vGrid, 0), )
@@ -88,16 +97,44 @@ class createNmrChainPopup(CcpnDialog):
 
     vGrid += 1
     self.labelSidechainAtoms = Label(self, text="Add sidechain atoms", grid=(vGrid, 0), )
-    self.checkboxBackboneAtoms = CheckBox(self, checked=True, grid=(vGrid, 1))
+    self.checkboxSideChainsAtoms = CheckBox(self, checked=True, grid=(vGrid, 1))
     # end
 
     self.spacerLabel = Label(self, text="", grid=(vGrid,0))
     vGrid += 1
 
     self.spacerLabel = Label(self, text="", grid=(vGrid, 0))
-    self.buttonBox = ButtonList(self, callbacks=[None, None], texts=['Cancel', 'Ok'], grid=(vGrid, 1))
+    self.buttonBox = ButtonList(self, callbacks=[self.reject, self._createNmrChain], texts=['Cancel', 'Ok'], grid=(vGrid, 1))
 
-    # self._activateOptions()
+
+    self._activateOptions()
+
+  def _createNmrChain(self):
+    sequence = self.sequenceEditor.toPlainText()
+    name = self.nameLineEdit.get()
+    addBackboneAtoms =  self.checkboxBackboneAtoms.get()
+    addSideChainAtoms = self.checkboxSideChainsAtoms.get()
+
+    if self.project:
+      newNmrChain = self.project.newNmrChain(shortName=name)
+      for i, item in enumerate(sequence):
+        nmrResidue = newNmrChain.newNmrResidue(sequenceCode=i, residueType=item)
+    print('sequence: %s @, name: %s @, addBackboneAtoms: %s @, addSideChainAtoms:%s @' %(sequence, name, addBackboneAtoms, addSideChainAtoms))
+
+  def _populateWidgets(self, selected):
+    obj = self.project.getByPid(selected)
+    if isinstance(obj, NmrChain):
+      self.nameLineEdit.clear()
+      self.sequenceEditor.clear()
+      self.nameLineEdit.setText(obj.shortName)
+      self.sequenceEditor.setText(''.join([r.shortName for r in obj.nmrResidues]))
+
+    if isinstance(obj, Chain):
+      self.nameLineEdit.clear()
+      self.sequenceEditor.clear()
+      self.nameLineEdit.setText(obj.shortName)
+      self.sequenceEditor.setText(''.join([r.shortName for r in obj.residues]))
+
 
   def _activateOptions(self):
     if self.availableNmrChainsPD.textList is None:
@@ -107,18 +144,27 @@ class createNmrChainPopup(CcpnDialog):
 
   def _showOptions(self):
     selected = self.selectInitialRadioButtons.getSelectedText()
+    # needs to clear the previous selection otherwise has a odd behaviour
+    for pd in self.pulldownsOptions:
+      self.pulldownsOptions[pd].select(SELECT)
+    if selected in self.pulldownsOptions:
+      self.pulldownsOptions[selected].show()
+    hs = [x for x in self.pulldownsOptions if x != selected]
+    for h in hs:
+      self.pulldownsOptions[h].hide()
 
 
-if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.popups.Dialog import CcpnDialog
-    from ccpn.ui.gui.widgets.Widget import Widget
-
-
-    app = TestApplication()
-    popup = createNmrChainPopup()
-    widget = Widget(parent=popup, grid=(0,0))
-
-    popup.show()
-    popup.raise_()
-    app.start()
+#
+# if __name__ == '__main__':
+#     from ccpn.ui.gui.widgets.Application import TestApplication
+#     from ccpn.ui.gui.popups.Dialog import CcpnDialog
+#     from ccpn.ui.gui.widgets.Widget import Widget
+#
+#
+#     app = TestApplication()
+#     popup = createNmrChainPopup()
+#     widget = Widget(parent=popup, grid=(0,0))
+#
+#     popup.show()
+#     popup.raise_()
+#     app.start()

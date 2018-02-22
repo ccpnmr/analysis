@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
-
+SELECT = '<Select>'
 
 def getPids(fromObject, attributeName):
     "Get a list of pids fromObject.attributeName or None on error"
@@ -79,9 +79,9 @@ class _Pulldown(PulldownListCompoundWidget):
         if showSelectName:
           gotPids = getPids(project, self.attributeName)
           if gotPids:
-            self.textList = ['<Select>']+gotPids
+            self.textList = [SELECT]+gotPids
           else:
-            self.textList = ['<Select>']
+            self.textList = [SELECT]
         else:
           self.textList = getPids(project, self.attributeName)  # ejb
 

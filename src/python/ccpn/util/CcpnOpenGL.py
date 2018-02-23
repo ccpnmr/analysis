@@ -655,12 +655,20 @@ class CcpnGLWidget(QOpenGLWidget):
       self.GLSignals._emitYAxisChanged(source=self, strip=self._parent,
                                        axisB=self.axisB, axisT=self.axisT,
                                        axisL=self.axisL, axisR=self.axisR)
+
       self._rescaleYAxis()
       # self.buildMouseCoords(refresh=True)
 
     event.accept()
 
   def _rescaleXAxis(self, update=True):
+
+    if self._preferences.lockAspectRatio:
+      midY = (self.axisT+self.AxisB)/2.0
+
+      xAxis = self._axisCodes[0][0]
+
+
     self.rescale()
 
     # spawn rebuild event for the grid
@@ -677,6 +685,10 @@ class CcpnGLWidget(QOpenGLWidget):
       self.update()
 
   def _rescaleYAxis(self, update=True):
+
+    if self._preferences.lockAspectRatio:
+      getLogger().info('checking Y aspect')
+
     self.rescale()
 
     # spawn rebuild event for the grid
@@ -1069,6 +1081,7 @@ void main()
     self._buildMouse = True
     self._mouseCoords = [-1.0, -1.0]
     self.mouseString = None
+    self.diffMouseString = None
     self.peakLabelling = 0
 
     self._contourList = GLVertexArray(numLists=1,
@@ -1493,8 +1506,8 @@ void main()
       vertices = self.stripIDString.numVertices
       offsets = [self.axisL+(10.0*self.pixelX)
                  , self.axisT-(1.5*self.firstFont.height*self.pixelY)]
-      for pp in range(0, vertices):
-        self.stripIDString.attribs[pp] = offsets
+      for pp in range(0, 2*vertices, 2):
+        self.stripIDString.attribs[pp:pp+2] = offsets
 
   def _rescalePeakList(self, spectrumView, peakListView):
     drawList = self._GLPeakLists[peakListView.pid]
@@ -3267,8 +3280,8 @@ void main()
         offsets = [self.axisL + (3.0 * self.pixelX),
                    mark.axisPosition + (3.0 * self.pixelY)]
 
-      for pp in range(0, vertices):
-        mark.attribs[pp] = offsets
+      for pp in range(0, 2*vertices, 2):
+        mark.attribs[pp:pp+2] = offsets
 
   def rescaleMarksRulers(self):
     self._rescaleMarksRulers()
@@ -3351,10 +3364,13 @@ void main()
     try:
       if self._orderedAxes[1] and self._orderedAxes[1].code == 'intensity':
         self.mouseFormat = " %s: %.3f\n %s: %.4g"
+        self.diffMouseFormat = " d%s: %.3f\n d%s: %.4g"
       else:
         self.mouseFormat = " %s: %.2f\n %s: %.2f"
+        self.diffMouseFormat = " d%s: %.2f\n d%s: %.2f"
     except:
       self.mouseFormat = " %s: %.3f  %s: %.4g"
+      self.diffMouseFormat = " d%s: %.3f  d%s: %.4g"
 
   @property
   def updateHTrace(self):
@@ -3378,18 +3394,33 @@ void main()
       newCoords = self.mouseFormat % (self._axisOrder[0], self.cursorCoordinate[0]
                                       , self._axisOrder[1], self.cursorCoordinate[1])
 
-      self.mouseString = GLString(text=newCoords
-                                  , font=self.firstFont
-                                  , x=self.cursorCoordinate[0], y=self.cursorCoordinate[1]
-                                  # self._screenZero[0], y=self._screenZero[1]
-                                  , color=(1.0, 1.0, 1.0, 1.0), GLContext=self
-                                  , object=None)
+      self.mouseString = GLString(text=newCoords,
+                                  font=self.firstFont,
+                                  x=self.cursorCoordinate[0],
+                                  y=self.cursorCoordinate[1],
+                                  color=(1.0, 1.0, 1.0, 1.0), GLContext=self,
+                                  object=None)
       self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+
+      if self._drawSelectionBox:
+        diffCoords = self.diffMouseFormat % (self._axisOrder[0], (self.cursorCoordinate[0]-
+                                                                  self._startCoordinate[0])
+                                            , self._axisOrder[1], (self.cursorCoordinate[1]-
+                                                                   self._startCoordinate[1]))
+
+        self.diffMouseString = GLString(text=diffCoords,
+                                    font=self.firstFont,
+                                    x=self.cursorCoordinate[0],
+                                    y=self.cursorCoordinate[1] - (self.firstFont.height*2.0*self.pixelY),
+                                    color=(1.0, 1.0, 1.0, 1.0), GLContext=self,
+                                    object=None)
 
   def drawMouseCoords(self):
     self.buildMouseCoords()
     # draw the mouse coordinates to the screen
     self.mouseString.drawTextArray()
+    if self._drawSelectionBox:
+      self.diffMouseString.drawTextArray()
 
   def drawSelectionBox(self):
     # should really use the proper VBOs for this
@@ -4280,17 +4311,19 @@ void main()
         self._successiveClicks = (self.cursorCoordinate[0], self.cursorCoordinate[1])
       else:
 
-        # TODO:ED check direction of the axes
-        self.axisL = max(self.cursorCoordinate[0], self._successiveClicks[0])
-        self.axisR = min(self.cursorCoordinate[0], self._successiveClicks[0])
-        self.axisB = max(self.cursorCoordinate[1], self._successiveClicks[1])
-        self.axisT = min(self.cursorCoordinate[1], self._successiveClicks[1])
+        if self._widthsChangedEnough((self.cursorCoordinate[0], self.cursorCoordinate[1]),
+                                     (self._successiveClicks[0], self._successiveClicks[1]),
+                                     3*max(abs(self.pixelX),
+                                           abs(self.pixelY))):
+          # TODO:ED check limits and aspect ratio
+          self.axisL = max(self.cursorCoordinate[0], self._successiveClicks[0])
+          self.axisR = min(self.cursorCoordinate[0], self._successiveClicks[0])
+          self.axisB = max(self.cursorCoordinate[1], self._successiveClicks[1])
+          self.axisT = min(self.cursorCoordinate[1], self._successiveClicks[1])
+          self._rescaleXAxis()
 
         self._resetBoxes()
         self._successiveClicks = None
-
-        # this also rescales the peaks
-        self._rescaleXAxis()
 
     elif rightMouse(event) and axis is None:
       # right click on canvas, not the axes
@@ -4309,6 +4342,8 @@ void main()
       # reset and hide all for all other clicks
       self._resetBoxes()
       event.ignore()
+
+    self.update()
 
   def _mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
     if controlShiftLeftMouse(event):
@@ -4481,6 +4516,7 @@ void main()
     else:
       event.ignore()
 
+    self.update()
 
 GlyphXpos = 'Xpos'
 GlyphYpos = 'Ypos'
@@ -5235,8 +5271,8 @@ class GLString(GLVertexArray):
           prev = charCode
 
       self.numVertices = len(self.vertices)
-      self.attribs = np.array([[x+ox, y+oy]] * self.numVertices, dtype=np.float32)
-      self.offsets = np.array([[x, y]] * self.numVertices, dtype=np.float32)
+      self.attribs = np.array([x+ox, y+oy] * self.numVertices, dtype=np.float32)
+      self.offsets = np.array([x, y] * self.numVertices, dtype=np.float32)
       self.lineWidths = [ox, oy]
 
     # total width of text - probably don't need
@@ -5246,7 +5282,7 @@ class GLString(GLVertexArray):
     self.colors = np.array(col*self.numVertices, dtype=np.float32)
 
   def setStringOffset(self, attrib):
-    self.attribs = self.offsets + np.array([attrib]*self.numVertices, dtype=np.float32)
+    self.attribs = self.offsets + np.array(attrib*self.numVertices, dtype=np.float32)
 
 if __name__ == '__main__':
 

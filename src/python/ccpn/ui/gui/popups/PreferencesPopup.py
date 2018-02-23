@@ -357,6 +357,23 @@ class PreferencesPopup(CcpnDialog):
     self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lastAxisOnly)
     self.showLastAxisOnlyBox.toggled.connect(partial(self._toggleGeneralOptions, 'lastAxisOnly'))
 
+    row += 1
+    self.lockAspectRatioLabel = Label(parent, text="Lock Aspect Ratio: ", grid=(row, 0))
+    self.lockAspectRatioBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lockAspectRatio)
+    self.lockAspectRatioBox.toggled.connect(partial(self._toggleGeneralOptions, 'lockAspectRatio'))
+
+    self.aspectLabel = {}
+    self.aspectData = {}
+    for aspect in sorted(self.preferences.general.Aspect.keys()):
+      row += 1
+      aspectValue = self.preferences.general.Aspect[aspect]
+      self.aspectLabel[aspect] = Label(parent, text=aspect, grid=(row, 0), hAlign='r')
+      self.aspectData[aspect] = DoubleSpinbox(parent, step=1
+                                              , min=1, max=100, grid=(row, 1), hAlign='l')
+      self.aspectData[aspect].setValue(aspectValue)
+      self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
+      self.aspectData[aspect].editingFinished.connect(partial(self._setAspect, aspect))
+
   def _setExternalProgramsTabWidgets(self, parent):
     ''' 
     Insert a widget in here to appear in the externalPrograms Tab 
@@ -625,4 +642,13 @@ class PreferencesPopup(CcpnDialog):
       return
     self.preferences.general.matchAxisCode = matchAxisCode
 
+  def _setAspect(self, aspect):
+    """
+    Set the aspect ratio for the axes
+    """
+    try:
+      aspectValue = float(self.aspectData[aspect].text())
+    except Exception as es:
+      return
+    self.preferences.general.Aspect[aspect] = aspectValue
 

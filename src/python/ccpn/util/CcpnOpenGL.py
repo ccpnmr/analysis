@@ -278,6 +278,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self.w = self.width()
     self.h = self.height()
     self.peakWidthPixels = 16
+    self.boxWidth = 0.0
+    self.boxHeight = 0.0
 
     # self.eventFilter = self._eventFilter
     # self.installEventFilter(self)
@@ -383,6 +385,19 @@ class CcpnGLWidget(QOpenGLWidget):
     # use the upated size
     w = self.w
     h = self.h
+
+    symbolType = self._preferences.peakSymbolType
+    symbolWidth = self._preferences.peakSymbolSize / 2.0
+    lineThickness = self._preferences.peakSymbolThickness / 2.0
+
+    x = abs(self.pixelX)
+    y = abs(self.pixelY)
+    if x <= y:
+      self.boxWidth = symbolWidth
+      self.boxHeight = symbolWidth * y / x
+    else:
+      self.boxHeight = symbolWidth
+      self.boxWidth = symbolWidth * x / y
 
     currentShader = self._shaderProgram1.makeCurrent()
 
@@ -1389,6 +1404,18 @@ void main()
     self._drawSelectionBox = False
     self.update()
 
+  def focusInEvent(self, ev: QtGui.QFocusEvent):
+    super(CcpnGLWidget, self).focusInEvent(ev)
+    self._drawSelectionBox = False
+    self.update()
+    getLogger().info('>>>focusIn')
+
+  def focusOutEvent(self, ev: QtGui.QFocusEvent):
+    super(CcpnGLWidget, self).focusOutEvent(ev)
+    self._drawSelectionBox = False
+    self.update()
+    getLogger().info('>>>focusOut')
+
   def leaveEvent(self, ev: QtCore.QEvent):
     super(CcpnGLWidget, self).leaveEvent(ev)
     self._drawSelectionBox = False
@@ -2337,6 +2364,14 @@ void main()
             self._rescalePeakListLabels(spectrumView, peakListView)
 
   def _processPeakNotifier(self, data):
+    # TODO:ED change this for the quick one
+    for spectrumView in self._parent.spectrumViews:
+      for peakListView in spectrumView.peakListViews:
+        peakListView.buildPeakLists = True
+        peakListView.buildPeakListLabels = True
+    self.buildPeakLists()
+    self.buildPeakListLabels()
+    return
 
     triggers = data[Notifier.TRIGGER]
     peak = data[Notifier.OBJECT]
@@ -2352,6 +2387,7 @@ void main()
       self._createPeakListLabel(peak)
 
     self._clearKeys()
+    self.update()
 
   def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
     # get the correct coordinates based on the axisCodes
@@ -4260,7 +4296,14 @@ void main()
           self._rescaleXAxis(update=False)
 
         if GLNotifier.GLPEAKNOTIFY in targets:
-          self._processPeakNotifier(targets)
+          for spectrumView in self._parent.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+              peakListView.buildPeakLists = True
+              peakListView.buildPeakListLabels = True
+          self.buildPeakLists()
+          self.buildPeakListLabels()
+
+          # self._processPeakNotifier(targets)
 
     # repaint
     self.update()

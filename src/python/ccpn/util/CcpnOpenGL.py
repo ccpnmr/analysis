@@ -1299,7 +1299,7 @@ void main()
         my = self.height() - pnt.y()
       vect = self.vInv.dot([mx, my, 0.0, 1.0])
 
-      return self._aMatrix.reshape((4, 4)).dot(vect)
+      return tuple(self._aMatrix.reshape((4, 4)).dot(vect)[:2])
     else:
       return None
 

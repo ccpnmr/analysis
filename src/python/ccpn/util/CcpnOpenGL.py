@@ -390,15 +390,6 @@ class CcpnGLWidget(QOpenGLWidget):
     symbolWidth = self._preferences.peakSymbolSize / 2.0
     lineThickness = self._preferences.peakSymbolThickness / 2.0
 
-    x = abs(self.pixelX)
-    y = abs(self.pixelY)
-    if x <= y:
-      self.boxWidth = symbolWidth
-      self.boxHeight = symbolWidth * y / x
-    else:
-      self.boxHeight = symbolWidth
-      self.boxWidth = symbolWidth * x / y
-
     currentShader = self._shaderProgram1.makeCurrent()
 
     # set projection to axis coordinates
@@ -443,6 +434,15 @@ class CcpnGLWidget(QOpenGLWidget):
       currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
       self.pixelX = (self.axisR - self.axisL) / w
       self.pixelY = (self.axisT - self.axisB) / h
+
+    x = abs(self.pixelX)
+    y = abs(self.pixelY)
+    if x <= y:
+      self.boxWidth = symbolWidth
+      self.boxHeight = symbolWidth * y / x
+    else:
+      self.boxHeight = symbolWidth
+      self.boxWidth = symbolWidth * x / y
 
     # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
     #                         0.0, 1.0, 0.0, 0.0,
@@ -1408,13 +1408,11 @@ void main()
     super(CcpnGLWidget, self).focusInEvent(ev)
     self._drawSelectionBox = False
     self.update()
-    getLogger().info('>>>focusIn')
 
   def focusOutEvent(self, ev: QtGui.QFocusEvent):
     super(CcpnGLWidget, self).focusOutEvent(ev)
     self._drawSelectionBox = False
     self.update()
-    getLogger().info('>>>focusOut')
 
   def leaveEvent(self, ev: QtCore.QEvent):
     super(CcpnGLWidget, self).leaveEvent(ev)
@@ -1543,8 +1541,8 @@ void main()
 
     if symbolType == 0:  # a cross
       # fix the aspect ratio of the cross to match the screen
-      minIndex = 0 if x <= y else 1
-      pos = [symbolWidth, symbolWidth * y / x]
+      # minIndex = 0 if x <= y else 1
+      # pos = [symbolWidth, symbolWidth * y / x]
 
       if x <= y:
         r = symbolWidth
@@ -1586,8 +1584,8 @@ void main()
 
       # fix the aspect ratio of the cross to match the screen
       minIndex = 0 if x <= y else 1
-      pos = [symbolWidth, symbolWidth * y / x]
-      w = r = pos[minIndex]
+      # pos = [symbolWidth, symbolWidth * y / x]
+      # w = r = pos[minIndex]
 
       if x <= y:
         r = symbolWidth
@@ -1857,8 +1855,8 @@ void main()
     if symbolType == 0:  # a cross
       # fix the aspect ratio of the cross to match the screen
       minIndex = 0 if x <= y else 1
-      pos = [symbolWidth, symbolWidth * y / x]
-      w = r = pos[minIndex]
+      # pos = [symbolWidth, symbolWidth * y / x]
+      # w = r = pos[minIndex]
 
       if x <= y:
         r = symbolWidth
@@ -2104,8 +2102,8 @@ void main()
       if symbolType == 0:  # a cross
         # fix the aspect ratio of the cross to match the screen
         minIndex = 0 if x <= y else 1
-        pos = [symbolWidth, symbolWidth * y / x]
-        w = r = pos[minIndex]
+        # pos = [symbolWidth, symbolWidth * y / x]
+        # w = r = pos[minIndex]
 
         if x <= y:
           r = symbolWidth

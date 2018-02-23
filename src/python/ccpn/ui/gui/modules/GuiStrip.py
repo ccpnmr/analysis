@@ -627,11 +627,14 @@ class GuiStrip(Frame):
     if not self._finaliseDone: return
 
     try:
-      axisPositionDict = self.axisPositionDict
-      axisCodes = [axis.code for axis in self.orderedAxes[:2]]
-      positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
-      self._project.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
-    except:
+      # axisPositionDict = self.axisPositionDict
+      # axisCodes = [axis.code for axis in self.orderedAxes[:2]]
+      # positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
+      # self._project.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
+
+      self._project.newMark('#e0e0e0', self.current.cursorPosition[:2], self.axisCodes[:2])  # the 'white' is overridden in PlotWidget._addRulerLine()
+
+    except Exception as es:
       getLogger().warning('Error setting mark at current position')
 
   # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)

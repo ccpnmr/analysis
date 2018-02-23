@@ -1294,7 +1294,7 @@ void main()
     self._startCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
 
     self._endCoordinate = self._startCoordinate
-    self._drawSelectionBox = True
+    # self._drawSelectionBox = True
 
   def mouseReleaseEvent(self, ev):
     self._drawSelectionBox = False
@@ -1417,14 +1417,17 @@ void main()
           (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
         self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 3
+        self._drawSelectionBox = True
 
       elif self._key == Qt.Key_Shift:
         self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 1
+        self._drawSelectionBox = True
 
       elif self._key == Qt.Key_Control:
         self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 2
+        self._drawSelectionBox = True
 
       else:
         self.axisL -= dx * self.pixelX
@@ -3008,15 +3011,15 @@ void main()
             if axisIndex == 0:
               # vertical ruler
               pos = x0 = x1 = rr.position
-              y0 = 200.0
-              y1 = 0.0
+              y0 = self.axisT
+              y1 = self.axisB
               textX = pos + (3.0 * self.pixelX)
               textY = self.axisB + (3.0 * self.pixelY)
             else:
               # horizontal ruler
               pos = y0 = y1 = rr.position
-              x0 = 200.0
-              x1 = 0.0
+              x0 = self.axisL
+              x1 = self.axisR
               textX = self.axisL + (3.0 * self.pixelX)
               textY = pos + (3.0 * self.pixelY)
 
@@ -3031,7 +3034,9 @@ void main()
             drawList.attribs = np.append(drawList.attribs, [axisIndex, pos, axisIndex, pos])
 
             # TODO:ED build the string and add the extra axis code
-            self._marksAxisCodes.append(GLString(text=rr.label,
+            label = rr.label if rr.label else rr.axisCode
+
+            self._marksAxisCodes.append(GLString(text=label,
                                         font=self.firstFont,
                                         x=textX,
                                         y=textY,
@@ -5209,6 +5214,9 @@ class GLString(GLVertexArray):
     super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=True
                                    , GLContext=GLContext, drawMode=GL.GL_TRIANGLES
                                    , dimension=2)
+    if text is None:
+      text = ''
+
     self.text = text
     self.font = font
     self.object = object

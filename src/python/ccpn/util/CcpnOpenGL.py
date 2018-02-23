@@ -265,6 +265,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self.lastPos = QPoint()
     self._mouseX = 0
     self._mouseY = 0
+
+    self._devicePixelRatio = QApplication.instance().devicePixelRatio()
     self.w = self.width()
     self.h = self.height()
     self.peakWidthPixels = 16
@@ -506,6 +508,8 @@ class CcpnGLWidget(QOpenGLWidget):
       self._spectrumSettings[spectrumView][SPECTRUM_YSCALE] = yScale
 
   def resizeGL(self, w, h):
+    self._devicePixelRatio = QApplication.instance().devicePixelRatio()
+
     self.w = w
     self.h = h
 
@@ -4877,8 +4881,8 @@ class GLViewports(object):
 
     if name in self._views:
       thisView = self._views[name]
-      w=thisView[0].width()
-      h=thisView[0].height()
+      w=thisView[0].width() * self._devicePixelRatio
+      h=thisView[0].height() * self._devicePixelRatio
       l = setVal(thisView[1], w, h, 0)
       b = setVal(thisView[2], w, h, 0)
       wi = setVal(thisView[3], w, h, l)

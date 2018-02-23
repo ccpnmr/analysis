@@ -44,8 +44,9 @@ from ccpn.core.Chain import Chain
 New, FromChain, FromNmrChain, = 'Empty', 'Chain', 'NmrChain'
 SelectionOptions = [New, FromChain, FromNmrChain]
 
+ATOM_TYPES = ['H', 'N', 'CA', 'CB', 'CO', 'HA', 'HB']
 
-class createNmrChainPopup(CcpnDialog):
+class CreateNmrChainPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None
                , title='Create NmrChain', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
@@ -100,6 +101,7 @@ class createNmrChainPopup(CcpnDialog):
     self.checkboxSideChainsAtoms = CheckBox(self, checked=True, grid=(vGrid, 1))
     # end
 
+    vGrid += 1
     self.spacerLabel = Label(self, text="", grid=(vGrid,0))
     vGrid += 1
 
@@ -115,20 +117,31 @@ class createNmrChainPopup(CcpnDialog):
     addBackboneAtoms =  self.checkboxBackboneAtoms.get()
     addSideChainAtoms = self.checkboxSideChainsAtoms.get()
 
-    # if self.project:
-      # newNmrChain = self.project.newNmrChain(shortName=name)
-      # for i, item in enumerate(sequence):
-      #   nmrResidue = newNmrChain.newNmrResidue(sequenceCode=i, residueType=item)
 
-    print('sequence: %s @, name: %s @, addBackboneAtoms: %s @, addSideChainAtoms:%s @' %(sequence, name, addBackboneAtoms, addSideChainAtoms))
+
+    if self.project:
+      newNmrChain = self.project.newNmrChain()
+      for i, item in enumerate(sequence):
+        nmrResidue = newNmrChain.newNmrResidue(sequenceCode=i+1, residueType=item)
+        if self._chain:
+          for residue in self._chain.residues:
+            if residue.shortName == item and residue.sequenceCode == str(i+1):
+              for atom in residue.atoms:
+                if atom.name in ATOM_TYPES:
+                  nmrResidue.fetchNmrAtom(atom.name)
+              nmrResidue.residue = residue
+      if len(newNmrChain.nmrResidues) == 0:
+        newNmrChain.delete()
+
+
 
   def _populateWidgets(self, selected):
     obj = self.project.getByPid(selected)
-    if isinstance(obj, NmrChain):
-      self.nameLineEdit.clear()
-      self.sequenceEditor.clear()
-      self.nameLineEdit.setText(obj.shortName)
-      self.sequenceEditor.setText(''.join([r.shortName for r in obj.nmrResidues]))
+    # if isinstance(obj, NmrChain):
+    #   self.nameLineEdit.clear()
+    #   self.sequenceEditor.clear()
+    #   self.nameLineEdit.setText(obj.shortName)
+    #   self.sequenceEditor.setText(''.join([r.shortName for r in obj.nmrResidues])) THIS IS WRONG . no shortName for nmrResidue !!!
 
 
     if isinstance(obj, Chain):
@@ -136,12 +149,13 @@ class createNmrChainPopup(CcpnDialog):
       self.sequenceEditor.clear()
       self.nameLineEdit.setText(obj.shortName)
       self.sequenceEditor.setText(''.join([r.shortName for r in obj.residues]))
-      self.nmrChainType = obj.molType
+      self._chain = obj
 
 
   def _activateOptions(self):
-    if self.availableNmrChainsPD.textList is None:
-      self.selectInitialRadioButtons.radioButtons[2].setEnabled(False)
+    # if self.availableNmrChainsPD.textList is None:
+    # NMR CHAIN is DISABLED for the moment
+    self.selectInitialRadioButtons.radioButtons[2].setEnabled(False)
     if self.availableChainsPD.textList is None:
       self.selectInitialRadioButtons.radioButtons[1].setEnabled(False)
 
@@ -157,17 +171,17 @@ class createNmrChainPopup(CcpnDialog):
       self.pulldownsOptions[h].hide()
 
 
-#
-# if __name__ == '__main__':
-#     from ccpn.ui.gui.widgets.Application import TestApplication
-#     from ccpn.ui.gui.popups.Dialog import CcpnDialog
-#     from ccpn.ui.gui.widgets.Widget import Widget
-#
-#
-#     app = TestApplication()
-#     popup = createNmrChainPopup()
-#     widget = Widget(parent=popup, grid=(0,0))
-#
-#     popup.show()
-#     popup.raise_()
-#     app.start()
+
+if __name__ == '__main__':
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from ccpn.ui.gui.widgets.Widget import Widget
+
+
+    app = TestApplication()
+    popup = CreateNmrChainPopup()
+    widget = Widget(parent=popup, grid=(0,0))
+
+    popup.show()
+    popup.raise_()
+    app.start()

@@ -68,7 +68,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressMan
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
-
+from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 # from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 
 # NB the order matters!
@@ -1008,7 +1008,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   def raisePopup(self, obj, item):
-
+    # TODO move in a dict
     if obj.shortClassName == 'SP':
       popup = SpectrumPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrum=obj)
       popup.exec_()
@@ -1170,6 +1170,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
           return
         elif item.parent().text(0) == 'SpectrumGroups':
           popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, addNew=True)
+          popup.exec_()
+          popup.raise_()
+          return
+        if item.parent().text(0) == 'NmrChains':
+          popup = CreateNmrChainPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
           popup.exec_()
           popup.raise_()
           return

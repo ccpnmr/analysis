@@ -1402,21 +1402,25 @@ void main()
   def enterEvent(self, ev: QtCore.QEvent):
     super(CcpnGLWidget, self).enterEvent(ev)
     self._drawSelectionBox = False
+    self._clearKeys()
     self.update()
 
   def focusInEvent(self, ev: QtGui.QFocusEvent):
     super(CcpnGLWidget, self).focusInEvent(ev)
     self._drawSelectionBox = False
+    self._clearKeys()
     self.update()
 
   def focusOutEvent(self, ev: QtGui.QFocusEvent):
     super(CcpnGLWidget, self).focusOutEvent(ev)
     self._drawSelectionBox = False
+    self._clearKeys()
     self.update()
 
   def leaveEvent(self, ev: QtCore.QEvent):
     super(CcpnGLWidget, self).leaveEvent(ev)
     self._drawSelectionBox = False
+    self._clearKeys()
     self.update()
 
   def mouseMoveEvent(self, event):

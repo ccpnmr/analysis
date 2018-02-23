@@ -97,6 +97,14 @@ FULLBOTTOMAXIS = 'fullBottomAxis'
 FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
 FULLVIEW = 'fullView'
 
+LENPID = 8
+LENVERTICES = 2
+LENINDICES = 1
+LENCOLORS = 4
+LENTEXCOORDS = 2
+LENATTRIBS = 4
+LENOFFSETS = 4
+
 
 def singleton(cls):
   """ Use class as singleton.
@@ -1282,6 +1290,19 @@ void main()
     self._shaderProgramTex.makeCurrent()
     self._shaderProgramTex.setBackground(self._background)
 
+  def mapMouseToAxis(self, pnt):
+    if isinstance(pnt, QPoint):
+      mx = pnt.x()
+      if self._drawBottomAxis:
+        my = self.height() - pnt.y() - AXIS_MARGINBOTTOM
+      else:
+        my = self.height() - pnt.y()
+      vect = self.vInv.dot([mx, my, 0.0, 1.0])
+
+      return self._aMatrix.reshape((4, 4)).dot(vect)
+    else:
+      return None
+
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
 
@@ -1724,18 +1745,39 @@ void main()
     index = 0
     if symbolType == 0:
       # for peak in pls.peaks:
-      for pp in range(0, len(drawList.pids), 8):
+      # for pp in range(0, len(drawList.pids), 8):
 
+
+      pp = 0
+      while pp < len(drawList.pids):
         # check whether the peaks still exists
         peak = drawList.pids[pp]
 
         if peak == delPeak:
           offset = drawList.pids[pp + 1]
           numPoints = drawList.pids[pp + 2]
+          _isInPlane = drawList.pids[pp + 3]
+          _isInFlankingPlane = drawList.pids[pp + 4]
+          _isSelected = drawList.pids[pp + 5]
 
           # delete here
           print('>>>delete0', peak)
-          index += numPoints
+
+          # if _isInPlane or _isInFlankingPlane:
+          #   if _isSelected:
+          #     drawList.indices = np.delete(drawList.indices, [index:index+12])
+          #   else:
+          #     drawList.indices = np.delete(drawList.indices, [index:index+4])
+          #
+          # drawList.vertices = np.delete(drawList.vertices, [])
+          # drawList.color = np.delete(drawList.color, [])
+          # drawList.attribs = np.delete(drawList.attribs, [])
+          # drawList.pids = np.delete(drawList.pids, [])
+          #
+          # index += numPoints
+
+        else:
+          pp += 8
 
     elif symbolType == 1:
 
@@ -1937,10 +1979,10 @@ void main()
                                                            p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
                                                           for an in ang])
         drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
-          , p0[0] + r, p0[1] + w
-          , p0[0] + r, p0[1] - w
-          , p0[0] - r, p0[1] + w
-          , p0[0], p0[1]])
+                                                        , p0[0] + r, p0[1] + w
+                                                        , p0[0] + r, p0[1] - w
+                                                        , p0[0] - r, p0[1] + w
+                                                        , p0[0], p0[1]])
 
         drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2 + 5))
         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
@@ -4881,8 +4923,8 @@ class GLViewports(object):
 
     if name in self._views:
       thisView = self._views[name]
-      w=thisView[0].width() * self._devicePixelRatio
-      h=thisView[0].height() * self._devicePixelRatio
+      w=thisView[0].width()
+      h=thisView[0].height()
       l = setVal(thisView[1], w, h, 0)
       b = setVal(thisView[2], w, h, 0)
       wi = setVal(thisView[3], w, h, l)

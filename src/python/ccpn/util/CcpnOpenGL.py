@@ -23,7 +23,7 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-import sys
+import sys, os
 import math, random
 import ctypes
 import functools
@@ -1083,7 +1083,9 @@ void main()
     self._GLPeakListLabels = {}
     self._marksAxisCodes = []
 
-    self.firstFont = CcpnGLFont('/Users/ejb66/Documents/Fonts/myfont.fnt')
+    from ccpn.framework.PathsAndUrls import fontsPath
+    self.firstFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'myfont.fnt'))
+
     self._buildTextFlag = True
 
     self._buildMouse = True
@@ -4556,7 +4558,7 @@ class CcpnGLFont():
 
     # no checking yet
     self.fontFile = self.fontInfo[0].replace('textures: ', '')
-    self.fontPNG = imread('/Users/ejb66/Documents/Fonts/'+self.fontFile)
+    self.fontPNG = imread(os.path.join(os.path.dirname(fileName), self.fontFile))
     self.fontName = self.fontInfo[1].split()[0]
     self.fontSize = self.fontInfo[1].split()[1]
     self.width = 0

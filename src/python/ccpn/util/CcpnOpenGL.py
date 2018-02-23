@@ -664,10 +664,12 @@ class CcpnGLWidget(QOpenGLWidget):
   def _rescaleXAxis(self, update=True):
 
     if self._preferences.lockAspectRatio:
-      midY = (self.axisT+self.AxisB)/2.0
+      midY = (self.axisT+self.axisB)/2.0
 
       xAxis = self._axisCodes[0][0]
+      yAxis = self._axisCodes[1][0]
 
+      ratio = self._preferences.Aspect[yAxis] / self._preferences.Aspect[xAxis]
 
     self.rescale()
 
@@ -687,7 +689,13 @@ class CcpnGLWidget(QOpenGLWidget):
   def _rescaleYAxis(self, update=True):
 
     if self._preferences.lockAspectRatio:
-      getLogger().info('checking Y aspect')
+      if self._preferences.lockAspectRatio:
+        midX = (self.axisL + self.axisR) / 2.0
+
+        xAxis = self._axisCodes[0][0]
+        yAxis = self._axisCodes[1][0]
+
+        ratio = self._preferences.Aspect[xAxis] / self._preferences.Aspect[yAxis]
 
     self.rescale()
 

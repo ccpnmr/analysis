@@ -431,6 +431,14 @@ class GuiStripNd(GuiStrip):
     try:
       self._testCcpnOpenGLWidget.updateHTrace = self.hTraceAction.isChecked()
       self._testCcpnOpenGLWidget.updateVTrace = self.vTraceAction.isChecked()
+
+      for strip in self.spectrumDisplay.strips:
+        if strip.hTraceAction.isChecked() or strip.vTraceAction.isChecked():
+          self.spectrumDisplay.phasingFrame.setVisible(True)
+          break
+      else:
+        self.spectrumDisplay.phasingFrame.setVisible(False)
+
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 

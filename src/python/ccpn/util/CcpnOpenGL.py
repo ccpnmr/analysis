@@ -3637,9 +3637,6 @@ void main()
     if self._parent.isDeleted:
       return
 
-    # cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
-    # if cursorPosition:
-
     position = [self.cursorCoordinate[0], self.cursorCoordinate[1]]     #list(cursorPosition)
     for axis in self._orderedAxes[2:]:
       position.append(axis.position)
@@ -3648,12 +3645,32 @@ void main()
 
     for spectrumView in self._parent.spectrumViews:
 
+      phasingFrame = self._parent.spectrumDisplay.phasingFrame
+      if phasingFrame.isVisible():
+        ph0 = phasingFrame.slider0.value()
+        ph1 = phasingFrame.slider1.value()
+        pivotPpm = phasingFrame.pivotEntry.get()
+        direction = phasingFrame.getDirection()
+        # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
+        # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+        axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
+        pivot = spectrumView.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
+      else:
+        # ph0 = ph1 = direction = 0
+        # pivot = 1
+        direction = 0
+        ph0 = ph1 = pivot = None
+
       inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
         = spectrumView._getTraceParams(position)
 
       # TODO:ED add on the parameters from the phasingFrame
-      self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
-      self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
+      if direction == 0:
+        self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, ph0, ph1, pivot)
+        self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
+      else:
+        self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
+        self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
   def drawTraces(self):
     # only paint if mouse is in the window

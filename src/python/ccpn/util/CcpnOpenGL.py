@@ -1348,8 +1348,6 @@ void main()
       my = self.height() - ev.pos().y()
     self._mouseEnd = (mx, my)
 
-    # TODO:ED test the current viewBox mouse press event :)
-
     # add a 2-pixel tolerance to the click event - in case of a small wiggle on coordinates
     if not self._widthsChangedEnough(self._mouseStart, self._mouseEnd, tol=2):
 
@@ -1392,36 +1390,30 @@ void main()
     self._isALT = ''
     self._isMETA = ''
 
-  def keyReleaseEvent(self, event: QtGui.QKeyEvent):
+  def _clearAndUpdate(self):
     self._clearKeys()
     self._drawSelectionBox = False
-
-    # spawn a repaint event - otherwise cursor will not update
     self.update()
+
+  def keyReleaseEvent(self, ev: QtGui.QKeyEvent):
+    super(CcpnGLWidget, self).keyReleaseEvent(ev)
+    self._clearAndUpdate()
 
   def enterEvent(self, ev: QtCore.QEvent):
     super(CcpnGLWidget, self).enterEvent(ev)
-    self._drawSelectionBox = False
-    self._clearKeys()
-    self.update()
+    self._clearAndUpdate()
 
   def focusInEvent(self, ev: QtGui.QFocusEvent):
     super(CcpnGLWidget, self).focusInEvent(ev)
-    self._drawSelectionBox = False
-    self._clearKeys()
-    self.update()
+    self._clearAndUpdate()
 
   def focusOutEvent(self, ev: QtGui.QFocusEvent):
     super(CcpnGLWidget, self).focusOutEvent(ev)
-    self._drawSelectionBox = False
-    self._clearKeys()
-    self.update()
+    self._clearAndUpdate()
 
   def leaveEvent(self, ev: QtCore.QEvent):
     super(CcpnGLWidget, self).leaveEvent(ev)
-    self._drawSelectionBox = False
-    self._clearKeys()
-    self.update()
+    self._clearAndUpdate()
 
   def mouseMoveEvent(self, event):
     self.setFocus()
@@ -1467,18 +1459,22 @@ void main()
     if event.buttons() & Qt.LeftButton:
       # do the complicated keypresses first
       # other keys are: Key_Alt, Key_Meta, and _isALT, _isMETA
+
       if (self._key == Qt.Key_Control and self._isSHIFT == 'S') or \
           (self._key == Qt.Key_Shift and self._isCTRL) == 'C':
+
         self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 3
         self._drawSelectionBox = True
 
       elif self._key == Qt.Key_Shift:
+
         self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 1
         self._drawSelectionBox = True
 
       elif self._key == Qt.Key_Control:
+
         self._endCoordinate = self.cursorCoordinate      #[event.pos().x(), self.height() - event.pos().y()]
         self._selectionMode = 2
         self._drawSelectionBox = True
@@ -1792,21 +1788,23 @@ void main()
           # delete here
           print('>>>delete0', peak)
 
-          # if _isInPlane or _isInFlankingPlane:
-          #   if _isSelected:
-          #     drawList.indices = np.delete(drawList.indices, [index:index+12])
-          #   else:
-          #     drawList.indices = np.delete(drawList.indices, [index:index+4])
-          #
+          # remove elements from the arrays corresponding to the peak
+          if _isInPlane or _isInFlankingPlane:
+            if _isSelected:
+              drawList.indices = np.delete(drawList.indices, np.s_[index:index+12])
+            else:
+              drawList.indices = np.delete(drawList.indices, np.s_[index:index+4])
+            index += numPoints
+
           # drawList.vertices = np.delete(drawList.vertices, [])
           # drawList.color = np.delete(drawList.color, [])
           # drawList.attribs = np.delete(drawList.attribs, [])
           # drawList.pids = np.delete(drawList.pids, [])
-          #
-          # index += numPoints
+
+          drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + LENPID])
 
         else:
-          pp += 8
+          pp += LENPID
 
     elif symbolType == 1:
 
@@ -4525,7 +4523,7 @@ void main()
       self.current.peaks = peaks
 
     elif controlLeftMouse(event):
-      # Control(Cmd)+left drag: selects peaks
+      # Control(Cmd)+left drag: selects peaks - purple box
       event.accept()
 
       self._resetBoxes()
@@ -4622,7 +4620,7 @@ void main()
     #     #   peak.position =  (peak.position[0] + deltaPosition[0],peak.position[1] + deltaPosition[1] )
 
     elif shiftLeftMouse(event):
-      # zoom into the region
+      # zoom into the region - yellow box
       self.axisL = max(self._startCoordinate[0], self._endCoordinate[0])
       self.axisR = min(self._startCoordinate[0], self._endCoordinate[0])
       self.axisB = max(self._startCoordinate[1], self._endCoordinate[1])

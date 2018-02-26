@@ -1602,9 +1602,11 @@ void main()
           drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
 
       elif symbolType == 1:  # an ellipse
+        # not needed yet
         pass
 
       elif symbolType == 2:  # filled ellipse
+        # not needed yet
         pass
 
   def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
@@ -1648,9 +1650,11 @@ void main()
     drawList.indices = np.empty(0, dtype=np.uint)
 
     index = 0
+    indexPtr = 0
+
     if symbolType == 0:
       # for peak in pls.peaks:
-      for pp in range(0, len(drawList.pids), 8):
+      for pp in range(0, len(drawList.pids), LENPID):
 
         # check whether the peaks still exists
         peak = drawList.pids[pp]
@@ -1680,14 +1684,17 @@ void main()
               drawList.indices = np.append(drawList.indices,
                                            np.array([index, index+1, index+2, index+3], dtype=np.uint))
             drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
-          drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
+
+          drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
+                                      indexPtr, len(drawList.indices)]
+          indexPtr = len(drawList.indices)
 
         index += numPoints
 
     elif symbolType == 1:
 
       # for peak in pls.peaks:
-      for pp in range(0, len(drawList.pids), 8):
+      for pp in range(0, len(drawList.pids), LENPID):
 
         # check whether the peaks still exists
         peak = drawList.pids[pp]
@@ -1721,14 +1728,17 @@ void main()
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
             drawList.colors[offset*4:(offset+np2+5)*4] = [colR, colG, colB, 1.0] * (np2+5)
-          drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
+
+          drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
+                                      indexPtr, len(drawList.indices)]
+          indexPtr = len(drawList.indices)
 
         index += np2+5
 
     elif symbolType == 2:
 
       # for peak in pls.peaks:
-      for pp in range(0, len(drawList.pids), 8):
+      for pp in range(0, len(drawList.pids), LENPID):
 
         # check whether the peaks still exists
         peak = drawList.pids[pp]
@@ -1758,7 +1768,10 @@ void main()
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
             drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [colR, colG, colB, 1.0] * (np2 + 5)
-          drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected, 0, 0]
+
+          drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
+                                      indexPtr, len(drawList.indices)]
+          indexPtr = len(drawList.indices)
 
         index += np2 + 5
 
@@ -1768,77 +1781,45 @@ void main()
     drawList = self._GLPeakLists[peakListView.pid]
 
     index = 0
-    if symbolType == 0:
-      # for peak in pls.peaks:
-      # for pp in range(0, len(drawList.pids), 8):
+    indexOffset = 0
+    numPoints = 0
 
+    pp = 0
+    while (pp < len(drawList.pids)):
+      # check whether the peaks still exists
+      peak = drawList.pids[pp]
 
-      pp = 0
-      while pp < len(drawList.pids):
-        # check whether the peaks still exists
-        peak = drawList.pids[pp]
+      if peak == delPeak:
+        offset = drawList.pids[pp + 1]
+        numPoints = drawList.pids[pp + 2]
 
-        if peak == delPeak:
-          offset = drawList.pids[pp + 1]
-          numPoints = drawList.pids[pp + 2]
-          _isInPlane = drawList.pids[pp + 3]
-          _isInFlankingPlane = drawList.pids[pp + 4]
-          _isSelected = drawList.pids[pp + 5]
+        # TODO:ED don't like this - should be same code for all
+        if symbolType != 0:
+          numPoints = 2*numPoints+5
 
-          # delete here
-          print('>>>delete0', peak)
+        # _isInPlane = drawList.pids[pp + 3]
+        # _isInFlankingPlane = drawList.pids[pp + 4]
+        # _isSelected = drawList.pids[pp + 5]
+        indexStart = drawList.pids[pp + 6]
+        indexEnd = drawList.pids[pp + 7]
+        indexOffset = indexEnd-indexStart
 
-          # remove elements from the arrays corresponding to the peak
-          if _isInPlane or _isInFlankingPlane:
-            if _isSelected:
-              drawList.indices = np.delete(drawList.indices, np.s_[index:index+12])
-            else:
-              drawList.indices = np.delete(drawList.indices, np.s_[index:index+4])
-            index += numPoints
+        drawList.indices = np.delete(drawList.indices, np.s_[indexStart:indexEnd])
+        drawList.vertices = np.delete(drawList.vertices, np.s_[2*offset:2*(offset+numPoints)])
+        drawList.attribs = np.delete(drawList.attribs, np.s_[2*offset:2*(offset+numPoints)])
+        drawList.colors = np.delete(drawList.colors, np.s_[4*offset:4*(offset+numPoints)])
+        drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + LENPID])
+        drawList.numVertices -= numPoints
+        break
+      else:
+        pp += LENPID
 
-          # drawList.vertices = np.delete(drawList.vertices, [])
-          # drawList.color = np.delete(drawList.color, [])
-          # drawList.attribs = np.delete(drawList.attribs, [])
-          # drawList.pids = np.delete(drawList.pids, [])
-
-          drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + LENPID])
-
-        else:
-          pp += LENPID
-
-    elif symbolType == 1:
-
-      # for peak in pls.peaks:
-      for pp in range(0, len(drawList.pids), 8):
-
-        # check whether the peaks still exists
-        peak = drawList.pids[pp]
-
-        if peak == delPeak:
-          offset = drawList.pids[pp + 1]
-          numPoints = drawList.pids[pp + 2]
-          np2 = 2 * numPoints
-
-          # delete here
-          print('>>>delete1', peak)
-          index += np2 + 5
-
-    elif symbolType == 2:
-
-      # for peak in pls.peaks:
-      for pp in range(0, len(drawList.pids), 8):
-
-        # check whether the peaks still exists
-        peak = drawList.pids[pp]
-
-        if peak == delPeak:
-          offset = drawList.pids[pp + 1]
-          numPoints = drawList.pids[pp + 2]
-          np2 = 2 * numPoints
-
-          # delete here
-          print('>>>delete2', peak)
-          index += np2 + 5
+    # clean up the rest of the list
+    while (pp < len(drawList.pids)):
+      drawList.pids[pp + 1] -= numPoints
+      drawList.pids[pp + 6] -= indexOffset
+      drawList.pids[pp + 7] -= indexOffset
+      pp += LENPID
 
   def _appendPeakListItem(self, spectrumView, peakListView, peak):
     spectrum = spectrumView.spectrum
@@ -1888,6 +1869,8 @@ void main()
 
     # build the peaks VBO
     index = 0
+    indexPtr = len(drawList.indices)
+
     # for pls in spectrum.peakLists:
 
     pls = peakListView.peakList
@@ -1952,17 +1935,19 @@ void main()
                                                             index, index + 3, index + 3, index + 1])
 
         drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
-          , p0[0] + r, p0[1] + w
-          , p0[0] + r, p0[1] - w
-          , p0[0] - r, p0[1] + w])
+                                                        , p0[0] + r, p0[1] + w
+                                                        , p0[0] + r, p0[1] - w
+                                                        , p0[0] - r, p0[1] + w])
         drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
-          , p0[0], p0[1]
-          , p0[0], p0[1]
-          , p0[0], p0[1]])
+                                                        , p0[0], p0[1]
+                                                        , p0[0], p0[1]
+                                                        , p0[0], p0[1]])
 
         # keep a pointer to the peak
-        drawList.pids = np.append(drawList.pids, [peak, index, 4, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+        drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, 4,
+                                                  _isInPlane, _isInFlankingPlane, _isSelected,
+                                                  indexPtr, len(drawList.indices)])
 
         index += 4
         drawList.numVertices += 4
@@ -2017,8 +2002,9 @@ void main()
         drawList.lineWidths = (r, w)
 
         # keep a pointer to the peak
-        drawList.pids = np.append(drawList.pids,
-                                  [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, skip, 0])
+        drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, numPoints,
+                                                 _isInPlane, _isInFlankingPlane, _isSelected,
+                                                 indexPtr, len(drawList.indices)])
 
         index += np2 + 5
         drawList.numVertices += np2 + 5
@@ -2068,8 +2054,9 @@ void main()
         drawList.lineWidths = (r, w)
 
         # keep a pointer to the peak
-        drawList.pids = np.append(drawList.pids,
-                                  [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, skip, 0])
+        drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, numPoints,
+                                                  _isInPlane, _isInFlankingPlane, _isSelected,
+                                                  indexPtr, len(drawList.indices)])
 
         index += np2 + 5
         drawList.numVertices += np2 + 5
@@ -2134,7 +2121,8 @@ void main()
         drawList.fillMode = GL.GL_FILL
 
       # build the peaks VBO
-      index=0
+      index = 0
+      indexPtr = 0
       # for pls in spectrum.peakLists:
 
       pls = peakListView.peakList
@@ -2194,24 +2182,29 @@ void main()
             _isSelected = False
             # unselected
             if _isInPlane or _isInFlankingPlane:
-              drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
               if hasattr(peak, '_isSelected') and peak._isSelected:
                 _isSelected = True
-                drawList.indices = np.append(drawList.indices, [index, index+2, index+2, index+1,
+                drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3,
+                                                                index, index+2, index+2, index+1,
                                                                 index, index+3, index+3, index+1])
+              else:
+                drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
 
             drawList.vertices = np.append(drawList.vertices, [p0[0]-r, p0[1]-w
                                                               , p0[0]+r, p0[1]+w
                                                               , p0[0]+r, p0[1]-w
                                                               , p0[0]-r, p0[1]+w])
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * LENCOLORS)
             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
                                                             ,p0[0], p0[1]
                                                             ,p0[0], p0[1]
                                                             ,p0[0], p0[1]])
 
             # keep a pointer to the peak
-            drawList.pids = np.append(drawList.pids, [peak, index, 4, _isInPlane, _isInFlankingPlane, _isSelected, 0, 0])
+            drawList.pids = np.append(drawList.pids, [peak, index, 4,
+                                                      _isInPlane, _isInFlankingPlane, _isSelected,
+                                                      indexPtr, len(drawList.indices)])
+            indexPtr = len(drawList.indices)
 
             index += 4
             drawList.numVertices += 4
@@ -2263,7 +2256,10 @@ void main()
             drawList.lineWidths = (r, w)
 
             # keep a pointer to the peak
-            drawList.pids = np.append(drawList.pids, [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, skip, 0])
+            drawList.pids = np.append(drawList.pids, [peak, index, numPoints,
+                                                      _isInPlane, _isInFlankingPlane, _isSelected,
+                                                      indexPtr, len(drawList.indices)])
+            indexPtr = len(drawList.indices)
 
             index += np2 + 5
             drawList.numVertices += np2 + 5
@@ -2309,7 +2305,10 @@ void main()
             drawList.lineWidths = (r, w)
 
             # keep a pointer to the peak
-            drawList.pids = np.append(drawList.pids, [peak, index, numPoints, _isInPlane, _isInFlankingPlane, _isSelected, skip, 0])
+            drawList.pids = np.append(drawList.pids, [peak, index, numPoints,
+                                                      _isInPlane, _isInFlankingPlane, _isSelected,
+                                                      indexPtr, len(drawList.indices)])
+            indexPtr = len(drawList.indices)
 
             index += np2 + 5
             drawList.numVertices += np2 + 5
@@ -2341,6 +2340,7 @@ void main()
           if spectrumView in self._parent.spectrumViews:
 
             self._appendPeakListItem(spectrumView, peakListView, peak)
+            self._updateHighlightedPeaks(spectrumView, peakListView)
 
   def _deletePeakListLabel(self, peak):
     for pid in self._GLPeakListLabels.keys():
@@ -2365,13 +2365,13 @@ void main()
 
   def _processPeakNotifier(self, data):
     # TODO:ED change this for the quick one
-    for spectrumView in self._parent.spectrumViews:
-      for peakListView in spectrumView.peakListViews:
-        peakListView.buildPeakLists = True
-        peakListView.buildPeakListLabels = True
-    self.buildPeakLists()
-    self.buildPeakListLabels()
-    return
+    # for spectrumView in self._parent.spectrumViews:
+    #   for peakListView in spectrumView.peakListViews:
+    #     peakListView.buildPeakLists = True
+    #     peakListView.buildPeakListLabels = True
+    # self.buildPeakLists()
+    # self.buildPeakListLabels()
+    # return
 
     triggers = data[Notifier.TRIGGER]
     peak = data[Notifier.OBJECT]
@@ -2387,7 +2387,10 @@ void main()
       self._createPeakListLabel(peak)
 
     self._clearKeys()
-    self.update()
+
+    # these are inside CREATE call above
+    # self._updateHighlightedPeaks()
+    # self._updateHighlightedPeakLabels()
 
   def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
     # get the correct coordinates based on the axisCodes

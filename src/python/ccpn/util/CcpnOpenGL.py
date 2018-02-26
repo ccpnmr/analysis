@@ -1575,39 +1575,55 @@ void main()
   def _rescalePeakList(self, spectrumView, peakListView):
     drawList = self._GLPeakLists[peakListView.pid]
 
-    if drawList.refreshMode == GLREFRESHMODE_REBUILD:
+    # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
-      symbolType = self._preferences.peakSymbolType
-      symbolWidth = self._preferences.peakSymbolSize / 2.0
-      x = abs(self.pixelX)
-      y = abs(self.pixelY)
+    symbolType = self._preferences.peakSymbolType
+    symbolWidth = self._preferences.peakSymbolSize / 2.0
+    x = abs(self.pixelX)
+    y = abs(self.pixelY)
 
-      # fix the aspect ratio of the cross to match the screen
-      minIndex = 0 if x <= y else 1
-      # pos = [symbolWidth, symbolWidth * y / x]
-      # w = r = pos[minIndex]
+    # fix the aspect ratio of the cross to match the screen
+    minIndex = 0 if x <= y else 1
+    # pos = [symbolWidth, symbolWidth * y / x]
+    # w = r = pos[minIndex]
 
-      if x <= y:
-        r = symbolWidth
-        w = symbolWidth * y / x
-      else:
-        w = symbolWidth
-        r = symbolWidth * x / y
+    if x <= y:
+      r = symbolWidth
+      w = symbolWidth * y / x
+    else:
+      w = symbolWidth
+      r = symbolWidth * x / y
 
-      if symbolType == 0:  # a cross
-        # drawList.clearVertices()
-        # drawList.vertices.copy(drawList.attribs)
-        offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
-        for pp in range(0, 2*drawList.numVertices, 8):
-          drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
+    if symbolType == 0:  # a cross
+      # drawList.clearVertices()
+      # drawList.vertices.copy(drawList.attribs)
+      offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
+      for pp in range(0, 2*drawList.numVertices, 8):
+        drawList.vertices[pp:pp+8] = drawList.attribs[pp:pp+8] + offsets
 
-      elif symbolType == 1:  # an ellipse
-        # not needed yet
-        pass
+    elif symbolType == 1:  # an ellipse
+      numPoints = 12
+      angPlus = 1.0 * np.pi
+      skip = 2
 
-      elif symbolType == 2:  # filled ellipse
-        # not needed yet
-        pass
+      np2 = 2 * numPoints
+      ang = list(range(numPoints))
+
+      offsets = np.empty(48)
+      for an in ang:
+        offsets[4*an:4*an+4] = [- r * math.sin(skip * an * angPlus / numPoints),
+                                - w * math.cos(skip * an * angPlus / numPoints),
+                                - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                - w * math.cos((skip * an + 1) * angPlus / numPoints)]
+
+      for pp in range(0, len(drawList.pids), LENPID):
+        if drawList.pids[pp+2] == 12:
+          index = 2*drawList.pids[pp+1]
+          drawList.vertices[index:index+48] = drawList.offsets[index:index+48] + offsets
+
+    elif symbolType == 2:  # filled ellipse
+      # not needed yet
+      pass
 
   def _isSelected(self, peak):
     if self.current and self.current.peaks:

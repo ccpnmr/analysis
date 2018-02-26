@@ -1362,6 +1362,12 @@ void main()
 
   def _checkKeys(self, ev):
     keyMod = QApplication.keyboardModifiers()
+    #
+    # if bool(keyMod & Qt.ControlModifier): self._isSHIFT = 'S'
+    # if bool(keyMod & Qt.ShiftModifier): self._isCTRL = 'C'
+    # if bool(keyMod & Qt.AltModifier): self._isALT = 'A'
+    # if bool(keyMod & Qt.MetaModifier): self._isMETA = 'M'
+
     if keyMod == Qt.ShiftModifier:
       self._isSHIFT = 'S'
     if keyMod == Qt.ControlModifier:
@@ -1373,15 +1379,16 @@ void main()
 
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()
-    keyMod = QApplication.keyboardModifiers()
-    if keyMod == Qt.ShiftModifier:
-      self._isSHIFT = 'S'
-    if keyMod == Qt.ControlModifier:
-      self._isCTRL = 'C'
-    if keyMod == Qt.AltModifier:
-      self._isALT = 'A'
-    if keyMod == Qt.MetaModifier:
-      self._isMETA = 'M'
+    self._checkKeys(event)
+    # keyMod = QApplication.keyboardModifiers()
+    # if keyMod == Qt.ShiftModifier:
+    #   self._isSHIFT = 'S'
+    # if keyMod == Qt.ControlModifier:
+    #   self._isCTRL = 'C'
+    # if keyMod == Qt.AltModifier:
+    #   self._isALT = 'A'
+    # if keyMod == Qt.MetaModifier:
+    #   self._isMETA = 'M'
 
   def _clearKeys(self):
     self._key = ''
@@ -1489,6 +1496,13 @@ void main()
                                            axisL=self.axisL, axisR=self.axisR)
         self._selectionMode = 0
         self._rescaleAllAxes()
+
+    elif event.buttons() & Qt.MiddleButton:
+      if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '':
+
+        # drag a peak
+        pass
+
 
     self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
 
@@ -1609,6 +1623,27 @@ void main()
       np2 = 2 * numPoints
       ang = list(range(numPoints))
 
+      offsets = np.empty(56)
+      for an in ang:
+        offsets[4*an:4*an+4] = [- r * math.sin(skip * an * angPlus / numPoints),
+                                - w * math.cos(skip * an * angPlus / numPoints),
+                                - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                - w * math.cos((skip * an + 1) * angPlus / numPoints)]
+        offsets[48:56] = [-r, -w, +r, +w, +r, -w, -r, +w]
+
+      for pp in range(0, len(drawList.pids), LENPID):
+        if drawList.pids[pp+2] == 12:
+          index = 2*drawList.pids[pp+1]
+          drawList.vertices[index:index+56] = drawList.attribs[index:index+56] + offsets
+
+    elif symbolType == 2:  # filled ellipse
+      numPoints = 12
+      angPlus = 1.0 * np.pi
+      skip = 2
+
+      np2 = 2 * numPoints
+      ang = list(range(numPoints))
+
       offsets = np.empty(48)
       for an in ang:
         offsets[4*an:4*an+4] = [- r * math.sin(skip * an * angPlus / numPoints),
@@ -1619,11 +1654,7 @@ void main()
       for pp in range(0, len(drawList.pids), LENPID):
         if drawList.pids[pp+2] == 12:
           index = 2*drawList.pids[pp+1]
-          drawList.vertices[index:index+48] = drawList.offsets[index:index+48] + offsets
-
-    elif symbolType == 2:  # filled ellipse
-      # not needed yet
-      pass
+          drawList.vertices[index:index+48] = drawList.attribs[index:index+48] + offsets
 
   def _isSelected(self, peak):
     if self.current and self.current.peaks:
@@ -1861,19 +1892,19 @@ void main()
 
     x = abs(self.pixelX)
     y = abs(self.pixelY)
+    # fix the aspect ratio of the cross to match the screen
+    minIndex = 0 if x <= y else 1
+    # pos = [symbolWidth, symbolWidth * y / x]
+    # w = r = pos[minIndex]
+
+    if x <= y:
+      r = symbolWidth
+      w = symbolWidth * y / x
+    else:
+      w = symbolWidth
+      r = symbolWidth * x / y
 
     if symbolType == 0:  # a cross
-      # fix the aspect ratio of the cross to match the screen
-      minIndex = 0 if x <= y else 1
-      # pos = [symbolWidth, symbolWidth * y / x]
-      # w = r = pos[minIndex]
-
-      if x <= y:
-        r = symbolWidth
-        w = symbolWidth * y / x
-      else:
-        w = symbolWidth
-        r = symbolWidth * x / y
 
       # change the ratio on resize
       drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -1993,8 +2024,8 @@ void main()
           skip = 1
         else:
           # draw 12 disconnected segments (dotted)
-          r = symbolWidth
-          w = symbolWidth
+          # r = symbolWidth
+          # w = symbolWidth
           numPoints = 12
           angPlus = 1.0 * np.pi
           skip = 2
@@ -2052,8 +2083,8 @@ void main()
           skip = 1
         else:
           # draw 12 disconnected segments (dotted)
-          r = symbolWidth
-          w = symbolWidth
+          # r = symbolWidth
+          # w = symbolWidth
           numPoints = 12
           angPlus = 1.0 * np.pi
           skip = 2
@@ -2075,10 +2106,10 @@ void main()
                                                            p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
                                                           for an in ang])
         drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
-          , p0[0] + r, p0[1] + w
-          , p0[0] + r, p0[1] - w
-          , p0[0] - r, p0[1] + w
-          , p0[0], p0[1]])
+                                                        , p0[0] + r, p0[1] + w
+                                                        , p0[0] + r, p0[1] - w
+                                                        , p0[0] - r, p0[1] + w
+                                                        , p0[0], p0[1]])
 
         drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2 + 5))
         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
@@ -2119,19 +2150,19 @@ void main()
 
       x = abs(self.pixelX)
       y = abs(self.pixelY)
+      # fix the aspect ratio of the cross to match the screen
+      minIndex = 0 if x <= y else 1
+      # pos = [symbolWidth, symbolWidth * y / x]
+      # w = r = pos[minIndex]
+
+      if x <= y:
+        r = symbolWidth
+        w = symbolWidth * y / x
+      else:
+        w = symbolWidth
+        r = symbolWidth * x / y
 
       if symbolType == 0:  # a cross
-        # fix the aspect ratio of the cross to match the screen
-        minIndex = 0 if x <= y else 1
-        # pos = [symbolWidth, symbolWidth * y / x]
-        # w = r = pos[minIndex]
-
-        if x <= y:
-          r = symbolWidth
-          w = symbolWidth * y / x
-        else:
-          w = symbolWidth
-          r = symbolWidth * x / y
 
         # change the ratio on resize
         drawList.refreshMode = GLREFRESHMODE_REBUILD
@@ -2254,8 +2285,8 @@ void main()
               skip = 1
             else:
               # draw 12 disconnected segments (dotted)
-              r = symbolWidth
-              w = symbolWidth
+              # r = symbolWidth
+              # w = symbolWidth
               numPoints = 12
               angPlus = 1.0 * np.pi
               skip = 2
@@ -2310,8 +2341,8 @@ void main()
               skip = 1
             else:
               # draw 12 disconnected segments (dotted)
-              r = symbolWidth
-              w = symbolWidth
+              # r = symbolWidth
+              # w = symbolWidth
               numPoints = 12
               angPlus = 1.0 * np.pi
               skip = 2
@@ -2377,6 +2408,23 @@ void main()
             self._appendPeakListItem(spectrumView, peakListView, peak)
             self._updateHighlightedPeaks(spectrumView, peakListView)
 
+  def _changePeakListLabel(self, peak):
+    self._deletePeakListLabel(peak)
+    self._createPeakListLabel(peak)
+
+  def _changePeakListItem(self, peak):
+    pls = peak.peakList
+    spectrum = pls.spectrum
+
+    for peakListView in pls.peakListViews:
+      if peakListView.pid in self._GLPeakListLabels.keys():
+        for spectrumView in spectrum.spectrumViews:
+          if spectrumView in self._parent.spectrumViews:
+
+            self._removePeakListItem(spectrumView, peakListView, peak)
+            self._appendPeakListItem(spectrumView, peakListView, peak)
+            self._updateHighlightedPeaks(spectrumView, peakListView)
+
   def _deletePeakListLabel(self, peak):
     for pid in self._GLPeakListLabels.keys():
       drawList = self._GLPeakListLabels[pid]
@@ -2420,6 +2468,11 @@ void main()
 
       self._createPeakListItem(peak)
       self._createPeakListLabel(peak)
+
+    if Notifier.CHANGE in triggers:
+
+      self._changePeakListItem(peak)
+      self._changePeakListLabel(peak)
 
     self._clearKeys()
 
@@ -4393,8 +4446,47 @@ void main()
         continue
 
       # TODO:ED could change this to actually use the pids in the drawList
-      if spectrumView.isVisible():
-        for peakList in spectrumView.spectrum.peakLists:
+      for peakListView in spectrumView.peakListViews:
+        if spectrumView.isVisible() and peakListView.isVisible():
+          # for peakList in spectrumView.spectrum.peakLists:
+          peakList = peakListView.peakList
+
+          for peak in peakList.peaks:
+            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+              and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+              if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
+
+                if peak in self.current.peaks:
+                  self.current._peaks.remove(peak)
+                else:
+                  self.current.addPeak(peak)
+
+  def _dragPeak(self, xPosition, yPosition):
+    """
+    (de-)Select first peak near cursor xPosition, yPosition
+    if peak already was selected, de-select it
+    """
+    xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
+    yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
+    xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
+    yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
+    if len(self._orderedAxes) > 2:
+      # NBNB TBD FIXME what about 4D peaks?
+      zPositions = self._orderedAxes[2].region
+    else:
+      zPositions = None
+
+    # now select (take first one within range)
+    for spectrumView in self._parent.spectrumViews:
+      if spectrumView.spectrum.dimensionCount == 1:
+        continue
+
+      # TODO:ED could change this to actually use the pids in the drawList
+      for peakListView in spectrumView.peakListViews:
+        if spectrumView.isVisible() and peakListView.isVisible():
+        # for peakList in spectrumView.spectrum.peakLists:
+          peakList = peakListView.peakList
+
           for peak in peakList.peaks:
             if (xPositions[0] < float(peak.position[0]) < xPositions[1]
               and yPositions[0] < float(peak.position[1]) < yPositions[1]):
@@ -4535,12 +4627,12 @@ void main()
       # needs to know about new peaks. This is not a good way to do it.
 
       # project = self.current.strip.project
-      self.project.blankNotification()
+      # self.project.blankNotification()
 
-      try:
-        peaks = self._parent.glPeakPickRegion(selectedRegion)
-      finally:
-        self.project.unblankNotification()
+      # try:
+      peaks = self._parent.glPeakPickRegion(selectedRegion)
+      # finally:
+      #   self.project.unblankNotification()
 
       # hide all the messages from the peak annotation generation
       self.project._startCommandEchoBlock('mousePeakPicking')
@@ -4629,34 +4721,35 @@ void main()
 
       self.current.peaks = peaks
 
-    # elif middleMouse(event):
-    #   # middle drag: moves a selected peak
-    #   event.accept()
-    #   self.setMouseEnabled(False, False)
-    #   refPosition = (self.mapSceneToView(event.buttonDownPos()).x(), self.mapSceneToView(event.buttonDownPos()).y())
-    #
-    #   peaks = self.current.peaks
-    #   if not peaks:
-    #     return
-    #
-    #   deltaPosition = np.subtract(self.current.cursorPosition, refPosition)
-    #   for peak in peaks:
-    #     peak.startPosition = peak.position
-    #
-    #   if event.isFinish():
-    #     for peak in peaks:
-    #       oldPosition = peak.position
-    #       peak.position = oldPosition + deltaPosition
-    #       peak._finaliseAction('change')
-    #       self.setMouseEnabled(True, True)
-    #       self.strip.spectrumDisplay.mainWindow.application.ui.echoCommands(
-    #         ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
-    #     self.current.peaks = peaks
-    #   else:  # this is when is being dragged
-    #     pass
-    #     # for peak in peaks:
-    #     #   # print(peak.position , deltaPosition)
-    #     #   peak.position =  (peak.position[0] + deltaPosition[0],peak.position[1] + deltaPosition[1] )
+    elif middleMouse(event):
+      # middle drag: moves a selected peak
+      event.accept()
+      # self.setMouseEnabled(False, False)
+      # refPosition = (self.mapSceneToView(event.buttonDownPos()).x(), self.mapSceneToView(event.buttonDownPos()).y())
+
+      peaks = self.current.peaks
+      if not peaks:
+        return
+
+      deltaPosition = np.array((self.cursorCoordinate[0]-self._startCoordinate[0],
+                       self.cursorCoordinate[1]-self._startCoordinate[1]))
+      for peak in peaks:
+        peak.startPosition = peak.position
+
+      # if event.isFinish():
+      for peak in peaks:
+        oldPosition = peak.position
+        peak.position = (oldPosition[0] + deltaPosition[0], oldPosition[1] + deltaPosition[1] )
+        # peak._finaliseAction('change')
+        # self.setMouseEnabled(True, True)
+        self.application.ui.echoCommands(("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
+
+      self.current.peaks = peaks
+      # else:  # this is when is being dragged
+      #   pass
+        # for peak in peaks:
+        #   # print(peak.position , deltaPosition)
+        #   peak.position =  (peak.position[0] + deltaPosition[0],peak.position[1] + deltaPosition[1] )
 
     elif shiftLeftMouse(event):
       # zoom into the region - yellow box

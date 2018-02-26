@@ -333,13 +333,14 @@ class Undo(deque):
 
         undoCall()
       self.nextIndex = undoTo + 1
-    # except Exception as e:
-    #   from ccpn.util.Logging import getLogger
-    #   getLogger().warning ("Error while undoing (%s). Undo stack is cleared." % e)
-    #   if self._debug:
-    #     print ("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
-    #     raise
-    #   self.clear()
+
+    except Exception as e:
+      from ccpn.util.Logging import getLogger
+      getLogger().warning ("Error while undoing (%s). Undo stack is cleared." % e)
+      if self._debug:
+        print ("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
+        raise
+      self.clear()
     finally:
       # Added by Rasmus March 2015. Surely we need to reset self._blocked?
       self._blocked = False
@@ -380,13 +381,14 @@ class Undo(deque):
         #   print ("@~@~ redoing", redoCall)
         redoCall()
       self.nextIndex = redoTo + 1
-    # except Exception as e:
-    #   from ccpn.util.Logging import getLogger
-    #   getLogger().warning("Error while redoing (%s). Undo stack is cleared." % e)
-    #   if self._debug:
-    #     print ("REDO DEBUG: error in redo. Last redo call was:", redoCall)
-    #     raise
-    #   self.clear()
+
+    except Exception as e:
+      from ccpn.util.Logging import getLogger
+      getLogger().warning("Error while redoing (%s). Undo stack is cleared." % e)
+      if self._debug:
+        print ("REDO DEBUG: error in redo. Last redo call was:", redoCall)
+        raise
+      self.clear()
     finally:
       # Added by Rasmus March 2015. Surely we need to reset self._blocked?
       self._blocked = False

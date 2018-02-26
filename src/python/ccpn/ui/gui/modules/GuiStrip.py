@@ -319,7 +319,7 @@ class GuiStrip(Frame):
     # from ccpn.util.CcpnOpenGL import GLNotifier
     # GLSignals = GLNotifier(parent=self)
     # GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKNOTIFY], targets=data)
-    #
+
     try:
       self._testCcpnOpenGLWidget._processPeakNotifier(data)
     except Exception as es:

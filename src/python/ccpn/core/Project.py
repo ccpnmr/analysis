@@ -681,7 +681,7 @@ class Project(AbstractWrapperObject):
     """Call startCommandBlock for wrapper object delete. Implementation only"""
 
     undo = self._undo
-    if undo:
+    if undo is not None:
       # set undo step
       undo.newWaypoint()                      # DO NOT CHANGE THIS
       undo.increaseWaypointBlocking()
@@ -709,7 +709,7 @@ class Project(AbstractWrapperObject):
 
     MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called"""
     undo = self._undo
-    if undo:
+    if undo is not None:
 
       # TODO:ED check this!
       # self.resumeNotification()

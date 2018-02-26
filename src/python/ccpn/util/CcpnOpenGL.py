@@ -1670,7 +1670,8 @@ void main()
             _isInFlankingPlane = None
 
           if _isInPlane or _isInFlankingPlane:
-            if hasattr(peak, '_isSelected') and peak._isSelected:
+            if peak in self.current.peaks:
+            # if hasattr(peak, '_isSelected') and peak._isSelected:
               _isSelected = True
               colR, colG, colB = self.highlightColour[:3]
               drawList.indices = np.append(drawList.indices, np.array([index, index+1, index+2, index+3,
@@ -1929,7 +1930,9 @@ void main()
         # unselected
         if _isInPlane or _isInFlankingPlane:
           drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
-          if hasattr(peak, '_isSelected') and peak._isSelected:
+
+          if peak in self.current.peaks:
+          # if hasattr(peak, '_isSelected') and peak._isSelected:
             _isSelected = True
             drawList.indices = np.append(drawList.indices, [index, index + 2, index + 2, index + 1,
                                                             index, index + 3, index + 3, index + 1])

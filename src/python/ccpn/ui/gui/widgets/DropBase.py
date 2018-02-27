@@ -53,6 +53,8 @@ class DropBase:
   def __init__(self, acceptDrops, *args, **kw):
 
     self._dropEventCallback = None
+    self._enterEventCallback = None
+    self._dragMoveEventCallback = None
     self.setAcceptDrops(acceptDrops)
 
   def setDropEventCallback(self, callback):
@@ -60,6 +62,24 @@ class DropBase:
     self._dropEventCallback = callback
 
   def dragEnterEvent(self, event):
+    dataDict = self.parseEvent(event)
+    if dataDict is not None and len(dataDict) > 1:
+      event.accept()
+      if self._dragMoveEventCallback is not None:
+        self._dragMoveEventCallback(dataDict)
+    event.accept()
+
+  def setDragMoveEventCallback(self, callback):
+    self._dragMoveEventCallback = callback
+
+  def setDragEnterEventCallback(self, callback):
+    self._enterEventCallback = callback
+
+  def dragMoveEvent(self, event):
+    dataDict = self.parseEvent(event)
+    if dataDict is not None and len(dataDict) > 1:
+      if self._dragMoveEventCallback is not None:
+        self._dragMoveEventCallback(dataDict)
     event.accept()
 
   def dropEvent(self, event):

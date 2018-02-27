@@ -87,7 +87,9 @@ class GuiNotifier(object):
 
   # Trigger keywords
   DROPEVENT = 'dropEvent'
-  _triggerKeywords = (DROPEVENT )
+  ENTEREVENT = 'enterEvent'
+  DRAGMOVEEVENT = 'dragMoveEvent'
+  _triggerKeywords = (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
 
   def __init__(self, theObject:Any, triggers:list, targetName:list, callback:Callable[..., str], *args, **kwargs):
     """
@@ -145,6 +147,19 @@ class GuiNotifier(object):
         self._theObject.setDropEventCallback(partial(self, notifier=notifier))
         self._unregister.append((trigger, targetName)) # for now a duplicate, but we may need this late
 
+      elif trigger == GuiNotifier.ENTEREVENT:
+        notifier = (trigger, targetName)
+        self._notifiers.append(notifier)
+        self._theObject.setDragEnterEventCallback(partial(self, notifier=notifier))
+        self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this late
+
+      elif trigger == GuiNotifier.DRAGMOVEEVENT:
+        notifier = (trigger, targetName)
+        self._notifiers.append(notifier)
+        self._theObject.setDragMoveEventCallback(partial(self, notifier=notifier))
+        self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this late
+
+
     if len(self._notifiers) == 0:
       raise RuntimeWarning('GuiNotifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
                          (theObject, targetName, triggers))
@@ -190,6 +205,16 @@ class GuiNotifier(object):
         trigger = trigger,
         theObject = self._theObject,
         targetName = targetName,
+      )
+      callbackDict.update(data)
+      self._callback(callbackDict, *self._args, **self._kwargs)
+
+    if trigger == GuiNotifier.DRAGMOVEEVENT:
+      callbackDict = dict(
+                notifier=self,
+                trigger=trigger,
+                theObject=self._theObject,
+                targetName=targetName,
       )
       callbackDict.update(data)
       self._callback(callbackDict, *self._args, **self._kwargs)

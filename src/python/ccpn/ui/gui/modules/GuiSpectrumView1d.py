@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,14 +19,16 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import numpy
 
+import numpy as np
+
+from OpenGL import GL
+from OpenGL.error import GLError
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import pyqtgraph as pg
@@ -36,6 +37,7 @@ from ccpn.ui.gui.modules.GuiSpectrumView import GuiSpectrumView
 
 from ccpn.util.Colour import spectrumColours
 from ccpn.util import Phasing
+
 
 class GuiSpectrumView1d(GuiSpectrumView):
 
@@ -78,8 +80,16 @@ class GuiSpectrumView1d(GuiSpectrumView):
       
     self.hPhaseTrace = None
 
+    self.buildContours = True     # trigger the first build
+    self.buildPeakLists = True
+    self.buildPeakListLabels = True
+
     # self.strip.viewBox.autoRange()
     # self.strip.zoomYAll()
+
+  def _getValues(self):
+    # ejb - get some spectrum information for scaling the display
+    return [self._getSpectrumViewParams(0)]
 
   def _turnOnPhasing(self):
 
@@ -189,10 +199,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
     pointInt = [1+int(pnt+0.4999) for pnt in point]
     data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
     if ph0 is not None and ph1 is not None and pivot is not None:
-      data0 = numpy.array(data)
+      data0 = np.array(data)
       data = Phasing.phaseRealData(data, ph0, ph1, pivot)
-      data1 = numpy.array(data)
-    x = numpy.array([xDataDim.primaryDataDimRef.pointToValue(p+1) for p in range(xMinFrequency, xMaxFrequency+1)])
+      data1 = np.array(data)
+    x = np.array([xDataDim.primaryDataDimRef.pointToValue(p+1) for p in range(xMinFrequency, xMaxFrequency+1)])
     # scale from ppm to pixels
     pixelViewBox0 = plotItem.getAxis('left').width()
     pixelViewBox1 = pixelViewBox0 + viewBox.width()
@@ -206,7 +216,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     
     yintensity0, yintensity1 = viewRegion[1]
     #v = positionPixel[1] - (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
-    v = pixelViewBox0 + (pixelViewBox1-pixelViewBox0) * (numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)]) - yintensity0) / (yintensity1 - yintensity0)
+    v = pixelViewBox0 + (pixelViewBox1-pixelViewBox0) * (np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)]) - yintensity0) / (yintensity1 - yintensity0)
   
     colour = '#e4e15b' if self._application.colourScheme == 'dark' else '#000000'
     hTrace.setPen({'color':colour})
@@ -237,3 +247,43 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
   def setSliceColour(self):
     self.plot.curve.setPen(self.spectrum.sliceColour)
+
+  def _buildGLContours(self, glList):
+    # build a glList for the spectrum
+    glList.clearArrays()
+
+    numVertices = len(self.spectrum.positions)
+    glList.indices = numVertices
+    glList.numVertices = numVertices
+    glList.indices = np.arange(numVertices, dtype=np.uint)
+
+    colour = self._getColour('sliceColour', '#aaaaaa')
+    colR = int(colour.strip('# ')[0:2], 16) / 255.0
+    colG = int(colour.strip('# ')[2:4], 16) / 255.0
+    colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+    glList.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+    glList.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+    glList.vertices[::2] = self.spectrum.positions
+    glList.vertices[1::2] = self.spectrum.intensities
+
+  def _paintContoursNoClip(self, plotHeight=0.0):
+
+    # not sure how to handle this
+    pass
+
+    # # xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0)
+    # # yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1)
+    # #
+    # # GL.glPushMatrix()
+    # # # GL.glScale(1.0, -1.0, 1.0)
+    # # # GL.glTranslate(0.0, -plotHeight, 0.0)
+    # # GL.glTranslate(-xTranslate, -yTranslate, 0.0)
+    # # GL.glScale(xScale, yScale, 1.0)
+    # for (colour, levels, displayLists) in ((self.posColour, self.posLevels, self.posDisplayLists),
+    #                                        (self.negColour, self.negLevels, self.negDisplayLists)):
+    #   for n, level in enumerate(levels):
+    #     GL.glColor4f(*colour)
+    #     # TBD: scaling, translating, etc.
+    #     GL.glCallList(displayLists[n])
+    # # GL.glPopMatrix()

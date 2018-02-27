@@ -30,7 +30,7 @@ def getPeakPosition(peak, dim, unit='ppm'):
     # peakDim = peak.position[dim]
 
     if peak.position[dim] is None:
-      value = "*NOT SET*"
+      value = None              #"*NOT SET*"
 
     elif unit == 'ppm':
       value = peak.position[dim]
@@ -47,8 +47,14 @@ def getPeakPosition(peak, dim, unit='ppm'):
       raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
                      % unit)
 
-    if type(value) is int or type(value) is float:
-      return '%7.2f' % float(value)
+    if isinstance(value, (int, float, np.float32, np.float64)):
+      return '{0:.2f}'.format(value)
+
+    return None
+
+    # if isinstance(value, [int, float]):
+    # # if type(value) is int or type(value) in (float, float32, float64):
+    #   return '%7.2f' % float(value)
 
 def getPeakAnnotation(peak, dim, separator=', '):
   if len(peak.dimensionNmrAtoms) > dim:

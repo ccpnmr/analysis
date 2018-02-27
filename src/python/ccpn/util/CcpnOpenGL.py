@@ -42,6 +42,7 @@ from ccpn.util.Logging import getLogger
 import numpy as np
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
+from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
@@ -505,16 +506,22 @@ class CcpnGLWidget(QOpenGLWidget):
       # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
       # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
 
-      dx = self.sign(self.axisR - self.axisL)
-      dy = self.sign(self.axisT - self.axisB)
-
       # get the bounding box of the spectra
+      dx = self.sign(self.axisR - self.axisL)
       fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-      fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
       dxAF = fx0 - fx1
-      dyAF = fy0 - fy1
       xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
-      yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+
+      if spectrumView.spectrum.dimensionCount > 1:
+        dy = self.sign(self.axisT - self.axisB)
+        fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+        dyAF = fy0 - fy1
+        yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+      else:
+        dy = self.sign(self.axisT - self.axisB)
+        fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
+        dyAF = fy0 - fy1
+        yScale = dy * dyAF / 1.0
 
       # create modelview matrix for the spectrum to be drawn
       self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
@@ -693,13 +700,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def _rescaleXAxis(self, update=True):
 
-    if self._preferences.lockAspectRatio:
-      midY = (self.axisT+self.axisB)/2.0
-
-      xAxis = self._axisCodes[0][0]
-      yAxis = self._axisCodes[1][0]
-
-      ratio = self._preferences.Aspect[yAxis] / self._preferences.Aspect[xAxis]
+    # if self._preferences.lockAspectRatio:
+    #   midY = (self.axisT+self.axisB)/2.0
+    #
+    #   xAxis = self._axisCodes[0][0]
+    #   yAxis = self._axisCodes[1][0]
+    #
+    #   ratio = self._preferences.Aspect[yAxis] / self._preferences.Aspect[xAxis]
 
     self.rescale()
 
@@ -718,14 +725,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def _rescaleYAxis(self, update=True):
 
-    if self._preferences.lockAspectRatio:
-      if self._preferences.lockAspectRatio:
-        midX = (self.axisL + self.axisR) / 2.0
-
-        xAxis = self._axisCodes[0][0]
-        yAxis = self._axisCodes[1][0]
-
-        ratio = self._preferences.Aspect[xAxis] / self._preferences.Aspect[yAxis]
+    # if self._preferences.lockAspectRatio:
+    #   if self._preferences.lockAspectRatio:
+    #     midX = (self.axisL + self.axisR) / 2.0
+    #
+    #     xAxis = self._axisCodes[0][0]
+    #     yAxis = self._axisCodes[1][0]
+    #
+    #     ratio = self._preferences.Aspect[xAxis] / self._preferences.Aspect[yAxis]
 
     self.rescale()
 
@@ -1124,12 +1131,12 @@ void main()
     self.diffMouseString = None
     self.peakLabelling = 0
 
-    self._contourList = GLVertexArray(numLists=1,
-                                      renderMode=GLRENDERMODE_REBUILD,
-                                      blendMode=True,
-                                      drawMode=GL.GL_TRIANGLES,
-                                      dimension=3,
-                                      GLContext=self)
+    self._contourList = {}            #GLVertexArray(numLists=1,
+                                      # renderMode=GLRENDERMODE_REBUILD,
+                                      # blendMode=True,
+                                      # drawMode=GL.GL_TRIANGLES,
+                                      # dimension=3,
+                                      # GLContext=self)
     self._selectionBox = GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
                                       blendMode=True,
@@ -2126,6 +2133,9 @@ void main()
 
         index += np2 + 5
         drawList.numVertices += np2 + 5
+  
+  def _build1dPeakLists(self, spectrumView, peakListView):
+    pass
 
   def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -2193,6 +2203,10 @@ void main()
 
       pls = peakListView.peakList
       spectrumFrequency = spectrum.spectrometerFrequencies
+
+      # trap IntegralLists that are stored under the peakListView
+      if isinstance(pls, IntegralList):
+        return
 
       for peak in pls.peaks:
 
@@ -2478,10 +2492,7 @@ void main()
       self._changePeakListLabel(peak)
 
     self._clearKeys()
-
-    # these are inside CREATE call above
-    # self._updateHighlightedPeaks()
-    # self._updateHighlightedPeakLabels()
+    self.update()
 
   def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
     # get the correct coordinates based on the axisCodes
@@ -2577,6 +2588,10 @@ void main()
 
       pls = peakListView.peakList
       spectrumFrequency = spectrum.spectrometerFrequencies
+
+      # trap IntegralLists that are stored under the peakListView
+      if isinstance(pls, IntegralList):
+        return
 
       for peak in pls.peaks:
 
@@ -2756,7 +2771,7 @@ void main()
     currentShader = self._shaderProgram1.makeCurrent()
 
     self.drawSelectionBox()
-    
+
     if self._crossHairVisible:
       self.drawCursors()
 
@@ -2848,7 +2863,15 @@ void main()
           peakListView.buildPeakListLabels = True
 
         # rebuild the contours
-        spectrumView._buildContours(None)
+
+        if spectrumView.pid not in self._contourList.keys():
+          self._contourList[spectrumView.pid] = GLVertexArray(numLists=1,
+                                                              renderMode=GLRENDERMODE_DRAW,
+                                                              blendMode=False,
+                                                              drawMode=GL.GL_LINE_STRIP,
+                                                              dimension=2,
+                                                              GLContext=self)
+        spectrumView._buildGLContours(self._contourList[spectrumView.pid])
 
         # # TODO:ED check how to efficiently trigger a rebuild of the peaklists
         # if spectrumView.spectrum.pid in self._GLPeakLists.keys():
@@ -2987,12 +3010,16 @@ void main()
 
         if spectrumView in self._spectrumSettings.keys():
             # set the scale matrix
+          if spectrumView.spectrum.dimensionCount > 1:
             self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
                                                        , 1, GL.GL_FALSE
                                                        , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
             # draw the spectrum - call the existing glCallList
             spectrumView._paintContoursNoClip()
+          else:
+            if spectrumView.pid in self._contourList.keys():
+              self._contourList[spectrumView.pid].drawIndexArray()
 
         # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
         #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW
@@ -3014,9 +3041,19 @@ void main()
 
         # get the bounding box of the spectra
         fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-        fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+        if spectrumView.spectrum.dimensionCount > 1:
+          fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+          GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
+        else:
+          fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
 
-        GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
+          colour = spectrumView.sliceColour
+          colR = int(colour.strip('# ')[0:2], 16)/255.0
+          colG = int(colour.strip('# ')[2:4], 16)/255.0
+          colB = int(colour.strip('# ')[4:6], 16)/255.0
+
+          GL.glColor4f(colR, colG, colB, 0.5)
+
         GL.glBegin(GL.GL_LINE_LOOP)
         GL.glVertex2d(fx0, fy0)
         GL.glVertex2d(fx0, fy1)
@@ -3790,16 +3827,23 @@ void main()
       self._spectrumSettings[spectrumView] = {}
 
       self._spectrumValues = spectrumView._getValues()
-      dx = self.sign(self.axisR - self.axisL)
-      dy = self.sign(self.axisT - self.axisB)
 
       # get the bounding box of the spectra
+      dx = self.sign(self.axisR - self.axisL)
       fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-      fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
       dxAF = fx0 - fx1
-      dyAF = fy0 - fy1
       xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
-      yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+
+      if spectrumView.spectrum.dimensionCount > 1:
+        dy = self.sign(self.axisT - self.axisB)
+        fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+        dyAF = fy0 - fy1
+        yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+      else:
+        dy = self.sign(self.axisT - self.axisB)
+        fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
+        dyAF = fy0 - fy1
+        yScale = dy * dyAF / 1.0
 
       # create modelview matrix for the spectrum to be drawn
       self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
@@ -4743,18 +4787,18 @@ void main()
 
       # if event.isFinish():
       for peak in peaks:
-        oldPosition = peak.position
+        # oldPosition = peak.position
         # orderedAxes = peak.orderedAxes
 
         # get the correct coordinates based on the axisCodes
-        p0 = [0.0] * 2            #len(self.axisOrder)
+        p0 = list(peak.position)          # [0.0] * 2            #len(self.axisOrder)
         axisCount = 0
-        for ps, psCode in enumerate(self.axisOrder):
+        for ps, psCode in enumerate(self.axisOrder[:2]):        # display x, y
           for pp, ppCode in enumerate(peak.axisCodes):
 
             # if self._preferences.matchAxisCode == 0:  # default - match atom type, first letter
             if ppCode[0] == psCode[0]:
-              p0[ps] = peak.position[pp]
+              p0[pp] += deltaPosition[ps]
               axisCount += 1
 
             # WRONG way round :)
@@ -4763,10 +4807,10 @@ void main()
             #   if ppCode == psCode:
             #     p0[ps] = peak.position[pp]
             #     axisCount += 1
-        if len(p0) > len(deltaPosition):
-          deltaPosition.append([0.0] * len(p0-deltaPosition))
+        # if len(p0) > len(deltaPosition):
+        #   deltaPosition.append([0.0] * len(p0-deltaPosition))
 
-        p0 = [p0[ii] + deltaPosition[ii] for ii in range(len(p0))]
+        # p0 = [p0[ii] + deltaPosition[ii] for ii in range(len(p0))]
         peak.position = p0
 
         # peak._finaliseAction('change')

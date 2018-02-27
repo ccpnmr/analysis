@@ -101,7 +101,13 @@ class GuiStrip(Frame):
     # TODO: ED comment out the block below to return to normal
     if self._useCcpnGL:
       self.plotWidget.hide()
-      from ccpn.util.CcpnOpenGL import CcpnGLWidget
+
+      # TODO:ED check whether this is sufficient to distinguish 1d and Nd
+      if 'intensity' in spectrumDisplay.axisCodes:
+        from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
+      else:
+        from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
+
       # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
       # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
 

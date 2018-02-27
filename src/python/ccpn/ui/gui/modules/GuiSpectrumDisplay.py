@@ -298,6 +298,49 @@ class GuiSpectrumDisplay(CcpnModule):
       self.current.strip = self.strips[0]
 
   def _handleNmrResidue(self, nmrResidue):
+    if not self.current.peak:
+      self._createNmrResidueMarks(nmrResidue)
+
+    # FIXME THIS IS ONLY A TEST FOR FUN
+    if self.current.strip:
+      if len(self.current.peaks) ==1:
+        peak = self.current.peaks[0]
+        xs = self.current.strip.orderedAxes
+        for atom in nmrResidue.nmrAtoms:
+          for x in xs:
+            if x.code == atom.name:
+              peak.assignDimension(x.code, atom)
+
+    # if self.current.cursorPosition
+
+  def _processDragEnterEvent(self, data):
+    event = data['event']
+    mousePosition = event.pos()
+    if self.current.strip:
+      position = list(self.current.strip._testCcpnOpenGLWidget.mapMouseToAxis(mousePosition))
+      orderedAxes = self.current.strip.orderedAxes
+      if self.current.peak:
+        peakPosition = self.current.peak.position
+        minPeakPos = min(peakPosition)
+        bw = self.current.strip._testCcpnOpenGLWidget.boxWidth
+        bh = self.current.strip._testCcpnOpenGLWidget.boxHeight
+        pW = 0
+        pH = 0
+        if len(peakPosition) > 0:
+          pW = peakPosition[0]
+        if len(peakPosition)>1:
+          pH = peakPosition[1]
+        boxW = (pW + bw, pW - bw)
+        boxH = (pH + bh, pH - bh)
+        if pW + bw>position[0]>pW - bw and  pH + bh >position[1]>pH - bh:
+         print()
+
+
+
+
+
+
+  def _createNmrResidueMarks(self, nmrResidue):
     """
     Mark a list of nmrAtoms in the spectrum displays
     """

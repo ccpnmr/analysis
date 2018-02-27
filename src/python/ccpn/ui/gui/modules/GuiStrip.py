@@ -238,6 +238,9 @@ class GuiStrip(Frame):
     self._droppedNotifier = GuiNotifier(self,
                                         [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                         self.spectrumDisplay._processDroppedItems)
+    self.moveEventNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
+                                       self.spectrumDisplay._processDragEnterEvent)
 
     # set peakLabelling to the default from preferences
     self.peakLabelling = self.application.preferences.general.annotationType

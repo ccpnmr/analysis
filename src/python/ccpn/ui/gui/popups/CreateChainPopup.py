@@ -110,13 +110,12 @@ class CreateChainPopup(CcpnDialog):
     """
     Creates a sequence using the values specified in the text widget.
     """
-    # try:
-    self.project.createChain(sequence=self.sequence, compoundName=self.moleculeName,
+    # check the sequence for consistency
+    seq = self.sequence
+
+    self.project.createChain(sequence=seq, compoundName=self.moleculeName,
                                  startNumber=self.sequenceStart, shortName=self.chainCode,
                                  molType=self.molTypePulldown.currentText())
-    #   self.accept()
-    # except Exception as es:
-    #   showWarning('Create Sequence', str(es))
 
   def _setSequenceStart(self, value:int):
     """

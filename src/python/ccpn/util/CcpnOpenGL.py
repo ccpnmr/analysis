@@ -494,6 +494,9 @@ class CcpnGLWidget(QOpenGLWidget):
     self.rescaleSpectra()
 
   def rescaleSpectra(self):
+    if self._parent.isDeleted:
+      return
+
     # rescale the matrices each spectrumView
     for spectrumView in self._parent.spectrumViews:
       self._spectrumSettings[spectrumView] = {}
@@ -2981,13 +2984,15 @@ void main()
 
     for spectrumView in self._parent.spectrumViews:
       if spectrumView.isVisible():
-        # set the scale matrix
-        self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
-                                                   , 1, GL.GL_FALSE
-                                                   , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
-        # draw the spectrum - call the existing glCallList
-        spectrumView._paintContoursNoClip()
+        if spectrumView in self._spectrumSettings.keys():
+            # set the scale matrix
+            self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
+                                                       , 1, GL.GL_FALSE
+                                                       , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
+
+            # draw the spectrum - call the existing glCallList
+            spectrumView._paintContoursNoClip()
 
         # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
         #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW
@@ -4731,15 +4736,39 @@ void main()
       if not peaks:
         return
 
-      deltaPosition = np.array((self.cursorCoordinate[0]-self._startCoordinate[0],
-                       self.cursorCoordinate[1]-self._startCoordinate[1]))
+      deltaPosition = [self.cursorCoordinate[0]-self._startCoordinate[0],
+                       self.cursorCoordinate[1]-self._startCoordinate[1]]
       for peak in peaks:
         peak.startPosition = peak.position
 
       # if event.isFinish():
       for peak in peaks:
         oldPosition = peak.position
-        peak.position = (oldPosition[0] + deltaPosition[0], oldPosition[1] + deltaPosition[1] )
+        # orderedAxes = peak.orderedAxes
+
+        # get the correct coordinates based on the axisCodes
+        p0 = [0.0] * 2            #len(self.axisOrder)
+        axisCount = 0
+        for ps, psCode in enumerate(self.axisOrder):
+          for pp, ppCode in enumerate(peak.axisCodes):
+
+            # if self._preferences.matchAxisCode == 0:  # default - match atom type, first letter
+            if ppCode[0] == psCode[0]:
+              p0[ps] = peak.position[pp]
+              axisCount += 1
+
+            # WRONG way round :)
+
+            # elif self._preferences.matchAxisCode == 1:  # match full code
+            #   if ppCode == psCode:
+            #     p0[ps] = peak.position[pp]
+            #     axisCount += 1
+        if len(p0) > len(deltaPosition):
+          deltaPosition.append([0.0] * len(p0-deltaPosition))
+
+        p0 = [p0[ii] + deltaPosition[ii] for ii in range(len(p0))]
+        peak.position = p0
+
         # peak._finaliseAction('change')
         # self.setMouseEnabled(True, True)
         self.application.ui.echoCommands(("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))

@@ -61,7 +61,6 @@ except ImportError:
             "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
-AXIS_MARGIN = 5
 AXIS_MARGINRIGHT = 40
 AXIS_MARGINBOTTOM = 40
 AXIS_LINE = 5
@@ -553,6 +552,8 @@ class CcpnGLWidget(QOpenGLWidget):
       li.renderMode = GLRENDERMODE_REBUILD
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
+    for pp in self._GLPeakListLabels.values():
+      pp.renderMode = GLRENDERMODE_RESCALE
 
     self.update()
 
@@ -717,6 +718,8 @@ class CcpnGLWidget(QOpenGLWidget):
     # ratios have changed so rescale the peaks symbols
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
+    for pp in self._GLPeakListLabels.values():
+      pp.renderMode = GLRENDERMODE_RESCALE
 
     self._rescaleOverlayText()
 
@@ -742,6 +745,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # ratios have changed so rescale the peaks symbols
     for pp in self._GLPeakLists.values():
+      pp.renderMode = GLRENDERMODE_RESCALE
+    for pp in self._GLPeakListLabels.values():
       pp.renderMode = GLRENDERMODE_RESCALE
 
     self._rescaleOverlayText()
@@ -1555,9 +1560,9 @@ void main()
 
   def _rescalePeakListLabels(self, spectrumView, peakListView):
     drawList = self._GLPeakListLabels[peakListView.pid]
-    strip = self._parent
+    # strip = self._parent
 
-    pls = peakListView.peakList
+    # pls = peakListView.peakList
     symbolType = self._preferences.peakSymbolType
     symbolWidth = self._preferences.peakSymbolSize / 2.0
     x = abs(self.pixelX)
@@ -2134,9 +2139,6 @@ void main()
         index += np2 + 5
         drawList.numVertices += np2 + 5
   
-  def _build1dPeakLists(self, spectrumView, peakListView):
-    pass
-
   def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
 
@@ -2406,7 +2408,7 @@ void main()
     spectrum = pls.spectrum
 
     for peakListView in pls.peakListViews:
-      if peakListView.pid in self._GLPeakListLabels.keys():
+      if peakListView.pid in self._GLPeakLists.keys():
         for spectrumView in spectrum.spectrumViews:
           if spectrumView in self._parent.spectrumViews:
 
@@ -2418,7 +2420,7 @@ void main()
     spectrum = pls.spectrum
 
     for peakListView in pls.peakListViews:
-      if peakListView.pid in self._GLPeakListLabels.keys():
+      if peakListView.pid in self._GLPeakLists.keys():
         for spectrumView in spectrum.spectrumViews:
           if spectrumView in self._parent.spectrumViews:
 
@@ -2570,7 +2572,7 @@ void main()
                                   object=peak))
 
   def _buildPeakListLabels(self, spectrumView, peakListView):
-    spectrum = spectrumView.spectrum
+    # spectrum = spectrumView.spectrum
 
     if peakListView.pid not in self._GLPeakListLabels.keys():
       self._GLPeakListLabels[peakListView.pid] = GLVertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
@@ -2584,10 +2586,10 @@ void main()
       drawList.clearArrays()
       drawList.stringList = []
 
-      symbolWidth = self._preferences.peakSymbolSize / 2.0
+      # symbolWidth = self._preferences.peakSymbolSize / 2.0
 
       pls = peakListView.peakList
-      spectrumFrequency = spectrum.spectrometerFrequencies
+      # spectrumFrequency = spectrum.spectrometerFrequencies
 
       # trap IntegralLists that are stored under the peakListView
       if isinstance(pls, IntegralList):
@@ -2681,6 +2683,7 @@ void main()
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
+      self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
 
   def _drawVertexColor(self, drawList):
     # new bit to use a vertex array to draw the peaks, very fast and easy
@@ -3268,11 +3271,6 @@ void main()
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-
-      # currently the lines are just very long
-      # self.rescaleMarksRulers()
-
-    pass
 
   def drawMarksRulers(self):
     if self._parent.isDeleted:
@@ -4052,7 +4050,7 @@ void main()
     axisLine = 5
     h = self.height()
     w = self.width()
-    GL.glViewport(w-AXIS_MARGIN, AXIS_MARGINRIGHT, AXIS_MARGINBOTTOM, h-AXIS_MARGIN)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(w-AXIS_LINE, AXIS_MARGINRIGHT, AXIS_MARGINBOTTOM, h-AXIS_LINE)   # leave a 35 width margin for the axes - bottom/right
     GLU.gluOrtho2D(*axisLimits)      # nearly!
 
     GL.glMatrixMode(GL.GL_MODELVIEW)
@@ -4491,8 +4489,8 @@ void main()
 
     # now select (take first one within range)
     for spectrumView in self._parent.spectrumViews:
-      if spectrumView.spectrum.dimensionCount == 1:
-        continue
+
+      # Nd peak selection - 1d is in the other class
 
       # TODO:ED could change this to actually use the pids in the drawList
       for peakListView in spectrumView.peakListViews:
@@ -5539,7 +5537,7 @@ class GLString(GLVertexArray):
     # self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
     # self.offsets = np.zeros((len(text) * 4, 2), dtype=np.float32)
     self.indexOffset = 0
-    pen = [0, 0]              # offset the string from (0,0) and use (x,y) in shader
+    penX = penY = 0              # offset the string from (0,0) and use (x,y) in shader
     prev = None
 
     # cs, sn = math.cos(angle), math.sin(angle)
@@ -5552,23 +5550,24 @@ class GLString(GLVertexArray):
       if glyph or c == 10 or c == 9:    # newline and tab
 
         if (c == 10):                                 # newline
-          pen[0] = 0
-          pen[1] = 0      #pen[1] + font.height
-          for vt in self.vertices:
-            vt[1] = vt[1] + font.height
-
+          penX = 0
+          penY = 0      #penY + font.height
+          # for vt in self.vertices:
+          #   vt[1] = vt[1] + font.height
+          self.vertices[:, 1] += font.height
+          
         elif (c == 9):                                # tab
-          pen[0] = pen[0] + 4 * font.width
+          penX = penX + 4 * font.width
 
         elif (c >= 32):
 
           kerning = font.get_kerning(charCode, prev)
 
           # TODO:ED check that these are correct
-          x0 = pen[0] + glyph[GlyphPX0] + kerning     # pen[0] + glyph.offset[0] + kerning
-          y0 = pen[1] + glyph[GlyphPY0]               # pen[1] + glyph.offset[1]
-          x1 = pen[0] + glyph[GlyphPX1] + kerning     # x0 + glyph.size[0]
-          y1 = pen[1] + glyph[GlyphPY1]               # y0 - glyph.size[1]
+          x0 = penX + glyph[GlyphPX0] + kerning     # penX + glyph.offset[0] + kerning
+          y0 = penY + glyph[GlyphPY0]               # penY + glyph.offset[1]
+          x1 = penX + glyph[GlyphPX1] + kerning     # x0 + glyph.size[0]
+          y1 = penY + glyph[GlyphPY1]               # y0 - glyph.size[1]
           u0 = glyph[GlyphTX0]          # glyph.texcoords[0]
           v0 = glyph[GlyphTY0]          # glyph.texcoords[1]
           u1 = glyph[GlyphTX1]          # glyph.texcoords[2]
@@ -5595,8 +5594,8 @@ class GLString(GLVertexArray):
           # self.attribs[i * 4:i * 4 + 4] = attribs
           # self.offsets[i * 4:i * 4 + 4] = offsets
 
-          pen[0] = pen[0] + glyph[GlyphOrigW] + kerning
-          # pen[1] = pen[1] + glyph[GlyphHeight]
+          penX = penX + glyph[GlyphOrigW] + kerning
+          # penY = penY + glyph[GlyphHeight]
           prev = charCode
 
       self.numVertices = len(self.vertices)
@@ -5605,7 +5604,7 @@ class GLString(GLVertexArray):
       self.lineWidths = [ox, oy]
 
     # total width of text - probably don't need
-    # width = pen[0] - glyph.advance[0] / 64.0 + glyph.size[0]
+    # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
 
   def setColour(self, col):
     self.colors = np.array(col*self.numVertices, dtype=np.float32)

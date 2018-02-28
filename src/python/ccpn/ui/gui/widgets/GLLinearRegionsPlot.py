@@ -36,7 +36,7 @@ from pyqtgraph.graphicsItems.LinearRegionItem import LinearRegionItem
 from ccpn.ui.gui.widgets.Icon import Icon
 
 
-class LinearRegionsPlot(LinearRegionItem):
+class GLLinearRegionsPlot(LinearRegionItem):
   """
 
   Used for marking a horizontal or vertical region in plots.
@@ -121,11 +121,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
                                                   brush=self.brush, colour = self.colour, movable=self.movable)
 
-
-
-
-
-
+    #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # if self.plotWidget is None:

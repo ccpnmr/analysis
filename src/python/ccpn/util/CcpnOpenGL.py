@@ -101,6 +101,16 @@ LENTEXCOORDS = 2
 LENATTRIBS = 4
 LENOFFSETS = 4
 
+REGION_COLOURS = {
+  'green': (0, 111, 20, 50),
+  'yellow': (0, 111, 20, 50),
+  'blue': None,  # Default,
+  'transparent': (0, 111, 20, 50),
+  'grey': (255, 255, 255, 50),
+  'red': (255, 0, 0, 50),
+  'purple': (178, 102, 255, 50)
+}
+
 
 def singleton(cls):
   """ Use class as singleton.
@@ -1147,6 +1157,7 @@ void main()
     self._GLPeakLists = {}
     self._GLPeakListLabels = {}
     self._marksAxisCodes = []
+    self._regions = []
 
     from ccpn.framework.PathsAndUrls import fontsPath
     self.firstFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'myfont.fnt'))
@@ -1181,6 +1192,12 @@ void main()
                                     renderMode=GLRENDERMODE_REBUILD,
                                     blendMode=False,
                                     drawMode=GL.GL_LINES,
+                                    dimension=2,
+                                    GLContext=self)
+    self._regionList = GLVertexArray(numLists=1,
+                                    renderMode=GLRENDERMODE_REBUILD,
+                                    blendMode=True,
+                                    drawMode=GL.GL_QUADS,
                                     dimension=2,
                                     GLContext=self)
 
@@ -3241,6 +3258,75 @@ void main()
         for lb in self._axisYLabelling:
           lb.drawTextArray()
 
+  def addRegion(self, values=None, axisCode = 'intensity', brush = None, colour = None, movable=True, bounds=None, **kw):
+    if colour in REGION_COLOURS.keys():
+      brush = REGION_COLOURS[colour]
+
+    self._regions.append( {'values': values,
+                           'axisCode': axisCode,
+                           'brush': brush,
+                           'colour': colour,
+                           'movable': movable,
+                           'bounds': bounds} )
+
+    self._regionList.renderMode = GLRENDERMODE_REBUILD
+    return len(self.regions)
+
+  def buildRegions(self):
+    drawList = self._regionList
+
+    if drawList.renderMode == GLRENDERMODE_REBUILD:
+      drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+      drawList.refreshMode = GLREFRESHMODE_REBUILD
+      drawList.clearArrays()
+
+      # build the marks VBO
+      index = 0
+      for region in self._regions:
+
+        if not region['visible']:
+          continue
+
+        for ps, psCode in enumerate(self.axisOrder[0:2]):
+          if self._preferences.matchAxisCode == 0:  # default - match atom type
+
+            if region['axisCode'][0] == psCode[0]:
+              axisIndex = ps
+          elif self._preferences.matchAxisCode == 1:  # match full code
+            if region['axisCode'] == psCode:
+              axisIndex = ps
+
+        # TODO:ED check axis units - assume 'ppm' for the minute
+
+        if axisIndex == 0:
+          # vertical ruler
+          pos0 = x0 = region['values'][0]
+          pos1 = x1 = region['values'][1]
+          y0 = self.axisT
+          y1 = self.axisB
+        else:
+          # horizontal ruler
+          pos0 = y0 = region['values'][0]
+          pos1 = y1 = region['values'][1]
+          x0 = self.axisL
+          x1 = self.axisR
+
+        colour = region['colour']
+        colR = int(colour.strip('# ')[0:2], 16) / 255.0
+        colG = int(colour.strip('# ')[2:4], 16) / 255.0
+        colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+        drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+        drawList.vertices = np.append(drawList.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+        drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+        drawList.attribs = np.append(drawList.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+
+        index += 4
+        drawList.numVertices += 4
+
+    elif drawList.renderMode == GLRENDERMODE_RESCALE:
+      drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+
   def buildMarksRulers(self):
     drawList = self._marksList
 
@@ -3322,6 +3408,13 @@ void main()
 
     self.buildMarksRulers()
     self._marksList.drawIndexArray()
+
+  def drawRegions(self):
+    if self._parent.isDeleted:
+      return
+
+    self.buildRegions()
+    self._regionList.drawIndexArray()
 
   def drawMarksAxisCodes(self):
     if self._parent.isDeleted:
@@ -5570,6 +5663,16 @@ class GLVertexArray():
   #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self._indexBuffer)
   #   GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, len(self.indices), self.indices, GL.GL_STATIC_DRAW)
   #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
+
+
+class GLRegions(GLVertexArray):
+  def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0),
+               x=0.0, y=0.0,
+               ox=0.0, oy=0.0,
+               angle=0.0, width=None, height=None, GLContext=None):
+    super(GLRegions, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=True
+                                   , GLContext=GLContext, drawMode=GL.GL_TRIANGLES
+                                   , dimension=2)
 
 
 class GLString(GLVertexArray):

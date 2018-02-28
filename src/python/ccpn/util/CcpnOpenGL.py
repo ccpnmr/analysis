@@ -61,10 +61,6 @@ except ImportError:
             "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
-AXIS_MARGINRIGHT = 40
-AXIS_MARGINBOTTOM = 40
-AXIS_LINE = 5
-
 GLRENDERMODE_IGNORE = 0
 GLRENDERMODE_DRAW = 1
 GLRENDERMODE_RESCALE = 2
@@ -245,6 +241,13 @@ class GLNotifier(QtWidgets.QWidget):
 
 class CcpnGLWidget(QOpenGLWidget):
 
+  AXIS_MARGINRIGHT = 40
+  AXIS_MARGINBOTTOM = 25
+  AXIS_LINE = 5
+  YAXISUSEEFORMAT = False
+  INVERTXAXIS = True
+  INVERTYAXIS = True
+
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(CcpnGLWidget, self).__init__(parent)
 
@@ -406,17 +409,17 @@ class CcpnGLWidget(QOpenGLWidget):
       self._currentBottomAxisView = BOTTOMAXIS
       self._currentBottomAxisBarView = BOTTOMAXISBAR
 
-      currentShader.setViewportMatrix(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, 0, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
-      self.pixelX = (self.axisR - self.axisL) / (w - AXIS_MARGINRIGHT)
-      self.pixelY = (self.axisT - self.axisB) / (h - AXIS_MARGINBOTTOM)
+      currentShader.setViewportMatrix(self._uVMatrix, 0, w-self.AXIS_MARGINRIGHT, 0, h-self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+      self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
+      self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
     elif self._drawRightAxis and not self._drawBottomAxis:
 
       self._currentView = MAINVIEWFULLHEIGHT
       self._currentRightAxisView = FULLRIGHTAXIS
       self._currentRightAxisBarView = FULLRIGHTAXISBAR
 
-      currentShader.setViewportMatrix(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
-      self.pixelX = (self.axisR - self.axisL) / (w - AXIS_MARGINRIGHT)
+      currentShader.setViewportMatrix(self._uVMatrix, 0, w-self.AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
+      self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
       self.pixelY = (self.axisT - self.axisB) / h
     elif not self._drawRightAxis and self._drawBottomAxis:
 
@@ -424,9 +427,9 @@ class CcpnGLWidget(QOpenGLWidget):
       self._currentBottomAxisView = FULLBOTTOMAXIS
       self._currentBottomAxisBarView = FULLBOTTOMAXISBAR
 
-      currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - AXIS_MARGINBOTTOM, -1.0, 1.0)
+      currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
       self.pixelX = (self.axisR - self.axisL) / w
-      self.pixelY = (self.axisT - self.axisB) / (h - AXIS_MARGINBOTTOM)
+      self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
     else:
 
       self._currentView = FULLVIEW
@@ -482,7 +485,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
 
     self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
-    self._view[0:4] = [w-AXIS_MARGINRIGHT, h-AXIS_MARGINBOTTOM, 1.0, 1.0]
+    self._view[0:4] = [w-self.AXIS_MARGINRIGHT, h-self.AXIS_MARGINBOTTOM, 1.0, 1.0]
 
     # self._axisScale[0:4] = [1.0/(self.axisR-self.axisL), 1.0/(self.axisT-self.axisB), 1.0, 1.0]
     currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
@@ -506,18 +509,18 @@ class CcpnGLWidget(QOpenGLWidget):
       # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
 
       # get the bounding box of the spectra
-      dx = self.sign(self.axisR - self.axisL)
+      dx = -1.0 if self.INVERTXAXIS else -1.0     # self.sign(self.axisR - self.axisL)
       fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
       dxAF = fx0 - fx1
       xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
 
       if spectrumView.spectrum.dimensionCount > 1:
-        dy = self.sign(self.axisT - self.axisB)
+        dy = -1.0 if self.INVERTYAXIS else -1.0       # self.sign(self.axisT - self.axisB)
         fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
         dyAF = fy0 - fy1
         yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
       else:
-        dy = self.sign(self.axisT - self.axisB)
+        dy = -1.0 if self.INVERTYAXIS else -1.0       # dy = self.sign(self.axisT - self.axisB)
         fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
         dyAF = fy0 - fy1
         yScale = dy * dyAF / 1.0
@@ -552,8 +555,8 @@ class CcpnGLWidget(QOpenGLWidget):
       li.renderMode = GLRENDERMODE_REBUILD
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
-    for pp in self._GLPeakListLabels.values():
-      pp.renderMode = GLRENDERMODE_RESCALE
+    # for pp in self._GLPeakListLabels.values():
+    #   pp.renderMode = GLRENDERMODE_RESCALE
 
     self.update()
 
@@ -600,9 +603,13 @@ class CcpnGLWidget(QOpenGLWidget):
     w = self.w
 
     # find the correct viewport
-    mw = [0, 35, w-36, h-1]
-    ba = [0, 0, w - 36, 34]
-    ra = [w-36, 35, w, h]
+    # mw = [0, 35, w-36, h-1]
+    # ba = [0, 0, w - 36, 34]
+    # ra = [w-36, 35, w, h]
+
+    mw = [0, self.AXIS_MARGINBOTTOM, w-self.AXIS_MARGINRIGHT, h-1]
+    ba = [0, 0, w-self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM-1]
+    ra = [w-self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, w, h]
 
     mx = event.pos().x()
     my = self.height() - event.pos().y()
@@ -718,8 +725,8 @@ class CcpnGLWidget(QOpenGLWidget):
     # ratios have changed so rescale the peaks symbols
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
-    for pp in self._GLPeakListLabels.values():
-      pp.renderMode = GLRENDERMODE_RESCALE
+    # for pp in self._GLPeakListLabels.values():
+    #   pp.renderMode = GLRENDERMODE_RESCALE
 
     self._rescaleOverlayText()
 
@@ -746,8 +753,8 @@ class CcpnGLWidget(QOpenGLWidget):
     # ratios have changed so rescale the peaks symbols
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
-    for pp in self._GLPeakListLabels.values():
-      pp.renderMode = GLRENDERMODE_RESCALE
+    # for pp in self._GLPeakListLabels.values():
+    #   pp.renderMode = GLRENDERMODE_RESCALE
 
     self._rescaleOverlayText()
 
@@ -820,12 +827,20 @@ class CcpnGLWidget(QOpenGLWidget):
     self._axisOrder = strip.axisOrder
 
     axis = self._orderedAxes[0]
-    self.axisL = axis.region[1]
-    self.axisR = axis.region[0]
+    if self.INVERTXAXIS:
+      self.axisL = max(axis.region[0], axis.region[1])
+      self.axisR = min(axis.region[0], axis.region[1])
+    else:
+      self.axisL = min(axis.region[0], axis.region[1])
+      self.axisR = max(axis.region[0], axis.region[1])
 
     axis = self._orderedAxes[1]
-    self.axisT = axis.region[0]
-    self.axisB = axis.region[1]
+    if self.INVERTYAXIS:
+      self.axisB = max(axis.region[0], axis.region[1])
+      self.axisT = min(axis.region[0], axis.region[1])
+    else:
+      self.axisB = min(axis.region[0], axis.region[1])
+      self.axisT = max(axis.region[0], axis.region[1])
     self.update()
 
   def storeZoom(self):
@@ -881,7 +896,15 @@ class CcpnGLWidget(QOpenGLWidget):
         axisLimits[2] = max(axisLimits[2], self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS])
         axisLimits[3] = min(axisLimits[3], self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS])
 
-    self.axisL, self.axisR, self.axisB, self.axisT = axisLimits
+    if self.INVERTXAXIS:
+      self.axisL, self.axisR = axisLimits[0:2]
+    else:
+      self.axisR, self.axisL = axisLimits[0:2]
+
+    if self.INVERTYAXIS:
+      self.axisB, self.axisT = axisLimits[2:4]
+    else:
+      self.axisT, self.axisB = axisLimits[2:4]
 
   def initializeGL(self):
 
@@ -1246,42 +1269,42 @@ void main()
     # TODO:ED error here when calulating the top offset, FOUND
 
     # define the main viewports
-    self.viewports.addViewport(MAINVIEW, self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
-                                                , (-AXIS_MARGINRIGHT, 'w'), (-AXIS_MARGINBOTTOM, 'h'))
+    self.viewports.addViewport(MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
+                                                , (-self.AXIS_MARGINRIGHT, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport(MAINVIEWFULLWIDTH, self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
-                                                        , (0, 'w'), (-AXIS_MARGINBOTTOM, 'h'))
+    self.viewports.addViewport(MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
+                                                        , (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
     self.viewports.addViewport(MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a')
-                                                , (-AXIS_MARGINRIGHT, 'w'), (0, 'h'))
+                                                , (-self.AXIS_MARGINRIGHT, 'w'), (0, 'h'))
 
     # define the viewports for the right axis bar
-    self.viewports.addViewport(RIGHTAXIS, self, (-(AXIS_MARGINRIGHT+AXIS_LINE), 'w')
-                                                  , (AXIS_MARGINBOTTOM, 'a')
-                                                  , (AXIS_LINE, 'a'), (-AXIS_MARGINBOTTOM, 'h'))
+    self.viewports.addViewport(RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w')
+                                                  , (self.AXIS_MARGINBOTTOM, 'a')
+                                                  , (self.AXIS_LINE, 'a'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport(RIGHTAXISBAR, self, (-AXIS_MARGINRIGHT, 'w'), (AXIS_MARGINBOTTOM, 'a')
-                                                    , (0, 'w'), (-AXIS_MARGINBOTTOM, 'h'))
+    self.viewports.addViewport(RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a')
+                                                    , (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport(FULLRIGHTAXIS, self, (-(AXIS_MARGINRIGHT+AXIS_LINE), 'w')
+    self.viewports.addViewport(FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w')
                                                   , (0, 'a')
-                                                  , (AXIS_LINE, 'a'), (0, 'h'))
+                                                  , (self.AXIS_LINE, 'a'), (0, 'h'))
 
-    self.viewports.addViewport(FULLRIGHTAXISBAR, self, (-AXIS_MARGINRIGHT, 'w'), (0, 'a')
+    self.viewports.addViewport(FULLRIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a')
                                                     , (0, 'w'), (0, 'h'))
 
     # define the viewports for the bottom axis bar
-    self.viewports.addViewport(BOTTOMAXIS, self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
-                                                  , (-AXIS_MARGINRIGHT, 'w'), (AXIS_LINE, 'a'))
+    self.viewports.addViewport(BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
+                                                  , (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_LINE, 'a'))
 
     self.viewports.addViewport(BOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
-                                                    , (-AXIS_MARGINRIGHT, 'w'), (AXIS_MARGINBOTTOM, 'a'))
+                                                    , (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
-    self.viewports.addViewport(FULLBOTTOMAXIS, self, (0, 'a'), (AXIS_MARGINBOTTOM, 'a')
-                                                  , (0, 'w'), (AXIS_LINE, 'a'))
+    self.viewports.addViewport(FULLBOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
+                                                  , (0, 'w'), (self.AXIS_LINE, 'a'))
 
     self.viewports.addViewport(FULLBOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
-                                                    , (0, 'w'), (AXIS_MARGINBOTTOM, 'a'))
+                                                    , (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
     # define the full viewport
     self.viewports.addViewport(FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
@@ -1324,7 +1347,7 @@ void main()
     if isinstance(pnt, QPoint):
       mx = pnt.x()
       if self._drawBottomAxis:
-        my = self.height() - pnt.y() - AXIS_MARGINBOTTOM
+        my = self.height() - pnt.y() - self.AXIS_MARGINBOTTOM
       else:
         my = self.height() - pnt.y()
       vect = self.vInv.dot([mx, my, 0.0, 1.0])
@@ -1339,7 +1362,7 @@ void main()
     # TODO:ED take into account whether axis is visible
     mx = ev.pos().x()
     if self._drawBottomAxis:
-      my = self.height() - ev.pos().y() - AXIS_MARGINBOTTOM
+      my = self.height() - ev.pos().y() - self.AXIS_MARGINBOTTOM
     else:
       my = self.height() - ev.pos().y()
     self._mouseStart = (mx, my)
@@ -1351,6 +1374,8 @@ void main()
     self._endCoordinate = self._startCoordinate
     # self._drawSelectionBox = True
 
+    self.current.strip = self._parent
+
   def mouseReleaseEvent(self, ev):
     self._drawSelectionBox = False
     self._lastButtonReleased = ev.button()
@@ -1358,7 +1383,7 @@ void main()
 
     mx = ev.pos().x()
     if self._drawBottomAxis:
-      my = self.height() - ev.pos().y() - AXIS_MARGINBOTTOM
+      my = self.height() - ev.pos().y() - self.AXIS_MARGINBOTTOM
     else:
       my = self.height() - ev.pos().y()
     self._mouseEnd = (mx, my)
@@ -1446,7 +1471,7 @@ void main()
     # calculate mouse coordinate within the mainView
     self._mouseX = event.pos().x()
     if self._drawBottomAxis:
-      self._mouseY = self.height() - event.pos().y() - AXIS_MARGINBOTTOM
+      self._mouseY = self.height() - event.pos().y() - self.AXIS_MARGINBOTTOM
     else:
       self._mouseY = self.height() - event.pos().y()
 
@@ -2795,7 +2820,7 @@ void main()
 
     # use the current viewport matrix to display the last bit of the axes
     currentShader = self._shaderProgram1.makeCurrent()
-    currentShader.setProjectionAxes(self._uVMatrix, 0, w-AXIS_MARGINRIGHT, -1, h-AXIS_MARGINBOTTOM, -1.0, 1.0)
+    currentShader.setProjectionAxes(self._uVMatrix, 0, w-self.AXIS_MARGINRIGHT, -1, h-self.AXIS_MARGINBOTTOM, -1.0, 1.0)
 
     self.viewports.setViewport(self._currentView)
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
@@ -2819,11 +2844,11 @@ void main()
 
     if self._drawBottomAxis:
       GL.glVertex2d(0,0)
-      GL.glVertex2d(w-AXIS_MARGINRIGHT, 0)
+      GL.glVertex2d(w-self.AXIS_MARGINRIGHT, 0)
 
     if self._drawRightAxis:
-      GL.glVertex2d(w-AXIS_MARGINRIGHT, 0)
-      GL.glVertex2d(w-AXIS_MARGINRIGHT, h-AXIS_MARGINBOTTOM)
+      GL.glVertex2d(w-self.AXIS_MARGINRIGHT, 0)
+      GL.glVertex2d(w-self.AXIS_MARGINRIGHT, h-self.AXIS_MARGINBOTTOM)
 
     # GL.glVertex2d(-.1,0)
     # GL.glVertex2d(.1, 0)
@@ -3111,6 +3136,21 @@ void main()
         # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
         self.gridList[2].drawIndexArray()
 
+  def _eformat(self, f, prec):
+    s = "%.*e" % (prec, f)
+    mantissa, exp = s.split('e')
+    mantissa = mantissa.rstrip('0')
+    if mantissa.endswith('.'):
+      mantissa += '0'
+    exp = exp.lstrip('0+')
+    if exp:
+      if exp.startswith('-'):
+        return "%se%d" % (mantissa, int(exp))
+      else:
+        return "%se+%d" % (mantissa, int(exp))
+    else:
+      return "%s" % mantissa
+
   def buildAxisLabels(self, refresh=False):
     # build axes labelling
     if refresh or self.labelsChanged:
@@ -3130,10 +3170,10 @@ void main()
                                   , font=self.firstFont
                                   # , angle=np.pi/2.0
                                   # , x=axisX-(10.0*self.pixelX) #*len(str(axisX)))
-                                  # , y=AXIS_MARGINBOTTOM-AXIS_LINE
+                                  # , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE
 
                                   , x=axisX-(0.4*self.firstFont.width*self.pixelX*len(axisXText)) #*len(str(axisX)))
-                                  , y=AXIS_MARGINBOTTOM-AXIS_LINE-self.firstFont.height
+                                  , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE-self.firstFont.height
 
                                   , color=labelColour, GLContext=self
                                   , object=None))
@@ -3142,7 +3182,7 @@ void main()
       self._axisXLabelling.append(GLString(text=self.axisCodes[0]
                                 , font=self.firstFont
                                 , x=self.axisL+(5*self.pixelX)
-                                , y=AXIS_LINE
+                                , y=self.AXIS_LINE
                                 , color=labelColour, GLContext=self
                                 , object=None))
 
@@ -3150,11 +3190,15 @@ void main()
 
       for xx, ayLabel in enumerate(self.axisLabelling['1']):
         axisY = ayLabel[2]
-        axisYText = str(int(axisY)) if ayLabel[3] >= 1 else str(axisY)
+
+        if self.YAXISUSEEFORMAT:
+          axisYText = self._eformat(axisY, 3)
+        else:
+          axisYText = str(int(axisY)) if ayLabel[3] >= 1 else str(axisY)
 
         self._axisYLabelling.append(GLString(text=axisYText
                                   , font=self.firstFont
-                                  , x=AXIS_LINE
+                                  , x=self.AXIS_LINE
                                   , y=axisY-(10.0*self.pixelY)
                                   , color=labelColour, GLContext=self
                                   , object=None))
@@ -3162,7 +3206,7 @@ void main()
       # append the axisCode to the end
       self._axisYLabelling.append(GLString(text=self.axisCodes[1]
                                 , font=self.firstFont
-                                , x=AXIS_LINE
+                                , x=self.AXIS_LINE
                                 , y=self.axisT-(1.5*self.firstFont.height*self.pixelY)
                                 , color=labelColour, GLContext=self
                                 , object=None))
@@ -3179,7 +3223,7 @@ void main()
         self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
         self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
         self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
-                                                 AXIS_MARGINBOTTOM, -1.0, 1.0)
+                                                 self.AXIS_MARGINBOTTOM, -1.0, 1.0)
         self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         for lb in self._axisXLabelling:
@@ -3190,7 +3234,7 @@ void main()
         self.viewports.setViewport(self._currentRightAxisBarView)
         self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
         self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-        self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, AXIS_MARGINRIGHT
+        self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT
                                                  , self.axisB, self.axisT, -1.0, 1.0)
         self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
@@ -4050,7 +4094,7 @@ void main()
     axisLine = 5
     h = self.height()
     w = self.width()
-    GL.glViewport(w-AXIS_LINE, AXIS_MARGINRIGHT, AXIS_MARGINBOTTOM, h-AXIS_LINE)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(w-self.AXIS_LINE, self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, h-self.AXIS_LINE)   # leave a 35 width margin for the axes - bottom/right
     GLU.gluOrtho2D(*axisLimits)      # nearly!
 
     GL.glMatrixMode(GL.GL_MODELVIEW)
@@ -4087,7 +4131,7 @@ void main()
     axisLine = 5
     h = self.height()
     w = self.width()
-    GL.glViewport(0, 0, w-AXIS_MARGINRIGHT, AXIS_MARGINBOTTOM)   # leave a 35 width margin for the axes - bottom/right
+    GL.glViewport(0, 0, w-self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM)   # leave a 35 width margin for the axes - bottom/right
     GLU.gluOrtho2D(*axisLimits)
 
     GL.glMatrixMode(GL.GL_MODELVIEW)
@@ -4158,8 +4202,8 @@ void main()
     if gridGLList.renderMode == GLRENDERMODE_REBUILD:
       dim = [self.width(), self.height()]
 
-      ul = np.array([self.axisL, self.axisT])
-      br = np.array([self.axisR, self.axisB])
+      ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
+      br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])
 
       gridGLList.renderMode = GLRENDERMODE_DRAW
       labelsChanged = True
@@ -4167,10 +4211,15 @@ void main()
       gridGLList.clearArrays()
 
       index = 0
-      if ul[0] > br[0]:
-        x = ul[0]
-        ul[0] = br[0]
-        br[0] = x
+      # if ul[0] > br[0]:
+      #   x = ul[0]
+      #   ul[0] = br[0]
+      #   br[0] = x
+      # if ul[1] > br[1]:
+      #   y = ul[1]
+      #   ul[1] = br[1]
+      #   br[1] = y
+
       for i in scaleGrid:       #  [2,1,0]:   ## Draw three different scales of grid
         dist = br-ul
         nlTarget = 10.**i
@@ -4299,14 +4348,22 @@ void main()
     stripAxisIndex = self.axisCodes.index(axisCode)
 
     if stripAxisIndex == 0:
-      self.axisL = range[1]
-      self.axisR = range[0]
+      if self.INVERTXAXIS:
+        self.axisL = max(range)
+        self.axisR = min(range)
+      else:
+        self.axisL = min(range)
+        self.axisR = max(range)
 
       self._rescaleXAxis(update=update)
 
     elif stripAxisIndex == 1:
-      self.axisB = range[1]
-      self.axisT = range[0]
+      if self.INVERTXAXIS:
+        self.axisB = max(range)
+        self.axisT = min(range)
+      else:
+        self.axisB = min(range)
+        self.axisT = max(range)
 
       self._rescaleYAxis(update=update)
 

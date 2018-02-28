@@ -82,11 +82,13 @@ class PreferencesPopup(CcpnDialog):
     self.buttonBox = Button(self, text='Close', callback=self._accept, grid=(1,2))
 
   def _accept(self):
+    self.accept()
+
+    # prompt the GLwidgets to update
     from ccpn.util.CcpnOpenGL import GLNotifier
 
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS])
-    self.accept()
 
   def _setTabs(self):
 

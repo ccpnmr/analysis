@@ -56,6 +56,11 @@ class GuiNdWidget(CcpnGLWidget):
 
 
 class Gui1dWidget(CcpnGLWidget):
+
+  AXIS_MARGINRIGHT = 70
+  YAXISUSEEFORMAT = True
+  INVERTYAXIS = False
+
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(Gui1dWidget, self).__init__(parent=parent,
                                       mainWindow=mainWindow,
@@ -466,12 +471,15 @@ class Gui1dWidget(CcpnGLWidget):
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-    if self._parent.peakLabelling == 0:
-      text = _getScreenPeakAnnotation(peak, useShortCode=True)
-    elif self._parent.peakLabelling == 1:
-      text = _getScreenPeakAnnotation(peak, useShortCode=False)
-    else:
-      text = _getPeakAnnotation(peak)  # original 'pid'
+    # if self._parent.peakLabelling == 0:
+    #   text = _getScreenPeakAnnotation(peak, useShortCode=True)
+    # elif self._parent.peakLabelling == 1:
+    #   text = _getScreenPeakAnnotation(peak, useShortCode=False)
+    # else:
+    #   text = _getPeakAnnotation(peak)  # original 'pid'
+
+    # TODO:ED check labelling
+    text = peak.id
 
     # TODO:ED check axisCodes and ordering
     stringList.append(GLString(text=text,

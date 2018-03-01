@@ -3,8 +3,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 def askPassword(title, prompt, parent=None):
     
-  dialog = QtGui.QInputDialog(parent)
-  dialog.setInputMode(QtGui.QInputDialog.TextInput)
+  dialog = QtWidgets.QInputDialog(parent)
+  dialog.setInputMode(QtWidgets.QInputDialog.TextInput)
   dialog.setTextEchoMode( QtWidgets.QLineEdit.Password )
   dialog.setLabelText(prompt)
   dialog.connect(dialog, QtCore.SIGNAL('rejected()'), lambda:dialog.setTextValue(''))  
@@ -15,7 +15,7 @@ def askPassword(title, prompt, parent=None):
 
 def askString(title, prompt, initialValue='', parent=None):
 
-  value, isOk =  QtGui.QInputDialog.getText(parent, title, prompt,
+  value, isOk =  QtWidgets.QInputDialog.getText(parent, title, prompt,
                                             text=initialValue)
   
   if isOk:
@@ -24,7 +24,7 @@ def askString(title, prompt, initialValue='', parent=None):
 def askInteger(title, prompt, initialValue=0, minValue=-2147483647,
                maxValue=2147483647, parent=None):
 
-  value, isOk = QtGui.QInputDialog.getInt(parent, title, prompt, initialValue,
+  value, isOk = QtWidgets.QInputDialog.getInt(parent, title, prompt, initialValue,
                                           minValue, maxValue)
   if isOk:
     return value
@@ -32,7 +32,7 @@ def askInteger(title, prompt, initialValue=0, minValue=-2147483647,
 def askFloat(title, prompt, initialValue=0.0, minValue=-2147483647,
              maxValue=2147483647, decimals=6, parent=None):
 
-  value, isOk = QtGui.QInputDialog.getDouble(parent, title, prompt, initialValue,
+  value, isOk = QtWidgets.QInputDialog.getDouble(parent, title, prompt, initialValue,
                                              minValue, maxValue, decimals)
                                              
   if isOk:

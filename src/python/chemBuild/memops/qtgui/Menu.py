@@ -220,7 +220,7 @@ class Menu(QtWidgets.QMenu):
     
     if event.timerId() is self._toolTipTimerId:
       tipText = self._toolTipAction.toolTip()
-      self._toolTip = QtGui.QToolTip
+      self._toolTip = QtWidgets.QToolTip
       self._toolTip.showText(QtGui.QCursor.pos(), tipText)
     
       self.killTimer(event.timerId())

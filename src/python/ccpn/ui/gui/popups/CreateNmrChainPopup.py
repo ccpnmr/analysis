@@ -40,6 +40,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, ChainPulldown, SELECT
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Chain import Chain
+from ccpn.util.Logging import getLogger
 
 New, FromChain, FromNmrChain, = 'Empty', 'Chain', 'NmrChain'
 SelectionOptions = [New, FromChain, FromNmrChain]
@@ -62,12 +63,12 @@ class CreateNmrChainPopup(CcpnDialog):
     self.getLayout().setContentsMargins(15, 20, 25, 10)  # L,T,R,B
     vGrid = 0
     self.newFromLabel = Label(self, text="New from", grid=(vGrid,0))
-    self.selectInitialRadioButtons = RadioButtons(self, texts=SelectionOptions,
-                                                  selectedInd=0,
-                                                  callback=self._showOptions,
-                                                  direction='v',
-                                                  tipTexts=None,
-                                                  grid=(vGrid, 1))
+    self.newNChainOptionsRButtons = RadioButtons(self, texts=SelectionOptions,
+                                                 selectedInd=0,
+                                                 callback=self._showOptions,
+                                                 direction='v',
+                                                 tipTexts=None,
+                                                 grid=(vGrid, 1))
     vGrid += 1
 
 
@@ -108,41 +109,81 @@ class CreateNmrChainPopup(CcpnDialog):
     self.spacerLabel = Label(self, text="", grid=(vGrid, 0))
     self.buttonBox = ButtonList(self, callbacks=[self.reject, self._createNmrChain], texts=['Cancel', 'Ok'], grid=(vGrid, 1))
 
-
+    self._chain = None # used to create a new nmrChain from a previous one
+    self._nmrChain  = None
     self._activateOptions()
 
   def _createNmrChain(self):
-    sequence = self.sequenceEditor.toPlainText()
+    nmrChainSequence = self.sequenceEditor.toPlainText()
     name = self.nameLineEdit.get()
     addBackboneAtoms =  self.checkboxBackboneAtoms.get()
     addSideChainAtoms = self.checkboxSideChainsAtoms.get()
 
-
-
     if self.project:
+      # self.project.blankNotification()
+
+      selectedOption = self.newNChainOptionsRButtons.getSelectedText()
+
       newNmrChain = self.project.newNmrChain()
-      for i, item in enumerate(sequence):
-        nmrResidue = newNmrChain.newNmrResidue(sequenceCode=i+1, residueType=item)
-        if self._chain:
-          for residue in self._chain.residues:
-            if residue.shortName == item and residue.sequenceCode == str(i+1):
-              for atom in residue.atoms:
-                if atom.name in ATOM_TYPES:
-                  nmrResidue.fetchNmrAtom(atom.name)
-              nmrResidue.residue = residue
-      if len(newNmrChain.nmrResidues) == 0:
-        newNmrChain.delete()
+
+      if self._chain:
+        chainSequence = ''.join([residue.shortName for residue in self._chain.residues])
+        if len(chainSequence) == len(nmrChainSequence):
+          try:
+            self.project._startCommandEchoBlock('_createNmrChain')
+            for residue, ss in zip(self._chain.residues, nmrChainSequence):
+              if residue.shortName == ss:
+                nmrResidue = newNmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=residue.shortName)
+                nmrResidue.residue = residue
+              else:
+                nmrResidue = newNmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=ss)
+              if addBackboneAtoms:
+                for atom in residue.atoms:
+                  if atom.name in ATOM_TYPES:
+                    nmrResidue.fetchNmrAtom(atom.name)
+            if len(newNmrChain.nmrResidues) == 0:
+              newNmrChain.delete() # no reason to keep an empty chain!
+          finally:
+            self.project._endCommandEchoBlock()
+        else:
+          for ss in nmrChainSequence:
+            nmrResidue = newNmrChain.newNmrResidue(sequenceCode=None, residueType=ss)
+
+      elif self._nmrChain:
+        selectedNmrchainSequence = ''.join([residue.residueType for residue in self._nmrChain.nmrResidues])
+        if len(selectedNmrchainSequence) == len(nmrChainSequence):
+          try:
+            self.project._startCommandEchoBlock('_createNmrChain')
+            for nmrResidue, ss in zip(self._nmrChain.nmrResidues, nmrChainSequence):
+              if nmrResidue.residueType == ss:
+                newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=nmrResidue.sequenceCode, residueType=nmrResidue.residueType)
+                for nmrAtom in nmrResidue.nmrAtoms:
+                  newNmrAtom = self.project.fetchNmrAtom(nmrAtom.name)
+              else:
+                newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=nmrResidue.sequenceCode, residueType=ss)
+
+          finally:
+            self.project._endCommandEchoBlock()
+      else:
+        for ss in  nmrChainSequence:
+          nmrResidue = newNmrChain.newNmrResidue(residueType=ss)
+
+      try:
+        newNmrChain.rename(newNmrChain.shortName + '-' + name)
+      except Exception as e:
+        getLogger().warn(e)
+
 
 
 
   def _populateWidgets(self, selected):
     obj = self.project.getByPid(selected)
-    # if isinstance(obj, NmrChain):
-    #   self.nameLineEdit.clear()
-    #   self.sequenceEditor.clear()
-    #   self.nameLineEdit.setText(obj.shortName)
-    #   self.sequenceEditor.setText(''.join([r.shortName for r in obj.nmrResidues])) THIS IS WRONG . no shortName for nmrResidue !!!
-
+    if isinstance(obj, NmrChain):
+      self.nameLineEdit.clear()
+      self.sequenceEditor.clear()
+      self.nameLineEdit.setText(obj.shortName)
+      self.sequenceEditor.setText(''.join([r.residueType for r in obj.nmrResidues]))
+      self._nmrChain = obj
 
     if isinstance(obj, Chain):
       self.nameLineEdit.clear()
@@ -154,16 +195,17 @@ class CreateNmrChainPopup(CcpnDialog):
 
   def _activateOptions(self):
     # if self.availableNmrChainsPD.textList is None:
-    # NMR CHAIN is DISABLED for the moment
-    self.selectInitialRadioButtons.radioButtons[2].setEnabled(False)
+
+    # self.newNChainOptionsRButtons.radioButtons[2].setEnabled(False)
     if self.availableChainsPD.textList is None:
-      self.selectInitialRadioButtons.radioButtons[1].setEnabled(False)
+      self.newNChainOptionsRButtons.radioButtons[1].setEnabled(False)
 
   def _showOptions(self):
-    selected = self.selectInitialRadioButtons.getSelectedText()
-    # needs to clear the previous selection otherwise has a odd behaviour
+    selected = self.newNChainOptionsRButtons.getSelectedText()
+    # needs to clear the previous selection otherwise has an odd behaviour from pulldownNofiers which remember the previous selection
     for pd in self.pulldownsOptions:
       self.pulldownsOptions[pd].select(SELECT)
+      self._chain = None
     if selected in self.pulldownsOptions:
       self.pulldownsOptions[selected].show()
     hs = [x for x in self.pulldownsOptions if x != selected]

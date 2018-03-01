@@ -28,6 +28,7 @@ from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
+from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -77,7 +78,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
     self.count = 1
 
     self.excludeRegion1Label = Label(self.pipeFrame, text=Region+str(self.count), grid=(self.count , 0))
-    setattr(self, Region + str(self.count), TargetButtonSpinBoxes(self.pipeFrame, application=self.application,
+    setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                     orientation='v', grid=(self.count, 1)))
     self.count += 1
 
@@ -85,7 +86,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 
   def _addRegion(self):
     self.excludeRegionLabel = Label(self.pipeFrame, text=Region+str(self.count), grid=(self.count, 0))
-    setattr(self, Region + str(self.count), TargetButtonSpinBoxes(self.pipeFrame, application=self.application,
+    setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
                                                                   orientation='v', grid=(self.count , 1)))
 
     self.count+=1
@@ -105,7 +106,7 @@ class ExcludeRegionsGuiPipe(GuiPipe):
           if item:
             w = item.widget()
             if w:
-              if isinstance(w,TargetButtonSpinBoxes):
+              if isinstance(w,GLTargetButtonSpinBoxes):
                 w._turnOffPositionPicking()
               w.deleteLater()
         self.count -= 1

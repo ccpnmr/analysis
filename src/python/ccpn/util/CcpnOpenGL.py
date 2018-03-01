@@ -1348,15 +1348,14 @@ void main()
     self.axisCodes = self._parent.axisCodes
     self.initialiseTraces()
 
-    self.addRegion(values=(3,4), axisCode='H', colour='green')
-    self.addRegion(values=(5,6), axisCode='H', colour='blue')
-    self.addRegion(values=(7,8), axisCode='H', colour='yellow')
-    self.addRegion(values=(9,10), axisCode='H', colour='grey')
-    self.addRegion(values=(11,12), axisCode='H', colour='purple')
-    self.addRegion(values=(13,14), axisCode='H', colour='red')
-    self.addRegion(values=(15,16), axisCode='H', colour='transparent')
-    self.addRegion(values=(110, 114), axisCode='N', colour='green')
-
+    # self.addRegion(values=(3,4), orientation='v', colour='green')
+    # self.addRegion(values=(5,6), orientation='h', colour='blue')
+    # self.addRegion(values=(7,8), orientation='v', colour='yellow')
+    # self.addRegion(values=(9,10), orientation='h', colour='grey')
+    # self.addRegion(values=(11,12), orientation='v', colour='purple')
+    # self.addRegion(values=(13,14), orientation='v', colour='red')
+    # self.addRegion(values=(15,16), orientation='v', colour='transparent')
+    # self.addRegion(values=(110, 114), axisCode='N', colour='green')
 
   def setBackgroundColour(self, col):
     """
@@ -3270,23 +3269,44 @@ void main()
         for lb in self._axisYLabelling:
           lb.drawTextArray()
 
-  def addRegion(self, values=None, axisCode='intensity',
-                brush=None, colour=None,
+  def addRegion(self, values=None, axisCode=None, orientation=None,
+                brush=None, colour='blue',
                 movable=True, visible=True, bounds=None, **kw):
 
     if colour in REGION_COLOURS.keys():
       brush = REGION_COLOURS[colour]
 
-    self._regions.append( {'values': values,
-                           'axisCode': axisCode,
-                           'brush': brush,
-                           'colour': colour,
-                           'movable': movable,
-                           'visible': visible,
-                           'bounds': bounds} )
+    if orientation == 'h':
+      axisCode = self._axisCodes[1]
+    elif orientation == 'v':
+      axisCode = self._axisCodes[0]
+    else:
+      if not axisCode:
+        axisIndex = None
+        for ps, psCode in enumerate(self._axisCodes[0:2]):
+          if self._preferences.matchAxisCode == 0:  # default - match atom type
+
+            if axisCode[0] == psCode[0]:
+              axisIndex = ps
+          elif self._preferences.matchAxisCode == 1:  # match full code
+            if axisCode == psCode:
+              axisIndex = ps
+
+        if not axisIndex:
+          getLogger().warning('Axis code %s not found in current strip' % axisCode)
+          return None
+
+    self._regions.append(GLRegion(self._regionList,
+                                  values=values,
+                                  axisCode=axisCode,
+                                  brush=brush,
+                                  colour=colour,
+                                  movable=movable,
+                                  visible=visible,
+                                  bounds=bounds))
 
     self._regionList.renderMode = GLRENDERMODE_REBUILD
-    return len(self._regions)
+    return self._regions[-1]
 
   def buildRegions(self):
     drawList = self._regionList
@@ -3300,34 +3320,34 @@ void main()
       index = 0
       for region in self._regions:
 
-        if not region['visible']:
+        if not region.visible:
           continue
 
         for ps, psCode in enumerate(self.axisOrder[0:2]):
           if self._preferences.matchAxisCode == 0:  # default - match atom type
 
-            if region['axisCode'][0] == psCode[0]:
+            if region.axisCode[0] == psCode[0]:
               axisIndex = ps
           elif self._preferences.matchAxisCode == 1:  # match full code
-            if region['axisCode'] == psCode:
+            if region.axisCode == psCode:
               axisIndex = ps
 
         # TODO:ED check axis units - assume 'ppm' for the minute
 
         if axisIndex == 0:
           # vertical ruler
-          pos0 = x0 = region['values'][0]
-          pos1 = x1 = region['values'][1]
+          pos0 = x0 = region.values[0]
+          pos1 = x1 = region.values[1]
           y0 = self.axisT
           y1 = self.axisB
         else:
           # horizontal ruler
-          pos0 = y0 = region['values'][0]
-          pos1 = y1 = region['values'][1]
+          pos0 = y0 = region.values[0]
+          pos1 = y1 = region.values[1]
           x0 = self.axisL
           x1 = self.axisR
 
-        colour = region['brush']
+        colour = region.brush
         drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3,
                                                         index, index+1, index, index+1,
                                                         index+1, index+2, index+1, index+2,
@@ -5704,15 +5724,33 @@ class GLVertexArray():
   #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
 
 
-class GLRegions(GLVertexArray):
-  def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0),
-               x=0.0, y=0.0,
-               ox=0.0, oy=0.0,
-               angle=0.0, width=None, height=None, GLContext=None):
-    super(GLRegions, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=True
-                                   , GLContext=GLContext, drawMode=GL.GL_TRIANGLES
-                                   , dimension=2)
+class GLRegion():
 
+  sigPositionChanged = pyqtSignal(list)
+
+  def __init__(self, glList, values=(0,0), axisCode=None, brush=None, colour='blue', movable=True, visible=True, bounds=None):
+    self._glList = glList
+    self._values = values
+    self._axisCode = axisCode
+    self._brush = brush
+    self._colour = colour
+    self._movable = movable
+    self._visible = visible
+    self._bounds = bounds
+
+  def setValues(self, values):
+    self._values = values
+    self._glList.renderMode = GLRENDERMODE_REBUILD
+
+  def getValues(self):
+    return self._values
+
+  def mouseDrag(self, values):
+    self.sigPositionChanged.emit(values)
+
+  def setVisible(self, visible):
+    self._visible = visible
+    self._glList.renderMode = GLRENDERMODE_REBUILD
 
 class GLString(GLVertexArray):
   def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0),

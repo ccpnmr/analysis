@@ -34,7 +34,7 @@ import pyqtgraph as pg
 import  numpy as np
 from pyqtgraph.graphicsItems.LinearRegionItem import LinearRegionItem
 from ccpn.ui.gui.widgets.Icon import Icon
-
+from ccpn.util.Logging import getLogger
 
 # class GLLinearRegionsPlot(LinearRegionItem):
 #   """
@@ -118,8 +118,9 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     # for sb in self.spinBoxes:
     #   sb.valueChanged.connect(self._setLinePosition)
 
-    self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
-                                                  brush=self.brush, colour = self.colour, movable=self.movable)
+    if self.GLWidget:
+      self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
+                                                    brush=self.brush, colour = self.colour, movable=self.movable)
 
     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -129,6 +130,8 @@ class GLTargetButtonSpinBoxes(Widget, Base):
 
   def setGLWidget(self, GLWidget):
     self.GLWidget = GLWidget
+    self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
+                                                   brush=self.brush, colour=self.colour, movable=self.movable)
 
   def _togglePicking(self):
 
@@ -147,22 +150,51 @@ class GLTargetButtonSpinBoxes(Widget, Base):
           self._turnOffPositionPicking()
 
   def _turnOnPositionPicking(self):
-    if self.plotWidget is not None:
-      self.plotWidget.addItem(self.linearRegions)
+    # if self.plotWidget is not None:
+    #   self.plotWidget.addItem(self.linearRegions)
+
+    if not self.GLWidget and self.current.strip:
+      try:
+        self.setGLWidget(self.current.strip._testCcpnOpenGLWidget)
+      except Exception as es:
+        getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.current.strip)
+
+    else:
+      if not self.GLlinearRegions:
+        self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation,
+                                                     bounds=self.bounds,
+                                                     brush=self.brush, colour=self.colour, movable=self.movable)
+      else:
+        self.GLlinearRegions.setVisible(True)
 
   def _turnOffPositionPicking(self):
-    if self.plotWidget is not None:
-      self.plotWidget.removeItem(self.linearRegions)
+    # if self.plotWidget is not None:
+    #   self.plotWidget.removeItem(self.linearRegions)
+
+    if self.GLWidget:
+      if not self.GLlinearRegions:
+        self.GLlinearRegions.setVisible(False)
 
   def _lineMoved(self):
-      values = []
-      for line in self.linearRegions.lines:
-        if self.orientation == 'h':
-          values.append(line.pos().y())
-        elif self.orientation == 'v':
-          values.append(line.pos().x())
-      self.pointBox1.setValue(min(values))
-      self.pointBox2.setValue(max(values))
+    values = []
+    # for line in self.linearRegions.lines:
+    #   if self.orientation == 'h':
+    #     values.append(line.pos().y())
+    #   elif self.orientation == 'v':
+    #     values.append(line.pos().x())
+    # self.pointBox1.setValue(min(values))
+    # self.pointBox2.setValue(max(values))
+
+    # for line in self.linearRegions.lines:
+    #   if self.orientation == 'h':
+    #     values.append(line.pos().y())
+    #   elif self.orientation == 'v':
+    #     values.append(line.pos().x())
+
+    self.linearRegions.getValues()
+
+    self.pointBox1.setValue(min(values))
+    self.pointBox2.setValue(max(values))
 
   def _setLinePosition(self):
     values = []
@@ -172,9 +204,10 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     self.pointBox1.setValue(min(values))
     self.pointBox2.setValue(max(values))
 
-    self.linearRegions.lines[0].setPos(min(values))
-    self.linearRegions.lines[1].setPos(max(values))
+    # self.linearRegions.lines[0].setPos(min(values))
+    # self.linearRegions.lines[1].setPos(max(values))
 
+    self.linearRegions.setValues((min(values), max(values)))
 
   def get(self):
     """

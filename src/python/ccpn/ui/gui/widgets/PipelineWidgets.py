@@ -58,6 +58,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
+from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 
 commonWidgets =           {
                             CheckBox.__name__:              ('get',         'setChecked'),
@@ -72,7 +73,7 @@ commonWidgets =           {
                             Slider.__name__:                ('get',         'setValue'  ),
                             Spinbox.__name__:               ('value',       'set'       ),
                             TextEditor.__name__:            ('get',         'setText'   ),
-                            TargetButtonSpinBoxes.__name__: ('get',         'setValues' ),
+                            GLTargetButtonSpinBoxes.__name__: ('get',         'setValues' ),
                             ExcludeRegions.__name__:        ('_getExcludedRegions', '_set' ),
 
 

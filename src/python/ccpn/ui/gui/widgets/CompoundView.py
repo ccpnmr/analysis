@@ -58,10 +58,12 @@ class CompoundView(QGraphicsView, Base):
       else:
         self.backgroundColor = self.setStyleSheet('background-color: #020F31')
         self.setAtomColorWhite = True
+      self.bondColor = Qt.white
     #
     else:
       self.backgroundColor = QtGui.QColor(10, 1, 0, 0)
-    self.bondColor = Qt.white
+      self.bondColor = Qt.black
+
 
     # self.setCompound = self.setCompound
     self.rotatePos = None
@@ -6941,8 +6943,12 @@ if __name__ == '__main__':
   app = TestApplication()
   popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
 
-  smilesText = 'CCC'
+  smilesText = 'CC(=O)OC1=CC=CC=C1C(=O)O'
   compoundView = CompoundView(popup, smiles=smilesText,)
+  c = compoundView.compound
+  print([a.groupType for a in c.atomGroups])
+  print([a.varAtoms for a in c.atomGroups])
+  print([a.subGroups for a in c.atomGroups])
   popup.getLayout().addWidget(compoundView)
   compoundView.centerView()
   compoundView.updateAll()

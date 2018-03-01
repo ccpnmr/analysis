@@ -35,6 +35,7 @@ import  numpy as np
 from pyqtgraph.graphicsItems.LinearRegionItem import LinearRegionItem
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.util.Logging import getLogger
+from PyQt5.QtCore import pyqtSlot
 
 # class GLLinearRegionsPlot(LinearRegionItem):
 #   """
@@ -121,6 +122,9 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     if self.GLWidget:
       self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
                                                     brush=self.brush, colour = self.colour, movable=self.movable)
+      self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
+    else:
+      self.GLlinearRegions = None
 
     #
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -132,6 +136,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     self.GLWidget = GLWidget
     self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
                                                    brush=self.brush, colour=self.colour, movable=self.movable)
+    self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
 
   def _togglePicking(self):
 
@@ -139,15 +144,21 @@ class GLTargetButtonSpinBoxes(Widget, Base):
       self.current = self.application.current
       self.strip = self.current.strip
       if self.strip is not None:
-        self.plotWidget = self.strip.plotWidget
+        try:
+          self.GLWidget = self.strip._testCcpnOpenGLWidget
+        except Exception as es:
+          getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.strip)
 
-    if self.plotWidget is not None:
-        if self.pickOnSpectrumButton.isChecked():
-          self.pickOnSpectrumButton.setIcon(self.toggleOnIcon)
-          self._turnOnPositionPicking()
-        elif not self.pickOnSpectrumButton.isChecked():
-          self.pickOnSpectrumButton.setIcon(self.toggleOffIcon)
-          self._turnOffPositionPicking()
+    if self.GLWidget:
+      if self.pickOnSpectrumButton.isChecked():
+        self.pickOnSpectrumButton.setIcon(self.toggleOnIcon)
+        self._turnOnPositionPicking()
+      elif not self.pickOnSpectrumButton.isChecked():
+        self.pickOnSpectrumButton.setIcon(self.toggleOffIcon)
+        self._turnOffPositionPicking()
+    else:
+      self.pickOnSpectrumButton.setChecked(False)
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.strip)
 
   def _turnOnPositionPicking(self):
     # if self.plotWidget is not None:
@@ -164,6 +175,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
         self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation,
                                                      bounds=self.bounds,
                                                      brush=self.brush, colour=self.colour, movable=self.movable)
+        self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
       else:
         self.GLlinearRegions.setVisible(True)
 
@@ -172,11 +184,15 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     #   self.plotWidget.removeItem(self.linearRegions)
 
     if self.GLWidget:
-      if not self.GLlinearRegions:
+      if self.GLlinearRegions:
         self.GLlinearRegions.setVisible(False)
+        self.GLWidget.removeRegion(self.GLlinearRegions)
+        self.GLlinearRegions.valuesChanged.disconnect()
+        self.GLlinearRegions = None
 
-  def _lineMoved(self):
-    values = []
+  @pyqtSlot(list)
+  def _lineMoved(self, data):
+    # values = []
     # for line in self.linearRegions.lines:
     #   if self.orientation == 'h':
     #     values.append(line.pos().y())
@@ -190,11 +206,11 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     #     values.append(line.pos().y())
     #   elif self.orientation == 'v':
     #     values.append(line.pos().x())
+    # values = self.GLlinearRegions.values
 
-    values = self.GLlinearRegions.values
-
-    self.pointBox1.setValue(min(values))
-    self.pointBox2.setValue(max(values))
+    self.pointBox1.setValue(min(data))
+    self.pointBox2.setValue(max(data))
+    self.values = [min(data), max(data)]
 
   def _setLinePosition(self):
     values = []
@@ -203,11 +219,13 @@ class GLTargetButtonSpinBoxes(Widget, Base):
 
     self.pointBox1.setValue(min(values))
     self.pointBox2.setValue(max(values))
+    self.values = [min(values), max(values)]
 
     # self.linearRegions.lines[0].setPos(min(values))
     # self.linearRegions.lines[1].setPos(max(values))
 
-    self.GLlinearRegions.values = (min(values), max(values))
+    if self.GLlinearRegions:
+      self.GLlinearRegions.values = [min(values), max(values)]
 
   def get(self):
     """

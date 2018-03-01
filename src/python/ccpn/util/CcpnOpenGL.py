@@ -1350,14 +1350,15 @@ void main()
     self.initialiseTraces()
 
     self._dragRegion = (None, None, None)
-    self.addRegion(values=(3,4), orientation='v', colour='green')
-    self.addRegion(values=(5,6), orientation='h', colour='blue')
-    self.addRegion(values=(7,8), orientation='v', colour='yellow')
-    self.addRegion(values=(9,10), orientation='h', colour='grey')
-    self.addRegion(values=(11,12), orientation='v', colour='purple')
-    self.addRegion(values=(13,14), orientation='v', colour='red')
-    self.addRegion(values=(15,16), orientation='v', colour='transparent')
-    self.addRegion(values=(110, 114), axisCode='N', colour='green')
+
+    # self.addRegion(values=(3,4), orientation='v', colour='green')
+    # self.addRegion(values=(5,6), orientation='h', colour='blue')
+    # self.addRegion(values=(7,8), orientation='v', colour='yellow')
+    # self.addRegion(values=(9,10), orientation='h', colour='grey')
+    # self.addRegion(values=(11,12), orientation='v', colour='purple')
+    # self.addRegion(values=(13,14), orientation='v', colour='red')
+    # self.addRegion(values=(15,16), orientation='v', colour='transparent')
+    # self.addRegion(values=(110, 114), axisCode='N', colour='green')
 
   def setBackgroundColour(self, col):
     """
@@ -1436,9 +1437,7 @@ void main()
     self.current.strip = self._parent
 
   def mouseReleaseEvent(self, ev):
-    self._drawSelectionBox = False
-    self._lastButtonReleased = ev.button()
-    self._checkKeys(ev)
+    self._clearAndUpdate()
 
     mx = ev.pos().x()
     if self._drawBottomAxis:
@@ -1499,6 +1498,7 @@ void main()
   def _clearAndUpdate(self):
     self._clearKeys()
     self._drawSelectionBox = False
+    self._dragRegion = (None, None, None)
     self.update()
 
   def keyReleaseEvent(self, ev: QtGui.QKeyEvent):
@@ -1586,15 +1586,24 @@ void main()
         self._drawSelectionBox = True
 
       else:
-        self.axisL -= dx * self.pixelX
-        self.axisR -= dx * self.pixelX
-        self.axisT += dy * self.pixelY
-        self.axisB += dy * self.pixelY
-        self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
-                                           axisB=self.axisB, axisT=self.axisT,
-                                           axisL=self.axisL, axisR=self.axisR)
-        self._selectionMode = 0
-        self._rescaleAllAxes()
+
+        if self._dragRegion[0]:
+          values = self._dragRegion[0].values
+          if self._dragRegion[1] == 'v':
+            values[self._dragRegion[2]] += dx * self.pixelX
+          elif self._dragRegion[1] == 'h':
+            values[self._dragRegion[2]] -= dy * self.pixelY
+          self._dragRegion[0].values = values
+        else:
+          self.axisL -= dx * self.pixelX
+          self.axisR -= dx * self.pixelX
+          self.axisT += dy * self.pixelY
+          self.axisB += dy * self.pixelY
+          self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                                             axisB=self.axisB, axisT=self.axisT,
+                                             axisL=self.axisL, axisR=self.axisR)
+          self._selectionMode = 0
+          self._rescaleAllAxes()
 
     elif event.buttons() & Qt.MiddleButton:
       if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '':
@@ -3301,6 +3310,11 @@ void main()
         for lb in self._axisYLabelling:
           lb.drawTextArray()
 
+  def removeRegion(self, region):
+    self._regions.remove(region)
+    self._regionList.renderMode = GLRENDERMODE_REBUILD
+    self.update()
+
   def addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None, **kw):
@@ -3347,6 +3361,7 @@ void main()
                                   bounds=bounds))
 
     self._regionList.renderMode = GLRENDERMODE_REBUILD
+    self.update()
     return self._regions[-1]
 
   def buildRegions(self):
@@ -5765,13 +5780,15 @@ class GLVertexArray():
   #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
 
 
-class GLRegion():
+class GLRegion(QtWidgets.QWidget):
 
-  sigPositionChanged = pyqtSignal(list)
+  valuesChanged = pyqtSignal(list)
 
   def __init__(self, parent, glList, values=(0,0), axisCode=None, orientation='h',
                brush=None, colour='blue',
                movable=True, visible=True, bounds=None):
+
+    super(GLRegion, self).__init__(parent)
 
     self.parent = parent
     self._glList = glList
@@ -5784,18 +5801,19 @@ class GLRegion():
     self._visible = visible
     self._bounds = bounds
 
-  def mouseDrag(self, values):
-    self.sigPositionChanged.emit(values)
+  def _mouseDrag(self, values):
+    self.valuesChanged.emit(list(values))
 
   @property
   def values(self):
-    return self._values
+    return list(self._values)
 
   @values.setter
   def values(self, values):
-    self._values = values
+    self._values = tuple(values)
     self._glList.renderMode = GLRENDERMODE_REBUILD
     self.parent.update()
+    self.valuesChanged.emit(list(values))
 
   @property
   def axisCode(self):
@@ -5832,8 +5850,7 @@ class GLRegion():
               axisIndex = ps
 
         if not axisIndex:
-          getLogger().warning('Axis code %s not found in current strip' % axisCode)
-          return None
+          getLogger().warning('Axis code %s not found in current strip' % self._axisCode)
 
     self._glList.renderMode = GLRENDERMODE_REBUILD
     self.parent.update()

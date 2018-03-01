@@ -114,9 +114,9 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     #
     # for line in self.linearRegions.lines:
     #   line.sigPositionChanged.connect(self._lineMoved)
-    #
-    # for sb in self.spinBoxes:
-    #   sb.valueChanged.connect(self._setLinePosition)
+
+    for sb in self.spinBoxes:
+      sb.valueChanged.connect(self._setLinePosition)
 
     if self.GLWidget:
       self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
@@ -191,7 +191,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     #   elif self.orientation == 'v':
     #     values.append(line.pos().x())
 
-    self.linearRegions.getValues()
+    values = self.GLlinearRegions.values
 
     self.pointBox1.setValue(min(values))
     self.pointBox2.setValue(max(values))
@@ -207,7 +207,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     # self.linearRegions.lines[0].setPos(min(values))
     # self.linearRegions.lines[1].setPos(max(values))
 
-    self.linearRegions.setValues((min(values), max(values)))
+    self.GLlinearRegions.values = (min(values), max(values))
 
   def get(self):
     """

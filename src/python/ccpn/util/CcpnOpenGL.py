@@ -108,7 +108,8 @@ REGION_COLOURS = {
   'transparent': (1.0, 1.0, 1.0, 0.01),
   'grey': (1.0, 1.0, 1.0, 0.15),
   'red': (1.0, 0.1, 0.2, 0.15),
-  'purple': (0.7, 0.4, 1.0, 0.15)
+  'purple': (0.7, 0.4, 1.0, 0.15),
+  None: (0.2, 0.1, 1.0, 0.15)
 }
 
 
@@ -1348,14 +1349,15 @@ void main()
     self.axisCodes = self._parent.axisCodes
     self.initialiseTraces()
 
-    # self.addRegion(values=(3,4), orientation='v', colour='green')
-    # self.addRegion(values=(5,6), orientation='h', colour='blue')
-    # self.addRegion(values=(7,8), orientation='v', colour='yellow')
-    # self.addRegion(values=(9,10), orientation='h', colour='grey')
-    # self.addRegion(values=(11,12), orientation='v', colour='purple')
-    # self.addRegion(values=(13,14), orientation='v', colour='red')
-    # self.addRegion(values=(15,16), orientation='v', colour='transparent')
-    # self.addRegion(values=(110, 114), axisCode='N', colour='green')
+    self._dragRegion = (None, None, None)
+    self.addRegion(values=(3,4), orientation='v', colour='green')
+    self.addRegion(values=(5,6), orientation='h', colour='blue')
+    self.addRegion(values=(7,8), orientation='v', colour='yellow')
+    self.addRegion(values=(9,10), orientation='h', colour='grey')
+    self.addRegion(values=(11,12), orientation='v', colour='purple')
+    self.addRegion(values=(13,14), orientation='v', colour='red')
+    self.addRegion(values=(15,16), orientation='v', colour='transparent')
+    self.addRegion(values=(110, 114), axisCode='N', colour='green')
 
   def setBackgroundColour(self, col):
     """
@@ -1400,6 +1402,36 @@ void main()
 
     self._endCoordinate = self._startCoordinate
     # self._drawSelectionBox = True
+
+    for region in self._regions:
+      if region.visible and region.movable:
+        if region.orientation == 'h':
+          if not self._widthsChangedEnough((0.0, region.values[0]),
+                                           (0.0, self.cursorCoordinate[1]),
+                                           tol=abs(2*self.pixelY)):
+            self._dragRegion = (region, 'h', 0)
+            break
+
+          elif not self._widthsChangedEnough((0.0, region.values[1]),
+                                            (0.0, self.cursorCoordinate[1]),
+                                            tol=abs(2*self.pixelY)):
+            self._dragRegion = (region, 'h', 1)
+            break
+
+        elif region.orientation == 'v':
+          if not self._widthsChangedEnough((region.values[0], 0.0),
+                                           (self.cursorCoordinate[0], 0.0),
+                                           tol=abs(2*self.pixelX)):
+            self._dragRegion = (region, 'v', 0)
+            break
+
+          elif not self._widthsChangedEnough((region.values[1], 0.0),
+                                            (self.cursorCoordinate[0], 0.0),
+                                            tol=abs(2*self.pixelX)):
+            self._dragRegion = (region, 'v', 1)
+            break
+    else:
+      self._dragRegion = (None, None, None)
 
     self.current.strip = self._parent
 
@@ -3281,7 +3313,7 @@ void main()
     elif orientation == 'v':
       axisCode = self._axisCodes[0]
     else:
-      if not axisCode:
+      if axisCode:
         axisIndex = None
         for ps, psCode in enumerate(self._axisCodes[0:2]):
           if self._preferences.matchAxisCode == 0:  # default - match atom type
@@ -3292,13 +3324,22 @@ void main()
             if axisCode == psCode:
               axisIndex = ps
 
+          if axisIndex == 0:
+            orientation = 'v'
+          elif axisIndex == 1:
+            orientation = 'h'
+
         if not axisIndex:
           getLogger().warning('Axis code %s not found in current strip' % axisCode)
           return None
+      else:
+        axisCode = self._axisCodes[0]
+        orientation = 'v'
 
-    self._regions.append(GLRegion(self._regionList,
+    self._regions.append(GLRegion(self._parent, self._regionList,
                                   values=values,
                                   axisCode=axisCode,
+                                  orientation=orientation,
                                   brush=brush,
                                   colour=colour,
                                   movable=movable,
@@ -5728,29 +5769,118 @@ class GLRegion():
 
   sigPositionChanged = pyqtSignal(list)
 
-  def __init__(self, glList, values=(0,0), axisCode=None, brush=None, colour='blue', movable=True, visible=True, bounds=None):
+  def __init__(self, parent, glList, values=(0,0), axisCode=None, orientation='h',
+               brush=None, colour='blue',
+               movable=True, visible=True, bounds=None):
+
+    self.parent = parent
     self._glList = glList
     self._values = values
     self._axisCode = axisCode
+    self._orientation = orientation
     self._brush = brush
     self._colour = colour
-    self._movable = movable
+    self.movable = movable
     self._visible = visible
     self._bounds = bounds
-
-  def setValues(self, values):
-    self._values = values
-    self._glList.renderMode = GLRENDERMODE_REBUILD
-
-  def getValues(self):
-    return self._values
 
   def mouseDrag(self, values):
     self.sigPositionChanged.emit(values)
 
-  def setVisible(self, visible):
+  @property
+  def values(self):
+    return self._values
+
+  @values.setter
+  def values(self, values):
+    self._values = values
+    self._glList.renderMode = GLRENDERMODE_REBUILD
+    self.parent.update()
+
+  @property
+  def axisCode(self):
+    return self._axisCode
+
+  @axisCode.setter
+  def axisCode(self, axisCode):
+    self._axisCode = axisCode
+    self._glList.renderMode = GLRENDERMODE_REBUILD
+    self.parent.update()
+
+  @property
+  def orientation(self):
+    return self._orientation
+
+  @orientation.setter
+  def orientation(self, orientation):
+    self._orientation = orientation
+
+    if orientation == 'h':
+      self._axisCode = self.parent._axisCodes[1]
+    elif orientation == 'v':
+      self._axisCode = self.parent._axisCodes[0]
+    else:
+      if not self._axisCode:
+        axisIndex = None
+        for ps, psCode in enumerate(self.parent._axisCodes[0:2]):
+          if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+
+            if self._axisCode[0] == psCode[0]:
+              axisIndex = ps
+          elif self.parent._preferences.matchAxisCode == 1:  # match full code
+            if self._axisCode == psCode:
+              axisIndex = ps
+
+        if not axisIndex:
+          getLogger().warning('Axis code %s not found in current strip' % axisCode)
+          return None
+
+    self._glList.renderMode = GLRENDERMODE_REBUILD
+    self.parent.update()
+
+  @property
+  def brush(self):
+    return self._brush
+
+  @brush.setter
+  def brush(self, brush):
+    self._brush = brush
+    self._glList.renderMode = GLRENDERMODE_REBUILD
+    self.parent.update()
+
+  @property
+  def colour(self):
+    return self._colour
+
+  @colour.setter
+  def colour(self, colour):
+    self._colour = colour
+    if colour in REGION_COLOURS.keys():
+      self._brush = REGION_COLOURS[colour]
+
+    self._glList.renderMode = GLRENDERMODE_REBUILD
+    self.parent.update()
+
+  @property
+  def visible(self):
+    return self._visible
+
+  @visible.setter
+  def visible(self, visible):
     self._visible = visible
     self._glList.renderMode = GLRENDERMODE_REBUILD
+    self.parent.update()
+
+  @property
+  def bounds(self):
+    return self._bounds
+
+  @bounds.setter
+  def bounds(self, bounds):
+    self._bounds = bounds
+    self._glList.renderMode = GLRENDERMODE_REBUILD
+    self.parent.update()
+
 
 class GLString(GLVertexArray):
   def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0),

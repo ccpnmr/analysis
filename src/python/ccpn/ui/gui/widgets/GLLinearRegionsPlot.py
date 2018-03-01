@@ -36,36 +36,36 @@ from pyqtgraph.graphicsItems.LinearRegionItem import LinearRegionItem
 from ccpn.ui.gui.widgets.Icon import Icon
 
 
-class GLLinearRegionsPlot(LinearRegionItem):
-  """
-
-  Used for marking a horizontal or vertical region in plots.
-  The region can be dragged and is bounded by lines which can be dragged individually.
-  """
-
-  def __init__(self, values=None, orientation='v', brush = None, colour = None, movable=True, bounds=None, **kw):
-    if orientation == 'v':
-      orientation = LinearRegionItem.Vertical
-    else:
-      orientation = LinearRegionItem.Horizontal
-
-    colours = {
-                'green': (0, 111, 20, 50),
-                'yellow': (0, 111, 20, 50),
-                'blue': None,  # Default,
-                'transparent': (0, 111, 20, 50),
-                'grey': (255, 255, 255, 50),
-                'red': (255, 0, 0, 50),
-                'purple': (178, 102, 255, 50)
-              }
-    if colour in  colours.keys():
-      brush = colours[colour]
-
-    LinearRegionItem.__init__(self, values=values, orientation=orientation, brush=brush, movable=movable, bounds=bounds)
-
-  def setLines(self, values):
-    self.lines[0].setPos(min(values))
-    self.lines[1].setPos(max(values))
+# class GLLinearRegionsPlot(LinearRegionItem):
+#   """
+#
+#   Used for marking a horizontal or vertical region in plots.
+#   The region can be dragged and is bounded by lines which can be dragged individually.
+#   """
+#
+#   def __init__(self, values=None, orientation='v', brush = None, colour = None, movable=True, bounds=None, **kw):
+#     if orientation == 'v':
+#       orientation = LinearRegionItem.Vertical
+#     else:
+#       orientation = LinearRegionItem.Horizontal
+#
+#     colours = {
+#                 'green': (0, 111, 20, 50),
+#                 'yellow': (0, 111, 20, 50),
+#                 'blue': None,  # Default,
+#                 'transparent': (0, 111, 20, 50),
+#                 'grey': (255, 255, 255, 50),
+#                 'red': (255, 0, 0, 50),
+#                 'purple': (178, 102, 255, 50)
+#               }
+#     if colour in  colours.keys():
+#       brush = colours[colour]
+#
+#     LinearRegionItem.__init__(self, values=values, orientation=orientation, brush=brush, movable=movable, bounds=bounds)
+#
+#   def setLines(self, values):
+#     self.lines[0].setPos(min(values))
+#     self.lines[1].setPos(max(values))
 
 
 class GLTargetButtonSpinBoxes(Widget, Base):

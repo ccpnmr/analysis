@@ -102,13 +102,13 @@ LENATTRIBS = 4
 LENOFFSETS = 4
 
 REGION_COLOURS = {
-  'green': (0, 1.0, 0.1, 0.2),
-  'yellow': (0.9, 1.0, 0.05, 0.2),
-  'blue': (0.1, 0.05, 1.0, 0.2),
-  'transparent': (0, 0.5, 0.1, 0.2),
-  'grey': (1.0, 1.0, 1.0, 0.2),
-  'red': (1.0, 0.05, 0.1, 0.2),
-  'purple': (0.7, 0.4, 1.0, 0.2)
+  'green': (0, 1.0, 0.1, 0.15),
+  'yellow': (0.9, 1.0, 0.05, 0.15),
+  'blue': (0.2, 0.1, 1.0, 0.15),
+  'transparent': (1.0, 1.0, 1.0, 0.01),
+  'grey': (1.0, 1.0, 1.0, 0.15),
+  'red': (1.0, 0.1, 0.2, 0.15),
+  'purple': (0.7, 0.4, 1.0, 0.15)
 }
 
 
@@ -1348,7 +1348,13 @@ void main()
     self.axisCodes = self._parent.axisCodes
     self.initialiseTraces()
 
-    self.addRegion(values=(5,7), axisCode='H', colour='green')
+    self.addRegion(values=(3,4), axisCode='H', colour='green')
+    self.addRegion(values=(5,6), axisCode='H', colour='blue')
+    self.addRegion(values=(7,8), axisCode='H', colour='yellow')
+    self.addRegion(values=(9,10), axisCode='H', colour='grey')
+    self.addRegion(values=(11,12), axisCode='H', colour='purple')
+    self.addRegion(values=(13,14), axisCode='H', colour='red')
+    self.addRegion(values=(15,16), axisCode='H', colour='transparent')
     self.addRegion(values=(110, 114), axisCode='N', colour='green')
 
 
@@ -3424,6 +3430,9 @@ void main()
       return
 
     self.buildRegions()
+    self._regionList.fillMode = GL.GL_LINE
+    self._regionList.drawIndexArray()
+    self._regionList.fillMode = GL.GL_FILL
     self._regionList.drawIndexArray()
 
   def drawMarksAxisCodes(self):

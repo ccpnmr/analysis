@@ -1418,6 +1418,14 @@ void main()
                                             tol=abs(2*self.pixelY)):
             self._dragRegion = (region, 'h', 1)
             break
+          else:
+            mid = (region.values[0]+region.values[1])/2.0
+            delta = abs(region.values[0]-region.values[1])/2.0
+            if not self._widthsChangedEnough((0.0, mid),
+                                             (0.0, self.cursorCoordinate[1]),
+                                             tol=delta):
+              self._dragRegion = (region, 'h', 3)
+              break
 
         elif region.orientation == 'v':
           if not self._widthsChangedEnough((region.values[0], 0.0),
@@ -1431,6 +1439,14 @@ void main()
                                             tol=abs(2*self.pixelX)):
             self._dragRegion = (region, 'v', 1)
             break
+          else:
+            mid = (region.values[0]+region.values[1])/2.0
+            delta = abs(region.values[0]-region.values[1])/2.0
+            if not self._widthsChangedEnough((mid, 0.0),
+                                             (self.cursorCoordinate[0], 0.0),
+                                             tol=delta):
+              self._dragRegion = (region, 'v', 3)
+              break
     else:
       self._dragRegion = (None, None, None)
 
@@ -1453,10 +1469,10 @@ void main()
       self._mouseClickEvent(ev)
 
     else:
-      if self._selectionMode != 0:
+      # if self._selectionMode != 0:
 
         # end of drag event - perform action
-        self._mouseDragEvent(ev)
+      self._mouseDragEvent(ev)
 
   def _checkKeys(self, ev):
     keyMod = QApplication.keyboardModifiers()
@@ -1590,9 +1606,21 @@ void main()
         if self._dragRegion[0]:
           values = self._dragRegion[0].values
           if self._dragRegion[1] == 'v':
-            values[self._dragRegion[2]] += dx * self.pixelX
+
+            if self._dragRegion[2] == 3:
+              values[0] += dx * self.pixelX
+              values[1] += dx * self.pixelX
+            else:
+              values[self._dragRegion[2]] += dx * self.pixelX
+
           elif self._dragRegion[1] == 'h':
-            values[self._dragRegion[2]] -= dy * self.pixelY
+
+            if self._dragRegion[2] == 3:
+              values[0] += dy * self.pixelY
+              values[1] += dy * self.pixelY
+            else:
+              values[self._dragRegion[2]] -= dy * self.pixelY
+
           self._dragRegion[0].values = values
         else:
           self.axisL -= dx * self.pixelX
@@ -3313,11 +3341,14 @@ void main()
   def removeRegion(self, region):
     self._regions.remove(region)
     self._regionList.renderMode = GLRENDERMODE_REBUILD
+    if self._dragRegion[0] == region:
+      self._dragRegion = (None, None, None)
     self.update()
 
   def addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
-                movable=True, visible=True, bounds=None, **kw):
+                movable=True, visible=True, bounds=None,
+                object=None, **kw):
 
     if colour in REGION_COLOURS.keys():
       brush = REGION_COLOURS[colour]
@@ -3358,7 +3389,8 @@ void main()
                                   colour=colour,
                                   movable=movable,
                                   visible=visible,
-                                  bounds=bounds))
+                                  bounds=bounds,
+                                  object=object))
 
     self._regionList.renderMode = GLRENDERMODE_REBUILD
     self.update()
@@ -4752,6 +4784,7 @@ void main()
     else:
       zPositions = None
 
+    peaks = list(self.current.peaks)
     # now select (take first one within range)
     for spectrumView in self._parent.spectrumViews:
 
@@ -4768,10 +4801,17 @@ void main()
               and yPositions[0] < float(peak.position[1]) < yPositions[1]):
               if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
 
-                if peak in self.current.peaks:
-                  self.current._peaks.remove(peak)
+                # if peak in self.current.peaks:
+                #   self.current._peaks.remove(peak)
+                # else:
+                #   self.current.addPeak(peak)
+
+                if peak in peaks:
+                  peaks.remove(peak)
                 else:
-                  self.current.addPeak(peak)
+                  peaks.append(peak)
+
+    self.current.peaks = peaks
 
   def _dragPeak(self, xPosition, yPosition):
     """
@@ -4832,7 +4872,11 @@ void main()
   def _clearIntegralRegions(self):
     # if self.integralRegions in self.addedItems:
     #   self.removeItem(self.integralRegions)
-    getLogger().info('not implemented yet')
+    # getLogger().info('not implemented yet')
+    self._regions = []
+    self._regionList.renderMode = GLRENDERMODE_REBUILD
+    self._dragRegion = (None, None, None)
+    self.update()
 
   def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
     self.current.strip = self._parent
@@ -5039,7 +5083,7 @@ void main()
       # self.setMouseEnabled(False, False)
       # refPosition = (self.mapSceneToView(event.buttonDownPos()).x(), self.mapSceneToView(event.buttonDownPos()).y())
 
-      peaks = self.current.peaks
+      peaks = list(self.current.peaks)
       if not peaks:
         return
 
@@ -5786,7 +5830,7 @@ class GLRegion(QtWidgets.QWidget):
 
   def __init__(self, parent, glList, values=(0,0), axisCode=None, orientation='h',
                brush=None, colour='blue',
-               movable=True, visible=True, bounds=None):
+               movable=True, visible=True, bounds=None, object=None):
 
     super(GLRegion, self).__init__(parent)
 
@@ -5800,6 +5844,8 @@ class GLRegion(QtWidgets.QWidget):
     self.movable = movable
     self._visible = visible
     self._bounds = bounds
+    self._object = object
+    self.pid = object.pid if hasattr(object, 'pid') else None
 
   def _mouseDrag(self, values):
     self.valuesChanged.emit(list(values))
@@ -5814,6 +5860,10 @@ class GLRegion(QtWidgets.QWidget):
     self._glList.renderMode = GLRENDERMODE_REBUILD
     self.parent.update()
     self.valuesChanged.emit(list(values))
+
+    # TODO:ED change the integral object - should spawn change event
+    if self._object:
+      self._object.limits = [(min(values), max(values))]
 
   @property
   def axisCode(self):

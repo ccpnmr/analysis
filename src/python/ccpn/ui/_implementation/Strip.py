@@ -715,26 +715,25 @@ class Strip(AbstractWrapperObject):
 
         for peakListView in spectrumView.peakListViews:
 
-            # find the first visible peakList
-            if not peakListView.isVisible() or not spectrumView.isVisible():
-              continue
+          # find the first visible peakList
+          if not peakListView.isVisible() or not spectrumView.isVisible():
+            continue
 
-            peakList = peakListView.peakList
-            if isinstance(peakList, PeakList):
-              peak = peakList.newPeak()
+          peakList = peakListView.peakList
+          if isinstance(peakList, PeakList):
+            peak = peakList.newPeak()
 
-              if peak.peakList.spectrum.dimensionCount == 1:
-                if len(position) > 1:
-                  peak.position = (position[0],)
-                  peak.height = position[1]
-              else:
-                peak.position = position
-                # note, the height below is not derived from any fitting
-                # but is a weighted average of the values at the neighbouring grid points
-                peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-              result.append(peak)
-              peakLists.append(peakList)
-
+            if peak.peakList.spectrum.dimensionCount == 1:
+              if len(position) > 1:
+                peak.position = (position[0],)
+                peak.height = position[1]
+            else:
+              peak.position = position
+              # note, the height below is not derived from any fitting
+              # but is a weighted average of the values at the neighbouring grid points
+              peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+            result.append(peak)
+            peakLists.append(peakList)
 
     finally:
       self._endCommandEchoBlock()

@@ -45,6 +45,7 @@ from ccpn.util.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_IGNOR
                                   LENCOLORS, LENPID,\
                                   GLString
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
+from ccpn.core.lib.Notifiers import Notifier
 
 
 class GuiNdWidget(CcpnGLWidget):
@@ -66,6 +67,58 @@ class Gui1dWidget(CcpnGLWidget):
                                       mainWindow=mainWindow,
                                       rightMenu=rightMenu,
                                       stripIDLabel=stripIDLabel)
+
+    self._integralNotifier = Notifier(self.project, [Notifier.CREATE,
+                                                 Notifier.DELETE,
+                                                 Notifier.CHANGE], 'Integral', self._updateDisplayedIntegrals,
+                                  onceOnly=True)
+
+  def _updateHighlightedPeaks(self, spectrumView, peakListView):
+    spectrum = spectrumView.spectrum
+    strip = self._parent
+
+    symbolType = self._preferences.peakSymbolType
+    symbolWidth = self._preferences.peakSymbolSize / 2.0
+    lineThickness = self._preferences.peakSymbolThickness / 2.0
+
+    drawList = self._GLPeakLists[peakListView.pid]
+    drawList.indices = np.empty(0, dtype=np.uint)
+
+    index = 0
+    indexPtr = 0
+
+    if symbolType is not None:
+      # for peak in pls.peaks:
+      for pp in range(0, len(drawList.pids), LENPID):
+
+        # check whether the peaks still exists
+        peak = drawList.pids[pp]
+        offset = drawList.pids[pp+1]
+        numPoints = drawList.pids[pp+2]
+
+        if not peak.isDeleted:
+          _isSelected = False
+          if self._isSelected(peak):
+          # if hasattr(peak, '_isSelected') and peak._isSelected:
+            _isSelected = True
+            colR, colG, colB = self.highlightColour[:3]
+            drawList.indices = np.append(drawList.indices, np.array([index, index+1, index+2, index+3,
+                                                                    index, index+2, index+2, index+1,
+                                                                    index, index+3, index+3, index+1], dtype=np.uint))
+          else:
+            colour = peak.peakList.symbolColour
+            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            colG = int(colour.strip('# ')[2:4], 16) / 255.0
+            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+            drawList.indices = np.append(drawList.indices,
+                                         np.array([index, index+1, index+2, index+3], dtype=np.uint))
+          drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
+
+          drawList.pids[pp+3:pp+8] = [True, True, _isSelected,
+                                      indexPtr, len(drawList.indices)]
+          indexPtr = len(drawList.indices)
+
+        index += numPoints
 
   def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -132,7 +185,7 @@ class Gui1dWidget(CcpnGLWidget):
       # for pls in spectrum.peakLists:
 
       pls = peakListView.peakList
-      spectrumFrequency = spectrum.spectrometerFrequencies
+      # spectrumFrequency = spectrum.spectrometerFrequencies
 
       # trap IntegralLists that are stored under the peakListView
       if isinstance(pls, IntegralList):
@@ -535,6 +588,7 @@ class Gui1dWidget(CcpnGLWidget):
     xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
     yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
 
+    peaks = list(self.current.peaks)
     for spectrumView in self._parent.spectrumViews:
 
       # TODO:ED could change this to actually use the pids in the drawList
@@ -549,7 +603,48 @@ class Gui1dWidget(CcpnGLWidget):
             if (xPositions[0] < float(peak.position[0]) < xPositions[1]
               and yPositions[0] < float(peak.height) < yPositions[1]):
 
-              if peak in self.current.peaks:
-                self.current._peaks.remove(peak)
+              # if peak in self.current.peaks:
+              #   self.current._peaks.remove(peak)
+              # else:
+              #   self.current.addPeak(peak)
+              if peak in peaks:
+                peaks.remove(peak)
               else:
-                self.current.addPeak(peak)
+                peaks.append(peak)
+
+    self.current.peaks = peaks
+
+  def _updateDisplayedIntegrals(self, data):
+    triggers = data[Notifier.TRIGGER]
+    integral = data[Notifier.OBJECT]
+
+    if Notifier.DELETE in triggers:
+      self._deleteIntegral(integral)
+
+    if Notifier.CREATE in triggers:
+      self._createIntegral(integral)
+
+    if Notifier.CHANGE in triggers:
+      self._changeIntegral(integral)
+
+    self._clearKeys()
+    self.update()
+
+  def _deleteIntegral(self, integral):
+    for region in self._regions:
+      if region._object == integral:
+        self._regions.remove(region)
+
+  def _createIntegral(self, integral):
+    for region in self._regions:
+      if region._object == integral:
+        # already exists
+        break
+    else:
+      self.addRegion(values=integral.limits[0], orientation='v', movable=True, object=integral)
+
+  def _changeIntegral(self, integral):
+    for region in self._regions:
+      if region._object == integral:
+        # self._regions.update(region)
+        pass

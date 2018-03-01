@@ -102,13 +102,13 @@ LENATTRIBS = 4
 LENOFFSETS = 4
 
 REGION_COLOURS = {
-  'green': (0, 111, 20, 50),
-  'yellow': (0, 111, 20, 50),
-  'blue': None,  # Default,
-  'transparent': (0, 111, 20, 50),
-  'grey': (255, 255, 255, 50),
-  'red': (255, 0, 0, 50),
-  'purple': (178, 102, 255, 50)
+  'green': (0, 1.0, 0.1, 0.2),
+  'yellow': (0.9, 1.0, 0.05, 0.2),
+  'blue': (0.1, 0.05, 1.0, 0.2),
+  'transparent': (0, 0.5, 0.1, 0.2),
+  'grey': (1.0, 1.0, 1.0, 0.2),
+  'red': (1.0, 0.05, 0.1, 0.2),
+  'purple': (0.7, 0.4, 1.0, 0.2)
 }
 
 
@@ -504,6 +504,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # TODO:ED marks and horizontal/vertical traces
     self._rescaleOverlayText()
     self.rescaleMarksRulers()
+    self._rescaleRegions()
     self.rescaleSpectra()
 
   def rescaleSpectra(self):
@@ -1346,6 +1347,10 @@ void main()
     self.axisOrder = self._parent.axisOrder
     self.axisCodes = self._parent.axisCodes
     self.initialiseTraces()
+
+    self.addRegion(values=(5,7), axisCode='H', colour='green')
+    self.addRegion(values=(110, 114), axisCode='N', colour='green')
+
 
   def setBackgroundColour(self, col):
     """
@@ -2797,6 +2802,7 @@ void main()
     self.drawSpectra()
     self.drawPeakLists()
     self.drawMarksRulers()
+    self.drawRegions()
 
     # draw the phase plots of the mouse is in the current window
 
@@ -3258,7 +3264,10 @@ void main()
         for lb in self._axisYLabelling:
           lb.drawTextArray()
 
-  def addRegion(self, values=None, axisCode = 'intensity', brush = None, colour = None, movable=True, bounds=None, **kw):
+  def addRegion(self, values=None, axisCode='intensity',
+                brush=None, colour=None,
+                movable=True, visible=True, bounds=None, **kw):
+
     if colour in REGION_COLOURS.keys():
       brush = REGION_COLOURS[colour]
 
@@ -3267,10 +3276,11 @@ void main()
                            'brush': brush,
                            'colour': colour,
                            'movable': movable,
+                           'visible': visible,
                            'bounds': bounds} )
 
     self._regionList.renderMode = GLRENDERMODE_REBUILD
-    return len(self.regions)
+    return len(self._regions)
 
   def buildRegions(self):
     drawList = self._regionList
@@ -3311,14 +3321,14 @@ void main()
           x0 = self.axisL
           x1 = self.axisR
 
-        colour = region['colour']
-        colR = int(colour.strip('# ')[0:2], 16) / 255.0
-        colG = int(colour.strip('# ')[2:4], 16) / 255.0
-        colB = int(colour.strip('# ')[4:6], 16) / 255.0
-
-        drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3])
+        colour = region['brush']
+        drawList.indices = np.append(drawList.indices, [index, index+1, index+2, index+3,
+                                                        index, index+1, index, index+1,
+                                                        index+1, index+2, index+1, index+2,
+                                                        index+2, index+3, index+2, index+3,
+                                                        index, index+3, index, index+3])
         drawList.vertices = np.append(drawList.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
-        drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+        drawList.colors = np.append(drawList.colors, colour * 4)
         drawList.attribs = np.append(drawList.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
 
         index += 4
@@ -3377,7 +3387,7 @@ void main()
             colG = int(colour.strip('# ')[2:4], 16) / 255.0
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            drawList.indices = np.append(drawList.indices, [index, index + 1])
+            drawList.indices = np.append(drawList.indices, [index, index+1])
             drawList.vertices = np.append(drawList.vertices, [x0, y0, x1, y1])
             drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 2)
             drawList.attribs = np.append(drawList.attribs, [axisIndex, pos, axisIndex, pos])
@@ -3616,6 +3626,26 @@ void main()
 
     # draw the strikp ID to the screen
     self.stripIDString.drawTextArray()
+
+  def _rescaleRegions(self):
+    vertices = self._regionList.numVertices
+
+    if vertices:
+      for pp in range(0, 2*vertices, 8):
+        axisIndex = int(self._regionList.attribs[pp])
+        axis0 = self._regionList.attribs[pp+1]
+        axis1 = self._regionList.attribs[pp+3]
+
+        # [x0, y0, x0, y1, x1, y1, x1, y0])
+
+        if axisIndex == 0:
+          offsets = [axis0, self.axisT+self.pixelY, axis0, self.axisB-self.pixelY,
+                     axis1, self.axisB-self.pixelY, axis1, self.axisT+self.pixelY]
+        else:
+          offsets = [self.axisL-self.pixelX, axis0, self.axisL-self.pixelX, axis1,
+                     self.axisR+self.pixelX, axis1, self.axisR+self.pixelX, axis0]
+
+        self._regionList.vertices[pp:pp+8] = offsets
 
   def _rescaleMarksRulers(self):
     vertices = self._marksList.numVertices

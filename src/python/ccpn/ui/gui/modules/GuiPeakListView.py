@@ -218,7 +218,7 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
         peakLabel.append('-')
     else:
       if len(pdNA) == 1:
-        peakLabel.append('1H')
+        peakLabel.append(peak.id)
       else:
         peakLabel.append('_')
 

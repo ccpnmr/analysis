@@ -30,6 +30,7 @@ from PyQt5 import QtGui, QtWidgets, Qt, QtCore
 from ccpn.util import Common as commonUtil
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
+from ccpn.core.PeakList import PeakList
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
@@ -719,13 +720,20 @@ class Strip(AbstractWrapperObject):
               continue
 
             peakList = peakListView.peakList
-            peak = peakList.newPeak(position=position)
+            if isinstance(peakList, PeakList):
+              peak = peakList.newPeak()
 
-            # note, the height below is not derived from any fitting
-            # but is a weighted average of the values at the neighbouring grid points
-            peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-            result.append(peak)
-            peakLists.append(peakList)
+              if peak.peakList.spectrum.dimensionCount == 1:
+                if len(position) > 1:
+                  peak.position = (position[0],)
+                  peak.height = position[1]
+              else:
+                peak.position = position
+                # note, the height below is not derived from any fitting
+                # but is a weighted average of the values at the neighbouring grid points
+                peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+              result.append(peak)
+              peakLists.append(peakList)
 
 
     finally:

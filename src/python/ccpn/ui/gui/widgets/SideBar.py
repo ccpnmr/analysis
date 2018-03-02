@@ -55,6 +55,7 @@ from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
 from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
+from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
 from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
 from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
@@ -1016,6 +1017,10 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       popup.raise_()
     elif obj.shortClassName == 'PL':
       popup = PeakListPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, peakList=obj)
+      popup.exec_()
+      popup.raise_()
+    elif obj.shortClassName == 'IL':
+      popup = IntegralListPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, integralList=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SG':

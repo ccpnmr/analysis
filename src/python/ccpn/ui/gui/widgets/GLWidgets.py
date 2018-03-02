@@ -647,6 +647,12 @@ class Gui1dWidget(CcpnGLWidget):
         self._regions.remove(region)
 
   def _createIntegral(self, integral):
+    for ils in self._GLIntegralLists.values():
+
+      # confusing as peakList and integralList share the same list :)
+      if integral.integralList == ils.integralListView.peakList:
+        ils.addIntegral(integral, colour=None, brush=ils.brush)
+
     return
 
     for region in self._regions:

@@ -159,6 +159,7 @@ class GLNotifier(QtWidgets.QWidget):
   GLPEAKNOTIFY = 'glPeakNotify'
   GLPEAKLISTS = 'glUpdatePeakLists'
   GLPEAKLISTLABELS = 'glUpdatePeakListLabels'
+  GLINTEGRALLISTS = 'glUpdateIntegralLists'
   GLGRID = 'glUpdateGrid'
   GLAXES = 'glUpdateAxes'
   GLCURSOR = 'glUpdateCursor'
@@ -3059,12 +3060,13 @@ void main()
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
       drawList.clearArrays()
-      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+
+      ils = integralListView.peakList
+      colour = ils.symbolColour
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-      ils = integralListView.peakList
       for integral in ils.integrals:
         drawList.addIntegral(integral, colour=None, brush=(colR, colG, colB, 0.15))
 
@@ -4860,6 +4862,11 @@ void main()
           self.buildPeakLists()
           self.buildPeakListLabels()
 
+        if GLNotifier.GLINTEGRALLISTS in triggers:
+          for ils in self._GLIntegralLists.values():
+            if ils.integralListView.peakList in targets:
+              ils.renderMode = GLRENDERMODE_REBUILD
+
           # self._processPeakNotifier(targets)
 
     # repaint
@@ -6317,7 +6324,10 @@ class GLIntegralArray(GLVertexArray):
     pp = 0
     for reg in self._regions:
 
-      axisIndex = int(self.attribs[pp])
+      try:
+        axisIndex = int(self.attribs[pp])
+      except Exception as es:
+        pass
 
       try:
         values = reg._object.limits[0]

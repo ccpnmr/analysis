@@ -120,7 +120,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
       sb.valueChanged.connect(self._setLinePosition)
 
     if self.GLWidget:
-      self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
+      self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
                                                     brush=self.brush, colour = self.colour, movable=self.movable)
       self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
     else:
@@ -134,7 +134,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
 
   def setGLWidget(self, GLWidget):
     self.GLWidget = GLWidget
-    self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
+    self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
                                                    brush=self.brush, colour=self.colour, movable=self.movable)
     self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
 
@@ -172,7 +172,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
 
     else:
       if not self.GLlinearRegions:
-        self.GLlinearRegions = self.GLWidget.addRegion(values=self.values, orientation=self.orientation,
+        self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation,
                                                      bounds=self.bounds,
                                                      brush=self.brush, colour=self.colour, movable=self.movable)
         self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
@@ -186,7 +186,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     if self.GLWidget:
       if self.GLlinearRegions:
         self.GLlinearRegions.setVisible(False)
-        self.GLWidget.removeRegion(self.GLlinearRegions)
+        self.GLWidget.removeExternalRegion(self.GLlinearRegions)
         self.GLlinearRegions.valuesChanged.disconnect()
         self.GLlinearRegions = None
 

@@ -1150,18 +1150,19 @@ void main()
     # initialise the arrays for the grid and axes
     self.gridList = []
     for li in range(3):
-      self.gridList.append(GLVertexArray(numLists=1
-                                         , renderMode=GLRENDERMODE_REBUILD
-                                         , blendMode=False
-                                         , drawMode=GL.GL_LINES
-                                         , dimension=2
-                                         , GLContext=self))
+      self.gridList.append(GLVertexArray(numLists=1,
+                                         renderMode=GLRENDERMODE_REBUILD,
+                                         blendMode=False,
+                                         drawMode=GL.GL_LINES,
+                                         dimension=2,
+                                         GLContext=self))
 
     self._GLPeakLists = {}
     self._GLPeakListLabels = {}
     self._marksAxisCodes = []
     self._regions = []
     self._GLIntegralLists = {}
+    self._externalRegions = GLIntegralArray(GLContext=self, spectrumView=None, integralListView=None)
 
     from ccpn.framework.PathsAndUrls import fontsPath
     self.firstFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'myfont.fnt'))
@@ -3058,10 +3059,14 @@ void main()
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
       drawList.clearArrays()
+      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
       ils = integralListView.peakList
       for integral in ils.integrals:
-        drawList.addIntegral(integral)
+        drawList.addIntegral(integral, colour=None, brush=(colR, colG, colB, 0.15))
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -3382,12 +3387,23 @@ void main()
         for lb in self._axisYLabelling:
           lb.drawTextArray()
 
-  def removeRegion(self, region):
-    self._regions.remove(region)
-    self._regionList.renderMode = GLRENDERMODE_REBUILD
-    if self._dragRegion[0] == region:
-      self._dragRegion = (None, None, None)
-    self.update()
+  def removeExternalRegion(self, region):
+    pass
+    # self._regions.remove(region)
+    # self._regionList.renderMode = GLRENDERMODE_REBUILD
+    # if self._dragRegion[0] == region:
+    #   self._dragRegion = (None, None, None)
+    # self.update()
+
+  def addExternalRegion(self, values=None, axisCode=None, orientation=None,
+                brush=None, colour='blue',
+                movable=True, visible=True, bounds=None,
+                object=None, **kw):
+
+    return self._externalRegions._addRegion(values=values, axisCode=axisCode, orientation=orientation,
+                brush=brush, colour=colour,
+                movable=movable, visible=visible, bounds=bounds,
+                object=object, **kw)
 
   def addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
@@ -4973,7 +4989,7 @@ void main()
       self.current.clearIntegrals()
 
       # TODO:ED check integrals
-      self._clearIntegralRegions()
+      # self._clearIntegralRegions()
       self._selectPeak(xPosition, yPosition)
 
     elif shiftRightMouse(event):
@@ -6146,15 +6162,15 @@ class GLIntegralArray(GLVertexArray):
     self.fillMode = GL.GL_FILL
     super(GLIntegralArray, self).drawIndexArray()
 
-  def addIntegral(self, integral):
-    newIntegral = self._addRegion(values=integral.limits[0], orientation='v', movable=True, object=integral)
+  def addIntegral(self, integral, colour='blue', brush=None):
+    return self._addRegion(values=integral.limits[0], orientation='v', movable=True, object=integral, colour=colour, brush=brush)
 
   def _addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None,
                 object=None, **kw):
 
-    if colour in REGION_COLOURS.keys():
+    if colour in REGION_COLOURS.keys() and not brush:
       brush = REGION_COLOURS[colour]
 
     if orientation == 'h':

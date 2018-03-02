@@ -83,6 +83,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     self.buildContours = True     # trigger the first build
     self.buildPeakLists = True
     self.buildPeakListLabels = True
+    self.buildIntegralLists = True
 
     # self.strip.viewBox.autoRange()
     # self.strip.zoomYAll()

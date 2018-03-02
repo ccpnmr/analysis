@@ -283,6 +283,7 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
     # ED - added to allow rebuilding of GLlists
     self.buildPeakLists = True
     self.buildPeakListLabels = True
+    self.buildIntegralLists = True
 
   def _printToFile(self, printer):
     # CCPN INTERNAL - called in _printToFile method of GuiSpectrumViewNd

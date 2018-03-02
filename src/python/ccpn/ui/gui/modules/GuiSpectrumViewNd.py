@@ -151,6 +151,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.buildContours = True     # trigger the first build
     self.buildPeakLists = True
     self.buildPeakListLabels = True
+    self.buildIntegralLists = True
     self._buildSignal = _spectrumSignal()   # TODO:ED check signalling
 
     # override of Qt setVisible

@@ -38,7 +38,8 @@ except ImportError:
 from ccpn.util.Logging import getLogger
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
-from ccpn.util.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_IGNORE,\
+from ccpn.util.CcpnOpenGL import CcpnGLWidget, GLPeakListArray, GLVertexArray, GLIntegralArray, \
+                                  GLRENDERMODE_IGNORE,\
                                   GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE,\
                                   GLRENDERMODE_REBUILD, GLREFRESHMODE_NEVER,\
                                   GLREFRESHMODE_ALWAYS, GLREFRESHMODE_REBUILD,\
@@ -46,6 +47,17 @@ from ccpn.util.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_IGNOR
                                   GLString
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 from ccpn.core.lib.Notifiers import Notifier
+
+REGION_COLOURS = {
+  'green': (0, 1.0, 0.1, 0.15),
+  'yellow': (0.9, 1.0, 0.05, 0.15),
+  'blue': (0.2, 0.1, 1.0, 0.15),
+  'transparent': (1.0, 1.0, 1.0, 0.01),
+  'grey': (1.0, 1.0, 1.0, 0.15),
+  'red': (1.0, 0.1, 0.2, 0.15),
+  'purple': (0.7, 0.4, 1.0, 0.15),
+  None: (0.2, 0.1, 1.0, 0.15)
+}
 
 
 class GuiNdWidget(CcpnGLWidget):
@@ -82,6 +94,7 @@ class Gui1dWidget(CcpnGLWidget):
     lineThickness = self._preferences.peakSymbolThickness / 2.0
 
     drawList = self._GLPeakLists[peakListView.pid]
+
     drawList.indices = np.empty(0, dtype=np.uint)
 
     index = 0
@@ -124,9 +137,9 @@ class Gui1dWidget(CcpnGLWidget):
     spectrum = spectrumView.spectrum
 
     if peakListView.pid not in self._GLPeakLists:
-      self._GLPeakLists[peakListView.pid] = GLVertexArray(numLists=1, renderMode=GLRENDERMODE_REBUILD
-                                                      , blendMode=False, drawMode=GL.GL_LINES
-                                                      , dimension=2, GLContext=self)
+      self._GLPeakLists[peakListView.pid] = GLPeakListArray(GLContext=self,
+                                                      spectrumView=spectrumView,
+                                                      peakListView=peakListView)
 
     drawList = self._GLPeakLists[peakListView.pid]
 
@@ -185,11 +198,6 @@ class Gui1dWidget(CcpnGLWidget):
       # for pls in spectrum.peakLists:
 
       pls = peakListView.peakList
-      # spectrumFrequency = spectrum.spectrometerFrequencies
-
-      # trap IntegralLists that are stored under the peakListView
-      if isinstance(pls, IntegralList):
-        return
 
       for peak in pls.peaks:
 
@@ -280,7 +288,7 @@ class Gui1dWidget(CcpnGLWidget):
     y = abs(self.pixelY)
 
     # fix the aspect ratio of the cross to match the screen
-    minIndex = 0 if x <= y else 1
+    # minIndex = 0 if x <= y else 1
     # pos = [symbolWidth, symbolWidth * y / x]
     # w = r = pos[minIndex]
 
@@ -630,12 +638,17 @@ class Gui1dWidget(CcpnGLWidget):
     self._clearKeys()
     self.update()
 
+  # TODO:ED these need to be special created from the pipeline widgets
   def _deleteIntegral(self, integral):
+    return
+
     for region in self._regions:
       if region._object == integral:
         self._regions.remove(region)
 
   def _createIntegral(self, integral):
+    return
+
     for region in self._regions:
       if region._object == integral:
         # already exists
@@ -644,7 +657,10 @@ class Gui1dWidget(CcpnGLWidget):
       self.addRegion(values=integral.limits[0], orientation='v', movable=True, object=integral)
 
   def _changeIntegral(self, integral):
+    return
+
     for region in self._regions:
       if region._object == integral:
-        # self._regions.update(region)
-        pass
+        self._regionList.renderMode = GLRENDERMODE_REBUILD
+        self.update()
+

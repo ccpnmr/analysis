@@ -659,11 +659,11 @@ class Gui1dWidget(CcpnGLWidget):
   def _changeIntegral(self, integral):
 
     # regions added by the pipeline module
-    for region in self._regions:
-      if region._object == integral:
-        self._regionList.renderMode = GLRENDERMODE_REBUILD
-        self.update()
-        return
+    # for region in self._externalRegions._regions:
+    #   if region._object == integral:
+    #     self._regionList.renderMode = GLRENDERMODE_REBUILD
+    #     self.update()
+    #     return
 
     for ils in self._GLIntegralLists.values():
       for reg in ils._regions:

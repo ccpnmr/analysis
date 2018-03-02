@@ -1461,7 +1461,7 @@ void main()
     self._endCoordinate = self._startCoordinate
     # self._drawSelectionBox = True
 
-    if not self.mousePressInRegion(self._regions):
+    if not self.mousePressInRegion(self._externalRegions._regions):
       self.mousePressInIntegralLists()
 
     self.current.strip = self._parent
@@ -1630,8 +1630,8 @@ void main()
           elif self._dragRegion[1] == 'h':
 
             if self._dragRegion[2] == 3:
-              values[0] += dy * self.pixelY
-              values[1] += dy * self.pixelY
+              values[0] -= dy * self.pixelY
+              values[1] -= dy * self.pixelY
             else:
               values[self._dragRegion[2]] -= dy * self.pixelY
 
@@ -3389,21 +3389,26 @@ void main()
 
   def removeExternalRegion(self, region):
     pass
-    # self._regions.remove(region)
-    # self._regionList.renderMode = GLRENDERMODE_REBUILD
-    # if self._dragRegion[0] == region:
-    #   self._dragRegion = (None, None, None)
-    # self.update()
+    self._externalRegions._removeRegion(region)
+    self._externalRegions.renderMode = GLRENDERMODE_REBUILD
+    if self._dragRegion[0] == region:
+      self._dragRegion = (None, None, None)
+    self.update()
 
   def addExternalRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None,
                 object=None, **kw):
 
-    return self._externalRegions._addRegion(values=values, axisCode=axisCode, orientation=orientation,
+    newRegion = self._externalRegions._addRegion(values=values, axisCode=axisCode, orientation=orientation,
                 brush=brush, colour=colour,
                 movable=movable, visible=visible, bounds=bounds,
                 object=object, **kw)
+
+    self._externalRegions.renderMode = GLRENDERMODE_REBUILD
+    self.update()
+
+    return newRegion
 
   def addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
@@ -3457,6 +3462,19 @@ void main()
     return self._regions[-1]
 
   def buildRegions(self):
+
+    drawList = self._externalRegions
+    if drawList.renderMode == GLRENDERMODE_REBUILD:
+      drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+      drawList._rebuild()
+
+    elif drawList.renderMode == GLRENDERMODE_RESCALE:
+      drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+      drawList._resize()
+
+
+    return
+
     drawList = self._regionList
 
     if drawList.renderMode == GLRENDERMODE_REBUILD:
@@ -3598,10 +3616,12 @@ void main()
       return
 
     self.buildRegions()
-    self._regionList.fillMode = GL.GL_LINE
-    self._regionList.drawIndexArray()
-    self._regionList.fillMode = GL.GL_FILL
-    self._regionList.drawIndexArray()
+    self._externalRegions.drawIndexArray()
+
+    # self._regionList.fillMode = GL.GL_LINE
+    # self._regionList.drawIndexArray()
+    # self._regionList.fillMode = GL.GL_FILL
+    # self._regionList.drawIndexArray()
 
   def drawMarksAxisCodes(self):
     if self._parent.isDeleted:
@@ -3805,6 +3825,9 @@ void main()
     self.stripIDString.drawTextArray()
 
   def _rescaleRegions(self):
+    self._externalRegions._rescale()
+    return
+
     vertices = self._regionList.numVertices
 
     if vertices:
@@ -6165,6 +6188,10 @@ class GLIntegralArray(GLVertexArray):
   def addIntegral(self, integral, colour='blue', brush=None):
     return self._addRegion(values=integral.limits[0], orientation='v', movable=True, object=integral, colour=colour, brush=brush)
 
+  def _removeRegion(self, region):
+    if region in self._regions:
+      self._regions.remove(region)
+
   def _addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None,
@@ -6292,7 +6319,11 @@ class GLIntegralArray(GLVertexArray):
 
       axisIndex = int(self.attribs[pp])
 
-      values = reg._object.limits[0]
+      try:
+        values = reg._object.limits[0]
+      except Exception as es:
+        values = reg.values
+
       axis0 = values[0]
       axis1 = values[1]
       reg._values = values
@@ -6315,6 +6346,58 @@ class GLIntegralArray(GLVertexArray):
       self.attribs[pp + 5] = axis0
       self.attribs[pp + 7] = axis1
       pp += 8
+
+  def _rebuild(self):
+    axisT = self.parent.axisT
+    axisB = self.parent.axisB
+    axisL = self.parent.axisL
+    axisR = self.parent.axisR
+    pixelX = self.parent.pixelX
+    pixelY = self.parent.pixelY
+
+    self.clearArrays()
+    for reg in self._regions:
+
+      axisIndex = 0
+      for ps, psCode in enumerate(self.parent.axisOrder[0:2]):
+        if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+
+          if reg.axisCode[0] == psCode[0]:
+            axisIndex = ps
+        elif self.parent._preferences.matchAxisCode == 1:  # match full code
+          if reg.axisCode == psCode:
+            axisIndex = ps
+
+      # TODO:ED check axis units - assume 'ppm' for the minute
+
+      if axisIndex == 0:
+        # vertical ruler
+        pos0 = x0 = reg.values[0]
+        pos1 = x1 = reg.values[1]
+        y0 = axisT+pixelY
+        y1 = axisB-pixelY
+      else:
+        # horizontal ruler
+        pos0 = y0 = reg.values[0]
+        pos1 = y1 = reg.values[1]
+        x0 = axisL-pixelX
+        x1 = axisR+pixelX
+
+      colour = reg.brush
+      index = self.numVertices
+      self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
+                                                      index, index + 1, index, index + 1,
+                                                      index + 1, index + 2, index + 1, index + 2,
+                                                      index + 2, index + 3, index + 2, index + 3,
+                                                      index, index + 3, index, index + 3])
+      self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+      self.colors = np.append(self.colors, colour * 4)
+      self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+
+      index += 4
+      self.numVertices += 4
+
+
 
 if __name__ == '__main__':
 

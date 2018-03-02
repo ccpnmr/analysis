@@ -505,6 +505,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # TODO:ED marks and horizontal/vertical traces
     self._rescaleOverlayText()
     self.rescaleMarksRulers()
+    self.rescaleIntegralLists()
     self._rescaleRegions()
     self.rescaleSpectra()
 
@@ -1387,25 +1388,8 @@ void main()
     else:
       return None
 
-  def mousePressEvent(self, ev):
-    self.lastPos = ev.pos()
-
-    # TODO:ED take into account whether axis is visible
-    mx = ev.pos().x()
-    if self._drawBottomAxis:
-      my = self.height() - ev.pos().y() - self.AXIS_MARGINBOTTOM
-    else:
-      my = self.height() - ev.pos().y()
-    self._mouseStart = (mx, my)
-
-    vect = self.vInv.dot([mx, my, 0.0, 1.0])
-    self._mouseStart = (mx, my)
-    self._startCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
-
-    self._endCoordinate = self._startCoordinate
-    # self._drawSelectionBox = True
-
-    for region in self._regions:
+  def mousePressInRegion(self, regions):
+    for region in regions:
       if region.visible and region.movable:
         if region.orientation == 'h':
           if not self._widthsChangedEnough((0.0, region.values[0]),
@@ -1450,6 +1434,34 @@ void main()
               break
     else:
       self._dragRegion = (None, None, None)
+
+    return self._dragRegion[0]
+
+  def mousePressInIntegralLists(self):
+    for reg in self._GLIntegralLists.values():
+      if self.mousePressInRegion(reg._regions):
+        break
+
+  def mousePressEvent(self, ev):
+    self.lastPos = ev.pos()
+
+    # TODO:ED take into account whether axis is visible
+    mx = ev.pos().x()
+    if self._drawBottomAxis:
+      my = self.height() - ev.pos().y() - self.AXIS_MARGINBOTTOM
+    else:
+      my = self.height() - ev.pos().y()
+    self._mouseStart = (mx, my)
+
+    vect = self.vInv.dot([mx, my, 0.0, 1.0])
+    self._mouseStart = (mx, my)
+    self._startCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
+
+    self._endCoordinate = self._startCoordinate
+    # self._drawSelectionBox = True
+
+    if not self.mousePressInRegion(self._regions):
+      self.mousePressInIntegralLists()
 
     self.current.strip = self._parent
 
@@ -3046,14 +3058,14 @@ void main()
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
       drawList.clearArrays()
-      drawList.refreshMode = GLREFRESHMODE_REBUILD
-      drawList.drawMode = GL.GL_LINES
-      drawList.fillMode = None
 
       ils = integralListView.peakList
-
       for integral in ils.integrals:
         drawList.addIntegral(integral)
+
+    elif drawList.renderMode == GLRENDERMODE_RESCALE:
+      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
+      drawList._resize()
 
   def buildIntegralLists(self):
     if self._parent.isDeleted:
@@ -3827,6 +3839,10 @@ void main()
 
       for pp in range(0, 2*vertices, 2):
         mark.attribs[pp:pp+2] = offsets
+
+  def rescaleIntegralLists(self):
+    for il in self._GLIntegralLists.values():
+      il._rescale()
 
   def rescaleMarksRulers(self):
     self._rescaleMarksRulers()
@@ -5907,7 +5923,7 @@ class GLRegion(QtWidgets.QWidget):
   @values.setter
   def values(self, values):
     self._values = tuple(values)
-    self._glList.renderMode = GLRENDERMODE_REBUILD
+    self._glList.renderMode = GLRENDERMODE_RESCALE
     self.parent.update()
     self.valuesChanged.emit(list(values))
 
@@ -6247,6 +6263,42 @@ class GLIntegralArray(GLVertexArray):
 
         self.vertices[pp:pp+8] = offsets
 
+  def _resize(self):
+    axisT = self.parent.axisT
+    axisB = self.parent.axisB
+    axisL = self.parent.axisL
+    axisR = self.parent.axisR
+    pixelX = self.parent.pixelX
+    pixelY = self.parent.pixelY
+
+    pp = 0
+    for reg in self._regions:
+
+      axisIndex = int(self.attribs[pp])
+
+      values = reg._object.limits[0]
+      axis0 = values[0]
+      axis1 = values[1]
+      reg._values = values
+
+      # axis0 = self.attribs[pp + 1]
+      # axis1 = self.attribs[pp + 3]
+
+      # [x0, y0, x0, y1, x1, y1, x1, y0])
+
+      if axisIndex == 0:
+        offsets = [axis0, axisT + pixelY, axis0, axisB - pixelY,
+                   axis1, axisB - pixelY, axis1, axisT + pixelY]
+      else:
+        offsets = [axisL - pixelX, axis0, axisL - pixelX, axis1,
+                   axisR + pixelX, axis1, axisR + pixelX, axis0]
+
+      self.vertices[pp:pp + 8] = offsets
+      self.attribs[pp + 1] = axis0
+      self.attribs[pp + 3] = axis1
+      self.attribs[pp + 5] = axis0
+      self.attribs[pp + 7] = axis1
+      pp += 8
 
 if __name__ == '__main__':
 

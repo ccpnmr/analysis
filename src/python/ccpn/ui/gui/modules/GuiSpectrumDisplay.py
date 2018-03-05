@@ -252,7 +252,7 @@ class GuiSpectrumDisplay(CcpnModule):
     obj = self.project.getByPid(pid)
     if obj is not None and isinstance(obj, Spectrum):
       if self.isGrouped:
-        showWarning('Forbidden drop','A Single spectrum cannot be dropped onto grouped displays. Open a new Blank Display (N,D)')
+        showWarning('Forbidden drop','A Single spectrum cannot be dropped onto grouped displays.')
         return success
       self.displaySpectrum(obj)
       if strip in self.strips:
@@ -303,37 +303,53 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # FIXME THIS IS ONLY A TEST FOR FUN
     if self.current.strip:
-      if len(self.current.peaks) ==1:
-        peak = self.current.peaks[0]
-        xs = self.current.strip.orderedAxes
-        for atom in nmrResidue.nmrAtoms:
-          for x in xs:
-            if x.code == atom.name:
-              peak.assignDimension(x.code, atom)
+        for nmrAtom in nmrResidue.nmrAtoms:
+          self._assignNmrAtomToCurrentPeaks(nmrAtom)
 
-    # if self.current.cursorPosition
+  def _handleNmrAtom(self, nmrAtom):
+    if not self.current.peak:
+      self._markNmrAtom(nmrAtom)
+
+    # FIXME THIS IS ONLY A TEST FOR FUN
+    if self.current.strip:
+      self._assignNmrAtomToCurrentPeaks(nmrAtom)
+
+
+  def _assignNmrAtomToCurrentPeaks(self, nmrAtom):
+    peaks = self.current.peaks
+    if len(peaks) > 0:
+      for peak in peaks:
+        for peakListView in peak.peakList.peakListViews:
+          if peakListView.isVisible():
+            orderedAxes = self.current.strip.orderedAxes
+            for ax in orderedAxes:
+              if ax.code:
+                if len(ax.code) > 0:
+                  if ax.code[0] in nmrAtom.name:
+                    peak.assignDimension(ax.code, nmrAtom)
 
   def _processDragEnterEvent(self, data):
-    event = data['event']
-    mousePosition = event.pos()
-    if self.current.strip:
-      position = list(self.current.strip._testCcpnOpenGLWidget.mapMouseToAxis(mousePosition))
-      orderedAxes = self.current.strip.orderedAxes
-      if self.current.peak:
-        peakPosition = self.current.peak.position
-        minPeakPos = min(peakPosition)
-        bw = self.current.strip._testCcpnOpenGLWidget.boxWidth
-        bh = self.current.strip._testCcpnOpenGLWidget.boxHeight
-        pW = 0
-        pH = 0
-        if len(peakPosition) > 0:
-          pW = peakPosition[0]
-        if len(peakPosition)>1:
-          pH = peakPosition[1]
-        boxW = (pW + bw, pW - bw)
-        boxH = (pH + bh, pH - bh)
-        if pW + bw>position[0]>pW - bw and  pH + bh >position[1]>pH - bh:
-         print()
+    pass
+    # event = data['event']
+    # mousePosition = event.pos()
+    # if self.current.strip:
+    #   position = list(self.current.strip._testCcpnOpenGLWidget.mapMouseToAxis(mousePosition))
+    #   orderedAxes = self.current.strip.orderedAxes
+    #   if self.current.peak:
+    #     peakPosition = self.current.peak.position
+    #     minPeakPos = min(peakPosition)
+    #     bw = self.current.strip._testCcpnOpenGLWidget.boxWidth
+    #     bh = self.current.strip._testCcpnOpenGLWidget.boxHeight
+    #     pW = 0
+    #     pH = 0
+    #     if len(peakPosition) > 0:
+    #       pW = peakPosition[0]
+    #     if len(peakPosition)>1:
+    #       pH = peakPosition[1]
+    #     boxW = (pW + bw, pW - bw)
+    #     boxH = (pH + bh, pH - bh)
+    #     if pW + bw>position[0]>pW - bw and  pH + bh >position[1]>pH - bh:
+    #      print('NOT IMPLEMENTED YET')
 
 
 
@@ -391,7 +407,7 @@ class GuiSpectrumDisplay(CcpnModule):
     if nmrAtoms:
       markNmrAtoms(self.mainWindow, nmrAtoms)
 
-  def _handleNmrAtom(self, nmrAtom):
+  def _markNmrAtom(self, nmrAtom):
     """
     Mark an nmrAtom in the spectrum displays with horizontal/vertical bars
     """

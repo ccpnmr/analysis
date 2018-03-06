@@ -124,6 +124,9 @@ class NmrChainPulldown(_Pulldown):
     className = 'NmrChain'
     attributeName = 'nmrChains'
 
+class ComplexesPulldown(_Pulldown):
+  className = 'Complex'
+  attributeName = 'complexes'
 
 class ChainPulldown(_Pulldown):
   className = 'Chain'
@@ -154,6 +157,10 @@ class PeakListPulldown(_Pulldown):
     className = 'PeakList'
     attributeName = 'peakLists'
 
+
+class SubstancePulldown(_Pulldown):
+  className = 'Substance'
+  attributeName = 'substances'
 
 class SpectrumPulldown(_Pulldown):
     className = 'Spectrum'

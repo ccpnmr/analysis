@@ -3012,9 +3012,9 @@ class BondItem(QtWidgets.QGraphicsItem):
 organicAtoms = set(["B", "C", "N", "O", "P", "S", "F", "Cl", "Br", "I"])
 cnos = set(["C", "N", "O", "S"])
 
-def importSmiles(smilesString):
+def importSmiles(smilesString, compoundName='Unnamed', project=None):
 
-  compound = Compound('Unnamed')
+  compound = Compound(compoundName)
   var = Variant(compound)
   compound.defaultVars.add(var)
 
@@ -3439,6 +3439,16 @@ def importSmiles(smilesString):
   var.minimise2d(maxCycles=50)
   var.checkBaseValences()
   #var.shuffleStereo()
+  if project:
+    try:
+      nmrChain = project.newNmrChain(compoundName)
+      nmrResidue = nmrChain.newNmrResidue(compoundName)
+      for atom in compound.atoms:
+        nmrAtom = nmrResidue.fetchNmrAtom(atom.name)
+        nmrAtom._compoundViewAtom = atom
+      nmrResidue._compoundViewCompound = compound
+    except Exception as e:
+      print(e)
 
   return compound
 

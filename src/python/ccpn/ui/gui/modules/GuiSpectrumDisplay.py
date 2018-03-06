@@ -262,12 +262,16 @@ class GuiSpectrumDisplay(CcpnModule):
       success = True
     elif obj is not None and isinstance(obj, PeakList):
       self._handlePeakList(obj)
+      success = True
     elif obj is not None and isinstance(obj, SpectrumGroup):
       self._handleSpectrumGroup(obj)
+      success = True
     elif obj is not None and isinstance(obj, NmrAtom):
       self._handleNmrAtom(obj)
+      success = True
     elif obj is not None and isinstance(obj, NmrResidue):
       self._handleNmrResidue(obj)
+      success = True
     else:
       showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup or PeakList')
     return success
@@ -326,7 +330,10 @@ class GuiSpectrumDisplay(CcpnModule):
               if ax.code:
                 if len(ax.code) > 0:
                   if ax.code[0] in nmrAtom.name:
-                    peak.assignDimension(ax.code, nmrAtom)
+                    # if not peak.isFullyAssigned():
+                      peak.assignDimension(ax.code, nmrAtom)
+                    # else:
+                    #   peak.addAssignment([nmrAtom])
 
   def _processDragEnterEvent(self, data):
     pass

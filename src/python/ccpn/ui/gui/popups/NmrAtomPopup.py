@@ -6,6 +6,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES
@@ -37,7 +38,7 @@ class NmrAtomPopup(CcpnDialog):
     self.colourScheme = self.application.colourScheme
     self.nmrAtomLabel = Label(self, "NmrAtom: %s " % self.nmrAtom.id, grid=(0, 0))
     self.nmrAtomNameLabel = Label(self, "NmrAtom name", grid=(1, 0))
-    self.nmrAtomNamePulldown = PulldownList(self, grid=(1, 1))
+    self.nmrAtomNamePulldown = FilteringPulldownList(self, grid=(1, 1))
     mergeLabel = Label(self, grid=(1, 2), hAlign='r', text='Merge to Existing?')
     self.mergeBox = CheckBox(self, grid=(1, 3), hAlign='l')
     self.nmrResidue = self.nmrAtom.nmrResidue

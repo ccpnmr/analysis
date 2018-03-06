@@ -30,6 +30,8 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
+
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
@@ -62,10 +64,9 @@ class NmrResiduePopup(CcpnDialog):
     self.seqCodePulldown = PulldownList(self, grid=(1, 3), callback=self._getResidueType)
 
     residueTypeLabel = Label(self, "Residue Type ", grid=(2, 0))
-    self.residueTypePulldown = PulldownList(self, grid=(2, 1))
+    self.residueTypePulldown = FilteringPulldownList(self, grid=(2, 1))
     self.residueTypePulldown.setData(('',)+CCP_CODES)              # ejb
     self.residueTypePulldown.setFixedWidth(100)
-
     leftOverLabel = Label(self, "Leftover Possibilities ", grid=(5, 0))
     leftOvers = Label(self, grid=(5, 1))
     closeButton = Button(self, grid=(6, 1), text='Close', callback=self.reject)

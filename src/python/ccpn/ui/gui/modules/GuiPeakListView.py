@@ -581,6 +581,14 @@ class Peak1dAnnotation(QtWidgets.QGraphicsSimpleTextItem):
                    redoArgs=(peakItem, clearLabel))
 
       # project._endCommandEchoBlock()
+  def clearPeakAnnotationItem(self, peakItem):
+
+    self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
+    self.setParentItem(peakItem)
+    colour = peakItem.peakListView.peakList.textColour
+    self.setBrush(QtGui.QColor(colour))
+
+    self.setupPeakAnnotationItem(peakItem, clearLabel=True)
 
   def sceneEventFilter(self, watched, event):
     print(event)

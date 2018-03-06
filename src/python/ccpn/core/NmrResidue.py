@@ -1342,6 +1342,7 @@ def _newNmrResidue(self:NmrChain, sequenceCode:typing.Union[int,str]=None, resid
   self._startCommandEchoBlock('newNmrResidue', values=locals(), defaults=defaults,
                               parName='newNmrResidue')
   self._project.blankNotification() # delay notifiers till NmrResidue is fully ready
+  result = None
   try:
 
     # Convert value to string, and check
@@ -1403,12 +1404,13 @@ def _newNmrResidue(self:NmrChain, sequenceCode:typing.Union[int,str]=None, resid
     self._endCommandEchoBlock()
 
   # Do creation notifications
-  if serial is not None:
-    result._finaliseAction('rename')
-    # If we have reset serial above this is needed
-  result._finaliseAction('create')
+  if result:
+    if serial is not None:
+      result._finaliseAction('rename')
+      # If we have reset serial above this is needed
+    result._finaliseAction('create')
 
-  return result
+    return result
 
 
 def _fetchNmrResidue(self:NmrChain, sequenceCode:typing.Union[int,str]=None,

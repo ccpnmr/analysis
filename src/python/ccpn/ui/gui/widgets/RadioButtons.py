@@ -32,7 +32,7 @@ UNCHECKED = QtCore.Qt.Unchecked
 
 class RadioButtons(QtWidgets.QWidget, Base):
 
-  def __init__(self, parent, texts=None, selectedInd=None,
+  def __init__(self, parent, texts=None, selectedInd=None, exclusive=True,
                callback=None, direction='h', tipTexts=None,  **kw):
 
 
@@ -45,7 +45,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
     self.texts = texts
     direction = direction.lower()
     buttonGroup = self.buttonGroup = QtWidgets.QButtonGroup(self)
-    buttonGroup.setExclusive(True)
+    self.isExclusive = exclusive
+    buttonGroup.setExclusive(self.isExclusive)
 
     if not tipTexts:
       tipTexts = [None] * len(texts)
@@ -96,6 +97,12 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
     self.radioButtons[i].setChecked(True)
 
+  def deselectAll(self):
+    self.buttonGroup.setExclusive(False)
+    for i in self.radioButtons:
+      i.setChecked(False)
+    self.buttonGroup.setExclusive(self.isExclusive)
+
   def setCallback(self, callback):
 
     self.callback = callback
@@ -113,14 +120,17 @@ if __name__ == '__main__':
 
   from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
+  def testCallback(a):
+    print(a)
+
   app = TestApplication()
   popup = CcpnDialog(windowTitle='Test radioButtons')
 
-  popup.setSize(250, 50)
 
   radioButtons = RadioButtons(parent=popup, texts=['Test1','Test2','Test3'], selectedInd=1,
-               callback=None, grid=(0, 0))
+               callback=testCallback, grid=(0, 0))
   radioButtons.radioButtons[0].setEnabled(False)
+
 
   popup.raise_()
   popup.exec()

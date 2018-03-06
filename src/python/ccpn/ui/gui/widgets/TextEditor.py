@@ -33,7 +33,7 @@ from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import fixedWidthFont
 
-class TextEditor(QtGui.QTextEdit, Base):
+class TextEditor(QtWidgets.QTextEdit, Base):
 
   def __init__(self, parent=None, filename=None, **kw):
     super(TextEditor, self).__init__(parent)

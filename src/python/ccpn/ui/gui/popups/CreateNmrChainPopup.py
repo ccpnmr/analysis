@@ -56,6 +56,13 @@ Create =  'Create'
 COPYNMRCHAIN = '-Copy'
 CloneOptions = [CHAIN, NMRCHAIN, SUBSTANCE, COMPLEX]
 
+CHAINTipText     =  'Clones an NmrChain from a Chain. All the nmrResidues and nmrAtoms will be created.'
+NMRCHAINTipText  =  'Clones an NmrChain from a NmrChain. All the nmrResidues and nmrAtoms will be created.'
+SUBSTANCETipText =  'Creates an NmrChain from a Substance which contains a single nmrResidue. If the SMILES is set, nmrAtoms will be created.'
+COMPLEXTipText   =  'Clones an nmrChain for each chain present in the complex. All the nmrResidues and nmrAtoms will be created.'
+
+CloneOptionsTipTexts = [CHAINTipText, NMRCHAINTipText, SUBSTANCETipText, COMPLEXTipText]
+
 
 class CreateNmrChainPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None
@@ -82,26 +89,26 @@ class CreateNmrChainPopup(CcpnDialog):
     self.cloneOptionsWidget = RadioButtons(self, texts=CloneOptions,
                                            callback=self._cloneOptionCallback,
                                            direction='v',
-                                           tipTexts=None,
+                                           tipTexts=CloneOptionsTipTexts,
                                            grid=(vGrid, 1),
                                            vAlign='c'
                                            )
     vGrid += 1
 
-    self.availableChainsPD = ChainPulldown(self, self.project,showSelectName=True, callback=self._populateWidgets, labelText='', grid=(vGrid, 1),)
+    self.availableChainsPD = ChainPulldown(self, self.project,showSelectName=True, callback=self._populateWidgets, labelText='', tipText=CHAINTipText, grid=(vGrid, 1),)
     self.availableChainsPD.label.hide()
     self.availableChainsPD.hide()
     vGrid += 1
-    self.availableNmrChainsPD = NmrChainPulldown(self, self.project,showSelectName=True, callback=self._populateWidgets, labelText='', grid=(vGrid, 1))
+    self.availableNmrChainsPD = NmrChainPulldown(self, self.project,showSelectName=True, callback=self._populateWidgets, labelText='',tipText=NMRCHAINTipText, grid=(vGrid, 1))
     self.availableNmrChainsPD.label.hide()
     self.availableNmrChainsPD.hide()
     vGrid += 1
     self.availableComplexesPD = ComplexesPulldown(self, self.project, showSelectName=True,
-                                                  callback=self._populateWidgets, labelText='', grid=(vGrid, 1))
+                                                  callback=self._populateWidgets, labelText='',tipText=COMPLEXTipText, grid=(vGrid, 1))
     self.availableComplexesPD.label.hide()
     self.availableComplexesPD.hide()
     vGrid += 1
-    tipText = 'Select a Substance containing a SMILES. Substances without SMILES are disabled'
+    tipText = SUBSTANCETipText
     self.availableSubstancesPD = SubstancePulldown(self, self.project, showSelectName=True,
                                                  callback=self._populateWidgets, labelText='', tipText=tipText,grid=(vGrid, 1))
     self.availableSubstancesPD.label.hide()
@@ -207,12 +214,12 @@ class CreateNmrChainPopup(CcpnDialog):
     if newNmrChain:
       try:
         self.project._startCommandEchoBlock('_createNmrChain')
-        # self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
+        # self.project.blankNotification()  # For speed issue
 
         from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
+        nmrResidue = newNmrChain.newNmrResidue(name)
         if self._substance.smiles:
           compound = importSmiles(self._substance.smiles, compoundName=name)
-          nmrResidue = newNmrChain.newNmrResidue(name)
           for atom in compound.atoms:
             nmrAtom = nmrResidue.fetchNmrAtom(atom.name)
 
@@ -222,14 +229,14 @@ class CreateNmrChainPopup(CcpnDialog):
         self.project._endCommandEchoBlock()
       return newNmrChain
 
-  def _disableSubstanceWithoutSMILES(self):
-    'disables from selection substances without SMILES'
-    if self.project:
-      for i, text in enumerate(self.availableSubstancesPD.textList):
-        substance = self.project.getByPid(text)
-        if isinstance(substance, Substance):
-          if not substance.smiles:
-            self.availableSubstancesPD.pulldownList.model().item(i).setEnabled(False)
+  # def _disableSubstanceWithoutSMILES(self):
+  #   'disables from selection substances without SMILES'
+  #   if self.project:
+  #     for i, text in enumerate(self.availableSubstancesPD.textList):
+  #       substance = self.project.getByPid(text)
+  #       if isinstance(substance, Substance):
+  #         if not substance.smiles:
+  #           self.availableSubstancesPD.pulldownList.model().item(i).setEnabled(False)
 
 
 
@@ -362,8 +369,7 @@ class CreateNmrChainPopup(CcpnDialog):
     hs = [x for x in self.pulldownsOptions if x != selected]
     for h in hs:
       self.pulldownsOptions[h].hide()
-    if selected == SUBSTANCE:
-      self._disableSubstanceWithoutSMILES()
+
 
 
 

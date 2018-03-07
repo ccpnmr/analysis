@@ -73,6 +73,11 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
     self.setCallback(callback)
 
+  def getRadioButton(self, text):
+    for rb in self.radioButtons:
+      if rb.text() == text:
+        return rb
+
   def get(self):
 
     return self.texts[self.getIndex()]

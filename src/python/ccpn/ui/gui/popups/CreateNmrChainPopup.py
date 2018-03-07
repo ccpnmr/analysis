@@ -46,10 +46,10 @@ from ccpn.core.Substance import Substance
 from ccpn.core.Complex import Complex
 from ccpn.util.Logging import getLogger
 
-CHAIN     = 'Chain'
-NMRCHAIN  = 'NmrChain'
-SUBSTANCE = 'Substance'
-COMPLEX   = 'Complex'
+CHAIN     =  Chain.className
+NMRCHAIN  =  NmrChain.className
+SUBSTANCE =  Substance.className
+COMPLEX   =  Complex.className
 
 Cancel = 'Cancel'
 Create =  'Create'
@@ -101,8 +101,9 @@ class CreateNmrChainPopup(CcpnDialog):
     self.availableComplexesPD.label.hide()
     self.availableComplexesPD.hide()
     vGrid += 1
+    tipText = 'Select a Substance containing a SMILES. Substances without SMILES are disabled'
     self.availableSubstancesPD = SubstancePulldown(self, self.project, showSelectName=True,
-                                                 callback=self._populateWidgets, labelText='', grid=(vGrid, 1))
+                                                 callback=self._populateWidgets, labelText='', tipText=tipText,grid=(vGrid, 1))
     self.availableSubstancesPD.label.hide()
     self.availableSubstancesPD.hide()
 
@@ -121,7 +122,7 @@ class CreateNmrChainPopup(CcpnDialog):
 
     self._resetObjectSelections()
     self._setCreateButtonEnabled(False)
-    # self._activateCloneOptions()
+    self._activateCloneOptions()
 
   def _resetObjectSelections(self):
     # used to create a new nmrChain from a selected object.
@@ -200,6 +201,37 @@ class CreateNmrChainPopup(CcpnDialog):
         self.project._endCommandEchoBlock()
       return newNmrChain
 
+  def _cloneFromSubstance(self, name):
+    '''Create a new nmr chain from a substance which has a SMILES set.'''
+    newNmrChain = self._createEmptyNmrChain(name)
+    if newNmrChain:
+      try:
+        self.project._startCommandEchoBlock('_createNmrChain')
+        # self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
+
+        from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
+        if self._substance.smiles:
+          compound = importSmiles(self._substance.smiles, compoundName=name)
+          nmrResidue = newNmrChain.newNmrResidue(name)
+          for atom in compound.atoms:
+            nmrAtom = nmrResidue.fetchNmrAtom(atom.name)
+
+        # self.project.unblankNotification()
+
+      finally:
+        self.project._endCommandEchoBlock()
+      return newNmrChain
+
+  def _disableSubstanceWithoutSMILES(self):
+    'disables from selection substances without SMILES'
+    if self.project:
+      for i, text in enumerate(self.availableSubstancesPD.textList):
+        substance = self.project.getByPid(text)
+        if isinstance(substance, Substance):
+          if not substance.smiles:
+            self.availableSubstancesPD.pulldownList.model().item(i).setEnabled(False)
+
+
 
   def _createNmrChain(self):
     name = self.nameLineEdit.get()
@@ -227,55 +259,112 @@ class CreateNmrChainPopup(CcpnDialog):
         else:
           return
 
+      if self._substance:
+        newNmrChain = self._cloneFromSubstance(name)
+        if newNmrChain:
+          self.accept()
+        else:
+          return
+
+      if self._complex:
+        if name:
+          names = name.split(',')
+          for name in names:
+            exsistingNmrChain = self.project.getByPid(NmrChain.shortClassName + ':' + name)
+            if exsistingNmrChain:
+              showWarning('Existing NmrChain %s' % exsistingNmrChain.shortName, 'Change name')
+              return
+
+          if len(self._complex.chains) == len(names):
+            for chain, name in zip(self._complex.chains, names):
+              self._chain = chain
+              self._cloneFromChain(name)
+            self.accept()
+          else:
+            showWarning('Not enough names', 'Complex %s has %s chains, Please add the missing name/s'
+                        %(self._complex.name,len(self._complex.chains)))
+            return
+        else:
+          return
+
+
       self.accept()
 
 
   def _populateWidgets(self, selected):
     self._resetObjectSelections()
+    self.nameLineEdit.clear()
+    self._setCreateButtonEnabled(False)
     obj = self.project.getByPid(selected)
     if isinstance(obj, NmrChain):
-      self.nameLineEdit.clear()
       self.nameLineEdit.setText(obj.shortName+COPYNMRCHAIN)
       self._nmrChain = obj
+      self._setCreateButtonEnabled(True)
+
 
     if isinstance(obj, Chain):
-      self.nameLineEdit.clear()
       self.nameLineEdit.setText(obj.shortName)
       self._chain = obj
+      self._setCreateButtonEnabled(True)
+
 
     if isinstance(obj, Substance):
-      self.nameLineEdit.clear()
       self.nameLineEdit.setText(obj.name)
       self._substance = obj
+      self._setCreateButtonEnabled(True)
+
 
     if isinstance(obj, Complex):
-      self.nameLineEdit.clear()
-      self.nameLineEdit.setText(obj.shortName)
-      self._complex = obj
+      names = [chain.shortName for chain in obj.chains]
+      if len(names)>0:
+        self.nameLineEdit.setText(",".join(names))
+        self._complex = obj
+        self._setCreateButtonEnabled(True)
 
 
   def _activateCloneOptions(self):
-    # if self.availableNmrChainsPD.textList is None:
+    if self.project:
+      if len(self.project.substances) == 0:
+        rb = self.cloneOptionsWidget.getRadioButton(SUBSTANCE)
+        if rb:
+          rb.setEnabled(False)
+      # elif len(self.project.substances) > 0:
+      #   noSmiles = [substance.smiles for substance in self.project.substances]
+      #   if all(noSmiles):
+      #     rb = self.cloneOptionsWidget.getRadioButton(SUBSTANCE)
+      #     if rb:
+      #       rb.setEnabled(False)
 
-    # self.newNChainOptionsRButtons.radioButtons[2].setEnabled(False)
-    if self.availableChainsPD.textList is None:
-      self.cloneOptionsWidget.radioButtons[1].setEnabled(False)
+      if len(self.project.chains) == 0:
+        rb = self.cloneOptionsWidget.getRadioButton(CHAIN)
+        if rb:
+          rb.setEnabled(False)
+
+      if len(self.project.complexes) == 0:
+        rb = self.cloneOptionsWidget.getRadioButton(COMPLEX)
+        if rb:
+          rb.setEnabled(False)
+
+
+
 
   def _cloneOptionCallback(self):
     self.createNewWidget.setChecked(False)
-    self._setCreateButtonEnabled(True)
+    self._setCreateButtonEnabled(False)
 
     selected = self.cloneOptionsWidget.getSelectedText()
     # # needs to clear the previous selection otherwise has an odd behaviour from pulldownNofiers which remember the previous selection
-    self._createEmpty = False
+    self._resetObjectSelections()
     for pd in self.pulldownsOptions:
       self.pulldownsOptions[pd].select(SELECT)
-      self._chain = None
     if selected in self.pulldownsOptions:
       self.pulldownsOptions[selected].show()
     hs = [x for x in self.pulldownsOptions if x != selected]
     for h in hs:
       self.pulldownsOptions[h].hide()
+    if selected == SUBSTANCE:
+      self._disableSubstanceWithoutSMILES()
+
 
 
 

@@ -77,7 +77,7 @@ def _getPeakAnnotation(peak):
     pdNA = peak.dimensionNmrAtoms
     if len(pdNA[dimension]) == 0:
       if len(pdNA) == 1:
-        peakLabel.append('1H')
+        peakLabel.append(peak.id)
       else:
         peakLabel.append('-')
     else:

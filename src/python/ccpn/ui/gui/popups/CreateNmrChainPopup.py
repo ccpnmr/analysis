@@ -53,7 +53,7 @@ COMPLEX   = 'Complex'
 
 Cancel = 'Cancel'
 Create =  'Create'
-
+COPYNMRCHAIN = '-Copy'
 CloneOptions = [CHAIN, NMRCHAIN, SUBSTANCE, COMPLEX]
 
 
@@ -119,13 +119,17 @@ class CreateNmrChainPopup(CcpnDialog):
     self.spacerLabel = Label(self, text="", grid=(vGrid, 0))
     self.buttonBox = ButtonList(self, texts=[Cancel, Create], callbacks=[self.reject, self._createNmrChain], grid=(vGrid, 1))
 
-    self._createEmpty = False
-    self._chain = None # used to create a new nmrChain from a previous one
-    self._nmrChain  = None
-    self._substance = None
-    self._complex = None
+    self._resetObjectSelections()
     self._setCreateButtonEnabled(False)
     # self._activateCloneOptions()
+
+  def _resetObjectSelections(self):
+    # used to create a new nmrChain from a selected object.
+    self._createEmpty = False
+    self._chain = None
+    self._nmrChain = None
+    self._substance = None
+    self._complex = None
 
   def _selectCreateEmpty(self):
     # Gui bit
@@ -138,11 +142,8 @@ class CreateNmrChainPopup(CcpnDialog):
       self.pulldownsOptions[h].hide()
 
     # FIXME Not an elegant solution
+    self._resetObjectSelections()
     self._createEmpty = True
-    self._chain = None
-    self._nmrChain = None
-    self._substance = None
-    self._complex = None
 
   def _createEmptyNmrChain(self, name):
     if not self.project.getByPid(NmrChain.shortClassName + ':' + name):
@@ -154,9 +155,54 @@ class CreateNmrChainPopup(CcpnDialog):
   def _setCreateButtonEnabled(self, value:bool=True):
     self.buttonBox.setButtonEnabled(Create, value)
 
+  def _cloneFromChain(self, name):
+    newNmrChain = self._createEmptyNmrChain(name)
+    if newNmrChain:
+      try:
+        self.project._startCommandEchoBlock('_createNmrChain')
+        if len(self._chain.residues) > 0:
+          self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
+          for residue in self._chain.residues[:-1]:
+            nmrResidue = newNmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=residue.residueType)
+            for atom in residue.atoms:
+              nmrResidue.fetchNmrAtom(atom.name)
+          self.project.unblankNotification()
+          lastResidue = self._chain.residues[-1]
+          lastNmrResidue = newNmrChain.newNmrResidue(sequenceCode=lastResidue.sequenceCode,
+                                                     residueType=lastResidue.residueType)
+          # lastNmrResidue.residue = lastResidue
+          for atom in lastResidue.atoms:
+            lastNmrResidue.fetchNmrAtom(atom.name)
+      finally:
+        self.project._endCommandEchoBlock()
+      return newNmrChain
+
+
+  def _cloneFromNmrChain(self, name):
+    newNmrChain = self._createEmptyNmrChain(name)
+    if newNmrChain:
+      try:
+        self.project._startCommandEchoBlock('_createNmrChain')
+        if len(self._nmrChain.nmrResidues) > 0:
+          self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
+          for nmrResidue in self._nmrChain.nmrResidues[:-1]:
+            newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=nmrResidue.sequenceCode, residueType=nmrResidue.residueType)
+            for nmrAtom in nmrResidue.nmrAtoms:
+              newNmrResidue.fetchNmrAtom(nmrAtom.name)
+          self.project.unblankNotification()
+          lastNmrResidue = self._nmrChain.nmrResidues[-1]
+          lastTargetNmrResidue = newNmrChain.newNmrResidue(sequenceCode=lastNmrResidue.sequenceCode,
+                                                     residueType=lastNmrResidue.residueType)
+          # lastNmrResidue.residue = lastResidue
+          for nmrAtom in lastNmrResidue.nmrAtoms:
+            lastTargetNmrResidue.fetchNmrAtom(nmrAtom.name)
+      finally:
+        self.project._endCommandEchoBlock()
+      return newNmrChain
+
+
   def _createNmrChain(self):
     name = self.nameLineEdit.get()
-
 
     if self.project:
       # self.project.blankNotification()
@@ -168,39 +214,28 @@ class CreateNmrChainPopup(CcpnDialog):
           return
 
       if self._chain:
-
-        newNmrChain = self._createEmptyNmrChain(name)
+        newNmrChain = self._cloneFromChain(name)
         if newNmrChain:
-          try:
-            self.project._startCommandEchoBlock('_createNmrChain')
-            if len(self._chain.residues)>0:
-              self.project.blankNotification()
-              for residue in self._chain.residues[:-1]:
-                nmrResidue = newNmrChain.newNmrResidue(sequenceCode=residue.sequenceCode, residueType=residue.residueType)
-                for atom in residue.atoms:
-                  nmrResidue.fetchNmrAtom(atom.name)
-                # nmrResidue.residue = residue
-              self.project.unblankNotification()
-              lastResidue = self._chain.residues[-1]
-              lastNmrResidue = newNmrChain.newNmrResidue(sequenceCode=lastResidue.sequenceCode, residueType=lastResidue.residueType)
-              # lastNmrResidue.residue = lastResidue
-              for atom in lastResidue.atoms:
-                lastNmrResidue.fetchNmrAtom(atom.name)
-          finally:
-            self.project._endCommandEchoBlock()
           self.accept()
         else:
           return
 
+      if self._nmrChain:
+        newNmrChain = self._cloneFromNmrChain(name)
+        if newNmrChain:
+          self.accept()
+        else:
+          return
 
       self.accept()
 
 
   def _populateWidgets(self, selected):
+    self._resetObjectSelections()
     obj = self.project.getByPid(selected)
     if isinstance(obj, NmrChain):
       self.nameLineEdit.clear()
-      self.nameLineEdit.setText(obj.shortName)
+      self.nameLineEdit.setText(obj.shortName+COPYNMRCHAIN)
       self._nmrChain = obj
 
     if isinstance(obj, Chain):

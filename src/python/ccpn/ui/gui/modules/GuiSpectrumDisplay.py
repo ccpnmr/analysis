@@ -307,8 +307,24 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # FIXME THIS IS ONLY A TEST FOR FUN
     if self.current.strip:
-        for nmrAtom in nmrResidue.nmrAtoms:
-          self._assignNmrAtomToCurrentPeaks(nmrAtom)
+      peaks = self.current.peaks
+      if len(peaks) > 0:
+        for peak in peaks:
+          for peakListView in peak.peakList.peakListViews:
+            if peakListView.isVisible():
+              orderedAxes = self.current.strip.orderedAxes
+              for ax in orderedAxes:
+                if ax.code:
+                  if len(ax.code) > 0:
+                    code = ax.code[0]
+                    nmrAtoms = [nmrAtom for nmrAtom in nmrResidue.nmrAtoms if code in nmrAtom.name ]
+                    for nmrAtom in nmrAtoms:
+                      if code == nmrAtom.name:
+                        peak.assignDimension(ax.code, nmrAtom)
+                      else:
+                        if len(nmrAtoms) > 0:
+                          peak.assignDimension(ax.code, nmrAtoms[0])
+
 
   def _handleNmrAtom(self, nmrAtom):
     if not self.current.peak:
@@ -329,9 +345,15 @@ class GuiSpectrumDisplay(CcpnModule):
             for ax in orderedAxes:
               if ax.code:
                 if len(ax.code) > 0:
-                  if ax.code[0] in nmrAtom.name:
+                  if ax.code[0] == nmrAtom.name:
                     # if not peak.isFullyAssigned():
                       peak.assignDimension(ax.code, nmrAtom)
+                      break
+                  else:
+                    if ax.code[0] in nmrAtom.name:
+                      peak.assignDimension(ax.code, nmrAtom)
+
+
                     # else:
                     #   peak.addAssignment([nmrAtom])
 

@@ -305,7 +305,7 @@ class GuiSpectrumDisplay(CcpnModule):
     if not self.current.peak:
       self._createNmrResidueMarks(nmrResidue)
 
-    # FIXME THIS IS ONLY A TEST FOR FUN
+    # FIXME THIS IS ONLY A Starting Point for Assign from SideBar
     if self.current.strip:
       peaks = self.current.peaks
       if len(peaks) > 0:
@@ -330,7 +330,7 @@ class GuiSpectrumDisplay(CcpnModule):
     if not self.current.peak:
       self._markNmrAtom(nmrAtom)
 
-    # FIXME THIS IS ONLY A TEST FOR FUN
+    # FIXME THIS IS ONLY A Starting Point for Assign from SideBar
     if self.current.strip:
       self._assignNmrAtomToCurrentPeaks(nmrAtom)
 
@@ -346,16 +346,11 @@ class GuiSpectrumDisplay(CcpnModule):
               if ax.code:
                 if len(ax.code) > 0:
                   if ax.code[0] == nmrAtom.name:
-                    # if not peak.isFullyAssigned():
                       peak.assignDimension(ax.code, nmrAtom)
                       break
                   else:
                     if ax.code[0] in nmrAtom.name:
                       peak.assignDimension(ax.code, nmrAtom)
-
-
-                    # else:
-                    #   peak.addAssignment([nmrAtom])
 
   def _processDragEnterEvent(self, data):
     pass

@@ -75,7 +75,7 @@ class PeakListPropertiesPopup(CcpnDialog):
       # NOTE: below is not sorted in any way, but if we change that, we also have to change loop in _fillColourPulldown
       spectrumColourKeys = list(spectrumColours.keys())
       if not self.peakList.symbolColour:
-          self.peakList.symbolColour = spectrumColourKeys[0]  # default
+        self.peakList.symbolColour = spectrumColourKeys[0]  # default
       if not self.peakList.textColour:
         self.peakList.textColour = spectrumColourKeys[1]   # default*
 
@@ -90,6 +90,7 @@ class PeakListPropertiesPopup(CcpnDialog):
       self.symbolColourPulldownList = PulldownList(self, grid=(3, 1))
       self._fillColourPulldown(self.symbolColourPulldownList)
       # FIXME BROKEN .index(peakList.symbolColour) is not in list
+
       c = peakList.symbolColour
       if c in spectrumColourKeys:
         self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
@@ -97,22 +98,23 @@ class PeakListPropertiesPopup(CcpnDialog):
         # FIXME
         self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
 
-      self.symbolColourPulldownList.currentIndexChanged.connect(self._applyChanges)
+      self.symbolColourPulldownList.activated.connect(self._applyChanges)
 
       self.textColourLabel = Label(self, 'Peak Text Colour', grid=(4, 0))
       self.textColourPulldownList = PulldownList(self, grid=(4, 1))
       self._fillColourPulldown(self.textColourPulldownList)
       # FIXME BROKEN .index(peakList.symbolColour) is not in list
+
       c = peakList.textColour
       if c in spectrumColourKeys:
-        self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
+        self.textColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
       else:
         # FIXME
-        self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
+        self.textColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
       # self.textColourPulldownList.setCurrentIndex(spectrumColourKeys.index(peakList.textColour))
-      self.textColourPulldownList.currentIndexChanged.connect(self._applyChanges)
+      self.textColourPulldownList.activated.connect(self._applyChanges)
 
-      self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self.accept)
+      self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self._accept)
       ## Broken.
       # self.minimalAnnotationLabel = Label(self, 'Minimal Annotation', grid=(5, 0))
       # self.minimalAnnotationCheckBox = CheckBox(self, grid=(5, 1))
@@ -206,4 +208,9 @@ class PeakListPropertiesPopup(CcpnDialog):
 
   def _okButton(self):
     if self._applyChanges() is True:
-      self.accept()
+      self._accept()
+
+  def _accept(self):
+    self.symbolColourPulldownList.activated.disconnect(self._applyChanges)
+    self.textColourPulldownList.activated.disconnect(self._applyChanges)
+    self.accept()

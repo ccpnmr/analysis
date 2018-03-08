@@ -1112,15 +1112,15 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       #to be decided when we design structure
       showInfo('Not implemented yet!',
           'This function has not been implemented in the current version')
-    elif obj.shortClassName == 'IL':
-      # to be decided when we design structure
-
-      # popup = IntegralListPopup(parent=self.mainWindow, mainWindow=self.mainWindow, integralList=obj)   # ejb - temp
-      # popup.exec_()
-      # popup.raise_()
-
-      showInfo('Not implemented yet!',
-               'This function has not been implemented in the current version')
+    # elif obj.shortClassName == 'IL':
+    #   # to be decided when we design structure
+    #
+    #   # popup = IntegralListPopup(parent=self.mainWindow, mainWindow=self.mainWindow, integralList=obj)   # ejb - temp
+    #   # popup.exec_()
+    #   # popup.raise_()
+    #
+    #   showInfo('Not implemented yet!',
+    #            'This function has not been implemented in the current version')
     elif obj.shortClassName == 'NO':
       popup = NotesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, note=obj)
       popup.exec_()

@@ -1048,5 +1048,6 @@ def _setupGuiStrip(project:Project, apiStrip):
 
   try:
     strip._testCcpnOpenGLWidget.initialiseAxes(strip=strip)
+    # strip._testCcpnOpenGLWidget._resetAxisRange()
   except:
     getLogger().debug('Error: OpenGL widget not instantiated for %s' % strip)

@@ -75,7 +75,7 @@ class IntegralListPropertiesPopup(CcpnDialog):
       # NOTE: below is not sorted in any way, but if we change that, we also have to change loop in _fillColourPulldown
       spectrumColourKeys = list(spectrumColours.keys())
       if not self.integralList.symbolColour:
-          self.integralList.symbolColour = spectrumColourKeys[0]  # default
+        self.integralList.symbolColour = spectrumColourKeys[0]  # default
       if not self.integralList.textColour:
         self.integralList.textColour = spectrumColourKeys[1]   # default*
 
@@ -90,6 +90,7 @@ class IntegralListPropertiesPopup(CcpnDialog):
       self.symbolColourPulldownList = PulldownList(self, grid=(3, 1))
       self._fillColourPulldown(self.symbolColourPulldownList)
       # FIXME BROKEN .index(peakList.symbolColour) is not in list
+
       c = integralList.symbolColour
       if c in spectrumColourKeys:
         self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
@@ -97,7 +98,7 @@ class IntegralListPropertiesPopup(CcpnDialog):
         # FIXME
         self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
 
-      self.symbolColourPulldownList.currentIndexChanged.connect(self._applyChanges)
+      self.symbolColourPulldownList.activated.connect(self._applyChanges)
 
       self.textColourLabel = Label(self, 'Integral Text Colour', grid=(4, 0))
       self.textColourPulldownList = PulldownList(self, grid=(4, 1))
@@ -107,16 +108,17 @@ class IntegralListPropertiesPopup(CcpnDialog):
 
       self._fillColourPulldown(self.textColourPulldownList)
       # FIXME BROKEN .index(integralList.symbolColour) is not in list
+
       c = integralList.textColour
       if c in spectrumColourKeys:
-        self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
+        self.textColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
       else:
         # FIXME
-        self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
+        self.textColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
       # self.textColourPulldownList.setCurrentIndex(spectrumColourKeys.index(integralList.textColour))
-      self.textColourPulldownList.currentIndexChanged.connect(self._applyChanges)
+      self.textColourPulldownList.activated.connect(self._applyChanges)
 
-      self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self.accept)
+      self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self._accept)
       ## Broken.
       # self.minimalAnnotationLabel = Label(self, 'Minimal Annotation', grid=(5, 0))
       # self.minimalAnnotationCheckBox = CheckBox(self, grid=(5, 1))
@@ -182,10 +184,11 @@ class IntegralListPropertiesPopup(CcpnDialog):
     try:
       self._changeColours()
 
+      applyAccept = True
+
       # repaint
       GLSignals.emitEvent(targets=[self.integralList], triggers=[GLNotifier.GLINTEGRALLISTS])
 
-      applyAccept = True
     except Exception as es:
       showWarning(str(self.windowTitle()), str(es))
     finally:
@@ -209,4 +212,9 @@ class IntegralListPropertiesPopup(CcpnDialog):
 
   def _okButton(self):
     if self._applyChanges() is True:
-      self.accept()
+      self._accept()
+
+  def _accept(self):
+    self.symbolColourPulldownList.activated.disconnect(self._applyChanges)
+    self.textColourPulldownList.activated.disconnect(self._applyChanges)
+    self.accept()

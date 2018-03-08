@@ -3060,6 +3060,7 @@ void main()
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
       drawList.clearArrays()
+      drawList._clearRegions()
 
       ils = integralListView.peakList
       colour = ils.symbolColour
@@ -4865,7 +4866,8 @@ void main()
         if GLNotifier.GLINTEGRALLISTS in triggers:
           for ils in self._GLIntegralLists.values():
             if ils.integralListView.peakList in targets:
-              ils.renderMode = GLRENDERMODE_REBUILD
+              # ils.renderMode = GLRENDERMODE_REBUILD
+              ils.integralListView.buildPeakLists = True
 
           # self._processPeakNotifier(targets)
 
@@ -6191,6 +6193,9 @@ class GLIntegralArray(GLVertexArray):
     super(GLIntegralArray, self).drawIndexArray()
     self.fillMode = GL.GL_FILL
     super(GLIntegralArray, self).drawIndexArray()
+
+  def _clearRegions(self):
+    self._regions = []
 
   def addIntegral(self, integral, colour='blue', brush=None):
     return self._addRegion(values=integral.limits[0], orientation='v', movable=True, object=integral, colour=colour, brush=brush)

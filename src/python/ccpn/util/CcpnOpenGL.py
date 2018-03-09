@@ -4086,7 +4086,8 @@ void main()
       GL.glEnd()
       GL.glDisable(GL.GL_BLEND)
 
-  def _updateHTraceData(self, spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
+  def _updateHTraceData(self, spectrumView, tracesDict, 
+                        point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
                         ph0=None, ph1=None, pivot=None):
 
     try:
@@ -4105,8 +4106,8 @@ void main()
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-      if spectrumView not in self._hTraces.keys():
-        self._hTraces[spectrumView] = GLVertexArray(numLists=1,
+      if spectrumView not in tracesDict.keys():
+        tracesDict[spectrumView] = GLVertexArray(numLists=1,
                                                         renderMode=GLRENDERMODE_REBUILD,
                                                         blendMode=False,
                                                         drawMode=GL.GL_LINE_STRIP,
@@ -4114,7 +4115,7 @@ void main()
                                                         GLContext=self)
 
       numVertices = len(x)
-      hSpectrum = self._hTraces[spectrumView]
+      hSpectrum = tracesDict[spectrumView]
       hSpectrum.indices = numVertices
       hSpectrum.numVertices = numVertices
       hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
@@ -4123,9 +4124,10 @@ void main()
       hSpectrum.vertices[::2] = x
       hSpectrum.vertices[1::2] = y
     except Exception as es:
-      self._hTraces[spectrumView].clearArrays()
+      tracesDict[spectrumView].clearArrays()
 
-  def _updateVTraceData(self, spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel,
+  def _updateVTraceData(self, spectrumView, tracesDict,
+                        point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel,
                         ph0=None, ph1=None, pivot=None):
 
     try:
@@ -4144,8 +4146,8 @@ void main()
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-      if spectrumView not in self._vTraces.keys():
-        self._vTraces[spectrumView] = GLVertexArray(numLists=1,
+      if spectrumView not in tracesDict.keys():
+        tracesDict[spectrumView] = GLVertexArray(numLists=1,
                                                         renderMode=GLRENDERMODE_REBUILD,
                                                         blendMode=False,
                                                         drawMode=GL.GL_LINE_STRIP,
@@ -4153,7 +4155,7 @@ void main()
                                                         GLContext=self)
 
       numVertices = len(x)
-      vSpectrum = self._vTraces[spectrumView]
+      vSpectrum = tracesDict[spectrumView]
       vSpectrum.indices = numVertices
       vSpectrum.numVertices = numVertices
       vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
@@ -4162,7 +4164,7 @@ void main()
       vSpectrum.vertices[::2] = x
       vSpectrum.vertices[1::2] = y
     except Exception as es:
-      self._vTraces[spectrumView].clearArrays()
+      tracesDict[spectrumView].clearArrays()
 
   def updateTraces(self):
     if self._parent.isDeleted:
@@ -4197,14 +4199,42 @@ void main()
 
       # TODO:ED add on the parameters from the phasingFrame
       if direction == 0:
-        self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, ph0, ph1, pivot)
-        self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
+        self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, ph0, ph1, pivot)
+        self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
       else:
-        self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
-        self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
+        self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
+        self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
   def newTrace(self):
-    pass
+    position = [self.cursorCoordinate[0], self.cursorCoordinate[1]]     #list(cursorPosition)
+    for axis in self._orderedAxes[2:]:
+      position.append(axis.position)
+
+    positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+
+    for spectrumView in self._parent.spectrumViews:
+
+      phasingFrame = self._parent.spectrumDisplay.phasingFrame
+
+      ph0 = phasingFrame.slider0.value()
+      ph1 = phasingFrame.slider1.value()
+      pivotPpm = phasingFrame.pivotEntry.get()
+      direction = phasingFrame.getDirection()
+      # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
+      # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+      axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
+      pivot = spectrumView.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
+
+      inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
+        = spectrumView._getTraceParams(position)
+
+      # TODO:ED add on the parameters from the phasingFrame
+      if direction == 0:
+        self._updateHTraceData(spectrumView, self._staticHTraces, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, ph0, ph1, pivot)
+        # self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
+      else:
+        # self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
+        self._updateVTraceData(spectrumView, self._staticVTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
   def buildStaticTraces(self):
     pass

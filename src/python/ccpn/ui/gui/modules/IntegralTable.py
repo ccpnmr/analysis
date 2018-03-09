@@ -318,14 +318,14 @@ class IntegralTable(QuickTable):
         self.clearTable()
 
   def _selectOnTableCurrentIntegralsNotifierCallback(self,  data):
-    '''callback from a notifier to select the current Integrals  '''
+    """callback from a notifier to select the current Integrals  """
     currentIntegrals = data['value']
     self._selectOnTableCurrentIntegrals(currentIntegrals)
 
   def _selectOnTableCurrentIntegrals(self, currentIntegrals):
-    ''' highlight current peaks on the opened peak table '''
+    """ highlight current integrals on the opened integral table """
 
-    print(currentIntegrals)
+    # print(currentIntegrals)
     if len(currentIntegrals) > 0:
       self._highLightObjs(currentIntegrals)
     else:

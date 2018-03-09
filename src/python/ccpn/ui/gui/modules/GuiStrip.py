@@ -224,6 +224,12 @@ class GuiStrip(Frame):
                                                  Notifier.DELETE,
                                                  Notifier.CHANGE], 'Peak', self._updateDisplayedPeaks,
                                   onceOnly=True)
+
+    self._integralNotifier = Notifier(self.project, [Notifier.CREATE,
+                                                 Notifier.DELETE,
+                                                 Notifier.CHANGE], 'Integral', self._updateDisplayedIntegrals,
+                                  onceOnly=True)
+
     # Notifier for change of stripLabel
     self._stripLabelNotifier = Notifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
     #self._stripNotifier.setDebug(True)
@@ -331,6 +337,19 @@ class GuiStrip(Frame):
 
     try:
       self._testCcpnOpenGLWidget._processPeakNotifier(data)
+    except Exception as es:
+      getLogger().debug('OpenGL widget not instantiated')
+
+  def _updateDisplayedIntegrals(self, data):
+    "Callback when peaks have changed"
+    # self.showPeaks(data['object'].peakList)
+
+    # from ccpn.util.CcpnOpenGL import GLNotifier
+    # GLSignals = GLNotifier(parent=self)
+    # GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKNOTIFY], targets=data)
+
+    try:
+      self._testCcpnOpenGLWidget._processIntegralNotifier(data)
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 

@@ -80,10 +80,10 @@ class Gui1dWidget(CcpnGLWidget):
                                       rightMenu=rightMenu,
                                       stripIDLabel=stripIDLabel)
 
-    self._integralNotifier = Notifier(self.project, [Notifier.CREATE,
-                                                 Notifier.DELETE,
-                                                 Notifier.CHANGE], 'Integral', self._updateDisplayedIntegrals,
-                                  onceOnly=True)
+    # self._integralNotifier = Notifier(self.project, [Notifier.CREATE,
+    #                                              Notifier.DELETE,
+    #                                              Notifier.CHANGE], 'Integral', self._updateDisplayedIntegrals,
+    #                               onceOnly=True)
 
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -93,7 +93,7 @@ class Gui1dWidget(CcpnGLWidget):
     symbolWidth = self._preferences.peakSymbolSize / 2.0
     lineThickness = self._preferences.peakSymbolThickness / 2.0
 
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
     drawList.indices = np.empty(0, dtype=np.uint)
 
@@ -136,12 +136,12 @@ class Gui1dWidget(CcpnGLWidget):
   def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
 
-    if peakListView.pid not in self._GLPeakLists:
-      self._GLPeakLists[peakListView.pid] = GLPeakListArray(GLContext=self,
+    if peakListView not in self._GLPeakLists:
+      self._GLPeakLists[peakListView] = GLPeakListArray(GLContext=self,
                                                       spectrumView=spectrumView,
                                                       peakListView=peakListView)
 
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
     if drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -278,7 +278,7 @@ class Gui1dWidget(CcpnGLWidget):
       self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
 
   def _rescalePeakList(self, spectrumView, peakListView):
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
     # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
@@ -308,7 +308,7 @@ class Gui1dWidget(CcpnGLWidget):
 
   def _appendPeakListItem(self, spectrumView, peakListView, peak):
     spectrum = spectrumView.spectrum
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
     # find the correct scale to draw square pixels
     # don't forget to change when the axes change
@@ -433,7 +433,7 @@ class Gui1dWidget(CcpnGLWidget):
   def _removePeakListItem(self, spectrumView, peakListView, delPeak):
     symbolType = self._preferences.peakSymbolType
 
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
     index = 0
     indexOffset = 0
@@ -552,7 +552,7 @@ class Gui1dWidget(CcpnGLWidget):
                                 object=peak))
 
   def _rescalePeakListLabels(self, spectrumView, peakListView):
-    drawList = self._GLPeakListLabels[peakListView.pid]
+    drawList = self._GLPeakListLabels[peakListView]
     # strip = self._parent
 
     # pls = peakListView.peakList
@@ -622,57 +622,3 @@ class Gui1dWidget(CcpnGLWidget):
 
     self.current.peaks = peaks
 
-  def _updateDisplayedIntegrals(self, data):
-    triggers = data[Notifier.TRIGGER]
-    integral = data[Notifier.OBJECT]
-
-    if Notifier.DELETE in triggers:
-      self._deleteIntegral(integral)
-
-    if Notifier.CREATE in triggers:
-      self._createIntegral(integral)
-
-    if Notifier.CHANGE in triggers:
-      self._changeIntegral(integral)
-
-    self._clearKeys()
-    self.update()
-
-  # TODO:ED these need to be special created from the pipeline widgets
-  def _deleteIntegral(self, integral):
-    return
-
-    for region in self._regions:
-      if region._object == integral:
-        self._regions.remove(region)
-
-  def _createIntegral(self, integral):
-    for ils in self._GLIntegralLists.values():
-
-      # confusing as peakList and integralList share the same list :)
-      if integral.integralList == ils.integralListView.peakList:
-        ils.addIntegral(integral, colour=None, brush=ils.brush)
-
-    return
-
-    for region in self._regions:
-      if region._object == integral:
-        # already exists
-        break
-    else:
-      self.addRegion(values=integral.limits[0], orientation='v', movable=True, object=integral)
-
-  def _changeIntegral(self, integral):
-
-    # regions added by the pipeline module
-    # for region in self._externalRegions._regions:
-    #   if region._object == integral:
-    #     self._regionList.renderMode = GLRENDERMODE_REBUILD
-    #     self.update()
-    #     return
-
-    for ils in self._GLIntegralLists.values():
-      for reg in ils._regions:
-        if reg._object == integral:
-          ils._resize()
-          return

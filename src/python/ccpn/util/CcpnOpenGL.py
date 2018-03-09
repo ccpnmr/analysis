@@ -1695,7 +1695,7 @@ void main()
     GL.glCallList(self.GLMarkList[0])
 
   def _rescalePeakListLabels(self, spectrumView, peakListView):
-    drawList = self._GLPeakListLabels[peakListView.pid]
+    drawList = self._GLPeakListLabels[peakListView]
     # strip = self._parent
 
     # pls = peakListView.peakList
@@ -1738,7 +1738,7 @@ void main()
         self.stripIDString.attribs[pp:pp+2] = offsets
 
   def _rescalePeakList(self, spectrumView, peakListView):
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
     # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
@@ -1814,7 +1814,7 @@ void main()
       return False
 
   def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
-    drawList = self._GLPeakListLabels[peakListView.pid]
+    drawList = self._GLPeakListLabels[peakListView]
     strip = self._parent
 
     pls = peakListView.peakList
@@ -1852,7 +1852,7 @@ void main()
     symbolWidth = self._preferences.peakSymbolSize / 2.0
     lineThickness = self._preferences.peakSymbolThickness / 2.0
 
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
     drawList.indices = np.empty(0, dtype=np.uint)
 
     index = 0
@@ -1987,7 +1987,7 @@ void main()
   def _removePeakListItem(self, spectrumView, peakListView, delPeak):
     symbolType = self._preferences.peakSymbolType
 
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
     index = 0
     indexOffset = 0
@@ -2032,7 +2032,7 @@ void main()
 
   def _appendPeakListItem(self, spectrumView, peakListView, peak):
     spectrum = spectrumView.spectrum
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
     # find the correct scale to draw square pixels
     # don't forget to change when the axes change
@@ -2278,14 +2278,20 @@ void main()
   def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
 
-    if peakListView.pid not in self._GLPeakLists:
-      self._GLPeakLists[peakListView.pid] = GLPeakListArray(GLContext=self,
+    if peakListView not in self._GLPeakLists:
+      self._GLPeakLists[peakListView] = GLPeakListArray(GLContext=self,
                                                       spectrumView=spectrumView,
                                                       peakListView=peakListView)
 
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
-    if drawList.renderMode == GLRENDERMODE_REBUILD:
+    if drawList.renderMode == GLRENDERMODE_RESCALE:
+      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
+
+      self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
+      self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
+
+    elif drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
       drawList.clearArrays()
@@ -2521,17 +2527,12 @@ void main()
             index += np2 + 5
             drawList.numVertices += np2 + 5
 
-    elif drawList.renderMode == GLRENDERMODE_RESCALE:
-      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
-      self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
-      self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
-
   def _deletePeakListItem(self, peak):
     pls = peak.peakList
     spectrum = pls.spectrum
 
     for peakListView in pls.peakListViews:
-      if peakListView.pid in self._GLPeakLists.keys():
+      if peakListView in self._GLPeakLists.keys():
         for spectrumView in spectrum.spectrumViews:
           if spectrumView in self._parent.spectrumViews:
 
@@ -2543,7 +2544,7 @@ void main()
     spectrum = pls.spectrum
 
     for peakListView in pls.peakListViews:
-      if peakListView.pid in self._GLPeakLists.keys():
+      if peakListView in self._GLPeakLists.keys():
         for spectrumView in spectrum.spectrumViews:
           if spectrumView in self._parent.spectrumViews:
 
@@ -2559,7 +2560,7 @@ void main()
     spectrum = pls.spectrum
 
     for peakListView in pls.peakListViews:
-      if peakListView.pid in self._GLPeakListLabels.keys():
+      if peakListView in self._GLPeakListLabels.keys():
         for spectrumView in spectrum.spectrumViews:
           if spectrumView in self._parent.spectrumViews:
 
@@ -2568,8 +2569,8 @@ void main()
             self._updateHighlightedPeaks(spectrumView, peakListView)
 
   def _deletePeakListLabel(self, peak):
-    for pid in self._GLPeakListLabels.keys():
-      drawList = self._GLPeakListLabels[pid]
+    for pll in self._GLPeakListLabels.keys():
+      drawList = self._GLPeakListLabels[pll]
 
       for drawStr in drawList.stringList:
         if drawStr.object == peak:
@@ -2581,10 +2582,10 @@ void main()
     spectrum = pls.spectrum
 
     for peakListView in pls.peakListViews:
-      if peakListView.pid in self._GLPeakListLabels.keys():
+      if peakListView in self._GLPeakListLabels.keys():
         for spectrumView in spectrum.spectrumViews:
           if spectrumView in self._parent.spectrumViews:
-            drawList = self._GLPeakListLabels[peakListView.pid]
+            drawList = self._GLPeakListLabels[peakListView]
             self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
             self._rescalePeakListLabels(spectrumView, peakListView)
 
@@ -2697,12 +2698,12 @@ void main()
   def _buildPeakListLabels(self, spectrumView, peakListView):
     # spectrum = spectrumView.spectrum
 
-    if peakListView.pid not in self._GLPeakListLabels.keys():
-      self._GLPeakListLabels[peakListView.pid] = GLPeakLabelsArray(GLContext=self,
+    if peakListView not in self._GLPeakListLabels.keys():
+      self._GLPeakListLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
                                                       spectrumView=spectrumView,
                                                       peakListView=peakListView)
 
-    drawList = self._GLPeakListLabels[peakListView.pid]
+    drawList = self._GLPeakListLabels[peakListView]
     if drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
@@ -2821,7 +2822,7 @@ void main()
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
   def _drawPeakListVertices(self, spectrumView, peakListView):
-    drawList = self._GLPeakLists[peakListView.pid]
+    drawList = self._GLPeakLists[peakListView]
 
     # new bit to use a vertex array to draw the peaks, very fast and easy
     GL.glEnable(GL.GL_BLEND)
@@ -3049,12 +3050,12 @@ void main()
 
   def _buildIntegralLists(self, spectrumView, integralListView):
 
-    if integralListView.pid not in self._GLIntegralLists:
-      self._GLIntegralLists[integralListView.pid] = GLIntegralArray(GLContext=self,
+    if integralListView not in self._GLIntegralLists:
+      self._GLIntegralLists[integralListView] = GLIntegralArray(GLContext=self,
                                                       spectrumView=spectrumView,
                                                       integralListView=integralListView)
 
-    drawList = self._GLIntegralLists[integralListView.pid]
+    drawList = self._GLIntegralLists[integralListView]
 
     if drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -3085,16 +3086,16 @@ void main()
 
         # only add the integral lists
         if isinstance(integralListView.peakList, IntegralList):
-          if integralListView.pid in self._GLIntegralLists.keys():
-            if self._GLIntegralLists[integralListView.pid].renderMode == GLRENDERMODE_RESCALE:
+          if integralListView in self._GLIntegralLists.keys():
+            if self._GLIntegralLists[integralListView].renderMode == GLRENDERMODE_RESCALE:
 
               self._buildIntegralLists(spectrumView, integralListView)
 
           if integralListView.buildPeakLists:
             integralListView.buildPeakLists = False
 
-            if integralListView.pid in self._GLIntegralLists.keys():
-              self._GLIntegralLists[integralListView.pid].renderMode = GLRENDERMODE_REBUILD
+            if integralListView in self._GLIntegralLists.keys():
+              self._GLIntegralLists[integralListView].renderMode = GLRENDERMODE_REBUILD
 
             self._buildIntegralLists(spectrumView, integralListView)
 
@@ -3102,20 +3103,23 @@ void main()
     if self._parent.isDeleted:
       return
 
+    # list through the valid peakListViews attached to the strip - including undeleted
     for spectrumView in self._parent.spectrumViews:
       for peakListView in spectrumView.peakListViews:
 
         # only add the peak lists
         if isinstance(peakListView.peakList, PeakList):
-          if peakListView.pid in self._GLPeakLists.keys():
-            if self._GLPeakLists[peakListView.pid].renderMode == GLRENDERMODE_RESCALE:
+
+          if peakListView in self._GLPeakLists.keys():
+            if self._GLPeakLists[peakListView].renderMode == GLRENDERMODE_RESCALE:
               self._buildPeakLists(spectrumView, peakListView)
 
           if peakListView.buildPeakLists:
             peakListView.buildPeakLists = False
 
-            if peakListView.pid in self._GLPeakLists.keys():
-              self._GLPeakLists[peakListView.pid].renderMode = GLRENDERMODE_REBUILD
+            # set the interior flags for rebuilding the GLdisplay
+            if peakListView in self._GLPeakLists.keys():
+              self._GLPeakLists[peakListView].renderMode = GLRENDERMODE_REBUILD
 
             self._buildPeakLists(spectrumView, peakListView)
 
@@ -3130,8 +3134,8 @@ void main()
           if peakListView.buildPeakListLabels:
             peakListView.buildPeakListLabels = False
 
-            if peakListView.pid in self._GLPeakListLabels.keys():
-              self._GLPeakListLabels[peakListView.pid].renderMode = GLRENDERMODE_REBUILD
+            if peakListView in self._GLPeakListLabels.keys():
+              self._GLPeakListLabels[peakListView].renderMode = GLRENDERMODE_REBUILD
 
             self._buildPeakListLabels(spectrumView, peakListView)
             self._rescalePeakListLabels(spectrumView, peakListView)
@@ -3142,9 +3146,18 @@ void main()
 
     self.buildIntegralLists()
 
-    for il in self._GLIntegralLists.values():
-      if il.spectrumView.isVisible() and il.integralListView.isVisible():
-        il.drawIndexArray()
+    # loop through the attached peakListViews to the strip
+    for spectrumView in self._parent.spectrumViews:
+      for peakListView in spectrumView.peakListViews:
+        if spectrumView.isVisible() and peakListView.isVisible():
+
+          if peakListView in self._GLIntegralLists.keys():
+            self._GLIntegralLists[peakListView].drawIndexArray()
+
+
+    # for il in self._GLIntegralLists.values():
+    #   if il.spectrumView.isVisible() and il.integralListView.isVisible():
+    #     il.drawIndexArray()
 
   def drawPeakLists(self):
     if self._parent.isDeleted:
@@ -3155,9 +3168,13 @@ void main()
     lineThickness = self._preferences.peakSymbolThickness
     GL.glLineWidth(lineThickness)
 
-    for pl in self._GLPeakLists.values():
-      if pl.spectrumView.isVisible() and pl.peakListView.isVisible():
-        pl.drawIndexArray()
+    # loop through the attached peakListViews to the strip
+    for spectrumView in self._parent.spectrumViews:
+      for peakListView in spectrumView.peakListViews:
+        if spectrumView.isVisible() and peakListView.isVisible():
+
+          if peakListView in self._GLPeakLists.keys():
+            self._GLPeakLists[peakListView].drawIndexArray()
 
     GL.glLineWidth(1.0)
 
@@ -3167,11 +3184,15 @@ void main()
 
     self.buildPeakListLabels()
 
-    for pll in self._GLPeakListLabels.values():
-      if pll.spectrumView.isVisible() and pll.peakListView.isVisible():
+    # loop through the attached peakListViews to the strip
+    for spectrumView in self._parent.spectrumViews:
+      for peakListView in spectrumView.peakListViews:
+        if spectrumView.isVisible() and peakListView.isVisible():
 
-        for drawString in pll.stringList:
-          drawString.drawTextArray()
+          if peakListView in self._GLPeakListLabels.keys():
+
+            for drawString in self._GLPeakListLabels[peakListView].stringList:
+              drawString.drawTextArray()
 
   def drawSpectra(self):
     if self._parent.isDeleted:
@@ -4801,7 +4822,7 @@ void main()
               for peakList in targets:
                 if peakList == peakListView.peakList:
                   peakListView.buildPeakLists = True
-          self.buildPeakLists()
+          # self.buildPeakLists()
 
         if GLNotifier.GLPEAKLISTLABELS in triggers:
           for spectrumView in self._parent.spectrumViews:
@@ -4809,65 +4830,60 @@ void main()
               for peakList in targets:
                 if peakList == peakListView.peakList:
                   peakListView.buildPeakListLabels = True
-          self.buildPeakListLabels()
+          # self.buildPeakListLabels()
 
         if GLNotifier.GLMARKS in triggers:
           self._marksList.renderMode = GLRENDERMODE_REBUILD
 
         # TODO:ED test trigger for the minute
         if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
-          # for spectrumView in self._parent.spectrumViews:
-          #   for peakListView in spectrumView.peakListViews:
-          #
-          #     self._updateHighlightedPeaks(spectrumView, peakListView)
-          #     self._updateHighlightedPeakLabels(spectrumView, peakListView)
 
-          for pl in self._GLPeakLists.values():
-            self._updateHighlightedPeaks(pl.spectrumView, pl.peakListView)
-          for pll in self._GLPeakListLabels.values():
-            self._updateHighlightedPeakLabels(pll.spectrumView, pll.peakListView)
+          for spectrumView in self._parent.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
 
-          #     peakListView.buildPeakLists = True
-          #     peakListView.buildPeakListLabels = True
-          # self.buildPeakLists()
-          # self.buildPeakListLabels()
+              if peakListView in self._GLPeakLists.keys():
+                self._updateHighlightedPeaks(spectrumView, peakListView)
+                self._updateHighlightedPeakLabels(spectrumView, peakListView)
 
         if GLNotifier.GLALLPEAKS in triggers:
-          # for spectrumView in self._parent.spectrumViews:
-          #   for peakListView in spectrumView.peakListViews:
-          #     peakListView.buildPeakLists = True
-          #     peakListView.buildPeakListLabels = True
 
-          for pl in self._GLPeakLists.values():
-            pl.peakListView.buildPeakLists = True
-          for pll in self._GLPeakListLabels.values():
-            pll.peakListView.buildPeakListLabels = True
+          for spectrumView in self._parent.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
 
-          self.buildPeakLists()
-          self.buildPeakListLabels()
+              if peakListView in self._GLPeakLists.keys():
+                peakListView.buildPeakLists = True
+                peakListView.buildPeakListLabels = True
+
+          # self.buildPeakLists()
+          # self.buildPeakListLabels()
 
         if GLNotifier.GLANY in targets:
           self._rescaleXAxis(update=False)
 
         if GLNotifier.GLPEAKNOTIFY in targets:
-          # for spectrumView in self._parent.spectrumViews:
-          #   for peakListView in spectrumView.peakListViews:
-          #     peakListView.buildPeakLists = True
-          #     peakListView.buildPeakListLabels = True
 
-          for pl in self._GLPeakLists.values():
-            pl.peakListView.buildPeakLists = True
-          for pll in self._GLPeakListLabels.values():
-            pll.peakListView.buildPeakListLabels = True
+          for spectrumView in self._parent.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
 
-          self.buildPeakLists()
-          self.buildPeakListLabels()
+              if peakListView in self._GLPeakLists.keys():
+                peakListView.buildPeakLists = True
+                peakListView.buildPeakListLabels = True
+
+          # self.buildPeakLists()
+          # self.buildPeakListLabels()
 
         if GLNotifier.GLINTEGRALLISTS in triggers:
-          for ils in self._GLIntegralLists.values():
-            if ils.integralListView.peakList in targets:
-              # ils.renderMode = GLRENDERMODE_REBUILD
-              ils.integralListView.buildPeakLists = True
+
+          for spectrumView in self._parent.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+
+              if peakListView in self._GLIntegralLists.keys():
+                peakListView.buildPeakLists = True
+
+          # for ils in self._GLIntegralLists.values():
+          #   if ils.integralListView.peakList in targets:
+          #     # ils.renderMode = GLRENDERMODE_REBUILD
+          #     ils.integralListView.buildPeakLists = True
 
           # self._processPeakNotifier(targets)
 
@@ -5263,6 +5279,67 @@ void main()
       event.ignore()
 
     self.update()
+
+  def _processIntegralNotifier(self, data):
+    triggers = data[Notifier.TRIGGER]
+    integral = data[Notifier.OBJECT]
+
+    if Notifier.DELETE in triggers:
+      self._deleteIntegral(integral)
+
+    if Notifier.CREATE in triggers:
+      self._createIntegral(integral)
+
+    if Notifier.CHANGE in triggers:
+      self._changeIntegral(integral)
+
+    self._clearKeys()
+    self.update()
+
+  # TODO:ED these need to be special created from the pipeline widgets
+  def _deleteIntegral(self, integral):
+    for ils in self._GLIntegralLists.values():
+
+      # confusing as peakList and integralList share the same list :)
+      if integral.integralList == ils.integralListView.peakList:
+
+        for reg in ils._regions:
+
+          if reg._object == integral:
+            ils._regions.remove(reg)
+            ils._rebuild()
+            self.update()
+            return
+
+  def _createIntegral(self, integral):
+    for ils in self._GLIntegralLists.values():
+
+      # confusing as peakList and integralList share the same list :)
+      if integral.integralList == ils.integralListView.peakList:
+        colour = ils.integralListView.symbolColour
+        colR = int(colour.strip('# ')[0:2], 16) / 255.0
+        colG = int(colour.strip('# ')[2:4], 16) / 255.0
+        colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+        ils.addIntegral(integral, colour=None, brush=(colR, colG, colB, 0.15))
+        self.update()
+        return
+
+  def _changeIntegral(self, integral):
+
+    # regions added by the pipeline module
+    # for region in self._externalRegions._regions:
+    #   if region._object == integral:
+    #     self._regionList.renderMode = GLRENDERMODE_REBUILD
+    #     self.update()
+    #     return
+
+    for ils in self._GLIntegralLists.values():
+      for reg in ils._regions:
+        if reg._object == integral:
+          ils._resize()
+          return
+
 
 GlyphXpos = 'Xpos'
 GlyphYpos = 'Ypos'

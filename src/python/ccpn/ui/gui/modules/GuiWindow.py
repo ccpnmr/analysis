@@ -183,7 +183,9 @@ class GuiWindow():
             spectrumView.spectrum.newIntegralList()
           integral = spectrumView.spectrum.integralLists[-1].newIntegral(value=None, limits=[limits,])
           self.current.integrals += (integral,)
-          strip.plotWidget.viewBox._showIntegralLines()
+
+          # TODO:ED disable to stop integralLines error
+          # strip.plotWidget.viewBox._showIntegralLines()
 
 
   def refitCurrentPeaks(self):

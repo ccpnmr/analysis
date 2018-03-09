@@ -4293,6 +4293,11 @@ void main()
         self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
         self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
+  def removeTraces(self):
+    # remove all static traces
+    self._staticHTraces = []
+    self._staticVTraces = []
+
   def newTrace(self):
     position = [self.cursorCoordinate[0], self.cursorCoordinate[1]]     #list(cursorPosition)
     for axis in self._orderedAxes[2:]:
@@ -4325,6 +4330,8 @@ void main()
           self._newStaticVTraceData(spectrumView, self._staticVTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
   def buildStaticTraces(self):
+
+    # TODO:ED now make them update when phasing values change
     pass
 
   def drawTraces(self):

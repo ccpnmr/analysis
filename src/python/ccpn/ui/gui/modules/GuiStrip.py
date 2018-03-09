@@ -448,6 +448,12 @@ class GuiStrip(Frame):
 
   def removePhasingTraces(self):
 
+    try:
+      self._testCcpnOpenGLWidget.removeTraces()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
+    return
     for spectrumView in self.spectrumViews:
       spectrumView.removePhasingTraces()
 

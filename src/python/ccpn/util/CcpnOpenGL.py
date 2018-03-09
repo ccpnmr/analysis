@@ -1209,8 +1209,8 @@ void main()
 
     self._hTraces = {}
     self._vTraces = {}
-    self._staticHTraces = {}
-    self._staticVTraces = {}
+    self._staticHTraces = []
+    self._staticVTraces = []
 
     # self._hTrace = GLVertexArray(numLists=1,
     #                                 renderMode=GLRENDERMODE_IGNORE,
@@ -4086,7 +4086,95 @@ void main()
       GL.glEnd()
       GL.glDisable(GL.GL_BLEND)
 
-  def _updateHTraceData(self, spectrumView, tracesDict, 
+  def _newStaticHTraceData(self, spectrumView, tracesDict,
+                            point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
+                            ph0=None, ph1=None, pivot=None):
+
+    try:
+      pointInt = [1 + int(pnt + 0.5) for pnt in point]
+      data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
+      preData = data
+
+      if ph0 is not None and ph1 is not None and pivot is not None:
+        preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
+
+      x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
+      y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
+          np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
+
+      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+      tracesDict.append(GLVertexArray(numLists=1,
+                                      renderMode=GLRENDERMODE_REBUILD,
+                                      blendMode=False,
+                                      drawMode=GL.GL_LINE_STRIP,
+                                      dimension=2,
+                                      GLContext=self))
+
+      numVertices = len(x)
+      hSpectrum = tracesDict[-1]
+      hSpectrum.indices = numVertices
+      hSpectrum.numVertices = numVertices
+      hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+      hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+      hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+      hSpectrum.vertices[::2] = x
+      hSpectrum.vertices[1::2] = y
+
+      # store the pre-phase data
+      hSpectrum.data = data
+
+    except Exception as es:
+      tracesDict = []
+
+  def _newStaticVTraceData(self, spectrumView, tracesDict,
+                        point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel,
+                        ph0=None, ph1=None, pivot=None):
+
+    try:
+      pointInt = [1 + int(pnt + 0.5) for pnt in point]
+      data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
+      preData = data
+
+      if ph0 is not None and ph1 is not None and pivot is not None:
+        preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
+
+      y = np.array([yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
+      x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
+          np.array([preData[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
+
+      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+      tracesDict.append(GLVertexArray(numLists=1,
+                                      renderMode=GLRENDERMODE_REBUILD,
+                                      blendMode=False,
+                                      drawMode=GL.GL_LINE_STRIP,
+                                      dimension=2,
+                                      GLContext=self))
+
+      numVertices = len(x)
+      vSpectrum = tracesDict[-1]
+      vSpectrum.indices = numVertices
+      vSpectrum.numVertices = numVertices
+      vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+      vSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+      vSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+      vSpectrum.vertices[::2] = x
+      vSpectrum.vertices[1::2] = y
+
+      # store the pre-phase data
+      vSpectrum.data = data
+
+    except Exception as es:
+      tracesDict = []
+
+  def _updateHTraceData(self, spectrumView, tracesDict,
                         point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
                         ph0=None, ph1=None, pivot=None):
 
@@ -4214,27 +4302,27 @@ void main()
 
     for spectrumView in self._parent.spectrumViews:
 
-      phasingFrame = self._parent.spectrumDisplay.phasingFrame
+      # only add phasing trace for the visible spectra
+      if spectrumView.isVisible():
 
-      ph0 = phasingFrame.slider0.value()
-      ph1 = phasingFrame.slider1.value()
-      pivotPpm = phasingFrame.pivotEntry.get()
-      direction = phasingFrame.getDirection()
-      # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
-      # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
-      axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
-      pivot = spectrumView.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
+        phasingFrame = self._parent.spectrumDisplay.phasingFrame
 
-      inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
-        = spectrumView._getTraceParams(position)
+        ph0 = phasingFrame.slider0.value()
+        ph1 = phasingFrame.slider1.value()
+        pivotPpm = phasingFrame.pivotEntry.get()
+        direction = phasingFrame.getDirection()
+        # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
+        # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+        axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
+        pivot = spectrumView.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
 
-      # TODO:ED add on the parameters from the phasingFrame
-      if direction == 0:
-        self._updateHTraceData(spectrumView, self._staticHTraces, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, ph0, ph1, pivot)
-        # self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel)
-      else:
-        # self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
-        self._updateVTraceData(spectrumView, self._staticVTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
+        inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
+          = spectrumView._getTraceParams(position)
+
+        if direction == 0:
+          self._newStaticHTraceData(spectrumView, self._staticHTraces, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, ph0, ph1, pivot)
+        else:
+          self._newStaticVTraceData(spectrumView, self._staticVTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
   def buildStaticTraces(self):
     pass
@@ -4253,14 +4341,42 @@ void main()
           self._vTraces[vTrace].drawIndexArray()
 
     # TODO:ED if phasing mode then draw horizontal and vertical traces that are fixed position
-    if self._parent.spectrumDisplay.phasingFrame.isVisible():
+    phasingFrame = self._parent.spectrumDisplay.phasingFrame
+    if phasingFrame.isVisible():
 
       self.buildStaticTraces()
 
-      for hTrace in self._staticHTraces.keys():
-        self._staticHTraces[hTrace].drawIndexArray()
-      for vTrace in self._staticVTraces.keys():
-        self._staticVTraces[vTrace].drawIndexArray()
+      for hTrace in self._staticHTraces:
+        hTrace.drawIndexArray()
+      for vTrace in self._staticVTraces:
+        vTrace.drawIndexArray()
+
+      # draw phasingPivot
+      direction = phasingFrame.getDirection()
+      pivotPpm = phasingFrame.pivotEntry.get()
+
+      if direction == 0:
+        GL.glColor4f(0.1, 0.5, 0.1, 1.0)
+        GL.glLineStipple(1, 0xF0F0)
+        GL.glEnable(GL.GL_LINE_STIPPLE)
+
+        GL.glBegin(GL.GL_LINES)
+        GL.glVertex2d(pivotPpm, self.axisT)
+        GL.glVertex2d(pivotPpm, self.axisB)
+        GL.glEnd()
+
+        GL.glDisable(GL.GL_LINE_STIPPLE)
+      else:
+        GL.glColor4f(0.1, 0.5, 0.1, 1.0)
+        GL.glLineStipple(1, 0xF0F0)
+        GL.glEnable(GL.GL_LINE_STIPPLE)
+
+        GL.glBegin(GL.GL_LINES)
+        GL.glVertex2d(self.axisL, pivotPpm)
+        GL.glVertex2d(self.axisR, pivotPpm)
+        GL.glEnd()
+
+        GL.glDisable(GL.GL_LINE_STIPPLE)
 
   def initialiseTraces(self):
     # set up the arrays and dimension for showing the horizontal/vertical traces

@@ -413,6 +413,16 @@ class GuiStrip(Frame):
       printer.writeText(text, printer.x0+yTickHeight+0.5*fontsize*0.7, printer.y1-tick+0.5*fontsize)
 
   def _newPhasingTrace(self):
+
+    try:
+      self._testCcpnOpenGLWidget.newTrace()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
+    return
+
+
+
     for spectrumView in self.spectrumViews:
       spectrumView._newPhasingTrace()
 

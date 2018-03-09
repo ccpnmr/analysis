@@ -1209,6 +1209,8 @@ void main()
 
     self._hTraces = {}
     self._vTraces = {}
+    self._staticHTraces = {}
+    self._staticVTraces = {}
 
     # self._hTrace = GLVertexArray(numLists=1,
     #                                 renderMode=GLRENDERMODE_IGNORE,
@@ -4095,7 +4097,7 @@ void main()
         data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
       x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
-      y = positionPixel[1] - spectrumView._traceScale * (self.axisT-self.axisB) * \
+      y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
           np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
       colour = spectrumView._getColour('sliceColour', '#aaaaaa')
@@ -4103,8 +4105,8 @@ void main()
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-      if spectrumView.pid not in self._hTraces.keys():
-        self._hTraces[spectrumView.pid] = GLVertexArray(numLists=1,
+      if spectrumView not in self._hTraces.keys():
+        self._hTraces[spectrumView] = GLVertexArray(numLists=1,
                                                         renderMode=GLRENDERMODE_REBUILD,
                                                         blendMode=False,
                                                         drawMode=GL.GL_LINE_STRIP,
@@ -4112,7 +4114,7 @@ void main()
                                                         GLContext=self)
 
       numVertices = len(x)
-      hSpectrum = self._hTraces[spectrumView.pid]
+      hSpectrum = self._hTraces[spectrumView]
       hSpectrum.indices = numVertices
       hSpectrum.numVertices = numVertices
       hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
@@ -4121,7 +4123,7 @@ void main()
       hSpectrum.vertices[::2] = x
       hSpectrum.vertices[1::2] = y
     except Exception as es:
-      self._hTraces[spectrumView.pid].clearArrays()
+      self._hTraces[spectrumView].clearArrays()
 
   def _updateVTraceData(self, spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel,
                         ph0=None, ph1=None, pivot=None):
@@ -4142,8 +4144,8 @@ void main()
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-      if spectrumView.pid not in self._vTraces.keys():
-        self._vTraces[spectrumView.pid] = GLVertexArray(numLists=1,
+      if spectrumView not in self._vTraces.keys():
+        self._vTraces[spectrumView] = GLVertexArray(numLists=1,
                                                         renderMode=GLRENDERMODE_REBUILD,
                                                         blendMode=False,
                                                         drawMode=GL.GL_LINE_STRIP,
@@ -4151,7 +4153,7 @@ void main()
                                                         GLContext=self)
 
       numVertices = len(x)
-      vSpectrum = self._vTraces[spectrumView.pid]
+      vSpectrum = self._vTraces[spectrumView]
       vSpectrum.indices = numVertices
       vSpectrum.numVertices = numVertices
       vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
@@ -4160,7 +4162,7 @@ void main()
       vSpectrum.vertices[::2] = x
       vSpectrum.vertices[1::2] = y
     except Exception as es:
-      self._hTraces[spectrumView.pid].clearArrays()
+      self._vTraces[spectrumView].clearArrays()
 
   def updateTraces(self):
     if self._parent.isDeleted:
@@ -4201,6 +4203,12 @@ void main()
         self._updateHTraceData(spectrumView, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
         self._updateVTraceData(spectrumView, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
+  def newTrace(self):
+    pass
+
+  def buildStaticTraces(self):
+    pass
+
   def drawTraces(self):
     # only paint if mouse is in the window
     if self.underMouse():
@@ -4213,6 +4221,16 @@ void main()
       if self._updateVTrace:
         for vTrace in self._vTraces.keys():
           self._vTraces[vTrace].drawIndexArray()
+
+    # TODO:ED if phasing mode then draw horizontal and vertical traces that are fixed position
+    if self._parent.spectrumDisplay.phasingFrame.isVisible():
+
+      self.buildStaticTraces()
+
+      for hTrace in self._staticHTraces.keys():
+        self._staticHTraces[hTrace].drawIndexArray()
+      for vTrace in self._staticVTraces.keys():
+        self._staticVTraces[vTrace].drawIndexArray()
 
   def initialiseTraces(self):
     # set up the arrays and dimension for showing the horizontal/vertical traces

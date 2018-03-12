@@ -36,7 +36,7 @@ from ccpn.core.lib.SpectrumLib import _calibrateX1D
 import pyqtgraph as pg
 from ccpn.util.Logging import getLogger
 
-OP = 'Original Position: '
+OP = 'Calibrate X - Original Position: '
 NP = 'New Position: '
 
 ToolTip = 'Click the line to select. Hold left click and drag. Release the mouse to set the original ' \

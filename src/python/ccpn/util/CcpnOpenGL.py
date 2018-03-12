@@ -4335,6 +4335,9 @@ void main()
     pass
 
   def drawTraces(self):
+    if self._parent.isDeleted:
+      return
+
     # only paint if mouse is in the window
     if self.underMouse():
       # self.updateTraces()

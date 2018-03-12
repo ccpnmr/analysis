@@ -286,7 +286,7 @@ class GuiSpectrumDisplay(CcpnModule):
       return
     else:
       from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
-      popup = CopyPeakListPopup(application=self.application)
+      popup = CopyPeakListPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
       popup.sourcePeakListPullDown.select(peakList.pid)
       popup.exec_()
     # showInfo(title='Copy PeakList "%s"' % peakList.pid, message='Copy to selected spectra')

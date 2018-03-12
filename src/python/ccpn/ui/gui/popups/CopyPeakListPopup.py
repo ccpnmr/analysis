@@ -38,7 +38,7 @@ class CopyPeakListPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', **kw):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
 
-    self.mainWindow= mainWindow
+    self.mainWindow = mainWindow
     self.application = self.mainWindow.application
     self.project = self.mainWindow.project
 

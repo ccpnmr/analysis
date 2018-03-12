@@ -112,6 +112,12 @@ REGION_COLOURS = {
   None: (0.2, 0.1, 1.0, 0.15)
 }
 
+GLLINE_STYLES = {
+  'solid': 0xFFFF,
+  'dashed': 0xF0F0,
+  'dotted': 0xAAAA
+}
+
 
 def singleton(cls):
   """ Use class as singleton.
@@ -1165,6 +1171,7 @@ void main()
     self._regions = []
     self._GLIntegralLists = {}
     self._externalRegions = GLIntegralArray(GLContext=self, spectrumView=None, integralListView=None)
+    self._infiniteLines = []
 
     from ccpn.framework.PathsAndUrls import fontsPath
     self.firstFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'myfont.fnt'))
@@ -1465,7 +1472,10 @@ void main()
     self._endCoordinate = self._startCoordinate
     # self._drawSelectionBox = True
 
-    if not self.mousePressInRegion(self._externalRegions._regions):
+    # if not self.mousePressInRegion(self._externalRegions._regions):
+    #   self.mousePressInIntegralLists()
+
+    if not self.mousePressInRegion(self._infiniteLines):
       self.mousePressInIntegralLists()
 
     self.current.strip = self._parent
@@ -2913,6 +2923,8 @@ void main()
     if not self._drawSelectionBox:
       self.drawTraces()
 
+    self.drawInfiniteLines()
+
     currentShader = self._shaderProgramTex.makeCurrent()
 
     if self._crossHairVisible:
@@ -3237,7 +3249,7 @@ void main()
     # draw the bounding boxes
     GL.glEnable(GL.GL_BLEND)
     for spectrumView in self._parent.spectrumViews:
-      if spectrumView.isVisible() and self._preferences.showSpectrumBorder:
+      if spectrumView.isVisible() and self._preferences.showSpectrumBorder and spectrumView.spectrum.dimensionCount > 1:
         self._spectrumValues = spectrumView._getValues()
 
         # get the bounding box of the spectra
@@ -3413,6 +3425,62 @@ void main()
 
         for lb in self._axisYLabelling:
           lb.drawTextArray()
+
+  def removeInfiniteLine(self, line):
+    if line in self._infiniteLines:
+      self._infiniteLines.remove(line)
+    self.update()
+
+  def addInfiniteLine(self, values=None, axisCode=None, orientation=None,
+                brush=None, colour='blue',
+                movable=True, visible=True, bounds=None,
+                object=None, lineStyle='dashed', **kw):
+
+    if colour in REGION_COLOURS.keys():
+      brush = REGION_COLOURS[colour]
+
+    if orientation == 'h':
+      axisCode = self._axisCodes[1]
+    elif orientation == 'v':
+      axisCode = self._axisCodes[0]
+    else:
+      if axisCode:
+        axisIndex = None
+        for ps, psCode in enumerate(self._axisCodes[0:2]):
+          if self._preferences.matchAxisCode == 0:  # default - match atom type
+
+            if axisCode[0] == psCode[0]:
+              axisIndex = ps
+          elif self._preferences.matchAxisCode == 1:  # match full code
+            if axisCode == psCode:
+              axisIndex = ps
+
+          if axisIndex == 0:
+            orientation = 'v'
+          elif axisIndex == 1:
+            orientation = 'h'
+
+        if not axisIndex:
+          getLogger().warning('Axis code %s not found in current strip' % axisCode)
+          return None
+      else:
+        axisCode = self._axisCodes[0]
+        orientation = 'v'
+
+    self._infiniteLines.append(GLRegion(self._parent, self._regionList,
+                                  values=values,
+                                  axisCode=axisCode,
+                                  orientation=orientation,
+                                  brush=brush,
+                                  colour=colour,
+                                  movable=movable,
+                                  visible=visible,
+                                  bounds=bounds,
+                                  object=object,
+                                  lineStyle=lineStyle))
+
+    self.update()
+    return self._infiniteLines[-1]
 
   def removeExternalRegion(self, region):
     pass
@@ -3825,6 +3893,29 @@ void main()
     GL.glVertex2d(self.axisL, self._successiveClicks[1])
     GL.glVertex2d(self.axisR, self._successiveClicks[1])
     GL.glEnd()
+
+    GL.glDisable(GL.GL_LINE_STIPPLE)
+
+  def drawInfiniteLines(self):
+    # draw the simulated infinite lines
+
+    GL.glDisable(GL.GL_BLEND)
+    GL.glEnable(GL.GL_LINE_STIPPLE)
+    for infLine in self._infiniteLines:
+
+      if infLine.visible:
+        GL.glColor4f(*infLine.brush)
+        GL.glLineStipple(1, GLLINE_STYLES[infLine.lineStyle])
+
+        GL.glBegin(GL.GL_LINES)
+        if infLine.orientation == 'h':
+          GL.glVertex2d(self.axisL, infLine.values[0])
+          GL.glVertex2d(self.axisR, infLine.values[0])
+        else:
+          GL.glVertex2d(infLine.values[0], self.axisT)
+          GL.glVertex2d(infLine.values[0], self.axisB)
+
+        GL.glEnd()
 
     GL.glDisable(GL.GL_LINE_STIPPLE)
 
@@ -6259,7 +6350,7 @@ class GLRegion(QtWidgets.QWidget):
 
   def __init__(self, parent, glList, values=(0,0), axisCode=None, orientation='h',
                brush=None, colour='blue',
-               movable=True, visible=True, bounds=None, object=None):
+               movable=True, visible=True, bounds=None, object=None, lineStyle='dashed'):
 
     super(GLRegion, self).__init__(parent)
 
@@ -6274,6 +6365,7 @@ class GLRegion(QtWidgets.QWidget):
     self._visible = visible
     self._bounds = bounds
     self._object = object
+    self.lineStyle = lineStyle
     self.pid = object.pid if hasattr(object, 'pid') else None
 
   def _mouseDrag(self, values):
@@ -6293,6 +6385,11 @@ class GLRegion(QtWidgets.QWidget):
     # TODO:ED change the integral object - should spawn change event
     if self._object and not self._object.isDeleted:
       self._object.limits = [(min(values), max(values))]
+
+  def setValue(self, val):
+    # use the region to simulate an infinite line
+    self.values = (val, val)
+    self.parent.update()
 
   @property
   def axisCode(self):

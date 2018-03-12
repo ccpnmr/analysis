@@ -34,12 +34,14 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.core.lib.SpectrumLib import _calibrateX1D
 import pyqtgraph as pg
+from ccpn.util.Logging import getLogger
 
 OP = 'Original Position: '
 NP = 'New Position: '
 
 ToolTip = 'Click the line to select. Hold left click and drag. Release the mouse to set the original ' \
           'position to the new position '
+
 
 class Calibrate1DWidgets(Frame):
   def __init__(self, parent=None, mainWindow=None, strip=None, **kw):
@@ -57,6 +59,11 @@ class Calibrate1DWidgets(Frame):
       self.newPosition = None
       self.strip = strip
 
+      try:
+        self.GLWidget = self.current.strip._testCcpnOpenGLWidget
+      except Exception as es:
+        getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.current.strip)
+
     i=0
     self.labelOriginalPosition = Label(self, OP,grid=(0, i))
     i += 1
@@ -69,11 +76,18 @@ class Calibrate1DWidgets(Frame):
     self.okButtons = ButtonList(self, ['Cancel', 'Apply'], callbacks=[self._close, self._calibrateSpectra],
                                 grid=(0,i))
 
-    self.infiniteLine = pg.InfiniteLine(movable=True)
-    self.originalPosInfiniteLine = pg.InfiniteLine(movable=False, pen='g')
+    # self.infiniteLine = pg.InfiniteLine(movable=True)
+    # self.originalPosInfiniteLine = pg.InfiniteLine(movable=False, pen='g')
+
+    if self.GLWidget:
+      self.infiniteLine = self.GLWidget.addInfiniteLine(colour = 'yellow', movable=True, lineStyle='solid')
+      self.originalPosInfiniteLine = self.GLWidget.addInfiniteLine(colour = 'green', movable=True, lineStyle='dashed')
+
+      self.infiniteLine.valuesChanged.connect(self._newPositionLineCallback)
+      self.originalPosInfiniteLine.valuesChanged.connect(self._originalPositionLineCallback)
 
     # self.infiniteLine.sigPositionChangeFinished.connect(self._calibrateSpectra)
-    self.infiniteLine.sigPositionChanged.connect(self._newPositionLineCallback)
+    # self.infiniteLine.sigPositionChanged.connect(self._newPositionLineCallback)
 
     self.boxOriginalPosition.valueChanged.connect(self._originalPositionBoxCallback)
     self.boxNewPosition.valueChanged.connect(self._newPositionBoxCallback)
@@ -83,9 +97,9 @@ class Calibrate1DWidgets(Frame):
   def _initLines(self):
 
     if self.mainWindow is not None:
-      if self.strip is not None:
-        self.strip.plotWidget.addItem(self.infiniteLine)
-        self.strip.plotWidget.addItem(self.originalPosInfiniteLine)
+      # if self.strip is not None:
+      #   self.strip.plotWidget.addItem(self.infiniteLine)
+      #   self.strip.plotWidget.addItem(self.originalPosInfiniteLine)
       ## NB Current.cursorPosition is extremely unreliable.
       if self.strip.plotWidget.viewBox.contextMenuPosition is not None:
         self.originalPosition = self.strip.plotWidget.viewBox.contextMenuPosition[0]
@@ -93,13 +107,17 @@ class Calibrate1DWidgets(Frame):
         self.originalPosInfiniteLine.setValue(self.originalPosition)
         self.boxOriginalPosition.setValue(round(self.originalPosition,3))
 
+        self.infiniteLine.visible = True
+        self.originalPosInfiniteLine.visible = True
 
   def _newBoxCallback(self):
     spinboxValue = self.sender().value()
     self.infiniteLine.setValue(spinboxValue)
 
   def _newPositionLineCallback(self):
-    self.newPosition = self.infiniteLine.pos().x()
+    # self.newPosition = self.infiniteLine.pos().x()
+
+    self.newPosition = self.infiniteLine.values[0]
     self.boxNewPosition.setValue(round(self.newPosition, 3))
 
   def _newPositionBoxCallback(self):
@@ -107,18 +125,24 @@ class Calibrate1DWidgets(Frame):
     self.newPosition = round(box.value(),3)
     self.infiniteLine.setValue(self.newPosition)
 
+  def _originalPositionLineCallback(self):
+    self.originalPosition = self.originalPosInfiniteLine.values[0]
+    self.boxOriginalPosition.setValue(round(self.originalPosition, 3))
+
   def _originalPositionBoxCallback(self):
     box = self.sender()
     self.originalPosition = round(box.value(),3)
     self.originalPosInfiniteLine.setValue(self.originalPosition)
 
-
   def _removeLines(self):
     if self.mainWindow is not None:
-      if self.strip is not None:
-        self.strip.plotWidget.removeItem(self.infiniteLine)
-        self.strip.plotWidget.removeItem(self.originalPosInfiniteLine)
+      # if self.strip is not None:
+      #   self.strip.plotWidget.removeItem(self.infiniteLine)
+      #   self.strip.plotWidget.removeItem(self.originalPosInfiniteLine)
 
+      if self.GLWidget:
+        self.infiniteLine.visible = False
+        self.originalPosInfiniteLine.visible = False
 
   def _toggleLines(self):
     if self.isVisible():
@@ -134,9 +158,13 @@ class Calibrate1DWidgets(Frame):
             spectrum = spectrumView.spectrum
             _calibrateX1D(spectrum, self.originalPosition, self.newPosition)
 
+          spectrumView.buildContours = True
+
     self.originalPosInfiniteLine.setValue(self.infiniteLine.pos().x())
     self._close()
 
+    if self.GLWidget:
+      self.GLWidget.update()
 
   def _close(self):
     self.setVisible(False)

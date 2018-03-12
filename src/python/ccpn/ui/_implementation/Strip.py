@@ -708,32 +708,43 @@ class Strip(AbstractWrapperObject):
     try:
       for spectrumView in self.spectrumViews:
 
-        if not spectrumView.peakListViews: # this can happen if no peakLists, so create one
-          self._project.unblankNotification() # need this otherwise SideBar does not get updated
+        # check whether there any peakLists attached to the spectrumView - could be peakLists or integralLists
+        numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)]
+        if not numPeakLists:                    # this can happen if no peakLists, so create one
+        # if not spectrumView.peakListViews:    # this can happen if no peakLists, so create one
+          self._project.unblankNotification()   # need this otherwise SideBar does not get updated
           spectrumView.spectrum.newPeakList()
           self._project.blankNotification()
 
-        for peakListView in spectrumView.peakListViews:
-
+        numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
+                                                                  and pp.isVisible()
+                                                                  and spectrumView.isVisible()]
+        if numPeakLists:
           # find the first visible peakList
-          if not peakListView.isVisible() or not spectrumView.isVisible():
-            continue
+          peakList = numPeakLists[0].peakList
 
-          peakList = peakListView.peakList
-          if isinstance(peakList, PeakList):
-            peak = peakList.newPeak()
+        # for peakListView in spectrumView.peakListViews:
+          # find the first visible peakList
+          # if not peakListView.isVisible() or not spectrumView.isVisible():
+          #   continue
 
-            if peak.peakList.spectrum.dimensionCount == 1:
-              if len(position) > 1:
-                peak.position = (position[0],)
-                peak.height = position[1]
-            else:
-              peak.position = position
-              # note, the height below is not derived from any fitting
-              # but is a weighted average of the values at the neighbouring grid points
-              peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-            result.append(peak)
-            peakLists.append(peakList)
+          # peakList = peakListView.peakList
+
+          # if isinstance(peakList, PeakList):
+          peak = peakList.newPeak()
+
+          if peak.peakList.spectrum.dimensionCount == 1:
+            if len(position) > 1:
+              peak.position = (position[0],)
+              peak.height = position[1]
+          else:
+            peak.position = position
+            # note, the height below is not derived from any fitting
+            # but is a weighted average of the values at the neighbouring grid points
+            peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+          result.append(peak)
+          peakLists.append(peakList)
+          break
 
     finally:
       self._endCommandEchoBlock()
@@ -829,41 +840,48 @@ class Strip(AbstractWrapperObject):
     try:
 
       for spectrumView in self.spectrumViews:
-        if not spectrumView.isVisible():
-          continue
 
-        if not spectrumView.spectrum.peakLists:
+        numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)]
+        if not numPeakLists:  # this can happen if no peakLists, so create one
           self._project.unblankNotification() # need this otherwise SideBar does not get updated
           spectrumView.spectrum.newPeakList()
           self._project.blankNotification()
 
-        peakList = spectrumView.spectrum.peakLists[0]
+        numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
+                                                                  and pp.isVisible()
+                                                                  and spectrumView.isVisible()]
+        if numPeakLists:
+          # find the first visible peakList
+          peakList = numPeakLists[0].peakList
 
-        if spectrumView.spectrum.dimensionCount > 1:
-          sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
-          spectrumAxisCodes = spectrumView.spectrum.axisCodes
-          stripAxisCodes = self.axisCodes
-          sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+          # peakList = spectrumView.spectrum.peakLists[0]
 
-          remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-          for n, axisCode in enumerate(spectrumAxisCodes):
-            # idx = stripAxisCodes.index(axisCode)
-            idx = remapIndices[n]
-            sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-          newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-                                          doPos=spectrumView.displayPositiveContours,
-                                          doNeg=spectrumView.displayNegativeContours,
-                                          fitMethod='gaussian', minDropfactor=minDropfactor)
-        else:
-          # 1D's
-          # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
-          newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]))
-          # y0 = startPosition.y()
-          # y1 = endPosition.y()
-          # y0, y1 = min(y0, y1), max(y0, y1)
-          # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
+          if spectrumView.spectrum.dimensionCount > 1:
+            sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
+            spectrumAxisCodes = spectrumView.spectrum.axisCodes
+            stripAxisCodes = self.axisCodes
+            sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
 
-        result.extend(newPeaks)
+            remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+            for n, axisCode in enumerate(spectrumAxisCodes):
+              # idx = stripAxisCodes.index(axisCode)
+              idx = remapIndices[n]
+              sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+            newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
+                                            doPos=spectrumView.displayPositiveContours,
+                                            doNeg=spectrumView.displayNegativeContours,
+                                            fitMethod='gaussian', minDropfactor=minDropfactor)
+          else:
+            # 1D's
+            # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
+            newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]))
+            # y0 = startPosition.y()
+            # y1 = endPosition.y()
+            # y0, y1 = min(y0, y1), max(y0, y1)
+            # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
+
+          result.extend(newPeaks)
+          break
 
         # # Add the new peaks to selection
         # for peak in newPeaks:

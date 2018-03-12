@@ -5099,6 +5099,9 @@ void main()
           # for peakList in spectrumView.spectrum.peakLists:
           peakList = peakListView.peakList
 
+          if not isinstance(peakList, PeakList):
+            continue
+
           for peak in peakList.peaks:
             if (xPositions[0] < float(peak.position[0]) < xPositions[1]
               and yPositions[0] < float(peak.position[1]) < yPositions[1]):

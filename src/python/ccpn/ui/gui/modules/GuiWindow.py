@@ -228,6 +228,9 @@ class GuiWindow():
         for strip in spectrumDisplay.strips:
           for spectrumView in strip.spectrumViews:
             spectrumView.traceScale *= scale
+
+          # spawn a redraw of the strip
+          strip._updatePivot()
     
   def traceScaleUp(self, window:'GuiWindow'):
     """

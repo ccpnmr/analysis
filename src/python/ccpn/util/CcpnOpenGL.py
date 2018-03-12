@@ -509,6 +509,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.rescaleIntegralLists()
     self._rescaleRegions()
     self.rescaleSpectra()
+    self.rescaleStaticTraces()
 
   def rescaleSpectra(self):
     if self._parent.isDeleted:
@@ -4126,6 +4127,9 @@ void main()
 
       # store the pre-phase data
       hSpectrum.data = data
+      hSpectrum.values = [spectrumView, point, xDataDim,
+                          xMinFrequency, xMaxFrequency,
+                          xNumPoints, positionPixel]
 
     except Exception as es:
       tracesDict = []
@@ -4170,6 +4174,9 @@ void main()
 
       # store the pre-phase data
       vSpectrum.data = data
+      vSpectrum.values = [spectrumView, point, yDataDim,
+                          yMinFrequency, yMaxFrequency,
+                          yNumPoints, positionPixel]
 
     except Exception as es:
       tracesDict = []
@@ -4329,10 +4336,64 @@ void main()
         else:
           self._newStaticVTraceData(spectrumView, self._staticVTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
+  def clearStaticTraces(self):
+    self._staticVTraces = []
+    self._staticHTraces = []
+    self.update()
+
+  def rescaleStaticTraces(self):
+    for hTrace in self._staticHTraces:
+      hTrace.renderMode = GLRENDERMODE_RESCALE
+
+    for vTrace in self._staticVTraces:
+      vTrace.renderMode = GLRENDERMODE_RESCALE
+
+    self.update()
+
   def buildStaticTraces(self):
 
-    # TODO:ED now make them update when phasing values change
-    pass
+    phasingFrame = self._parent.spectrumDisplay.phasingFrame
+    if phasingFrame.isVisible():
+      ph0 = phasingFrame.slider0.value()
+      ph1 = phasingFrame.slider1.value()
+      pivotPpm = phasingFrame.pivotEntry.get()
+      direction = phasingFrame.getDirection()
+      # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
+      # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+
+      for hTrace in self._staticHTraces:
+        if hTrace.renderMode == GLRENDERMODE_RESCALE:
+          hTrace.renderMode = GLRENDERMODE_DRAW
+
+          # [spectrumView._traceScale, point, yDataDim,
+          # yMinFrequency, yMaxFrequency,
+          # yNumPoints, positionPixel]
+
+          values = hTrace.values
+          axisIndex = values[0]._displayOrderSpectrumDimensionIndices[direction]
+          pivot = values[0].spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
+
+          preData = Phasing.phaseRealData(hTrace.data, ph0, ph1, pivot)
+
+          y = values[6][1] + values[0]._traceScale * (self.axisT - self.axisB) * \
+              np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
+
+          hTrace.vertices[1::2] = y
+
+      for vTrace in self._staticVTraces:
+        if vTrace.renderMode == GLRENDERMODE_RESCALE:
+          vTrace.renderMode = GLRENDERMODE_DRAW
+
+          values = vTrace.values
+          axisIndex = values[0]._displayOrderSpectrumDimensionIndices[direction]
+          pivot = values[0].spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
+
+          preData = Phasing.phaseRealData(vTrace.data, ph0, ph1, pivot)
+
+          x = values[6][0] + values[0]._traceScale * (self.axisL - self.axisR) * \
+              np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
+
+          vTrace.vertices[::2] = x
 
   def drawTraces(self):
     if self._parent.isDeleted:

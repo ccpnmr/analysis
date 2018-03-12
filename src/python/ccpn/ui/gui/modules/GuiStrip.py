@@ -252,6 +252,8 @@ class GuiStrip(Frame):
     self.peakLabelling = self.application.preferences.general.annotationType
     self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
 
+    self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+
     try:
       self._testCcpnOpenGLWidget.gridVisible = self.application.preferences.general.showGrid
     except Exception as es:
@@ -466,6 +468,14 @@ class GuiStrip(Frame):
 
   def _updatePivot(self): # this is called if pivot entry at bottom of display is updated and then "return" key used
 
+    # update the static traces from the phasing console
+    # redraw should update the display
+    try:
+      self._testCcpnOpenGLWidget.rescaleStaticTraces()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+    return
+
     phasingFrame = self.spectrumDisplay.phasingFrame
     position = phasingFrame.pivotEntry.get()
     direction = phasingFrame.getDirection()
@@ -507,6 +517,11 @@ class GuiStrip(Frame):
 
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
+
+    self._storedPhasingData[1-direction] = [phasingFrame.slider0.value(),
+                                            phasingFrame.slider1.value(),
+                                            phasingFrame.pivotEntry.get()]
+
     if direction == 0:
       self.hPhasingPivot.setVisible(True)
       self.vPhasingPivot.setVisible(False)
@@ -514,11 +529,28 @@ class GuiStrip(Frame):
       self.hPhasingPivot.setVisible(False)
       self.vPhasingPivot.setVisible(True)
 
+    phasingFrame.slider0.setValue(self._storedPhasingData[direction][0])
+    phasingFrame.slider1.setValue(self._storedPhasingData[direction][1])
+    phasingFrame.pivotEntry.set(self._storedPhasingData[direction][2])
+    try:
+      self._testCcpnOpenGLWidget.clearStaticTraces()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
     for spectrumView in self.spectrumViews:
       spectrumView._changedPhasingDirection()
 
+
   def _updatePhasing(self):
-    #
+
+    # update the static traces from the phasing console
+    # redraw should update the display
+    try:
+      self._testCcpnOpenGLWidget.rescaleStaticTraces()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+    return
+
     # TODO:GEERTEN: Fix with proper stylesheet
     colour = '#e4e15b' if self.application.colourScheme == 'dark' else '#000000'
     self.hPhasingPivot.setPen({'color': colour})

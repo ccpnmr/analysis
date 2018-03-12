@@ -25,11 +25,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.Entry import FloatEntry
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 
 directionTexts = ('Horizontal', 'Vertical')
 
@@ -58,10 +60,12 @@ class PhasingFrame(Frame):
     
     self.label0 = Label(self, text='ph0', grid=(0,0))
     self.label0.setFixedWidth(30)
-    self.phLabel0 = Label(self, text=value, grid=(0, 1))
-    self.phLabel0.setFixedWidth(35)
-    self.slider0 = Slider(self, callback=self.setPh0, grid=(0, 2), **sliderDict)
-    self.slider0.setFixedWidth(200)
+    # self.phLabel0 = Label(self, text=value, grid=(0, 1))
+    # self.phLabel0.setFixedWidth(35)
+    # self.slider0 = Slider(self, callback=self.setPh0, grid=(0, 2), **sliderDict)
+    # self.slider0.setFixedWidth(200)
+    self.slider0 = DoubleSpinbox(self, grid=(0, 2), decimals=1, step=0.1, callback=self.setPh0)
+    self.slider0.setRange(-180, 180)
 
     sliderDict = {
       'startVal': -360,
@@ -75,10 +79,12 @@ class PhasingFrame(Frame):
     
     self.label1 = Label(self, text='ph1', grid=(0,3))
     self.label1.setFixedWidth(30)
-    self.phLabel1 = Label(self, text=value, grid=(0, 4))
-    self.phLabel1.setFixedWidth(35)
-    self.slider1 = Slider(self, callback=self.setPh1, grid=(0, 5), **sliderDict)
-    self.slider1.setFixedWidth(200)
+    # self.phLabel1 = Label(self, text=value, grid=(0, 4))
+    # self.phLabel1.setFixedWidth(35)
+    # self.slider1 = Slider(self, callback=self.setPh1, grid=(0, 5), **sliderDict)
+    # self.slider1.setFixedWidth(200)
+    self.slider1 = DoubleSpinbox(self, grid=(0, 5), decimals=1, step=0.1, callback=self.setPh1)
+    self.slider1.setRange(-360, 360)
 
     self.PivotLabel = Label(self, text='pivot', grid=(0,6))
     self.PivotLabel.setFixedWidth(35)
@@ -90,17 +96,21 @@ class PhasingFrame(Frame):
                                         callback=lambda text: self.directionCallback(), grid=(0,8))
     else:
       self.directionList = None
-      
+
+    self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
+
+    lastValues = [{'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}, {'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}]
+
   def getDirection(self):
     
     return directionTexts.index(self.directionList.get()) if self.directionList else 0
     
   def setPh0(self, value):
-    self.phLabel0.setText(str(value))
+    # self.phLabel0.setText(str(value))
     self.doCallback()
     
   def setPh1(self, value):
-    self.phLabel1.setText(str(value))
+    # self.phLabel1.setText(str(value))
     self.doCallback()
     
   def doCallback(self):

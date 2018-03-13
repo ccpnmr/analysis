@@ -70,6 +70,7 @@ GLREFRESHMODE_NEVER = 0
 GLREFRESHMODE_ALWAYS = 1
 GLREFRESHMODE_REBUILD = 2
 
+SPECTRUM_STACKEDMATRIX = 'stackedMatrix'
 SPECTRUM_MATRIX = 'spectrumMatrix'
 SPECTRUM_MAXXALIAS = 'maxXAlias'
 SPECTRUM_MINXALIAS = 'minXAlias'
@@ -528,8 +529,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # rescale the matrices each spectrumView
     stackCount = 0
-    for spectrumView in self._parent.spectrumViews:
+    for spectrumView in self._parent.orderedSpectrumViews():
       self._spectrumSettings[spectrumView] = {}
+
+      if spectrumView.isDeleted:
+        continue
 
       self._spectrumValues = spectrumView._getValues()
       # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
@@ -552,9 +556,15 @@ class CcpnGLWidget(QOpenGLWidget):
         dyAF = fy0 - fy1
         yScale = dy * dyAF / 1.0
 
-      if self._stackingValue:
-        fy0 -= stackCount * self._stackingValue
-        stackCount += 1
+        if self._stackingValue:
+          st = stackCount * self._stackingValue
+          stackCount += 1
+          self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
+
+          self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
+                                                                               0.0, 1.0, 0.0, 0.0,
+                                                                               0.0, 0.0, 1.0, 0.0,
+                                                                               0.0, st, 0.0, 1.0]
 
       # create modelview matrix for the spectrum to be drawn
       self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
@@ -3019,14 +3029,14 @@ void main()
 
         # rebuild the contours
 
-        if spectrumView.pid not in self._contourList.keys():
-          self._contourList[spectrumView.pid] = GLVertexArray(numLists=1,
+        if spectrumView not in self._contourList.keys():
+          self._contourList[spectrumView] = GLVertexArray(numLists=1,
                                                               renderMode=GLRENDERMODE_DRAW,
                                                               blendMode=False,
                                                               drawMode=GL.GL_LINE_STRIP,
                                                               dimension=2,
                                                               GLContext=self)
-        spectrumView._buildGLContours(self._contourList[spectrumView.pid])
+        spectrumView._buildGLContours(self._contourList[spectrumView])
 
         # # TODO:ED check how to efficiently trigger a rebuild of the peaklists
         # if spectrumView.spectrum.pid in self._GLPeakLists.keys():
@@ -3229,7 +3239,10 @@ void main()
     GL.glLineWidth(1.0)
     GL.glDisable(GL.GL_BLEND)
 
-    for spectrumView in self._parent.spectrumViews:
+    for spectrumView in self._parent.orderedSpectrumViews():
+      if spectrumView.isDeleted:
+        continue
+
       if spectrumView.isVisible():
 
         if spectrumView in self._spectrumSettings.keys():
@@ -3242,8 +3255,15 @@ void main()
             # draw the spectrum - call the existing glCallList
             spectrumView._paintContoursNoClip()
           else:
-            if spectrumView.pid in self._contourList.keys():
-              self._contourList[spectrumView.pid].drawIndexArray()
+            if spectrumView in self._contourList.keys():
+              if self._stackingValue:
+
+                # use the stacking matrix to offset the 1D spectra
+                self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
+                                                           , 1, GL.GL_FALSE
+                                                           , self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX])
+
+              self._contourList[spectrumView].drawIndexArray()
 
         # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
         #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW
@@ -4575,10 +4595,6 @@ void main()
         fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
         dyAF = fy0 - fy1
         yScale = dy * dyAF / 1.0
-
-      if self._stackingValue:
-        fy0 -= stackCount * self._stackingValue
-        stackCount += 1
 
       # create modelview matrix for the spectrum to be drawn
       self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)

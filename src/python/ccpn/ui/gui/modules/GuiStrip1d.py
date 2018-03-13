@@ -147,8 +147,8 @@ class GuiStrip1d(GuiStrip):
     return self.contextMenu
 
   def showExportDialog(self):
-    from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
-    self.exportDialog = CustomExportDialog(self.viewBox.scene(), spectrumDimension='1D')
+    from ccpn.ui.gui.widgets.CustomExportDialog import CustomGLExportDialog
+    self.exportDialog = CustomGLExportDialog(self._testCcpnOpenGLWidget, spectrumDimension='1D')
     self.exportDialog.show(self.viewBox)
 
   def resetYZoom(self):

@@ -236,7 +236,9 @@ class GuiStripNd(GuiStrip):
       # (tType.actn, 'Store Zoom',            'icons/zoom-store',       'Store Zoom',               True,   True,       self.spectrumDisplay._storeZoom,      ''),
       # (tType.actn, 'Restore Zoom',          'icons/zoom-restore',     'Restore Zoom',             True,   True,       self.spectrumDisplay._restoreZoom,    ''),
       (tType.actn, 'Reset Zoom',            'icons/zoom-full',        'Reset Zoom',               True,   True,       self.resetZoom,                       ''),
-      (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', True, True, lambda:self.spectrumDisplay.window.printToFile(self.spectrumDisplay), ''),
+      (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', True, True,   self.showExportDialog, ''),
+      # (tType.actn, 'Print to File...', 'icons/print', 'Print Spectrum Display to File', True, True,
+      #  lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay), ''),
 
       (tType.menu, 'Navigate To',           '',                       '',                         True,   True,       None,                                 'navigateToMenu')
     ]
@@ -280,6 +282,11 @@ class GuiStripNd(GuiStrip):
     self.lastAxisOnlyCheckBox.setChecked(self.spectrumDisplay.lastAxisOnly)
 
     return self.contextMenu
+
+  def showExportDialog(self):
+    from ccpn.ui.gui.widgets.CustomExportDialog import CustomGLExportDialog
+    self.exportDialog = CustomGLExportDialog(self._testCcpnOpenGLWidget, spectrumDimension='nD')
+    self.exportDialog.show(self.viewBox)
 
   def flipXYAxis(self):
     """

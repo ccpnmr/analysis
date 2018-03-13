@@ -774,6 +774,13 @@ class CcpnGLWidget(QOpenGLWidget):
     if update:
       self.update()
 
+    try:
+      self._parent.viewBox.setXRange(min(self.axisL, self.axisR),
+                                      max(self.axisL, self.axisR), padding=0)
+      self._orderedAxes[0].region = (self.axisL, self.axisR)
+    except:
+      getLogger().debug('error setting viewbox X-range')
+
   def _rescaleYAxis(self, update=True):
 
     # if self._preferences.lockAspectRatio:
@@ -802,6 +809,13 @@ class CcpnGLWidget(QOpenGLWidget):
     if update:
       self.update()
 
+    try:
+      self._parent.viewBox.setYRange(min(self.axisT, self.axisB),
+                                      max(self.axisT, self.axisB), padding=0)
+      self._orderedAxes[1].region = (self.axisT, self.axisB)
+    except:
+      getLogger().debug('error setting viewbox Y-range')
+
   def _rebuildMarks(self, update=True):
     self.rescale()
 
@@ -826,6 +840,18 @@ class CcpnGLWidget(QOpenGLWidget):
 
     if update:
       self.update()
+
+    try:
+      self._parent.viewBox.setXRange(min(self.axisL, self.axisR),
+                                      max(self.axisL, self.axisR), padding=0)
+      self._parent.viewBox.setYRange(min(self.axisT, self.axisB),
+                                      max(self.axisT, self.axisB), padding=0)
+
+      self._orderedAxes[0].region = (self.axisL, self.axisR)
+      self._orderedAxes[1].region = (self.axisT, self.axisB)
+
+    except Exception as es:
+      getLogger().debug('error setting viewbox XY-range')
 
   def eventFilter(self, obj, event):
     self._key = '_'

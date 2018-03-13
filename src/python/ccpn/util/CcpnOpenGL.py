@@ -1496,8 +1496,10 @@ void main()
     # if not self.mousePressInRegion(self._externalRegions._regions):
     #   self.mousePressInIntegralLists()
 
+    #€ check for dragging of infinite lines, region boundaries, integrals
     if not self.mousePressInRegion(self._infiniteLines):
-      self.mousePressInIntegralLists()
+      if not self.mousePressInRegion(self._externalRegions._regions):
+        self.mousePressInIntegralLists()
 
     self.current.strip = self._parent
 

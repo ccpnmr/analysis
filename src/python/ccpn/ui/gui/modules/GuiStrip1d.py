@@ -200,11 +200,11 @@ class GuiStrip1d(GuiStrip):
         return peakListView
 
   def _addCalibrate1DXSpectrumWidget(self):
-    from ccpn.ui.gui.widgets.CalibrateSpectrum1DWidget import Calibrate1DWidgets
+    from ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget import CalibrateX1DWidgets
     sdWid = self.spectrumDisplay.mainWidget
     self.widgetIndex+=1
-    self.calibrateX1DWidgets = Calibrate1DWidgets(sdWid, mainWindow=self.mainWindow,strip=self,
-                                                  grid=(self.widgetIndex, 0))
+    self.calibrateX1DWidgets = CalibrateX1DWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
+                                                   grid=(self.widgetIndex, 0))
     self.calibrateX1DWidgets.setVisible(True)
 
   def _toggleCalibrateXSpectrum(self):
@@ -257,8 +257,21 @@ class GuiStrip1d(GuiStrip):
       self._restoreStacked1DSpectra()
       self.toggleOffsetWidget()
 
+      try:
+        self._testCcpnOpenGLWidget.setStackingValue(None)
+      except:
+        getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
 
   def _stack1DSpectra(self, offSet=None):
+
+    try:
+      self._testCcpnOpenGLWidget.setStackingValue(offSet)
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
+    return
+
     for i, spectrumView in enumerate(self.spectrumViews):
       sp = spectrumView.spectrum
       x = sp.positions
@@ -269,7 +282,6 @@ class GuiStrip1d(GuiStrip):
       spectrumView.plot.curve.setData(x, y +(i*offSet))
       for peakListView in self.peakListViews:
         peakListView.setVisible(False)
-
 
 
   def _restoreStacked1DSpectra(self):

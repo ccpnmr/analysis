@@ -517,11 +517,17 @@ class CcpnGLWidget(QOpenGLWidget):
     self.rescaleSpectra()
     self.rescaleStaticTraces()
 
+  def setStackingValue(self, val):
+    self._stackingValue = val
+    self.rescaleSpectra()
+    self.update()
+
   def rescaleSpectra(self):
     if self._parent.isDeleted:
       return
 
     # rescale the matrices each spectrumView
+    stackCount = 0
     for spectrumView in self._parent.spectrumViews:
       self._spectrumSettings[spectrumView] = {}
 
@@ -545,6 +551,10 @@ class CcpnGLWidget(QOpenGLWidget):
         fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
         dyAF = fy0 - fy1
         yScale = dy * dyAF / 1.0
+
+      if self._stackingValue:
+        fy0 -= stackCount * self._stackingValue
+        stackCount += 1
 
       # create modelview matrix for the spectrum to be drawn
       self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
@@ -1219,6 +1229,7 @@ void main()
     self._vTraces = {}
     self._staticHTraces = []
     self._staticVTraces = []
+    self._stackingValue = None
 
     # self._hTrace = GLVertexArray(numLists=1,
     #                                 renderMode=GLRENDERMODE_IGNORE,
@@ -4542,6 +4553,7 @@ void main()
 
   def initialiseTraces(self):
     # set up the arrays and dimension for showing the horizontal/vertical traces
+    stackCount = 0
     for spectrumView in self._parent.spectrumViews:
       self._spectrumSettings[spectrumView] = {}
 
@@ -4563,6 +4575,10 @@ void main()
         fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
         dyAF = fy0 - fy1
         yScale = dy * dyAF / 1.0
+
+      if self._stackingValue:
+        fy0 -= stackCount * self._stackingValue
+        stackCount += 1
 
       # create modelview matrix for the spectrum to be drawn
       self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)

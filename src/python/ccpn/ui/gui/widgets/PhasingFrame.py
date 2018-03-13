@@ -62,9 +62,9 @@ class PhasingFrame(Frame):
     self.label0.setFixedWidth(30)
     # self.phLabel0 = Label(self, text=value, grid=(0, 1))
     # self.phLabel0.setFixedWidth(35)
-    # self.slider0 = Slider(self, callback=self.setPh0, grid=(0, 2), **sliderDict)
+    self.coarseSlider0 = Slider(self, callback=self.setCoarsePh0, grid=(0, 2), **sliderDict)
     # self.slider0.setFixedWidth(200)
-    self.slider0 = DoubleSpinbox(self, grid=(0, 2), decimals=1, step=0.1, callback=self.setPh0)
+    self.slider0 = DoubleSpinbox(self, grid=(0, 3), decimals=1, step=0.1, callback=self.setPh0)
     self.slider0.setRange(-180, 180)
 
     sliderDict = {
@@ -77,23 +77,23 @@ class PhasingFrame(Frame):
     }
     value = '%4d' % sliderDict['value']
     
-    self.label1 = Label(self, text='ph1', grid=(0,3))
+    self.label1 = Label(self, text='ph1', grid=(0,4))
     self.label1.setFixedWidth(30)
     # self.phLabel1 = Label(self, text=value, grid=(0, 4))
     # self.phLabel1.setFixedWidth(35)
-    # self.slider1 = Slider(self, callback=self.setPh1, grid=(0, 5), **sliderDict)
+    self.coarseSlider1 = Slider(self, callback=self.setCoarsePh1, grid=(0, 5), **sliderDict)
     # self.slider1.setFixedWidth(200)
-    self.slider1 = DoubleSpinbox(self, grid=(0, 5), decimals=1, step=0.1, callback=self.setPh1)
+    self.slider1 = DoubleSpinbox(self, grid=(0, 6), decimals=1, step=0.1, callback=self.setPh1)
     self.slider1.setRange(-360, 360)
 
-    self.PivotLabel = Label(self, text='pivot', grid=(0,6))
+    self.PivotLabel = Label(self, text='pivot', grid=(0,7))
     self.PivotLabel.setFixedWidth(35)
-    self.pivotEntry = FloatEntry(self, callback=lambda value: self.returnCallback(), decimals=2, grid=(0,7))
+    self.pivotEntry = FloatEntry(self, callback=lambda value: self.returnCallback(), decimals=2, grid=(0,8))
     self.pivotEntry.setFixedWidth(60)
     
     if includeDirection:
       self.directionList = PulldownList(self, texts=directionTexts,
-                                        callback=lambda text: self.directionCallback(), grid=(0,8))
+                                        callback=lambda text: self.directionCallback(), grid=(0,9))
     else:
       self.directionList = None
 
@@ -104,13 +104,25 @@ class PhasingFrame(Frame):
   def getDirection(self):
     
     return directionTexts.index(self.directionList.get()) if self.directionList else 0
-    
+
+  def setCoarsePh0(self, value):
+    # self.phLabel0.setText(str(value))
+    self.slider0.setValue(value)
+    self.doCallback()
+
+  def setCoarsePh1(self, value):
+    # self.phLabel1.setText(str(value))
+    self.slider1.setValue(value)
+    self.doCallback()
+
   def setPh0(self, value):
     # self.phLabel0.setText(str(value))
+    self.coarseSlider0.setValue(value)
     self.doCallback()
     
   def setPh1(self, value):
     # self.phLabel1.setText(str(value))
+    self.coarseSlider1.setValue(value)
     self.doCallback()
     
   def doCallback(self):

@@ -25,15 +25,15 @@ __date__ = "$Date: 2017-07-25 11:28:58 +0100 (Tue, July 25, 2017) $"
 # Start of code
 #=========================================================================================
 
-import os
-from ccpn.util import Path
+# import os
+# from ccpn.util import Path
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.core.lib.SpectrumLib import _calibrateX1D
-import pyqtgraph as pg
+# import pyqtgraph as pg
 from ccpn.util.Logging import getLogger
 
 OP = 'Calibrate X - Original Position: '
@@ -43,7 +43,7 @@ ToolTip = 'Click the line to select. Hold left click and drag. Release the mouse
           'position to the new position '
 
 
-class Calibrate1DWidgets(Frame):
+class CalibrateX1DWidgets(Frame):
   def __init__(self, parent=None, mainWindow=None, strip=None, **kw):
     Frame.__init__(self, parent, setLayout=True, **kw)
 
@@ -79,6 +79,12 @@ class Calibrate1DWidgets(Frame):
     # self.infiniteLine = pg.InfiniteLine(movable=True)
     # self.originalPosInfiniteLine = pg.InfiniteLine(movable=False, pen='g')
 
+    self.labelOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+    self.boxOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+    self.labelNewPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+    self.boxNewPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+    self.okButtons.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+
     if self.GLWidget:
       self.infiniteLine = self.GLWidget.addInfiniteLine(colour = 'yellow', movable=True, lineStyle='solid')
       self.originalPosInfiniteLine = self.GLWidget.addInfiniteLine(colour = 'green', movable=True, lineStyle='dashed')
@@ -93,6 +99,7 @@ class Calibrate1DWidgets(Frame):
     self.boxNewPosition.valueChanged.connect(self._newPositionBoxCallback)
 
     self._initLines()
+    self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
 
   def _initLines(self):
 
@@ -177,7 +184,7 @@ if __name__ == '__main__':
 
   app = TestApplication()
   popup = CcpnDialog()
-  f = Calibrate1DWidgets(popup)
+  f = CalibrateX1DWidgets(popup)
 
   popup.show()
   popup.raise_()

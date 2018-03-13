@@ -25,12 +25,13 @@ __date__ = "$Date: 2017-07-25 11:28:58 +0100 (Tue, July 25, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.core.lib.SpectrumLib import _calibrateY1D
-import pyqtgraph as pg
+# import pyqtgraph as pg
 from ccpn.util.Logging import getLogger
 
 OP = 'Calibrate Y - Original Position: '
@@ -79,6 +80,12 @@ class CalibrateY1DWidgets(Frame):
     # # self.infiniteLine.sigPositionChangeFinished.connect(self._calibrateSpectra)
     # self.infiniteLine.sigPositionChanged.connect(self._newPositionLineCallback)
 
+    self.labelOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+    self.boxOriginalPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+    self.labelNewPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+    self.boxNewPosition.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+    self.okButtons.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+
     if self.GLWidget:
       self.infiniteLine = self.GLWidget.addInfiniteLine(colour = 'yellow', movable=True, lineStyle='solid', orientation='h')
       self.originalPosInfiniteLine = self.GLWidget.addInfiniteLine(colour = 'green', movable=True, lineStyle='dashed', orientation='h')
@@ -90,6 +97,7 @@ class CalibrateY1DWidgets(Frame):
     self.boxNewPosition.valueChanged.connect(self._newPositionBoxCallback)
 
     self._initLines()
+    self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
 
   def _initLines(self):
     if self.mainWindow is not None:

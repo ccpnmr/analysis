@@ -5585,36 +5585,13 @@ void main()
         peak.startPosition = peak.position
 
       # if event.isFinish():
+      self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
       for peak in peaks:
-        # oldPosition = peak.position
-        # orderedAxes = peak.orderedAxes
-
-        # get the correct coordinates based on the axisCodes
-        p0 = list(peak.position)          # [0.0] * 2            #len(self.axisOrder)
-        axisCount = 0
-        for ps, psCode in enumerate(self.axisOrder[:2]):        # display x, y
-          for pp, ppCode in enumerate(peak.axisCodes):
-
-            # if self._preferences.matchAxisCode == 0:  # default - match atom type, first letter
-            if ppCode[0] == psCode[0]:
-              p0[pp] += deltaPosition[ps]
-              axisCount += 1
-
-            # WRONG way round :)
-
-            # elif self._preferences.matchAxisCode == 1:  # match full code
-            #   if ppCode == psCode:
-            #     p0[ps] = peak.position[pp]
-            #     axisCount += 1
-        # if len(p0) > len(deltaPosition):
-        #   deltaPosition.append([0.0] * len(p0-deltaPosition))
-
-        # p0 = [p0[ii] + deltaPosition[ii] for ii in range(len(p0))]
-        peak.position = p0
-
-        # peak._finaliseAction('change')
-        # self.setMouseEnabled(True, True)
-        self.application.ui.echoCommands(("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
+        self._movePeak(peak, deltaPosition)
+      self.project.unblankNotification()
+      for peak in peaks:
+        peak._finaliseAction('change')
+      # self.application.ui.echoCommands(("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
 
       self.current.peaks = peaks
       # else:  # this is when is being dragged
@@ -5642,6 +5619,33 @@ void main()
       event.ignore()
 
     self.update()
+
+  def _movePeak(self, peak, deltaPosition):
+    # oldPosition = peak.position
+    # orderedAxes = peak.orderedAxes
+
+    # get the correct coordinates based on the axisCodes
+    p0 = list(peak.position)  # [0.0] * 2            #len(self.axisOrder)
+    axisCount = 0
+    for ps, psCode in enumerate(self.axisOrder[:2]):  # display x, y
+      for pp, ppCode in enumerate(peak.axisCodes):
+
+        # if self._preferences.matchAxisCode == 0:  # default - match atom type, first letter
+        if ppCode[0] == psCode[0]:
+          p0[pp] += deltaPosition[ps]
+          axisCount += 1
+
+        # WRONG way round :)
+
+        # elif self._preferences.matchAxisCode == 1:  # match full code
+        #   if ppCode == psCode:
+        #     p0[ps] = peak.position[pp]
+        #     axisCount += 1
+    # if len(p0) > len(deltaPosition):
+    #   deltaPosition.append([0.0] * len(p0-deltaPosition))
+
+    # p0 = [p0[ii] + deltaPosition[ii] for ii in range(len(p0))]
+    peak.position = p0
 
   def _processIntegralNotifier(self, data):
     triggers = data[Notifier.TRIGGER]

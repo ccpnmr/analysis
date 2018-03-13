@@ -242,39 +242,59 @@ class GuiSpectrumDisplay(CcpnModule):
     #         self._handlePid(obj.pid, theObject)  # pass the object as its pid so we use
     #                                   # the same method used to process the pids
 
-    for pid in data.get('pids',[]):
-      getLogger().debug('dropped:', pid)
-      self._handlePid(pid, theObject)
+    pids = data.get('pids',[])
+    if pids:
+      if len(pids)>0:
+        self._handlePids(pids, theObject)
+    #
+    # for pid in data.get('pids',[]):
+    #   getLogger().debug('dropped:', pid)
 
-  def _handlePid(self, pid, strip=None):
+  def _handlePids(self, pids, strip=None):
     "handle a; return True in case it is a Spectrum or a SpectrumGroup"
     success = False
-    obj = self.project.getByPid(pid)
-    if obj is not None and isinstance(obj, Spectrum):
-      if self.isGrouped:
-        showWarning('Forbidden drop','A Single spectrum cannot be dropped onto grouped displays.')
-        return success
-      self.displaySpectrum(obj)
-      if strip in self.strips:
-        self.current.strip = strip
-      elif self.current.strip not in self.strips:
-        self.current.strip = self.strips[0]
-      success = True
-    elif obj is not None and isinstance(obj, PeakList):
-      self._handlePeakList(obj)
-      success = True
-    elif obj is not None and isinstance(obj, SpectrumGroup):
-      self._handleSpectrumGroup(obj)
-      success = True
-    elif obj is not None and isinstance(obj, NmrAtom):
-      self._handleNmrAtom(obj)
-      success = True
-    elif obj is not None and isinstance(obj, NmrResidue):
-      self._handleNmrResidue(obj)
-      success = True
-    else:
-      showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup or PeakList')
+    objs = []
+    nmrResidues = []
+    nmrAtoms = []
+
+    for pid in pids:
+      obj = self.project.getByPid(pid)
+      if obj:
+        objs.append(obj)
+
+    for obj in objs:
+      if obj is not None and isinstance(obj, Spectrum):
+        if self.isGrouped:
+          showWarning('Forbidden drop','A Single spectrum cannot be dropped onto grouped displays.')
+          return success
+        self.displaySpectrum(obj)
+        if strip in self.strips:
+          self.current.strip = strip
+        elif self.current.strip not in self.strips:
+          self.current.strip = self.strips[0]
+        success = True
+      elif obj is not None and isinstance(obj, PeakList):
+        self._handlePeakList(obj)
+        success = True
+      elif obj is not None and isinstance(obj, SpectrumGroup):
+        self._handleSpectrumGroup(obj)
+        success = True
+      elif obj is not None and isinstance(obj, NmrAtom):
+        nmrAtoms.append(obj)
+
+      elif obj is not None and isinstance(obj, NmrResidue):
+        nmrResidues.append(obj)
+
+      else:
+        showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, PeakList,'
+                                                   ' NmrResidue or NmrAtom')
+    if nmrResidues:
+      self._handleNmrResidues(nmrResidues)
+    if nmrAtoms:
+      self._handleNmrAtoms(nmrAtoms)
+
     return success
+
 
   def _handlePeakList(self, peakList):
     "See if peaklist can be copied"
@@ -301,9 +321,10 @@ class GuiSpectrumDisplay(CcpnModule):
     if self.current.strip not in self.strips:
       self.current.strip = self.strips[0]
 
-  def _handleNmrResidue(self, nmrResidue):
+  def _handleNmrResidues(self, nmrResidues):
     if not self.current.peak:
-      self._createNmrResidueMarks(nmrResidue)
+      for nmrResidue in nmrResidues:
+        self._createNmrResidueMarks(nmrResidue)
 
     # FIXME THIS IS ONLY A Starting Point for Assign from SideBar
     if self.current.strip:
@@ -317,25 +338,28 @@ class GuiSpectrumDisplay(CcpnModule):
                 if ax.code:
                   if len(ax.code) > 0:
                     code = ax.code[0]
-                    nmrAtoms = [nmrAtom for nmrAtom in nmrResidue.nmrAtoms if code in nmrAtom.name ]
+                    nmrAtoms = [nmrAtom for nmrResidue in nmrResidues for nmrAtom in nmrResidue.nmrAtoms if code in nmrAtom.name]
+                    matchingNmrAtoms = []
                     for nmrAtom in nmrAtoms:
                       if code == nmrAtom.name:
-                        peak.assignDimension(ax.code, nmrAtom)
+                        matchingNmrAtoms.append(nmrAtom)
                       else:
                         if len(nmrAtoms) > 0:
-                          peak.assignDimension(ax.code, nmrAtoms[0])
+                          matchingNmrAtoms.append(nmrAtoms[0])
+                    peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
 
 
-  def _handleNmrAtom(self, nmrAtom):
+  def _handleNmrAtoms(self, nmrAtoms):
     if not self.current.peak:
-      self._markNmrAtom(nmrAtom)
+      for nmrAtom in nmrAtoms:
+        self._markNmrAtom(nmrAtom)
 
     # FIXME THIS IS ONLY A Starting Point for Assign from SideBar
     if self.current.strip:
-      self._assignNmrAtomToCurrentPeaks(nmrAtom)
+      self._assignNmrAtomsToCurrentPeaks(nmrAtoms)
 
 
-  def _assignNmrAtomToCurrentPeaks(self, nmrAtom):
+  def _assignNmrAtomsToCurrentPeaks(self, nmrAtoms):
     peaks = self.current.peaks
     if len(peaks) > 0:
       for peak in peaks:
@@ -344,13 +368,17 @@ class GuiSpectrumDisplay(CcpnModule):
             orderedAxes = self.current.strip.orderedAxes
             for ax in orderedAxes:
               if ax.code:
-                if len(ax.code) > 0:
-                  if ax.code[0] == nmrAtom.name:
-                      peak.assignDimension(ax.code, nmrAtom)
+                matchedNmrAtoms = []
+                for nmrAtom in nmrAtoms:
+                  if len(ax.code) > 0:
+                    if ax.code[0] == nmrAtom.name:
+                      matchedNmrAtoms.append(nmrAtom)
                       break
-                  else:
-                    if ax.code[0] in nmrAtom.name:
-                      peak.assignDimension(ax.code, nmrAtom)
+                    else:
+                      if ax.code[0] in nmrAtom.name:
+                        matchedNmrAtoms.append(nmrAtom)
+                if len(matchedNmrAtoms)>0:
+                  peak.assignDimension(ax.code, matchedNmrAtoms)
 
   def _processDragEnterEvent(self, data):
     pass

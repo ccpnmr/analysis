@@ -346,7 +346,10 @@ class GuiSpectrumDisplay(CcpnModule):
                       else:
                         if len(nmrAtoms) > 0:
                           matchingNmrAtoms.append(nmrAtoms[0])
-                    peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
+                    if ax.code.isupper():
+                      peak.assignDimension(ax.code[0], list(set(matchingNmrAtoms)))
+                    else:
+                      peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
 
 
   def _handleNmrAtoms(self, nmrAtoms):
@@ -354,7 +357,8 @@ class GuiSpectrumDisplay(CcpnModule):
       for nmrAtom in nmrAtoms:
         self._markNmrAtom(nmrAtom)
 
-    # FIXME THIS IS ONLY A Starting Point for Assign from SideBar
+    # FIXME THIS IS ONLY A Starting Point for Assign from SideBar.
+    # FIXME Needs to be cleaned up, removed any hacks and crazy axes codes checks!
     if self.current.strip:
       self._assignNmrAtomsToCurrentPeaks(nmrAtoms)
 
@@ -371,14 +375,19 @@ class GuiSpectrumDisplay(CcpnModule):
                 matchedNmrAtoms = []
                 for nmrAtom in nmrAtoms:
                   if len(ax.code) > 0:
-                    if ax.code[0] == nmrAtom.name:
-                      matchedNmrAtoms.append(nmrAtom)
-                      break
-                    else:
-                      if ax.code[0] in nmrAtom.name:
+                    if ax.code.isupper():
+                      if ax.code[0] == nmrAtom.name:
                         matchedNmrAtoms.append(nmrAtom)
+                        break
+                      else:
+                        if ax.code[0] in nmrAtom.name:
+                          matchedNmrAtoms.append(nmrAtom)
                 if len(matchedNmrAtoms)>0:
-                  peak.assignDimension(ax.code, matchedNmrAtoms)
+                  if ax.code.isupper():
+                    peak.assignDimension(ax.code[0], list(set(matchedNmrAtoms)))
+                  else:
+                    peak.assignDimension(ax.code, list(set(matchedNmrAtoms)))
+
 
   def _processDragEnterEvent(self, data):
     pass

@@ -271,7 +271,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.splitter = Splitter(QtCore.Qt.Vertical)
 
       self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid = (1, 0))
-
+      self.barGraphWidget.setViewBoxLimits(0,None,0,None)
       self.barGraphWidget.xLine.setPos(DefaultThreshould)
       self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
@@ -616,6 +616,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                    disappearedObjects = self.disappereadObjects,
                                    disappearedBrush = self.disappearedPeakBrush,
                                    )
+    self.barGraphWidget.setViewBoxLimits(0, max(xs)*2, 0,  max(ys)*2)
     # self.splitter.addWidget(self.barGraphWidget)
     # self._colourDeltaShiftTableValues()
 

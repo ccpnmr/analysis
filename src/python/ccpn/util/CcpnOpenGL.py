@@ -299,8 +299,8 @@ class CcpnGLWidget(QOpenGLWidget):
       self.current = None
 
     # TODO:ED need to check how this works
-    for spectrumView in self._parent.spectrumViews:
-      spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
+    # for spectrumView in self._parent.spectrumViews:
+    #   spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
 
     self.lastPos = QPoint()
     self._mouseX = 0
@@ -954,12 +954,12 @@ class CcpnGLWidget(QOpenGLWidget):
       return True
     return super(CcpnGLWidget, self).eventFilter(obj, event)
 
-  def _connectSpectra(self):
-    """
-    haven't tested this yet
-    """
-    for spectrumView in self._parent.spectrumViews:
-      spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
+  # def _connectSpectra(self):
+  #   """
+  #   haven't tested this yet
+  #   """
+  #   for spectrumView in self._parent.spectrumViews:
+  #     spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
 
   def setXRotation(self, angle):
     angle = self.normalizeAngle(angle)
@@ -1759,7 +1759,11 @@ void main()
     # orderedAxes = strip.orderedAxes
 
     currentPos = self.current.cursorPosition
-    mouseMovedDict = dict(strip=self._parent)   #strip)
+    try:
+      mouseMovedDict = self.current.mouseMovedDict
+    except:
+      mouseMovedDict = dict(strip=self._parent)   #strip)
+
     xPos = yPos = 0
     for n, axisCode in enumerate(self._axisCodes):
       if n == 0:
@@ -1775,6 +1779,7 @@ void main()
       mouseMovedDict[axisCode] = pos
 
     self.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
+    self.current.mouseMovedDict = mouseMovedDict
 
     if event.buttons() & Qt.LeftButton:
       # do the complicated keypresses first
@@ -2532,8 +2537,8 @@ void main()
         else:
           _isInFlankingPlane = None
 
-        # if not _isInPlane and not _isInFlankingPlane:
-        #   continue
+        if not _isInPlane and not _isInFlankingPlane:
+          continue
 
         if self._isSelected(peak):
         # if hasattr(peak, '_isSelected') and peak._isSelected:
@@ -2903,90 +2908,7 @@ void main()
         return
 
       for peak in pls.peaks:
-
-        # get the correct coordinates based on the axisCodes
-        # p0 = [0.0] * 2            #len(self.axisOrder)
-        # axisCount = 0
-        # for ps, psCode in enumerate(self.axisOrder[0:2]):
-        #   for pp, ppCode in enumerate(peak.axisCodes):
-        #
-        #     if self._preferences.matchAxisCode == 0:  # default - match atom type
-        #       if ppCode[0] == psCode[0]:
-        #         p0[ps] = peak.position[pp]
-        #         axisCount += 1
-        #
-        #     elif self._preferences.matchAxisCode == 1:  # match full code
-        #       if ppCode == psCode:
-        #         p0[ps] = peak.position[pp]
-        #         axisCount += 1
-
-        # # get the correct coordinates based on the axisCodes
-        # p0 = [0.0] * 2            #len(self.axisOrder)
-        # lineWidths = [None] * 2    #len(self.axisOrder)
-        # frequency = [0.0] * 2     #len(self.axisOrder)
-        # axisCount = 0
-        # for ps, psCode in enumerate(self.axisOrder[0:2]):
-        #   for pp, ppCode in enumerate(peak.axisCodes):
-        #
-        #     if self._preferences.matchAxisCode == 0:  # default - match atom type
-        #       if ppCode[0] == psCode[0]:
-        #         p0[ps] = peak.position[pp]
-        #         lineWidths[ps] = peak.lineWidths[pp]
-        #         frequency[ps] = spectrumFrequency[pp]
-        #         axisCount += 1
-        #
-        #     elif self._preferences.matchAxisCode == 1:  # match full code
-        #       if ppCode == psCode:
-        #         p0[ps] = peak.position[pp]
-        #         lineWidths[ps] = peak.lineWidths[pp]
-        #         frequency[ps] = spectrumFrequency[pp]
-        #         axisCount += 1
-        #
-        # if lineWidths[0] and lineWidths[1]:
-        #   # draw 24 connected segments
-        #   r = 0.5 * lineWidths[0] / frequency[0]
-        #   w = 0.5 * lineWidths[1] / frequency[1]
-        # else:
-        #   r = symbolWidth
-        #   w = symbolWidth
-        #
-        # if axisCount == 2:
-        #   # TODO:ED display the required peaks
-        #   strip = spectrumView.strip
-        #   _isInPlane = strip.peakIsInPlane(peak)
-        #   if not _isInPlane:
-        #     _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-        #   else:
-        #     _isInFlankingPlane = None
-        #
-        #   if not _isInPlane and not _isInFlankingPlane:
-        #     continue
-        #
-        #   if hasattr(peak, '_isSelected') and peak._isSelected:
-        #     colR, colG, colB = self.highlightColour[:3]
-        #   else:
-        #     colour = pls.textColour
-        #     colR = int(colour.strip('# ')[0:2], 16)/255.0
-        #     colG = int(colour.strip('# ')[2:4], 16)/255.0
-        #     colB = int(colour.strip('# ')[4:6], 16)/255.0
-        #
-        #   if self._parent.peakLabelling == 0:
-        #     text = _getScreenPeakAnnotation(peak, useShortCode=True)
-        #   elif self._parent.peakLabelling == 1:
-        #     text = _getScreenPeakAnnotation(peak, useShortCode=False)
-        #   else:
-        #     text = _getPeakAnnotation(peak)  # original 'pid'
-        #
-        #   # TODO:ED check axisCodes and ordering
-        #   drawList.stringList.append(GLString(text=text,
-        #                               font=self.firstFont,
-        #                               x=p0[0], y=p0[1],
-        #                               ox=r, oy=w,
-        #                               # x=self._screenZero[0], y=self._screenZero[1]
-        #                               color=(colR, colG, colB, 1.0), GLContext=self,
-        #                               object=peak))
-
-          self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
+        self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -3110,21 +3032,15 @@ void main()
 
     self.viewports.setViewport(self._currentView)
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
-
-    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-    #                          0.0, 1.0, 0.0, 0.0,
-    #                          0.0, 0.0, 1.0, 0.0,
-    #                          0.0, 0.0, 0.0, 1.0]
     currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
-    # cheat for the moment
+    # cheat for the moment to draw the axes (if visible)
     if self.highlighted:
       colour = self.highlightColour
     else:
       colour = self.foreground
 
     GL.glDisable(GL.GL_BLEND)
-
     GL.glColor4f(*colour)
     GL.glBegin(GL.GL_LINES)
 
@@ -3136,15 +3052,6 @@ void main()
       GL.glVertex2d(w-self.AXIS_MARGINRIGHT, 0)
       GL.glVertex2d(w-self.AXIS_MARGINRIGHT, h-self.AXIS_MARGINBOTTOM)
 
-    # GL.glVertex2d(-.1,0)
-    # GL.glVertex2d(.1, 0)
-    # GL.glVertex2d(0, -.1)
-    # GL.glVertex2d(0, .1)
-
-    # GL.glVertex3d(-1.0, -0.99, 0)
-    # GL.glVertex3d(1.0, -0.99, 0)
-    # GL.glVertex3d(1.0, -0.99, 0)
-    # GL.glVertex3d(1.0, 1.0, 0)
     GL.glEnd()
 
   def enableTexture(self):
@@ -3201,44 +3108,6 @@ void main()
         #   self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
 
     # self.rescaleSpectra()
-
-        # build spectrum settings for speed
-
-      # # should be in resize
-      # self._spectrumValues = spectrumView._getValues()
-      # # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
-      # # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
-      #
-      # dx = self.sign(self.axisR - self.axisL)
-      # dy = self.sign(self.axisT - self.axisB)
-      #
-      # # get the bounding box of the spectra
-      # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-      # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
-      # dxAF = fx0 - fx1
-      # dyAF = fy0 - fy1
-      # xScale = dx*dxAF/self._spectrumValues[0].totalPointCount
-      # yScale = dy*dyAF/self._spectrumValues[1].totalPointCount
-      #
-      # # create modelview matrix for the spectrum to be drawn
-      #
-      # self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
-      #
-      # self._spectrumSettings[spectrumView][SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
-      #                                                                0.0, yScale, 0.0, 0.0,
-      #                                                                0.0, 0.0, 1.0, 0.0,
-      #                                                                fx0, fy0, 0.0, 1.0]
-
-      # if spectrumView.buildPeakLists:
-      #   # spectrumView._buildContours(None)  # need to trigger these changes now
-      #   spectrumView.buildPeakLists = False  # set to false, as we have rebuilt
-      #
-      #   if spectrumView.spectrum.pid in self._GLPeakLists.keys():
-      #     self._GLPeakLists[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
-      #   if spectrumView.spectrum.pid in self._GLPeakListLabels.keys():
-      #     self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
-      #
-      #   self._buildPeakLists(spectrumView)  # should include rescaling
 
   def _buildIntegralLists(self, spectrumView, integralListView):
 
@@ -3400,36 +3269,30 @@ void main()
 
       if spectrumView.isVisible():
 
-        if spectrumView in self._spectrumSettings.keys():
-            # set the scale matrix
-          if spectrumView.spectrum.dimensionCount > 1:
+        if spectrumView.spectrum.dimensionCount > 1:
+          if spectrumView in self._spectrumSettings.keys():
             self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
                                                        , 1, GL.GL_FALSE
                                                        , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
             # draw the spectrum - call the existing glCallList
             spectrumView._paintContoursNoClip()
-          else:
-            if spectrumView in self._contourList.keys():
-              if self._stackingValue:
+        else:
+          if spectrumView in self._contourList.keys():
+            if self._stackingValue:
 
-                # use the stacking matrix to offset the 1D spectra
-                self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
-                                                           , 1, GL.GL_FALSE
-                                                           , self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX])
+              # use the stacking matrix to offset the 1D spectra
+              self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
+                                                         , 1, GL.GL_FALSE
+                                                         , self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX])
 
-              self._contourList[spectrumView].drawIndexArray()
+            self._contourList[spectrumView].drawVertexColor()
 
         # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
         #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW
         #
         #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
-    # reset the modelview matrix
-    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-    #                          0.0, 1.0, 0.0, 0.0,
-    #                          0.0, 0.0, 1.0, 0.0,
-    #                          0.0, 0.0, 0.0, 1.0]
     self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
     # draw the bounding boxes

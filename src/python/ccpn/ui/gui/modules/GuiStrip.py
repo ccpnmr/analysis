@@ -455,7 +455,19 @@ class GuiStrip(Frame):
 
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
-    position = self.current.cursorPosition[0] if direction == 0 else self.current.cursorPosition[1]
+    # position = self.current.cursorPosition[0] if direction == 0 else self.current.cursorPosition[1]
+    # position = self.current.positions[0] if direction == 0 else self.current.positions[1]
+
+    mouseMovedDict = self.current.mouseMovedDict
+    if direction == 0:
+      for mm in mouseMovedDict.keys():
+        if mm[0] == self.axisCodes[0][0]:
+          position = mouseMovedDict[mm]
+    else:
+      for mm in mouseMovedDict.keys():
+        if mm[0] == self.axisCodes[1][0]:
+          position = mouseMovedDict[mm]
+
     phasingFrame.pivotEntry.set(position)
     self._updatePivot()
 

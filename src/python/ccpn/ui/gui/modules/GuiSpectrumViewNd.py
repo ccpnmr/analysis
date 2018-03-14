@@ -63,11 +63,11 @@ def _getLevels(count:int, base:float, factor:float)->list:
       levels.append(numpy.float32(factor * levels[-1]))
   return levels
 
-class _spectrumSignal(QtWidgets.QWidget):
-  _buildSignal = QtCore.pyqtSignal(bool)
-
-  def _emitSignal(self, value):
-    self._buildSignal.emit(value)
+# class _spectrumSignal(QtWidgets.QWidget):
+#   _buildSignal = QtCore.pyqtSignal(bool)
+#
+#   def _emitSignal(self, value):
+#     self._buildSignal.emit(value)
 
 class GuiSpectrumViewNd(GuiSpectrumView):
 
@@ -152,7 +152,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.buildPeakLists = True
     self.buildPeakListLabels = True
     self.buildIntegralLists = True
-    self._buildSignal = _spectrumSignal()   # TODO:ED check signalling
+    # self._buildSignal = _spectrumSignal()   # TODO:ED check signalling
 
     # override of Qt setVisible
 

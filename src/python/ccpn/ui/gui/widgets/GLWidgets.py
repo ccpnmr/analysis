@@ -73,6 +73,7 @@ class Gui1dWidget(CcpnGLWidget):
   AXIS_MARGINRIGHT = 70
   YAXISUSEEFORMAT = True
   INVERTYAXIS = False
+  AXISLOCKEDBUTTON = False
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(Gui1dWidget, self).__init__(parent=parent,

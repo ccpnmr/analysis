@@ -186,6 +186,7 @@ class GLNotifier(QtWidgets.QWidget):
   glAllAxesChanged = pyqtSignal(dict)
   glMouseMoved = pyqtSignal(dict)
   glEvent = pyqtSignal(dict)
+  glAxisLockChanged = pyqtSignal(dict)
 
   def __init__(self, parent=None, strip=None):
     super(GLNotifier, self).__init__()
@@ -257,6 +258,14 @@ class GLNotifier(QtWidgets.QWidget):
              }
     self.glYAxisChanged.emit(aDict)
 
+  def _emitAxisLockChanged(self, source=None, strip=None, lock=False):
+    aDict = {GLNotifier.GLSOURCE: source,
+             GLNotifier.GLSTRIP: strip,
+             GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+             GLNotifier.GLVALUES: lock
+             }
+    self.glAxisLockChanged.emit(aDict)
+
 
 class CcpnGLWidget(QOpenGLWidget):
 
@@ -266,6 +275,7 @@ class CcpnGLWidget(QOpenGLWidget):
   YAXISUSEEFORMAT = False
   INVERTXAXIS = True
   INVERTYAXIS = True
+  AXISLOCKEDBUTTON = True
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(CcpnGLWidget, self).__init__(parent)
@@ -391,12 +401,15 @@ class CcpnGLWidget(QOpenGLWidget):
     self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
     self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
     self.GLSignals.glEvent.connect(self._glEvent)
+    self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
 
   def close(self):
     self.GLSignals.glXAxisChanged.disconnect()
     self.GLSignals.glYAxisChanged.disconnect()
     self.GLSignals.glAllAxesChanged.disconnect()
     self.GLSignals.glMouseMoved.disconnect()
+    self.GLSignals.glEvent.disconnect()
+    self.GLSignals.glAxisLockChanged.disconnect()
 
   def rescale(self):
     """
@@ -408,9 +421,28 @@ class CcpnGLWidget(QOpenGLWidget):
     w = self.w
     h = self.h
 
-    symbolType = self._preferences.peakSymbolType
+    # if self._axisLocked:
+    #   # TODO:ED modify axes to keep aspect ratio - centred on screen
+    #   mbx = self.axisL + 0.5 * (self.axisR - self.axisL)
+    #
+    #   self.axisL = mbx + zoomIn * (self.axisL - mbx)
+    #   self.axisR = mbx - zoomIn * (mbx - self.axisR)
+    #
+    #   mby = self.axisB + 0.5 * (self.axisT - self.axisB)
+    #
+    #   self.axisB = mby + zoomIn * (self.axisB - mby)
+    #   self.axisT = mby - zoomIn * (mby - self.axisT)
+    #
+    #   mby = 0.5 * (self.axisT + self.axisB)
+    #
+    #   ratio = (self.h / self.w) * 0.5 * abs(self.axisL - self.axisR) * self._preferences.aspectRatios[
+    #     self._axisCodes[1][0]] / self._preferences.aspectRatios[self._axisCodes[0][0]]
+    #   self.axisB = mby + ratio * self.sign(self.axisB - mby)
+    #   self.axisT = mby - ratio * self.sign(mby - self.axisT)
+
+    # symbolType = self._preferences.peakSymbolType
     symbolWidth = self._preferences.peakSymbolSize / 2.0
-    lineThickness = self._preferences.peakSymbolThickness / 2.0
+    # lineThickness = self._preferences.peakSymbolThickness / 2.0
 
     currentShader = self._shaderProgram1.makeCurrent()
 
@@ -589,6 +621,22 @@ class CcpnGLWidget(QOpenGLWidget):
     self.w = w
     self.h = h
 
+    if self._axisLocked:
+      if (self.h/self.w) > 1:
+        mby = 0.5 * (self.axisT + self.axisB)
+
+        ratio = (self.h / self.w) * 0.5 * abs(self.axisL - self.axisR) * self._preferences.aspectRatios[
+          self._axisCodes[1][0]] / self._preferences.aspectRatios[self._axisCodes[0][0]]
+        self.axisB = mby + ratio * self.sign(self.axisB - mby)
+        self.axisT = mby - ratio * self.sign(mby - self.axisT)
+      else:
+        mbx = 0.5 * (self.axisR + self.axisL)
+
+        ratio = (self.w / self.h) * 0.5 * abs(self.axisT - self.axisB) * self._preferences.aspectRatios[
+          self._axisCodes[0][0]] / self._preferences.aspectRatios[self._axisCodes[1][0]]
+        self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
+        self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
+
     self.rescale()
 
     # put stuff in here that will change on a resize
@@ -715,11 +763,25 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisL = mbx + zoomOut * (self.axisL - mbx)
         self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
-      self.GLSignals._emitXAxisChanged(source=self, strip=self._parent,
-                                       axisB=self.axisB, axisT=self.axisT,
-                                       axisL=self.axisL, axisR=self.axisR)
+      if not self._axisLocked:
+        self.GLSignals._emitXAxisChanged(source=self, strip=self._parent,
+                                         axisB=self.axisB, axisT=self.axisT,
+                                         axisL=self.axisL, axisR=self.axisR)
 
-      self._rescaleXAxis()
+        self._rescaleXAxis()
+      else:
+        mby = 0.5 * (self.axisT + self.axisB)
+
+        ratio = (self.h/self.w) * 0.5 * abs(self.axisL-self.axisR) * self._preferences.aspectRatios[self._axisCodes[1][0]] / self._preferences.aspectRatios[self._axisCodes[0][0]]
+        self.axisB = mby + ratio * self.sign(self.axisB - mby)
+        self.axisT = mby - ratio * self.sign(mby - self.axisT)
+
+        self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                                           axisB=self.axisB, axisT=self.axisT,
+                                           axisL=self.axisL, axisR=self.axisR)
+
+        self._rescaleAllAxes()
+
       # self.buildMouseCoords(refresh=True)
 
     elif between(mx, ra[0], ra[2]) and between(my, ra[1], ra[3]):
@@ -738,11 +800,24 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + zoomOut * (self.axisB - mby)
         self.axisT = mby - zoomOut * (mby - self.axisT)
 
-      self.GLSignals._emitYAxisChanged(source=self, strip=self._parent,
-                                       axisB=self.axisB, axisT=self.axisT,
-                                       axisL=self.axisL, axisR=self.axisR)
+      if not self._axisLocked:
+        self.GLSignals._emitYAxisChanged(source=self, strip=self._parent,
+                                         axisB=self.axisB, axisT=self.axisT,
+                                         axisL=self.axisL, axisR=self.axisR)
 
-      self._rescaleYAxis()
+        self._rescaleYAxis()
+      else:
+        mbx = 0.5 * (self.axisR + self.axisL)
+
+        ratio = (self.w/self.h) * 0.5 * abs(self.axisT-self.axisB) * self._preferences.aspectRatios[self._axisCodes[0][0]] / self._preferences.aspectRatios[self._axisCodes[1][0]]
+        self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
+        self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
+
+        self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                                           axisB=self.axisB, axisT=self.axisT,
+                                           axisL=self.axisL, axisR=self.axisR)
+
+        self._rescaleAllAxes()
       # self.buildMouseCoords(refresh=True)
 
     event.accept()
@@ -775,8 +850,8 @@ class CcpnGLWidget(QOpenGLWidget):
       self.update()
 
     try:
-      self._parent.viewBox.setXRange(min(self.axisL, self.axisR),
-                                      max(self.axisL, self.axisR), padding=0)
+      # self._parent.viewBox.setXRange(min(self.axisL, self.axisR),
+      #                                 max(self.axisL, self.axisR), padding=0)
       self._orderedAxes[0].region = (self.axisL, self.axisR)
     except:
       getLogger().debug('error setting viewbox X-range')
@@ -810,8 +885,8 @@ class CcpnGLWidget(QOpenGLWidget):
       self.update()
 
     try:
-      self._parent.viewBox.setYRange(min(self.axisT, self.axisB),
-                                      max(self.axisT, self.axisB), padding=0)
+      # self._parent.viewBox.setYRange(min(self.axisT, self.axisB),
+      #                                 max(self.axisT, self.axisB), padding=0)
       self._orderedAxes[1].region = (self.axisT, self.axisB)
     except:
       getLogger().debug('error setting viewbox Y-range')
@@ -842,10 +917,10 @@ class CcpnGLWidget(QOpenGLWidget):
       self.update()
 
     try:
-      self._parent.viewBox.setXRange(min(self.axisL, self.axisR),
-                                      max(self.axisL, self.axisR), padding=0)
-      self._parent.viewBox.setYRange(min(self.axisT, self.axisB),
-                                      max(self.axisT, self.axisB), padding=0)
+      # self._parent.viewBox.setXRange(min(self.axisL, self.axisR),
+      #                                 max(self.axisL, self.axisR), padding=0)
+      # self._parent.viewBox.setYRange(min(self.axisT, self.axisB),
+      #                                 max(self.axisT, self.axisB), padding=0)
 
       self._orderedAxes[0].region = (self.axisL, self.axisR)
       self._orderedAxes[1].region = (self.axisT, self.axisB)
@@ -1451,13 +1526,19 @@ void main()
     else:
       return None
 
-  def mousePressInCornerButtons(self, mx, my):
-    lockButton = [14, 6, 14, 6]       # centre x, y; half-width, half-height
-    minDiff = abs(mx - lockButton[0])
-    maxDiff = abs(my - lockButton[1])
+  def _toggleAxisLocked(self):
+    self._axisLocked = not self._axisLocked
+    self.GLSignals._emitAxisLockChanged(source=self, strip=self._parent, lock=self._axisLocked)
 
-    if (minDiff < lockButton[2]) and (maxDiff < lockButton[3]):
-      self._axisLocked = not self._axisLocked
+  def mousePressInCornerButtons(self, mx, my):
+    if self.AXISLOCKEDBUTTON:
+      buttons = ((14, 6, 14, 6, self._toggleAxisLocked),)
+      for button in buttons:
+        minDiff = abs(mx - button[0])
+        maxDiff = abs(my - button[1])
+
+        if (minDiff < button[2]) and (maxDiff < button[3]):
+          button[4]()
 
   def mousePressInRegion(self, regions):
     for region in regions:
@@ -4015,12 +4096,13 @@ void main()
     # draw the strip ID to the screen
     self.stripIDString.drawTextArray()
 
-    if self._axisLocked:
-      self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
-      self._lockStringTrue.drawTextArray()
-    else:
-      self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
-      self._lockStringFalse.drawTextArray()
+    if self.AXISLOCKEDBUTTON:
+      if self._axisLocked:
+        self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
+        self._lockStringTrue.drawTextArray()
+      else:
+        self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
+        self._lockStringFalse.drawTextArray()
 
   def _rescaleRegions(self):
     self._externalRegions._rescale()
@@ -5065,6 +5147,15 @@ void main()
         self.axisL = mid-diff
         self.axisR = mid+diff
         self._rescaleXAxis()
+
+  @pyqtSlot(dict)
+  def _glAxisLockChanged(self, aDict):
+    if self._parent.isDeleted:
+      return
+
+    if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+      self._axisLocked = aDict[GLNotifier.GLVALUES]
+      self.update()
 
   def setAxisPosition(self, axisCode, position, update=True):
     stripAxisIndex = self.axisCodes.index(axisCode)

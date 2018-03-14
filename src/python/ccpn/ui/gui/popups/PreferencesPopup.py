@@ -366,9 +366,9 @@ class PreferencesPopup(CcpnDialog):
 
     self.aspectLabel = {}
     self.aspectData = {}
-    for aspect in sorted(self.preferences.general.Aspect.keys()):
+    for aspect in sorted(self.preferences.general.aspectRatios.keys()):
       row += 1
-      aspectValue = self.preferences.general.Aspect[aspect]
+      aspectValue = self.preferences.general.aspectRatios[aspect]
       self.aspectLabel[aspect] = Label(parent, text=aspect, grid=(row, 0), hAlign='r')
       self.aspectData[aspect] = DoubleSpinbox(parent, step=1
                                               , min=1, max=100, grid=(row, 1), hAlign='l')
@@ -652,5 +652,5 @@ class PreferencesPopup(CcpnDialog):
       aspectValue = float(self.aspectData[aspect].text())
     except Exception as es:
       return
-    self.preferences.general.Aspect[aspect] = aspectValue
+    self.preferences.general.aspectRatios[aspect] = aspectValue
 

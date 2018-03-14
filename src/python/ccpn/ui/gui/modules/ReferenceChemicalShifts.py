@@ -16,7 +16,7 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: simon $"
+__author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -30,6 +30,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.util.Colour import spectrumHexColours
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
+
 
 class ReferenceChemicalShifts(CcpnModule): # DropBase needs to be first, else the drop events are not processed
 

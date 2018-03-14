@@ -1,7 +1,6 @@
 """
 This file contains the SequenceModule module
 
-intial version by Simon;
 GWV: modified 1-9/12/2016
 GWV: 13/04/2017: Disconnected from Sequence Graph; Needs rafactoring
 

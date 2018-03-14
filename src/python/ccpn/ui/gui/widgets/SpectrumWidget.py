@@ -46,13 +46,7 @@ class SpectrumWidget:
     self.widget = pg.PlotWidget(
       enableMenu=False, axisItems={
         'bottom':self.xAxis, 'right': self.yAxis})
-    # shortcutFile=open('/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/shortcuts.json', 'r')
-    # self.shortcuts = json.load(shortcutFile)
-    # # self.createShortcuts()
-    #
-    # self.createCrossHair()
-    ## connect cross hair (mouseMoved) and mouseClick events to QtGraphicsScene
-
+    
     ## setup axes for display
 
     self.widget.plotItem.axes['left']['item'].hide()

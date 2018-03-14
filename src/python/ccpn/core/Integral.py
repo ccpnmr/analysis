@@ -1,4 +1,5 @@
 """
+Module documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -9,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -19,12 +19,12 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -34,6 +34,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from typing import Optional, Tuple, Sequence, List
 import numpy as np
 from scipy.integrate import trapz
+
 
 class Integral(AbstractWrapperObject):
   """n-dimensional Integral, with integration region and value.

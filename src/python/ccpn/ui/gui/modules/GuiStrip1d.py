@@ -136,10 +136,13 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu.addSeparator()
 
     self.gridAction = QtWidgets.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
-    if self.gridShown:
-      self.gridAction.setChecked(True)
-    else:
-      self.gridAction.setChecked(False)
+    # if self.gridShown:
+    #   self.gridAction.setChecked(True)
+    # else:
+    #   self.gridAction.setChecked(False)
+
+    self.gridAction.setChecked(self.gridIsVisible)
+
     self.contextMenu.addAction(self.gridAction)
     self.contextMenu.addSeparator()
     self.contextMenu.addAction("Print to File...", self.showExportDialog)

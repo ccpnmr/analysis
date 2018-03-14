@@ -1397,8 +1397,12 @@ void main()
     # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
 
     # testing string
-    self._testStrings = [GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=2.813*xx, y=15.13571*xx
-                                , color=(0.15, 0.6, 0.25, 1.0), GLContext=self) for xx in list(range(50))]
+    # self._testStrings = [GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=2.813*xx, y=15.13571*xx
+    #                             , color=(0.15, 0.6, 0.25, 1.0), GLContext=self) for xx in list(range(50))]
+
+    self._lockStringFalse = GLString(text='Lock', font=self.firstFont, x=0, y=0, color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
+    self._lockStringTrue = GLString(text='Lock', font=self.firstFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
+    self._axisLocked = False
 
     # This is the correct blend function to ignore stray surface blending functions
     GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
@@ -1446,6 +1450,14 @@ void main()
       return tuple(self._aMatrix.reshape((4, 4)).dot(vect)[:2])
     else:
       return None
+
+  def mousePressInCornerButtons(self, mx, my):
+    lockButton = [14, 6, 14, 6]       # centre x, y; half-width, half-height
+    minDiff = abs(mx - lockButton[0])
+    maxDiff = abs(my - lockButton[1])
+
+    if (minDiff < lockButton[2]) and (maxDiff < lockButton[3]):
+      self._axisLocked = not self._axisLocked
 
   def mousePressInRegion(self, regions):
     for region in regions:
@@ -1521,6 +1533,8 @@ void main()
 
     # if not self.mousePressInRegion(self._externalRegions._regions):
     #   self.mousePressInIntegralLists()
+
+    self.mousePressInCornerButtons(mx, my)
 
     #€ check for dragging of infinite lines, region boundaries, integrals
     if not self.mousePressInRegion(self._infiniteLines):
@@ -3998,8 +4012,15 @@ void main()
                                   , object=None)
       self._oldStripIDLabel = self.stripIDLabel
 
-    # draw the strikp ID to the screen
+    # draw the strip ID to the screen
     self.stripIDString.drawTextArray()
+
+    if self._axisLocked:
+      self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
+      self._lockStringTrue.drawTextArray()
+    else:
+      self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
+      self._lockStringFalse.drawTextArray()
 
   def _rescaleRegions(self):
     self._externalRegions._rescale()

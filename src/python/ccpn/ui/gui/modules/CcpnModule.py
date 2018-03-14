@@ -1,9 +1,6 @@
 """
 This file contains CcpnModule base class
-
-initial version by Simon;
-Extensively modified by Geerten 1-12/12/2016
-
+modified by Geerten 1-12/12/2016
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -55,6 +52,7 @@ settingsWidgetPositions = {
                            'left':   {'settings':(0,0), 'widget':(0,1)},
                            'right':  {'settings':(0,1), 'widget':(0,0)},
                            }
+
 
 class CcpnModule(Dock, DropBase):
   """

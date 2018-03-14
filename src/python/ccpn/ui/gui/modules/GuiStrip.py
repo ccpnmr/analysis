@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -102,8 +101,17 @@ class GuiStrip(Frame):
     if self._useCcpnGL:
       self.plotWidget.hide()
 
-      # TODO:ED check whether this is sufficient to distinguish 1d and Nd
-      if 'intensity' in spectrumDisplay.axisCodes:
+      # for spectrumView in self.spectrumViews:
+      #   if spectrumView.spectrum.dimensionCount < 2:
+      #     from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
+      #   else:
+      #     from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
+      #   break
+      # else:
+      #   getLogger().warning('no dimensions defined for this OpenGL display')
+      #   return
+
+      if spectrumDisplay.is1D:
         from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
       else:
         from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget

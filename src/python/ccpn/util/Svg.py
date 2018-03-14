@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+Module Documentation here
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,14 +19,14 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
-__author__ = "$Author: skinnersp $"
+__author__ = "$Author: CCPN $"
 __date__ = "$Date: 2015-03-16 16:57:10 +0000 (Mon, 16 Mar 2015) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 from ccpn.util.PrintFile import PrintFile
+
 
 class Svg(PrintFile):
 

@@ -1,7 +1,6 @@
 """This file contains ChemicalShiftTable class
 
-intial version by Simon;
-extensively modified by Geerten 1-7/12/2016
+modified by Geerten 1-7/12/2016
 tertiary version by Ejb 9/5/17
 """
 #=========================================================================================

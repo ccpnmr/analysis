@@ -39,11 +39,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2017
 | 
-            **Please cite: **
-            Skinner et al., J Biomol NMR (2016) 66:111–124; DOI 10.1007/s10858-016-0060-y
-
-            **Written by: **
-            Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister
+            **Developed by:**
+            Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister
 
             **This program uses:**
             The CCPN data model: J Biomol NMR (2006) 36:147–155, DOI 10.1007/s10858-006-9076-z 

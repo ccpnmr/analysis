@@ -881,7 +881,7 @@ class Strip(AbstractWrapperObject):
             # newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
 
           result.extend(newPeaks)
-          break
+          # break
 
         # # Add the new peaks to selection
         # for peak in newPeaks:

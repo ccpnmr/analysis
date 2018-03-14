@@ -360,21 +360,21 @@ class PreferencesPopup(CcpnDialog):
     self.showLastAxisOnlyBox.toggled.connect(partial(self._toggleGeneralOptions, 'lastAxisOnly'))
 
     row += 1
-    self.lockAspectRatioLabel = Label(parent, text="Lock Aspect Ratio: ", grid=(row, 0))
-    self.lockAspectRatioBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lockAspectRatio)
-    self.lockAspectRatioBox.toggled.connect(partial(self._toggleGeneralOptions, 'lockAspectRatio'))
+    self.lockAspectRatioLabel = Label(parent, text="Aspect Ratios: ", grid=(row, 0))
+    # self.lockAspectRatioBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lockAspectRatio)
+    # self.lockAspectRatioBox.toggled.connect(partial(self._toggleGeneralOptions, 'lockAspectRatio'))
 
     self.aspectLabel = {}
     self.aspectData = {}
     for aspect in sorted(self.preferences.general.aspectRatios.keys()):
-      row += 1
       aspectValue = self.preferences.general.aspectRatios[aspect]
       self.aspectLabel[aspect] = Label(parent, text=aspect, grid=(row, 0), hAlign='r')
       self.aspectData[aspect] = DoubleSpinbox(parent, step=1
-                                              , min=1, max=100, grid=(row, 1), hAlign='l')
+                                              , min=1, grid=(row, 1), hAlign='l')
       self.aspectData[aspect].setValue(aspectValue)
       self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
       self.aspectData[aspect].editingFinished.connect(partial(self._setAspect, aspect))
+      row += 1
 
   def _setExternalProgramsTabWidgets(self, parent):
     ''' 

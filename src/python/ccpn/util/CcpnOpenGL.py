@@ -421,25 +421,6 @@ class CcpnGLWidget(QOpenGLWidget):
     w = self.w
     h = self.h
 
-    # if self._axisLocked:
-    #   # TODO:ED modify axes to keep aspect ratio - centred on screen
-    #   mbx = self.axisL + 0.5 * (self.axisR - self.axisL)
-    #
-    #   self.axisL = mbx + zoomIn * (self.axisL - mbx)
-    #   self.axisR = mbx - zoomIn * (mbx - self.axisR)
-    #
-    #   mby = self.axisB + 0.5 * (self.axisT - self.axisB)
-    #
-    #   self.axisB = mby + zoomIn * (self.axisB - mby)
-    #   self.axisT = mby - zoomIn * (mby - self.axisT)
-    #
-    #   mby = 0.5 * (self.axisT + self.axisB)
-    #
-    #   ratio = (self.h / self.w) * 0.5 * abs(self.axisL - self.axisR) * self._preferences.aspectRatios[
-    #     self._axisCodes[1][0]] / self._preferences.aspectRatios[self._axisCodes[0][0]]
-    #   self.axisB = mby + ratio * self.sign(self.axisB - mby)
-    #   self.axisT = mby - ratio * self.sign(mby - self.axisT)
-
     # symbolType = self._preferences.peakSymbolType
     symbolWidth = self._preferences.peakSymbolSize / 2.0
     # lineThickness = self._preferences.peakSymbolThickness / 2.0
@@ -743,9 +724,9 @@ class CcpnGLWidget(QOpenGLWidget):
       self._rescaleAllAxes()
       # self.buildMouseCoords(refresh=True)
 
-      # spawn rebuild event for the grid
-      for li in self.gridList:
-        li.renderMode = GLRENDERMODE_REBUILD
+      # # spawn rebuild event for the grid
+      # for li in self.gridList:
+      #   li.renderMode = GLRENDERMODE_REBUILD
 
     elif between(mx, ba[0], ba[2]) and between(my, ba[1], ba[3]):
       # in the bottomAxisBar
@@ -910,6 +891,11 @@ class CcpnGLWidget(QOpenGLWidget):
     # spawn rebuild event for the grid
     for li in self.gridList:
       li.renderMode = GLRENDERMODE_REBUILD
+
+    if self._axisLocked:
+      # ratios have changed so rescale the peaks symbols
+      for pp in self._GLPeakLists.values():
+        pp.renderMode = GLRENDERMODE_RESCALE
 
     self._rescaleOverlayText()
 
@@ -4051,7 +4037,7 @@ void main()
     GL.glDisable(GL.GL_LINE_STIPPLE)
 
   def drawInfiniteLines(self):
-    # draw the simulated infinite lines
+    # draw the simulated infinite lines - using deprecated GL :)
 
     GL.glDisable(GL.GL_BLEND)
     GL.glEnable(GL.GL_LINE_STIPPLE)

@@ -81,11 +81,6 @@ class Gui1dWidget(CcpnGLWidget):
                                       rightMenu=rightMenu,
                                       stripIDLabel=stripIDLabel)
 
-    # self._integralNotifier = Notifier(self.project, [Notifier.CREATE,
-    #                                              Notifier.DELETE,
-    #                                              Notifier.CHANGE], 'Integral', self._updateDisplayedIntegrals,
-    #                               onceOnly=True)
-
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
     strip = self._parent

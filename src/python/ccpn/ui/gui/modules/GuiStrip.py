@@ -273,6 +273,9 @@ class GuiStrip(Frame):
 
     self.show()
 
+  def viewRange(self):
+    return self._testCcpnOpenGLWidget.viewRange()
+
   @property
   def gridIsVisible(self):
     "True if grid is visible"

@@ -109,7 +109,7 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
         continue
 
       if ii<len(positions) and positions[ii]:
-        strip._testCcpnOpenGLWidget.setAxisPosition(axisCode=axisCode, position=positions[ii], update=True)
+        strip._testCcpnOpenGLWidget.setAxisPosition(axisCode=axisCode, position=positions[ii], update=False)
 
       if widths is not None:
         if ii<len(widths) and widths[ii]:
@@ -140,7 +140,7 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
                                                          update=False)
 
     # build here so it doesn't conflict with OpenGl update
-    # strip._testCcpnOpenGLWidget.buildAll()
+    strip._testCcpnOpenGLWidget.buildAll()
     strip._testCcpnOpenGLWidget.update()
 
   except:

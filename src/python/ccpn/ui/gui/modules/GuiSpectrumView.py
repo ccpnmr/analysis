@@ -30,6 +30,7 @@ import collections
 from ccpn.util import Colour
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
+from ccpn.core.IntegralList import IntegralList
 #import pyqtgraph as pg
 
 #from ccpn.ui.gui.modules.spectrumPane.PeakListItem import PeakListItem

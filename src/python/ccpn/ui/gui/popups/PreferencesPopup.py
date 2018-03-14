@@ -377,10 +377,9 @@ class PreferencesPopup(CcpnDialog):
       row += 1
 
   def _setExternalProgramsTabWidgets(self, parent):
-    ''' 
-    Insert a widget in here to appear in the externalPrograms Tab 
-
-    '''
+    """
+    Insert a widget in here to appear in the externalPrograms Tab
+    """
 
     row = 0
 

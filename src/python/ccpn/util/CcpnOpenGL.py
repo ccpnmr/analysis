@@ -630,6 +630,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.update()
 
+  def viewRange(self):
+    return ((self.axisL, self.axisR),
+            (self.axisT, self.axisB))
+
   def wheelEvent(self, event):
     def between(val, l, r):
       return (l-val)*(r-val) <= 0
@@ -1985,7 +1989,7 @@ void main()
             colG = int(colour.strip('# ')[2:4], 16) / 255.0
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-        drawStr.setColour((colR, colG, colB, 1.0))
+          drawStr.setColour((colR, colG, colB, 1.0))
 
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -3117,9 +3121,12 @@ void main()
     GL.glDisable(GL.GL_TEXTURE_2D)
 
   def buildAll(self):
-    self.buildSpectra()
-    self.buildAxisLabels()
-    self.buildGrid()
+    for spectrumView in self._parent.spectrumViews:
+      spectrumView.buildContours = True
+
+    # self.buildSpectra()
+    # self.buildAxisLabels()
+    # self.buildGrid()
 
   def buildSpectra(self):
     if self._parent.isDeleted:
@@ -3298,7 +3305,6 @@ void main()
 
           if peakListView in self._GLIntegralLists.keys():
             self._GLIntegralLists[peakListView].drawIndexArray()
-
 
     # for il in self._GLIntegralLists.values():
     #   if il.spectrumView.isVisible() and il.integralListView.isVisible():

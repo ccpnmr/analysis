@@ -34,6 +34,8 @@ from ccpn.core.Peak import Peak
 # from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.Logging import getLogger
+from ccpn.core.IntegralList import IntegralList
+
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import AbstractPeakDimContrib as ApiAbstractPeakDimContrib
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
@@ -285,6 +287,10 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
     self.buildPeakListLabels = True
     self.buildIntegralLists = True
 
+    if isinstance(self.peakList, IntegralList):
+      self.setVisible(False)
+
+
   def _printToFile(self, printer):
     # CCPN INTERNAL - called in _printToFile method of GuiSpectrumViewNd
 
@@ -361,8 +367,6 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
 
   # For notifiers - moved from core PeakListView
   def _deletedStripPeakListView(self):
-
-    from ccpn.core.IntegralList import IntegralList
 
     if isinstance(self.peakList, IntegralList):
       return

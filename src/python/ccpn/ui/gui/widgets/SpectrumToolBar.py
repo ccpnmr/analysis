@@ -82,7 +82,7 @@ class SpectrumToolBar(ToolBar):
 
     for peakListView in peakListViews:
       if peakListView.spectrumView._apiDataSource == key:
-        action = contextMenu.addAction(peakListView.peakList.id)
+        action = contextMenu.addAction(peakListView.peakList.pid)
         action.setCheckable(True)
         if peakListView.isVisible():
           action.setChecked(True)

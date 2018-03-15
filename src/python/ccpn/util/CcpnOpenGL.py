@@ -3297,31 +3297,32 @@ void main()
 
     # draw the bounding boxes
     GL.glEnable(GL.GL_BLEND)
-    for spectrumView in self._parent.spectrumViews:
-      if spectrumView.isVisible() and self._preferences.showSpectrumBorder and spectrumView.spectrum.dimensionCount > 1:
-        self._spectrumValues = spectrumView._getValues()
+    if self._preferences.showSpectrumBorder and spectrumView.spectrum.dimensionCount > 1:
+      for spectrumView in self._parent.spectrumViews:
+        if spectrumView.isVisible():
+          self._spectrumValues = spectrumView._getValues()
 
-        # get the bounding box of the spectra
-        fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-        if spectrumView.spectrum.dimensionCount > 1:
-          fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
-          GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
-        else:
-          fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
+          # get the bounding box of the spectra
+          fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+          if spectrumView.spectrum.dimensionCount > 1:
+            fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+            GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
+          else:
+            fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
 
-          colour = spectrumView.sliceColour
-          colR = int(colour.strip('# ')[0:2], 16)/255.0
-          colG = int(colour.strip('# ')[2:4], 16)/255.0
-          colB = int(colour.strip('# ')[4:6], 16)/255.0
+            colour = spectrumView.sliceColour
+            colR = int(colour.strip('# ')[0:2], 16)/255.0
+            colG = int(colour.strip('# ')[2:4], 16)/255.0
+            colB = int(colour.strip('# ')[4:6], 16)/255.0
 
-          GL.glColor4f(colR, colG, colB, 0.5)
+            GL.glColor4f(colR, colG, colB, 0.5)
 
-        GL.glBegin(GL.GL_LINE_LOOP)
-        GL.glVertex2d(fx0, fy0)
-        GL.glVertex2d(fx0, fy1)
-        GL.glVertex2d(fx1, fy1)
-        GL.glVertex2d(fx1, fy0)
-        GL.glEnd()
+          GL.glBegin(GL.GL_LINE_LOOP)
+          GL.glVertex2d(fx0, fy0)
+          GL.glVertex2d(fx0, fy1)
+          GL.glVertex2d(fx1, fy1)
+          GL.glVertex2d(fx1, fy0)
+          GL.glEnd()
 
   def buildGrid(self):
     self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0, 1],

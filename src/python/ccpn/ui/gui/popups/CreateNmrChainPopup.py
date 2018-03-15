@@ -160,6 +160,12 @@ class CreateNmrChainPopup(CcpnDialog):
       showWarning('Existing NmrChain name.', 'Change name')
       return
 
+  def _isNmrChainNameExisting(self, name):
+    if self.project.getByPid(NmrChain.shortClassName + ':' + name):
+      return True
+    else:
+      return False
+
   def _setCreateButtonEnabled(self, value:bool=True):
     self.buttonBox.setButtonEnabled(Create, value)
 
@@ -310,19 +316,31 @@ class CreateNmrChainPopup(CcpnDialog):
 
 
     if isinstance(obj, Chain):
-      self.nameLineEdit.setText(obj.shortName)
       self._chain = obj
+      if self._isNmrChainNameExisting(self._chain.shortName):
+        self.nameLineEdit.setText(self._chain.shortName+COPYNMRCHAIN)
+      else:
+        self.nameLineEdit.setText(self._chain.shortName)
       self._setCreateButtonEnabled(True)
 
 
     if isinstance(obj, Substance):
-      self.nameLineEdit.setText(obj.name)
       self._substance = obj
+      if self._isNmrChainNameExisting(self._substance.name):
+        self.nameLineEdit.setText(self._substance.name + COPYNMRCHAIN)
+      else:
+        self.nameLineEdit.setText(self._substance.name)
       self._setCreateButtonEnabled(True)
 
 
     if isinstance(obj, Complex):
-      names = [chain.shortName for chain in obj.chains]
+      chainsNames = [chain.shortName for chain in obj.chains]
+      names = []
+      for name in chainsNames:
+        if self._isNmrChainNameExisting(name):
+          names.append(name+COPYNMRCHAIN)
+        else:
+          names.append(name)
       if len(names)>0:
         self.nameLineEdit.setText(",".join(names))
         self._complex = obj

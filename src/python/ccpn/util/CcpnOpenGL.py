@@ -403,7 +403,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self.GLSignals.glEvent.connect(self._glEvent)
     self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
 
-    # QtGui.QApplication.screenChanged.connect(self._screenChanged)
+    # print (dir(QtGui.QWindow))
+    self.mainWindow.window().windowHandle().screenChanged.connect(self._screenChanged)
 
   def close(self):
     self.GLSignals.glXAxisChanged.disconnect()
@@ -612,7 +613,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.viewports._devicePixelRatio = self._devicePixelRatio
 
     screens = QtGui.QApplication.screens()
-    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
+    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QCursor().pos())
     # print ('>>>', screens, screen)
     self._devicePixelRatio = screens[screen].devicePixelRatio()
     self.viewports._devicePixelRatio = self._devicePixelRatio

@@ -602,15 +602,16 @@ class CcpnGLWidget(QOpenGLWidget):
   @pyqtSlot()
   def _screenChanged(self, *args):
     screens = QtGui.QApplication.screens()
-    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
+    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QCursor().pos())
     # print ('>>>', screens, screen)
     self._devicePixelRatio = screens[screen].devicePixelRatio()
     self.viewports._devicePixelRatio = self._devicePixelRatio
+    self.update()
 
   def resizeGL(self, w, h):
     # must be set here to catch the change of screen
-    self._devicePixelRatio = QApplication.primaryScreen().devicePixelRatio()   #.instance().devicePixelRatio()
-    self.viewports._devicePixelRatio = self._devicePixelRatio
+    # self._devicePixelRatio = QApplication.primaryScreen().devicePixelRatio()   #.instance().devicePixelRatio()
+    # self.viewports._devicePixelRatio = self._devicePixelRatio
 
     screens = QtGui.QApplication.screens()
     screen = QtGui.QApplication.desktop().screenNumber(QtGui.QCursor().pos())

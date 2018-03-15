@@ -99,10 +99,10 @@ def printCreditsText(fp, programName, version):
 
   try:
     if isinstance(__credits__, str):
-      lines.append("Written by:   %s" % __credits__)
+      lines.append("Developed by: %s" % __credits__)
     else:
       if isinstance(__credits__, tuple):
-        lines.append("Written by:   %s" % __credits__[0])
+        lines.append("Developed by: %s" % __credits__[0])
         for crLine in __credits__[1:]:
           lines.append("              %s" % crLine)
   except:

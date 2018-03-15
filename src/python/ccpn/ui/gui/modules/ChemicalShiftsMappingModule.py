@@ -664,7 +664,7 @@ class ChemicalShiftsMapping(CcpnModule):
           if nmrAtom1 and nmrAtom2:
             navigateToNmrAtomsInStrip(strip,
                                       nmrAtoms=[nmrAtom1, nmrAtom2],
-                                      widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                      widths=_getCurrentZoomRatio(strip.viewRange()),
                                       markPositions=True
                                       )
       else:

@@ -546,10 +546,18 @@ class CcpnGLWidget(QOpenGLWidget):
     # rescale the matrices each spectrumView
     stackCount = 0
     for spectrumView in self._parent.spectrumViews:       #.orderedSpectrumViews():
-      self._spectrumSettings[spectrumView] = {}
+      # self._spectrumSettings[spectrumView] = {}
 
       if spectrumView.isDeleted:
+        self._spectrumSettings[spectrumView] = {}
         continue
+
+      self._buildSpectrumSetting(spectrumView, stackCount)
+      if self._stackingValue:
+        stackCount += 1
+
+  def _buildSpectrumSetting(self, spectrumView, stackCount=0):
+      self._spectrumSettings[spectrumView] = {}
 
       self._spectrumValues = spectrumView._getValues()
       # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
@@ -3182,7 +3190,7 @@ void main()
                                                               GLContext=self)
         spectrumView._buildGLContours(self._contourList[spectrumView])
 
-
+        self._buildSpectrumSetting(spectrumView=spectrumView)
 
 
 

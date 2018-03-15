@@ -4328,11 +4328,12 @@ void main()
                                     object=None)
 
   def drawMouseCoords(self):
-    self.buildMouseCoords()
-    # draw the mouse coordinates to the screen
-    self.mouseString.drawTextArray()
-    if self._drawSelectionBox:
-      self.diffMouseString.drawTextArray()
+    if self.underMouse():
+      self.buildMouseCoords()
+      # draw the mouse coordinates to the screen
+      self.mouseString.drawTextArray()
+      if self._drawSelectionBox:
+        self.diffMouseString.drawTextArray()
 
   def drawSelectionBox(self):
     # should really use the proper VBOs for this

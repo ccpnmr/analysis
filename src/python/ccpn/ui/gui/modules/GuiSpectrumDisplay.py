@@ -179,6 +179,7 @@ class GuiSpectrumDisplay(CcpnModule):
       self.spectrumUtilToolBar.hide()
 
     self.stripFrame = Frame(setLayout=True, showBorder=True, spacing=(5,0), stretch=(1,1))
+    self.stripFrame.layout().setContentsMargins(4, 0, 4, 0)
 
     if useScrollArea:
       # scroll area for strips

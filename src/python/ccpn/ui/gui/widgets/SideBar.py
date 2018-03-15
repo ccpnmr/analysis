@@ -498,12 +498,12 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     # Register notifiers to maintain sidebar
     for cls in classesInSideBar.values():
       className = cls.className
-      project.registerNotifier(className, 'delete', self._removeItem)
+      project.registerNotifier(className, 'delete', self._removeItem, onceOnly=True)
       if className != 'NmrResidue':
-        project.registerNotifier(className, 'create', self._createItem)
-        project.registerNotifier(className, 'rename', self._renameItem)
-    project.registerNotifier('NmrResidue', 'create', self._refreshParentNmrChain)
-    project.registerNotifier('NmrResidue', 'rename', self._renameNmrResidueItem)
+        project.registerNotifier(className, 'create', self._createItem, )
+        project.registerNotifier(className, 'rename', self._renameItem, onceOnly=True)
+    project.registerNotifier('NmrResidue', 'create', self._refreshParentNmrChain, onceOnly=True)
+    project.registerNotifier('NmrResidue', 'rename', self._renameNmrResidueItem, onceOnly=True)
 
     notifier = project.registerNotifier('SpectrumGroup', 'Spectrum', self._refreshSidebarSpectra,
                                         onceOnly=True)

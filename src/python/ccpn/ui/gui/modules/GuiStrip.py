@@ -368,7 +368,7 @@ class GuiStrip(Frame):
 
   def _highlightCurrentStrip(self, data):
     "Callback to highlight the axes of current strip"
-    self.plotWidget.highlightAxes(self is self.current.strip)
+    # self.plotWidget.highlightAxes(self is self.current.strip)
 
     try:
       self._testCcpnOpenGLWidget.highlightCurrentStrip(self is self.current.strip)

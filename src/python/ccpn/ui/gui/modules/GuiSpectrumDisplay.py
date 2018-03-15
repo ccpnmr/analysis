@@ -273,6 +273,12 @@ class GuiSpectrumDisplay(CcpnModule):
           self.current.strip = strip
         elif self.current.strip not in self.strips:
           self.current.strip = self.strips[0]
+
+        # spawn a redraw of the GL windows
+        from ccpn.util.CcpnOpenGL import GLNotifier
+        GLSignals = GLNotifier(parent=None)
+        GLSignals.emitPaintEvent()
+
         success = True
       elif obj is not None and isinstance(obj, PeakList):
         self._handlePeakList(obj)

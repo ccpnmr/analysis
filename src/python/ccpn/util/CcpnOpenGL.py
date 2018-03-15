@@ -3267,6 +3267,8 @@ void main()
     GL.glDisable(GL.GL_BLEND)
 
     for spectrumView in self._parent.spectrumViews:      #.orderedSpectrumViews():
+    # specList = self._parent.orderedSpectrumViews()
+    # for spectrumView in self._parent._orderedSpectra:
       if spectrumView.isDeleted:
         continue
 

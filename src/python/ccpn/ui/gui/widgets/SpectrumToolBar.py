@@ -155,6 +155,11 @@ class SpectrumToolBar(ToolBar):
     for st in stripUpdateList:
       st.removeSpectrumView(None)
 
+    # spawn a redraw of the GL windows
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=None)
+    GLSignals.emitPaintEvent()
+
   def _mousePressEvent(self, event:QtGui.QMouseEvent):
     """
     Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object

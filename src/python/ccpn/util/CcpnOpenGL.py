@@ -581,10 +581,10 @@ class CcpnGLWidget(QOpenGLWidget):
         dyAF = fy0 - fy1
         yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
 
-        self._minXRange = min(self._minXRange, 5.0*(fx0-fx1) / self._spectrumValues[0].totalPointCount)
-        self._maxXRange = max(self._maxXRange, 2.0*(fx0-fx1))
-        self._minYRange = min(self._minYRange, 5.0*(fy0-fy1) / self._spectrumValues[1].totalPointCount)
-        self._maxYRange = max(self._maxYRange, 2.0*(fy0-fy1))
+        self._minXRange = min(self._minXRange, 3.0*(fx0-fx1) / self._spectrumValues[0].totalPointCount)
+        self._maxXRange = max(self._maxXRange, (fx0-fx1))
+        self._minYRange = min(self._minYRange, 3.0*(fy0-fy1) / self._spectrumValues[1].totalPointCount)
+        self._maxYRange = max(self._maxYRange, (fy0-fy1))
 
       else:
         dy = -1.0 if self.INVERTYAXIS else -1.0       # dy = self.sign(self.axisT - self.axisB)
@@ -592,10 +592,10 @@ class CcpnGLWidget(QOpenGLWidget):
         dyAF = fy0 - fy1
         yScale = dy * dyAF / 1.0
 
-        self._minXRange = min(self._minXRange, 5.0*(fx0-fx1) / self._spectrumValues[0].totalPointCount)
-        self._maxXRange = max(self._maxXRange, 2.0*(fx0-fx1))
-        self._minYRange = min(self._minYRange, 5.0*(fy0-fy1) / 2048.0)
-        self._maxYRange = max(self._maxYRange, 2.0*(fy0-fy1))
+        self._minXRange = min(self._minXRange, 3.0*(fx0-fx1) / self._spectrumValues[0].totalPointCount)
+        self._maxXRange = max(self._maxXRange, (fx0-fx1))
+        self._minYRange = min(self._minYRange, 3.0*(fy0-fy1) / 2048.0)
+        self._maxYRange = max(self._maxYRange, (fy0-fy1))
 
         if self._stackingValue:
           st = stackCount * self._stackingValue

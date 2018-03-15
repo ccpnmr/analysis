@@ -1568,6 +1568,9 @@ void main()
 
   def mousePressInRegion(self, regions):
     for region in regions:
+      if region._objectView and not region._objectView.isVisible():
+        continue
+
       if region.visible and region.movable:
         if region.orientation == 'h':
           if not self._widthsChangedEnough((0.0, region.values[0]),
@@ -3131,7 +3134,7 @@ void main()
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
       for integral in ils.integrals:
-        drawList.addIntegral(integral, colour=None, brush=(colR, colG, colB, 0.15))
+        drawList.addIntegral(integral, integralListView, colour=None, brush=(colR, colG, colB, 0.15))
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -6427,7 +6430,8 @@ class GLRegion(QtWidgets.QWidget):
 
   def __init__(self, parent, glList, values=(0,0), axisCode=None, orientation='h',
                brush=None, colour='blue',
-               movable=True, visible=True, bounds=None, object=None, lineStyle='dashed'):
+               movable=True, visible=True, bounds=None,
+               object=None, objectView=None, lineStyle='dashed'):
 
     super(GLRegion, self).__init__(parent)
 
@@ -6442,6 +6446,7 @@ class GLRegion(QtWidgets.QWidget):
     self._visible = visible
     self._bounds = bounds
     self._object = object
+    self._objectView = objectView
     self.lineStyle = lineStyle
     self.pid = object.pid if hasattr(object, 'pid') else None
 
@@ -6686,8 +6691,9 @@ class GLIntegralArray(GLVertexArray):
   def _clearRegions(self):
     self._regions = []
 
-  def addIntegral(self, integral, colour='blue', brush=None):
-    return self._addRegion(values=integral.limits[0], orientation='v', movable=True, object=integral, colour=colour, brush=brush)
+  def addIntegral(self, integral, integralListView, colour='blue', brush=None):
+    return self._addRegion(values=integral.limits[0], orientation='v', movable=True,
+                           object=integral, objectView=integralListView, colour=colour, brush=brush)
 
   def _removeRegion(self, region):
     if region in self._regions:
@@ -6696,7 +6702,8 @@ class GLIntegralArray(GLVertexArray):
   def _addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None,
-                object=None, **kw):
+                object=None, objectView=None,
+                **kw):
 
     if colour in REGION_COLOURS.keys() and not brush:
       brush = REGION_COLOURS[colour]
@@ -6738,7 +6745,8 @@ class GLIntegralArray(GLVertexArray):
                                   movable=movable,
                                   visible=visible,
                                   bounds=bounds,
-                                  object=object))
+                                  object=object,
+                                  objectView=objectView))
 
     axisIndex = 0
     for ps, psCode in enumerate(self.parent.axisOrder[0:2]):

@@ -545,7 +545,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # rescale the matrices each spectrumView
     stackCount = 0
-    for spectrumView in self._parent.orderedSpectrumViews():
+    for spectrumView in self._parent.spectrumViews:       #.orderedSpectrumViews():
       self._spectrumSettings[spectrumView] = {}
 
       if spectrumView.isDeleted:
@@ -3182,6 +3182,10 @@ void main()
                                                               GLContext=self)
         spectrumView._buildGLContours(self._contourList[spectrumView])
 
+
+
+
+
         # # TODO:ED check how to efficiently trigger a rebuild of the peaklists
         # if spectrumView.spectrum.pid in self._GLPeakLists.keys():
         #   self._GLPeakLists[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
@@ -3382,7 +3386,7 @@ void main()
     GL.glLineWidth(1.0)
     GL.glDisable(GL.GL_BLEND)
 
-    for spectrumView in self._parent.orderedSpectrumViews():
+    for spectrumView in self._parent.spectrumViews:      #.orderedSpectrumViews():
       if spectrumView.isDeleted:
         continue
 

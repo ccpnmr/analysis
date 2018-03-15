@@ -650,9 +650,9 @@ class GuiStrip(Frame):
 
   def _showCrossHair(self):
     "Displays crosshair in strip"
-    self.plotWidget.crossHair1.show()
-    if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
-      self.plotWidget.crossHair2.show()
+    # self.plotWidget.crossHair1.show()
+    # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
+    #   self.plotWidget.crossHair2.show()
 
     try:
       self._testCcpnOpenGLWidget.crossHairVisible = True
@@ -661,9 +661,9 @@ class GuiStrip(Frame):
 
   def _hideCrossHair(self):
     "Hides crosshair in strip."
-    self.plotWidget.crossHair1.hide()
-    if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
-      self.plotWidget.crossHair2.hide()
+    # self.plotWidget.crossHair1.hide()
+    # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
+    #   self.plotWidget.crossHair2.hide()
 
     try:
       self._testCcpnOpenGLWidget.crossHairVisible = False

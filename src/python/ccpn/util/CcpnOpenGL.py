@@ -403,6 +403,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self.GLSignals.glEvent.connect(self._glEvent)
     self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
 
+    # QtGui.QApplication.screenChanged.connect(self._screenChanged)
+
   def close(self):
     self.GLSignals.glXAxisChanged.disconnect()
     self.GLSignals.glYAxisChanged.disconnect()
@@ -596,9 +598,23 @@ class CcpnGLWidget(QOpenGLWidget):
       self._spectrumSettings[spectrumView][SPECTRUM_XSCALE] = xScale
       self._spectrumSettings[spectrumView][SPECTRUM_YSCALE] = yScale
 
+  @pyqtSlot()
+  def _screenChanged(self, *args):
+    screens = QtGui.QApplication.screens()
+    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
+    # print ('>>>', screens, screen)
+    self._devicePixelRatio = screens[screen].devicePixelRatio()
+    self.viewports._devicePixelRatio = self._devicePixelRatio
+
   def resizeGL(self, w, h):
     # must be set here to catch the change of screen
-    self._devicePixelRatio = QApplication.instance().devicePixelRatio()
+    self._devicePixelRatio = QApplication.primaryScreen().devicePixelRatio()   #.instance().devicePixelRatio()
+    self.viewports._devicePixelRatio = self._devicePixelRatio
+
+    screens = QtGui.QApplication.screens()
+    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
+    # print ('>>>', screens, screen)
+    self._devicePixelRatio = screens[screen].devicePixelRatio()
     self.viewports._devicePixelRatio = self._devicePixelRatio
 
     self.w = w
@@ -1269,6 +1285,12 @@ void main()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
 
     self._devicePixelRatio = QApplication.instance().devicePixelRatio()
+
+    # screens = QApplication.screens()
+    # print ('>>>', screens[0].devicePixelRatio())
+    # print ('>>>', screens[1].devicePixelRatio())
+
+
 
     # initialise the arrays for the grid and axes
     self.gridList = []

@@ -306,7 +306,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._mouseX = 0
     self._mouseY = 0
 
-    self._devicePixelRatio = QApplication.instance().devicePixelRatio()
+    self._devicePixelRatio = 1.0      # set in the initialiseGL routine
     self.w = self.width()
     self.h = self.height()
     self.peakWidthPixels = 16
@@ -597,7 +597,9 @@ class CcpnGLWidget(QOpenGLWidget):
       self._spectrumSettings[spectrumView][SPECTRUM_YSCALE] = yScale
 
   def resizeGL(self, w, h):
+    # must be set here to catch the change of screen
     self._devicePixelRatio = QApplication.instance().devicePixelRatio()
+    self.viewports._devicePixelRatio = self._devicePixelRatio
 
     self.w = w
     self.h = h
@@ -1266,6 +1268,8 @@ void main()
     GL.initializeOpenGLFunctions()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
 
+    self._devicePixelRatio = QApplication.instance().devicePixelRatio()
+
     # initialise the arrays for the grid and axes
     self.gridList = []
     for li in range(3):
@@ -1409,7 +1413,7 @@ void main()
 
     self.w = 0
     self.h = 0
-    self.viewports = GLViewports()
+    self.viewports = GLViewports(self._devicePixelRatio)
 
     # TODO:ED error here when calulating the top offset, FOUND
 
@@ -6131,9 +6135,10 @@ color_data = np.array([1, 0, 0,
 
 class GLViewports(object):
   # Class to handle the different viewports in the display
-  def __init__(self):
+  def __init__(self, pixelRatio):
     # define a new empty list
     self._views = {}
+    self._devicePixelRatio = pixelRatio
 
   def addViewport(self, name, parent, left, bottom, rightOffset, topOffset):
     # add a new viewport
@@ -6165,7 +6170,10 @@ class GLViewports(object):
       wi = setVal(thisView[3], w, h, l)
       he = setVal(thisView[4], w, h, 0)
 
-      GL.glViewport(l, b-1, wi, he)
+      GL.glViewport(int(l * self._devicePixelRatio),
+                    int((b-1) * self._devicePixelRatio),
+                    int(wi * self._devicePixelRatio),
+                    int(he * self._devicePixelRatio))
                     # , w-thisView[3]-thisView[1], h-thisView[4]-thisView[2])
     else:
       raise RuntimeError('Error: viewport %s does not exist' % name)

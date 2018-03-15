@@ -3300,9 +3300,9 @@ void main()
 
     # draw the bounding boxes
     GL.glEnable(GL.GL_BLEND)
-    if self._preferences.showSpectrumBorder and spectrumView.spectrum.dimensionCount > 1:
+    if self._preferences.showSpectrumBorder:
       for spectrumView in self._parent.spectrumViews:
-        if spectrumView.isVisible():
+        if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
           self._spectrumValues = spectrumView._getValues()
 
           # get the bounding box of the spectra

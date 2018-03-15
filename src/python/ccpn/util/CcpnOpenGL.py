@@ -545,6 +545,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # rescale the matrices each spectrumView
     stackCount = 0
+
+    self._minXRange = 1e12
+    self._maxXRange = 0.0
+    self._minYRange = 1e12
+    self._maxYRange = 0.0
+
     for spectrumView in self._parent.spectrumViews:       #.orderedSpectrumViews():
       # self._spectrumSettings[spectrumView] = {}
 
@@ -574,11 +580,22 @@ class CcpnGLWidget(QOpenGLWidget):
         fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
         dyAF = fy0 - fy1
         yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+
+        self._minXRange = min(self._minXRange, 5.0*(fx0-fx1) / self._spectrumValues[0].totalPointCount)
+        self._maxXRange = max(self._maxXRange, 2.0*(fx0-fx1))
+        self._minYRange = min(self._minYRange, 5.0*(fy0-fy1) / self._spectrumValues[1].totalPointCount)
+        self._maxYRange = max(self._maxYRange, 2.0*(fy0-fy1))
+
       else:
         dy = -1.0 if self.INVERTYAXIS else -1.0       # dy = self.sign(self.axisT - self.axisB)
         fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
         dyAF = fy0 - fy1
         yScale = dy * dyAF / 1.0
+
+        self._minXRange = min(self._minXRange, 5.0*(fx0-fx1) / self._spectrumValues[0].totalPointCount)
+        self._maxXRange = max(self._maxXRange, 2.0*(fx0-fx1))
+        self._minYRange = min(self._minYRange, 5.0*(fy0-fy1) / 2048.0)
+        self._maxYRange = max(self._maxYRange, 2.0*(fy0-fy1))
 
         if self._stackingValue:
           st = stackCount * self._stackingValue
@@ -606,6 +623,7 @@ class CcpnGLWidget(QOpenGLWidget):
       self._spectrumSettings[spectrumView][SPECTRUM_DYAF] = dyAF
       self._spectrumSettings[spectrumView][SPECTRUM_XSCALE] = xScale
       self._spectrumSettings[spectrumView][SPECTRUM_YSCALE] = yScale
+
 
   @pyqtSlot()
   def _screenChanged(self, *args):
@@ -697,6 +715,11 @@ class CcpnGLWidget(QOpenGLWidget):
       event.ignore()
       return
 
+    # TODO:ED quick fix to lock the maximum and minimum zooms
+    if (scrollDirection > 0 and self._minReached) or (scrollDirection < 0 and self._maxReached):
+      event.accept()
+      return
+
     zoomIn = (100.0+zoomScale)/100.0
     zoomOut = 100.0/(100.0+zoomScale)
 
@@ -748,6 +771,9 @@ class CcpnGLWidget(QOpenGLWidget):
       else:
         self.axisB = mby + zoomOut * (self.axisB - mby)
         self.axisT = mby - zoomOut * (mby - self.axisT)
+
+      # TODO:ED check that the axes limits are not exceeded
+
 
       self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
                                          axisB=self.axisB, axisT=self.axisT,
@@ -845,6 +871,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #
     #   ratio = self._preferences.Aspect[yAxis] / self._preferences.Aspect[xAxis]
 
+    self._testAxisLimits()
     self.rescale()
 
     # spawn rebuild event for the grid
@@ -880,6 +907,7 @@ class CcpnGLWidget(QOpenGLWidget):
     #
     #     ratio = self._preferences.Aspect[xAxis] / self._preferences.Aspect[yAxis]
 
+    self._testAxisLimits()
     self.rescale()
 
     # spawn rebuild event for the grid
@@ -917,7 +945,48 @@ class CcpnGLWidget(QOpenGLWidget):
     if update:
       self.update()
 
+  def _testAxisLimits(self):
+    xRange = abs(self.axisL-self.axisR)/2.0
+    self._minReached = False
+    self._maxReached = False
+
+    if xRange < self._minXRange:
+      xMid = (self.axisR + self.axisL) / 2.0
+      self.axisL = xMid - self._minXRange * np.sign(self.pixelX)
+      self.axisR = xMid + self._minXRange * np.sign(self.pixelX)
+      self._minReached = True
+
+    if xRange > self._maxXRange:
+      xMid = (self.axisR + self.axisL) / 2.0
+      self.axisL = xMid - self._maxXRange * np.sign(self.pixelX)
+      self.axisR = xMid + self._maxXRange * np.sign(self.pixelX)
+      self._maxReached = True
+
+    yRange = abs(self.axisT - self.axisB)/2.0
+    if yRange < self._minYRange:
+      yMid = (self.axisT + self.axisB) / 2.0
+      self.axisT = yMid + self._minYRange * np.sign(self.pixelY)
+      self.axisB = yMid - self._minYRange * np.sign(self.pixelY)
+      self._minReached = True
+
+    if yRange > self._maxYRange:
+      yMid = (self.axisT + self.axisB) / 2.0
+      self.axisT = yMid + self._maxYRange * np.sign(self.pixelY)
+      self.axisB = yMid - self._maxYRange * np.sign(self.pixelY)
+      self._maxReached = True
+
+    #   getLogger().warning('out of X range')
+    #
+    # yRange = abs(self.axisT-self.axisB)
+    # if yRange < self._minYRange or xRange > self._maxYRange:
+    #   getLogger().warning('out of Y range')
+    #
+    # if xRange < self._minXRange or xRange > self._maxXRange or yRange < self._minYRange or xRange > self._maxYRange:
+    #   # limit the display
+
+
   def _rescaleAllAxes(self, update=True):
+    self._testAxisLimits()
     self.rescale()
 
     # spawn rebuild event for the grid
@@ -1006,6 +1075,14 @@ class CcpnGLWidget(QOpenGLWidget):
   def storeZoom(self):
     self.storedZooms.append((self.axisL, self.axisR, self.axisB, self.axisT))
 
+  def resetXZoom(self):
+    self._resetAxisRange(xAxis=True, yAxis=False)
+    self._rescaleXAxis()
+
+  def resetYZoom(self):
+    self._resetAxisRange(xAxis=False, yAxis=True)
+    self._rescaleYAxis()
+
   def restoreZoom(self):
     if self.storedZooms:
       restoredZooms = self.storedZooms.pop()
@@ -1038,7 +1115,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self._rescaleAllAxes()
 
-  def _resetAxisRange(self):
+  def _resetAxisRange(self, xAxis=True, yAxis=True):
     """
     reset the axes to the limits of the spectra in this view
     """
@@ -1056,15 +1133,17 @@ class CcpnGLWidget(QOpenGLWidget):
         axisLimits[2] = max(axisLimits[2], self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS])
         axisLimits[3] = min(axisLimits[3], self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS])
 
-    if self.INVERTXAXIS:
-      self.axisL, self.axisR = axisLimits[0:2]
-    else:
-      self.axisR, self.axisL = axisLimits[0:2]
+    if xAxis:
+      if self.INVERTXAXIS:
+        self.axisL, self.axisR = axisLimits[0:2]
+      else:
+        self.axisR, self.axisL = axisLimits[0:2]
 
-    if self.INVERTYAXIS:
-      self.axisB, self.axisT = axisLimits[2:4]
-    else:
-      self.axisT, self.axisB = axisLimits[2:4]
+    if yAxis:
+      if self.INVERTYAXIS:
+        self.axisB, self.axisT = axisLimits[2:4]
+      else:
+        self.axisT, self.axisB = axisLimits[2:4]
 
   def initializeGL(self):
 
@@ -1516,6 +1595,14 @@ void main()
     self.initialiseTraces()
 
     self._dragRegion = (None, None, None)
+
+    # define zoom limits for the display
+    self._minXRange = 0.0
+    self._maxXRange = 0.0
+    self._minYRange = 0.0
+    self._maxYRange = 0.0
+    self._minReached = False
+    self._maxReached = False
 
     # self.addRegion(values=(3,4), orientation='v', colour='green')
     # self.addRegion(values=(5,6), orientation='h', colour='blue')

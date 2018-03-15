@@ -158,18 +158,26 @@ class GuiStrip1d(GuiStrip):
     """
     Zooms y axis to maximum of data.
     """
-    y2 = self.viewBox.childrenBoundingRect().top()
-    y1 = y2 + self.viewBox.childrenBoundingRect().height()
-    self.viewBox.setYRange(y2, y1)
+    # y2 = self.viewBox.childrenBoundingRect().top()
+    # y1 = y2 + self.viewBox.childrenBoundingRect().height()
+    # self.viewBox.setYRange(y2, y1)
+    try:
+      self._testCcpnOpenGLWidget.resetYZoom()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
   def resetXZoom(self):
     """
     Zooms x axis to maximum value of data.
     """
-    x2 = self.viewBox.childrenBoundingRect().left()
-    x1 = x2 + self.viewBox.childrenBoundingRect().width()
-    padding = self.application.preferences.general.stripRegionPadding
-    self.viewBox.setXRange(x2, x1, padding=padding)
+    # x2 = self.viewBox.childrenBoundingRect().left()
+    # x1 = x2 + self.viewBox.childrenBoundingRect().width()
+    # padding = self.application.preferences.general.stripRegionPadding
+    # self.viewBox.setXRange(x2, x1, padding=padding)
+    try:
+      self._testCcpnOpenGLWidget.resetXZoom()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
   def flipXYAxis(self):
     """

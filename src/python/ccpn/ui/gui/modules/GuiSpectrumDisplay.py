@@ -335,6 +335,8 @@ class GuiSpectrumDisplay(CcpnModule):
             if peakListView.isVisible():
               orderedAxes = self.current.strip.orderedAxes
               for ax in orderedAxes:
+                if ax.code == 'intensity':
+                  continue
                 if ax.code:
                   if len(ax.code) > 0:
                     code = ax.code[0]
@@ -345,11 +347,18 @@ class GuiSpectrumDisplay(CcpnModule):
                         matchingNmrAtoms.append(nmrAtom)
                       else:
                         if len(nmrAtoms) > 0:
-                          matchingNmrAtoms.append(nmrAtoms[0])
-                    if ax.code.isupper():
-                      peak.assignDimension(ax.code[0], list(set(matchingNmrAtoms)))
-                    else:
-                      peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
+                          if ax.code == nmrAtom.name:
+                            matchingNmrAtoms.append(nmrAtom)
+                          else:
+                            matchingNmrAtoms.append(nmrAtoms[0])
+                    if len(matchingNmrAtoms) > 0:
+                      if ax.code.isupper():
+                        try:
+                          peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
+                        except:
+                          peak.assignDimension(ax.code[0], list(set(matchingNmrAtoms)))
+                      else:
+                        peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
 
 
   def _handleNmrAtoms(self, nmrAtoms):
@@ -371,23 +380,30 @@ class GuiSpectrumDisplay(CcpnModule):
           if peakListView.isVisible():
             orderedAxes = self.current.strip.orderedAxes
             for ax in orderedAxes:
+              if ax.code == 'intensity':
+                continue
               if ax.code:
-                matchedNmrAtoms = []
+                matchingNmrAtoms = []
                 for nmrAtom in nmrAtoms:
                   if len(ax.code) > 0:
                     if ax.code.isupper():
-                      if ax.code[0] == nmrAtom.name:
-                        matchedNmrAtoms.append(nmrAtom)
+                      if ax.code == nmrAtom.name:
+                        matchingNmrAtoms.append(nmrAtom)
                         break
                       else:
                         if ax.code[0] in nmrAtom.name:
-                          matchedNmrAtoms.append(nmrAtom)
-                if len(matchedNmrAtoms)>0:
-                  if ax.code.isupper():
-                    peak.assignDimension(ax.code[0], list(set(matchedNmrAtoms)))
-                  else:
-                    peak.assignDimension(ax.code, list(set(matchedNmrAtoms)))
-
+                          matchingNmrAtoms.append(nmrAtom)
+                    else:
+                      if ax.code[0] in nmrAtom.name:
+                        matchingNmrAtoms.append(nmrAtom)
+                if len(matchingNmrAtoms)>0:
+                  # if ax.code.isupper():
+                    try: # sometime A
+                      peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
+                    except:
+                      peak.assignDimension(ax.code[0], list(set(matchingNmrAtoms)))
+                  # else:
+                  #   peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
 
   def _processDragEnterEvent(self, data):
     pass

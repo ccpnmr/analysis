@@ -588,7 +588,8 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     NB, the clean-up of the side bar is done through notifiers
     """
     from ccpnmodel.ccpncore.memops.ApiError import ApiError
-
+    list = self._saveExpandedState()
+    self.project.blankNotification()
     for obj in objs:
       if obj:
         try:
@@ -612,6 +613,10 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         # except ApiError:
         except Exception as es:
           showWarning('Delete', 'Object %s cannot be deleted' % obj.pid)
+
+    self.project.unblankNotification()
+    self.fillSideBar(self.project)
+    self._restoreExpandedState(list)
 
   def _cloneObject(self, objs):
     """Clones the specified objects"""

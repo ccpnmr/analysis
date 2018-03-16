@@ -108,7 +108,10 @@ class PhasingFrame(Frame):
 
     self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
 
-    self.values = [{'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}, {'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}]
+    self.values = { 'direction': directionTexts[0],
+                    directionTexts[0]: {'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0},
+                    directionTexts[1]: {'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}
+                  }
 
   def _apply(self):
     if self.applyCallback:
@@ -116,9 +119,10 @@ class PhasingFrame(Frame):
 
   def updateValues(self):
     dd = self.getDirection()
-    self.values[dd] = {'ph0': float(self.slider0.value()),
-                       'ph1': float(self.slider1.value()),
-                       'pivot': float(self.pivotEntry.get())}
+    self.values['direction'] = directionTexts[dd]
+    self.values[directionTexts[dd]] = {'ph0': float(self.slider0.value()),
+                                       'ph1': float(self.slider1.value()),
+                                       'pivot': float(self.pivotEntry.get())}
 
   def getDirection(self):
     return directionTexts.index(self.directionList.get()) if self.directionList else 0

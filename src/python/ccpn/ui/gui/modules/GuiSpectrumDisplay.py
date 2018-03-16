@@ -527,6 +527,18 @@ class GuiSpectrumDisplay(CcpnModule):
       strip._changedPhasingDirection()
 
   def _applyPhasing(self, phasingValues):
+    """apply the phasing values here
+    phasingValues is a dict:
+
+    { 'direction': 'Horizontal' or 'Vertical' - the last direction selected
+      'Horizontal': {'ph0': float,
+                     'ph1': float,
+                     'pivot': float},
+      'Vertical':   {'ph0': float,
+                     'ph1': float,
+                     'pivot': float}
+    }
+    """
     pass
 
   def togglePhaseConsole(self):

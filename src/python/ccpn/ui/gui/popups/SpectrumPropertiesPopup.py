@@ -607,7 +607,6 @@ class GeneralTab(QtWidgets.QWidget, Base):
     self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % list(spectrumColours.keys())[value], spectrum=self.spectrum)
 
 
-
 class DimensionsTab(QtWidgets.QWidget, Base):
   def __init__(self, spectrum, dimensions, parent=None):
     super(DimensionsTab, self).__init__(parent)

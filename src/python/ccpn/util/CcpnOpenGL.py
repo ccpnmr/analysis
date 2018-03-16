@@ -1195,6 +1195,7 @@ uniform vec4 axisScale;
 uniform vec4 viewport;
 varying vec4 FC;
 varying vec4 FO;
+varying vec4 varyingTexCoord;
 attribute vec2 offset;
 
 void main()
@@ -1204,11 +1205,11 @@ void main()
                     // character_pos              world_coord
                       
   // centre on the nearest pixel in NDC - shouldn't be needed but textures not correct yet
-  gl_Position = vec4( pos.x,        //floor(0.5 + viewport.x*pos.x) / viewport.x,
-                      pos.y,        //floor(0.5 + viewport.y*pos.y) / viewport.y,
-                      pos.zw );
+  gl_Position = pos;       //vec4( pos.x,        //floor(0.5 + viewport.x*pos.x) / viewport.x,
+                           //pos.y,        //floor(0.5 + viewport.y*pos.y) / viewport.y,
+                           //pos.zw );
                
-  gl_TexCoord[0] = gl_MultiTexCoord0;
+  varyingTexCoord = gl_MultiTexCoord0;
   FC = gl_Color;
 }
 """
@@ -1221,10 +1222,11 @@ varying vec4 FC;
 vec4    filter;
 uniform vec4    background;
 varying vec4 FO;
+varying vec4 varyingTexCoord;
 
 void main()
 {
-  filter = texture2D(texture, gl_TexCoord[0].xy);
+  filter = texture2D(texture, varyingTexCoord.xy);
   gl_FragColor = vec4(FC.xyz, filter.w);
 }
 """
@@ -1401,7 +1403,9 @@ void main()
     self._infiniteLines = []
 
     from ccpn.framework.PathsAndUrls import fontsPath
-    self.firstFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'myfont.fnt'))
+    self.glSmallFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallFont.fnt'), activeTexture=GL.GL_TEXTURE0)
+    self.glSmallTransparentFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallTransparentFont.fnt'), fontTransparency=0.5, activeTexture=GL.GL_TEXTURE1)
+    # TODO:ED modify transparent font to be half transparency
 
     self._buildTextFlag = True
 
@@ -1578,11 +1582,11 @@ void main()
     # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
 
     # testing string
-    # self._testStrings = [GLString(text='The quick brown fox jumped over the lazy dog.', font=self.firstFont, x=2.813*xx, y=15.13571*xx
+    # self._testStrings = [GLString(text='The quick brown fox jumped over the lazy dog.', font=self.glSmallFont, x=2.813*xx, y=15.13571*xx
     #                             , color=(0.15, 0.6, 0.25, 1.0), GLContext=self) for xx in list(range(50))]
 
-    self._lockStringFalse = GLString(text='Lock', font=self.firstFont, x=0, y=0, color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
-    self._lockStringTrue = GLString(text='Lock', font=self.firstFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
+    self._lockStringFalse = GLString(text='Lock', font=self.glSmallFont, x=0, y=0, color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
+    self._lockStringTrue = GLString(text='Lock', font=self.glSmallFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
     self._axisLocked = False
 
     # This is the correct blend function to ignore stray surface blending functions
@@ -2012,7 +2016,7 @@ void main()
     if self.stripIDString:
       vertices = self.stripIDString.numVertices
       offsets = [self.axisL+(10.0*self.pixelX)
-                 , self.axisT-(1.5*self.firstFont.height*self.pixelY)]
+                 , self.axisT-(1.5*self.glSmallFont.height*self.pixelY)]
       for pp in range(0, 2*vertices, 2):
         self.stripIDString.attribs[pp:pp+2] = offsets
 
@@ -2967,7 +2971,7 @@ void main()
 
       # TODO:ED check axisCodes and ordering
       stringList.append(GLString(text=text,
-                                  font=self.firstFont,
+                                  font=self.glSmallFont if _isInPlane else self.glSmallTransparentFont,
                                   x=p0[0], y=p0[1],
                                   ox=r, oy=w,
                                   # x=self._screenZero[0], y=self._screenZero[1]
@@ -3034,8 +3038,8 @@ void main()
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
     # GL.glEnable(GL.GL_TEXTURE_2D)
-    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
-    # GL.glListBase( self.firstFont.base )
+    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.glSmallFont.textureId)
+    # GL.glListBase( self.glSmallFont.base )
     # GL.glCallList(drawList[0])        # temporarily call the drawing of the text
     # GL.glDisable(GL.GL_TEXTURE_2D)
 
@@ -3147,12 +3151,23 @@ void main()
 
   def enableTexture(self):
     GL.glEnable(GL.GL_BLEND)
-    GL.glEnable(GL.GL_TEXTURE_2D)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, self.firstFont.textureId)
+    # GL.glEnable(GL.GL_TEXTURE_2D)
+    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.glSmallFont.textureId)
+
+    GL.glActiveTexture(GL.GL_TEXTURE0)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.glSmallFont.textureId)
+    GL.glActiveTexture(GL.GL_TEXTURE1)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.glSmallTransparentFont.textureId)
+
+    # glActiveTexture(GL.GL_TEXTURE1);
+    # glBindTexture(GL_TEXTURE_2D, Reflection);
+    #
+    # glActiveTexture(GL.GL_TEXTURE2);
+    # glBindTexture(GL_TEXTURE_2D, Refraction);
 
   def disableTexture(self):
     GL.glDisable(GL.GL_BLEND)
-    GL.glDisable(GL.GL_TEXTURE_2D)
+    # GL.glDisable(GL.GL_TEXTURE_2D)
 
   def buildAll(self):
     for spectrumView in self._parent.spectrumViews:
@@ -3495,20 +3510,20 @@ void main()
         axisXText = str(int(axisX)) if axLabel[3] >= 1 else str(axisX)
 
         self._axisXLabelling.append(GLString(text=axisXText
-                                  , font=self.firstFont
+                                  , font=self.glSmallFont
                                   # , angle=np.pi/2.0
                                   # , x=axisX-(10.0*self.pixelX) #*len(str(axisX)))
                                   # , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE
 
-                                  , x=axisX-(0.4*self.firstFont.width*self.pixelX*len(axisXText)) #*len(str(axisX)))
-                                  , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE-self.firstFont.height
+                                  , x=axisX-(0.4*self.glSmallFont.width*self.pixelX*len(axisXText)) #*len(str(axisX)))
+                                  , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE-self.glSmallFont.height
 
                                   , color=labelColour, GLContext=self
                                   , object=None))
 
       # append the axisCode to the end
       self._axisXLabelling.append(GLString(text=self.axisCodes[0]
-                                , font=self.firstFont
+                                , font=self.glSmallFont
                                 , x=self.axisL+(5*self.pixelX)
                                 , y=self.AXIS_LINE
                                 , color=labelColour, GLContext=self
@@ -3525,7 +3540,7 @@ void main()
           axisYText = str(int(axisY)) if ayLabel[3] >= 1 else str(axisY)
 
         self._axisYLabelling.append(GLString(text=axisYText
-                                  , font=self.firstFont
+                                  , font=self.glSmallFont
                                   , x=self.AXIS_LINE
                                   , y=axisY-(10.0*self.pixelY)
                                   , color=labelColour, GLContext=self
@@ -3533,9 +3548,9 @@ void main()
 
       # append the axisCode to the end
       self._axisYLabelling.append(GLString(text=self.axisCodes[1]
-                                , font=self.firstFont
+                                , font=self.glSmallFont
                                 , x=self.AXIS_LINE
-                                , y=self.axisT-(1.5*self.firstFont.height*self.pixelY)
+                                , y=self.axisT-(1.5*self.glSmallFont.height*self.pixelY)
                                 , color=labelColour, GLContext=self
                                 , object=None))
 
@@ -3826,7 +3841,7 @@ void main()
             label = rr.label if rr.label else rr.axisCode
 
             self._marksAxisCodes.append(GLString(text=label,
-                                        font=self.firstFont,
+                                        font=self.glSmallFont,
                                         x=textX,
                                         y=textY,
                                         color=(colR, colG, colB, 1.0),
@@ -4074,9 +4089,9 @@ void main()
 
     if refresh or self.stripIDLabel != self._oldStripIDLabel:
       self.stripIDString = GLString(text=self.stripIDLabel
-                                  , font=self.firstFont
+                                  , font=self.glSmallFont
                                   , x=self.axisL+(10.0*self.pixelX)
-                                  , y=self.axisT-(1.5*self.firstFont.height*self.pixelY)
+                                  , y=self.axisT-(1.5*self.glSmallFont.height*self.pixelY)
                                   # self._screenZero[0], y=self._screenZero[1]
                                   , color=colour, GLContext=self
                                   , object=None)
@@ -4264,7 +4279,7 @@ void main()
                                       , self._axisOrder[1], self.cursorCoordinate[1])
 
       self.mouseString = GLString(text=newCoords,
-                                  font=self.firstFont,
+                                  font=self.glSmallFont,
                                   x=self.cursorCoordinate[0],
                                   y=self.cursorCoordinate[1],
                                   color=(1.0, 1.0, 1.0, 1.0), GLContext=self,
@@ -4278,9 +4293,9 @@ void main()
                                                                    self._startCoordinate[1]))
 
         self.diffMouseString = GLString(text=diffCoords,
-                                    font=self.firstFont,
+                                    font=self.glSmallFont,
                                     x=self.cursorCoordinate[0],
-                                    y=self.cursorCoordinate[1] - (self.firstFont.height*2.0*self.pixelY),
+                                    y=self.cursorCoordinate[1] - (self.glSmallFont.height*2.0*self.pixelY),
                                     color=(1.0, 1.0, 1.0, 1.0), GLContext=self,
                                     object=None)
 
@@ -5930,7 +5945,7 @@ GlyphPY1 = 'py1'
 
 
 class CcpnGLFont():
-  def __init__(self, fileName=None, size=12, base=0):
+  def __init__(self, fileName=None, size=12, base=0, fontTransparency=None, activeTexture=GL.GL_TEXTURE0):
     self.fontName = None
     self.fontGlyph = [None] * 256
     self.base = base
@@ -5945,6 +5960,8 @@ class CcpnGLFont():
     self.fontSize = self.fontInfo[1].split()[1]
     self.width = 0
     self.height = 0
+    self.activeTexture = activeTexture
+    self.fontTransparency = fontTransparency
 
     row = 2
     exitDims = False
@@ -6045,8 +6062,14 @@ class CcpnGLFont():
         height = max( height, self.fontGlyph[chrNum][GlyphOrigH] )
 
     self.textureId = GL.glGenTextures(1)
-    GL.glEnable(GL.GL_TEXTURE_2D)
+    # GL.glEnable(GL.GL_TEXTURE_2D)
+    GL.glActiveTexture(activeTexture)
     GL.glBindTexture( GL.GL_TEXTURE_2D, self.textureId )
+
+    if fontTransparency:
+      for fontI in self.fontPNG:
+        for fontJ in fontI:
+          fontJ[3] = int(fontJ[3] * fontTransparency)
 
     GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
                      , self.fontPNG.shape[1], self.fontPNG.shape[0]
@@ -6811,6 +6834,12 @@ class GLString(GLVertexArray):
 
     # total width of text - probably don't need
     # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
+
+  def drawTextArray(self):
+    # TODO:ED need to sort out the speed of this
+    GL.glActiveTexture(GL.GL_TEXTURE0)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.font.textureId)
+    super(GLString, self).drawTextArray()
 
   def setColour(self, col):
     self.colors = np.array(col*self.numVertices, dtype=np.float32)

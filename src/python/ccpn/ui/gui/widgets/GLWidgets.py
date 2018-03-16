@@ -544,7 +544,7 @@ class Gui1dWidget(CcpnGLWidget):
 
     # TODO:ED check axisCodes and ordering
     stringList.append(GLString(text=text,
-                                font=self.firstFont,
+                                font=self.glSmallFont,
                                 x=p0[0], y=p0[1],
                                 ox=symbolWidth, oy=symbolWidth,
                                 # x=self._screenZero[0], y=self._screenZero[1]

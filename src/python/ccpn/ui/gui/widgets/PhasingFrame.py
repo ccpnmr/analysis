@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Button import Button
 
-directionTexts = ('Horizontal', 'Vertical')
+directionTexts = ('horizontal', 'vertical')
 
 
 class PhasingFrame(Frame):

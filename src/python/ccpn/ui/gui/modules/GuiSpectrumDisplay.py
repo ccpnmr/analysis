@@ -530,11 +530,11 @@ class GuiSpectrumDisplay(CcpnModule):
     """apply the phasing values here
     phasingValues is a dict:
 
-    { 'direction': 'Horizontal' or 'Vertical' - the last direction selected
-      'Horizontal': {'ph0': float,
+    { 'direction': 'horizontal' or 'vertical' - the last direction selected
+      'horizontal': {'ph0': float,
                      'ph1': float,
                      'pivot': float},
-      'Vertical':   {'ph0': float,
+      'vertical':   {'ph0': float,
                      'ph1': float,
                      'pivot': float}
     }

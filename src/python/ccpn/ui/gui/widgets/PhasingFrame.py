@@ -32,19 +32,26 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Button import Button
 
 directionTexts = ('Horizontal', 'Vertical')
 
 
 class PhasingFrame(Frame):
 
-  def __init__(self, parent=None, includeDirection=True, callback=None, returnCallback=None, directionCallback=None, **kw):
+  def __init__(self, parent=None,
+               includeDirection=True,
+               callback=None,
+               returnCallback=None,
+               directionCallback=None,
+               applyCallback=None, **kw):
 
     Frame.__init__(self, parent, setLayout=True, **kw)
     
     self.callback = callback
     self.returnCallback = returnCallback if returnCallback else self.doCallback
     self.directionCallback = directionCallback if directionCallback else self.doCallback
+    self.applyCallback = applyCallback
 
     sliderDict = {
       'startVal': -180,
@@ -97,32 +104,45 @@ class PhasingFrame(Frame):
     else:
       self.directionList = None
 
+    self.applyButton = Button(self, grid=(0, 10), text='Apply', callback=self._apply)
+
     self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
 
-    lastValues = [{'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}, {'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}]
+    self.values = [{'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}, {'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}]
+
+  def _apply(self):
+    if self.applyCallback:
+      self.applyCallback(self.values)
+
+  def updateValues(self):
+    dd = self.getDirection()
+    self.values[dd] = {'ph0': float(self.slider0.value()),
+                       'ph1': float(self.slider1.value()),
+                       'pivot': float(self.pivotEntry.get())}
 
   def getDirection(self):
-    
     return directionTexts.index(self.directionList.get()) if self.directionList else 0
 
   def setCoarsePh0(self, value):
     # self.phLabel0.setText(str(value))
     self.slider0.setValue(value)
-    self.doCallback()
+    # self.doCallback()
 
   def setCoarsePh1(self, value):
     # self.phLabel1.setText(str(value))
     self.slider1.setValue(value)
-    self.doCallback()
+    # self.doCallback()
 
   def setPh0(self, value):
     # self.phLabel0.setText(str(value))
     self.coarseSlider0.setValue(value)
+    self.updateValues()
     self.doCallback()
     
   def setPh1(self, value):
     # self.phLabel1.setText(str(value))
     self.coarseSlider1.setValue(value)
+    self.updateValues()
     self.doCallback()
     
   def doCallback(self):

@@ -205,6 +205,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                      callback=self._updatePhasing,
                                      returnCallback=self._updatePivot,
                                      directionCallback=self._changedPhasingDirection,
+                                     applyCallback=self._applyPhasing,
                                      grid=(2, 0), gridSpan=(1, 7), hAlign='top',
                                      margins=(0,0,0,0), spacing=(0,0))
     self.phasingFrame.setVisible(False)
@@ -524,7 +525,10 @@ class GuiSpectrumDisplay(CcpnModule):
     """Changes direction of phasing from horizontal to vertical or vice versa."""
     for strip in self.strips:
       strip._changedPhasingDirection()
-    
+
+  def _applyPhasing(self, phasingValues):
+    pass
+
   def togglePhaseConsole(self):
     """Toggles whether phasing console is displayed.
     """

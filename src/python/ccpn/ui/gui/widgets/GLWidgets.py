@@ -61,6 +61,9 @@ REGION_COLOURS = {
 
 
 class GuiNdWidget(CcpnGLWidget):
+
+  is1D = False
+
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(GuiNdWidget, self).__init__(parent=parent,
                                       mainWindow=mainWindow,
@@ -74,6 +77,7 @@ class Gui1dWidget(CcpnGLWidget):
   YAXISUSEEFORMAT = True
   INVERTYAXIS = False
   AXISLOCKEDBUTTON = False
+  is1D = True
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(Gui1dWidget, self).__init__(parent=parent,

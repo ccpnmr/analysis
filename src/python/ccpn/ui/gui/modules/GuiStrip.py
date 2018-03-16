@@ -429,7 +429,7 @@ class GuiStrip(Frame):
 
     try:
       self._testCcpnOpenGLWidget.newTrace()
-    except:
+    except Exception as es:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
     return
@@ -474,7 +474,7 @@ class GuiStrip(Frame):
   def removePhasingTraces(self):
 
     try:
-      self._testCcpnOpenGLWidget.removeTraces()
+      self._testCcpnOpenGLWidget.clearStaticTraces()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -528,6 +528,11 @@ class GuiStrip(Frame):
     for spectrumView in self.spectrumViews:
       spectrumView._turnOnPhasing()
 
+    # make sure that all traces are clear
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
+
   def turnOffPhasing(self):
 
     self.hPhasingPivot.setVisible(False)
@@ -535,6 +540,11 @@ class GuiStrip(Frame):
 
     for spectrumView in self.spectrumViews:
       spectrumView._turnOffPhasing()
+
+    # make sure that all traces are clear
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
 
   def _changedPhasingDirection(self):
 

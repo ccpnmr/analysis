@@ -160,6 +160,7 @@ class GLNotifier(QtWidgets.QWidget):
   GLTOPAXISVALUE = 'topAxis'
   GLLEFTAXISVALUE = 'leftAxis'
   GLRIGHTAXISVALUE = 'rightAxis'
+  GLCLEARPHASING = 'clearPhasing'
   GLCONTOURS = 'updateContours'
   GLHIGHLIGHTPEAKS = 'glHighlightPeaks'
   GLALLPEAKS = 'glAllPeaks'
@@ -4329,6 +4330,54 @@ void main()
       GL.glEnd()
       GL.glDisable(GL.GL_BLEND)
 
+  def _newStatic1DTraceData(self, spectrumView, tracesDict,
+                            point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
+                            ph0=None, ph1=None, pivot=None):
+
+    try:
+      pointInt = [1 + int(pnt + 0.5) for pnt in point]
+      data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
+      preData = data
+
+      if ph0 is not None and ph1 is not None and pivot is not None:
+        preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
+
+      x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency)])
+      # y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
+      #     np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
+
+      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+      tracesDict.append(GLVertexArray(numLists=1,
+                                      renderMode=GLRENDERMODE_REBUILD,
+                                      blendMode=False,
+                                      drawMode=GL.GL_LINE_STRIP,
+                                      dimension=2,
+                                      GLContext=self))
+
+      numVertices = len(x)
+      hSpectrum = tracesDict[-1]
+      hSpectrum.indices = numVertices
+      hSpectrum.numVertices = numVertices
+      hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+      hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+      hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+      hSpectrum.vertices[::2] = x
+      hSpectrum.vertices[1::2] = preData
+
+      # store the pre-phase data
+      hSpectrum.data = data
+      hSpectrum.values = [spectrumView, point, xDataDim,
+                          xMinFrequency, xMaxFrequency,
+                          xNumPoints, positionPixel]
+      hSpectrum.spectrumView = spectrumView
+
+    except Exception as es:
+      tracesDict = []
+
   def _newStaticHTraceData(self, spectrumView, tracesDict,
                             point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
                             ph0=None, ph1=None, pivot=None):
@@ -4372,6 +4421,7 @@ void main()
       hSpectrum.values = [spectrumView, point, xDataDim,
                           xMinFrequency, xMaxFrequency,
                           xNumPoints, positionPixel]
+      hSpectrum.spectrumView = spectrumView
 
     except Exception as es:
       tracesDict = []
@@ -4419,6 +4469,7 @@ void main()
       vSpectrum.values = [spectrumView, point, yDataDim,
                           yMinFrequency, yMaxFrequency,
                           yNumPoints, positionPixel]
+      vSpectrum.spectrumView = spectrumView
 
     except Exception as es:
       tracesDict = []
@@ -4542,11 +4593,6 @@ void main()
         self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel)
         self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
-  def removeTraces(self):
-    # remove all static traces
-    self._staticHTraces = []
-    self._staticVTraces = []
-
   def newTrace(self):
     position = [self.cursorCoordinate[0], self.cursorCoordinate[1]]     #list(cursorPosition)
     for axis in self._orderedAxes[2:]:
@@ -4570,13 +4616,18 @@ void main()
         axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
         pivot = spectrumView.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
 
-        inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
-          = spectrumView._getTraceParams(position)
-
-        if direction == 0:
-          self._newStaticHTraceData(spectrumView, self._staticHTraces, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, ph0, ph1, pivot)
+        if self.is1D:
+          inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints = spectrumView._getTraceParams(position)
+          self._newStatic1DTraceData(spectrumView, self._staticHTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
+                                    xNumPoints, positionPixel, ph0, ph1, pivot)
         else:
-          self._newStaticVTraceData(spectrumView, self._staticVTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
+          inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints\
+            = spectrumView._getTraceParams(position)
+
+          if direction == 0:
+            self._newStaticHTraceData(spectrumView, self._staticHTraces, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, ph0, ph1, pivot)
+          else:
+            self._newStaticVTraceData(spectrumView, self._staticVTraces, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
 
   def clearStaticTraces(self):
     self._staticVTraces = []
@@ -4603,7 +4654,12 @@ void main()
       # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
       # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
 
+      deleteHList = []
       for hTrace in self._staticHTraces:
+        if hTrace.spectrumView and hTrace.spectrumView.isDeleted:
+          deleteHList.append(hTrace)
+          continue
+
         if hTrace.renderMode == GLRENDERMODE_RESCALE:
           hTrace.renderMode = GLRENDERMODE_DRAW
 
@@ -4617,12 +4673,23 @@ void main()
 
           preData = Phasing.phaseRealData(hTrace.data, ph0, ph1, pivot)
 
-          y = values[6][1] + values[0]._traceScale * (self.axisT - self.axisB) * \
-              np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
+          if self.is1D:
+            hTrace.vertices[1::2] = preData
+          else:
+            y = values[6][1] + values[0]._traceScale * (self.axisT - self.axisB) * \
+                np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
 
-          hTrace.vertices[1::2] = y
+            hTrace.vertices[1::2] = y
 
+      for dd in deleteHList:
+        self._staticHTraces.remove(dd)
+
+      deleteVList = []
       for vTrace in self._staticVTraces:
+        if vTrace.spectrumView and vTrace.spectrumView.isDeleted:
+          deleteVList.append(vTrace)
+          continue
+
         if vTrace.renderMode == GLRENDERMODE_RESCALE:
           vTrace.renderMode = GLRENDERMODE_DRAW
 
@@ -4636,6 +4703,9 @@ void main()
               np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
 
           vTrace.vertices[::2] = x
+
+      for dd in deleteVList:
+        self._staticVTraces.remove(dd)
 
   def drawTraces(self):
     if self._parent.isDeleted:
@@ -4653,7 +4723,6 @@ void main()
         for vTrace in self._vTraces.keys():
           self._vTraces[vTrace].drawIndexArray()
 
-    # TODO:ED if phasing mode then draw horizontal and vertical traces that are fixed position
     phasingFrame = self._parent.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible():
 
@@ -4668,6 +4737,7 @@ void main()
       direction = phasingFrame.getDirection()
       pivotPpm = phasingFrame.pivotEntry.get()
 
+      # this is deprecated GL
       if direction == 0:
         GL.glColor4f(0.1, 0.5, 0.1, 1.0)
         GL.glLineStipple(1, 0xF0F0)
@@ -4679,6 +4749,7 @@ void main()
         GL.glEnd()
 
         GL.glDisable(GL.GL_LINE_STIPPLE)
+
       else:
         GL.glColor4f(0.1, 0.5, 0.1, 1.0)
         GL.glLineStipple(1, 0xF0F0)
@@ -5373,6 +5444,10 @@ void main()
           #     ils.integralListView.buildPeakLists = True
 
           # self._processPeakNotifier(targets)
+
+        if GLNotifier.GLCLEARPHASING in triggers:
+          if self._parent.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
+            self.clearStaticTraces()
 
     # repaint
     self.update()

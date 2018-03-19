@@ -298,5 +298,17 @@ class GuiStrip1d(GuiStrip):
   def _restoreStacked1DSpectra(self):
     for spectrumView in self.spectrumViews:
       spectrumView.plot.curve.setData(spectrumView.spectrum.positions, spectrumView.spectrum.intensities)
-    for peakListView in self.peakListViews:
-      peakListView.setVisible(True)
+    # for peakListView in self.peakListViews:
+    #   peakListView.setVisible(True)
+
+  def toggleHorizontalTrace(self):
+    """
+    Toggles whether or not horizontal trace is displayed.
+    """
+    pass
+
+  def toggleVerticalTrace(self):
+    """
+    Toggles whether or not vertical trace is displayed.
+    """
+    pass

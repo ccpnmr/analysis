@@ -95,7 +95,7 @@ class PhasingFrame(Frame):
 
     self.PivotLabel = Label(self, text='pivot', grid=(0,7))
     self.PivotLabel.setFixedWidth(35)
-    self.pivotEntry = FloatEntry(self, callback=lambda value: self.returnCallback(), decimals=2, grid=(0,8))
+    self.pivotEntry = DoubleSpinbox(self, callback=lambda value: self.returnCallback(), decimals=3, step=0.1, grid=(0,8))
     self.pivotEntry.setFixedWidth(60)
     
     if includeDirection:
@@ -105,6 +105,7 @@ class PhasingFrame(Frame):
       self.directionList = None
 
     self.applyButton = Button(self, grid=(0, 10), text='Apply', callback=self._apply)
+    self.applyButton.setEnabled(False)
 
     self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
 

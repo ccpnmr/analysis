@@ -522,8 +522,28 @@ class GuiStrip(Frame):
 
   def turnOnPhasing(self):
 
+    phasingFrame = self.spectrumDisplay.phasingFrame
     self.hPhasingPivot.setVisible(True)
     self.vPhasingPivot.setVisible(True)
+
+    if self.spectrumDisplay.is1D:
+
+      self._hTraceActive = True
+      self._vTraceActive = False
+      self._newConsoleDirection = 0
+    else:
+      # TODO:ED remember trace direction
+      self._hTraceActive = self.hTraceAction.isChecked()
+      self._vTraceActive = self.vTraceAction.isChecked()
+
+      # set to the first active or the remembered phasingDirection
+      self._newConsoleDirection = phasingFrame.getDirection()
+      if self._hTraceActive:
+        self._newConsoleDirection = 0
+        phasingFrame.directionList.setIndex(0)
+      elif self._vTraceActive:
+        self._newConsoleDirection = 1
+        phasingFrame.directionList.setIndex(1)
 
     for spectrumView in self.spectrumViews:
       spectrumView._turnOnPhasing()
@@ -531,9 +551,47 @@ class GuiStrip(Frame):
     # make sure that all traces are clear
     from ccpn.util.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
-    GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
+    if self.spectrumDisplay.is1D:
+      GLSignals.emitEvent(triggers=[GLNotifier.GLADD1DPHASING], display=self.spectrumDisplay)
+    else:
+      GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
+
+    # TODO:ED remember direction
+    self._newPosition = phasingFrame.pivotEntry.get()
+    self._infiniteLine = self._testCcpnOpenGLWidget.addInfiniteLine(colour='green', movable=True, lineStyle='dashed')
+
+    if self._newConsoleDirection == 0:
+      self._infiniteLine.orientation = ('v')
+
+      # TODO:ED don't need as menu will change
+      # self.hTraceAction.setChecked(True)
+      # self.vTraceAction.setChecked(False)
+      if not self.spectrumDisplay.is1D:
+        self._testCcpnOpenGLWidget.updateHTrace = True
+        self._testCcpnOpenGLWidget.updateVTrace = False
+    else:
+      self._infiniteLine.orientation = ('h')
+      # self.hTraceAction.setChecked(False)
+      # self.vTraceAction.setChecked(True)
+      if not self.spectrumDisplay.is1D:
+        self._testCcpnOpenGLWidget.updateHTrace = False
+        self._testCcpnOpenGLWidget.updateVTrace = True
+
+    self._infiniteLine.valuesChanged.connect(self._newPositionLineCallback)
+    self._infiniteLine.setValue(self._newPosition)
+    phasingFrame.pivotEntry.valueChanged.connect(self._newPositionPivotCallback)
+
+  def _newPositionLineCallback(self):
+    phasingFrame = self.spectrumDisplay.phasingFrame
+    self._newPosition = self._infiniteLine.values[0]
+    phasingFrame.pivotEntry.setValue(self._newPosition)
+
+  def _newPositionPivotCallback(self, value):
+    self._newPosition = value
+    self._infiniteLine.setValue(value)
 
   def turnOffPhasing(self):
+    phasingFrame = self.spectrumDisplay.phasingFrame
 
     self.hPhasingPivot.setVisible(False)
     self.vPhasingPivot.setVisible(False)
@@ -545,6 +603,20 @@ class GuiStrip(Frame):
     from ccpn.util.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
+
+    self._testCcpnOpenGLWidget.removeInfiniteLine(self._infiniteLine)
+    self._infiniteLine.valuesChanged.disconnect(self._newPositionLineCallback)
+    phasingFrame.pivotEntry.valueChanged.disconnect(self._newPositionPivotCallback)
+
+    if self.spectrumDisplay.is1D:
+      self._testCcpnOpenGLWidget.updateHTrace = False
+      self._testCcpnOpenGLWidget.updateVTrace = False
+    else:
+      # TODO:ED remember trace direction
+      self.hTraceAction.setChecked(self._hTraceActive)
+      self.vTraceAction.setChecked(self._vTraceActive)
+      self._testCcpnOpenGLWidget.updateHTrace = self._hTraceActive
+      self._testCcpnOpenGLWidget.updateVTrace = self._vTraceActive
 
   def _changedPhasingDirection(self):
 
@@ -558,9 +630,24 @@ class GuiStrip(Frame):
     if direction == 0:
       self.hPhasingPivot.setVisible(True)
       self.vPhasingPivot.setVisible(False)
+      # self._infiniteLine.orientation = ('v')
     else:
       self.hPhasingPivot.setVisible(False)
       self.vPhasingPivot.setVisible(True)
+      # self._infiniteLine.orientation = ('h')
+
+    if direction == 0:
+      self._infiniteLine.orientation = ('v')
+      self.hTraceAction.setChecked(True)
+      self.vTraceAction.setChecked(False)
+      self._testCcpnOpenGLWidget.updateHTrace = True
+      self._testCcpnOpenGLWidget.updateVTrace = False
+    else:
+      self._infiniteLine.orientation = ('h')
+      self.hTraceAction.setChecked(False)
+      self.vTraceAction.setChecked(True)
+      self._testCcpnOpenGLWidget.updateHTrace = False
+      self._testCcpnOpenGLWidget.updateVTrace = True
 
     phasingFrame.slider0.setValue(self._storedPhasingData[direction][0])
     phasingFrame.slider1.setValue(self._storedPhasingData[direction][1])
@@ -572,7 +659,6 @@ class GuiStrip(Frame):
 
     for spectrumView in self.spectrumViews:
       spectrumView._changedPhasingDirection()
-
 
   def _updatePhasing(self):
 

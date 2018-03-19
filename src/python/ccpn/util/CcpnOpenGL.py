@@ -160,6 +160,7 @@ class GLNotifier(QtWidgets.QWidget):
   GLTOPAXISVALUE = 'topAxis'
   GLLEFTAXISVALUE = 'leftAxis'
   GLRIGHTAXISVALUE = 'rightAxis'
+  GLADD1DPHASING = 'add1DPhasing'
   GLCLEARPHASING = 'clearPhasing'
   GLCONTOURS = 'updateContours'
   GLHIGHLIGHTPEAKS = 'glHighlightPeaks'
@@ -379,12 +380,14 @@ class CcpnGLWidget(QOpenGLWidget):
       self.gridColour = (0.5, 0.0, 0.0, 1.0)    #'#080000'
       self.highlightColour = (0.23, 0.23, 1.0, 1.0)    #'#3333ff'
       self._labellingColour = (0.05, 0.05, 0.05, 1.0)
+      self._phasingTraceColour = (0.2, 0.2, 0.2, 1.0)
     else:
       self.background = (0.05, 0.05, 0.05, 1.0)    #'#080000'
       self.foreground = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
       self.gridColour = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
       self.highlightColour = (0.2, 1.0, 0.3, 1.0)   #'#00ff00'
       self._labellingColour = (1.0, 1.0, 1.0, 1.0)
+      self._phasingTraceColour = (0.8, 0.8, 0.8, 1.0)
 
     self._preferences = self._parent.application.preferences.general
 
@@ -1457,6 +1460,8 @@ void main()
     self._staticHTraces = []
     self._staticVTraces = []
     self._stackingValue = None
+    self._hTraceVisible = False
+    self._vTraceVisible = False
 
     # self._hTrace = GLVertexArray(numLists=1,
     #                                 renderMode=GLRENDERMODE_IGNORE,
@@ -3127,7 +3132,7 @@ void main()
     self.drawSelectionBox()
     self.drawMouseMoveLine()
 
-    if self._crossHairVisible:
+    if self._crossHairVisible and not self.updateHTrace and not self.updateVTrace:
       self.drawCursors()
 
     if self._successiveClicks:
@@ -4399,10 +4404,10 @@ void main()
       # y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
       #     np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
-      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      # colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      # colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      # colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      # colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
       tracesDict.append(GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
@@ -4416,7 +4421,7 @@ void main()
       hSpectrum.indices = numVertices
       hSpectrum.numVertices = numVertices
       hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-      hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+      hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
       hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
       hSpectrum.vertices[::2] = x
       hSpectrum.vertices[1::2] = preData
@@ -4447,10 +4452,10 @@ void main()
       y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
           np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
-      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      # colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      # colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      # colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      # colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
       tracesDict.append(GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
@@ -4464,7 +4469,7 @@ void main()
       hSpectrum.indices = numVertices
       hSpectrum.numVertices = numVertices
       hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-      hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+      hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
       hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
       hSpectrum.vertices[::2] = x
       hSpectrum.vertices[1::2] = y
@@ -4495,10 +4500,10 @@ void main()
       x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
           np.array([preData[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
 
-      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      # colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      # colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      # colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      # colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
       tracesDict.append(GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
@@ -4512,7 +4517,7 @@ void main()
       vSpectrum.indices = numVertices
       vSpectrum.numVertices = numVertices
       vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-      vSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
+      vSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
       vSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
       vSpectrum.vertices[::2] = x
       vSpectrum.vertices[1::2] = y
@@ -4790,30 +4795,30 @@ void main()
       direction = phasingFrame.getDirection()
       pivotPpm = phasingFrame.pivotEntry.get()
 
-      # this is deprecated GL
-      if direction == 0:
-        GL.glColor4f(0.1, 0.5, 0.1, 1.0)
-        GL.glLineStipple(1, 0xF0F0)
-        GL.glEnable(GL.GL_LINE_STIPPLE)
-
-        GL.glBegin(GL.GL_LINES)
-        GL.glVertex2d(pivotPpm, self.axisT)
-        GL.glVertex2d(pivotPpm, self.axisB)
-        GL.glEnd()
-
-        GL.glDisable(GL.GL_LINE_STIPPLE)
-
-      else:
-        GL.glColor4f(0.1, 0.5, 0.1, 1.0)
-        GL.glLineStipple(1, 0xF0F0)
-        GL.glEnable(GL.GL_LINE_STIPPLE)
-
-        GL.glBegin(GL.GL_LINES)
-        GL.glVertex2d(self.axisL, pivotPpm)
-        GL.glVertex2d(self.axisR, pivotPpm)
-        GL.glEnd()
-
-        GL.glDisable(GL.GL_LINE_STIPPLE)
+      # # this is deprecated GL
+      # if direction == 0:
+      #   GL.glColor4f(0.1, 0.5, 0.1, 1.0)
+      #   GL.glLineStipple(1, 0xF0F0)
+      #   GL.glEnable(GL.GL_LINE_STIPPLE)
+      #
+      #   GL.glBegin(GL.GL_LINES)
+      #   GL.glVertex2d(pivotPpm, self.axisT)
+      #   GL.glVertex2d(pivotPpm, self.axisB)
+      #   GL.glEnd()
+      #
+      #   GL.glDisable(GL.GL_LINE_STIPPLE)
+      #
+      # else:
+      #   GL.glColor4f(0.1, 0.5, 0.1, 1.0)
+      #   GL.glLineStipple(1, 0xF0F0)
+      #   GL.glEnable(GL.GL_LINE_STIPPLE)
+      #
+      #   GL.glBegin(GL.GL_LINES)
+      #   GL.glVertex2d(self.axisL, pivotPpm)
+      #   GL.glVertex2d(self.axisR, pivotPpm)
+      #   GL.glEnd()
+      #
+      #   GL.glDisable(GL.GL_LINE_STIPPLE)
 
   def initialiseTraces(self):
     # set up the arrays and dimension for showing the horizontal/vertical traces
@@ -5501,6 +5506,11 @@ void main()
         if GLNotifier.GLCLEARPHASING in triggers:
           if self._parent.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
             self.clearStaticTraces()
+
+        if GLNotifier.GLADD1DPHASING in triggers:
+          if self._parent.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
+            self.clearStaticTraces()
+            self.newTrace()
 
     # repaint
     self.update()
@@ -6726,13 +6736,13 @@ class GLRegion(QtWidgets.QWidget):
     self._orientation = orientation
 
     if orientation == 'h':
-      self._axisCode = self.parent._axisCodes[1]
+      self._axisCode = self.parent.axisCodes[1]
     elif orientation == 'v':
-      self._axisCode = self.parent._axisCodes[0]
+      self._axisCode = self.parent.axisCodes[0]
     else:
       if not self._axisCode:
         axisIndex = None
-        for ps, psCode in enumerate(self.parent._axisCodes[0:2]):
+        for ps, psCode in enumerate(self.parent.axisCodes[0:2]):
           if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
 
             if self._axisCode[0] == psCode[0]:

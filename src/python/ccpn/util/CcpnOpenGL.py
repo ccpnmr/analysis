@@ -323,6 +323,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.highlighted = False
     self._drawSelectionBox = False
+    self._drawMouseMoveLine = False
     self._selectionMode = 0
     self._startCoordinate = None
     self._endCoordinate = None
@@ -1813,6 +1814,7 @@ void main()
   def _clearAndUpdate(self):
     self._clearKeys()
     self._drawSelectionBox = False
+    self._drawMouseMoveLine = False
     self._dragRegion = (None, None, None)
     self.update()
 
@@ -1941,7 +1943,8 @@ void main()
       if self._isSHIFT == '' and self._isCTRL == '' and self._isALT == '' and self._isMETA == '':
 
         # drag a peak
-        pass
+        self._endCoordinate = self.cursorCoordinate
+        self._drawMouseMoveLine = True
 
 
     self.GLSignals._emitMouseMoved(source=self, coords=self.cursorCoordinate, mouseMovedDict=mouseMovedDict)
@@ -3122,6 +3125,7 @@ void main()
     currentShader = self._shaderProgram1.makeCurrent()
 
     self.drawSelectionBox()
+    self.drawMouseMoveLine()
 
     if self._crossHairVisible:
       self.drawCursors()
@@ -4365,6 +4369,14 @@ void main()
       GL.glVertex2d(self._dragStart[0], self._dragStart[1])
       GL.glEnd()
       GL.glDisable(GL.GL_BLEND)
+
+  def drawMouseMoveLine(self):
+    if self._drawMouseMoveLine:
+      GL.glColor4f(0.8, 0.2, 0.9, 1.0)
+      GL.glBegin(GL.GL_LINES)
+      GL.glVertex2d(self._startCoordinate[0], self._startCoordinate[1])
+      GL.glVertex2d(self.cursorCoordinate[0], self.cursorCoordinate[1])
+      GL.glEnd()
 
   def _newStatic1DTraceData(self, spectrumView, tracesDict,
                             point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,

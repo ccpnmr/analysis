@@ -1003,13 +1003,15 @@ class GuiStrip(Frame):
     countSpvs = len(spectrumViews)
     if countSpvs > 0:
       visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
-      if len(visibleSpectrumViews) == 1:
-        currentIndex = spectrumViews.index(visibleSpectrumViews[0])
+      if len(visibleSpectrumViews) > 0:
+        currentIndex = spectrumViews.index(visibleSpectrumViews[-1])
         if countSpvs > currentIndex + 1:
-          visibleSpectrumViews[0].setVisible(False)
+          for visibleSpectrumView in visibleSpectrumViews:
+            visibleSpectrumView.setVisible(False)
           spectrumViews[currentIndex + 1].setVisible(True)
         elif countSpvs == currentIndex + 1: #starts again from the first
-          visibleSpectrumViews[0].setVisible(False)
+          for visibleSpectrumView in visibleSpectrumViews:
+            visibleSpectrumView.setVisible(False)
           spectrumViews[0].setVisible(True)
       else:
         getLogger().warning('Option available if only one spectrum per time is toggled on')
@@ -1021,13 +1023,14 @@ class GuiStrip(Frame):
     countSpvs = len(spectrumViews)
     if countSpvs > 0:
       visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
-      if len(visibleSpectrumViews) == 1:
+      if len(visibleSpectrumViews) >0:
         currentIndex = spectrumViews.index(visibleSpectrumViews[0])
         # if countSpvs > currentIndex + 1:
-        visibleSpectrumViews[0].setVisible(False)
+        for visibleSpectrumView in visibleSpectrumViews:
+          visibleSpectrumView.setVisible(False)
         spectrumViews[currentIndex - 1].setVisible(True)
-      else:
-        getLogger().warning('Option available if only one spectrum per time is toggled on')
+      # else:
+      #   getLogger().warning('Option available if only one spectrum per time is toggled on')
     else:
       getLogger().warning('No spectra displayed')
 

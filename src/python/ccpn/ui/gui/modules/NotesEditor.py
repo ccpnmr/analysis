@@ -35,6 +35,8 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Note import Note
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 logger = getLogger()
 
@@ -109,6 +111,36 @@ class NotesEditorModule(CcpnModule):
     if note is not None:
       self.selectNote(note)
 
+    self.droppedNotifier = GuiNotifier(self.mainWidget,
+                                     [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                     self._processDroppedItems)
+
+  def _processDroppedItems(self, data):
+    """
+    CallBack for Drop events
+    """
+    pids = data.get('pids', [])
+    from ccpn.ui.gui.widgets.SideBar import _openItemObject
+    objs = [self.project.getByPid(pid) for pid in pids]
+
+    selectableObjects = [obj for obj in objs if isinstance(obj, Note)]
+    others = [obj for obj in objs if not isinstance(obj, Note)]
+    if len(selectableObjects) > 0:
+      self.selectNote(selectableObjects[0])
+      _openItemObject(self.mainWindow, selectableObjects[1:])
+
+    else:
+      from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+      othersClassNames = list(set([obj.className for obj in others]))
+      if len(othersClassNames) > 0:
+        if len(othersClassNames) == 1:
+          title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
+        else:
+          title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
+        openNew = showYesNo(title, msg)
+        if openNew:
+          _openItemObject(self.mainWindow, others)
+
   def selectNote(self, note=None):
     """
     Manually select a Note from the pullDown
@@ -144,6 +176,8 @@ class NotesEditorModule(CcpnModule):
     """
     if self._noteNotifier is not None:
       self._noteNotifier.unRegister()
+    if self.droppedNotifier is not None:
+      self.droppedNotifier.unRegister()
 
   def _applyNote(self):
     """

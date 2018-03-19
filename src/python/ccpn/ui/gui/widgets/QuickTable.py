@@ -212,6 +212,7 @@ class QuickTable(TableWidget, Base):
     self._rowNotifier = None
     self._cellNotifiers = []
     self._selectCurrentNotifier = None
+    self.droppedNotifier = None
     self._icons = [self.ICON_FILE]
     self._stretchLastSection = stretchLastSection
 
@@ -1324,6 +1325,8 @@ class QuickTable(TableWidget, Base):
     self._cellNotifiers = []
     if self._selectCurrentNotifier is not None:
       self._selectCurrentNotifier.unRegister()
+    if self.droppedNotifier is not None:
+      self.droppedNotifier.unRegister()
 
   # def dragEnterEvent(self, event):
   #   ccpnmrJsonData = 'ccpnmr-json'

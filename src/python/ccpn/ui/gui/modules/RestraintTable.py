@@ -294,7 +294,7 @@ class RestraintTable(QuickTable):
 
   def _selectRestraintList(self, restraintList=None):
     """
-    Manually select a NmrChain from the pullDown
+    Manually select a restraintList from the pullDown
     """
     if restraintList is None:
       logger.debug('select: No RestraintList selected')
@@ -306,8 +306,8 @@ class RestraintTable(QuickTable):
       else:
         for widgetObj in self.rtWidget.textList:
           if restraintList.pid == widgetObj:
-            self.nmrChain = restraintList
-            self.rtWidget.select(self.nmrChain.pid)
+            self.restraintList = restraintList
+            self.rtWidget.select(self.restraintList.pid)
 
   def displayTableForRestraint(self, restraintList):
     """

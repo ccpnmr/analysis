@@ -374,16 +374,7 @@ class QuickTableStructure(QuickTable):
         # item.textChanged.connect(partial(self._changeMe, item))
         self.editItem(item)         # enter the editing mode
 
-    self.droppedNotifier = GuiNotifier(self,
-                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                       self._processDroppedItems)
 
-  def _processDroppedItems(self, data):
-    """
-    CallBack for Drop events
-    """
-    pids = data.get('pids', [])
-    self._handleDroppedItems(pids, StructureEnsemble, self.stWidget)
 
 class StructureTable(QuickTableStructure):
   """
@@ -506,6 +497,17 @@ class StructureTable(QuickTableStructure):
     # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
     #
     # # self.setData(data)
+
+    self.droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self._processDroppedItems)
+
+  def _processDroppedItems(self, data):
+    """
+    CallBack for Drop events
+    """
+    pids = data.get('pids', [])
+    self._handleDroppedItems(pids, StructureEnsemble, self.stWidget)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -949,25 +951,26 @@ class StructureTable(QuickTableStructure):
     rename calls on name
     change calls on any other attribute
     """
-    self._clearNotifiers()
+    # self._clearNotifiers()
     self._ensembleNotifier = Notifier(self._project
                                       , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                       , StructureEnsemble.__name__
                                       , self._updateCallback
                                       , onceOnly=True)
 
-  def _clearNotifiers(self):
-    """
-    clean up the notifiers
-    """
-    if self._ensembleNotifier is not None:
-      self._ensembleNotifier.unRegister()
+  # def _clearNotifiers(self):
+  #   """
+  #   clean up the notifiers
+  #   """
+  #   if self._ensembleNotifier is not None:
+  #     self._ensembleNotifier.unRegister()
+
 
   def _close(self):
     """
     Cleanup the notifiers when the window is closed
     """
-    self._clearNotifiers()
+    self.clearTableNotifiers()
 
   # def resizeEvent(self, event):
   #   getLogger().info('table.resize '+str(self.resizeCount))

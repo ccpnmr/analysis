@@ -4340,7 +4340,7 @@ void main()
       self._dragStart = self._startCoordinate
       self._dragEnd = self._endCoordinate
 
-      if self._selectionMode == 1:    # yellow
+      if self._selectionMode == 1:        # yellow
         GL.glColor4f(0.8, 0.9, 0.2, 0.3)
       elif self._selectionMode == 2:      # purple
         GL.glColor4f(0.8, 0.2, 0.9, 0.3)
@@ -4354,7 +4354,7 @@ void main()
       GL.glVertex2d(self._dragStart[0], self._dragEnd[1])
       GL.glEnd()
 
-      if self._selectionMode == 1:    # yellow
+      if self._selectionMode == 1:        # yellow
         GL.glColor4f(0.8, 0.9, 0.2, 0.9)
       elif self._selectionMode == 2:      # purple
         GL.glColor4f(0.8, 0.2, 0.9, 0.9)
@@ -4383,6 +4383,11 @@ void main()
                             ph0=None, ph1=None, pivot=None):
 
     try:
+      # ignore for 1D if already in the traces list
+      for thisTrace in tracesDict:
+        if spectrumView == thisTrace.spectrumView:
+          return
+
       pointInt = [1 + int(pnt + 0.5) for pnt in point]
       data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
       preData = data

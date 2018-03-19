@@ -2185,6 +2185,7 @@ void main()
                                            np.array([index, index+1, index+2, index+3], dtype=np.uint))
             drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, fade] * numPoints
 
+          # list MAY contain out of plane peaks
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
                                       indexPtr, len(drawList.indices)]
           indexPtr = len(drawList.indices)

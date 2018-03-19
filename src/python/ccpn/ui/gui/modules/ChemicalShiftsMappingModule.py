@@ -616,7 +616,8 @@ class ChemicalShiftsMapping(CcpnModule):
                                    disappearedObjects = self.disappereadObjects,
                                    disappearedBrush = self.disappearedPeakBrush,
                                    )
-    self.barGraphWidget.setViewBoxLimits(0, max(xs)*2, 0,  max(ys)*2)
+    if xs and ys:
+      self.barGraphWidget.setViewBoxLimits(0, max(xs)*2, 0,  max(ys)*2)
     # self.splitter.addWidget(self.barGraphWidget)
     # self._colourDeltaShiftTableValues()
 
@@ -647,14 +648,15 @@ class ChemicalShiftsMapping(CcpnModule):
 
   # def _customActionCallBack(self, nmrResidue, *args):
   def _customActionCallBack(self, data):
-    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio
+    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
 
     nmrResidue = data[Notifier.OBJECT]
 
     if nmrResidue:
       xPos = int(nmrResidue.sequenceCode)
       yPos = nmrResidue._deltaShift
-      self.barGraphWidget.customViewBox.setRange(xRange=[xPos-10, xPos+10], yRange=[0, yPos],)
+      if xPos and yPos:
+        self.barGraphWidget.customViewBox.setRange(xRange=[xPos-10, xPos+10], yRange=[0, yPos],)
       self.application.ui.mainWindow.clearMarks()
       if self.current.strip is not None:
         strip = self.current.strip
@@ -667,8 +669,19 @@ class ChemicalShiftsMapping(CcpnModule):
                                       widths=_getCurrentZoomRatio(strip.viewRange()),
                                       markPositions=True
                                       )
+        else:
+          navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
+                                        widths=_getCurrentZoomRatio(strip.viewRange()),
+                                        markPositions=True)
       else:
         getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
+
+  def _isInt(self, s):
+    try:
+      int(s)
+      return True
+    except ValueError:
+      return False
 
   def updateModule(self):
 
@@ -681,16 +694,17 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
+          if self._isInt(nmrResidue.sequenceCode):
 
-          spectra = self.spectraSelectionWidget.getSelections()
-          self._updatedPeakCount(nmrResidue, spectra)
-          if nmrResidue._includeInDeltaShift:
-            nmrResidue.spectraCount = len(spectra)
-            nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
-            nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
-            nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
-          else:
-            nmrResidue._deltaShift = None
+            spectra = self.spectraSelectionWidget.getSelections()
+            self._updatedPeakCount(nmrResidue, spectra)
+            if nmrResidue._includeInDeltaShift:
+              nmrResidue.spectraCount = len(spectra)
+              nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
+              nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
+              nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
+            else:
+              nmrResidue._deltaShift = None
         self.updateTable(self.nmrResidueTable._nmrChain)
         self.updateBarGraph()
 

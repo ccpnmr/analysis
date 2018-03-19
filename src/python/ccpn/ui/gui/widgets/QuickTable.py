@@ -54,6 +54,9 @@ from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets.TableModel import ObjectTableModel
 from ccpn.ui.gui.widgets.SearchWidget import attachSearchWidget
 from ccpn.core.lib.Notifiers import Notifier
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
 from functools import partial
 from collections import OrderedDict
 
@@ -218,10 +221,45 @@ class QuickTable(TableWidget, Base):
     self._parent.layout().setVerticalSpacing(0)
 
     self.setDefaultTableData()
+    # self.droppedNotifier = GuiNotifier(self,
+    #                                    [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+    #                                    self._processDroppedItems)
   #
   # def _cellClicked(self, row, col):
   #   self._currentRow = row
   #   self._currentCol = col
+
+  def _handleDroppedItems(self, pids, objType, pulldown):
+    '''
+
+    :param pids: the selected objects pids
+    :param objType: the instance of the obj to handle. Eg. PeakList
+    :param pulldown: the pulldown of the module wich updates the table
+    :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
+    If multiple different obj instances, then asks first.
+    '''
+
+    from ccpn.ui.gui.widgets.SideBar import _openItemObject
+    objs = [self.project.getByPid(pid) for pid in pids]
+
+    selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
+    others = [obj for obj in objs if not isinstance(obj, objType)]
+    if len(selectableObjects) > 0:
+      pulldown.select(selectableObjects[0].pid)
+      _openItemObject(self.mainWindow, selectableObjects[1:])
+
+    else:
+      from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+      othersClassNames = list(set([obj.className for obj in others]))
+      if len(othersClassNames) > 0:
+        if len(othersClassNames)==1:
+          title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' %''.join(othersClassNames)
+        else:
+          title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
+        openNew = showYesNo(title, msg)
+        if openNew:
+          _openItemObject(self.mainWindow, others)
+
 
   def _cellClicked(self, item):
     if item:

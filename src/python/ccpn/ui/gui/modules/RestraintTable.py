@@ -37,6 +37,8 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintsPulldown
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Restraint import Restraint
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
@@ -271,6 +273,16 @@ class RestraintTable(QuickTable):
                            , pullDownWidget=self.RLcolumns
                            , callBackClass=Restraint
                            , selectCurrentCallBack=None)
+    self.droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self._processDroppedItems)
+
+  def _processDroppedItems(self, data):
+    """
+    CallBack for Drop events
+    """
+    pids = data.get('pids', [])
+    self._handleDroppedItems(pids, RestraintList, self.rtWidget)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """

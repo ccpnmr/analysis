@@ -40,7 +40,8 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Logging import getLogger
-
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 logger = getLogger()
 
 UNITS = ['ppm', 'Hz', 'point']
@@ -185,6 +186,21 @@ class PeakListTableWidget(QuickTable):
                            , pullDownWidget=self.pLwidget
                            , callBackClass=Peak
                            , selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback)
+
+    self.droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self._processDroppedItems)
+
+
+
+  def _processDroppedItems(self, data):
+    """
+    CallBack for Drop events
+    """
+    pids = data.get('pids', [])
+    self._handleDroppedItems(pids, PeakList, self.pLwidget)
+
+
 
   def _getTableColumns(self, peakList):
     '''Add default columns  plus the ones according with peakList.spectrum dimension

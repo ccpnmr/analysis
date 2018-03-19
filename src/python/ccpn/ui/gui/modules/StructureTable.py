@@ -47,6 +47,8 @@ from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.StructureEnsemble import EnsembleData
 from ccpn.ui._implementation.Module import Module
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 ALL = '<all>'
 
@@ -372,6 +374,16 @@ class QuickTableStructure(QuickTable):
         # item.textChanged.connect(partial(self._changeMe, item))
         self.editItem(item)         # enter the editing mode
 
+    self.droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self._processDroppedItems)
+
+  def _processDroppedItems(self, data):
+    """
+    CallBack for Drop events
+    """
+    pids = data.get('pids', [])
+    self._handleDroppedItems(pids, StructureEnsemble, self.stWidget)
 
 class StructureTable(QuickTableStructure):
   """

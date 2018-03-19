@@ -37,6 +37,8 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
 
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 logger = getLogger()
 ALL = '<all>'
@@ -206,6 +208,17 @@ class IntegralTable(QuickTable):
                            , pullDownWidget=self.ITcolumns
                            , callBackClass=Integral
                            , selectCurrentCallBack=self._selectOnTableCurrentIntegralsNotifierCallback)
+
+    self.droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self._processDroppedItems)
+
+  def _processDroppedItems(self, data):
+    """
+    CallBack for Drop events
+    """
+    pids = data.get('pids', [])
+    self._handleDroppedItems(pids, IntegralList, self.itWidget)
 
   def _selectIntegralList(self, integralList=None):
     """

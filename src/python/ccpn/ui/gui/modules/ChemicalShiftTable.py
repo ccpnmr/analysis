@@ -41,6 +41,8 @@ from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
 from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 logger = getLogger()
 ALL = '<all>'
@@ -289,6 +291,18 @@ class ChemicalShiftTable(QuickTable):
                            , pullDownWidget=self.CScolumns
                            , callBackClass=ChemicalShift
                            , selectCurrentCallBack=None)
+
+
+    self.droppedNotifier = GuiNotifier(self,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self._processDroppedItems)
+
+  def _processDroppedItems(self, data):
+    """
+    CallBack for Drop events
+    """
+    pids = data.get('pids', [])
+    self._handleDroppedItems(pids, ChemicalShiftList, self.ncWidget)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """

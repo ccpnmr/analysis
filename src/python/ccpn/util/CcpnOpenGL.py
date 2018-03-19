@@ -5857,10 +5857,19 @@ void main()
 
     elif shiftLeftMouse(event):
       # zoom into the region - yellow box
-      self.axisL = max(self._startCoordinate[0], self._endCoordinate[0])
-      self.axisR = min(self._startCoordinate[0], self._endCoordinate[0])
-      self.axisB = max(self._startCoordinate[1], self._endCoordinate[1])
-      self.axisT = min(self._startCoordinate[1], self._endCoordinate[1])
+      if self.INVERTXAXIS:
+        self.axisL = max(self._startCoordinate[0], self._endCoordinate[0])
+        self.axisR = min(self._startCoordinate[0], self._endCoordinate[0])
+      else:
+        self.axisL = min(self._startCoordinate[0], self._endCoordinate[0])
+        self.axisR = max(self._startCoordinate[0], self._endCoordinate[0])
+
+      if self.INVERTYAXIS:
+        self.axisB = max(self._startCoordinate[1], self._endCoordinate[1])
+        self.axisT = min(self._startCoordinate[1], self._endCoordinate[1])
+      else:
+        self.axisB = min(self._startCoordinate[1], self._endCoordinate[1])
+        self.axisT = max(self._startCoordinate[1], self._endCoordinate[1])
 
       self._resetBoxes()
 

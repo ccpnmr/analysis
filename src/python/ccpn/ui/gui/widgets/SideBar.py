@@ -514,7 +514,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def _refreshSidebarSpectra(self, dummy:Project):
     """Reset spectra in sidebar - to be called from notifiers
     """
-    list = self._saveExpandedState()
+    sideBarState = self._saveExpandedState()
 
     for spectrum in self.project.spectra:
       # self._removeItem( self.project, spectrum)
@@ -523,14 +523,14 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       for obj in spectrum.peakLists + spectrum.integralLists:
         self._createItem(obj)
 
-    self._restoreExpandedState(list)
+    self._restoreExpandedState(sideBarState)
 
   def _refreshParentNmrChain(self, nmrResidue:NmrResidue, oldPid:Pid=None):     # ejb - catch oldName
     """Reset NmrChain sidebar - needed when NmrResidue is created or renamed to trigger re-sort
 
     Replaces normal _createItem notifier for NmrResidues"""
 
-    list = self._saveExpandedState()
+    sideBarState = self._saveExpandedState()
 
     nmrChain = nmrResidue._parent
 
@@ -544,7 +544,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       for nmrAtom in nr.nmrAtoms:
         self._createItem(nmrAtom)
 
-    self._restoreExpandedState(list)
+    self._restoreExpandedState(sideBarState)
 
     # nmrChain = nmrResidue._parent     # ejb - just insert the 1 item
     # for nr in nmrChain.nmrResidues:
@@ -588,11 +588,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     NB, the clean-up of the side bar is done through notifiers
     """
     from ccpnmodel.ccpncore.memops.ApiError import ApiError
-    list = self._saveExpandedState()
-    self.project.blankNotification()
+    ll = self._saveExpandedState()
+
     for obj in objs:
       if obj:
-        try:
+        # try:
           if isinstance(obj, Spectrum):
 
             # need to delete all peakLists and integralLists first, treat as single undo
@@ -609,14 +609,62 @@ class SideBar(QtWidgets.QTreeWidget, Base):
               self.project._endCommandEchoBlock()
 
           else:
-            obj.delete()
-        # except ApiError:
-        except Exception as es:
-          showWarning('Delete', 'Object %s cannot be deleted' % obj.pid)
+            self.project._startCommandEchoBlock('_deleteItemObject')
+            try:
+              ll = self._getChildren(obj)
+              z = [i for i in self._traverse(ll)]
+              # self.project.blankNotification()
+              if len(z)>0:
+                ii = list(set([type(i) for i in z]))
+                index = {k: list(set(filter(lambda x: isinstance(x, k), z))) for k in ii}
+                for i in ii:
+                  children = index[i]
+                  if len(children)>1:
+                    self.project.blankNotification()
+                    for child in children[:-1]:
+                      if child != obj:
+                        if child is not None and not child.isDeleted:
+                          child.delete()
+                    self.project.unblankNotification()
+                    if children[-1] is not None and not children[-1].isDeleted:
+                      children[-1].delete()
+              if not obj.isDeleted:
+                obj.delete()
 
-    self.project.unblankNotification()
-    self.fillSideBar(self.project)
-    self._restoreExpandedState(list)
+            except Exception as es:
+              getLogger().warn('Delete', 'Object %s cannot be deleted' % obj.pid)
+            finally:
+
+              self.project._endCommandEchoBlock()
+
+    #  Force redrawing
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS])
+
+
+  def _traverse(self, o, tree_types=(list, tuple)):
+    '''used to flat the state in a long list '''
+    if isinstance(o, tree_types):
+      for value in o:
+        for subvalue in self._traverse(value, tree_types):
+          yield subvalue
+    else:
+      yield o
+
+  def _getChildren(self, obj, path=None):
+    "Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...] ."
+    children = []
+    if path is None:
+      path = []
+    path.append(obj)
+    if obj._childClasses:
+      for att in obj._childClasses:
+        for child in getattr(obj, att._pluralLinkName):
+          children.extend(self._getChildren(child, path[:]))
+    else:
+      children.append(path)
+    return children
 
   def _cloneObject(self, objs):
     """Clones the specified objects"""
@@ -719,7 +767,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def _renameItem(self, obj:AbstractWrapperObject, oldPid:str):
     """rename item(s) from previous pid oldPid to current object pid"""
 
-    list = self._saveExpandedState()
+    ll = self._saveExpandedState()
 
     import sip
     newPid = obj.pid
@@ -733,6 +781,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         # parent has changed - we must move and rename the entire item tree.
         # NB this is relevant for NmrAtom (NmrResidue is handled elsewhere)
         objects = self._itemObjects(item, recursive=True)
+        print(objects, '$$$')
         sip.delete(item) # this also removes child items
 
         # NB the first object cannot be found from its pid (as it has already been renamed)
@@ -741,15 +790,15 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         for xx in objects[1:]:
           self._createItem(xx)
 
-    self._restoreExpandedState(list)
+    self._restoreExpandedState(ll)
 
   def _saveExpandedState(self):
-    list = {}
+    sideBarState = {}
     items = self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive, 0)
     for item in items:
       if item.isExpanded():
-        list[item.text(0)] = True   #.isExpanded()
-    return list
+        sideBarState[item.text(0)] = True   #.isExpanded()
+    return sideBarState
 
   def _restoreExpandedState(self, list):
     # TODO:ED see if this is feasible
@@ -768,7 +817,8 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
     """rename NmrResidue(s) from previous pid oldPid to current object pid"""
 
-    list = self._saveExpandedState()
+    dd = self._saveExpandedState()
+
 
     if not oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
       # Parent has changed - remove items from old location
@@ -785,7 +835,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     # for item in self._findItems(oldPid):
     #   item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
-    self._restoreExpandedState(list)
+    self._restoreExpandedState(dd)
 
   def _removeItem(self, wrapperObject:AbstractWrapperObject):
     """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.

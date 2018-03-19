@@ -373,13 +373,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # TODO:ED fix this to get the correct colours
     if self._parent.spectrumDisplay.mainWindow.application.colourScheme == 'light':
-      self.background = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
-      self.foreground = (0.5, 0.0, 0.0, 1.0)    #'#080000'
+      self.background = (0.95, 0.95, 0.95, 1.0)    #'#f7ffff'
+      self.foreground = (0.05, 0.05, 0.05, 1.0)    #'#080000'
       self.gridColour = (0.5, 0.0, 0.0, 1.0)    #'#080000'
       self.highlightColour = (0.23, 0.23, 1.0, 1.0)    #'#3333ff'
       self._labellingColour = (0.05, 0.05, 0.05, 1.0)
     else:
-      self.background = (0.5, 0.0, 0.0, 1.0)    #'#080000'
+      self.background = (0.05, 0.05, 0.05, 1.0)    #'#080000'
       self.foreground = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
       self.gridColour = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
       self.highlightColour = (0.2, 1.0, 0.3, 1.0)   #'#00ff00'
@@ -1227,7 +1227,12 @@ varying vec4 varyingTexCoord;
 void main()
 {
   filter = texture2D(texture, varyingTexCoord.xy);
+  // colour for blending enabled
   gl_FragColor = vec4(FC.xyz, filter.w);
+  
+//  if (filter.w < 0.01)
+//    discard;
+//  gl_FragColor = vec4(FC.xyz * filter.w, 1.0);
 }
 """
 
@@ -1403,8 +1408,8 @@ void main()
     self._infiniteLines = []
 
     from ccpn.framework.PathsAndUrls import fontsPath
-    self.glSmallFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallFont.fnt'), activeTexture=GL.GL_TEXTURE0)
-    self.glSmallTransparentFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallTransparentFont.fnt'), fontTransparency=0.5, activeTexture=GL.GL_TEXTURE1)
+    self.glSmallFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallFont.fnt'), activeTexture=0)
+    self.glSmallTransparentFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallTransparentFont.fnt'), fontTransparency=0.5, activeTexture=1)
     # TODO:ED modify transparent font to be half transparency
 
     self._buildTextFlag = True
@@ -1470,29 +1475,30 @@ void main()
     #                                   , blendMode=True
     #                                   , drawMode=GL.GL_TRIANGLES)
 
-    self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1
-                                        , fragment=self._fragmentShader1
-                                        , attributes={'pMatrix':(16, np.float32)
-                                                      , 'mvMatrix':(16, np.float32)
-                                                      , 'parameterList': (4, np.int32)
-                                                      , 'background': (4, np.float32)})
-    self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2
-                                        , fragment=self._fragmentShader2
-                                        , attributes={'pMatrix':(16, np.float32)
-                                                      , 'mvMatrix':(16, np.float32)
-                                                      , 'positiveContours':(4, np.float32)
-                                                      , 'negativeContours':(4, np.float32)})
-    self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3
-                                        , fragment=self._fragmentShader3
-                                        , attributes={'pMatrix':(16, np.float32)
-                                                      , 'mvMatrix':(16, np.float32)})
-    self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex
-                                        , fragment=self._fragmentShaderTex
-                                        , attributes={'pMatrix':(16, np.float32)
-                                                      , 'mvMatrix':(16, np.float32)
-                                                      , 'axisScale':(4, np.float32)
-                                                      , 'background': (4, np.float32)
-                                                      , 'viewport':(4, np.float32)})
+    self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
+                                        fragment=self._fragmentShader1,
+                                        attributes={'pMatrix':(16, np.float32),
+                                                      'mvMatrix':(16, np.float32),
+                                                      'parameterList':(4, np.int32),
+                                                      'background':(4, np.float32)})
+    self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2,
+                                        fragment=self._fragmentShader2,
+                                        attributes={'pMatrix':(16, np.float32),
+                                                      'mvMatrix':(16, np.float32),
+                                                      'positiveContours':(4, np.float32),
+                                                      'negativeContours':(4, np.float32)})
+    self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3,
+                                        fragment=self._fragmentShader3,
+                                        attributes={'pMatrix':(16, np.float32),
+                                                      'mvMatrix':(16, np.float32)})
+    self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex,
+                                        fragment=self._fragmentShaderTex,
+                                        attributes={'pMatrix':(16, np.float32),
+                                                      'mvMatrix':(16, np.float32),
+                                                      'axisScale':(4, np.float32),
+                                                      'background':(4, np.float32),
+                                                      'viewport':(4, np.float32),
+                                                      'texture':(1, np.uint)})
 
     # these are the links to the GL projection.model matrices
     # self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
@@ -1591,7 +1597,7 @@ void main()
 
     # This is the correct blend function to ignore stray surface blending functions
     GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
-    self.setBackgroundColour([0.05, 0.05, 0.05, 1.0])
+    self.setBackgroundColour(self.background)
 
     # get information from the parent class (strip)
     self.orderedAxes = self._parent.orderedAxes
@@ -2110,8 +2116,10 @@ void main()
         _isInPlane = strip.peakIsInPlane(peak)
         if not _isInPlane:
           _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+          fade = 0.4
         else:
           _isInFlankingPlane = None
+          fade = 1.0
 
         if _isInPlane or _isInFlankingPlane:
 
@@ -2125,7 +2133,7 @@ void main()
             colG = int(colour.strip('# ')[2:4], 16) / 255.0
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-          drawStr.setColour((colR, colG, colB, 1.0))
+          drawStr.setColour((colR, colG, colB, fade))
 
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -2155,8 +2163,10 @@ void main()
           _isInPlane = strip.peakIsInPlane(peak)
           if not _isInPlane:
             _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+            fade = 0.4
           else:
             _isInFlankingPlane = None
+            fade = 1.0
 
           if _isInPlane or _isInFlankingPlane:
             if self._isSelected(peak):
@@ -2173,7 +2183,7 @@ void main()
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
               drawList.indices = np.append(drawList.indices,
                                            np.array([index, index+1, index+2, index+3], dtype=np.uint))
-            drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
+            drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, fade] * numPoints
 
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
                                       indexPtr, len(drawList.indices)]
@@ -2199,8 +2209,10 @@ void main()
           _isInPlane = strip.peakIsInPlane(peak)
           if not _isInPlane:
             _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+            fade = 0.4
           else:
             _isInFlankingPlane = None
+            fade = 1.0
 
           if _isInPlane or _isInFlankingPlane:
             drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
@@ -2218,7 +2230,7 @@ void main()
               colG = int(colour.strip('# ')[2:4], 16) / 255.0
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            drawList.colors[offset*4:(offset+np2+5)*4] = [colR, colG, colB, 1.0] * (np2+5)
+            drawList.colors[offset*4:(offset+np2+5)*4] = [colR, colG, colB, fade] * (np2+5)
 
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
                                       indexPtr, len(drawList.indices)]
@@ -2244,8 +2256,10 @@ void main()
           _isInPlane = strip.peakIsInPlane(peak)
           if not _isInPlane:
             _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+            fade = 0.4
           else:
             _isInFlankingPlane = None
+            fade = 1.0
 
           if _isInPlane or _isInFlankingPlane:
             drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4] for an in ang])
@@ -2259,7 +2273,7 @@ void main()
               colG = int(colour.strip('# ')[2:4], 16) / 255.0
               colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-            drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [colR, colG, colB, 1.0] * (np2 + 5)
+            drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [colR, colG, colB, fade] * (np2 + 5)
 
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
                                       indexPtr, len(drawList.indices)]
@@ -2373,11 +2387,14 @@ void main()
     _isInPlane = strip.peakIsInPlane(peak)
     if not _isInPlane:
       _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+      fade = 0.4
     else:
       _isInFlankingPlane = None
+      fade = 1.0
 
-    # if not _isInPlane and not _isInFlankingPlane:
-    #   continue
+    # ignore if not visible
+    if not _isInPlane and not _isInFlankingPlane:
+      return
 
     if self._isSelected(peak):
     # if hasattr(peak, '_isSelected') and peak._isSelected:
@@ -2433,7 +2450,7 @@ void main()
                                                         , p0[0] + r, p0[1] + w
                                                         , p0[0] + r, p0[1] - w
                                                         , p0[0] - r, p0[1] + w])
-        drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+        drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * 4)
         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
                                                         , p0[0], p0[1]
                                                         , p0[0], p0[1]
@@ -2493,7 +2510,7 @@ void main()
                                                         , p0[0] - r, p0[1] + w
                                                         , p0[0], p0[1]])
 
-        drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2 + 5))
+        drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * (np2 + 5))
         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
         drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
         drawList.lineWidths = (r, w)
@@ -2545,7 +2562,7 @@ void main()
                                                         , p0[0] - r, p0[1] + w
                                                         , p0[0], p0[1]])
 
-        drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2 + 5))
+        drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * (np2 + 5))
         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
         drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
         drawList.lineWidths = (r, w)
@@ -2629,8 +2646,10 @@ void main()
         _isInPlane = strip.peakIsInPlane(peak)
         if not _isInPlane:
           _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+          fade = 0.4
         else:
           _isInFlankingPlane = None
+          fade = 1.0
 
         if not _isInPlane and not _isInFlankingPlane:
           continue
@@ -2690,7 +2709,7 @@ void main()
                                                               , p0[0]+r, p0[1]+w
                                                               , p0[0]+r, p0[1]-w
                                                               , p0[0]-r, p0[1]+w])
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * LENCOLORS)
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * LENCOLORS)
             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
                                                             ,p0[0], p0[1]
                                                             ,p0[0], p0[1]
@@ -2747,7 +2766,7 @@ void main()
                                                               , p0[0] - r, p0[1] + w
                                                               , p0[0], p0[1]])
 
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2+5))
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * (np2+5))
             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+5))
             drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2+5))
             drawList.lineWidths = (r, w)
@@ -2796,7 +2815,7 @@ void main()
                                                               , p0[0] - r, p0[1] + w
                                                               , p0[0], p0[1]])
 
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * (np2+5))
+            drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * (np2+5))
             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+5))
             drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2+5))
             drawList.lineWidths = (r, w)
@@ -2947,8 +2966,10 @@ void main()
       _isInPlane = strip.peakIsInPlane(peak)
       if not _isInPlane:
         _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        fade = 0.4
       else:
         _isInFlankingPlane = None
+        fade = 1.0
 
       if not _isInPlane and not _isInFlankingPlane:
         return
@@ -2975,7 +2996,7 @@ void main()
                                   x=p0[0], y=p0[1],
                                   ox=r, oy=w,
                                   # x=self._screenZero[0], y=self._screenZero[1]
-                                  color=(colR, colG, colB, 1.0), GLContext=self,
+                                  color=(colR, colG, colB, fade), GLContext=self,
                                   object=peak))
 
   def _buildPeakListLabels(self, spectrumView, peakListView):
@@ -3159,15 +3180,14 @@ void main()
     GL.glActiveTexture(GL.GL_TEXTURE1)
     GL.glBindTexture(GL.GL_TEXTURE_2D, self.glSmallTransparentFont.textureId)
 
-    # glActiveTexture(GL.GL_TEXTURE1);
-    # glBindTexture(GL_TEXTURE_2D, Reflection);
-    #
-    # glActiveTexture(GL.GL_TEXTURE2);
-    # glBindTexture(GL_TEXTURE_2D, Refraction);
+    # # specific blend function for text overlay
+    # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_DST_COLOR, GL.GL_ONE, GL.GL_ONE)
 
   def disableTexture(self):
     GL.glDisable(GL.GL_BLEND)
-    # GL.glDisable(GL.GL_TEXTURE_2D)
+
+    # # reset blend function
+    # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
   def buildAll(self):
     for spectrumView in self._parent.spectrumViews:
@@ -4025,7 +4045,7 @@ void main()
 
     # add cursors to marks?
 
-    GL.glColor4f(0.8, 0.9, 1.0, 1.0)
+    GL.glColor4f(*self.foreground)
     GL.glBegin(GL.GL_LINES)
 
     GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
@@ -4282,7 +4302,7 @@ void main()
                                   font=self.glSmallFont,
                                   x=self.cursorCoordinate[0],
                                   y=self.cursorCoordinate[1],
-                                  color=(1.0, 1.0, 1.0, 1.0), GLContext=self,
+                                  color=self.foreground, GLContext=self,
                                   object=None)
       self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
@@ -4296,7 +4316,7 @@ void main()
                                     font=self.glSmallFont,
                                     x=self.cursorCoordinate[0],
                                     y=self.cursorCoordinate[1] - (self.glSmallFont.height*2.0*self.pixelY),
-                                    color=(1.0, 1.0, 1.0, 1.0), GLContext=self,
+                                    color=self.foreground, GLContext=self,
                                     object=None)
 
   def drawMouseCoords(self):
@@ -5945,7 +5965,7 @@ GlyphPY1 = 'py1'
 
 
 class CcpnGLFont():
-  def __init__(self, fileName=None, size=12, base=0, fontTransparency=None, activeTexture=GL.GL_TEXTURE0):
+  def __init__(self, fileName=None, size=12, base=0, fontTransparency=None, activeTexture=0):
     self.fontName = None
     self.fontGlyph = [None] * 256
     self.base = base
@@ -5960,7 +5980,8 @@ class CcpnGLFont():
     self.fontSize = self.fontInfo[1].split()[1]
     self.width = 0
     self.height = 0
-    self.activeTexture = activeTexture
+    self.activeTexture = GL.GL_TEXTURE0+activeTexture
+    self.activeTextureNum = activeTexture
     self.fontTransparency = fontTransparency
 
     row = 2
@@ -6063,7 +6084,7 @@ class CcpnGLFont():
 
     self.textureId = GL.glGenTextures(1)
     # GL.glEnable(GL.GL_TEXTURE_2D)
-    GL.glActiveTexture(activeTexture)
+    GL.glActiveTexture(self.activeTexture)
     GL.glBindTexture( GL.GL_TEXTURE_2D, self.textureId )
 
     if fontTransparency:
@@ -6399,10 +6420,9 @@ class ShaderProgram(object):
     else:
       raise RuntimeError('Error setting setGLUniform4iv: %s' % uniformLocation)
 
-  def setGLUniform1i(self, uniformLocation=None, count=1, value=None):
+  def setGLUniform1i(self, uniformLocation=None, value=None):
     if uniformLocation in self.uniformLocations:
-      GL.glUniform1i(self.uniformLocations[uniformLocation]
-                      , count, value)
+      GL.glUniform1i(self.uniformLocations[uniformLocation], value)
     else:
       raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
 
@@ -6837,8 +6857,11 @@ class GLString(GLVertexArray):
 
   def drawTextArray(self):
     # TODO:ED need to sort out the speed of this
-    GL.glActiveTexture(GL.GL_TEXTURE0)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, self.font.textureId)
+    # GL.glActiveTexture(GL.GL_TEXTURE0)
+    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.font.textureId)
+
+    self._GLContext._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
+
     super(GLString, self).drawTextArray()
 
   def setColour(self, col):

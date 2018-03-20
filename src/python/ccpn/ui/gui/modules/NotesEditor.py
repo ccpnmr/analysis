@@ -106,14 +106,13 @@ class NotesEditorModule(CcpnModule):
     self.mainWidget.setContentsMargins(5, 5, 5, 5)
 
     self._noteNotifier = None
+    self.droppedNotifier = None
     self._setNotifiers()
 
     if note is not None:
       self.selectNote(note)
 
-    self.droppedNotifier = GuiNotifier(self.mainWidget,
-                                     [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                     self._processDroppedItems)
+
 
   def _processDroppedItems(self, data):
     """
@@ -169,6 +168,9 @@ class NotesEditorModule(CcpnModule):
                                   , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
                                   , Note.__name__
                                   , self._updateCallback)
+    self.droppedNotifier = GuiNotifier(self.mainWidget,
+                                       [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                       self._processDroppedItems)
 
   def _clearNotifiers(self):
     """

@@ -4062,6 +4062,7 @@ void main()
     if self._crossHairVisible and (not self._updateHTrace or not self._updateVTrace):
       GL.glBegin(GL.GL_LINES)
 
+      # TODO:ED may want to put other icons for other modes
       if self.mainWindow.mouseMode == PICK:
         GL.glColor4f(0.2, 0.5, 0.9, 0.3)
         x = self.pixelX * 8

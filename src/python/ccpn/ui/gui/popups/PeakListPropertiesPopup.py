@@ -147,17 +147,17 @@ class PeakListPropertiesPopup(CcpnDialog):
       colList.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
       colList.setCurrentIndex(int(newIndex) - 1)
 
-  def _changeSymbolColour(self, value):
-    self.project._undo.increaseBlocking()     # prevent more undo points
-    colour = list(spectrumColours.keys())[value]
-    self.peakList.symbolColour = colour
-    self.project._undo.decreaseBlocking()
+  # def _changeSymbolColour(self, value):
+  #   self.project._undo.increaseBlocking()     # prevent more undo points
+  #   colour = list(spectrumColours.keys())[value]
+  #   self.peakList.symbolColour = colour
+  #   self.project._undo.decreaseBlocking()
 
-  def _changeTextColour(self, value):
-    self.project._undo.increaseBlocking()     # prevent more undo points
-    colour = list(spectrumColours.keys())[value]
-    self.peakList.textColour = colour
-    self.project._undo.decreaseBlocking()
+  # def _changeTextColour(self, value):
+  #   self.project._undo.increaseBlocking()     # prevent more undo points
+  #   colour = list(spectrumColours.keys())[value]
+  #   self.peakList.textColour = colour
+  #   self.project._undo.decreaseBlocking()
 
   def _changeColours(self):
     value = self.symbolColourPulldownList.index

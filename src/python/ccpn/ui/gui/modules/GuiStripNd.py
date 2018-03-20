@@ -224,8 +224,6 @@ class GuiStripNd(GuiStrip):
        # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
       (tType.item, 'ToolBar',               'toolbarAction',          '',                         True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
       (tType.item, 'Crosshair',             'crossHairAction',        '',                         True,   True,       self._toggleCrossHair,                'crossHairAction'),
-      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      self._updateTraces,                   'hTraceAction'),
-      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      self._updateTraces,                   'vTraceAction'),
       (tType.item, 'Grid',                  'gridAction',             '',                         True,   True,       self.toggleGrid,                      'gridAction'),
 
       (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            True,   True,       self.spectrumDisplay.adjustContours, ''),
@@ -239,12 +237,15 @@ class GuiStripNd(GuiStrip):
       # (tType.actn, 'Store Zoom',            'icons/zoom-store',       'Store Zoom',               True,   True,       self.spectrumDisplay._storeZoom,      ''),
       # (tType.actn, 'Restore Zoom',          'icons/zoom-restore',     'Restore Zoom',             True,   True,       self.spectrumDisplay._restoreZoom,    ''),
       (tType.actn, 'Reset Zoom',            'icons/zoom-full',        'Reset Zoom',               True,   True,       self.resetZoom,                       ''),
-      (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', True, True,   self.showExportDialog, ''),
       (tType.sep, None, None, None, False, False, None, None),
+      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      self._updateTraces,                   'hTraceAction'),
+      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      self._updateTraces,                   'vTraceAction'),
       (tType.actn, 'Enable Phasing Console',     None,                  'Enable Phasing Console',   True, True,   self.spectrumDisplay.togglePhaseConsole, ''),
+      (tType.sep, None, None, None, False, False, None, None),
       # (tType.actn, 'Print to File...', 'icons/print', 'Print Spectrum Display to File', True, True,
       #  lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay), ''),
 
+      (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', True, True,   self.showExportDialog, ''),
       (tType.menu, 'Navigate To',           '',                       '',                         True,   True,       None,                                 'navigateToMenu')
     ]
 

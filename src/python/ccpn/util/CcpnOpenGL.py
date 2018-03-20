@@ -3133,8 +3133,7 @@ void main()
     self.drawSelectionBox()
     self.drawMouseMoveLine()
 
-    if self._crossHairVisible and not self._updateHTrace and not self._updateVTrace:
-      self.drawCursors()
+    self.drawCursors()
 
     if self._successiveClicks:
       self.drawDottedCursor()
@@ -4056,15 +4055,18 @@ void main()
 
     # add cursors to marks?
 
-    GL.glColor4f(*self.foreground)
-    GL.glBegin(GL.GL_LINES)
+    if self._crossHairVisible:    # and not self._updateHTrace and not self._updateVTrace:
+      GL.glColor4f(*self.foreground)
+      GL.glBegin(GL.GL_LINES)
 
-    GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
-    GL.glVertex2d(self.cursorCoordinate[0], self.axisB)
-    GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
-    GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
+      if not self._updateVTrace:
+        GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
+        GL.glVertex2d(self.cursorCoordinate[0], self.axisB)
+      if not self._updateHTrace:
+        GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
+        GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
 
-    GL.glEnd()
+      GL.glEnd()
 
   def drawDottedCursor(self):
     # draw the cursors
@@ -4770,56 +4772,49 @@ void main()
     if self._parent.isDeleted:
       return
 
-    # only paint if mouse is in the window
-    if self.underMouse():
-      # self.updateTraces()
-
-      if self._updateHTrace:
-        for hTrace in self._hTraces.keys():
-          self._hTraces[hTrace].drawIndexArray()
-
-      if self._updateVTrace:
-        for vTrace in self._vTraces.keys():
-          self._vTraces[vTrace].drawIndexArray()
-
     phasingFrame = self._parent.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible():
 
       self.buildStaticTraces()
 
       for hTrace in self._staticHTraces:
-        hTrace.drawIndexArray()
+        if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
+          hTrace.drawIndexArray()
       for vTrace in self._staticVTraces:
-        vTrace.drawIndexArray()
+        if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
+          vTrace.drawIndexArray()
 
-      # draw phasingPivot
-      direction = phasingFrame.getDirection()
-      pivotPpm = phasingFrame.pivotEntry.get()
+    # only paint if mouse is in the window
+    if self.underMouse():
+      # self.updateTraces()
 
-      # # this is deprecated GL
-      # if direction == 0:
-      #   GL.glColor4f(0.1, 0.5, 0.1, 1.0)
-      #   GL.glLineStipple(1, 0xF0F0)
-      #   GL.glEnable(GL.GL_LINE_STIPPLE)
-      #
-      #   GL.glBegin(GL.GL_LINES)
-      #   GL.glVertex2d(pivotPpm, self.axisT)
-      #   GL.glVertex2d(pivotPpm, self.axisB)
-      #   GL.glEnd()
-      #
-      #   GL.glDisable(GL.GL_LINE_STIPPLE)
-      #
-      # else:
-      #   GL.glColor4f(0.1, 0.5, 0.1, 1.0)
-      #   GL.glLineStipple(1, 0xF0F0)
-      #   GL.glEnable(GL.GL_LINE_STIPPLE)
-      #
-      #   GL.glBegin(GL.GL_LINES)
-      #   GL.glVertex2d(self.axisL, pivotPpm)
-      #   GL.glVertex2d(self.axisR, pivotPpm)
-      #   GL.glEnd()
-      #
-      #   GL.glDisable(GL.GL_LINE_STIPPLE)
+      deleteHList = []
+      if self._updateHTrace:
+        for hTrace in self._hTraces.keys():
+          trace = self._hTraces[hTrace]
+          if hTrace and hTrace.isDeleted:
+            deleteHList.append(hTrace)
+            continue
+
+          if hTrace and not hTrace.isDeleted and hTrace.isVisible():
+            trace.drawIndexArray()
+
+      for dd in deleteHList:
+        del self._hTraces[dd]
+
+      deleteVList = []
+      if self._updateVTrace:
+        for vTrace in self._vTraces.keys():
+          trace = self._vTraces[vTrace]
+          if vTrace and vTrace.isDeleted:
+            deleteVList.append(vTrace)
+            continue
+
+          if vTrace and not vTrace.isDeleted and vTrace.isVisible():
+            trace.drawIndexArray()
+
+      for dd in deleteVList:
+        del self._vTraces[dd]
 
   def initialiseTraces(self):
     # set up the arrays and dimension for showing the horizontal/vertical traces

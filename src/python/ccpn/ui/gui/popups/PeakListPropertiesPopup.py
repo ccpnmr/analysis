@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
-from ccpn.util.Colour import spectrumColours
+from ccpn.util.Colour import spectrumColours, addNewColourString
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
@@ -96,7 +96,9 @@ class PeakListPropertiesPopup(CcpnDialog):
         self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
       else:
         # FIXME
-        self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
+        # self.symbolColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
+        addNewColourString(c)
+        self._fillColourPulldown(self.symbolColourPulldownList)
 
       self.symbolColourPulldownList.activated.connect(self._applyChanges)
 
@@ -110,7 +112,11 @@ class PeakListPropertiesPopup(CcpnDialog):
         self.textColourPulldownList.setCurrentIndex(spectrumColourKeys.index(c))
       else:
         # FIXME
-        self.textColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
+        # self.textColourPulldownList.setCurrentIndex(spectrumColourKeys[0])
+        addNewColourString(c)
+        self._fillColourPulldown(self.symbolColourPulldownList)
+        self._fillColourPulldown(self.textColourPulldownList)
+
       # self.textColourPulldownList.setCurrentIndex(spectrumColourKeys.index(peakList.textColour))
       self.textColourPulldownList.activated.connect(self._applyChanges)
 
@@ -129,6 +135,17 @@ class PeakListPropertiesPopup(CcpnDialog):
       #   self.displayedCheckBox.toggled.connect(peakListView.setVisible)
 
     self.numUndos = 0
+
+  def _setNewColour(self, colList, newCol):
+    pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+    pix.fill(QtGui.QColor(newCol))
+    # add the new colour to the spectrumColours dict
+    newIndex = str(len(spectrumColours.items()) + 1)
+    # spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+    addNewColourString(newCol)
+    if newCol not in colList.texts:
+      colList.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+      colList.setCurrentIndex(int(newIndex) - 1)
 
   def _changeSymbolColour(self, value):
     self.project._undo.increaseBlocking()     # prevent more undo points
@@ -152,10 +169,14 @@ class PeakListPropertiesPopup(CcpnDialog):
     self.peakList.textColour = colour
 
   def _fillColourPulldown(self, pulldown):
+    pulldown.clear()
     for item in spectrumColours.items():
-      pix=QtGui.QPixmap(QtCore.QSize(20, 20))
-      pix.fill(QtGui.QColor(item[0]))
-      pulldown.addItem(icon=QtGui.QIcon(pix), text=item[1])
+      if item[0] != '#':
+        pix=QtGui.QPixmap(QtCore.QSize(20, 20))
+        pix.fill(QtGui.QColor(item[0]))
+        pulldown.addItem(icon=QtGui.QIcon(pix), text=item[1])
+      else:
+        pulldown.addItem(text=item[1])
 
   def _applyChanges(self):
     """

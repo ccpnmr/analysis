@@ -27,6 +27,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 """Color specification"""
 
 from collections import OrderedDict
+from PyQt5 import QtGui, QtCore
+
 
 def rgbaToHex(r, g, b, a=255):
   
@@ -52,7 +54,8 @@ colourNameToHexDict = {
   'cyan':    '#ffff00',
 }
 
-spectrumColours = OrderedDict([('#cb1400','red'),
+spectrumColours = OrderedDict([('#','<auto>'),
+                                ('#cb1400','red'),
                                 ('#318290','pastel blue'),
                                 ('#fe6c11','orange'),
                                 ('#3a4e5c','dark grey'),
@@ -76,7 +79,9 @@ spectrumColours = OrderedDict([('#cb1400','red'),
                                 ('#f9609c','mid pink'),
                                 ('#50ae56','mid green'),
                                 ('#ff8eff','light pink'),
-                                ('#3fe945','light green')])
+                                ('#3fe945','light green'),
+                                ('#ffffff','white'),
+                                ('#000000','black')])
 
 spectrumHexColours = tuple(spectrumColours.keys())
 
@@ -157,3 +162,28 @@ def scaledRgba(value):
   # print(value, 'scaledRgba')
   return Colour(value).scaledRgba()
 
+def addNewColour(newColour):
+  newIndex = str(len(spectrumColours.items()) + 1)
+  spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+
+def addNewColourString(colourString):
+  newIndex = str(len(spectrumColours.items()) + 1)
+  spectrumColours[colourString] = 'Colour %s' % newIndex
+
+def _setNewColour(self, colList, newCol:str):
+
+  # check if the colour is in the spectrumColours list
+
+  # check if colour is in you colList
+
+
+  pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+  pix.fill(QtGui.QColor(newCol))
+
+  # add the new colour to the spectrumColours dict
+  newIndex = str(len(spectrumColours.items()) + 1)
+  # spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+  addNewColourString(newCol)
+  if newCol not in colList.texts:
+    colList.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+    colList.setCurrentIndex(int(newIndex) - 1)

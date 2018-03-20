@@ -45,7 +45,7 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.popups.ExperimentTypePopup import  _getExperimentTypes
-from ccpn.util.Colour import spectrumColours
+from ccpn.util.Colour import spectrumColours, addNewColour
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
@@ -588,7 +588,9 @@ class GeneralTab(QtWidgets.QWidget, Base):
       pix.fill(QtGui.QColor(newColour))
       newIndex = str(len(spectrumColours.items())+1)
       self.colourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-      spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+      # spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+      addNewColour(newColour)
+
       self.colourBox.setCurrentIndex(int(newIndex)-1)
       self._changes['spectrumColour'] = partial(self._setSpectrumColour, spectrum, newColour)
 
@@ -972,11 +974,16 @@ class ContoursTab(QtWidgets.QWidget, Base):
     if newColour is not None:
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(newColour))
+
+      # add the new colour to the spectrumColours dict
       newIndex = str(len(spectrumColours.items())+1)
+      # spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+      addNewColour(newColour)
+
       self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
       self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-      spectrumColours[newColour.name()] = 'Colour %s' % newIndex
 
+      print ('>>>', newColour.name())
       # spawns combobox change event below
       self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
 
@@ -986,10 +993,14 @@ class ContoursTab(QtWidgets.QWidget, Base):
     if newColour is not None:
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(newColour))
+
+      # add the new colour to the spectrumColours dict
       newIndex = str(len(spectrumColours.items())+1)
+      # spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+      addNewColour(newColour)
+
       self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
       self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' %newIndex)
-      spectrumColours[newColour.name()] = 'Colour %s' % newIndex
 
       # spawns combobox change event below
       self.negativeColourBox.setCurrentIndex(int(newIndex)-1)

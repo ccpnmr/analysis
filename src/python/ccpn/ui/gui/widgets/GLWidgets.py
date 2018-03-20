@@ -63,6 +63,7 @@ REGION_COLOURS = {
 class GuiNdWidget(CcpnGLWidget):
 
   is1D = False
+  SPECTRUM_COLOUR = 'positiveContourColour'
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(GuiNdWidget, self).__init__(parent=parent,
@@ -78,6 +79,7 @@ class Gui1dWidget(CcpnGLWidget):
   INVERTYAXIS = False
   AXISLOCKEDBUTTON = False
   is1D = True
+  SPECTRUM_COLOUR = 'sliceColour'
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(Gui1dWidget, self).__init__(parent=parent,
@@ -102,6 +104,14 @@ class Gui1dWidget(CcpnGLWidget):
 
     if symbolType is not None:
       # for peak in pls.peaks:
+
+      listColour = peakListView.peakList.symbolColour
+      if listColour == '#':
+        listColour = getattr(peakListView.peakList.spectrum, self.SPECTRUM_COLOUR)
+      listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
+      listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
+      listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+
       for pp in range(0, len(drawList.pids), LENPID):
 
         # check whether the peaks still exists
@@ -119,10 +129,11 @@ class Gui1dWidget(CcpnGLWidget):
                                                                     index, index+2, index+2, index+1,
                                                                     index, index+3, index+3, index+1], dtype=np.uint))
           else:
-            colour = peak.peakList.symbolColour
-            colR = int(colour.strip('# ')[0:2], 16) / 255.0
-            colG = int(colour.strip('# ')[2:4], 16) / 255.0
-            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+            # colour = peak.peakList.symbolColour
+            colR = listColR   #int(colour.strip('# ')[0:2], 16) / 255.0
+            colG = listColG   #int(colour.strip('# ')[2:4], 16) / 255.0
+            colB = listColB   #int(colour.strip('# ')[4:6], 16) / 255.0
+
             drawList.indices = np.append(drawList.indices,
                                          np.array([index, index+1, index+2, index+3], dtype=np.uint))
           drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
@@ -199,6 +210,13 @@ class Gui1dWidget(CcpnGLWidget):
 
       pls = peakListView.peakList
 
+      listColour = pls.symbolColour
+      if listColour == '#':
+        listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+      listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
+      listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
+      listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+
       for peak in pls.peaks:
 
         # TODO:ED display the required peaks - possibly build all then on draw selected later
@@ -216,10 +234,10 @@ class Gui1dWidget(CcpnGLWidget):
         # if hasattr(peak, '_isSelected') and peak._isSelected:
           colR, colG, colB = self.highlightColour[:3]
         else:
-          colour = pls.symbolColour
-          colR = int(colour.strip('# ')[0:2], 16)/255.0
-          colG = int(colour.strip('# ')[2:4], 16)/255.0
-          colB = int(colour.strip('# ')[4:6], 16)/255.0
+          # colour = pls.symbolColour
+          colR = listColR   # int(colour.strip('# ')[0:2], 16)/255.0
+          colG = listColG   # int(colour.strip('# ')[2:4], 16)/255.0
+          colB = listColB   # int(colour.strip('# ')[4:6], 16)/255.0
 
         # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2            #len(self.axisOrder)
@@ -361,6 +379,13 @@ class Gui1dWidget(CcpnGLWidget):
     pls = peakListView.peakList
     spectrumFrequency = spectrum.spectrometerFrequencies
 
+    listColour = pls.symbolColour
+    if listColour == '#':
+      listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+    listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
+    listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
+    listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+
     # TODO:ED display the required peaks - possibly build all then on draw selected later
     strip = spectrumView.strip
     _isInPlane = strip.peakIsInPlane(peak)
@@ -376,10 +401,10 @@ class Gui1dWidget(CcpnGLWidget):
     # if hasattr(peak, '_isSelected') and peak._isSelected:
       colR, colG, colB = self.highlightColour[:3]
     else:
-      colour = pls.symbolColour
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      # colour = pls.symbolColour
+      colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+      colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+      colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
 
     # get the correct coordinates based on the axisCodes
     p0 = [0.0] * 2  # len(self.axisOrder)
@@ -528,6 +553,8 @@ class Gui1dWidget(CcpnGLWidget):
       colR, colG, colB = self.highlightColour[:3]
     else:
       colour = pls.textColour
+      if colour == '#':
+        colour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0

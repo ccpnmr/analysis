@@ -221,20 +221,24 @@ class ViewBox(pg.ViewBox):
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
     from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
     position = event.screenPos()
-    self.menu.navigateToMenu.clear()
-    if self.current.peak:
-      for spectrumDisplay in self.current.project.spectrumDisplays:
-        strip = spectrumDisplay.strips[0]
-        if len(list(set(strip.axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
-          self.menu.navigateToMenu.addAction(spectrumDisplay.pid, partial(navigateToPeakPosition, self.current.project,
-                                                                        self.current.peak, [spectrumDisplay.pid]))
-    else:
-      for spectrumDisplay in self.current.project.spectrumDisplays:
-        axisCodes = self.current.strip.axisCodes
-        strip = spectrumDisplay.strips[0]
-        if len(list(set(strip.axisCodes) & set(axisCodes))) <= 2:
-          self.menu.navigateToMenu.addAction(spectrumDisplay.pid,
-                partial(navigateToPositionInStrip, strip, self.current.cursorPosition, axisCodes))
+    try:
+      self.menu.navigateToMenu.clear()
+      if self.current.peak:
+        for spectrumDisplay in self.current.project.spectrumDisplays:
+          strip = spectrumDisplay.strips[0]
+          if len(list(set(strip.axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
+            self.menu.navigateToMenu.addAction(spectrumDisplay.pid, partial(navigateToPeakPosition, self.current.project,
+                                                                          self.current.peak, [spectrumDisplay.pid]))
+      else:
+        for spectrumDisplay in self.current.project.spectrumDisplays:
+          axisCodes = self.current.strip.axisCodes
+          strip = spectrumDisplay.strips[0]
+          if len(list(set(strip.axisCodes) & set(axisCodes))) <= 2:
+            self.menu.navigateToMenu.addAction(spectrumDisplay.pid,
+                  partial(navigateToPositionInStrip, strip, self.current.cursorPosition, axisCodes))
+    except AttributeError as es:
+      pass
+
     self.menu.popup(QtCore.QPoint(position.x(), position.y()))
     self.contextMenuPosition = self.current.cursorPosition
 

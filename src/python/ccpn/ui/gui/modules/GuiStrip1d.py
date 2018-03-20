@@ -30,6 +30,7 @@ from PyQt5 import QtGui, QtWidgets
 from ccpn.core.PeakList import PeakList
 
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
 import numpy as np
 from ccpn.util.Logging import getLogger
@@ -104,6 +105,9 @@ class GuiStrip1d(GuiStrip):
     self.plotWidget.showGrid(x=False, y=False)
     self.gridShown = True
     self.viewBox.menu = self._get1dContextMenu()
+    self._defaultMenu = self.viewBox.menu
+    self._phasingMenu = self._get1dContextPhasingMenu()
+
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.spectrumIndex = 0
     self.peakItems = {}
@@ -145,8 +149,76 @@ class GuiStrip1d(GuiStrip):
 
     self.contextMenu.addAction(self.gridAction)
     self.contextMenu.addSeparator()
+
+    self.contextMenu.addItem("Enable Phasing Console", callback=self.spectrumDisplay.togglePhaseConsole)
+
+    self.contextMenu.addSeparator()
     self.contextMenu.addAction("Print to File...", self.showExportDialog)
     self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+    return self.contextMenu
+
+  def _get1dContextPhasingMenu(self) -> Menu:
+    """
+    Creates and returns the Nd context menu
+    """
+    class tType:
+      menu, item, actn, sep = range(1,5)
+
+    self._spectrumUtilActions = {}
+    self.contextMenu = Menu('', self, isFloatWidget=True)     # generate new menu
+
+    toolBarItems = [
+       # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
+      (tType.actn, 'Add Trace',               None,                     'Add new trace',          True,   True,       self._newPhasingTrace, ''),
+      (tType.actn, 'Remove All Traces',       None,                     'Remove all traces',      True,   True,       self.removePhasingTraces,''),
+      (tType.actn, 'Set Pivot',               None,                     'Set pivot value',        True,   True,       self._setPhasingPivot,''),
+      # (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',   True,   True,       self.spectrumDisplay._increaseTraceScale,''),
+      # (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',   True,   True,       self.spectrumDisplay._decreaseTraceScale,      ''),
+      (tType.sep, None, None, None, False, False, None, None),
+      (tType.actn, 'Disable Phasing Console', None,                     'Disable phasing console',True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
+    ]
+
+    for aType, aName, icon, tooltip, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
+      # self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+      def tempMethod():           # ejb - how does this work?????
+        return
+      if aType == tType.menu:
+        action = self.contextMenu.addMenu(aName)
+        tempMethod.__doc__=''
+        tempMethod.__name__=attrib
+        setattr(self.contextMenu, tempMethod.__name__, action)      # add to the menu
+
+      elif aType == tType.item:
+        # self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
+        action = self.contextMenu.addItem(aName, callback=callback, checkable=active, checked=checked)
+        tempMethod.__doc__=''
+        tempMethod.__name__=attrib
+        setattr(self, tempMethod.__name__, action)
+        # add to self
+
+      elif aType == tType.actn:
+        # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
+        action = self.contextMenu.addAction(aName, callback)
+        if icon is not None:
+          ic = Icon(icon)
+          action.setIcon(ic)
+        self._spectrumUtilActions[aName] = action
+
+      elif aType == tType.sep:
+        self.contextMenu.addSeparator()
+
+    # self.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+    # self.spectrumDisplays = self.getSpectrumDisplays()
+    # for spectrumDisplay in self.spectrumDisplays:
+    #   spectrumDisplayAction = self.navigateToMenu.addAction(spectrumDisplay.pid)
+    #   receiver = lambda spectrumDisplay=spectrumDisplay.pid: self.navigateTo(spectrumDisplay)
+    #   self.connect(spectrumDisplayAction, QtCore.SIGNAL('triggered()'), receiver)
+    #   self.navigateToMenu.addAction(spectrumDisplay)
+
+    # self.crossHairAction.setChecked(self.crossHairIsVisible)
+    # self.gridAction.setChecked(self.gridIsVisible)
+    # self.lastAxisOnlyCheckBox.setChecked(self.spectrumDisplay.lastAxisOnly)
+
     return self.contextMenu
 
   def showExportDialog(self):

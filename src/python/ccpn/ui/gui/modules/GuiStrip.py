@@ -45,7 +45,8 @@ from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
-
+# from ccpn.ui.gui.widgets.Icon import Icon
+# from ccpn.ui.gui.widgets.Menu import Menu
 
 from ccpn.util import Ticks
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
@@ -526,6 +527,9 @@ class GuiStrip(Frame):
     self.hPhasingPivot.setVisible(True)
     self.vPhasingPivot.setVisible(True)
 
+    # change menu
+    self.viewBox.menu = self._phasingMenu
+
     if self.spectrumDisplay.is1D:
 
       self._hTraceActive = True
@@ -599,6 +603,9 @@ class GuiStrip(Frame):
 
     self.hPhasingPivot.setVisible(False)
     self.vPhasingPivot.setVisible(False)
+
+    # change menu
+    self.viewBox.menu = self._defaultMenu
 
     for spectrumView in self.spectrumViews:
       spectrumView._turnOffPhasing()

@@ -134,7 +134,6 @@ class BarGraph(pg.BarGraphItem):
     if event.button() == QtCore.Qt.LeftButton:
       for label in self.labels:
         if label.text() == str(self.clicked):
-          print(label.data(self.clicked))
           label.setSelected(True)
 
       event.accept()
@@ -229,6 +228,18 @@ class CustomViewBox(pg.ViewBox):
     self.showAboveThresholdOnly = False
     self.lastRange = self.viewRange()
 
+    self.__xLine = pg.InfiniteLine(angle=0, movable=True, pen='b')
+    self.addItem(self.xLine)
+
+
+  @property
+  def xLine(self):
+    return self.__xLine
+
+
+  @xLine.getter
+  def xLine(self):
+    return self.__xLine
 
 
   def addSelectionBox(self):
@@ -394,9 +405,9 @@ class CustomViewBox(pg.ViewBox):
     self.contextMenu.exec_(ev.screenPos().toPoint())
 
   def _checkThresholdAction(self):
-    tls = self.getthreshouldLine()
-    if len(tls) > 0 and not None in tls:
-      if tls[0].isVisible():
+    tl = self.xLine
+    if tl:
+      if tl.isVisible():
         self.thresholdLineAction.setChecked(True)
       else:
         self.thresholdLineAction.setChecked(False)
@@ -414,10 +425,9 @@ class CustomViewBox(pg.ViewBox):
     self.contextMenu._addQMenu(self.labelMenu)
 
   def _toggleThresholdLine(self):
-    tls = self.getthreshouldLine()
-    if len(tls)>0 and not None in tls:
-      for tl in tls:
-        tl.setVisible(not tl.isVisible())
+    tl = self.xLine
+    if tl:
+     tl.setVisible(not tl.isVisible())
 
   def _toggleLabels(self):
 
@@ -427,11 +437,9 @@ class CustomViewBox(pg.ViewBox):
       self.showAllLabels()
 
 
-
-
-
-  def getthreshouldLine(self):
-    return [tl for tl in self.childGroup.childItems() if isinstance(tl, pg.InfiniteLine)]
+  def getThreshouldLine(self):
+    if hasattr(self, 'xLine'):
+      return self.xLine
 
   def hideAllLabels(self):
     self.allLabelsShown = False
@@ -450,9 +458,8 @@ class CustomViewBox(pg.ViewBox):
   def showAboveThreshold(self):
     self.allLabelsShown = False
     self.showAboveThresholdOnly = True
-    if self.getthreshouldLine():
-      tl = self.getthreshouldLine()[0]
-      yTlPos = tl.pos().y()
+    if self.xLine:
+      yTlPos = self.xLine.pos().y()
       if self.getLabels():
         for label in self.getLabels():
           if label.pos().y() >= yTlPos:
@@ -517,73 +524,71 @@ class CustomViewBox(pg.ViewBox):
 #         yHighs.append(y)
 #
 # ######################################################################################################
-# ################################### Start Application ################################################
-# # ######################################################################################################
+
+app = pg.mkQApp()
+
+customViewBox = CustomViewBox()
 #
-# app = pg.mkQApp()
-#
-# customViewBox = CustomViewBox()
-# #
-# plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
-# customViewBox.setParent(plotWidget)
-#
-# x=[6,
-#     8,
-#     10,
-#     12,
-#     14,
-#     16,
-#     18,
-#     20]
-# y = [
-# 1.731,
-# 10.809,
-# 10.658,
-# 4.831,
-# 11.406,
-# 5.287,
-# 2.971,
-# 4.412,
-# ]
-#
-# xLow = BarGraph(viewBox=customViewBox, xValues=x, yValues=y, objects=[], brush='r', widht=1)
-# # xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
-# # xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
-#
-#
-# customViewBox.addItem(xLow)
-# # customViewBox.addItem(xMid)
-# # customViewBox.addItem(xHigh)
-#
-# # xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
-# # customViewBox.addItem(xLine)
-#
-# l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
-# l.setParentItem(customViewBox.graphicsItem())
-#
-# c1 = plotWidget.plot(pen='r', name='low')
-# # c2 = plotWidget.plot(pen='b', name='mid')
-# # c3 = plotWidget.plot(pen='g', name='high')
-#
-# l.addItem(c1, 'low')
-# # l.addItem(c2, 'mid')
-# # l.addItem(c3, 'high')
-#
-# # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
-# customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)
-# customViewBox.setMenuEnabled(enableMenu=False)
-#
-# plotWidget.show()
-#
-#
-#
-#
-#
-#
-# # Start Qt event
-# if __name__ == '__main__':
-#   import sys
-#   if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-#     QtWidgets.QApplication.instance().exec_()
+plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
+customViewBox.setParent(plotWidget)
+
+x=[6,
+    8,
+    10,
+    12,
+    14,
+    16,
+    18,
+    20]
+y = [
+1.731,
+10.809,
+10.658,
+4.831,
+11.406,
+5.287,
+2.971,
+4.412,
+]
+
+xLow = BarGraph(viewBox=customViewBox, xValues=x, yValues=y, objects=[], brush='r', widht=1)
+# xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
+# xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
+
+
+customViewBox.addItem(xLow)
+# customViewBox.addItem(xMid)
+# customViewBox.addItem(xHigh)
+
+# xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
+# customViewBox.addItem(xLine)
+
+l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
+l.setParentItem(customViewBox.graphicsItem())
+
+c1 = plotWidget.plot(pen='r', name='low')
+# c2 = plotWidget.plot(pen='b', name='mid')
+# c3 = plotWidget.plot(pen='g', name='high')
+
+l.addItem(c1, 'low')
+# l.addItem(c2, 'mid')
+# l.addItem(c3, 'high')
+
+# customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
+customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)
+customViewBox.setMenuEnabled(enableMenu=False)
+print(customViewBox.xLine._viewBox)
+plotWidget.show()
+
+
+
+
+
+
+# Start Qt event
+if __name__ == '__main__':
+  import sys
+  if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+    QtWidgets.QApplication.instance().exec_()
 
 

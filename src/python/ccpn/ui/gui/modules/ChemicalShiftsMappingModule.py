@@ -273,6 +273,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid = (1, 0))
       self.barGraphWidget.setViewBoxLimits(0,None,0,None)
       self.barGraphWidget.xLine.setPos(DefaultThreshould)
+      self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._threshouldLineMoved)
       self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
                                                    actionCallback= self._customActionCallBack, checkBoxCallback=self._checkBoxCallback,
@@ -538,6 +539,11 @@ class ChemicalShiftsMapping(CcpnModule):
   def _selectNmrResiduesAboveThreshold(self):
     if self.aboveObjects:
       self.current.nmrResidues = self.aboveObjects
+
+  def _threshouldLineMoved(self):
+    pos = self.barGraphWidget.xLine.pos().y()
+    self.thresholdSpinBox.setValue(pos)
+    self.updateBarGraph()
 
   def updateBarGraph(self):
     xs = []

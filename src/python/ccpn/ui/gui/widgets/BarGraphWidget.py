@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 
 
 from functools import partial
-
+import weakref
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox , CustomLabel
@@ -66,22 +66,10 @@ class BarGraphWidget(Widget, Base):
     self.disappearedBrush = 'b'
     self.threshouldLine = threshouldLine
     self.setData(viewBox=self.customViewBox, xValues=xValues,yValues=yValues, objects=objects,colour=colour,replace=True)
-    # self._addExtraItems()
-    self.__xLine = pg.InfiniteLine(angle=0, movable=True, pen=self.thresholdLineColour)
+    self.xLine = self.customViewBox.xLine
+    self.customViewBox.addItem(self.xLine)
     self.setThresholdLine()
 
-  @property
-  def xLine(self):
-    return self.__xLine
-
-  @xLine.getter
-  def xLine(self):
-    return self.__xLine
-
-  @xLine.deleter
-  def xLine(self):
-    del self.__xLine
-    # self.updateViewBoxLimits()
 
   def _setViewBox(self):
     self.customViewBox = CustomViewBox(application = self.application)
@@ -132,7 +120,8 @@ class BarGraphWidget(Widget, Base):
       if not isinstance(item, pg.InfiniteLine):
         self.customViewBox.removeItem(item)
     for ch in self.customViewBox.childGroup.childItems():
-      self.customViewBox.removeItem(ch)
+      if not isinstance(ch, pg.InfiniteLine):
+        self.customViewBox.removeItem(ch)
 
 
 
@@ -145,7 +134,7 @@ class BarGraphWidget(Widget, Base):
 
   def setThresholdLine(self):
 
-    self.customViewBox.addItem(self.xLine)
+
 
     # self.thresholdValueTextItem = pg.TextItem(str(self.xLine.pos().y()), anchor=(self.customViewBox.viewRange()[0][0], 1.0),)
     # self.thresholdValueTextItem.setParentItem(self.xLine)
@@ -170,8 +159,7 @@ class BarGraphWidget(Widget, Base):
       self.xLine.hide()
 
   def _lineMoved(self, **args):
-
-    self.customViewBox.clear()
+    self.clear()
     if len(args)>0:
         aboveX = args['aboveX']
         aboveY =  args['aboveY']
@@ -199,6 +187,7 @@ class BarGraphWidget(Widget, Base):
 
 
       pos = self.xLine.pos().y()
+      self.xLine.show()
       if self.xValues:
         for x,y,obj in zip(self.xValues, self.yValues, self.objects):
           if y > pos:
@@ -272,7 +261,7 @@ nmrChain.nmrResidues = nmrResidues
 
 
 
-
+#
 # if __name__ == '__main__':
 #   from ccpn.ui.gui.widgets.Application import TestApplication
 #   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea

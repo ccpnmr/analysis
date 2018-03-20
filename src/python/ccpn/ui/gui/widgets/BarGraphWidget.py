@@ -55,7 +55,6 @@ class BarGraphWidget(Widget, Base):
     self._setViewBox()
     self._setLayout()
     self.setContentsMargins(1, 1, 1, 1)
-    self.xLine = None
     self.barGraphs = []
 
     self.xValues = xValues
@@ -67,7 +66,21 @@ class BarGraphWidget(Widget, Base):
     self.disappearedBrush = 'b'
     self.threshouldLine = threshouldLine
     self.setData(viewBox=self.customViewBox, xValues=xValues,yValues=yValues, objects=objects,colour=colour,replace=True)
-    self._addExtraItems()
+    # self._addExtraItems()
+    self.__xLine = pg.InfiniteLine(angle=0, movable=True, pen=self.thresholdLineColour)
+    self.setThresholdLine()
+
+  @property
+  def xLine(self):
+    return self.__xLine
+
+  @xLine.getter
+  def xLine(self):
+    return self.__xLine
+
+  @xLine.deleter
+  def xLine(self):
+    del self.__xLine
     # self.updateViewBoxLimits()
 
   def _setViewBox(self):
@@ -84,7 +97,7 @@ class BarGraphWidget(Widget, Base):
 
   def _addExtraItems(self):
     # self.addLegend()
-    self.addThresholdLine()
+    self.setThresholdLine()
 
 
   def setData(self,viewBox, xValues, yValues, objects, colour, replace=True):
@@ -113,6 +126,16 @@ class BarGraphWidget(Widget, Base):
                                    )
 
 
+  def clear(self):
+
+    for item in self.customViewBox.addedItems:
+      if not isinstance(item, pg.InfiniteLine):
+        self.customViewBox.removeItem(item)
+    for ch in self.customViewBox.childGroup.childItems():
+      self.customViewBox.removeItem(ch)
+
+
+
 
   def clearBars(self):
     self.barGraphs = []
@@ -120,9 +143,8 @@ class BarGraphWidget(Widget, Base):
       if not isinstance(item, pg.InfiniteLine):
         self.customViewBox.removeItem(item)
 
-  def addThresholdLine(self):
+  def setThresholdLine(self):
 
-    self.xLine = pg.InfiniteLine(angle=0, movable=True, pen=self.thresholdLineColour)
     self.customViewBox.addItem(self.xLine)
 
     # self.thresholdValueTextItem = pg.TextItem(str(self.xLine.pos().y()), anchor=(self.customViewBox.viewRange()[0][0], 1.0),)
@@ -149,7 +171,7 @@ class BarGraphWidget(Widget, Base):
 
   def _lineMoved(self, **args):
 
-    self.clearBars()
+    self.customViewBox.clear()
     if len(args)>0:
         aboveX = args['aboveX']
         aboveY =  args['aboveY']
@@ -225,8 +247,6 @@ class BarGraphWidget(Widget, Base):
     else:
      self.legendItem.hide()
 
-  def _updateGraph(self):
-    self.customViewBox.clear()
 
 
 

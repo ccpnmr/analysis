@@ -54,7 +54,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
 from ccpn.util.Scripting import getScriptsDirectoryPath
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue
+from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME
 from ccpn.core.lib import CcpnSorting
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
@@ -325,6 +325,9 @@ class ChemicalShiftsMapping(CcpnModule):
     self._checkSpectraWithPeakListsOnly()
 
     # self.spectraSelectionWidget.setMaximumHeight(150)
+    i += 1
+    self.modeLabel = Label(self.scrollAreaWidgetContents, text='Calculation mode ', grid=(i, 0))
+    self.modeButtons = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=MODES, callback=self._toggleRelativeContribuitions, grid=(i, 1))
     i += 2
     self.atomWeightLabel = Label(self.scrollAreaWidgetContents, text='Relative Contribution ', grid=(i, 0))
     j = 0
@@ -442,10 +445,27 @@ class ChemicalShiftsMapping(CcpnModule):
            , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
            , grid=(i,3), gridSpan=(1,1))
 
+  def _toggleRelativeContribuitions(self):
+    value = self.modeButtons.getSelectedText()
+    if value == HEIGHT or value ==  VOLUME:
+      self.atomWeightLabel.hide()
+      self._scrollAreaSpinBoxFrame.hide()
+      self.atomLabel.hide()
+      for i in self.atomWeightSpinBoxes: i.hide()
+      for i in self.atomRadioButtons: i.hide()
+
+
+    else:
+      self.atomWeightLabel.show()
+      self._scrollAreaSpinBoxFrame.show()
+      self.atomLabel.show()
+      for i in self.atomWeightSpinBoxes: i.show()
+      for i in self.atomRadioButtons: i.show()
+
   def _setThresholdLineBySTD(self):
     nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())
     if nc:
-      deltaShifts = [ n._deltaShift for n in nc.nmrResidues]
+      deltaShifts = [ n._deltaShift for n in nc.nmrResidues if n._deltaShift is not None]
       if len(deltaShifts)>0:
         if not None in deltaShifts:
           std = np.std(deltaShifts)
@@ -536,6 +556,11 @@ class ChemicalShiftsMapping(CcpnModule):
     self.belowBrush = 'r'
     self.disappearedPeakBrush = 'b'
     thresholdPos = self.thresholdSpinBox.value()
+    # check if all values are none:
+    shifts = [nmrResidue._deltaShift for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
+    if not any(shifts):
+      self.barGraphWidget.clear()
+      return
 
     if self.barGraphWidget.xLine:
       self.thresholdLinePos = self.thresholdSpinBox.value()
@@ -592,17 +617,7 @@ class ChemicalShiftsMapping(CcpnModule):
       if name == selectedNameColourC:
         self.disappearedPeakBrush = code
 
-    # self.barGraphWidget.deleteLater()
-    # self.barGraphWidget = None
-    # self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application,
-    #                                      xValues=xs, yValues=ys, objects=obs,threshouldLine = thresholdPos,
-    #                                      grid=(10, 0))
-    self.barGraphWidget.setMinimumHeight(100)
-    self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
-    self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._updateThreshold)
-    self.barGraphWidget.customViewBox.addSelectionBox()
-    self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
-    self.barGraphWidget.clearBars()
+    self.barGraphWidget.clear()
     self.barGraphWidget._lineMoved(aboveX=self.aboveX,
                                    aboveY=self.aboveY,
                                    aboveObjects=self.aboveObjects,
@@ -618,12 +633,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                    )
     if xs and ys:
       self.barGraphWidget.setViewBoxLimits(0, max(xs)*2, 0,  max(ys)*2)
-    # self.splitter.addWidget(self.barGraphWidget)
-    # self._colourDeltaShiftTableValues()
 
-  # def _colourDeltaShiftTableValues(self):
-  #   print(self.nmrResidueTable.deltaShiftsColumn)
-    # self.nmrResidueTable.item(0, 0).setBackground(QtGui.QColor(100, 100, 150))
 
   def updateThresholdLineValue(self, value):
     if self.barGraphWidget:
@@ -685,6 +695,9 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def updateModule(self):
 
+    mode = self.modeButtons.getSelectedText()
+    if not mode in MODES:
+      return
     weights = {}
     for atomWSB in self.atomWeightSpinBoxes:
       weights.update({atomWSB.objectName():atomWSB.value()})
@@ -702,7 +715,7 @@ class ChemicalShiftsMapping(CcpnModule):
               nmrResidue.spectraCount = len(spectra)
               nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
               nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
-              nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, spectra=spectra, atomWeights=weights)
+              nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
             else:
               nmrResidue._deltaShift = None
         self.updateTable(self.nmrResidueTable._nmrChain)

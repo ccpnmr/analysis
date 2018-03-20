@@ -23,6 +23,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
+from ccpn.util.Logging import getLogger
+
+
+POSITIONS = 'positions'
+HEIGHT = 'height'
+VOLUME = 'volume'
+LINEWIDTHS = 'lineWhidths'
+
+MODES = [POSITIONS, HEIGHT, VOLUME, LINEWIDTHS]
 
 def getPeakPosition(peak, dim, unit='ppm'):
 
@@ -67,7 +76,7 @@ def getPeakLinewidth(peak, dim):
       return float(lw)
 
 
-def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, atomWeights=None):
+def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atomWeights=None):
   '''
   
   :param nmrResidue: 
@@ -102,11 +111,33 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, atomWeights=None):
   if len(peaks)>0:
     for i, peak in enumerate(peaks):
       if peak.peakList.spectrum in spectra:
-        if len(peak.position) == 2:
-          delta1Atoms = (peak.position[0] - list(peaks)[0].position[0])
-          delta2Atoms = (peak.position[1] - list(peaks)[0].position[1])
+        try:
+          if mode == POSITIONS:
+            if len(peak.position) == 2:
+              delta1Atoms = (peak.position[0] - list(peaks)[0].position[0])
+              delta2Atoms = (peak.position[1] - list(peaks)[0].position[1])
+              deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5, ]
 
-          deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5,]
+          if mode == VOLUME:
+            delta1Atoms = (peak.volume - list(peaks)[0].volume)
+            deltas += [((delta1Atoms)** 2 ) ** 0.5, ]
+
+          if mode == HEIGHT:
+            delta1Atoms = (peak.height - list(peaks)[0].height)
+            deltas += [((delta1Atoms) ** 2) ** 0.5,]
+
+          if mode == LINEWIDTHS:
+            if len(peak.lineWidths) == 2:
+              delta1Atoms = (peak.lineWidths[0] - list(peaks)[0].lineWidths[0])
+              delta2Atoms = (peak.lineWidths[1] - list(peaks)[0].lineWidths[1])
+              deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5,]
+        except Exception as e:
+          message = 'Error for calculation mode: %s on %s and %s. ' % (mode, peak.pid, list(peaks)[0].pid) + str(e)
+          getLogger().debug(message)
+
+
+
+
   if deltas and not None in deltas:
     return round(float(np.mean(deltas)),3)
   return

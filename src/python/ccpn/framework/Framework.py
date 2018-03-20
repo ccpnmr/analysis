@@ -2221,6 +2221,13 @@ def getSaveDirectory(parent, preferences=None):
   if not newPath:
     return
   if newPath:
+
+    # native dialog returns a tuple: (path, ''); ccpn returns a string
+    if isinstance(newPath, tuple):
+      newPath = newPath[0]
+      if not newPath:
+        return None
+
     newPath = apiIo.addCcpnDirectorySuffix(newPath)
     if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
       # should not really need to check the second and third condition above, only

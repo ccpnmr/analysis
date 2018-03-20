@@ -567,6 +567,8 @@ class GuiStrip(Frame):
       # self.hTraceAction.setChecked(True)
       # self.vTraceAction.setChecked(False)
       if not self.spectrumDisplay.is1D:
+        self.hTraceAction.setChecked(True)
+        self.vTraceAction.setChecked(False)
         self._testCcpnOpenGLWidget.updateHTrace = True
         self._testCcpnOpenGLWidget.updateVTrace = False
     else:
@@ -574,6 +576,8 @@ class GuiStrip(Frame):
       # self.hTraceAction.setChecked(False)
       # self.vTraceAction.setChecked(True)
       if not self.spectrumDisplay.is1D:
+        self.hTraceAction.setChecked(False)
+        self.vTraceAction.setChecked(True)
         self._testCcpnOpenGLWidget.updateHTrace = False
         self._testCcpnOpenGLWidget.updateVTrace = True
 

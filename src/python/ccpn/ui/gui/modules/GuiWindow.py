@@ -216,9 +216,6 @@ class GuiWindow():
         peakLists = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
         self.application.current.peaks = [peak for peakList in peakLists for peak in peakList]
 
-
-
-
   def traceScaleScale(self, window:'GuiWindow', scale:float):
     """
     Changes the scale of a trace in all spectrum displays of the window.
@@ -232,17 +229,17 @@ class GuiWindow():
           # spawn a redraw of the strip
           strip._updatePivot()
     
-  def traceScaleUp(self, window:'GuiWindow'):
+  def traceScaleUp(self, window:'GuiWindow', scale=1.4):
     """
     Doubles the scale for all traces in the specified window.
     """
-    self.traceScaleScale(window, 2.0)
+    self.traceScaleScale(window, scale=scale)
     
-  def traceScaleDown(self, window:'GuiWindow'):
+  def traceScaleDown(self, window:'GuiWindow', scale=(1.0/1.4)):
     """
     Halves the scale for all traces in the specified window.
     """
-    self.traceScaleScale(window, 0.5)
+    self.traceScaleScale(window, scale=scale)
     
   def toggleHTrace(self, window:'GuiWindow'):
     """

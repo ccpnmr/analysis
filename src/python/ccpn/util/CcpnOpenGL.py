@@ -3132,7 +3132,7 @@ void main()
     self.drawSelectionBox()
     self.drawMouseMoveLine()
 
-    if self._crossHairVisible and not self.updateHTrace and not self.updateVTrace:
+    if self._crossHairVisible and not self._updateHTrace and not self._updateVTrace:
       self.drawCursors()
 
     if self._successiveClicks:

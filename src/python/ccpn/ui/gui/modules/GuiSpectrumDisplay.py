@@ -689,6 +689,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
       self.setColumnStretches(True)
 
+  def increaseTraceScale(self):
+    self.mainWindow.traceScaleUp(self.mainWindow)
+
+  def decreaseTraceScale(self):
+    self.mainWindow.traceScaleDown(self.mainWindow)
+
   def increaseStripWidth(self):
     currentWidth = self.strips[0].width() * (100.0+self.application.preferences.general.stripWidthZoomPercent) / 100.0
     for strip in self.strips:

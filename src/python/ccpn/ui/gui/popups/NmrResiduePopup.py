@@ -154,7 +154,7 @@ class NmrResiduePopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
-    self.project._startCommandEchoBlock('_applyChanges')
+    self.project._startCommandEchoBlock('_applyChanges', quiet=True)
     try:
       if isinstance(chain, Chain):
         residueItem = self.seqCodePulldown.currentText().split(' ')

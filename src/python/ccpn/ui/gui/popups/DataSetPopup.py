@@ -77,7 +77,7 @@ class DataSetPopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
-    self.project._startCommandEchoBlock('_applyChanges')
+    self.project._startCommandEchoBlock('_applyChanges', quiet=True)
     try:
       newName = self.dataSetText.text()
       if str(newName) != self.dataSet.title:

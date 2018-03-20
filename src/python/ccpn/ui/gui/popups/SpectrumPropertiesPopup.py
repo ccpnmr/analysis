@@ -136,7 +136,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
     from ccpn.util.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
 
-    self.project._startCommandEchoBlock('_applyChanges')
+    self.project._startCommandEchoBlock('_applyChanges', quiet=True)
     try:
       for t in tabs:
         if t is not None:
@@ -1081,7 +1081,7 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
     from ccpn.util.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
 
-    self.project._startCommandEchoBlock('_applyChanges')
+    self.project._startCommandEchoBlock('_applyChanges', quiet=True)
     try:
       for t in tabs:
         if t is not None:

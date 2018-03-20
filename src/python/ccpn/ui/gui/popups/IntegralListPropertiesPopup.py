@@ -180,7 +180,7 @@ class IntegralListPropertiesPopup(CcpnDialog):
     from ccpn.util.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
 
-    self.project._startCommandEchoBlock('_applyChanges')
+    self.project._startCommandEchoBlock('_applyChanges', quiet=True)
     try:
       self._changeColours()
 

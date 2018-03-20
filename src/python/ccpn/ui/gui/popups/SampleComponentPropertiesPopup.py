@@ -361,7 +361,7 @@ class EditSampleComponentPopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
-    self.project._startCommandEchoBlock('_applyChanges')
+    self.project._startCommandEchoBlock('_applyChanges', quiet=True)
     try:
       if self.newSampleComponentToCreate:
         self.sampleComponent = self.sample.newSampleComponent(

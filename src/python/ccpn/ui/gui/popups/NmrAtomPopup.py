@@ -89,7 +89,7 @@ class NmrAtomPopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
-    self.project._startCommandEchoBlock('_applyChanges')
+    self.project._startCommandEchoBlock('_applyChanges', quiet=True)
     try:
       if self.nmrAtom.name != self.nmrAtomNamePulldown.currentText():
         self.nmrAtom.rename(self.nmrAtomNamePulldown.currentText())

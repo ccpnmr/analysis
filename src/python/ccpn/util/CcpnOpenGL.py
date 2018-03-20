@@ -110,7 +110,8 @@ REGION_COLOURS = {
   'grey': (1.0, 1.0, 1.0, 0.15),
   'red': (1.0, 0.1, 0.2, 0.15),
   'purple': (0.7, 0.4, 1.0, 0.15),
-  None: (0.2, 0.1, 1.0, 0.15)
+  None: (0.2, 0.1, 1.0, 0.15),
+  'highlight': (0.5, 0.5, 0.5, 0.15)
 }
 
 GLLINE_STYLES = {
@@ -3625,7 +3626,10 @@ void main()
                 object=None, lineStyle='dashed', **kw):
 
     if colour in REGION_COLOURS.keys():
-      brush = REGION_COLOURS[colour]
+      if colour == 'highlight':
+        brush = self.highlightColour
+      else:
+        brush = REGION_COLOURS[colour]
 
     if orientation == 'h':
       axisCode = self._axisCodes[1]
@@ -4055,9 +4059,24 @@ void main()
 
     # add cursors to marks?
 
-    if self._crossHairVisible:    # and not self._updateHTrace and not self._updateVTrace:
-      GL.glColor4f(*self.foreground)
+    if self._crossHairVisible and (not self._updateHTrace or not self._updateVTrace):
       GL.glBegin(GL.GL_LINES)
+
+      if self.mainWindow.mouseMode == PICK:
+        GL.glColor4f(0.2, 0.5, 0.9, 0.3)
+        x = self.pixelX * 8
+        y = self.pixelY * 8
+        GL.glVertex2d(self.cursorCoordinate[0]-x, self.cursorCoordinate[1]-y)
+        GL.glVertex2d(self.cursorCoordinate[0]+x, self.cursorCoordinate[1]-y)
+        GL.glVertex2d(self.cursorCoordinate[0]+x, self.cursorCoordinate[1]-y)
+        GL.glVertex2d(self.cursorCoordinate[0]+x, self.cursorCoordinate[1]+y)
+        GL.glVertex2d(self.cursorCoordinate[0]+x, self.cursorCoordinate[1]+y)
+        GL.glVertex2d(self.cursorCoordinate[0]-x, self.cursorCoordinate[1]+y)
+        GL.glVertex2d(self.cursorCoordinate[0]-x, self.cursorCoordinate[1]+y)
+        GL.glVertex2d(self.cursorCoordinate[0]-x, self.cursorCoordinate[1]-y)
+
+      else:
+        GL.glColor4f(*self.foreground)
 
       if not self._updateVTrace:
         GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
@@ -5640,7 +5659,7 @@ void main()
     # This is the correct future style for cursorPosition handling
     self.current.cursorPosition = (xPosition, yPosition)
 
-    if self.application.ui.mainWindow.mouseMode == PICK:
+    if self.mainWindow.mouseMode == PICK:
       self._pickAtMousePosition(event)
 
     if controlShiftLeftMouse(event):

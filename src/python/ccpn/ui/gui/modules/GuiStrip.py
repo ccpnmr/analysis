@@ -562,7 +562,7 @@ class GuiStrip(Frame):
 
     # TODO:ED remember direction
     self._newPosition = phasingFrame.pivotEntry.get()
-    self._infiniteLine = self._testCcpnOpenGLWidget.addInfiniteLine(colour='green', movable=True, lineStyle='dashed')
+    self._infiniteLine = self._testCcpnOpenGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')
 
     if self._newConsoleDirection == 0:
       self._infiniteLine.orientation = ('v')

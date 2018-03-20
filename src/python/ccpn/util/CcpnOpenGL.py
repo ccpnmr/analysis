@@ -119,6 +119,7 @@ GLLINE_STYLES = {
   'dotted': 0xAAAA
 }
 
+FADE_FACTOR = 0.3
 
 def singleton(cls):
   """ Use class as singleton.
@@ -2124,7 +2125,7 @@ void main()
         _isInPlane = strip.peakIsInPlane(peak)
         if not _isInPlane:
           _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-          fade = 0.4
+          fade = FADE_FACTOR
         else:
           _isInFlankingPlane = None
           fade = 1.0
@@ -2171,7 +2172,7 @@ void main()
           _isInPlane = strip.peakIsInPlane(peak)
           if not _isInPlane:
             _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-            fade = 0.4
+            fade = FADE_FACTOR
           else:
             _isInFlankingPlane = None
             fade = 1.0
@@ -2218,7 +2219,7 @@ void main()
           _isInPlane = strip.peakIsInPlane(peak)
           if not _isInPlane:
             _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-            fade = 0.4
+            fade = FADE_FACTOR
           else:
             _isInFlankingPlane = None
             fade = 1.0
@@ -2265,7 +2266,7 @@ void main()
           _isInPlane = strip.peakIsInPlane(peak)
           if not _isInPlane:
             _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-            fade = 0.4
+            fade = FADE_FACTOR
           else:
             _isInFlankingPlane = None
             fade = 1.0
@@ -2396,7 +2397,7 @@ void main()
     _isInPlane = strip.peakIsInPlane(peak)
     if not _isInPlane:
       _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-      fade = 0.4
+      fade = FADE_FACTOR
     else:
       _isInFlankingPlane = None
       fade = 1.0
@@ -2655,7 +2656,7 @@ void main()
         _isInPlane = strip.peakIsInPlane(peak)
         if not _isInPlane:
           _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-          fade = 0.4
+          fade = FADE_FACTOR
         else:
           _isInFlankingPlane = None
           fade = 1.0
@@ -2975,7 +2976,7 @@ void main()
       _isInPlane = strip.peakIsInPlane(peak)
       if not _isInPlane:
         _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-        fade = 0.4
+        fade = FADE_FACTOR
       else:
         _isInFlankingPlane = None
         fade = 1.0

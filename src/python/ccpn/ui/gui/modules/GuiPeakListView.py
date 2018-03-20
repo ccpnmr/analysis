@@ -405,6 +405,15 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
         peakItem.update()     # ejb - force a repaint of the peakItem
         peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
+  def setVisible(self, visible):
+    super(GuiPeakListView, self).setVisible(visible)
+
+    # repaint all displays - this is called for each spectrumView in the spectrumDisplay
+    # all are attached to the same click
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
+    
 class Peak1d(QtWidgets.QGraphicsItem):
   """ A GraphicsItem that is not actually drawn itself,
   but is the parent of the peak symbol and peak annotation.

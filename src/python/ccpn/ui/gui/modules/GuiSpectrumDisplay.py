@@ -554,14 +554,25 @@ class GuiSpectrumDisplay(CcpnModule):
     for strip in self.strips:
       strip.toggleVerticalTrace()
 
+  def removePhasingTraces(self):
+    """
+    Removes all phasing traces from all strips.
+    """
+    for strip in self.strips:
+      strip.removePhasingTraces()
+
   def togglePhaseConsole(self):
     """Toggles whether phasing console is displayed.
     """
     isVisible = not self.phasingFrame.isVisible()
     self.phasingFrame.setVisible(isVisible)
 
-    self.hTraceAction = self.current.strip.hTraceAction.isChecked()
-    self.vTraceAction = self.current.strip.vTraceAction.isChecked()
+    if self.is1D:
+      self.hTraceAction = True
+      self.vTraceAction = False
+    else:
+      self.hTraceAction = self.current.strip.hTraceAction.isChecked()
+      self.vTraceAction = self.current.strip.vTraceAction.isChecked()
 
     for strip in self.strips:
       if isVisible:

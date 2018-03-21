@@ -305,7 +305,7 @@ class GuiStripNd(GuiStrip):
     toolBarItems = [
        # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
       (tType.actn, 'Add Trace',               None,                     'Add new trace',          True,   True,       self._newPhasingTrace,''),
-      (tType.actn, 'Remove All Traces',       None,                     'Remove all traces',      True,   True,       self.removePhasingTraces,''),
+      (tType.actn, 'Remove All Traces',       None,                     'Remove all traces',      True,   True,       self.spectrumDisplay.removePhasingTraces,''),
       (tType.actn, 'Set Pivot',               None,                     'Set pivot value',        True,   True,       self._setPhasingPivot,''),
       (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',   True,   True,       self.spectrumDisplay.increaseTraceScale,''),
       (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',   True,   True,       self.spectrumDisplay.decreaseTraceScale,      ''),

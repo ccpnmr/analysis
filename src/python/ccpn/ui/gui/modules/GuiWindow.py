@@ -300,8 +300,9 @@ class GuiWindow():
     """
     strip = self.application.current.strip
     if strip and (strip.spectrumDisplay.window is self):
-      strip.removePhasingTraces()
-
+      # strip.removePhasingTraces()
+      for strip in strip.spectrumDisplay.strips:
+        strip.removePhasingTraces()
    
   def _clearCurrentPeaks(self):
     """

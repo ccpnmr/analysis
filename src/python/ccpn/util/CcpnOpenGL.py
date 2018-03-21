@@ -4624,6 +4624,7 @@ void main()
       y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
           np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
+      # TODO:ED make this posColour to negColour :)
       colour = getattr(spectrumView.spectrum, self.SPECTRUM_COLOUR)    #spectrumView._getColour('sliceColour', '#aaaaaa')
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0

@@ -2117,6 +2117,14 @@ void main()
     strip = self._parent
 
     pls = peakListView.peakList
+
+    listColour = pls.textColour
+    if listColour == '#':
+      listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+    listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
+    listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
+    listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+
     for drawStr in drawList.stringList:
 
       peak = drawStr.object
@@ -2138,13 +2146,10 @@ void main()
             _isSelected = True
             colR, colG, colB = self.highlightColour[:3]
           else:
-            colour = pls.textColour
-            if colour == '#':
-              colour = pls.spectrum.positiveContourColour
-
-            colR = int(colour.strip('# ')[0:2], 16) / 255.0
-            colG = int(colour.strip('# ')[2:4], 16) / 255.0
-            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+            # colour = pls.textColour
+            colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+            colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+            colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
 
           drawStr.setColour((colR, colG, colB, fade))
 
@@ -2161,6 +2166,14 @@ void main()
 
     index = 0
     indexPtr = 0
+
+    pls = peakListView.peakList
+    listColour = pls.symbolColour
+    if listColour == '#':
+      listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+    listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
+    listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
+    listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
 
     if symbolType == 0:
       # for peak in pls.peaks:
@@ -2190,12 +2203,11 @@ void main()
                                                                       index, index+2, index+2, index+1,
                                                                       index, index+3, index+3, index+1], dtype=np.uint))
             else:
-              colour = peak.peakList.symbolColour
-              if colour == '#':
-                colour = peak.peakList.spectrum.positiveContourColour
-              colR = int(colour.strip('# ')[0:2], 16) / 255.0
-              colG = int(colour.strip('# ')[2:4], 16) / 255.0
-              colB = int(colour.strip('# ')[4:6], 16) / 255.0
+              # colour = peak.peakList.symbolColour
+              colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+              colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+              colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+
               drawList.indices = np.append(drawList.indices,
                                            np.array([index, index+1, index+2, index+3], dtype=np.uint))
             drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, fade] * numPoints
@@ -2241,12 +2253,10 @@ void main()
                                                               index + np2, index + np2 + 3,
                                                               index + np2 + 3, index + np2 + 1])
             else:
-              colour = peak.peakList.symbolColour
-              if colour == '#':
-                colour = peak.peakList.spectrum.positiveContourColour
-              colR = int(colour.strip('# ')[0:2], 16) / 255.0
-              colG = int(colour.strip('# ')[2:4], 16) / 255.0
-              colB = int(colour.strip('# ')[4:6], 16) / 255.0
+              # colour = peak.peakList.symbolColour
+              colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+              colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+              colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
 
             drawList.colors[offset*4:(offset+np2+5)*4] = [colR, colG, colB, fade] * (np2+5)
 
@@ -2286,12 +2296,10 @@ void main()
               _isSelected = True
               colR, colG, colB = self.highlightColour[:3]
             else:
-              colour = peak.peakList.symbolColour
-              if colour == '#':
-                colour = peak.peakList.spectrum.positiveContourColour
-              colR = int(colour.strip('# ')[0:2], 16) / 255.0
-              colG = int(colour.strip('# ')[2:4], 16) / 255.0
-              colB = int(colour.strip('# ')[4:6], 16) / 255.0
+              # colour = peak.peakList.symbolColour
+              colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+              colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+              colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
 
             drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [colR, colG, colB, fade] * (np2 + 5)
 
@@ -2422,7 +2430,7 @@ void main()
     else:
       colour = pls.symbolColour
       if colour == '#':
-        colour = pls.spectrum.positiveContourColour
+        colour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
@@ -2659,6 +2667,13 @@ void main()
       indexPtr = 0
 
       pls = peakListView.peakList
+      listColour = pls.symbolColour
+      if listColour == '#':
+        listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+      listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
+      listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
+      listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+
       spectrumFrequency = spectrum.spectrometerFrequencies
 
       for peak in pls.peaks:
@@ -2680,13 +2695,10 @@ void main()
         # if hasattr(peak, '_isSelected') and peak._isSelected:
           colR, colG, colB = self.highlightColour[:3]
         else:
-          colour = pls.symbolColour
-          if colour == '#':
-            colour = pls.spectrum.positiveContourColour
-
-          colR = int(colour.strip('# ')[0:2], 16)/255.0
-          colG = int(colour.strip('# ')[2:4], 16)/255.0
-          colB = int(colour.strip('# ')[4:6], 16)/255.0
+          # colour = pls.symbolColour
+          colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+          colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+          colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
 
         # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2            #len(self.axisOrder)
@@ -3005,7 +3017,7 @@ void main()
       else:
         colour = pls.textColour
         if colour == '#':
-          colour = pls.spectrum.positiveContourColour
+          colour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
 
         colR = int(colour.strip('# ')[0:2], 16) / 255.0
         colG = int(colour.strip('# ')[2:4], 16) / 255.0
@@ -3281,7 +3293,7 @@ void main()
       ils = integralListView.peakList
       colour = ils.symbolColour
       if colour == '#':
-        colour = ils.spectrum.positiveContourColour
+        colour = getattr(ils.spectrum, self.SPECTRUM_COLOUR)
 
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
@@ -5995,7 +6007,7 @@ void main()
       if integral.integralList == ils.integralListView.peakList:
         colour = ils.integralListView.symbolColour
         if colour == '#':
-          colour = ils.integralListView.peakList.spectrum.positiveContourColour
+          colour = getattr(ils.integralListView.peakList.spectrum, self.SPECTRUM_COLOUR)
 
         colR = int(colour.strip('# ')[0:2], 16) / 255.0
         colG = int(colour.strip('# ')[2:4], 16) / 255.0

@@ -170,20 +170,36 @@ def addNewColourString(colourString):
   newIndex = str(len(spectrumColours.items()) + 1)
   spectrumColours[colourString] = 'Colour %s' % newIndex
 
-def _setNewColour(self, colList, newCol:str):
+# def _setNewColour(colList, newCol:str):
+#
+#   # check if the colour is in the spectrumColours list
+#
+#   # check if colour is in you colList
+#
+#
+#   pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+#   pix.fill(QtGui.QColor(newCol))
+#
+#   # add the new colour to the spectrumColours dict
+#   newIndex = str(len(spectrumColours.items()) + 1)
+#   # spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+#   addNewColourString(newCol)
+#   if newCol not in colList.texts:
+#     colList.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+#     colList.setCurrentIndex(int(newIndex) - 1)
 
-  # check if the colour is in the spectrumColours list
+def fillColourPulldown(pulldown, allowAuto=False):
+  currText = pulldown.currentText()
+  # currIndex = pulldown.currentIndex()
+  # print ('>>>', currText, currIndex)
+  pulldown.clear()
+  for item in spectrumColours.items():
+    # if item[1] not in pulldown.texts:
+    if item[0] != '#':
+      pix=QtGui.QPixmap(QtCore.QSize(20, 20))
+      pix.fill(QtGui.QColor(item[0]))
+      pulldown.addItem(icon=QtGui.QIcon(pix), text=item[1])
+    elif allowAuto:
+      pulldown.addItem(text=item[1])
 
-  # check if colour is in you colList
-
-
-  pix = QtGui.QPixmap(QtCore.QSize(20, 20))
-  pix.fill(QtGui.QColor(newCol))
-
-  # add the new colour to the spectrumColours dict
-  newIndex = str(len(spectrumColours.items()) + 1)
-  # spectrumColours[newColour.name()] = 'Colour %s' % newIndex
-  addNewColourString(newCol)
-  if newCol not in colList.texts:
-    colList.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-    colList.setCurrentIndex(int(newIndex) - 1)
+  pulldown.setCurrentText(currText)

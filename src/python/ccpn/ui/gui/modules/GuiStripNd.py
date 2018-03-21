@@ -223,8 +223,8 @@ class GuiStripNd(GuiStrip):
     toolBarItems = [
        # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
       (tType.item, 'ToolBar',               'toolbarAction',          '',                         True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
-      (tType.item, 'Crosshair',             'crossHairAction',        '',                         True,   True,       self._toggleCrossHair,                'crossHairAction'),
-      (tType.item, 'Grid',                  'gridAction',             '',                         True,   True,       self.toggleGrid,                      'gridAction'),
+      (tType.item, 'Crosshair',             'crossHairAction',        '',                         True,   True,       self.spectrumDisplay.toggleCrossHair,                'crossHairAction'),
+      (tType.item, 'Grid',                  'gridAction',             '',                         True,   True,       self.spectrumDisplay.toggleGrid,                      'gridAction'),
 
       (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            True,   True,       self.spectrumDisplay.adjustContours, ''),
       (tType.actn, 'Cycle Peak Labels',     'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', True, True, self.cyclePeakLabelling, ''),
@@ -238,8 +238,8 @@ class GuiStripNd(GuiStrip):
       # (tType.actn, 'Restore Zoom',          'icons/zoom-restore',     'Restore Zoom',             True,   True,       self.spectrumDisplay._restoreZoom,    ''),
       (tType.actn, 'Reset Zoom',            'icons/zoom-full',        'Reset Zoom',               True,   True,       self.resetZoom,                       ''),
       (tType.sep, None, None, None, False, False, None, None),
-      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      self._updateTraces,                   'hTraceAction'),
-      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      self._updateTraces,                   'vTraceAction'),
+      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      self.toggleHorizontalTrace,                   'hTraceAction'),
+      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      self.toggleVerticalTrace,                   'vTraceAction'),
       (tType.actn, 'Enable Phasing Console',     None,                  'Enable Phasing Console',   True, True,   self.spectrumDisplay.togglePhaseConsole, ''),
       (tType.sep, None, None, None, False, False, None, None),
       # (tType.actn, 'Print to File...', 'icons/print', 'Print Spectrum Display to File', True, True,
@@ -310,7 +310,7 @@ class GuiStripNd(GuiStrip):
       (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',   True,   True,       self.spectrumDisplay.increaseTraceScale,''),
       (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',   True,   True,       self.spectrumDisplay.decreaseTraceScale,      ''),
       (tType.sep, None, None, None, False, False, None, None),
-      (tType.actn, 'Disable Phasing Console', None,                     'Disable phasing console',True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
+      (tType.actn, 'Exit Phasing Console', None,                     'Disable phasing console',True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
     ]
 
     for aType, aName, icon, tooltip, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
@@ -544,7 +544,7 @@ class GuiStripNd(GuiStrip):
     Toggles whether or not horizontal trace is displayed.
     """
     if not self.spectrumDisplay.phasingFrame.isVisible():
-      self.hTraceAction.setChecked(not self.hTraceAction.isChecked())
+      # self.hTraceAction.setChecked(not self.hTraceAction.isChecked())
       self._updateTraces()
 
   def toggleVerticalTrace(self):
@@ -552,7 +552,7 @@ class GuiStripNd(GuiStrip):
     Toggles whether or not vertical trace is displayed.
     """
     if not self.spectrumDisplay.phasingFrame.isVisible():
-      self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
+      # self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
       self._updateTraces()
 
   def toggleLastAxisOnly(self):

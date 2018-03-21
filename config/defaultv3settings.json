@@ -28,6 +28,7 @@
         "stripWidthZoomPercent": 10.0,
         "lastAxisOnly": true,
         "showGrid": true,
+        "showCrosshair": true,
         "matchAxisCode": 0,
         "restoreLayoutOnOpening":true,
         "lockAspectRatio": false,

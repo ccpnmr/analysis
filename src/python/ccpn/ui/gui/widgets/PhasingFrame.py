@@ -100,7 +100,8 @@ class PhasingFrame(Frame):
     
     if includeDirection:
       self.directionList = PulldownList(self, texts=directionTexts,
-                                        callback=lambda text: self.directionCallback(), grid=(0,9))
+                                        callback=None, grid=(0,9))
+      self.directionList.activated.connect(lambda text: self.directionCallback())
     else:
       self.directionList = None
 

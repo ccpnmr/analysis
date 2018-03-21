@@ -126,7 +126,7 @@ class GuiStrip(Frame):
                                                , QtWidgets.QSizePolicy.Expanding)
 
       # set the ID label in the new widget
-      self._testCcpnOpenGLWidget.stripIDLabel = '.'.join(self.id.split('.'))
+      self._testCcpnOpenGLWidget.setStripID('.'.join(self.id.split('.')))
       self._testCcpnOpenGLWidget.gridVisible = self.application.preferences.general.showGrid
 
     # self.plotWidgetOverlay = pg.PlotWidget(self, useOpenGL=useOpenGL)  #    make a copy
@@ -257,8 +257,22 @@ class GuiStrip(Frame):
                                        [GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
                                        self.spectrumDisplay._processDragEnterEvent)
 
-    # set peakLabelling to the default from preferences
-    self.peakLabelling = self.application.preferences.general.annotationType
+    # set peakLabelling to the default from preferences or strip to the left
+    if len(spectrumDisplay.strips) > 1:
+      self.peakLabelling = spectrumDisplay.strips[0].peakLabelling
+      self.peakSymbolType = spectrumDisplay.strips[0].peakSymbolType
+      self.peakSymbolSize = spectrumDisplay.strips[0].peakSymbolSize
+      self.peakSymbolThickness = spectrumDisplay.strips[0].peakSymbolThickness
+      self.gridVisible = spectrumDisplay.strips[0].gridVisible
+      self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
+    else:
+      self.peakLabelling = self.application.preferences.general.annotationType
+      self.peakSymbolType = self.application.preferences.general.peakSymbolType
+      self.peakSymbolSize = self.application.preferences.general.peakSymbolSize
+      self.peakSymbolThickness = self.application.preferences.general.peakSymbolThickness
+      self.gridVisible = self.application.preferences.general.showGrid
+      self.crosshairVisible = self.application.preferences.general.showCrosshair
+
     self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
 
     self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
@@ -331,7 +345,7 @@ class GuiStrip(Frame):
       self.setStripLabelText(callbackDict['object'].pid)
 
     try:
-      self._testCcpnOpenGLWidget.stripIDString(callbackDict['object'].pid)
+      self._testCcpnOpenGLWidget.setStripIDString(callbackDict['object'].pid)
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 
@@ -373,6 +387,12 @@ class GuiStrip(Frame):
 
     try:
       self._testCcpnOpenGLWidget.highlightCurrentStrip(self is self.current.strip)
+
+      # # spawn a redraw of the GL windows
+      # from ccpn.util.CcpnOpenGL import GLNotifier
+      # GLSignals = GLNotifier(parent=None)
+      # GLSignals.emitPaintEvent()
+
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 
@@ -537,8 +557,8 @@ class GuiStrip(Frame):
       self._newConsoleDirection = 0
     else:
       # TODO:ED remember trace direction
-      self._hTraceActive = self.hTraceAction.isChecked()
-      self._vTraceActive = self.vTraceAction.isChecked()
+      self._hTraceActive = self.spectrumDisplay.hTraceAction    # self.hTraceAction.isChecked()
+      self._vTraceActive = self.spectrumDisplay.vTraceAction    # self.vTraceAction.isChecked()
 
       # set to the first active or the remembered phasingDirection
       self._newConsoleDirection = phasingFrame.getDirection()
@@ -563,6 +583,10 @@ class GuiStrip(Frame):
     # TODO:ED remember direction
     self._newPosition = phasingFrame.pivotEntry.get()
     self._infiniteLine = self._testCcpnOpenGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')
+
+    if not self._infiniteLine:
+      getLogger().warning('no infiniteLine')
+      return
 
     if self._newConsoleDirection == 0:
       self._infiniteLine.orientation = ('v')
@@ -624,10 +648,10 @@ class GuiStrip(Frame):
       self._testCcpnOpenGLWidget.updateVTrace = False
     else:
       # TODO:ED remember trace direction
-      self.hTraceAction.setChecked(self._hTraceActive)
-      self.vTraceAction.setChecked(self._vTraceActive)
-      self._testCcpnOpenGLWidget.updateHTrace = self._hTraceActive
-      self._testCcpnOpenGLWidget.updateVTrace = self._vTraceActive
+      self.hTraceAction.setChecked(False)     #self._hTraceActive)
+      self.vTraceAction.setChecked(False)     #self._vTraceActive)
+      self._testCcpnOpenGLWidget.updateHTrace = False     #self._hTraceActive
+      self._testCcpnOpenGLWidget.updateVTrace = False     #self._vTraceActive
 
   def _changedPhasingDirection(self):
 
@@ -637,6 +661,9 @@ class GuiStrip(Frame):
     self._storedPhasingData[1-direction] = [phasingFrame.slider0.value(),
                                             phasingFrame.slider1.value(),
                                             phasingFrame.pivotEntry.get()]
+
+    if not phasingFrame.isVisible():
+      return
 
     if direction == 0:
       self.hPhasingPivot.setVisible(True)
@@ -763,7 +790,8 @@ class GuiStrip(Frame):
       self.plotWidget.crossHair2.toggle()
 
     try:
-      self._testCcpnOpenGLWidget.toggleCrossHair()
+      self.crosshairVisible = not self.crosshairVisible
+      self._testCcpnOpenGLWidget.crossHairVisible = self.crosshairVisible
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -774,6 +802,7 @@ class GuiStrip(Frame):
     #   self.plotWidget.crossHair2.show()
 
     try:
+      self.crosshairVisible = True
       self._testCcpnOpenGLWidget.crossHairVisible = True
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
@@ -785,6 +814,7 @@ class GuiStrip(Frame):
     #   self.plotWidget.crossHair2.hide()
 
     try:
+      self.crosshairVisible = False
       self._testCcpnOpenGLWidget.crossHairVisible = False
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
@@ -794,7 +824,8 @@ class GuiStrip(Frame):
     self.plotWidget.toggleGrid()
 
     try:
-      self._testCcpnOpenGLWidget.toggleGrid()
+      self.gridVisible = not self.gridVisible
+      self._testCcpnOpenGLWidget.gridVisible = self.gridVisible
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -808,8 +839,31 @@ class GuiStrip(Frame):
       for sV in self.spectrumViews:
 
         for peakListView in sV.peakListViews:
-          peakListView.buildPeakLists = True
+          # peakListView.buildPeakLists = True
           peakListView.buildPeakListLabels = True
+
+      # spawn a redraw of the GL windows
+      from ccpn.util.CcpnOpenGL import GLNotifier
+      GLSignals = GLNotifier(parent=None)
+      GLSignals.emitPaintEvent()
+
+  def cyclePeakSymbols(self):
+    "Toggles whether peak labelling is minimal is visible in the strip."
+    self.peakSymbolType += 1
+    if self.peakSymbolType > 2:
+      self.peakSymbolType = 0
+
+    if self.spectrumViews:
+      for sV in self.spectrumViews:
+
+        for peakListView in sV.peakListViews:
+          peakListView.buildPeakLists = True
+          # peakListView.buildPeakListLabels = True
+
+      # spawn a redraw of the GL windows
+      from ccpn.util.CcpnOpenGL import GLNotifier
+      GLSignals = GLNotifier(parent=None)
+      GLSignals.emitPaintEvent()
 
       # old code from plotWidget
         # for peakList in sV.spectrum.peakLists:

@@ -139,7 +139,7 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu.addAction(self.stackAction)
     self.contextMenu.addSeparator()
 
-    self.gridAction = QtWidgets.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
+    self.gridAction = QtWidgets.QAction("Grid", self, triggered=self.spectrumDisplay.toggleGrid, checkable=True)
     # if self.gridShown:
     #   self.gridAction.setChecked(True)
     # else:
@@ -150,7 +150,7 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu.addAction(self.gridAction)
     self.contextMenu.addSeparator()
 
-    self.contextMenu.addItem("Enable Phasing Console", callback=self.spectrumDisplay.togglePhaseConsole)
+    self.contextMenu.addItem("Enter Phasing Console", callback=self.spectrumDisplay.togglePhaseConsole)
 
     self.contextMenu.addSeparator()
     self.contextMenu.addAction("Print to File...", self.showExportDialog)
@@ -175,7 +175,7 @@ class GuiStrip1d(GuiStrip):
       # (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',   True,   True,       self.spectrumDisplay._increaseTraceScale,''),
       # (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',   True,   True,       self.spectrumDisplay._decreaseTraceScale,      ''),
       (tType.sep, None, None, None, False, False, None, None),
-      (tType.actn, 'Disable Phasing Console', None,                     'Disable phasing console',True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
+      (tType.actn, 'Exit Phasing Console', None,                     'Disable phasing console',True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
     ]
 
     for aType, aName, icon, tooltip, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions

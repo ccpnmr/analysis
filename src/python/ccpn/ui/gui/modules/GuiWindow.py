@@ -91,6 +91,7 @@ class GuiWindow():
     QtWidgets.QShortcut(QtGui.QKeySequence("z, i"), self, self.zoomIn, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("z, o"), self, self.zoomOut, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("p, l"), self, self.cyclePeakLabelling, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("c, s"), self, self.cyclePeakSymbols, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
 
   def _setUserShortcuts(self, preferences=None, mainWindow=None):
@@ -455,6 +456,15 @@ class GuiWindow():
     """
     if self.current.strip:
       self.current.strip.spectrumDisplay._cyclePeakLabelling()
+    else:
+      getLogger().warning('No current strip. Select a strip first.')
+
+  def cyclePeakSymbols(self):
+    """
+    restore the zoom of the currently selected strip to the top item of the queue
+    """
+    if self.current.strip:
+      self.current.strip.spectrumDisplay._cyclePeakSymbols()
     else:
       getLogger().warning('No current strip. Select a strip first.')
 

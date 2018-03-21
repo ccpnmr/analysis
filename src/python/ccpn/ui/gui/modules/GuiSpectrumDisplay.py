@@ -526,6 +526,11 @@ class GuiSpectrumDisplay(CcpnModule):
     for strip in self.strips:
       strip._changedPhasingDirection()
 
+  def updateSpectrumTraces(self):
+    """Add traces to all strips"""
+    for strip in self.strips:
+      strip._updateTraces()
+
   def _applyPhasing(self, phasingValues):
     """apply the phasing values here
     phasingValues is a dict:
@@ -541,11 +546,23 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     pass
 
+  def toggleHTrace(self):
+    for strip in self.strips:
+      strip.toggleHorizontalTrace()
+
+  def toggleVTrace(self):
+    for strip in self.strips:
+      strip.toggleVerticalTrace()
+
   def togglePhaseConsole(self):
     """Toggles whether phasing console is displayed.
     """
     isVisible = not self.phasingFrame.isVisible()
     self.phasingFrame.setVisible(isVisible)
+
+    self.hTraceAction = self.current.strip.hTraceAction.isChecked()
+    self.vTraceAction = self.current.strip.vTraceAction.isChecked()
+
     for strip in self.strips:
       if isVisible:
         strip.turnOnPhasing()
@@ -874,14 +891,40 @@ class GuiSpectrumDisplay(CcpnModule):
       if not self.current.strip:
         showWarning('Cycle Peak Labelling', 'No strip selected')
         return
-      if self.current.strip not in self.strips:
-        showWarning('Cycle Peak Labelling', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-                    % (self.current.strip.pid, self.pid))
-        return
-      else:
-        self.current.strip.cyclePeakLabelling()
+
+      # if self.current.strip not in self.strips:
+      #   showWarning('Cycle Peak Labelling', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+      #               % (self.current.strip.pid, self.pid))
+      #   return
+      # else:
+      #   self.current.strip.cyclePeakLabelling()
+
+      for strip in self.strips:
+        strip.cyclePeakLabelling()
+
+
     except:
       getLogger().warning('Error cycling peak labelling')
+
+  def _cyclePeakSymbols(self):
+    """toggles peak labelling of current strip."""
+    try:
+      if not self.current.strip:
+        showWarning('Cycle Peak Symbols', 'No strip selected')
+        return
+
+      # if self.current.strip not in self.strips:
+      #   showWarning('Cycle Peak ymbols', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+      #               % (self.current.strip.pid, self.pid))
+      #   return
+      # else:
+      #   self.current.strip.cyclePeakLabelling()
+
+      for strip in self.strips:
+        strip.cyclePeakSymbols()
+    except:
+      getLogger().warning('Error cycling peak symbols')
+
 
   def _deletedPeak(self, peak):
     apiPeak = peak._wrappedData

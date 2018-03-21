@@ -374,6 +374,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.stripIDLabel = stripIDLabel if stripIDLabel else ''
     self.stripIDString = None
     self._spectrumSettings = {}
+    self._newStripID = False
 
     # TODO:ED fix this to get the correct colours
     if self._parent.spectrumDisplay.mainWindow.application.colourScheme == 'light':
@@ -393,7 +394,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self._preferences = self._parent.application.preferences.general
 
-    self._peakLabelling = self._preferences.annotationType
+    # self._peakLabelling = self._preferences.annotationType
+    # self._peakSymbols = self._parent.peakSymbolType
+
     self._gridVisible = self._preferences.showGrid
     self._updateHTrace = False
     self._updateVTrace = False
@@ -431,9 +434,9 @@ class CcpnGLWidget(QOpenGLWidget):
     w = self.w
     h = self.h
 
-    # symbolType = self._preferences.peakSymbolType
-    symbolWidth = self._preferences.peakSymbolSize / 2.0
-    # lineThickness = self._preferences.peakSymbolThickness / 2.0
+    # symbolType = self._parent.peakSymbolType
+    symbolWidth = self._parent.peakSymbolSize / 2.0
+    # lineThickness = self._parent.peakSymbolThickness / 2.0
 
     currentShader = self._shaderProgram1.makeCurrent()
 
@@ -999,6 +1002,8 @@ class CcpnGLWidget(QOpenGLWidget):
     # spawn rebuild event for the grid
     for li in self.gridList:
       li.renderMode = GLRENDERMODE_REBUILD
+    # self.buildGrid()
+    # self.buildAxisLabels()
 
     if self._axisLocked:
       # ratios have changed so rescale the peaks symbols
@@ -1603,6 +1608,8 @@ void main()
     self._lockStringTrue = GLString(text='Lock', font=self.glSmallFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
     self._axisLocked = False
 
+    self.stripIDString = GLString(text='', font=self.glSmallFont, x=0, y=0, GLContext=self, object=None)
+
     # This is the correct blend function to ignore stray surface blending functions
     GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
     self.setBackgroundColour(self.background)
@@ -1758,6 +1765,13 @@ void main()
         self.mousePressInIntegralLists()
 
     self.current.strip = self._parent
+    self.update()
+
+    # # spawn rebuild event for the grid
+    # for li in self.gridList:
+    #   li.renderMode = GLRENDERMODE_REBUILD
+    # self.buildGrid()
+    # self.buildAxisLabels()
 
   def mouseReleaseEvent(self, ev):
     self._clearAndUpdate()
@@ -1998,8 +2012,8 @@ void main()
     # strip = self._parent
 
     # pls = peakListView.peakList
-    symbolType = self._preferences.peakSymbolType
-    symbolWidth = self._preferences.peakSymbolSize / 2.0
+    symbolType = self._parent.peakSymbolType
+    symbolWidth = self._parent.peakSymbolSize / 2.0
     x = abs(self.pixelX)
     y = abs(self.pixelY)
 
@@ -2041,8 +2055,8 @@ void main()
 
     # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
-    symbolType = self._preferences.peakSymbolType
-    symbolWidth = self._preferences.peakSymbolSize / 2.0
+    symbolType = self._parent.peakSymbolType
+    symbolWidth = self._parent.peakSymbolSize / 2.0
     x = abs(self.pixelX)
     y = abs(self.pixelY)
 
@@ -2157,9 +2171,9 @@ void main()
     spectrum = spectrumView.spectrum
     strip = self._parent
 
-    symbolType = self._preferences.peakSymbolType
-    symbolWidth = self._preferences.peakSymbolSize / 2.0
-    lineThickness = self._preferences.peakSymbolThickness / 2.0
+    symbolType = self._parent.peakSymbolType
+    symbolWidth = self._parent.peakSymbolSize / 2.0
+    lineThickness = self._parent.peakSymbolThickness / 2.0
 
     drawList = self._GLPeakLists[peakListView]
     drawList.indices = np.empty(0, dtype=np.uint)
@@ -2310,7 +2324,7 @@ void main()
         index += np2 + 5
 
   def _removePeakListItem(self, spectrumView, peakListView, delPeak):
-    symbolType = self._preferences.peakSymbolType
+    symbolType = self._parent.peakSymbolType
 
     drawList = self._GLPeakLists[peakListView]
 
@@ -2362,9 +2376,9 @@ void main()
     # find the correct scale to draw square pixels
     # don't forget to change when the axes change
 
-    symbolType = self._preferences.peakSymbolType
-    symbolWidth = self._preferences.peakSymbolSize / 2.0
-    lineThickness = self._preferences.peakSymbolThickness / 2.0
+    symbolType = self._parent.peakSymbolType
+    symbolWidth = self._parent.peakSymbolSize / 2.0
+    lineThickness = self._parent.peakSymbolThickness / 2.0
 
     x = abs(self.pixelX)
     y = abs(self.pixelY)
@@ -2629,8 +2643,8 @@ void main()
       # find the correct scale to draw square pixels
       # don't forget to change when the axes change
 
-      symbolType = self._preferences.peakSymbolType
-      symbolWidth = self._preferences.peakSymbolSize / 2.0
+      symbolType = self._parent.peakSymbolType
+      symbolWidth = self._parent.peakSymbolSize / 2.0
 
       x = abs(self.pixelX)
       y = abs(self.pixelY)
@@ -2966,7 +2980,7 @@ void main()
     spectrumFrequency = spectrum.spectrometerFrequencies
     pls = peakListView.peakList
 
-    symbolWidth = self._preferences.peakSymbolSize / 2.0
+    symbolWidth = self._parent.peakSymbolSize / 2.0
 
     p0 = [0.0] * 2  # len(self.axisOrder)
     lineWidths = [None] * 2  # len(self.axisOrder)
@@ -3054,7 +3068,7 @@ void main()
       drawList.clearArrays()
       drawList.stringList = []
 
-      # symbolWidth = self._preferences.peakSymbolSize / 2.0
+      # symbolWidth = self._parent.peakSymbolSize / 2.0
 
       pls = peakListView.peakList
       # spectrumFrequency = spectrum.spectrometerFrequencies
@@ -3175,7 +3189,7 @@ void main()
 
     currentShader = self._shaderProgramTex.makeCurrent()
 
-    if self._crossHairVisible:
+    if self._parent.crosshairVisible:
       self.drawMouseCoords()
 
     self.drawOverlayText()
@@ -3232,10 +3246,6 @@ void main()
   def buildAll(self):
     for spectrumView in self._parent.spectrumViews:
       spectrumView.buildContours = True
-
-    # self.buildSpectra()
-    # self.buildAxisLabels()
-    # self.buildGrid()
 
   def buildSpectra(self):
     if self._parent.isDeleted:
@@ -3394,7 +3404,7 @@ void main()
 
     self.buildPeakLists()
 
-    lineThickness = self._preferences.peakSymbolThickness
+    lineThickness = self._parent.peakSymbolThickness
     GL.glLineWidth(lineThickness)
 
     # loop through the attached peakListViews to the strip
@@ -3524,7 +3534,7 @@ void main()
     self.buildGrid()
     GL.glEnable(GL.GL_BLEND)
 
-    if self._gridVisible:
+    if self._parent.gridVisible:
       self.viewports.setViewport(self._currentView)
       # self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
       self.gridList[0].drawIndexArray()
@@ -4091,7 +4101,7 @@ void main()
 
     # add cursors to marks?
 
-    if self._crossHairVisible and (not self._updateHTrace or not self._updateVTrace):
+    if self._parent.crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
       GL.glBegin(GL.GL_LINES)
 
       # TODO:ED may want to put other icons for other modes
@@ -4111,12 +4121,12 @@ void main()
       else:
         GL.glColor4f(*self.foreground)
 
-      if not self._updateVTrace:
-        GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
-        GL.glVertex2d(self.cursorCoordinate[0], self.axisB)
-      if not self._updateHTrace:
-        GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
-        GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
+      # if not self._updateVTrace:
+      GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
+      GL.glVertex2d(self.cursorCoordinate[0], self.axisB)
+      # if not self._updateHTrace:
+      GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
+      GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
 
       GL.glEnd()
 
@@ -4162,17 +4172,28 @@ void main()
 
     GL.glDisable(GL.GL_LINE_STIPPLE)
 
+  def _buildStripID(self):
+    pass
+
+  def setStripID(self, name):
+    self.stripIDLabel = name
+    self._newStripID = True
+
   def drawOverlayText(self, refresh=False):
     """
     draw extra information to the screen
     """
     # cheat for the moment
-    if self.highlighted:
-      colour = self.highlightColour
-    else:
-      colour = self.foreground
+    if self._newStripID or self.stripIDString.renderMode == GLRENDERMODE_REBUILD:
+      self.stripIDString.renderMode = GLRENDERMODE_DRAW
+      self._newStripID = False
 
-    if refresh or self.stripIDLabel != self._oldStripIDLabel:
+      if self.highlighted:
+        colour = self.highlightColour
+      else:
+        colour = self.foreground
+
+      # if refresh or self.stripIDLabel != self._oldStripIDLabel:
       self.stripIDString = GLString(text=self.stripIDLabel
                                   , font=self.glSmallFont
                                   , x=self.axisL+(10.0*self.pixelX)
@@ -4180,6 +4201,7 @@ void main()
                                   # self._screenZero[0], y=self._screenZero[1]
                                   , color=colour, GLContext=self
                                   , object=None)
+
       self._oldStripIDLabel = self.stripIDLabel
 
     # draw the strip ID to the screen
@@ -4602,7 +4624,7 @@ void main()
       y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
           np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
-      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      colour = getattr(spectrumView.spectrum, self.SPECTRUM_COLOUR)    #spectrumView._getColour('sliceColour', '#aaaaaa')
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
@@ -4642,7 +4664,7 @@ void main()
       x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
           np.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
 
-      colour = spectrumView._getColour('sliceColour', '#aaaaaa')
+      colour = getattr(spectrumView.spectrum, self.SPECTRUM_COLOUR)    #spectrumView._getColour('sliceColour', '#aaaaaa')
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
@@ -4839,6 +4861,10 @@ void main()
     # only paint if mouse is in the window
     if self.underMouse():
       # self.updateTraces()
+
+    # spawn rebuild/paint of traces
+    # if self._updateHTrace or self._updateVTrace:
+    #   self.updateTraces()
 
       deleteHList = []
       if self._updateHTrace:
@@ -5170,22 +5196,27 @@ void main()
     if current:
       self.highlighted = True
 
-      self.drawOverlayText(refresh=True)
       for gr in self.gridList:
         gr.renderMode = GLRENDERMODE_REBUILD
-      self.buildGrid()
-      self.buildAxisLabels()
+      # self.buildGrid()
+      # self.buildAxisLabels()
+
+      self.stripIDString.renderMode = GLRENDERMODE_REBUILD
+      # self.drawOverlayText(refresh=True)
 
       # set axes colour
       # set stripIDStringcolour
       # set to self.highLightColour
     else:
       self.highlighted = False
-      self.drawOverlayText(refresh=True)
+
       for gr in self.gridList:
         gr.renderMode = GLRENDERMODE_REBUILD
-      self.buildGrid()
-      self.buildAxisLabels()
+      # self.buildGrid()
+      # self.buildAxisLabels()
+
+      self.stripIDString.renderMode = GLRENDERMODE_REBUILD
+      # self.drawOverlayText(refresh=True)
 
       # set axes colour
       # set stripIDStringcolour
@@ -5206,6 +5237,7 @@ void main()
     labelsChanged = False
 
     if gridGLList.renderMode == GLRENDERMODE_REBUILD:
+      # print ('>>>', gridGLList)
       dim = [self.width(), self.height()]
 
       ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
@@ -5461,7 +5493,9 @@ void main()
       self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
       # only need to redraw if we can see the cursor
-      if self._crossHairVisible:
+      if self._parent.crosshairVisible:   # or self._updateVTrace or self._updateHTrace:
+        # if self._updateVTrace or self._updateHTrace:
+        #   self.updateTraces()
         self.update()
 
   @pyqtSlot(dict)
@@ -5684,7 +5718,7 @@ void main()
     self.update()
 
   def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
-    self.current.strip = self._parent
+    # self.current.strip = self._parent
     xPosition = self.cursorCoordinate[0]          # self.mapSceneToView(event.pos()).x()
     yPosition = self.cursorCoordinate[1]          # self.mapSceneToView(event.pos()).y()
     self.current.positions = [xPosition, yPosition]

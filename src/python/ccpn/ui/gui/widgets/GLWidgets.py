@@ -63,6 +63,8 @@ REGION_COLOURS = {
 class GuiNdWidget(CcpnGLWidget):
 
   is1D = False
+  INVERTXAXIS = False
+  INVERTYAXIS = False
   SPECTRUM_COLOUR = 'positiveContourColour'
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):

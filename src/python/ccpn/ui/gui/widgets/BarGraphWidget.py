@@ -244,20 +244,20 @@ class BarGraphWidget(Widget, Base):
 #######################################################################################################
 ####################################      Mock DATA TESTING    ########################################
 #######################################################################################################
-
-from collections import namedtuple
-import random
-
-nmrResidues = []
-for i in range(30):
-  nmrResidue = namedtuple('nmrResidue', ['sequenceCode','peaksShifts'])
-  nmrResidue.__new__.__defaults__ = (0,)
-  nmrResidue.sequenceCode = i
-  nmrResidue.peaksShifts = random.uniform(1.5, 3.9)
-  nmrResidues.append(nmrResidue)
-
-nmrChain = namedtuple('nmrChain', ['nmrResidues'])
-nmrChain.nmrResidues = nmrResidues
+#
+# from collections import namedtuple
+# import random
+#
+# nmrResidues = []
+# for i in range(30):
+#   nmrResidue = namedtuple('nmrResidue', ['sequenceCode','peaksShifts'])
+#   nmrResidue.__new__.__defaults__ = (0,)
+#   nmrResidue.sequenceCode = i
+#   nmrResidue.peaksShifts = random.uniform(1.5, 3.9)
+#   nmrResidues.append(nmrResidue)
+#
+# nmrChain = namedtuple('nmrChain', ['nmrResidues'])
+# nmrChain.nmrResidues = nmrResidues
 
 
 

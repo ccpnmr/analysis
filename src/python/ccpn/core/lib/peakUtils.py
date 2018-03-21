@@ -29,7 +29,7 @@ from ccpn.util.Logging import getLogger
 POSITIONS = 'positions'
 HEIGHT = 'height'
 VOLUME = 'volume'
-LINEWIDTHS = 'lineWhidths'
+LINEWIDTHS = 'lineWidths'
 
 MODES = [POSITIONS, HEIGHT, VOLUME, LINEWIDTHS]
 

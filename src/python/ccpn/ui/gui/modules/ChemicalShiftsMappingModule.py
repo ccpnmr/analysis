@@ -37,7 +37,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox , CustomLabel
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
@@ -53,15 +53,13 @@ from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
 from ccpn.util.Scripting import getScriptsDirectoryPath
-from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME
+from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.util import Colour
 import random
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
@@ -94,13 +92,12 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
 
   return filePath
 
-DefaultAtoms = ['H', 'N']
-DefaultAtomWeight = {'H':7.00, 'N':1.00, 'C':4.00, 'Other':1.00}
 DefaultThreshould = 0.1
 LightColourSchemeCurrentLabel = '#3333ff'
 DarkColourSchemeCurrentLabel = '#00ff00'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 
+MORE, LESS = 'More', 'Less'
 
 class CustomNmrResidueTable(NmrResidueTable):
   """
@@ -217,23 +214,23 @@ class ChemicalShiftsMapping(CcpnModule):
       self.application = self.mainWindow.application
       self.current = self.application.current
 
-      if len(self.project.nmrResidues):
-
-        for i in self.project.nmrResidues:
-          for atom in i.nmrAtoms:
-            # self.atoms.add(atom.name)
-            if 'N' in atom.name:
-              self.Natoms.add(atom.name)
-              self.atomNames.append('N')
-            if 'H' in atom.name:
-              self.Hatoms.add(atom.name)
-              self.atomNames.append('H')
-            if 'C' in atom.name:
-              self.Hatoms.add(atom.name)
-              self.atomNames.append('C')
-            else:
-              self.OtherAtoms.add(atom.name)
-              self.atomNames.append('Others')
+      # if len(self.project.nmrResidues):
+      #
+      #   for i in self.project.nmrResidues:
+      #     for atom in i.nmrAtoms:
+      #       # self.atoms.add(atom.name)
+      #       if 'N' in atom.name:
+      #         self.Natoms.add(atom.name)
+      #         self.atomNames.append('N')
+      #       if 'H' in atom.name:
+      #         self.Hatoms.add(atom.name)
+      #         self.atomNames.append('H')
+      #       if 'C' in atom.name:
+      #         self.Hatoms.add(atom.name)
+      #         self.atomNames.append('C')
+      #       else:
+      #         self.OtherAtoms.add(atom.name)
+      #         self.atomNames.append('Others')
 
 
     self.thresholdLinePos = DefaultThreshould
@@ -261,7 +258,26 @@ class ChemicalShiftsMapping(CcpnModule):
       if self.project:
         if len(self.project.nmrChains) > 0:
           self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
+          self._updateNmrAtomsOption()
           self._setThresholdLineBySTD()
+
+
+  def _availableNmrAtoms(self, nmrAtomType = None):
+    '''
+    returns sorted nmrAtoms names present in nmrResidues of the selected  nmrChain.
+    '''
+    nmrAtoms = []
+    if self.nmrResidueTable._nmrChain:
+      for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
+        nmrAtoms += nmrResidue.nmrAtoms
+    if len(nmrAtoms)>0:
+      availableNmrAtoms =  list(set([nmrAtom.name for nmrAtom in nmrAtoms]))
+      allAvailable = sorted(availableNmrAtoms, key=CcpnSorting.stringSortKey)
+      if nmrAtomType:
+        return [na for na in allAvailable if na.startswith(nmrAtomType) ]
+      else:
+        return allAvailable
+    return []
 
   def _setWidgets(self):
     self.nmrResidueTable = None
@@ -309,16 +325,103 @@ class ChemicalShiftsMapping(CcpnModule):
       if not any(lsts):
         cb.setChecked(False)
 
+  def _addMoreNmrAtomsForAtomType(self, nmrAtomsNames, widget):
+    '''
+
+    :param widget: Widget where to add the option. EG frame
+    :return:
+    '''
+    print(nmrAtomsNames)
+    regioncount = 0
+    totalCount  = len(nmrAtomsNames)
+    valueCount = int(len(nmrAtomsNames) / 2)
+    if totalCount>0:
+      positions = [(i + regioncount, j) for i in range(valueCount+1)
+                        for j in range(2)]
+
+      for position, nmrAtomName in zip(positions, nmrAtomsNames):
+        extraNmrAtom = CheckBox(widget, text=nmrAtomName, grid=position)
+        print(nmrAtomName, position)
+
+  def _toggleMoreNmrAtoms(self, widget):
+    if self.sender():
+      name = self.sender().text()
+      if widget.isHidden():
+        self.sender().setText(name.replace(MORE,LESS))
+        widget.show()
+        print('Needs to Show')
+      else:
+        self.sender().setText(name.replace(LESS,MORE))
+        widget.hide()
+        print('Needs to hide')
+
+  def _updateNmrAtomsOption(self ):
+    i = 0
+    availableNmrAtoms = self._availableNmrAtoms()
+
+    for name, value in DefaultAtomWeights.items():
+      atomFrame = Frame(self.nmrAtomsFrame, setLayout=True, grid=(i, 1))
+      hFrame = 0
+      vFrame = 0
+      labelRelativeContribution = Label(atomFrame, text='%s Relative Contribution' % name, grid=(vFrame, hFrame))
+      hFrame +=1
+      self.atomWeightSpinBox = DoubleSpinbox(atomFrame, value=DefaultAtomWeights[name],
+                                             prefix=str('Weight' + (' ' * 2)), grid=(vFrame, hFrame),
+                                             tipText='Relative Contribution for the selected nmrAtom')
+      self.atomWeightSpinBox.setObjectName(name)
+      self.atomWeightSpinBox.setMaximumWidth(150)
+      self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
+
+      vFrame += 1
+      self.commonAtomsFrame = Frame(atomFrame, setLayout=True, grid=(vFrame, 0))
+      # add the first three of ccpn Sorted.
+      vFrame += 1
+      self.scrollAreaMoreNmrAtoms = ScrollArea(atomFrame, setLayout=False, grid=(vFrame, 0))
+      self.scrollAreaMoreNmrAtoms.setWidgetResizable(True)
+      self.moreOptionFrame = Frame(self, setLayout=True,  )
+      self.scrollAreaMoreNmrAtoms.setWidget(self.moreOptionFrame)
+      self.moreOptionFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+      self.scrollAreaMoreNmrAtoms.hide()
+      self.moreButton = Button(atomFrame, 'More %s NmrAtoms' % name,
+                          callback=partial(self._toggleMoreNmrAtoms,self.scrollAreaMoreNmrAtoms),  grid=(vFrame, hFrame), hAlign='l', )
+      self.moreButton.hide()
+
+      availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
+      n = 0
+      if len(availableNmrAtomsForType)<3:
+        for nmrAtomName in availableNmrAtomsForType:
+          self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+          n += 1
+      else:
+        for nmrAtomName in availableNmrAtomsForType[:3]:
+          self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+          n += 1
+
+        self.moreButton.show()
+        self._addMoreNmrAtomsForAtomType(availableNmrAtomsForType[2:], self.moreOptionFrame)
+
+      vFrame += 1
+      ## Scrollable area where to add more atoms
+
+      i +=1
+
+
+      if name not in availableNmrAtoms:
+        atomFrame.hide()
+
+
   def _setSettingsWidgets(self):
 
     self.scrollArea = ScrollArea(self, setLayout=False, )
     self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = Frame(self, setLayout=True)
+    self.scrollAreaWidgetContents = Frame(self, setLayout=True, )
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
     # self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
     self.settingsWidget.getLayout().addWidget(self.scrollArea)
     self.scrollArea.setContentsMargins(10, 10, 10, 15) #l,t,r,b
     self.scrollAreaWidgetContents.setContentsMargins(10, 10, 10, 15) #l,t,r,b
+    # self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+    self.scrollAreaWidgetContents.getLayout().setSpacing(10)
 
     i = 0
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
@@ -329,50 +432,15 @@ class ChemicalShiftsMapping(CcpnModule):
     i += 1
     self.modeLabel = Label(self.scrollAreaWidgetContents, text='Calculation mode ', grid=(i, 0))
     self.modeButtons = RadioButtons(self.scrollAreaWidgetContents, selectedInd=0, texts=MODES, callback=self._toggleRelativeContribuitions, grid=(i, 1))
-    i += 2
-    self.atomWeightLabel = Label(self.scrollAreaWidgetContents, text='Relative Contribution ', grid=(i, 0))
-    j = 0
-
-    self._scrollAreaSpinBoxFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
     i += 1
 
-    # original by Luca
-    # for k in sorted(DefaultAtomWeight.keys(), key=CcpnSorting.stringSortKey):
-    #   if k in self.atomNames:
-    #     j += 1
-    #     # weightLabel = Label(self.scrollAreaWidgetContents, text=str(k), grid=(i, j), hAlign='l')
-    #     self.atomWeightSpinBox = Spinbox(self.scrollAreaWidgetContents, value=DefaultAtomWeight[k],
-    #                                      prefix=str(k+(' '*10)), grid=(i,j), hAlign='l')
-    #     self.atomWeightSpinBox.setObjectName(str(k))
-    #     self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
-    #     j += 1
 
-    # slight change by Ed
-    j = 0
-    for k in sorted(DefaultAtomWeight.keys(), key=CcpnSorting.stringSortKey):
-      if k in self.atomNames:
-        self.atomWeightSpinBox = DoubleSpinbox(self._scrollAreaSpinBoxFrame, value=DefaultAtomWeight[k],
-                                         prefix=str(k+(' '*10)), grid=(0, j), hAlign='l')
-        self.atomWeightSpinBox.setObjectName(str(k))
-        self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
-        j += 1
+    self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select Nmr Atoms', grid=(i, 0))
+    self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
 
+    self._updateNmrAtomsOption()
     i += 1
-    self.atomLabel = Label(self.scrollAreaWidgetContents,text='Select Atoms', grid=(i,0))
-    col = 1
-    if len(self.Hatoms)>0:
-      self._addAtomCheckBoxes(self.Hatoms, i, col)
-      col += 1
-    if len(self.Natoms)>0:
-      self._addAtomCheckBoxes(self.Natoms, i, col)
-      col += 1
-    if len(self.Catoms)>0:
-      self._addAtomCheckBoxes(self.Catoms, i, col)
-      col += 1
-    if len(self.OtherAtoms)>0:
-      self._addAtomCheckBoxes(self.Catoms, i, col)
-      col += 1
-    i = max([len(self.Hatoms),len(self.Natoms),len(self.Catoms),len(self.OtherAtoms)])
+
 
     i += 1
     self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
@@ -440,28 +508,30 @@ class ChemicalShiftsMapping(CcpnModule):
     i += 1
 
     self.updateButton = Button(self.scrollAreaWidgetContents, text='Update All', callback=self.updateModule,
-                               grid=(i, 1),  gridSpan=(i, 2))
+                               grid=(i, 1))
     i += 1
-    Spacer(self.scrollAreaWidgetContents, 3, 3
-           , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-           , grid=(i,3), gridSpan=(1,1))
+    # Spacer(self.scrollAreaWidgetContents, 3, 3
+    #        , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
+    #        , grid=(i,3), gridSpan=(1,1))
 
   def _toggleRelativeContribuitions(self):
     value = self.modeButtons.getSelectedText()
     if value == HEIGHT or value ==  VOLUME:
-      self.atomWeightLabel.hide()
-      self._scrollAreaSpinBoxFrame.hide()
-      self.atomLabel.hide()
-      for i in self.atomWeightSpinBoxes: i.hide()
-      for i in self.atomRadioButtons: i.hide()
+      print('Refactoring')
+      # self.atomWeightLabel.hide()
+      # self._scrollAreaSpinBoxFrame.hide()
+      # self.atomLabel.hide()
+      # for i in self.atomWeightSpinBoxes: i.hide()
+      # for i in self.atomRadioButtons: i.hide()
 
 
     else:
-      self.atomWeightLabel.show()
-      self._scrollAreaSpinBoxFrame.show()
-      self.atomLabel.show()
-      for i in self.atomWeightSpinBoxes: i.show()
-      for i in self.atomRadioButtons: i.show()
+      print('Refactoring')
+      # self.atomWeightLabel.show()
+      # self._scrollAreaSpinBoxFrame.show()
+      # self.atomLabel.show()
+      # for i in self.atomWeightSpinBoxes: i.show()
+      # for i in self.atomRadioButtons: i.show()
 
   def _setThresholdLineBySTD(self):
     nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())
@@ -476,10 +546,10 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _addAtomCheckBoxes(self, atoms, rowPos, colPos ):
     texts = sorted(atoms, key=CcpnSorting.stringSortKey)
-    self.atomRadioButton = RadioButtons(self.scrollAreaWidgetContents, texts=texts, direction='v', grid=(rowPos, colPos))
-    self.atomRadioButtons.append(self.atomRadioButton)
+    self.atomSelection = RadioButtons(self.scrollAreaWidgetContents, exclusive=False, texts=texts, direction='v', grid=(rowPos, colPos))
+    self.atomRadioButtons.append(self.atomSelection)
     if len(texts)>0:
-      self.atomRadioButton.radioButtons[0].setChecked(True)
+      self.atomSelection.radioButtons[0].setChecked(True)
 
   def updateTable(self, nmrChain):
     self.nmrResidueTable.ncWidget.select(nmrChain.pid)
@@ -859,6 +929,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                              )
              else:
                getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
+
 
   def close(self):
     """

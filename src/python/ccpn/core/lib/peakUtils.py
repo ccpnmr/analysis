@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import numpy as np
 from ccpn.util.Logging import getLogger
-
+from collections import OrderedDict
 
 POSITIONS = 'positions'
 HEIGHT = 'height'
@@ -32,6 +32,11 @@ VOLUME = 'volume'
 LINEWIDTHS = 'lineWidths'
 
 MODES = [POSITIONS, HEIGHT, VOLUME, LINEWIDTHS]
+OTHER = 'Other'
+H = 'H'
+N = 'N'
+C = 'C'
+DefaultAtomWeights = OrderedDict(((H, 7.00), (N, 1.00), (C, 4.00), (OTHER, 1.00)))
 
 def getPeakPosition(peak, dim, unit='ppm'):
 
@@ -76,6 +81,28 @@ def getPeakLinewidth(peak, dim):
       return float(lw)
 
 
+def _getAtomWeight(axisCode, atomWeights) -> float or int:
+  '''
+
+  :param axisCode: str of peak axis code
+  :param atomWeights: dictionary of atomWeights eg {'H': 7.00, 'N': 1.00, 'C': 4.00, 'Other': 1.00}
+  :return: float or int from dict atomWeights
+  '''
+  value = 1.0
+  if len(axisCode) > 0:
+    firstLetterAxisCode = axisCode[0]
+    if firstLetterAxisCode in atomWeights:
+      value = atomWeights[firstLetterAxisCode]
+    else:
+      if OTHER in atomWeights:
+        if atomWeights[OTHER] != 1:
+          value = atomWeights[OTHER]
+      else:
+        value = 1.0
+
+  return value
+
+
 def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atomWeights=None):
   '''
   
@@ -87,36 +114,42 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atom
 
   deltas = []
   peaks = []
-  if atomWeights is None:
-    atomWeights = {'H': 7.00, 'N': 1.00, 'C': 4.00, 'Other': 1.00}
-  weight1, weight2 = atomWeights['H'], atomWeights['N']
 
   if len(spectra) <=1:
     return
-  if len(nmrAtoms) == 2:
-    nmrAtom1 = nmrResidue.getNmrAtom(str(nmrAtoms[0]))
-    nmrAtom2 = nmrResidue.getNmrAtom(str(nmrAtoms[1]))
+  if atomWeights is None:
+    atomWeights = DefaultAtomWeights
 
+  for  nmrAtomName in nmrAtoms:
+    nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
+    if nmrAtom is not None:
+      peaks += [p for p in nmrAtom.assignedPeaks if p.peakList.spectrum in spectra and p not in peaks]
 
-    if nmrAtom1 and nmrAtom2 is not None:
-      if nmrAtom1.name != nmrAtom2.name:
-        for k, weight in atomWeights.items():
-          if k in nmrAtom1.name:
-            weight1 = weight
-          if k in nmrAtom2.name:
-            weight2 = weight
-        peaks = [p for p in nmrAtom1.assignedPeaks if p.peakList.spectrum in spectra]
-        peaks += [p for p in nmrAtom2.assignedPeaks if p.peakList.spectrum in spectra and not peaks]
 
   if len(peaks)>0:
     for i, peak in enumerate(peaks):
       if peak.peakList.spectrum in spectra:
-        try:
+        try: #some None value can get in here
           if mode == POSITIONS:
-            if len(peak.position) == 2:
-              delta1Atoms = (peak.position[0] - list(peaks)[0].position[0])
-              delta2Atoms = (peak.position[1] - list(peaks)[0].position[1])
-              deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5, ]
+            delta = None
+            for i, axisCode in enumerate(peak.axisCodes):
+              if axisCode:
+                weight = _getAtomWeight(axisCode, atomWeights)
+                if axisCode[0] in nmrAtoms:
+                  if delta is None:
+                    delta = 0.0
+                  delta += ((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2
+                  delta = delta ** 0.5
+
+            deltas += [delta]
+
+
+
+            # if len(peak.position) == 2:
+            #   delta1Atoms = (peak.position[0] - list(peaks)[0].position[0])
+            #   delta2Atoms = (peak.position[1] - list(peaks)[0].position[1])
+            #
+            #   deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5, ]
 
           if mode == VOLUME:
             delta1Atoms = (peak.volume - list(peaks)[0].volume)

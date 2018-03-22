@@ -207,7 +207,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.Catoms = set()
     self.atomCheckBoxes = []
     self.atomWeightSpinBoxes = []
-    self.atomRadioButtons = []
+    self.nmrAtomsCheckBoxes = []
     self.atomNames = []
     if self.mainWindow is not None:
       self.project = self.mainWindow.project
@@ -331,7 +331,6 @@ class ChemicalShiftsMapping(CcpnModule):
     :param widget: Widget where to add the option. EG frame
     :return:
     '''
-    print(nmrAtomsNames)
     regioncount = 0
     totalCount  = len(nmrAtomsNames)
     valueCount = int(len(nmrAtomsNames) / 2)
@@ -340,8 +339,8 @@ class ChemicalShiftsMapping(CcpnModule):
                         for j in range(2)]
 
       for position, nmrAtomName in zip(positions, nmrAtomsNames):
-        extraNmrAtom = CheckBox(widget, text=nmrAtomName, grid=position)
-        print(nmrAtomName, position)
+        self.atomSelection = CheckBox(widget, text=nmrAtomName, grid=position)
+        self.nmrAtomsCheckBoxes.append(self.atomSelection)
 
   def _toggleMoreNmrAtoms(self, widget):
     if self.sender():
@@ -349,11 +348,9 @@ class ChemicalShiftsMapping(CcpnModule):
       if widget.isHidden():
         self.sender().setText(name.replace(MORE,LESS))
         widget.show()
-        print('Needs to Show')
       else:
         self.sender().setText(name.replace(LESS,MORE))
         widget.hide()
-        print('Needs to hide')
 
   def _updateNmrAtomsOption(self ):
     i = 0
@@ -391,10 +388,12 @@ class ChemicalShiftsMapping(CcpnModule):
       if len(availableNmrAtomsForType)<3:
         for nmrAtomName in availableNmrAtomsForType:
           self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+          self.nmrAtomsCheckBoxes.append(self.atomSelection)
           n += 1
       else:
         for nmrAtomName in availableNmrAtomsForType[:3]:
           self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+          self.nmrAtomsCheckBoxes.append(self.atomSelection)
           n += 1
 
         self.moreButton.show()
@@ -544,12 +543,7 @@ class ChemicalShiftsMapping(CcpnModule):
             self.thresholdLinePos = std
             self.thresholdSpinBox.set(std)
 
-  def _addAtomCheckBoxes(self, atoms, rowPos, colPos ):
-    texts = sorted(atoms, key=CcpnSorting.stringSortKey)
-    self.atomSelection = RadioButtons(self.scrollAreaWidgetContents, exclusive=False, texts=texts, direction='v', grid=(rowPos, colPos))
-    self.atomRadioButtons.append(self.atomSelection)
-    if len(texts)>0:
-      self.atomSelection.radioButtons[0].setChecked(True)
+
 
   def updateTable(self, nmrChain):
     self.nmrResidueTable.ncWidget.select(nmrChain.pid)
@@ -779,7 +773,7 @@ class ChemicalShiftsMapping(CcpnModule):
       weights.update({atomWSB.objectName():atomWSB.value()})
 
     # selectedAtomNames = [cb.text() for cb in self.atomCheckBoxes if cb.isChecked()]
-    selectedAtomNames = [rb.getSelectedText() for rb in self.atomRadioButtons if rb.getSelectedText()]
+    selectedAtomNames = [w.text() for w in self.nmrAtomsCheckBoxes if w.text()]
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:

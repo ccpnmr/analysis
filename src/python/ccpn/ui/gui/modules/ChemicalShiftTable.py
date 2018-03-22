@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core.lib.CallBack import CallBack
 from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -379,17 +380,19 @@ class ChemicalShiftTable(QuickTable):
     """
     self._updateSilence = silence
 
-  def _actionCallback(self, chemicalShift, row, column):
+  def _actionCallback(self, data):
     """
     Notifier DoubleClick action on item in table
     """
-    logger.debug('ChemicalShiftTable>>>', chemicalShift, row, column)
+    obj = data[CallBack.OBJECT]
+
+    getLogger().debug('ChemicalShiftTable>>>', obj)
 
   def _selectionCallback(self, data):
     """
     Notifier Callback for selecting a row in the table
     """
-    selected = data[Notifier.OBJECT]
+    selected = data[CallBack.OBJECT]
 
     if selected:
       if self.multiSelect: #In this case selected is a List!!

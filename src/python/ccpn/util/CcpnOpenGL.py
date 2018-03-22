@@ -359,6 +359,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._gridVisible = True
     self._crossHairVisible = True
     self._axesVisible = True
+    self._axisLocked = False
 
     self._drawRightAxis = True
     self._drawBottomAxis = True
@@ -1105,6 +1106,10 @@ class CcpnGLWidget(QOpenGLWidget):
     # use this because it rescales all the symbols
     self._rescaleXAxis()
 
+  def resetZoom(self):
+    self._resetAxisRange()
+    self._rescaleAllAxes()
+
   def zoomIn(self):
     zoomPercent = -self._preferences.zoomPercent/100.0
     dx = (self.axisR-self.axisL)/2.0
@@ -1606,7 +1611,6 @@ void main()
 
     self._lockStringFalse = GLString(text='Lock', font=self.glSmallFont, x=0, y=0, color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
     self._lockStringTrue = GLString(text='Lock', font=self.glSmallFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
-    self._axisLocked = False
 
     self.stripIDString = GLString(text='', font=self.glSmallFont, x=0, y=0, GLContext=self, object=None)
 
@@ -2134,7 +2138,7 @@ void main()
 
     listColour = pls.textColour
     if listColour == '#':
-      listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
     listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
     listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
     listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
@@ -2184,7 +2188,7 @@ void main()
     pls = peakListView.peakList
     listColour = pls.symbolColour
     if listColour == '#':
-      listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
     listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
     listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
     listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
@@ -2444,7 +2448,7 @@ void main()
     else:
       colour = pls.symbolColour
       if colour == '#':
-        colour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+        colour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0
@@ -2683,7 +2687,7 @@ void main()
       pls = peakListView.peakList
       listColour = pls.symbolColour
       if listColour == '#':
-        listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+        listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
       listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
       listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
       listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
@@ -3031,7 +3035,7 @@ void main()
       else:
         colour = pls.textColour
         if colour == '#':
-          colour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+          colour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
 
         colR = int(colour.strip('# ')[0:2], 16) / 255.0
         colG = int(colour.strip('# ')[2:4], 16) / 255.0
@@ -3254,13 +3258,16 @@ void main()
     # self._spectrumSettings = {}
     for spectrumView in self._parent.spectrumViews:
 
-      if spectrumView.buildContours:
-        spectrumView.buildContours = False  # set to false, as we have rebuilt
+      if spectrumView.buildContours or spectrumView.buildContoursOnly:
 
         # flag the peaks for rebuilding
-        for peakListView in spectrumView.peakListViews:
-          peakListView.buildPeakLists = True
-          peakListView.buildPeakListLabels = True
+        if not spectrumView.buildContoursOnly:
+          for peakListView in spectrumView.peakListViews:
+            peakListView.buildPeakLists = True
+            peakListView.buildPeakListLabels = True
+
+        spectrumView.buildContours = False
+        spectrumView.buildContoursOnly = False
 
         # rebuild the contours
 
@@ -3303,7 +3310,7 @@ void main()
       ils = integralListView.peakList
       colour = ils.symbolColour
       if colour == '#':
-        colour = getattr(ils.spectrum, self.SPECTRUM_COLOUR)
+        colour = getattr(ils.spectrum, self.SPECTRUMPOSCOLOUR)
 
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
@@ -4546,7 +4553,7 @@ void main()
       hSpectrum.indices = numVertices
       hSpectrum.numVertices = numVertices
       hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-      hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
+      hSpectrum.colors = np.array((self._phasingTraceColour) * numVertices, dtype=np.float32)
       hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
       hSpectrum.vertices[::2] = x
       hSpectrum.vertices[1::2] = y
@@ -4620,15 +4627,22 @@ void main()
       if ph0 is not None and ph1 is not None and pivot is not None:
         data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
+      dataY = np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
       x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
-      y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
-          np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
+      y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * dataY
 
       # TODO:ED make this posColour to negColour :) and axis direction
-      colour = getattr(spectrumView.spectrum, self.SPECTRUM_COLOUR)    #spectrumView._getColour('sliceColour', '#aaaaaa')
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      col1 = getattr(spectrumView.spectrum, self.SPECTRUMPOSCOLOUR)    #spectrumView._getColour('sliceColour', '#aaaaaa')
+      if self.is1D:
+        col2 = col1
+      else:
+        col2 = getattr(spectrumView.spectrum, self.SPECTRUMNEGCOLOUR)    #spectrumView._getColour('sliceColour', '#aaaaaa')
+      colR = int(col1.strip('# ')[0:2], 16) / 255.0
+      colG = int(col1.strip('# ')[2:4], 16) / 255.0
+      colB = int(col1.strip('# ')[4:6], 16) / 255.0
+      colRn = int(col2.strip('# ')[0:2], 16) / 255.0
+      colGn = int(col2.strip('# ')[2:4], 16) / 255.0
+      colBn = int(col2.strip('# ')[4:6], 16) / 255.0
 
       if spectrumView not in tracesDict.keys():
         tracesDict[spectrumView] = GLVertexArray(numLists=1,
@@ -4643,10 +4657,12 @@ void main()
       hSpectrum.indices = numVertices
       hSpectrum.numVertices = numVertices
       hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-      hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
       hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
       hSpectrum.vertices[::2] = x
       hSpectrum.vertices[1::2] = y
+      hSpectrum.colors = np.array([[colR, colG, colB, 1.0]] * numVertices, dtype=np.float32)
+      hSpectrum.colors[dataY < 0] = [colRn, colGn, colBn, 1.0]
+
     except Exception as es:
       tracesDict[spectrumView].clearArrays()
 
@@ -4661,14 +4677,21 @@ void main()
       if ph0 is not None and ph1 is not None and pivot is not None:
         data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
+      dataX = np.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
       y = np.array([yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
-      x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
-          np.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
+      x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * dataX
 
-      colour = getattr(spectrumView.spectrum, self.SPECTRUM_COLOUR)    #spectrumView._getColour('sliceColour', '#aaaaaa')
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      col1 = getattr(spectrumView.spectrum, self.SPECTRUMPOSCOLOUR)    #spectrumView._getColour('sliceColour', '#aaaaaa')
+      if self.is1D:
+        col2 = col1
+      else:
+        col2 = getattr(spectrumView.spectrum, self.SPECTRUMNEGCOLOUR)    #spectrumView._getColour('sliceColour', '#aaaaaa')
+      colR = int(col1.strip('# ')[0:2], 16) / 255.0
+      colG = int(col1.strip('# ')[2:4], 16) / 255.0
+      colB = int(col1.strip('# ')[4:6], 16) / 255.0
+      colRn = int(col2.strip('# ')[0:2], 16) / 255.0
+      colGn = int(col2.strip('# ')[2:4], 16) / 255.0
+      colBn = int(col2.strip('# ')[4:6], 16) / 255.0
 
       if spectrumView not in tracesDict.keys():
         tracesDict[spectrumView] = GLVertexArray(numLists=1,
@@ -4683,10 +4706,12 @@ void main()
       vSpectrum.indices = numVertices
       vSpectrum.numVertices = numVertices
       vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-      vSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
       vSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
       vSpectrum.vertices[::2] = x
       vSpectrum.vertices[1::2] = y
+      vSpectrum.colors = np.array([[colR, colG, colB, 1.0]] * numVertices, dtype=np.float32)
+      vSpectrum.colors[dataX < 0] = [colRn, colGn, colBn, 1.0]
+
     except Exception as es:
       tracesDict[spectrumView].clearArrays()
 
@@ -5701,7 +5726,7 @@ void main()
     for orderedAxis in self._orderedAxes[2:]:
       position.append(orderedAxis.position)
 
-    newPeaks, peakLists = self._parent.glPeakPickPosition(position)
+    newPeaks, peakLists = self._parent.peakPickPosition(position)
 
     # should fire peak notifier
     # self.GLSignals.emitEvent(targets=peakLists, triggers=[GLNotifier.GLPEAKLISTS,
@@ -5826,7 +5851,7 @@ void main()
       # self.project.blankNotification()
 
       # try:
-      peaks = self._parent.glPeakPickRegion(selectedRegion)
+      peaks = self._parent.peakPickRegion(selectedRegion)
       # finally:
       #   self.project.unblankNotification()
 
@@ -6042,7 +6067,7 @@ void main()
       if integral.integralList == ils.integralListView.peakList:
         colour = ils.integralListView.symbolColour
         if colour == '#':
-          colour = getattr(ils.integralListView.peakList.spectrum, self.SPECTRUM_COLOUR)
+          colour = getattr(ils.integralListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR)
 
         colR = int(colour.strip('# ')[0:2], 16) / 255.0
         colG = int(colour.strip('# ')[2:4], 16) / 255.0

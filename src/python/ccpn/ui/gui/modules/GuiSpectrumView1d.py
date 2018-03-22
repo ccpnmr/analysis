@@ -81,6 +81,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     self.hPhaseTrace = None
 
     self.buildContours = True     # trigger the first build
+    self.buildContoursOnly = False
     self.buildPeakLists = True
     self.buildPeakListLabels = True
     self.buildIntegralLists = True

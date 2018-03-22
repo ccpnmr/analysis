@@ -63,9 +63,10 @@ REGION_COLOURS = {
 class GuiNdWidget(CcpnGLWidget):
 
   is1D = False
-  INVERTXAXIS = False
-  INVERTYAXIS = False
-  SPECTRUM_COLOUR = 'positiveContourColour'
+  INVERTXAXIS = True
+  INVERTYAXIS = True
+  SPECTRUMPOSCOLOUR = 'positiveContourColour'
+  SPECTRUMNEGCOLOUR = 'negativeContourColour'
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(GuiNdWidget, self).__init__(parent=parent,
@@ -76,12 +77,13 @@ class GuiNdWidget(CcpnGLWidget):
 
 class Gui1dWidget(CcpnGLWidget):
 
-  AXIS_MARGINRIGHT = 70
+  AXIS_MARGINRIGHT = 65
   YAXISUSEEFORMAT = True
+  INVERTXAXIS = True
   INVERTYAXIS = False
   AXISLOCKEDBUTTON = False
   is1D = True
-  SPECTRUM_COLOUR = 'sliceColour'
+  SPECTRUMPOSCOLOUR = 'sliceColour'
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(Gui1dWidget, self).__init__(parent=parent,
@@ -109,7 +111,7 @@ class Gui1dWidget(CcpnGLWidget):
 
       listColour = peakListView.peakList.symbolColour
       if listColour == '#':
-        listColour = getattr(peakListView.peakList.spectrum, self.SPECTRUM_COLOUR)
+        listColour = getattr(peakListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR)
       listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
       listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
       listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
@@ -214,7 +216,7 @@ class Gui1dWidget(CcpnGLWidget):
 
       listColour = pls.symbolColour
       if listColour == '#':
-        listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+        listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
       listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
       listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
       listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
@@ -383,7 +385,7 @@ class Gui1dWidget(CcpnGLWidget):
 
     listColour = pls.symbolColour
     if listColour == '#':
-      listColour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
     listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
     listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
     listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
@@ -556,7 +558,7 @@ class Gui1dWidget(CcpnGLWidget):
     else:
       colour = pls.textColour
       if colour == '#':
-        colour = getattr(pls.spectrum, self.SPECTRUM_COLOUR)
+        colour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
       colR = int(colour.strip('# ')[0:2], 16) / 255.0
       colG = int(colour.strip('# ')[2:4], 16) / 255.0
       colB = int(colour.strip('# ')[4:6], 16) / 255.0

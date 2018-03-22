@@ -108,7 +108,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     GLSignals = GLNotifier(parent=self)
 
     for specViews in self.spectrumViews:
-      specViews.buildContours = True
+      specViews.buildContoursOnly = True
 
     # repaint
     GLSignals.emitPaintEvent()

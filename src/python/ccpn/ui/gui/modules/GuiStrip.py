@@ -265,6 +265,10 @@ class GuiStrip(Frame):
       self.peakSymbolThickness = spectrumDisplay.strips[0].peakSymbolThickness
       self.gridVisible = spectrumDisplay.strips[0].gridVisible
       self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
+      try:
+        self._testCcpnOpenGLWidget._axisLocked = spectrumDisplay.strips[0]._testCcpnOpenGLWidget._axisLocked
+      except:
+        getLogger().debug('OpenGL widget not instantiated')
     else:
       self.peakLabelling = self.application.preferences.general.annotationType
       self.peakSymbolType = self.application.preferences.general.peakSymbolType
@@ -960,14 +964,6 @@ class GuiStrip(Frame):
     padding = self.application.preferences.general.stripRegionPadding
     self.viewBox.setYRange(y1, y2, padding=padding)
 
-  def resetZoom(self):
-    """
-    Zooms both axis of strip to the specified region
-    """
-    if not self._finaliseDone: return
-    padding = self.application.preferences.general.stripRegionPadding
-    self.viewBox.autoRange(padding=padding)
-
   def showZoomPopup(self):
     """
     Creates and displays a popup for zooming to a region in the strip.
@@ -1069,6 +1065,22 @@ class GuiStrip(Frame):
 
     try:
       self._testCcpnOpenGLWidget.restoreZoom()
+    except:
+      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+
+  # def resetZoom(self):
+  #   """
+  #   Zooms both axis of strip to the specified region
+  #   """
+  #   if not self._finaliseDone: return
+  #   padding = self.application.preferences.general.stripRegionPadding
+  #   self.viewBox.autoRange(padding=padding)
+
+  def resetZoom(self):
+    try:
+      self._testCcpnOpenGLWidget.resetZoom()
+      self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
+      getLogger().info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 

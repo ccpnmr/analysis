@@ -536,7 +536,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
       if mode != SELECT:
         self.setMouseMode(SELECT)
 
-
   def _fillPluginsMenu(self):
     from ccpn.framework.lib.ExtensionLoader import getPlugins
     from ccpn.framework.PathsAndUrls import pluginPath

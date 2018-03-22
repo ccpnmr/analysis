@@ -149,6 +149,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self._setupTrace()
 
     self.buildContours = True     # trigger the first build
+    self.buildContoursOnly = False
     self.buildPeakLists = True
     self.buildPeakListLabels = True
     self.buildIntegralLists = True

@@ -656,8 +656,8 @@ class Framework:
         if value is not None:
           if not isinstance(value, str):
             value = value.pid
-          commands.append("%s = project.getByPid(%s)" % (parameter, repr(value)))
-      commands.append(command)
+          commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
+      commands.append(command)    # ED: newLine NOT needed here
 
       # echo command strings
       # added 'quiet' mode to keep full functionality to 'startCommandEchoBLock'
@@ -1797,7 +1797,7 @@ class Framework:
       relativeTo = mainWindow.moduleArea      # ejb
     self.chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, chemicalShiftList=chemicalShiftList)
     mainWindow.moduleArea.addModule(self.chemicalShiftTableModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()\n")
+    mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     getLogger().info("application.showChemicalShiftTable()")
     return self.chemicalShiftTableModule
 
@@ -1811,7 +1811,7 @@ class Framework:
       relativeTo = mainWindow.moduleArea      # ejb
     self.nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, nmrChain=nmrChain)
     mainWindow.moduleArea.addModule(self.nmrResidueTableModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()\n")
+    mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     getLogger().info("application.showNmrResidueTable()")
     return self.nmrResidueTableModule
 
@@ -1827,7 +1827,7 @@ class Framework:
   #                                               , structureEnsemble=structureEnsemble)
   #   mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
   #
-  #   mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()\n")
+  #   mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
   #   logger.info("application.showStructureTable()")
   #   return self.structureTableModule
   #
@@ -1843,7 +1843,7 @@ class Framework:
       relativeTo = mainWindow.moduleArea      # ejb
     self.peakTableModule = PeakTableModule(mainWindow, peakList=peakList)
     mainWindow.moduleArea.addModule(self.peakTableModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()\n")
+    mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     getLogger().info("application.showPeakTable()")
     return  self.peakTableModule
 
@@ -1859,7 +1859,7 @@ class Framework:
       relativeTo = mainWindow.moduleArea      # ejb
     self.integralTableModule = IntegralTableModule(mainWindow=mainWindow, integralList=integralList)
     mainWindow.moduleArea.addModule(self.integralTableModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showIntegralTable()\n")
+    mainWindow.pythonConsole.writeConsoleCommand("application.showIntegralTable()")
     getLogger().info("application.showIntegralTable()")
     return  self.integralTableModule
 
@@ -1875,7 +1875,7 @@ class Framework:
       relativeTo = mainWindow.moduleArea      # ejb
     self.restraintTableModule = RestraintTableModule(mainWindow=mainWindow, restraintList=restraintList)
     mainWindow.moduleArea.addModule(self.restraintTableModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()\n")
+    mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
     getLogger().info("application.showRestraintTable()")
     return self.restraintTableModule
 
@@ -1898,7 +1898,7 @@ class Framework:
 
     mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
 
-    mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()\n")
+    mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
     getLogger().info("application.showStructureTable()")
     return self.structureTableModule
 
@@ -1914,7 +1914,7 @@ class Framework:
       relativeTo = mainWindow.moduleArea      # ejb
     self.notesEditorModule = NotesEditorModule(mainWindow=mainWindow, note=note)
     mainWindow.moduleArea.addModule(self.notesEditorModule, position=position, relativeTo=relativeTo)
-    mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()\n")
+    mainWindow.pythonConsole.writeConsoleCommand("application.showNotesEditorTable()")
     getLogger().info("application.showNotesEditorTable()")
     return self.notesEditorModule
 

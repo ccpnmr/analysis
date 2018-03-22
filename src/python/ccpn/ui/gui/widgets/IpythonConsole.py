@@ -183,7 +183,7 @@ class IpythonConsole(Widget, Base):
         self._write("%s = project.getByPid('%s')\n" % (parameter, value))
 
       # execute command
-      self._write(msg=command)
+      self._write(msg=command+'\n')    # ED: newLine IS needed here
 
       # set undo step
       self._setUndoWaypoint()

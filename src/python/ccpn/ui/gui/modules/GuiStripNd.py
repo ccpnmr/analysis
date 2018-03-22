@@ -419,34 +419,35 @@ class GuiStripNd(GuiStrip):
   def reorderSpectra(self):
     pass
 
-  def resetZoom(self, axis=None):
-    """
-    Resets zoom of strip axes to limits of maxima and minima of the limits of the displayed spectra.
-    """
-    x = []
-    y = []
-    for spectrumView in self.spectrumViews:
-
-      # Get spectrum dimension index matching display X and Y
-      # without using axis codes, as they may not match
-      spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
-      spectrumLimits = spectrumView.spectrum.spectrumLimits
-      x.append(spectrumLimits[spectrumIndices[0]])
-      y.append(spectrumLimits[spectrumIndices[1]])
-      # xIndex = spectrumView.spectrum.axisCodes.index(self.axisCodes[0])
-      # yIndex = spectrumView.spectrum.axisCodes.index(self.axisCodes[1])
-      # x.append(spectrumView.spectrum.spectrumLimits[xIndex])
-      # y.append(spectrumView.spectrum.spectrumLimits[yIndex])
-
-    xArray = numpy.array(x).flatten()
-    yArray = numpy.array(y).flatten()
-
-    zoomXArray = ([min(xArray), max(xArray)])
-    zoomYArray = ([min(yArray), max(yArray)])
-    self.zoomToRegion(zoomXArray, zoomYArray)
-    self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
-    getLogger().info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
-    return zoomXArray, zoomYArray
+  # def resetZoom(self, axis=None):
+  #   """
+  #   Resets zoom of strip axes to limits of maxima and minima of the limits of the displayed spectra.
+  #   """
+  #   x = []
+  #   y = []
+  #   for spectrumView in self.spectrumViews:
+  #
+  #     # Get spectrum dimension index matching display X and Y
+  #     # without using axis codes, as they may not match
+  #     spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+  #     spectrumLimits = spectrumView.spectrum.spectrumLimits
+  #     x.append(spectrumLimits[spectrumIndices[0]])
+  #     y.append(spectrumLimits[spectrumIndices[1]])
+  #     # xIndex = spectrumView.spectrum.axisCodes.index(self.axisCodes[0])
+  #     # yIndex = spectrumView.spectrum.axisCodes.index(self.axisCodes[1])
+  #     # x.append(spectrumView.spectrum.spectrumLimits[xIndex])
+  #     # y.append(spectrumView.spectrum.spectrumLimits[yIndex])
+  #
+  #   xArray = numpy.array(x).flatten()
+  #   yArray = numpy.array(y).flatten()
+  #
+  #   zoomXArray = ([min(xArray), max(xArray)])
+  #   zoomYArray = ([min(yArray), max(yArray)])
+  #   self.zoomToRegion(zoomXArray, zoomYArray)
+  #
+  #   self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
+  #   getLogger().info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
+  #   return zoomXArray, zoomYArray
 
   def resetAxisRange(self, axis):
     # if not axis:

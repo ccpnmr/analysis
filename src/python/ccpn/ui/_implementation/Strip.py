@@ -663,12 +663,12 @@ class Strip(AbstractWrapperObject):
     #
     return False
 
-  def peakPickPosition(self, position:List[float]) -> Tuple[Peak]:
+  def peakPickPosition_OLDplotWidget(self, position:List[float]) -> Tuple[Peak]:
     """Pick peak at position for all spectra currently displayed in strip"""
 
     result = []
 
-    self._startCommandEchoBlock('peakPickPosition', position)
+    self._startCommandEchoBlock('peakPickPosition_OLD', position)
     self._project.blankNotification()
     try:
       for spectrumView in self.spectrumViews:
@@ -696,7 +696,7 @@ class Strip(AbstractWrapperObject):
     #
     return tuple(result)
 
-  def glPeakPickPosition(self, position:List[float]) -> Tuple[Peak]:
+  def peakPickPosition(self, position:List[float]) -> Tuple[Peak]:
     """
     Pick peak at position for all spectra currently displayed in strip
     """
@@ -716,12 +716,12 @@ class Strip(AbstractWrapperObject):
           spectrumView.spectrum.newPeakList()
           self._project.blankNotification()
 
-        numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
+        validPeakListViews = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
                                                                   and pp.isVisible()
                                                                   and spectrumView.isVisible()]
-        if numPeakLists:
+        for thisPeakListView in validPeakListViews:
           # find the first visible peakList
-          peakList = numPeakLists[0].peakList
+          peakList = thisPeakListView.peakList
 
         # for peakListView in spectrumView.peakListViews:
           # find the first visible peakList
@@ -744,7 +744,6 @@ class Strip(AbstractWrapperObject):
             peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
           result.append(peak)
           peakLists.append(peakList)
-          break
 
     finally:
       self._endCommandEchoBlock()
@@ -755,7 +754,7 @@ class Strip(AbstractWrapperObject):
 
     return tuple(result), tuple(peakLists)
 
-  def peakPickRegion(self, selectedRegion:List[List[float]]) -> Tuple[Peak]:
+  def peakPickRegion_OLD(self, selectedRegion:List[List[float]]) -> Tuple[Peak]:
     """Peak pick all spectra currently displayed in strip in selectedRegion """
 
     result = []
@@ -763,7 +762,7 @@ class Strip(AbstractWrapperObject):
     project = self.project
     minDropfactor = project._appBase.preferences.general.peakDropFactor
 
-    self._startCommandEchoBlock('peakPickRegion', selectedRegion)
+    self._startCommandEchoBlock('peakPickRegion_OLD', selectedRegion)
     self._project.blankNotification()
     try:
 
@@ -827,7 +826,7 @@ class Strip(AbstractWrapperObject):
     #
     return tuple(result)
 
-  def glPeakPickRegion(self, selectedRegion:List[List[float]]) -> Tuple[Peak]:
+  def peakPickRegion(self, selectedRegion:List[List[float]]) -> Tuple[Peak]:
     """Peak pick all spectra currently displayed in strip in selectedRegion """
 
     result = []
@@ -847,12 +846,13 @@ class Strip(AbstractWrapperObject):
           spectrumView.spectrum.newPeakList()
           self._project.blankNotification()
 
-        numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
-                                                                  and pp.isVisible()
-                                                                  and spectrumView.isVisible()]
-        if numPeakLists:
+        validPeakListViews = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
+                                                                      and pp.isVisible()
+                                                                      and spectrumView.isVisible()]
+        # if numPeakLists:
+        for thisPeakListView in validPeakListViews:
           # find the first visible peakList
-          peakList = numPeakLists[0].peakList
+          peakList = thisPeakListView.peakList
 
           # peakList = spectrumView.spectrum.peakLists[0]
 

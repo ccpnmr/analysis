@@ -265,9 +265,16 @@ class GuiStrip(Frame):
       self.peakSymbolThickness = spectrumDisplay.strips[0].peakSymbolThickness
       self.gridVisible = spectrumDisplay.strips[0].gridVisible
       self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
+
       try:
         self._testCcpnOpenGLWidget._axisLocked = spectrumDisplay.strips[0]._testCcpnOpenGLWidget._axisLocked
-      except:
+
+        # self._testCcpnOpenGLWidget._updateHTrace = spectrumDisplay.strips[0]._testCcpnOpenGLWidget._updateHTrace
+        # self._testCcpnOpenGLWidget._updateVTrace = spectrumDisplay.strips[0]._testCcpnOpenGLWidget._updateVTrace
+        # self.hTraceAction.setChecked(self._testCcpnOpenGLWidget._updateHTrace)
+        # self.vTraceAction.setChecked(self._testCcpnOpenGLWidget._updateVTrace)
+
+      except Exception as es:
         getLogger().debug('OpenGL widget not instantiated')
     else:
       self.peakLabelling = self.application.preferences.general.annotationType
@@ -545,6 +552,10 @@ class GuiStrip(Frame):
     phasingFrame.pivotEntry.set(position)
     self._updatePhasing()
 
+  def setTraceScale(self, traceScale):
+    for spectrumView in self.spectrumViews:
+      spectrumView.traceScale = traceScale
+
   def turnOnPhasing(self):
 
     phasingFrame = self.spectrumDisplay.phasingFrame
@@ -618,9 +629,10 @@ class GuiStrip(Frame):
     phasingFrame.pivotEntry.valueChanged.connect(self._newPositionPivotCallback)
 
   def _newPositionLineCallback(self):
-    phasingFrame = self.spectrumDisplay.phasingFrame
-    self._newPosition = self._infiniteLine.values[0]
-    phasingFrame.pivotEntry.setValue(self._newPosition)
+    if not self.isDeleted:
+      phasingFrame = self.spectrumDisplay.phasingFrame
+      self._newPosition = self._infiniteLine.values[0]
+      phasingFrame.pivotEntry.setValue(self._newPosition)
 
   def _newPositionPivotCallback(self, value):
     self._newPosition = value

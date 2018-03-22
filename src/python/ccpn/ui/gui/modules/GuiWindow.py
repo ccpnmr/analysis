@@ -29,7 +29,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 import typing
 from ccpn.core.lib import AssignmentLib
-
+from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.core.lib.AssignmentLib import propagateAssignments
@@ -175,19 +175,33 @@ class GuiWindow():
 
   def addIntegral1D(self):
     strip = self.current.strip
+
     if strip is not None:
-      cursorPosition = self.current.cursorPosition
-      if cursorPosition is not None:
-        limits = [cursorPosition[0], cursorPosition[0]+0.005]
-        for spectrumView in strip.spectrumViews:
-          if not len(spectrumView.spectrum.integralLists) >0:
-            spectrumView.spectrum.newIntegralList()
-          integral = spectrumView.spectrum.integralLists[-1].newIntegral(value=None, limits=[limits,])
-          self.current.integrals += (integral,)
+      if strip.spectrumDisplay.is1D:
+        cursorPosition = self.current.cursorPosition
+        if cursorPosition is not None:
+          limits = [cursorPosition[0], cursorPosition[0]+0.005]
 
-          # TODO:ED disable to stop integralLines error
-          # strip.plotWidget.viewBox._showIntegralLines()
+          validViews = [sv for sv in strip.spectrumViews if sv.isVisible()]
 
+          for spectrumView in validViews:
+
+            validIntegralLists = [il.peakList for il in spectrumView.peakListViews if isinstance(il.peakList, IntegralList)
+                                  and il.isVisible()]
+
+            for integralList in validIntegralLists:
+              integral = integralList.newIntegral(value=None, limits=[limits,])
+              self.current.integrals += (integral,)
+
+          # if not len(spectrumView.spectrum.integralLists) >0:
+            #   spectrumView.spectrum.newIntegralList()
+            # integral = spectrumView.spectrum.integralLists[-1].newIntegral(value=None, limits=[limits,])
+            # self.current.integrals += (integral,)
+
+            # TODO:ED disable to stop integralLines error
+            # strip.plotWidget.viewBox._showIntegralLines()
+      else:
+        getLogger().warning('Current strip is not 1D')
 
   def refitCurrentPeaks(self):
     peaks = self.application.current.peaks
@@ -360,7 +374,8 @@ class GuiWindow():
           if colour:
             project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
           else:
-            project.newMark('white', [chemicalShift.value], [axisCode])
+            # just use gray rather than checking colourScheme
+            project.newMark('#808080', [chemicalShift.value], [axisCode])
 
     finally:
       project._endCommandEchoBlock()

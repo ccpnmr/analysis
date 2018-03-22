@@ -219,6 +219,7 @@ class GuiSpectrumDisplay(CcpnModule):
     # the module to another location
     self.hoverEvent = self._hoverEvent
     self.lastAxisOnly = True
+    self._phasingTraceScale = 1.0e-7
 
   def _hoverEvent(self, event):
     event.accept()
@@ -741,6 +742,22 @@ class GuiSpectrumDisplay(CcpnModule):
     # for col in range(cols):
     #   self.stripFrame.layout().setColumnMinimumWidth(col, 50)
 
+  def _copyPreviousStripValues(self, fromStrip, toStrip):
+    try:
+      traceScale = fromStrip.spectrumViews[0].traceScale
+      toStrip.setTraceScale(traceScale)
+      if self.phasingFrame.isVisible():
+        toStrip._testCcpnOpenGLWidget._updateHTrace = fromStrip._testCcpnOpenGLWidget._updateHTrace
+        toStrip._testCcpnOpenGLWidget._updateVTrace = fromStrip._testCcpnOpenGLWidget._updateVTrace
+        toStrip.hTraceAction.setChecked(toStrip._testCcpnOpenGLWidget._updateHTrace)
+        toStrip.vTraceAction.setChecked(toStrip._testCcpnOpenGLWidget._updateVTrace)
+
+        toStrip.turnOnPhasing()
+
+    except Exception as es:
+      print ('>>> ERROR turning on phasing')
+      getLogger().debug('OpenGL widget not instantiated')
+
   def addStrip(self) -> 'GuiStripNd':
     """
     Creates a new strip by cloning strip with index (default the last) in the display.
@@ -749,6 +766,10 @@ class GuiSpectrumDisplay(CcpnModule):
     newStrip = self.strips[stripIndex].clone()
 
     newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
+
+    # ED: copy traceScale from the previous strips and enable phasing Console
+    self._copyPreviousStripValues(self.strips[stripIndex-1], newStrip)
+
 
     self.showAxes()
 
@@ -767,6 +788,9 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     stripIndex = self.strips.index(strip)
     newStrip = strip.clone()
+
+    # ED: copy traceScale from the previous strips and enable phasing Console
+    self._copyPreviousStripValues(self.strips[stripIndex - 1], newStrip)
 
     self.showAxes()
 

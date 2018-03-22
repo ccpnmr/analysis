@@ -1789,13 +1789,13 @@ class Framework:
     """
     Displays Chemical Shift table.
     """
-    from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTableModule
+    from ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment import ChemicalShiftTableWithAssignment
 
     mainWindow = self.ui.mainWindow
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, chemicalShiftList=chemicalShiftList)
+    self.chemicalShiftTableModule = ChemicalShiftTableWithAssignment(mainWindow=mainWindow, chemicalShiftList=chemicalShiftList)
     mainWindow.moduleArea.addModule(self.chemicalShiftTableModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     getLogger().info("application.showChemicalShiftTable()")

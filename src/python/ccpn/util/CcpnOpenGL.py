@@ -6036,10 +6036,10 @@ void main()
     if Notifier.DELETE in triggers:
       self._deleteIntegral(integral)
 
-    if Notifier.CREATE in triggers:
+    elif Notifier.CREATE in triggers:
       self._createIntegral(integral)
 
-    if Notifier.CHANGE in triggers:
+    elif Notifier.CHANGE in triggers:
       self._changeIntegral(integral)
 
     self._clearKeys()
@@ -6073,7 +6073,7 @@ void main()
         colG = int(colour.strip('# ')[2:4], 16) / 255.0
         colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-        ils.addIntegral(integral, colour=None, brush=(colR, colG, colB, 0.15))
+        ils.addIntegral(integral, ils.integralListView, colour=None, brush=(colR, colG, colB, 0.15))
         self.update()
         return
 

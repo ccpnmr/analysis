@@ -385,19 +385,27 @@ class ChemicalShiftsMapping(CcpnModule):
 
       availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
       n = 0
+      checkFirst = False
       if len(availableNmrAtomsForType)<3:
         for nmrAtomName in availableNmrAtomsForType:
           self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+          if not checkFirst:
+            self.atomSelection.setChecked(True)
+            checkFirst = True
           self.nmrAtomsCheckBoxes.append(self.atomSelection)
           n += 1
       else:
         for nmrAtomName in availableNmrAtomsForType[:3]:
           self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+          if not checkFirst:
+            self.atomSelection.setChecked(True)
+            checkFirst = True
           self.nmrAtomsCheckBoxes.append(self.atomSelection)
           n += 1
 
         self.moreButton.show()
         self._addMoreNmrAtomsForAtomType(availableNmrAtomsForType[2:], self.moreOptionFrame)
+
 
       vFrame += 1
       ## Scrollable area where to add more atoms

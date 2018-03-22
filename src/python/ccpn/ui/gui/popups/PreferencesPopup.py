@@ -104,6 +104,7 @@ class PreferencesPopup(CcpnDialog):
     self.generalTabFrame.setContentsMargins(1, 10, 1, 10)
     self._setGeneralTabWidgets(parent=self.generalTabFrame)
     self.tabWidget.addTab(self.generalTabFrame, 'General')
+    # self.generalTabFrame.layout().setSpacing(2)
 
     ## 2 Tab
     self.spectrumTabFrame = Frame(self, setLayout=True)
@@ -111,6 +112,7 @@ class PreferencesPopup(CcpnDialog):
     self.spectrumTabFrame.setContentsMargins(1, 10, 1, 10)  # l,t,r,b
     self._setspectrumTabWidgets(parent=self.spectrumTabFrame)
     self.tabWidget.addTab(self.spectrumTabFrame, 'Spectrum')
+    # self.spectrumTabFrame.layout().setSpacing(2)
 
     # 3 Tab Disabled. # Keep the code for future additions
     self.externalProgramsTabFrame = Frame(self, setLayout=True)
@@ -118,7 +120,7 @@ class PreferencesPopup(CcpnDialog):
     self.externalProgramsTabFrame.setContentsMargins(1, 10, 1, 10)  # l,t,r,b
     self._setExternalProgramsTabWidgets(parent=self.externalProgramsTabFrame)
     self.tabWidget.addTab(self.externalProgramsTabFrame, 'External Programs')
-
+    # self.externalProgramsTabFrame.layout().setSpacing(2)
 
   def _setGeneralTabWidgets(self, parent):
     ''' Insert a widget in here to appear in the General Tab  '''

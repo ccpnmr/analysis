@@ -92,7 +92,10 @@ class ReferenceChemicalShifts(CcpnModule): # DropBase needs to be first, else th
     selectors are changed.
     """
     self.plotWidget.clear()
+    while self.plotWidget.plotItem.legend.layout.count() > 0:
+      self.plotWidget.plotItem.legend.layout.removeAt(0)
     self.plotWidget.plotItem.legend.items = []
+
     self.plotWidget.showGrid(x=True, y=True)
     atomType = self.atomTypePulldown.currentText()
     ccpCode = self.residueTypePulldown.currentText()

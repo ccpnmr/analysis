@@ -139,7 +139,6 @@ class Frame(QtWidgets.QFrame, Base):
       #self.setLineWidth(3)
       self.setMidLineWidth(3)
 
-
 class ScrollableFrame(Frame):
   "A scrollable frame"
 

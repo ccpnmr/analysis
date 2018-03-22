@@ -83,7 +83,7 @@ spectrumColours = OrderedDict([('#','<auto>'),
                                 ('#ffffff','white'),
                                 ('#000000','black')])
 
-spectrumHexColours = tuple(spectrumColours.keys())
+spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != '#')
 
 # Note that Colour strings are not re-used
 

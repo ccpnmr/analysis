@@ -386,7 +386,8 @@ class ChemicalShiftsMapping(CcpnModule):
       availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
       n = 0
       checkFirst = False
-      if len(availableNmrAtomsForType)<3:
+      maxCountRow = 3
+      if len(availableNmrAtomsForType)<maxCountRow:
         for nmrAtomName in availableNmrAtomsForType:
           self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
           if not checkFirst:
@@ -395,16 +396,39 @@ class ChemicalShiftsMapping(CcpnModule):
           self.nmrAtomsCheckBoxes.append(self.atomSelection)
           n += 1
       else:
-        for nmrAtomName in availableNmrAtomsForType[:3]:
-          self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
-          if not checkFirst:
-            self.atomSelection.setChecked(True)
-            checkFirst = True
-          self.nmrAtomsCheckBoxes.append(self.atomSelection)
-          n += 1
-
         self.moreButton.show()
-        self._addMoreNmrAtomsForAtomType(availableNmrAtomsForType[2:], self.moreOptionFrame)
+        preferredAtoms = ['H','HA', 'HB', 'C', 'CA','CB', 'N', 'NE', 'ND' ]
+        showPreferredFirst = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName in preferredAtoms]
+        rest = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName not in showPreferredFirst]
+        if len(showPreferredFirst)>0:
+          if len(showPreferredFirst) < maxCountRow:
+              needed = maxCountRow - len(showPreferredFirst)
+              if len(rest) > needed:
+                showPreferredFirst += rest[:needed]
+                rest = rest[needed:]
+              else:
+                showPreferredFirst += rest
+                rest = []
+                self.moreButton.hide()
+          for nmrAtomName in showPreferredFirst:
+            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+            n += 1
+            if not checkFirst:
+              self.atomSelection.setChecked(True)
+              checkFirst = True
+            self.nmrAtomsCheckBoxes.append(self.atomSelection)
+          self._addMoreNmrAtomsForAtomType(rest, self.moreOptionFrame)
+        else:
+          for nmrAtomName in availableNmrAtomsForType[:3]:
+            self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
+            if not checkFirst:
+              self.atomSelection.setChecked(True)
+              checkFirst = True
+            self.nmrAtomsCheckBoxes.append(self.atomSelection)
+            n += 1
+
+
+          self._addMoreNmrAtomsForAtomType(availableNmrAtomsForType[2:], self.moreOptionFrame)
 
 
       vFrame += 1

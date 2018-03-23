@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
 
 class CheckBox(QtWidgets.QCheckBox, Base):
 
@@ -52,17 +53,44 @@ class CheckBox(QtWidgets.QCheckBox, Base):
     # self.connect(self, QtCore.SIGNAL('clicked()'), callback)
     self.clicked.connect(callback)
 
+
+
+class EditableCheckBox(QtWidgets.QWidget, Base):
+  def __init__(self,parent, text=None, checked=False, callback=None,  **kw):
+    QtWidgets.QWidget.__init__(self, parent)
+    Base.__init__(self, setLayout=True, **kw)
+
+
+    self.checkBox = CheckBox(self, checked=checked, grid=(0, 0), hAlign='c', )
+    self.lineEdit = LineEdit(self, text=text,  grid=(0, 1), hAlign='c', )
+    if callback:
+      self.checkBox.setCallback(callback)
+
+  def text(self):
+    return self.lineEdit.text()
+
+  def setText(self, value):
+    self.lineEdit.setText(value)
+
+  def isChecked(self):
+    return self.checkBox.isChecked()
+
+  def setChecked(self, value):
+    return self.checkBox.setChecked(value)
+
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.BasePopup import BasePopup
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
   app = TestApplication()
 
   def callback():
     print('callback')
 
-  popup = BasePopup(title='Test CheckBox')
+  popup = CcpnDialog(setLayout=True)
 
-  checkBox1 = CheckBox(parent=popup, text="test", callback=callback, grid=(0, 0)
+  checkBox1 = EditableCheckBox(parent=popup, text="test", callback=callback, grid=(0, 0)
                       )
+  popup.show()
+  popup.raise_()
   app.start()

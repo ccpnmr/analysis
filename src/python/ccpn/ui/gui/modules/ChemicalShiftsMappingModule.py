@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.CheckBox import CheckBox, EditableCheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -60,6 +60,7 @@ from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Icon import Icon
+
 import random
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
@@ -313,11 +314,13 @@ class ChemicalShiftsMapping(CcpnModule):
     :param widget: Widget where to add the option. EG frame
     :return:
     '''
+    editableOption = EditableCheckBox(widget, grid=(0,0))
+    self.nmrAtomsCheckBoxes.append(editableOption)
     regioncount = 0
     totalCount  = len(nmrAtomsNames)
     valueCount = int(len(nmrAtomsNames) / 2)
     if totalCount>0:
-      positions = [(i + regioncount, j) for i in range(valueCount+1)
+      positions = [(i+1 + regioncount, j) for i in range(valueCount+1)
                         for j in range(2)]
 
       for position, nmrAtomName in zip(positions, nmrAtomsNames):
@@ -366,7 +369,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.moreOptionFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
       self.scrollAreaMoreNmrAtoms.hide()
       self.moreButton = Button(atomFrame, 'More %s NmrAtoms' % name,
-                               callback=partial(self._toggleMoreNmrAtoms,self.scrollAreaMoreNmrAtoms),  grid=(vFrame, 1), hAlign='l', )
+                               callback=partial(self._toggleMoreNmrAtoms,self.scrollAreaMoreNmrAtoms),  grid=(vFrame-1, 1), hAlign='l', )
       self.moreButton.hide()
 
       availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
@@ -801,7 +804,6 @@ class ChemicalShiftsMapping(CcpnModule):
       weights.update({atomWSB.objectName():atomWSB.value()})
 
     selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
-    print(selectedAtomNames)
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:

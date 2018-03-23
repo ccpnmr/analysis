@@ -103,6 +103,15 @@ def _getAtomWeight(axisCode, atomWeights) -> float or int:
   return value
 
 
+def _traverse(o, tree_types=(list, tuple)):
+  '''used to flat the state in a long list '''
+  if isinstance(o, tree_types):
+    for value in o:
+      for subvalue in _traverse(value, tree_types):
+        yield subvalue
+  else:
+    yield o
+
 def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atomWeights=None):
   '''
   
@@ -120,14 +129,15 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atom
   if atomWeights is None:
     atomWeights = DefaultAtomWeights
 
-  for  nmrAtomName in nmrAtoms:
+  for nmrAtomName in nmrAtoms:
     nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
     if nmrAtom is not None:
       peaks += [p for p in nmrAtom.assignedPeaks if p.peakList.spectrum in spectra and p not in peaks]
+  print(peaks)
 
 
   if len(peaks)>0:
-    for i, peak in enumerate(peaks):
+    for peak in peaks:
       if peak.peakList.spectrum in spectra:
         try: #some None value can get in here
           if mode == POSITIONS:
@@ -135,11 +145,14 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atom
             for i, axisCode in enumerate(peak.axisCodes):
               if axisCode:
                 weight = _getAtomWeight(axisCode, atomWeights)
-                if axisCode[0] in nmrAtoms:
-                  if delta is None:
-                    delta = 0.0
-                  delta += ((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2
-                  delta = delta ** 0.5
+                assignedNmrAtomsNames = [na.name for na in peak.dimensionNmrAtoms[i]]
+                if assignedNmrAtomsNames[0] in nmrAtoms:
+
+                # if axisCode[0] in nmrAtoms:
+                    if delta is None:
+                      delta = 0.0
+                    delta += ((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2
+                    delta = delta ** 0.5
 
             deltas += [delta]
 

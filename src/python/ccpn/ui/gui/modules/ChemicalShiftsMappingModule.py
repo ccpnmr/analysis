@@ -769,23 +769,31 @@ class ChemicalShiftsMapping(CcpnModule):
       if xPos and yPos:
         self.barGraphWidget.customViewBox.setRange(xRange=[xPos-10, xPos+10], yRange=[0, yPos],)
       self.application.ui.mainWindow.clearMarks()
+
       if self.current.strip is not None:
         strip = self.current.strip
-        if len(nmrResidue.selectedNmrAtomNames) == 2:
-          nmrAtom1 = nmrResidue.getNmrAtom(str(nmrResidue.selectedNmrAtomNames[0]))
-          nmrAtom2 = nmrResidue.getNmrAtom(str(nmrResidue.selectedNmrAtomNames[1]))
-          if nmrAtom1 and nmrAtom2:
+        if len(nmrResidue.selectedNmrAtomNames) > 0:
+          nmrAtoms = [nmrResidue.getNmrAtom(str(i)) for i in nmrResidue.selectedNmrAtomNames]
+          if len(nmrAtoms) <= 1:
+            navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
+                                          nmrResidue=nmrResidue,
+                                          widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                          markPositions=True
+                                          )
+          else:
             navigateToNmrAtomsInStrip(strip,
-                                      nmrAtoms=[nmrAtom1, nmrAtom2],
-                                      widths=_getCurrentZoomRatio(strip.viewRange()),
+                                      nmrAtoms=nmrAtoms,
+                                      widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
                                       markPositions=True
                                       )
-        else:
-          navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
-                                        widths=_getCurrentZoomRatio(strip.viewRange()),
-                                        markPositions=True)
       else:
-        getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
+        if len(self.project.strips) > 0:
+          selectFirst = MessageDialog.showYesNo('No Strip selected.', ' Use first available?')
+          if selectFirst:
+            self.current.strip = self.project.strips[0]
+            self._customActionCallBack(data)
+        else:
+          getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
 
   def _isInt(self, s):
     try:
@@ -927,7 +935,7 @@ class ChemicalShiftsMapping(CcpnModule):
       event.accept()
 
   def _mouseDoubleClickEvent(self, event):
-    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio
+    from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
 
     self.nmrResidueTable.scrollToSelectedIndex()
 
@@ -942,18 +950,28 @@ class ChemicalShiftsMapping(CcpnModule):
            if nmrResidue:
              if self.current.strip is not None:
                strip = self.current.strip
-               if len(nmrResidue.selectedNmrAtomNames) == 2:
-                 nmrAtom1 = nmrResidue.getNmrAtom(str(nmrResidue.selectedNmrAtomNames[0]))
-                 nmrAtom2 = nmrResidue.getNmrAtom(str(nmrResidue.selectedNmrAtomNames[1]))
-                 if nmrAtom1 and nmrAtom2:
-
+               if len(nmrResidue.selectedNmrAtomNames) >0:
+                 nmrAtoms = [ nmrResidue.getNmrAtom(str(i)) for i  in nmrResidue.selectedNmrAtomNames]
+                 if len(nmrAtoms) <= 1:
+                   navigateToNmrResidueInDisplay(display=strip.spectrumDisplay,
+                                                 nmrResidue=nmrResidue,
+                                                 widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
+                                                 markPositions=True
+                                             )
+                 else:
                    navigateToNmrAtomsInStrip(strip,
-                                             nmrAtoms=[nmrAtom1, nmrAtom2],
+                                             nmrAtoms=nmrAtoms,
                                              widths=_getCurrentZoomRatio(strip.viewBox.viewRange()),
                                              markPositions=True
                                              )
              else:
-               getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
+               if len(self.project.strips)>0:
+                 selectFirst = MessageDialog.showYesNo('No Strip selected.',' Use first available?')
+                 if selectFirst:
+                   self.current.strip = self.project.strips[0]
+                   self._mouseDoubleClickEvent(event)
+               else:
+                 getLogger().warning('Impossible to navigate to peak position. Set a current strip first')
 
 
   def close(self):

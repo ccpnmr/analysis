@@ -83,7 +83,6 @@ class GuiStrip(Frame):
     # The strip is responsive on restore to the contentMargins set here
     #self.setContentsMargins(5, 0, 5, 0)
     self.setContentsMargins(0, 0, 0, 0)
-    #self.setMinimumWidth(250)
     self.setMinimumWidth(50)
     self.setMinimumHeight(150)
 
@@ -102,23 +101,10 @@ class GuiStrip(Frame):
     if self._useCcpnGL:
       self.plotWidget.hide()
 
-      # for spectrumView in self.spectrumViews:
-      #   if spectrumView.spectrum.dimensionCount < 2:
-      #     from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
-      #   else:
-      #     from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
-      #   break
-      # else:
-      #   getLogger().warning('no dimensions defined for this OpenGL display')
-      #   return
-
       if spectrumDisplay.is1D:
         from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
       else:
         from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
-
-      # self._testCcpnOpenGLWidget = CcpnOpenGLWidget(self)
-      # self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)
 
       self._testCcpnOpenGLWidget = CcpnGLWidget(parent=self, mainWindow=self.mainWindow)
       self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)    # (3,0) if not hiding plotWidget
@@ -136,27 +122,19 @@ class GuiStrip(Frame):
     # self.plotWidgetOverlay.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
     # self.plotWidgetOverlay.showGrid(x=True, y=True, alpha=None)
 
-
-
-
-
-
-
     # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
     # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
     self._stripToolBarWidget = Widget(parent=self, setLayout=True,
                                       hPolicy='expanding',
                                       grid=(2, 0), spacing=(5,5))
-    # self._stripToolBarWidget.setFixedHeight(30)
 
     # Widgets for _stripIdLabel and _stripLabel
     self._labelWidget = Widget(parent=self, setLayout=True,
-                               hPolicy='expanding', vAlign='center',
+                               # hPolicy='expanding', vAlign='center',
                                grid=(0, 0), spacing=(0,0))
-    self._labelWidget.layout().setHorizontalSpacing(0)
-    self._labelWidget.layout().setVerticalSpacing(0)
-
-    # self._labelWidget.setFixedHeight(34)
+    # self._labelWidget.layout().setHorizontalSpacing(0)
+    # self._labelWidget.layout().setVerticalSpacing(0)
+    self._labelWidget.setFixedHeight(16)
 
     # display and pid
     #TODO:GEERTEN correct once pid has been reviewed
@@ -172,28 +150,10 @@ class GuiStrip(Frame):
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
                                    text='', spacing=(0,0),
-                                   grid=(2,0), gridSpan=(1,3), hAlign='left', vAlign='top', hPolicy='minimum')
+                                   grid=(0,0), gridSpan=(1,3))    #, hAlign='left', vAlign='top', hPolicy='minimum')
+
+    self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
     self._stripLabel.setFont(textFontSmall)
-
-    # TODO:ED do the same as stripIDLabel
-    # self.hideStripLabel()     # the top bar containing the residue Pid
-
-    # A label to display the cursor positions (updated by _showMousePosition)
-    # self._cursorLabel = Label(parent=self._labelWidget,
-    #                            text='',
-    #                            grid=(0,0), gridSpan=(2,4), margins=[0,0,0,0], spacing=(0,0),
-    #                            # grid=(0,0), gridSpan=(1,3), margins=[0,0,0,0],
-    #                            hAlign='right', vAlign='top', hPolicy='minimum')#, vPolicy='expanding')
-
-    # self._cursorLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
-    # self._cursorLabel.setAutoFillBackground(False)
-    # self._stripIdLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
-    # self._stripIdLabel.setAutoFillBackground(False)
-    # self._stripLabel.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
-    # self._stripLabel.setAutoFillBackground(False)
-
-    # self._cursorLabel.setFont(textFontSmall)
-    # self._labelWidget.layout().setSpacing(0)    # ejb - stop overlap hiding spectrum _stripIdLabel
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem
@@ -244,10 +204,6 @@ class GuiStrip(Frame):
     #self._stripNotifier.setDebug(True)
     #self._peakNotifier.setDebug(True)
 
-    # self._marksNotifier = Notifier(self.project, [Notifier.CREATE,
-    #                                               Notifier.DELETE,
-    #                                               Notifier.CHANGE], 'Mark', self._updateDisplayedMarks)
-
     # For now, all dropevents are not strip specific, use spectrumDisplay's
     # handling
     self._droppedNotifier = GuiNotifier(self,
@@ -297,7 +253,7 @@ class GuiStrip(Frame):
     # self._labelWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
     # self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
-    self.show()
+    # self.show()
 
   def viewRange(self):
     return self._testCcpnOpenGLWidget.viewRange()

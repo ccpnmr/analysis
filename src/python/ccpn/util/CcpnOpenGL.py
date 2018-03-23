@@ -353,6 +353,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisB = 80
     self.storedZooms = []
 
+    self._marksList = None
     self._orderedAxes = None
     self._axisOrder = None
     self._axisCodes = None
@@ -401,7 +402,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._updateVTrace = False
 
     # set a minimum size so that the strips resize nicely
-    self.setMinimumSize(150, 100)
+    # self.setMinimumSize(150, 100)
 
     # set the pyqtsignal responders
     self.GLSignals = GLNotifier(parent=self, strip=parent)
@@ -5555,7 +5556,8 @@ void main()
           # self.buildPeakListLabels()
 
         if GLNotifier.GLMARKS in triggers:
-          self._marksList.renderMode = GLRENDERMODE_REBUILD
+          if self._marksList:
+            self._marksList.renderMode = GLRENDERMODE_REBUILD
 
         # TODO:ED test trigger for the minute
         if GLNotifier.GLHIGHLIGHTPEAKS in triggers:

@@ -95,8 +95,8 @@ COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
 
 
 MARK_LINE_COLOUR_DICT = {
-  'CA': '#0000FF',
-  'CB': '#0024FF',
+  'CA': '#0080FF',      # aqua
+  'CB': '#6666FF',      # orchid
   'CG': '#0048FF',
   'CD': '#006DFF',
   'CE': '#0091FF',

@@ -133,7 +133,7 @@ class ChemicalShiftTableModule(CcpnModule):
     if chemicalShiftList is not None:
       self.selectChemicalShiftList(chemicalShiftList)
 
-    self.installMaximiseEventHandler(self._maximise)
+    self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
   def _fillDisplayWidget(self):
     list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]

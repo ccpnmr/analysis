@@ -82,7 +82,7 @@ class IntegralTableModule(CcpnModule):
       self.selectIntegralList(integralList)
 
     # install the event filter to handle maximising from floated dock
-    self.installMaximiseEventHandler(self._maximise)
+    self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
   def _maximise(self):
     """

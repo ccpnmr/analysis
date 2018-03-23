@@ -156,7 +156,7 @@ class NmrResidueTableModule(CcpnModule):
       self.selectNmrChain(nmrChain)
 
     # install the event filter to handle maximising from floated dock
-    self.installMaximiseEventHandler(self._maximise)
+    self.installMaximiseEventHandler(self._maximise, self._closeModule)
     # self.mainWidget.layout().setVerticalSpacing(0)
 
   def _fillDisplayWidget(self):

@@ -428,7 +428,7 @@ class CcpnModule(Dock, DropBase):
     # }
     # """)
 
-  def installMaximiseEventHandler(self, maximiseFunc):
+  def installMaximiseEventHandler(self, maximiseFunc, closeFunc):
     """
     Attach a maximise function to the parent window.
     This is called when the WindowStateChanges to maximises
@@ -436,6 +436,7 @@ class CcpnModule(Dock, DropBase):
     :param maximiseFunc:
     """
     self._maximiseFunc = maximiseFunc
+    self._closeFunc = closeFunc
 
   def removeMaximiseEventHandler(self):
     """
@@ -456,6 +457,10 @@ class CcpnModule(Dock, DropBase):
           # TODO:ED check that this is unique if changed to another window
           if self._maximiseFunc:
             self._maximiseFunc()
+
+      elif event.type() == QtCore.QEvent.Close:
+        if self._closeFunc:
+          self._closeFunc()
 
     except Exception as es:
       print('>>>TEMP Error', obj, event, str(es))

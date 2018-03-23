@@ -78,7 +78,7 @@ class PeakTableModule(CcpnModule):
     if peakList is not None:
       self.selectPeakList(peakList)
 
-    self.installMaximiseEventHandler(self._maximise)
+    self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
   def _maximise(self):
     """

@@ -35,9 +35,9 @@ import os
 import numpy as np
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
-from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox , CustomLabel
+from ccpn.ui.gui.widgets.BarGraph import BarGraph
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
@@ -48,8 +48,8 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
-from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.Column import Column, ColumnClass
+from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
 from ccpn.util.Scripting import getScriptsDirectoryPath
@@ -93,8 +93,6 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
   return filePath
 
 DefaultThreshould = 0.1
-LightColourSchemeCurrentLabel = '#3333ff'
-DarkColourSchemeCurrentLabel = '#00ff00'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 
 MORE, LESS = 'More', 'Less'
@@ -354,8 +352,8 @@ class ChemicalShiftsMapping(CcpnModule):
   def _updateNmrAtomsOption(self ):
     i = 0
     availableNmrAtoms = self._availableNmrAtoms()
-
     for name, value in DefaultAtomWeights.items():
+      # line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
       atomFrame = Frame(self.nmrAtomsFrame, setLayout=True, grid=(i, 1))
       hFrame = 0
       vFrame = 0
@@ -371,7 +369,7 @@ class ChemicalShiftsMapping(CcpnModule):
       vFrame += 1
       self.commonAtomsFrame = Frame(atomFrame, setLayout=True, grid=(vFrame, 0))
       # add the first three of ccpn Sorted.
-      vFrame += 1
+
       self.scrollAreaMoreNmrAtoms = ScrollArea(atomFrame, setLayout=False, grid=(vFrame, 0))
       self.scrollAreaMoreNmrAtoms.setWidgetResizable(True)
       self.moreOptionFrame = Frame(self, setLayout=True,  )
@@ -379,7 +377,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.moreOptionFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
       self.scrollAreaMoreNmrAtoms.hide()
       self.moreButton = Button(atomFrame, 'More %s NmrAtoms' % name,
-                          callback=partial(self._toggleMoreNmrAtoms,self.scrollAreaMoreNmrAtoms),  grid=(vFrame, hFrame), hAlign='l', )
+                          callback=partial(self._toggleMoreNmrAtoms,self.scrollAreaMoreNmrAtoms),  grid=(vFrame, 1), hAlign='l', )
       self.moreButton.hide()
 
       availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
@@ -434,9 +432,14 @@ class ChemicalShiftsMapping(CcpnModule):
 
       i +=1
 
+      # if name == OTHER:
+      #   addedNmrAtoms = [i.text() for i in self.nmrAtomsCheckBoxes if i is not None]
+      #   othersAvailable = [name for name in availableNmrAtoms if name not in addedNmrAtoms]
+      #   self.moreButton.show()
+      #   self._addMoreNmrAtomsForAtomType(othersAvailable, self.moreOptionFrame)
 
-      if name not in availableNmrAtoms:
-        atomFrame.hide()
+      # if name not in availableNmrAtoms:
+      #   atomFrame.hide()
 
 
 
@@ -467,8 +470,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
 
     self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select Nmr Atoms', grid=(i, 0))
-    self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
-
+    self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents,setLayout=True, grid=(i, 1))
     self._updateNmrAtomsOption()
     i += 1
 

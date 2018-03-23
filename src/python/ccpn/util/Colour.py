@@ -165,8 +165,10 @@ def addNewColour(newColour):
   spectrumColours[newColour.name()] = 'Colour %s' % newIndex
 
 def addNewColourString(colourString):
-  newIndex = str(len(spectrumColours.items()) + 1)
-  spectrumColours[colourString] = 'Colour %s' % newIndex
+  # '#' is reserved for auto colour so shouldn't ever be added
+  if colourString != '#':
+    newIndex = str(len(spectrumColours.items()) + 1)
+    spectrumColours[colourString] = 'Colour %s' % newIndex
 
 # def _setNewColour(colList, newCol:str):
 #
@@ -186,11 +188,20 @@ def addNewColourString(colourString):
 #     colList.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
 #     colList.setCurrentIndex(int(newIndex) - 1)
 
+def selectPullDownColour(pulldown, colourString, allowAuto=False):
+  try:
+    pulldown.setCurrentText(spectrumColours[colourString])
+  except:
+    if allowAuto and '#' in pulldown.texts:
+      pulldown.setCurrentText('#')
+
 def fillColourPulldown(pulldown, allowAuto=False):
   currText = pulldown.currentText()
   # currIndex = pulldown.currentIndex()
   # print ('>>>', currText, currIndex)
   pulldown.clear()
+  if allowAuto:
+    pulldown.addItem(text='<auto>')
   for item in spectrumColours.items():
     # if item[1] not in pulldown.texts:
     if item[0] != '#':
@@ -201,3 +212,14 @@ def fillColourPulldown(pulldown, allowAuto=False):
       pulldown.addItem(text=item[1])
 
   pulldown.setCurrentText(currText)
+
+def getSpectrumColour(colourName, defaultReturn=None):
+  """
+  return the hex colour of the named colour
+  """
+  try:
+    col = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourName)]
+    return col
+  except:
+    # colour not found in the list
+    return defaultReturn

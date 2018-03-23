@@ -98,6 +98,8 @@ DarkColourSchemeCurrentLabel = '#00ff00'
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 
 MORE, LESS = 'More', 'Less'
+PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
+
 
 class CustomNmrResidueTable(NmrResidueTable):
   """
@@ -243,17 +245,14 @@ class ChemicalShiftsMapping(CcpnModule):
     if self.mainWindow:
       self._selectCurrentNmrResiduesNotifier = Notifier(self.current , [Notifier.CURRENT] , targetName='nmrResidues'
                                                        , callback=self._selectCurrentNmrResiduesNotifierCallback)
-      self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak',
-                                                self._peakDeletedCallBack)
+      self._peakDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'Peak', self._peakDeletedCallBack)
 
       # self._peakChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'Peak',
       #                                        self._peakChangedCallBack, onceOnly=True)
       # self._peakChangedNotifier.lastPeakPos = None
 
-      self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE, Notifier.DELETE], 'NmrResidue',
-                                           self._nmrResidueChanged)
-      self._nrDeletedNotifier = Notifier(self.project, [Notifier.CHANGE, Notifier.DELETE], 'NmrResidue',
-                                         self._nmrResidueDeleted)
+      self._nrChangedNotifier = Notifier(self.project, [Notifier.CHANGE], 'NmrResidue',self._nmrObjectChanged)
+      self._nrDeletedNotifier = Notifier(self.project, [Notifier.DELETE], 'NmrResidue',self._nmrResidueDeleted)
 
       if self.project:
         if len(self.project.nmrChains) > 0:
@@ -397,8 +396,7 @@ class ChemicalShiftsMapping(CcpnModule):
           n += 1
       else:
         self.moreButton.show()
-        preferredAtoms = ['H','HA', 'HB', 'C', 'CA','CB', 'N', 'NE', 'ND' ]
-        showPreferredFirst = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName in preferredAtoms]
+        showPreferredFirst = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName in PreferredNmrAtoms]
         rest = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName not in showPreferredFirst]
         if len(showPreferredFirst)>0:
           if len(showPreferredFirst) < maxCountRow:
@@ -439,6 +437,8 @@ class ChemicalShiftsMapping(CcpnModule):
 
       if name not in availableNmrAtoms:
         atomFrame.hide()
+
+
 
 
   def _setSettingsWidgets(self):
@@ -624,8 +624,7 @@ class ChemicalShiftsMapping(CcpnModule):
     pass
     # print(data)
 
-  def _nmrResidueChanged(self, data):
-    nmrResidue =  data[Notifier.OBJECT]
+  def _nmrObjectChanged(self, data):
     self.updateModule()
 
   def _nmrResidueDeleted(self, data):

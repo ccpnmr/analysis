@@ -5326,8 +5326,8 @@ void main()
             gridGLList.numVertices += 2
             index += 2
 
-      # restrict the labelling to the maximum without overlap
-      while len(labelling['0']) > 6:
+      # restrict the labelling to the maximum without overlap based on width
+      while len(labelling['0']) > (self.w/35.0):
         #restrict X axis labelling
         lStrings = labelling['0']
         if check(lStrings[0]):

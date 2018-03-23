@@ -260,27 +260,15 @@ class GuiWindow():
     """
     Toggles whether horizontal traces are displayed in the specified window.
     """
-    """ Only do it for current strip because otherwise conflicts with how right mouse menu works
-    for spectrumDisplay in window.spectrumDisplays:
-      if not spectrumDisplay.is1D:
-        for strip in spectrumDisplay.strips:
-          strip.toggleHorizontalTrace()
-"""
     if self.application.current.strip:
-      self.application.current.strip.toggleHorizontalTrace()
-    
+      self.application.current.strip.spectrumDisplay.toggleHTrace()
+
   def toggleVTrace(self, window:'GuiWindow'):
     """
     Toggles whether vertical traces are displayed in the specified window.
     """
-    """ Only do it for current strip because otherwise conflicts with how right mouse menu works
-    for spectrumDisplay in window.spectrumDisplays:
-      if not spectrumDisplay.is1D:
-        for strip in spectrumDisplay.strips:
-          strip.toggleVerticalTrace()
-"""
     if self.application.current.strip:
-      self.application.current.strip.toggleVerticalTrace()
+      self.application.current.strip.spectrumDisplay.toggleVTrace()
 
   def toggleLastAxisOnly(self, window:'GuiWindow'):
     """

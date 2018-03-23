@@ -389,6 +389,7 @@ class Strip(AbstractWrapperObject):
         self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(ccpnStrip)
         ccpnStrip.delete()
 
+      self.current.strip = spectrumDisplay.strips[-1]
     else:
       raise  ValueError("The last strip in a display cannot be deleted")
 
@@ -397,7 +398,7 @@ class Strip(AbstractWrapperObject):
     # currentStripItem = self._getWidgetFromLayout()
     # self.setParent(None)
 
-    # TODO:ED check this hack
+    # TODO:ED check this cheeky code :)
     self._unDeleteCall(*self._unDeleteArgs)     # recover the deleted apiStrip
 
     ccpnStrip = self._wrappedData
@@ -414,6 +415,8 @@ class Strip(AbstractWrapperObject):
         _undo = self.project._undo
         if _undo is not None:
           _undo.newItem(self._removeFromLayout, self._restoreToLayout)
+
+      self.current.strip = spectrumDisplay.strips[-1]
 
     else:
       raise ValueError("The last strip in a display cannot be deleted")

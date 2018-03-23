@@ -545,7 +545,14 @@ class GuiStripNd(GuiStrip):
     Toggles whether or not horizontal trace is displayed.
     """
     if not self.spectrumDisplay.phasingFrame.isVisible():
-      # self.hTraceAction.setChecked(not self.hTraceAction.isChecked())
+      self.spectrumDisplay.setHorizontalTraces(self.hTraceAction.isChecked())
+
+  def _setHorizontalTrace(self, trace):
+    """
+    Toggles whether or not horizontal trace is displayed.
+    """
+    if not self.spectrumDisplay.phasingFrame.isVisible():
+      self.hTraceAction.setChecked(trace)
       self._updateTraces()
 
   def toggleVerticalTrace(self):
@@ -553,7 +560,14 @@ class GuiStripNd(GuiStrip):
     Toggles whether or not vertical trace is displayed.
     """
     if not self.spectrumDisplay.phasingFrame.isVisible():
-      # self.vTraceAction.setChecked(not self.vTraceAction.isChecked())
+      self.spectrumDisplay.setVerticalTraces(self.vTraceAction.isChecked())
+
+  def _setVerticalTrace(self, trace):
+    """
+    Toggles whether or not vertical trace is displayed.
+    """
+    if not self.spectrumDisplay.phasingFrame.isVisible():
+      self.vTraceAction.setChecked(trace)
       self._updateTraces()
 
   def toggleLastAxisOnly(self):

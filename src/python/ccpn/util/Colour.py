@@ -44,7 +44,6 @@ def hexToRgb(hex):
   return tuple(int(hex[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
   
-
 colourNameToHexDict = {
   'red':     '#ff0000',
   'green':   '#00ff00',

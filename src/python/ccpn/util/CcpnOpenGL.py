@@ -6867,7 +6867,8 @@ class GLRegion(QtWidgets.QWidget):
         if not axisIndex:
           getLogger().warning('Axis code %s not found in current strip' % self._axisCode)
 
-    self._glList.renderMode = GLRENDERMODE_REBUILD
+    if self._glList:
+      self._glList.renderMode = GLRENDERMODE_REBUILD
     self.parent.update()
 
   @property

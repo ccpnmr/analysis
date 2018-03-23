@@ -352,8 +352,9 @@ class ChemicalShiftsMapping(CcpnModule):
   def _updateNmrAtomsOption(self ):
     i = 0
     availableNmrAtoms = self._availableNmrAtoms()
+    line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
+    i += 1
     for name, value in DefaultAtomWeights.items():
-      # line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
       atomFrame = Frame(self.nmrAtomsFrame, setLayout=True, grid=(i, 1))
       hFrame = 0
       vFrame = 0
@@ -377,7 +378,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.moreOptionFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
       self.scrollAreaMoreNmrAtoms.hide()
       self.moreButton = Button(atomFrame, 'More %s NmrAtoms' % name,
-                          callback=partial(self._toggleMoreNmrAtoms,self.scrollAreaMoreNmrAtoms),  grid=(vFrame, 1), hAlign='l', )
+                               callback=partial(self._toggleMoreNmrAtoms,self.scrollAreaMoreNmrAtoms),  grid=(vFrame, 1), hAlign='l', )
       self.moreButton.hide()
 
       availableNmrAtomsForType = self._availableNmrAtoms(nmrAtomType=name)
@@ -398,14 +399,14 @@ class ChemicalShiftsMapping(CcpnModule):
         rest = [nmrAtomName for nmrAtomName in availableNmrAtomsForType if nmrAtomName not in showPreferredFirst]
         if len(showPreferredFirst)>0:
           if len(showPreferredFirst) < maxCountRow:
-              needed = maxCountRow - len(showPreferredFirst)
-              if len(rest) > needed:
-                showPreferredFirst += rest[:needed]
-                rest = rest[needed:]
-              else:
-                showPreferredFirst += rest
-                rest = []
-                self.moreButton.hide()
+            needed = maxCountRow - len(showPreferredFirst)
+            if len(rest) > needed:
+              showPreferredFirst += rest[:needed]
+              rest = rest[needed:]
+            else:
+              showPreferredFirst += rest
+              rest = []
+              self.moreButton.hide()
           for nmrAtomName in showPreferredFirst:
             self.atomSelection = CheckBox(self.commonAtomsFrame, text=nmrAtomName, grid=(0, n))
             n += 1
@@ -432,17 +433,18 @@ class ChemicalShiftsMapping(CcpnModule):
 
       i +=1
 
-      # if name == OTHER:
-      #   addedNmrAtoms = [i.text() for i in self.nmrAtomsCheckBoxes if i is not None]
-      #   othersAvailable = [name for name in availableNmrAtoms if name not in addedNmrAtoms]
-      #   self.moreButton.show()
-      #   self._addMoreNmrAtomsForAtomType(othersAvailable, self.moreOptionFrame)
+      if name == OTHER:
+        addedNmrAtoms = [i.text() for i in self.nmrAtomsCheckBoxes if i is not None]
+        othersAvailable = [name for name in availableNmrAtoms if name not in addedNmrAtoms]
+        if len(othersAvailable):
+          self.moreButton.show()
+          availableNmrAtoms.append(name)
+          self._addMoreNmrAtomsForAtomType(othersAvailable, self.moreOptionFrame)
 
-      # if name not in availableNmrAtoms:
-      #   atomFrame.hide()
+      if name not in availableNmrAtoms:
+        atomFrame.hide()
 
-
-
+    line = HLine(self.nmrAtomsFrame, style='DashLine', height=1, grid=(i, 1))
 
   def _setSettingsWidgets(self):
 

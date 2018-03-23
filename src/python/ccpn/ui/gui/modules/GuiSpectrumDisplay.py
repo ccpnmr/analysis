@@ -773,7 +773,7 @@ class GuiSpectrumDisplay(CcpnModule):
         toStrip.turnOnPhasing()
 
     except Exception as es:
-      print ('>>> ERROR turning on phasing')
+      print ('>>> ERROR turning on phasing', str(es))
       getLogger().debug('OpenGL widget not instantiated')
 
   def addStrip(self) -> 'GuiStripNd':

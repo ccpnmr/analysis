@@ -354,6 +354,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self.storedZooms = []
 
     self._marksList = None
+    self._infiniteLines = []
+    self._regionList = None
     self._orderedAxes = None
     self._axisOrder = None
     self._axisCodes = None

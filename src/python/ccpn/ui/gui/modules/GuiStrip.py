@@ -543,13 +543,13 @@ class GuiStrip(Frame):
     for spectrumView in self.spectrumViews:
       spectrumView._turnOnPhasing()
 
-    # make sure that all traces are clear
-    from ccpn.util.CcpnOpenGL import GLNotifier
-    GLSignals = GLNotifier(parent=self)
-    if self.spectrumDisplay.is1D:
-      GLSignals.emitEvent(triggers=[GLNotifier.GLADD1DPHASING], display=self.spectrumDisplay)
-    else:
-      GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
+    # # make sure that all traces are clear
+    # from ccpn.util.CcpnOpenGL import GLNotifier
+    # GLSignals = GLNotifier(parent=self)
+    # if self.spectrumDisplay.is1D:
+    #   GLSignals.emitEvent(triggers=[GLNotifier.GLADD1DPHASING], display=self.spectrumDisplay)
+    # else:
+    #   GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
 
     # TODO:ED remember direction
     self._newPosition = phasingFrame.pivotEntry.get()
@@ -583,6 +583,14 @@ class GuiStrip(Frame):
     self._infiniteLine.valuesChanged.connect(self._newPositionLineCallback)
     self._infiniteLine.setValue(self._newPosition)
     phasingFrame.pivotEntry.valueChanged.connect(self._newPositionPivotCallback)
+
+    # make sure that all traces are clear
+    from ccpn.util.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    if self.spectrumDisplay.is1D:
+      GLSignals.emitEvent(triggers=[GLNotifier.GLADD1DPHASING], display=self.spectrumDisplay)
+    else:
+      GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
 
   def _newPositionLineCallback(self):
     if not self.isDeleted:
@@ -630,9 +638,10 @@ class GuiStrip(Frame):
     phasingFrame = self.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
 
-    self._storedPhasingData[1-direction] = [phasingFrame.slider0.value(),
-                                            phasingFrame.slider1.value(),
-                                            phasingFrame.pivotEntry.get()]
+    # phasingFrame.setDirection(1-direction)
+    # self.spectrumDisplay._storedPhasingData[1-direction] = [phasingFrame.slider0.value(),
+    #                                                         phasingFrame.slider1.value(),
+    #                                                         phasingFrame.pivotEntry.get()]
 
     if not phasingFrame.isVisible():
       return
@@ -659,9 +668,14 @@ class GuiStrip(Frame):
       self._testCcpnOpenGLWidget.updateHTrace = False
       self._testCcpnOpenGLWidget.updateVTrace = True
 
-    phasingFrame.slider0.setValue(self._storedPhasingData[direction][0])
-    phasingFrame.slider1.setValue(self._storedPhasingData[direction][1])
-    phasingFrame.pivotEntry.set(self._storedPhasingData[direction][2])
+    vals = phasingFrame.getValues(direction)
+    # phasingFrame.slider0.setValue(self.spectrumDisplay._storedPhasingData[direction][0])
+    # phasingFrame.slider1.setValue(self.spectrumDisplay._storedPhasingData[direction][1])
+    # phasingFrame.pivotEntry.set(self.spectrumDisplay._storedPhasingData[direction][2])
+    phasingFrame.slider0.setValue(vals[0])
+    phasingFrame.slider1.setValue(vals[1])
+    phasingFrame.pivotEntry.set(vals[2])
+
     try:
       self._testCcpnOpenGLWidget.clearStaticTraces()
     except:

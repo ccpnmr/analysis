@@ -30,8 +30,9 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 Qt = QtCore.Qt
 
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.guiSettings import getColours
+#from ccpn.ui.gui.guiSettings import getColours
 from ccpn.framework.Translation import translator
+import ccpn.ui.gui.guiSettings as guiSettings
 
 class Label(QtWidgets.QLabel, Base):
 
@@ -69,8 +70,8 @@ class Label(QtWidgets.QLabel, Base):
     # this appears not to pick up the colour as set by the stylesheet!
     # self._colour = textColor if textColor else self.palette().color(QtGui.QPalette.WindowText).name()
 
-    colours = getColours()
-    self._colour = textColour if textColour else colours['LabelFG']
+    colours = guiSettings.getColours()
+    self._colour = textColour if textColour else colours[guiSettings.LABEL_FOREGROUND]
     self._setStyleSheet()
 
   def get(self):

@@ -1553,9 +1553,6 @@ class Framework:
     json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
     prefFile.close()
 
-    # reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-    #                                 ['Save and Quit', 'Quit without Saving', 'Cancel'],
-    #                                 colourScheme=self.ui.mainWindow.colourScheme)
     reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
                                     ['Save and Quit', 'Quit without Saving', 'Cancel'])   # ejb
     if reply == 'Save and Quit':

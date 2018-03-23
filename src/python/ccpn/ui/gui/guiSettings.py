@@ -30,6 +30,8 @@ __date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Font import Font
+from ccpn.util.decorators import singleton
+from ccpn.util.Logging import getLogger
 
 # fonts
 monaco12              = Font('Monaco', 12)
@@ -90,7 +92,7 @@ LIGHT = 'light'
 DARK = 'dark'
 DEFAULT = 'default'
 COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
-LabelFG = 'LabelFG'
+
 
 MARK_LINE_COLOUR_DICT = {
   'CA': '#0000FF',
@@ -116,6 +118,115 @@ MARK_LINE_COLOUR_DICT = {
   'NH': '#FFFF00',
 }
 
+# Widget definitions
+CCPNMODULELABEL_FOREGROUND = 'CCPNMODULELABEL_FOREGROUND'
+CCPNMODULELABEL_BACKGROUND = 'CCPNMODULELABEL_BACKGROUND'
+
+# Spectrum GL base class
+CCPNGLWIDGET_BACKGROUND    = 'CCPNGLWIDGET_BACKGROUND'
+CCPNGLWIDGET_FOREGROUND    = 'CCPNGLWIDGET_FOREGROUND'
+CCPNGLWIDGET_GRID          = 'CCPNGLWIDGET_GRID'
+CCPNGLWIDGET_HIGHLIGHT     = 'CCPNGLWIDGET_HIGHLIGHT'
+CCPNGLWIDGET_LABELLING     = 'CCPNGLWIDGET_LABELLING'
+CCPNGLWIDGET_PHASETRACE    = 'CCPNGLWIDGET_PHASETRACE'
+
+GUICHAINLABEL_TEXT         = 'GUICHAINLABEL_TEXT'
+
+GUICHAINRESIDUE_UNASSIGNED = 'GUICHAINRESIDUE_UNASSIGNED'
+GUICHAINRESIDUE_ASSIGNED   = 'GUICHAINRESIDUE_ASSIGNED'
+GUICHAINRESIDUE_POSSIBLE   = 'GUICHAINRESIDUE_POSSIBLE'
+GUICHAINRESIDUE_DRAGENTER  = 'GUICHAINRESIDUE_DRAGENTER'
+GUICHAINRESIDUE_DRAGLEAVE  = 'GUICHAINRESIDUE_DRAGLEAVE'
+
+GUINMRATOM_SELECTED        = 'GUINMRATOM_SELECTED'
+GUINMRATOM_NOTSELECTED     = 'GUINMRATOM_NOTSELECTED'
+
+GUINMRRESIDUE              = 'GUINMRRESIDUE'
+
+LABEL_FOREGROUND           = 'LABEL_FOREGROUND'
+
+SEQUENCEGRAPHMODULE_LINE   = 'SEQUENCEGRAPHMODULE_LINE'
+SEQUENCEGRAPHMODULE_TEXT   = 'SEQUENCEGRAPHMODULE_TEXT'
+
+SEQUENCEMODULE_DRAGMOVE    = 'SEQUENCEMODULE_DRAGMOVE'
+SEQUENCEMODULE_TEXT        = 'SEQUENCEMODULE_TEXT'
+
+# used in QuickTable stylesheet (cannot change definition)
+QUICKTABLE_BACKGROUND          = 'QUICKTABLE_BACKGROUND'
+QUICKTABLE_ALT_BACKGROUND      = 'QUICKTABLE_ALT_BACKGROUND'
+QUICKTABLE_ITEM_FOREGROUND     = 'QUICKTABLE_ITEM_FOREGROUND'
+QUICKTABLE_SELECTED_FOREGROUND = 'QUICKTABLE_SELECTED_FOREGROUND'
+QUICKTABLE_SELECTED_BACKGROUND = 'QUICKTABLE_SELECTED_BACKGROUND'
+
+# Colours
+TEXT_COLOUR = '#555D85'
+LIGHT_GREY  = 'rgb(250,250,250)'
+MARISHINO   = '#004D81'  # rgb(0,77,129) ; red colour (from apple)
+GREEN1      = '#009a00'
+
+# Colour schemes definitions
+colourSchemes = {
+  # all colours defined here
+  DEFAULT: {
+
+    CCPNGLWIDGET_BACKGROUND    : (0.99, 0.99, 0.99, 1.0),
+    CCPNGLWIDGET_FOREGROUND    : (0.05, 0.05, 0.05, 1.0), #'#080000'
+    CCPNGLWIDGET_GRID          : (0.5, 0.0, 0.0, 1.0),    #'#080000'
+    CCPNGLWIDGET_HIGHLIGHT     : (0.23, 0.23, 1.0, 1.0),  #'#3333ff'
+    CCPNGLWIDGET_LABELLING     : (0.05, 0.05, 0.05, 1.0),
+    CCPNGLWIDGET_PHASETRACE    : (0.2, 0.2, 0.2, 1.0),
+
+    CCPNMODULELABEL_BACKGROUND : '#FFFFFF',
+    CCPNMODULELABEL_FOREGROUND : TEXT_COLOUR,
+
+    GUICHAINLABEL_TEXT      : TEXT_COLOUR,
+
+    GUICHAINRESIDUE_UNASSIGNED : 'black',
+    GUICHAINRESIDUE_ASSIGNED   : GREEN1,
+    GUICHAINRESIDUE_POSSIBLE   : 'orange',
+    GUICHAINRESIDUE_DRAGENTER  : MARISHINO,
+    GUICHAINRESIDUE_DRAGLEAVE  : 'black', # '#666e98',
+
+    GUINMRATOM_SELECTED        : TEXT_COLOUR,
+    GUINMRATOM_NOTSELECTED     : '#FDFDFC',
+
+    GUINMRRESIDUE              : TEXT_COLOUR,
+
+    LABEL_FOREGROUND           : TEXT_COLOUR,
+
+    SEQUENCEGRAPHMODULE_LINE   : 'black',
+    SEQUENCEGRAPHMODULE_TEXT   : TEXT_COLOUR,
+
+    SEQUENCEMODULE_DRAGMOVE    : 'orange',
+    SEQUENCEMODULE_TEXT        : TEXT_COLOUR,
+
+    QUICKTABLE_BACKGROUND          : 'white',
+    QUICKTABLE_ALT_BACKGROUND      : LIGHT_GREY,
+    QUICKTABLE_ITEM_FOREGROUND     : TEXT_COLOUR,
+    QUICKTABLE_SELECTED_FOREGROUND : 'black',
+    QUICKTABLE_SELECTED_BACKGROUND : '#FFFCBA',
+
+},
+
+  # Overridden for dark colour scheme
+  DARK: {
+
+    CCPNGLWIDGET_BACKGROUND: (0.1, 0.1, 0.1, 1.0),
+    CCPNGLWIDGET_FOREGROUND: (0.9, 1.0, 1.0, 1.0),      #'#f7ffff'
+    CCPNGLWIDGET_GRID:       (0.9, 1.0, 1.0, 1.0),    #'#f7ffff'
+    CCPNGLWIDGET_HIGHLIGHT:  (0.2, 1.0, 0.3, 1.0),   #'#00ff00'
+    CCPNGLWIDGET_LABELLING:  (1.0, 1.0, 1.0, 1.0),
+    CCPNGLWIDGET_PHASETRACE: (0.8, 0.8, 0.8, 1.0)
+
+  },
+
+  # Overridden for light colour scheme
+  LIGHT: {
+
+  }
+
+}
+
 def getColourScheme():
   """
   :return: colourScheme
@@ -126,10 +237,34 @@ def getColourScheme():
     colourScheme = application.colourScheme
     if colourScheme not in COLOUR_SCHEMES:
       raise RuntimeError('Undefined colour scheme')
+      return DEFAULT
     return colourScheme
   # for now to make the tests run
   else:
-    return LIGHT
+    return DEFAULT
+
+
+@singleton
+class ColourDict(dict):
+  """
+  Singleton Class to store colours; 
+  """
+  def __init__(self, colourScheme = None):
+    super(dict, self).__init__()
+    # assure always default values
+    self.setColourScheme(DEFAULT)
+    if colourScheme is not None:
+      self.setColourScheme(colourScheme)
+    else:
+      self.setColourScheme(getColourScheme())
+
+  def setColourScheme(self, colourScheme):
+    if colourScheme in COLOUR_SCHEMES:
+      self.update(colourSchemes[colourScheme])
+      self.colourScheme = colourScheme
+    else:
+      getLogger().warning('undefined colourScheme "%s", retained "%s"' % (colourScheme, self.colourScheme))
+#end class
 
 
 def getColours():
@@ -138,24 +273,5 @@ def getColours():
   :return: colourDict
   """
   colourScheme = getColourScheme()
-  colourDict = {}
-
-  if colourScheme == DARK:
-    textColour = '#f7ffff'
-    colourDict[LabelFG] = textColour
-    colourDict['LabelBG'] = '#2a3358'
-
-  elif colourScheme == LIGHT:
-    textColour = '#555D85'
-    colourDict[LabelFG] = textColour
-    colourDict['LabelBG'] = '#FBF4CC'
-
-  elif colourScheme == DEFAULT:
-    textColour = '#000000'
-    colourDict[LabelFG] = textColour
-    colourDict['LabelBG'] = '#000000'
-
-  else:
-    raise RuntimeError('Undefined colour scheme')
-
+  colourDict = ColourDict(colourScheme)
   return colourDict

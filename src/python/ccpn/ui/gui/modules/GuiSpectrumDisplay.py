@@ -179,7 +179,7 @@ class GuiSpectrumDisplay(CcpnModule):
       self.spectrumUtilToolBar.hide()
 
     self.stripFrame = Frame(setLayout=True, showBorder=True, spacing=(5,0), stretch=(1,1))
-    self.stripFrame.layout().setContentsMargins(4, 0, 4, 0)
+    self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
     if useScrollArea:
       # scroll area for strips
@@ -245,7 +245,7 @@ class GuiSpectrumDisplay(CcpnModule):
     #         self._handlePid(obj.pid, theObject)  # pass the object as its pid so we use
     #                                   # the same method used to process the pids
 
-    pids = data.get('pids',[])
+    pids = data.get(DropBase.PIDS,[])
     if pids:
       if len(pids)>0:
         self._handlePids(pids, theObject)

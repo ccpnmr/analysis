@@ -2,7 +2,8 @@
 This file contains the SequenceModule module
 
 GWV: modified 1-9/12/2016
-GWV: 13/04/2017: Disconnected from Sequence Graph; Needs rafactoring
+GWV: 13/04/2017: Disconnected from Sequence Graph; Needs refactoring
+GWV: 22/4/2018: New handling of colours
 
 """
 #=========================================================================================
@@ -38,8 +39,15 @@ from ccpn.core.Residue import Residue
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.lib.Notifiers import Notifier
+
+from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui.guiSettings import GUICHAINLABEL_TEXT, \
+                                    GUICHAINRESIDUE_DRAGENTER, GUICHAINRESIDUE_DRAGLEAVE, \
+                                    GUICHAINRESIDUE_UNASSIGNED, GUICHAINRESIDUE_ASSIGNED, \
+                                    GUICHAINRESIDUE_POSSIBLE, \
+                                    SEQUENCEMODULE_DRAGMOVE, SEQUENCEMODULE_TEXT
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthLargeFont
+from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthLargeFont, helvetica8
 from ccpn.ui.gui.guiSettings import textFontHugeSpacing as fontSpacing
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
@@ -72,7 +80,6 @@ class SequenceModule(CcpnModule):
 
     self.mainWindow = mainWindow
     self.project = mainWindow.application.project
-    self.colourScheme = mainWindow.application.colourScheme
     #self.label.hide()
 
     self.setAcceptDrops(True)
@@ -87,6 +94,8 @@ class SequenceModule(CcpnModule):
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
     self.horizontalLayout2 = QtWidgets.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
+
+    self.colours = getColours()
     self.setStyleSheet("""QScrollArea QScrollBar::horizontal {max-height: 20px;}
                           QScrollArea QScrollBar::vertical{max-width:20px;}
                       """)
@@ -106,6 +115,10 @@ class SequenceModule(CcpnModule):
     self.setMaximumHeight(100)
     self.scrollContents.setMaximumHeight(100)
 
+    #GWV: explicit intialisation to prevent crashes
+    self._chainNotifier = None
+    self._residueNotifier = None
+    self._chainDeleteNotifier = None
     self._registerNotifiers()
 
     # TODO:ED add highlight if an nmrChain already selected
@@ -126,7 +139,7 @@ class SequenceModule(CcpnModule):
 
     item = self._getGuiItem(self.scrollArea.scene)
     if item:
-      self._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % 'orange' +
+      self._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[SEQUENCEMODULE_DRAGMOVE] +
                               item.toPlainText() + '</strong></div>')
       self._highlight.setPos(item.pos())
     else:
@@ -162,10 +175,6 @@ class SequenceModule(CcpnModule):
     all succeeding residues according to the length of the list.
     """
 
-    if self.colourScheme == 'dark':
-      colour = '#f7ffff'
-    elif self.colourScheme == 'light':
-      colour = '#666e98'
     guiRes = self._getGuiItem(self.scrollArea.scene)
     #self.scene.itemAt(event.scenePos())
 
@@ -194,8 +203,9 @@ class SequenceModule(CcpnModule):
           for ii, res in enumerate(residues):
             if hasattr(self, 'guiChainLabel'):
               guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
-              guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
-                                   res.shortName+'</strong></div>')
+              guiResidue._setStyleAssigned()
+              # guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_ASSIGNED] +
+              #                      res.shortName+'</strong></div>')
         except Exception as es:
           getLogger().warning('Sequence Module: %s' % str(es))
 
@@ -225,18 +235,13 @@ class SequenceModule(CcpnModule):
       for residue in residues:
         guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
         guiResidue._styleResidue()
-      if self.colourScheme == 'dark':
-        colour = '#e4e15b'
-      elif self.colourScheme == 'light':
-        colour = '#009a00'
-      else:
-        colour = '#808080'
       guiResidues = []
       for residue in residues:
         guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
         guiResidues.append(guiResidue)
-        guiResidue.setHtml('<div style="color: %s;text-align: center; padding: 0px;">' % colour+
-                             residue.shortName+'</div>')
+        guiResidue._setStylePossibleAssigned()
+        # guiResidue.setHtml('<div style="color: %s;text-align: center; padding: 0px;">' %
+        #                     self.colours[GUICHAINRESIDUE_POSSIBLE] +  residue.shortName+'</div>')
     except Exception as es:
       pass
 
@@ -283,10 +288,13 @@ class SequenceModule(CcpnModule):
   def _unRegisterNotifiers(self):
     if self._chainNotifier:
       self._chainNotifier.unRegister()
+      self._chainNotifier = None
     if self._residueNotifier:
       self._residueNotifier.unRegister()
+      self._residueNotifier = None
     if self._chainDeleteNotifier:
       self._chainDeleteNotifier.unRegister()
+      self._chainDeleteNotifier = None
 
   def _closeModule(self):
     self._unRegisterNotifiers()
@@ -316,11 +324,12 @@ class SequenceModule(CcpnModule):
     if self._highlight:
       self.scrollArea.scene.removeItem(self._highlight)
     self._highlight = QtWidgets.QGraphicsTextItem()
-    self._highlight.setDefaultTextColor(QtGui.QColor('orange'))
+    self._highlight.setDefaultTextColor(QtGui.QColor(self.colours[SEQUENCEMODULE_TEXT]))
     self._highlight.setFont(fixedWidthLargeFont)
     self._highlight.setPlainText('')
     # self._highlight.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
     self.scrollArea.scene.addItem(self._highlight)
+
 
 class GuiChainLabel(QtWidgets.QGraphicsTextItem):
   """
@@ -331,72 +340,70 @@ class GuiChainLabel(QtWidgets.QGraphicsTextItem):
   def __init__(self, sequenceModule, mainWindow, scene, position, chain, placeholder=None, tryToUseSequenceCodes=False):
     QtWidgets.QGraphicsTextItem.__init__(self)
 
+    self.sequenceModule = sequenceModule
     self.mainWindow = mainWindow
+    self.scene = scene
     self.chain = chain
+    self.project = mainWindow.application.project
+
     self.items = [self]  # keeps track of items specific to this chainLabel
 
-    # self.colourScheme = project._appBase.colourScheme
-    self.colourScheme = mainWindow.application.colourScheme
-
-    if self.colourScheme == 'dark':
-      self.colour1 = '#bec4f3'
-      self.colour2 = '#f7ffff'
-    elif self.colourScheme == 'light':
-      #colour = '#bd8413'
-      self.colour1 = 'black'
-      self.colour2 = '#555D85'
-    self.setDefaultTextColor(QtGui.QColor(self.colour1))
+    self.colours = getColours()
+    self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
+    self.setFont(fixedWidthLargeFont)
 
     self.setPos(QtCore.QPointF(position[0], position[1]))
+
     if placeholder:
       self.text = 'No Chains in Project!'
     else:
       self.text = '%s:%s' % (chain.compoundName, chain.shortName)
-    self.sequenceModule = sequenceModule
     self.setHtml('<div style=><strong>'+self.text+' </strong></div>')
-    self.setFont(fixedWidthLargeFont)
+
     self.residueDict = {}
-    self.project = mainWindow.application.project
     self.currentIndex = 0
-    self.scene = scene
     self.labelPosition = self.boundingRect().width()
     self.yPosition = position[1]
-    if chain:
-      useSequenceCode = False
-      if tryToUseSequenceCodes:
-        # mark residues where sequence is multiple of 10 when you can
-        # simple rules: sequenceCodes must be integers and consecutive
-        prevCode = None
-        for residue in chain.residues:
-          try:
-            code = int(residue.sequenceCode)
-            if prevCode and code != (prevCode+1):
-              break
-            prevCode = code
-          except: # not an integer
-            break
-        else:
-          useSequenceCode = True
-      for n, residue in enumerate(chain.residues):
-        self._addResidue(n, residue, useSequenceCode)
 
-  def _addResidue(self, number, residue, useSequenceCode=False):
+    if chain:
+      # useSequenceCode = False
+      # if tryToUseSequenceCodes:
+      #   # mark residues where sequence is multiple of 10 when you can
+      #   # simple rules: sequenceCodes must be integers and consecutive
+      #   prevCode = None
+      #   for residue in chain.residues:
+      #     try:
+      #       code = int(residue.sequenceCode)
+      #       if prevCode and code != (prevCode+1):
+      #         break
+      #       prevCode = code
+      #     except: # not an integer
+      #       break
+      #   else:
+      #     useSequenceCode = True
+      for idx, residue in enumerate(chain.residues):
+        self._addResidue(idx, residue)
+
+  def _addResidue(self, idx, residue):
+    """
+    Add residue and optional sequenceCode for
+    """
+    if idx % 10 == 9:  # print out every 10
+      numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
+      numberItem.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINLABEL_TEXT]))
+      numberItem.setFont(helvetica8)
+      xPosition = self.labelPosition + (fontSpacing * self.currentIndex)
+      numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
+      self.scene.addItem(numberItem)
+      self.items.append(numberItem)
+      self.currentIndex += 1
+
     newResidue = GuiChainResidue(self, self.mainWindow, residue, self.scene,
                                  self.labelPosition, self.currentIndex, self.yPosition)
     self.scene.addItem(newResidue)
     self.items.append(newResidue)
     self.residueDict[residue.sequenceCode] = newResidue
     self.currentIndex += 1
-    value = int(residue.sequenceCode)-1 if useSequenceCode else number
-    if value % 10 == 9:  # print out every 10
-      numberItem = QtWidgets.QGraphicsTextItem(residue.sequenceCode)
-      numberItem.setDefaultTextColor(QtGui.QColor(self.colour1))
-      numberItem.setFont(fixedWidthFont)
-      xPosition = self.labelPosition + (fontSpacing * self.currentIndex)
-      numberItem.setPos(QtCore.QPointF(xPosition, self.yPosition))
-      self.scene.addItem(numberItem)
-      self.items.append(numberItem)
-      self.currentIndex += 1
 
 
 # WB: TODO: this used to be in some util library but the
@@ -441,31 +448,14 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     QtWidgets.QGraphicsTextItem.__init__(self)
     Base.__init__(self, acceptDrops=True)
 
-    # self.project = project
-    self.mainWindow = mainWindow
-
-    self.residue = residue
     self.guiChainLabel = guiChainLabel
+    self.mainWindow = mainWindow
+    self.residue = residue
+    self.scene = scene
 
-    #font = QtGui.QFont('Lucida Console', GuiChainResidue.fontSize)
-    #font.setStyleHint(QtGui.QFont.Monospace)
-    #self.setFont(font)
     self.setFont(fixedWidthLargeFont)
-    # self.colourScheme = project._appBase.colourScheme
-    self.colourScheme = mainWindow.application.colourScheme
-
-    if self.colourScheme == 'dark':
-      self.colour1 = '#bec4f3'  # un-assigned
-      self.colour2 = '#f7ffff'  # assigned
-      self.colour3 = '#e4e15b'  # drag-enter event
-    elif self.colourScheme == 'light':
-      #self.colour1 = '#bd8413'
-      #self.colour2 = '#666e98'
-      self.colour1 = 'black'
-      self.colour2 = '#555D85'
-      self.colour3 = '#009a00'  # drag-enter event
-
-    self.setDefaultTextColor(QtGui.QColor(self.colour1))
+    self.colours = getColours()
+    self.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_UNASSIGNED]))
 
     self.setPlainText(residue.shortName)
     position = labelPosition+(fontSpacing*index)
@@ -477,7 +467,6 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     # scene.dragLeaveEvent = self._dragLeaveEvent
     # scene.dragEnterEvent = self._dragEnterEvent
     # scene.dropEvent = self.dropEvent
-    self.scene = scene
     self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable | self.flags())
     self._styleResidue()
 
@@ -490,13 +479,24 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     """
     try:
       if self.residue.nmrResidue is not None:
-        self.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colour2 +
-                     self.residue.shortName+'</strong></div>')
+        self._setStyleAssigned()
       else:
-        self.setHtml('<div style="color: %s; "text-align: center;">'% self.colour1 + self.residue.shortName+'</div')
+        self._setStyleUnAssigned()
     except:
-      # self.setHtml('<div style="color: %s; "text-align: center;">' % self.colour1 + '</div')
+      # self.setHtml('<div style="color: %s; "text-align: center;">' % self.colours[GUICHAINRESIDUE_UNASSIGNED] + '</div')
       getLogger().warning('GuiChainResidue has been deleted')
+
+  def _setStyleAssigned(self):
+    self.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_ASSIGNED] +
+                 self.residue.shortName + '</strong></div>')
+
+  def _setStyleUnAssigned(self):
+    self.setHtml('<div style="color: %s; "text-align: center;">' % self.colours[GUICHAINRESIDUE_UNASSIGNED] +
+                 self.residue.shortName + '</div')
+
+  def _setStylePossibleAssigned(self):
+    self.setHtml('<div style="color: %s; "text-align: center;">' % self.colours[GUICHAINRESIDUE_POSSIBLE] +
+                 self.residue.shortName + '</div')
 
   def _setFontBold(self):
     """
@@ -525,7 +525,7 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
 
     ###item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
-      item.setDefaultTextColor(QtGui.QColor('orange'))    #self.colour3))
+      item.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_DRAGENTER]))
       self.scene.update()
     event.accept()
 
@@ -534,12 +534,8 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     A re-implementation of the QGraphicsTextItem.dragLeaveEvent to facilitate the correct colouring
     of GuiChainResidues during drag-and-drop.
     Required for processNmrChains to work properly.
-    GWV: TODO: this need to call the _StyleResidue function
     """
-    if self.colourScheme == 'dark':
-      colour = '#f7ffff'
-    elif self.colourScheme == 'light':
-      colour = '#666e98'
+
     pos = event.scenePos()
     pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
 
@@ -548,8 +544,8 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
 
     ###item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
-      item.setDefaultTextColor(QtGui.QColor(colour))
-    event.accept()
+      item.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_DRAGLEAVE]))
+      self.scene.update()
 
   # WB: TODO: a version of this used to be in DropBase but that has
   # been changed but it is not clear (to me) how to use this new

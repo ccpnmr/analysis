@@ -85,7 +85,7 @@ class MessageDialog(QtWidgets.QMessageBox):
                 - self.frameGeometry().center()
                 + self.frameGeometry().topLeft())
 
-def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
+def showInfo(title, message, parent=None, iconPath=None):
   """Display an info message
   """
   dialog = MessageDialog('Information', title, message, Information, iconPath, parent)
@@ -97,7 +97,7 @@ def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
   return 
 
 
-def showOkCancel(title, message, parent=None, colourScheme=None, iconPath=None):
+def showOkCancel(title, message, parent=None, iconPath=None):
 
   dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
 
@@ -108,7 +108,7 @@ def showOkCancel(title, message, parent=None, colourScheme=None, iconPath=None):
   return dialog.exec_() == Ok
 
 
-def showYesNo(title, message, parent=None, colourScheme=None, iconPath=None):
+def showYesNo(title, message, parent=None, iconPath=None):
 
   dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
                          
@@ -119,7 +119,7 @@ def showYesNo(title, message, parent=None, colourScheme=None, iconPath=None):
   return dialog.exec_() == Yes
 
 
-def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None, iconPath=None):
+def showRetryIgnoreCancel(title, message, parent=None, iconPath=None):
 
   dialog = MessageDialog('Retry', title, message, Question, iconPath, parent)
                          
@@ -139,7 +139,7 @@ def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None, iconPa
     return None    
 
 
-def showSaveDiscardCancel(title, message, parent=None, colourScheme=None, iconPath=None):
+def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
 
   dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
                          
@@ -159,7 +159,7 @@ def showSaveDiscardCancel(title, message, parent=None, colourScheme=None, iconPa
     return None    
 
 
-def showWarning(title, message, parent=None, colourScheme=None, iconPath=None):
+def showWarning(title, message, parent=None, iconPath=None):
 
   dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
 
@@ -168,7 +168,8 @@ def showWarning(title, message, parent=None, colourScheme=None, iconPath=None):
   dialog.exec_()
   return
 
-def showOkCancelWarning(title, message, parent=None, colourScheme=None, iconPath=None):
+
+def showOkCancelWarning(title, message, parent=None, iconPath=None):
 
   dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
 
@@ -178,7 +179,8 @@ def showOkCancelWarning(title, message, parent=None, colourScheme=None, iconPath
   dialog.raise_()
   return dialog.exec_() == Ok
 
-def showYesNoWarning(title, message, parent=None, colourScheme=None, iconPath=None):
+
+def showYesNoWarning(title, message, parent=None, iconPath=None):
 
   dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
 
@@ -188,7 +190,7 @@ def showYesNoWarning(title, message, parent=None, colourScheme=None, iconPath=No
   dialog.raise_()
   return dialog.exec_() == Yes
 
-def showMulti(title, message, texts, objects=None, parent=None, colourScheme=None, iconPath=None):
+def showMulti(title, message, texts, objects=None, parent=None, iconPath=None):
 
   if objects:
     assert len(objects) == len(texts)
@@ -207,7 +209,8 @@ def showMulti(title, message, texts, objects=None, parent=None, colourScheme=Non
   else:
     return texts[index]  
 
-def showError(title, message, parent=None, colourScheme=None, iconPath=None):
+
+def showError(title, message, parent=None, iconPath=None):
   
   dialog = MessageDialog('Error', title, message, Critical, iconPath, parent)
 
@@ -216,7 +219,8 @@ def showError(title, message, parent=None, colourScheme=None, iconPath=None):
   dialog.exec_()
   return
 
-def showMessage(title, message, parent=None, colourScheme=None, iconPath=None):
+
+def showMessage(title, message, parent=None, iconPath=None):
   
   dialog = MessageDialog('Message', title, message, Information, iconPath, parent)
 

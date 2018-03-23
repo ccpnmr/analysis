@@ -44,6 +44,11 @@ from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Spectrum import Spectrum
+
+from ccpn.ui.gui.guiSettings import getColours
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, \
+                                    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
+                                    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE
 from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 import ccpn.util.Phasing as Phasing
@@ -377,21 +382,14 @@ class CcpnGLWidget(QOpenGLWidget):
     self._spectrumSettings = {}
     self._newStripID = False
 
-    # TODO:ED fix this to get the correct colours
-    if self._parent.spectrumDisplay.mainWindow.application.colourScheme == 'light':
-      self.background = (0.95, 0.95, 0.95, 1.0)    #'#f7ffff'
-      self.foreground = (0.05, 0.05, 0.05, 1.0)    #'#080000'
-      self.gridColour = (0.5, 0.0, 0.0, 1.0)    #'#080000'
-      self.highlightColour = (0.23, 0.23, 1.0, 1.0)    #'#3333ff'
-      self._labellingColour = (0.05, 0.05, 0.05, 1.0)
-      self._phasingTraceColour = (0.2, 0.2, 0.2, 1.0)
-    else:
-      self.background = (0.05, 0.05, 0.05, 1.0)    #'#080000'
-      self.foreground = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
-      self.gridColour = (0.9, 1.0, 1.0, 1.0)    #'#f7ffff'
-      self.highlightColour = (0.2, 1.0, 0.3, 1.0)   #'#00ff00'
-      self._labellingColour = (1.0, 1.0, 1.0, 1.0)
-      self._phasingTraceColour = (0.8, 0.8, 0.8, 1.0)
+    # colours
+    self.colours = getColours()
+    self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
+    self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
+    self.gridColour = self.colours[CCPNGLWIDGET_GRID]
+    self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
+    self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
+    self._phasingTraceColour = self.colours[CCPNGLWIDGET_PHASETRACE]
 
     self._preferences = self._parent.application.preferences.general
 

@@ -35,6 +35,7 @@ from ccpn.core.lib import Util as ccpnUtil
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
@@ -87,18 +88,12 @@ class SpectrumPropertiesPopup(CcpnDialog):
       self.tabWidget.addTab(self._generalTab, "General")
       self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
       self.tabWidget.addTab(self._contoursTab, "Contours")
-
-
     self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
-    Button(self, grid=(2, 1), callback=self.reject, text='Cancel',vPolicy='fixed')
-    self.applyButton = Button(self, grid=(2, 2), callback=self._applyChanges, text='Apply', vPolicy='fixed')
-    # self.applyButton.setEnabled(False)
-    Button(self, grid=(2, 3), callback=self._okButton, text='Ok', vPolicy='fixed')
-    if sys.platform.lower() == 'linux':
-      if spectrum.project._appBase.colourScheme == 'dark':
-        self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358; color: #f7ffff; padding:4px;}")
-      elif spectrum.project._appBase.colourScheme == 'light':
-        self.setStyleSheet("QTabWidget > QWidget { background-color: #fbf4cc;} QTabWidget { background-color: #fbf4cc;}")
+
+    self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
+                                   callbacks=[self.reject, self._applyChanges, self._okButton],
+                                   tipTexts=['', '', '', None], direction='h',
+                                   hAlign='r', grid=(2,1), gridSpan=(1,4))
 
     self._fillPullDowns()
 
@@ -243,10 +238,10 @@ class GeneralTab(QtWidgets.QWidget, Base):
     self.pathData = LineEdit(self, vAlign='t', grid=(2, 1))
     self.pathData.setValidator(FilePathValidator(parent=self.pathData, spectrum=self.spectrum))
     self.pathButton = Button(self, grid=(2, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
-    if self.spectrum.project._appBase.ui.mainWindow is not None:
-      mainWindow = self.spectrum.project._appBase.ui.mainWindow
-    else:
-      mainWindow = self.spectrum.project._appBase._mainWindow
+    # if self.spectrum.project._appBase.ui.mainWindow is not None:
+    #   mainWindow = self.spectrum.project._appBase.ui.mainWindow
+    # else:
+    #   mainWindow = self.spectrum.project._appBase._mainWindow
     self.pythonConsole = mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
 
@@ -789,6 +784,7 @@ class DimensionsTab(QtWidgets.QWidget, Base):
 
 
 class ContoursTab(QtWidgets.QWidget, Base):
+
   def __init__(self, parent, spectrum):
     super(ContoursTab, self).__init__(parent)
     Base.__init__(self, setLayout=True)      # ejb
@@ -1110,9 +1106,13 @@ class ContoursTab(QtWidgets.QWidget, Base):
 
 
 class SpectrumDisplayPropertiesPopup(CcpnDialog):
-  # All spectra in the current display are added as tabs
-  # The apply button then steps through each tab, and calls each function in the _changes dictionary
-  # in order to set the parameters.
+  """All spectra in the current display are added as tabs
+  The apply button then steps through each tab, and calls each function in the _changes dictionary
+  in order to set the parameters.
+  """
+
+  MINIMUM_WIDTH_PER_TAB = 120
+  MINIMUM_WIDTH = 400
 
   def __init__(self, parent=None, mainWindow=None, orderedSpectra=None
                , title='Spectrum Display Properties', **kw):
@@ -1125,6 +1125,8 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
     self.orderedSpectra = orderedSpectra
 
     self.tabWidget = QtWidgets.QTabWidget()
+    self.tabWidget.setMinimumWidth(
+                   max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB*len(self.orderedSpectra)))
 
     self._contoursTab = []
     for specNum, thisSpec in enumerate(orderedSpectra):
@@ -1133,16 +1135,10 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
 
     self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
 
-    Button(self, grid=(2, 1), callback=self.reject, text='Cancel',vPolicy='fixed')
-    self.applyButton = Button(self, grid=(2, 2), callback=self._applyChanges, text='Apply', vPolicy='fixed')
-    # self.applyButton.setEnabled(False)
-    Button(self, grid=(2, 3), callback=self._okButton, text='Ok', vPolicy='fixed')
-
-    # if sys.platform.lower() == 'linux':
-    #   if spectrum.project._appBase.colourScheme == 'dark':
-    #     self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358; color: #f7ffff; padding:4px;}")
-    #   elif spectrum.project._appBase.colourScheme == 'light':
-    #     self.setStyleSheet("QTabWidget > QWidget { background-color: #fbf4cc;} QTabWidget { background-color: #fbf4cc;}")
+    self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
+                                   callbacks=[self.reject, self._applyChanges, self._okButton],
+                                   tipTexts=['', '', '', None], direction='h',
+                                   hAlign='r', grid=(2,1), gridSpan=(1,4))
 
     self._fillPullDowns()
 

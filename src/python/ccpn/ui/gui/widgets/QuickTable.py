@@ -36,6 +36,9 @@ from pyqtgraph.widgets.TableWidget import _defersort
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject, OBJECT_DATAFRAME
+
+from ccpn.ui.gui.guiSettings import getColours
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Label import Label
@@ -72,6 +75,22 @@ OBJECT_PARENT = 1
 
 class QuickTable(TableWidget, Base):
   ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
+
+  styleSheet = """
+QuickTable {
+    background-color: %(QUICKTABLE_BACKGROUND)s;
+    alternate-background-color: %(QUICKTABLE_ALT_BACKGROUND)s;
+}
+
+QuickTable::item {
+    padding: 2px;
+    color: %(QUICKTABLE_ITEM_FOREGROUND)s;
+}
+
+QuickTable::item::selected {
+    background-color: %(QUICKTABLE_SELECTED_BACKGROUND)s;
+    color: %(QUICKTABLE_SELECTED_FOREGROUND)s;
+}"""
 
   @staticmethod
   def _getCommentText(obj):
@@ -138,6 +157,12 @@ class QuickTable(TableWidget, Base):
 
     # initialise the internal data storage
     self._dataFrameObject = dataFrameObject
+
+    # set stylesheet
+    self.colours = getColours()
+    styleSheet = self.styleSheet % self.colours
+    self.setStyleSheet(styleSheet)
+    self.setAlternatingRowColors(True)
 
     # set the preferred scrolling behaviour
     self.setHorizontalScrollMode(self.ScrollPerPixel)

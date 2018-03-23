@@ -40,7 +40,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.SideBar import SideBar, OpenObjAction, _openItemObject
 from ccpn.ui.gui.widgets.Font import Font
-from ccpn.ui.gui.guiSettings import getColourScheme, getColours, LabelFG
+from ccpn.ui.gui.guiSettings import getColourScheme, getColours, LABEL_FOREGROUND
 from ccpn.util.Colour import  hexToRgb
 
 ModuleArea = DockArea
@@ -51,21 +51,14 @@ Failed = 'Failed'
 class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
   def __init__(self, mainWindow):
-    # super(CcpnModuleArea, self).__init__(mainWindow)
+
     ModuleArea.__init__(self, mainWindow)
     DropBase.__init__(self, acceptDrops=True)
-    # DropBase.__init__(self, acceptDrops=True)
 
-    # #GWV test to trace gridding issues
-    # # remove the existing Vbox layout by transferring to a temp widget
-    # QtWidgets.QWidget().setLayout(self.layout)  ## pyqtgraph stored the layout as self.layout
-    # self.layout = QtWidgets.QGridLayout(self)
-    # self.layout.setContentsMargins(0, 0, 0, 0)
-    # self.layout.setSpacing(0)
+    self.mainWindow = mainWindow  # a link back to the parent MainWindow
 
     self.modules = self.docks
     self.moveModule = self.moveDock
-    self.mainWindow = mainWindow  # a link back to the parent MainWindow
     self.setContentsMargins(0, 0, 0, 0)
     self.currentModuleNames = []
     self._modulesNames = {}
@@ -76,7 +69,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     self.textLabel = DropAreaLabel
     self.fontLabel = Font('Helvetica', 36, bold=False)
     colours = getColours()
-    textColour = colours[LabelFG]
+    textColour = colours[LABEL_FOREGROUND]
     self.colourLabel = hexToRgb(textColour)
     self._dropArea  = None # Needed to know where to add a newmodule when dropping a pid from sideBar
     if self._container is None:
@@ -223,9 +216,6 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     if module.className in self._modulesNames:
       if not module.serial:
         module.serial = len(list(set(self._modulesNames[module.className])))
-
-
-
 
   @property
   def ccpnModules(self) -> list:

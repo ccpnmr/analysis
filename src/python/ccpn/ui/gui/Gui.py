@@ -72,8 +72,10 @@ class Gui(Ui):
     self.qtApp = Application(self.application.applicationName,
                                    self.application.applicationVersion,
                                    organizationName='CCPN', organizationDomain='ccpn.ac.uk')
-    self.qtApp.setStyleSheet(self.application.styleSheet)
+    #self.qtApp.setStyleSheet(self.application.styleSheet)
 
+    styles = QtGui.QStyleFactory()
+    self.qtApp.setStyle(styles.create('fusion'))
 
   def initialize(self, mainWindow):
     """UI operations done after every project load/create"""

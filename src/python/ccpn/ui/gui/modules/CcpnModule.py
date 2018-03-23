@@ -34,6 +34,8 @@ from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from pyqtgraph.dockarea.DockArea import TempAreaWindow
+
+from ccpn.ui.gui.guiSettings import getColours, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -232,34 +234,34 @@ class CcpnModule(Dock, DropBase):
 
       self.addWidget(self._splitter)
 
-      #another fix for the stylesheet
-      if hasattr(mainWindow, 'application') and mainWindow.application:
-        # check that application has been attached - may not be the case for some test modules
-        self.colourScheme = mainWindow.application.colourScheme
-        if self.colourScheme == 'dark':
-          self.setStyleSheet("""QSplitter{
-                                      background-color: #2a3358;
-                                }
-                                QSplitter::handle:horizontal {
-                                      width: 3px;
-                                }
-                                QSplitter::handle:vertical {
-                                      height: 3px;
-                                }
-                                QSplitter::handle { background-color: LightGray }
-                                """)
-        elif self.colourScheme == 'light':
-          self.setStyleSheet("""QSplitter{
-                                      background-color: #FBF4CC;
-                                }
-                                QSplitter::handle:horizontal {
-                                      width: 3px;
-                                }
-                                QSplitter::handle:vertical {
-                                      height: 3px;
-                                }
-                                QSplitter::handle { background-color: DarkGray }
-                                """)
+      # #another fix for the stylesheet
+      # if hasattr(mainWindow, 'application') and mainWindow.application:
+      #   # check that application has been attached - may not be the case for some test modules
+      #   self.colourScheme = mainWindow.application.colourScheme
+      #   if self.colourScheme == 'dark':
+      #     self.setStyleSheet("""QSplitter{
+      #                                 background-color: #2a3358;
+      #                           }
+      #                           QSplitter::handle:horizontal {
+      #                                 width: 3px;
+      #                           }
+      #                           QSplitter::handle:vertical {
+      #                                 height: 3px;
+      #                           }
+      #                           QSplitter::handle { background-color: LightGray }
+      #                           """)
+      #   elif self.colourScheme == 'light':
+      #     self.setStyleSheet("""QSplitter{
+      #                                 background-color: #FBF4CC;
+      #                           }
+      #                           QSplitter::handle:horizontal {
+      #                                 width: 3px;
+      #                           }
+      #                           QSplitter::handle:vertical {
+      #                                 height: 3px;
+      #                           }
+      #                           QSplitter::handle { background-color: DarkGray }
+      #                           """)
 
     else:
       self.settingsWidget = None
@@ -608,11 +610,10 @@ class CcpnModuleLabel(DockLabel):
 
   labelSize = 16
 
-  # TODO:GEERTEN remove colours from here
+  # TODO:GEERTEN check colours handling
   # defined here, as the updateStyle routine is called from the
   # DockLabel instanciation; changed later on
-  backgroundColour = '#555D85'
-  foregroundColour = '#fdfdfc'
+
 
   def __init__(self, name, module, showCloseButton=True, closeCallback=None, showSettingsButton=False, settingsCallback=None):
     super(CcpnModuleLabel, self).__init__(name, module, showCloseButton=showCloseButton)
@@ -622,26 +623,17 @@ class CcpnModuleLabel(DockLabel):
     self.setFont(moduleLabelFont)
     #print('>>', name, self.module.application.colourScheme)
 
-    from ccpn.ui.gui.guiSettings import getColourScheme
-    self.colourScheme = getColourScheme()
-    if self.colourScheme == 'light':
-      self.backgroundColour = '#bd8413'
-      #self.backgroundColour = '#EDC151'
-      self.foregroundColour = '#fdfdfc'
-    else:
-      self.backgroundColour = '#555D85'
-      self.foregroundColour = '#fdfdfc'
     self.setAlignment(QtCore.Qt.AlignVCenter|QtCore.Qt.AlignHCenter)
 
     if showCloseButton:
       # button is already there because of the DockLabel init
       self.closeButton.setIconSize(QtCore.QSize(self.labelSize, self.labelSize))
       # hardcoded because stylesheet appears not to work
-      self.closeButton.setStyleSheet("""
-        QToolButton {
-          border-width: 0px;
-          padding: 0px;
-        }""")
+      # self.closeButton.setStyleSheet("""
+      #   QToolButton
+      #     border-width: 0px;
+      #     padding: 0px;
+      #   }""")
       if closeCallback is None:
         raise RuntimeError('Requested closeButton without callback')
       else:
@@ -653,11 +645,16 @@ class CcpnModuleLabel(DockLabel):
       self.settingsButton.setIcon(Icon('icons/settings'))
       self.settingsButton.setIconSize(QtCore.QSize(self.labelSize, self.labelSize))
       # hardcoded because stylesheet appears not to work
-      self.settingsButton.setStyleSheet("""
-        QToolButton {
-          border-width: 0px;
-          padding: 0px;
-        }""")
+      # colours = getColours()
+      # styleSheet = """
+      #   QComboBox {
+      #     border-width: 0px;
+      #     padding: 0px;
+      #     background-color : %s;
+      #     color : %s;
+      #   }""" % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])
+      # print(">>>", styleSheet)
+      # self.settingsButton.setStyleSheet(styleSheet)
       if settingsCallback is None:
         raise RuntimeError('Requested settingsButton without callback')
       else:
@@ -672,40 +669,34 @@ class CcpnModuleLabel(DockLabel):
   #     self.startedDrag = False
   #     ev.accept()
 
-  def updateStyle(self):
-    """
-    Copied from the parent class to allow for modification in StyleSheet
-    However, that appears not to work;
-
-    TODO: this routine needs fixing so that colourschemes
-    are taken from the stylesheet
-    """
-    # GWV: many calls to the updateStyle are triggered during initialization
-    # probably from paint event
-
-    #print('>updateStyle>', self)
-    #return
-
-    #r = '3px'
-    #fg = '#fdfdfc'
-    #bg = '#555D85'
-    #border = bg
-
-    # Padding apears not to work; overriden somewhere else?
-    if self.orientation == 'vertical':
-      self.vStyle = """DockLabel {
-              background-color : %s;
-              color : %s;
-              border-width: 0px;
-          }""" % (self.backgroundColour, self.foregroundColour)
-      self.setStyleSheet(self.vStyle)
-    else:
-      self.hStyle = """DockLabel {
-              background-color : %s;
-              color : %s;
-              border-width: 0px;
-          }""" % (self.backgroundColour, self.foregroundColour)
-      self.setStyleSheet(self.hStyle)
+  # def updateStyle(self):
+  #   """
+  #   Copied from the parent class to allow for modification in StyleSheet
+  #   However, that appears not to work (fully);
+  #
+  #   GWV: many calls to the updateStyle are triggered during initialization
+  #        probably from paint event
+  #   """
+  #
+  #   # Padding apears not to work; overriden somewhere else?
+  #   colours = getColours()
+  #   print('>>>', colours)
+  #   # retain 'horizontal' and 'vertical' as the underlying PyQtGraph has it
+  #   if self.orientation == 'vertical':
+  #     self.vStyle = """CcpnModuleLabel {
+  #             background-color : %s;
+  #             color : %s;
+  #             border-width: 0px;
+  #         }""" % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])
+  #     self.setStyleSheet(self.vStyle)
+  #   else:
+  #     self.hStyle = """CcpnModuleLabel {
+  #             background-color %s;
+  #             color : %s;
+  #             border-width: 0px;
+  #         }""" % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])
+  #     print('>>>', self.hStyle)
+  #     self.setStyleSheet(self.hStyle)
 
   def paintEvent(self, ev):
     """
@@ -723,7 +714,7 @@ class CcpnModuleLabel(DockLabel):
       rgn = self.contentsRect()
       #print('>>', self.width(), self.height())
       #print(rgn, rgn.left(), rgn.top())
-      added = 2
+      added = 4
       rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height()+added)
 
     #align = self.alignment()

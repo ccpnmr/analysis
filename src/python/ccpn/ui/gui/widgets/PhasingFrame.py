@@ -97,7 +97,8 @@ class PhasingFrame(Frame):
     self.PivotLabel.setFixedWidth(35)
     self.pivotEntry = DoubleSpinbox(self, callback=lambda value: self._returnCallback(), decimals=3, step=0.1, grid=(0,8))
     self.pivotEntry.setFixedWidth(60)
-    
+
+    self.pivotEntry.valueChanged.connect(self.setPivotValue)
     if includeDirection:
       self.directionList = PulldownList(self, texts=directionTexts,
                                         callback=None, grid=(0,9))
@@ -114,6 +115,16 @@ class PhasingFrame(Frame):
                     directionTexts[0]: {'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0},
                     directionTexts[1]: {'ph0': 0.0, 'ph1': 0.0, 'pivot': 0.0}
                   }
+    self._pivotsSet = False
+
+  @property
+  def pivotsSet(self):
+    return self._pivotsSet
+
+  def setInitialPivots(self, pivotList):
+    self._pivotsSet = True
+    for dd, pivot in enumerate(pivotList):
+      self.values[directionTexts[dd]]['pivot'] = pivot
 
   def _apply(self):
     if self.applyCallback:
@@ -157,14 +168,17 @@ class PhasingFrame(Frame):
     self.updateValues()
     self.doCallback()
     
-  def _returnCallback(self):
+  def setPivotValue(self):
     self.updateValues()
-    self.returnCallback()
+    self.doCallback()
 
   def doCallback(self):
     if self.callback:
       self.callback()
- 
+
+  def _returnCallback(self):
+    pass
+
 if __name__ == '__main__':
 
   import os

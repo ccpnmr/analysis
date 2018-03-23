@@ -585,9 +585,23 @@ class GuiSpectrumDisplay(CcpnModule):
     if self.is1D:
       self.hTraceAction = True
       self.vTraceAction = False
+
+      if not self.phasingFrame.pivotsSet:
+        inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints \
+          = self.spectrumViews[0]._getTraceParams((0.0, 0.0))
+
+        self.phasingFrame.setInitialPivots((xDataDim.primaryDataDimRef.pointToValue((xMinFrequency + xMaxFrequency)/2.0, 0.0)))
+
     else:
       self.hTraceAction = self.current.strip.hTraceAction.isChecked()
       self.vTraceAction = self.current.strip.vTraceAction.isChecked()
+
+      if not self.phasingFrame.pivotsSet:
+        inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
+          = self.spectrumViews[0]._getTraceParams((0.0, 0.0))
+
+        self.phasingFrame.setInitialPivots((xDataDim.primaryDataDimRef.pointToValue((xMinFrequency + xMaxFrequency)/2.0),
+                                            yDataDim.primaryDataDimRef.pointToValue((yMinFrequency + yMaxFrequency)/2.0)))
 
     for strip in self.strips:
       if isVisible:
@@ -689,6 +703,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
   def removeCurrentStrip(self):
     "Remove current.strip if it belongs to self"
+
     if self.current.strip is None:
       showWarning('Remove current strip', 'Select first in SpectrumDisplay by clicking')
       return
@@ -760,33 +775,36 @@ class GuiSpectrumDisplay(CcpnModule):
     #   self.stripFrame.layout().setColumnMinimumWidth(col, 50)
 
   def _copyPreviousStripValues(self, fromStrip, toStrip):
-    try:
+    # try:
       traceScale = fromStrip.spectrumViews[0].traceScale
       toStrip.setTraceScale(traceScale)
 
-      toStrip._testCcpnOpenGLWidget._updateHTrace = fromStrip._testCcpnOpenGLWidget._updateHTrace
-      toStrip._testCcpnOpenGLWidget._updateVTrace = fromStrip._testCcpnOpenGLWidget._updateVTrace
-      toStrip.hTraceAction.setChecked(toStrip._testCcpnOpenGLWidget._updateHTrace)
-      toStrip.vTraceAction.setChecked(toStrip._testCcpnOpenGLWidget._updateVTrace)
+      # hTrace = fromStrip._testCcpnOpenGLWidget._updateHTrace
+      # vTrace = fromStrip._testCcpnOpenGLWidget._updateVTrace
+      # toStrip._testCcpnOpenGLWidget._updateHTrace = hTrace
+      # toStrip._testCcpnOpenGLWidget._updateVTrace = vTrace
+      # toStrip.hTraceAction.setChecked(hTrace)
+      # toStrip.vTraceAction.setChecked(vTrace)
 
       if self.phasingFrame.isVisible():
         toStrip.turnOnPhasing()
 
-    except Exception as es:
-      print ('>>> ERROR turning on phasing', str(es))
-      getLogger().debug('OpenGL widget not instantiated')
+    # except Exception as es:
+    #   getLogger().warning('>>> ERROR turning on phasing - %s' % str(es))
+    #   getLogger().debug('OpenGL widget not instantiated')
 
   def addStrip(self) -> 'GuiStripNd':
     """
     Creates a new strip by cloning strip with index (default the last) in the display.
     """
+    if self.phasingFrame.isVisible():
+      showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
+      return
+
     stripIndex = -1   # ejb - just here for the minute
     newStrip = self.strips[stripIndex].clone()
 
     newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
-
-    # ED: copy traceScale from the previous strips and enable phasing Console
-    self._copyPreviousStripValues(self.strips[stripIndex-1], newStrip)
 
     self.showAxes()
 
@@ -799,17 +817,22 @@ class GuiSpectrumDisplay(CcpnModule):
                      % (self.pid, stripIndex))
 
     self.current.strip = newStrip
+
+    # ED: copy traceScale from the previous strips and enable phasing Console
+    self._copyPreviousStripValues(self.strips[0], newStrip)
+
     return newStrip
 
   def _addObjStrip(self, strip=None) -> 'GuiStripNd':
     """
     Creates a new strip by cloning strip with index (default the last) in the display.
     """
+    if self.phasingFrame.isVisible():
+      showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
+      return
+
     stripIndex = self.strips.index(strip)
     newStrip = strip.clone()
-
-    # ED: copy traceScale from the previous strips and enable phasing Console
-    self._copyPreviousStripValues(self.strips[stripIndex - 1], newStrip)
 
     self.showAxes()
 
@@ -822,6 +845,10 @@ class GuiSpectrumDisplay(CcpnModule):
                      % (self.pid, stripIndex))
 
     self.current.strip = newStrip
+
+    # ED: copy traceScale from the previous strips and enable phasing Console
+    self._copyPreviousStripValues(self.strips[0], newStrip)
+
     return newStrip
 
   def setColumnStretches(self, stretchValue=False):

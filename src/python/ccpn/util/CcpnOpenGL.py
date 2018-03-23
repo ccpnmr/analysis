@@ -353,6 +353,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisB = 80
     self.storedZooms = []
 
+    self.buildMarks = True
     self._marksList = None
     self._infiniteLines = []
     self._regionList = None
@@ -3945,6 +3946,9 @@ void main()
     if self._parent.isDeleted:
       return
 
+    if self.buildMarks:
+      self._marksList.renderMode = GLRENDERMODE_REBUILD
+
     self.buildMarksRulers()
     self._marksList.drawIndexArray()
 
@@ -5558,8 +5562,7 @@ void main()
           # self.buildPeakListLabels()
 
         if GLNotifier.GLMARKS in triggers:
-          if self._marksList:
-            self._marksList.renderMode = GLRENDERMODE_REBUILD
+          self.buildMarks = True
 
         # TODO:ED test trigger for the minute
         if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
@@ -6817,7 +6820,11 @@ class GLRegion(QtWidgets.QWidget):
   @values.setter
   def values(self, values):
     self._values = tuple(values)
-    self._glList.renderMode = GLRENDERMODE_RESCALE
+    try:
+      self._glList.renderMode = GLRENDERMODE_RESCALE
+    except Exception as es:
+      pass
+
     self.parent.update()
     self.valuesChanged.emit(list(values))
 

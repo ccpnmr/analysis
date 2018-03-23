@@ -551,6 +551,11 @@ class GuiStrip(Frame):
     # else:
     #   GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
 
+    vals = self.spectrumDisplay.phasingFrame.getValues(self._newConsoleDirection)
+    self.spectrumDisplay.phasingFrame.slider0.setValue(vals[0])
+    self.spectrumDisplay.phasingFrame.slider1.setValue(vals[1])
+    self.spectrumDisplay.phasingFrame.pivotEntry.set(vals[2])
+
     # TODO:ED remember direction
     self._newPosition = phasingFrame.pivotEntry.get()
     self._infiniteLine = self._testCcpnOpenGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')

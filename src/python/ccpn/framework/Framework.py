@@ -2059,8 +2059,7 @@ class Framework:
   def defineUserShortcuts(self):
 
     from ccpn.ui.gui.modules.ShortcutModule import ShortcutModule
-    # self.shortcutModule = ShortcutModule(self.ui.mainWindow)
-    ShortcutModule(mainWindow=self.ui.mainWindow).exec_()   # ejb
+    ShortcutModule(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
 
   def runMacro(self, macroFile:str=None):
     """

@@ -350,6 +350,7 @@ class ChemicalShiftsMapping(CcpnModule):
         widget.hide()
 
   def _updateNmrAtomsOption(self ):
+    otherAvailable = False
     i = 0
     availableNmrAtoms = self._availableNmrAtoms()
     line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
@@ -358,7 +359,7 @@ class ChemicalShiftsMapping(CcpnModule):
       atomFrame = Frame(self.nmrAtomsFrame, setLayout=True, grid=(i, 1))
       hFrame = 0
       vFrame = 0
-      labelRelativeContribution = Label(atomFrame, text='%s Relative Contribution' % name, grid=(vFrame, hFrame))
+      labelRelativeContribution = Label(atomFrame, text='%s Relative Contribution' % name,  grid=(vFrame, hFrame))
       hFrame +=1
       self.atomWeightSpinBox = DoubleSpinbox(atomFrame, value=DefaultAtomWeights[name],
                                              prefix=str('Weight' + (' ' * 2)), grid=(vFrame, hFrame),
@@ -370,6 +371,7 @@ class ChemicalShiftsMapping(CcpnModule):
       vFrame += 1
       self.commonAtomsFrame = Frame(atomFrame, setLayout=True, grid=(vFrame, 0))
       # add the first three of ccpn Sorted.
+      vFrame += 1
 
       self.scrollAreaMoreNmrAtoms = ScrollArea(atomFrame, setLayout=False, grid=(vFrame, 0))
       self.scrollAreaMoreNmrAtoms.setWidgetResizable(True)
@@ -423,28 +425,33 @@ class ChemicalShiftsMapping(CcpnModule):
               checkFirst = True
             self.nmrAtomsCheckBoxes.append(self.atomSelection)
             n += 1
-
-
           self._addMoreNmrAtomsForAtomType(availableNmrAtomsForType[2:], self.moreOptionFrame)
-
 
       vFrame += 1
       ## Scrollable area where to add more atoms
 
       i +=1
-
       if name == OTHER:
-        addedNmrAtoms = [i.text() for i in self.nmrAtomsCheckBoxes if i is not None]
-        othersAvailable = [name for name in availableNmrAtoms if name not in addedNmrAtoms]
-        if len(othersAvailable):
-          self.moreButton.show()
-          availableNmrAtoms.append(name)
-          self._addMoreNmrAtomsForAtomType(othersAvailable, self.moreOptionFrame)
+        if not otherAvailable:
+          otherAvailable  = self._addOtherNmrAtomsAvailable(availableNmrAtoms)
 
-      if name not in availableNmrAtoms:
+
+      if name not in availableNmrAtoms and not otherAvailable:
+
         atomFrame.hide()
 
     line = HLine(self.nmrAtomsFrame, style='DashLine', height=1, grid=(i, 1))
+
+  def _addOtherNmrAtomsAvailable(self, availableNmrAtoms):
+    '''Adds more nmr atoms if not in the default atoms'''
+    addedNmrAtoms = [i.text() for i in self.nmrAtomsCheckBoxes if i is not None]
+    othersAvailable = [name for name in availableNmrAtoms if name not in addedNmrAtoms]
+    if len(othersAvailable):
+      self.moreButton.show()
+      self._addMoreNmrAtomsForAtomType(othersAvailable, self.moreOptionFrame)
+      return True
+    return False
+
 
   def _setSettingsWidgets(self):
 

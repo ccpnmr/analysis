@@ -101,24 +101,10 @@ PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
 
 class CustomNmrResidueTable(NmrResidueTable):
   """
-  Custon nmrResidue Table with extra Delta Shifts column
+  Custon nmrResidue Table with extra Delta column
   """
-  deltaShiftsColumn = ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None)
+  deltaShiftsColumn = ('Deltas', lambda nmrResidue: nmrResidue._delta, '', None)
 
-  # columnDefs = [
-  #   ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None),
-  #   ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
-  #   ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
-  #   ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
-  #   ('Selected NmrAtoms', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
-  #   ('Selected Spectra count', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
-  #    , 'Number of spectra selected for calculating the delta shift', None),
-  #   ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None),
-  #   ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
-  # ]
-  #
-  # columnDefs = NmrResidueTable.columnDefs+[deltaShiftsColumn,]
-  # columnDefs[-1], columnDefs[-2] = columnDefs[-2], columnDefs[-1]
 
   def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
                checkBoxCallback=None, nmrChain=None, **kwds):
@@ -144,8 +130,8 @@ class CustomNmrResidueTable(NmrResidueTable):
         ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
         ('Selected NmrAtoms', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
         ('Selected Spectra count', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
-         , 'Number of spectra selected for calculating the delta shift', None),
-        ('Delta Shifts', lambda nmrResidue: nmrResidue._deltaShift, '', None),
+         , 'Number of spectra selected for calculating the deltas', None),
+        ('Deltas', lambda nmrResidue: nmrResidue._delta, '', None),
         ('include in Map', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: CustomNmrResidueTable._setChecked(nmr, value)),
         # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None),
         ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
@@ -205,7 +191,6 @@ class ChemicalShiftsMapping(CcpnModule):
     self.Natoms = set()
     self.Hatoms = set()
     self.Catoms = set()
-    self.atomCheckBoxes = []
     self.atomWeightSpinBoxes = []
     self.nmrAtomsCheckBoxes = []
     self.atomNames = []
@@ -348,7 +333,8 @@ class ChemicalShiftsMapping(CcpnModule):
       else:
         self.sender().setText(name.replace(LESS,MORE))
         widget.hide()
-
+  
+  
   def _updateNmrAtomsOption(self ):
     otherAvailable = False
     i = 0
@@ -487,7 +473,7 @@ class ChemicalShiftsMapping(CcpnModule):
     i += 1
     self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
     self.thresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=DefaultThreshould, step=0.01,
-                                          decimals=3, callback=self.updateThresholdLineValue, tipText = 'Deafult: STD of delta shifts',
+                                          decimals=3, callback=self.updateThresholdLineValue, tipText = 'Deafult: STD of deltas',
                                           grid=(i, 1))
     i += 1
     self.aboveThresholdColourLabel =  Label(self.scrollAreaWidgetContents,text='Above Threshold Colour', grid=(i,0))
@@ -578,10 +564,10 @@ class ChemicalShiftsMapping(CcpnModule):
   def _setThresholdLineBySTD(self):
     nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())
     if nc:
-      deltaShifts = [ n._deltaShift for n in nc.nmrResidues if n._deltaShift is not None]
-      if len(deltaShifts)>0:
-        if not None in deltaShifts:
-          std = np.std(deltaShifts)
+      deltas = [ n._delta for n in nc.nmrResidues if n._delta is not None]
+      if len(deltas)>0:
+        if not None in deltas:
+          std = np.std(deltas)
           if std:
             self.thresholdLinePos = std
             self.thresholdSpinBox.set(std)
@@ -592,7 +578,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.nmrResidueTable.ncWidget.select(nmrChain.pid)
     # self.nmrResidueTable.setColumns(self.nmrResidueTable.NMRcolumns)
 
-    # self.nmrResidueTable.setObjects([nr for nr in nmrChain.nmrResidues if nr._deltaShift])
+    # self.nmrResidueTable.setObjects([nr for nr in nmrChain.nmrResidues if nr._delta])
 
     self.nmrResidueTable._update(nmrChain)
 
@@ -669,7 +655,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.disappearedPeakBrush = 'b'
     thresholdPos = self.thresholdSpinBox.value()
     # check if all values are none:
-    shifts = [nmrResidue._deltaShift for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
+    shifts = [nmrResidue._delta for nmrResidue in self.nmrResidueTable._dataFrameObject.objects]
     if not any(shifts):
       self.barGraphWidget.clear()
       return
@@ -685,8 +671,8 @@ class ChemicalShiftsMapping(CcpnModule):
               if len(nmrResidue._spectraWithMissingPeaks) != 0:
                 if nmrResidue.sequenceCode:
                   x = int(nmrResidue.sequenceCode)
-                  if nmrResidue._deltaShift:
-                    y = nmrResidue._deltaShift
+                  if nmrResidue._delta:
+                    y = nmrResidue._delta
                   else:
                     if nmrResidue._includeInDeltaShift:
                       y = self.disappearedBarThresholdSpinBox.value()
@@ -696,11 +682,11 @@ class ChemicalShiftsMapping(CcpnModule):
                   self.disappearedX.append(x)
                   self.disappereadObjects.append(nmrResidue)
                   nmrResidue.missingPeaks = True
-            if nmrResidue._deltaShift:
+            if nmrResidue._delta:
               if not nmrResidue.missingPeaks:
                 if nmrResidue.sequenceCode:
                   x = int(nmrResidue.sequenceCode)
-                  y = float(nmrResidue._deltaShift)
+                  y = float(nmrResidue._delta)
                   xs.append(x)
                   ys.append(y)
                   obs.append(nmrResidue)
@@ -776,7 +762,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
     if nmrResidue:
       xPos = int(nmrResidue.sequenceCode)
-      yPos = nmrResidue._deltaShift
+      yPos = nmrResidue._delta
       if xPos and yPos:
         self.barGraphWidget.customViewBox.setRange(xRange=[xPos-10, xPos+10], yRange=[0, yPos],)
       self.application.ui.mainWindow.clearMarks()
@@ -814,8 +800,8 @@ class ChemicalShiftsMapping(CcpnModule):
     for atomWSB in self.atomWeightSpinBoxes:
       weights.update({atomWSB.objectName():atomWSB.value()})
 
-    # selectedAtomNames = [cb.text() for cb in self.atomCheckBoxes if cb.isChecked()]
-    selectedAtomNames = [w.text() for w in self.nmrAtomsCheckBoxes if w.text()]
+    selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
+    print(selectedAtomNames)
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
@@ -827,9 +813,9 @@ class ChemicalShiftsMapping(CcpnModule):
               nmrResidue.spectraCount = len(spectra)
               nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
               nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
-              nmrResidue._deltaShift = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
+              nmrResidue._delta = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
             else:
-              nmrResidue._deltaShift = None
+              nmrResidue._delta = None
         self.updateTable(self.nmrResidueTable._nmrChain)
         self.updateBarGraph()
 

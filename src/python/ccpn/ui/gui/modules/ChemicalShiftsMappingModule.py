@@ -129,11 +129,11 @@ class CustomNmrResidueTable(NmrResidueTable):
         ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None),
         ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
         ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
-        ('Selected NmrAtoms', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
-        ('Selected Spectra count', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
+        ('Selected', lambda nmrResidue: CustomNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None),
+        ('Spectra', lambda nmrResidue: CustomNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
          , 'Number of spectra selected for calculating the deltas', None),
         ('Deltas', lambda nmrResidue: nmrResidue._delta, '', None),
-        ('include in Map', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: CustomNmrResidueTable._setChecked(nmr, value)),
+        ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: CustomNmrResidueTable._setChecked(nmr, value)),
         # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None),
         ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value))
       ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
@@ -804,8 +804,9 @@ class ChemicalShiftsMapping(CcpnModule):
       weights.update({atomWSB.objectName():atomWSB.value()})
 
     selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
+    print(selectedAtomNames)
     if self.nmrResidueTable:
-      if self.nmrResidueTable._nmrChain:
+      if self.nmrResidueTable._nmrChain is not None:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
           if self._isInt(nmrResidue.sequenceCode):
 

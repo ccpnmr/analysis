@@ -176,23 +176,6 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atom
   return
 
 
-  # TODO make for nDs
-  # defaultWeights = {'H': 7.0, 'N': 1.0, 'C': 4.0}
-  # if atomWeights is not None:
-  #   atomWeights = defaultWeights.update(atomWeights)
-  # else:
-  #   atomWeights = defaultWeights
-  # weight1, weight2 = atomWeights['H'], atomWeights['N']
-  #
-  # delta = 0.0
-  # for dim in peak.dimensiomns:
-  #   axisCode = dim.axisCode
-  #   weight = atomWeights.getDefault(axisCode[0:1], 1.0)
-  #   delta += ((peak.position[dim] - peak2.position[dim]) * weight ) **2
-  #
-  # delta = delta**0.5
-
-
 
 
 

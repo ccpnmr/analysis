@@ -4541,10 +4541,10 @@ void main()
       y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
           np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
-      # colour = spectrumView._getColour('sliceColour', '#aaaaaa')
-      # colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      # colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      # colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
       tracesDict.append(GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
@@ -4556,10 +4556,17 @@ void main()
       numVertices = len(x)
       hSpectrum = tracesDict[-1]
       hSpectrum.indices = numVertices
-      hSpectrum.numVertices = numVertices
+      hSpectrum.numVertices = numVertices+2
       hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
       hSpectrum.colors = np.array((self._phasingTraceColour) * numVertices, dtype=np.float32)
-      hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+      hSpectrum.vertices = np.zeros((hSpectrum.numVertices * 2), dtype=np.float32)
+
+      x = np.append(x, [xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
+                        xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)])
+      y = np.append(y, [positionPixel[1], positionPixel[1]])
+      hSpectrum.colors = np.append(hSpectrum.colors, ((colR, colG, colB, 1.0),
+                                            (colR, colG, colB, 1.0)))
+
       hSpectrum.vertices[::2] = x
       hSpectrum.vertices[1::2] = y
 
@@ -4840,12 +4847,12 @@ void main()
           preData = Phasing.phaseRealData(hTrace.data, ph0, ph1, pivot)
 
           if self.is1D:
-            hTrace.vertices[1::2] = preData
+            hTrace.vertices[1:-4:2] = preData
           else:
             y = values[6][1] + values[0]._traceScale * (self.axisT - self.axisB) * \
                 np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
 
-            hTrace.vertices[1::2] = y
+            hTrace.vertices[1:-4:2] = y
 
       for dd in deleteHList:
         self._staticHTraces.remove(dd)
@@ -4884,10 +4891,10 @@ void main()
 
       for hTrace in self._staticHTraces:
         if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
-          hTrace.drawIndexArray()
+          hTrace.drawVertexColor()
       for vTrace in self._staticVTraces:
         if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
-          vTrace.drawIndexArray()
+          vTrace.drawVertexColor()
 
     # only paint if mouse is in the window
     if self.underMouse():
@@ -4906,7 +4913,7 @@ void main()
             continue
 
           if hTrace and not hTrace.isDeleted and hTrace.isVisible():
-            trace.drawIndexArray()
+            trace.drawVertexColor()
 
       for dd in deleteHList:
         del self._hTraces[dd]
@@ -4920,7 +4927,7 @@ void main()
             continue
 
           if vTrace and not vTrace.isDeleted and vTrace.isVisible():
-            trace.drawIndexArray()
+            trace.drawVertexColor()
 
       for dd in deleteVList:
         del self._vTraces[dd]

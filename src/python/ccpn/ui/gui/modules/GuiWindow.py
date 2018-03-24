@@ -351,35 +351,39 @@ class GuiWindow():
     :param chemicalShifts: A list or tuple of ChemicalShifts at whose values the marks should be made
     """
     project = self.application.project
-    project._startCommandEchoBlock('markPositions', project, axisCodes, chemicalShifts)
-    try:
-      colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
-      for ii, axisCode in enumerate(axisCodes):
-        for chemicalShift in chemicalShifts[ii]:
-          atomName = chemicalShift.nmrAtom.name
-          # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
+    # project._startCommandEchoBlock('markPositions', project, axisCodes, chemicalShifts)
+    # try:
 
-          colour = colourDict.get(atomName[:min(2,len(atomName))])
+    colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
+    for ii, axisCode in enumerate(axisCodes):
+      for chemicalShift in chemicalShifts[ii]:
+        atomName = chemicalShift.nmrAtom.name
+        # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
 
-          # exit if mark exists
-          found = False
-          for mm in project.marks:
-            if atomName in mm.labels and\
-              colour == mm.colour and\
-              abs(chemicalShift.value-mm.positions[0]) < 1e-6:
-                found=True
-                break
-          if found:
-            continue
+        colour = colourDict.get(atomName[:min(2,len(atomName))])
 
+        # exit if mark exists
+        found = False
+        for mm in project.marks:
+          if atomName in mm.labels and\
+            colour == mm.colour and\
+            abs(chemicalShift.value-mm.positions[0]) < 1e-6:
+              found=True
+              break
+        if found:
+          continue
+
+        project._startCommandEchoBlock('markPositions', project, [axisCode], [chemicalShift])
+        try:
           if colour:
             project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
           else:
             # just use gray rather than checking colourScheme
             project.newMark('#808080', [chemicalShift.value], [axisCode])
-          print ('>>>newMark', atomName)
-    finally:
-      project._endCommandEchoBlock()
+          # print ('>>>newMark', atomName)
+
+        finally:
+          project._endCommandEchoBlock()
 
   def toggleGridAll(self):
     """

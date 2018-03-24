@@ -883,7 +883,9 @@ class GuiStrip(Frame):
       # positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
       # self._project.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
 
-      self._project.newMark('#e0e0e0', self.current.cursorPosition[:2], self.axisCodes[:2])  # the 'white' is overridden in PlotWidget._addRulerLine()
+      positions = [self.current.mouseMovedDict[ax] for ax in self.axisCodes]
+      self._project.newMark('#e0e0e0', positions, self.axisCodes)  # the 'white' is overridden in PlotWidget._addRulerLine()
+      # self._project.newMark('#e0e0e0', self.current.cursorPosition[:2], self.axisCodes[:2])  # the 'white' is overridden in PlotWidget._addRulerLine()
 
     except Exception as es:
       getLogger().warning('Error setting mark at current position')

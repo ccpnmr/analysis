@@ -3175,8 +3175,8 @@ void main()
     currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
 
     self.enableTexture()
-    self.drawMarksAxisCodes()
     self.drawPeakListLabels()
+    self.drawMarksAxisCodes()
 
     currentShader = self._shaderProgram1.makeCurrent()
 

@@ -221,14 +221,15 @@ class GuiStripNd(GuiStrip):
     self.contextMenu = Menu('', self, isFloatWidget=True)     # generate new menu
 
     toolBarItems = [
-       # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
-      (tType.item, 'ToolBar',               'toolbarAction',          '',                         True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
-      (tType.item, 'Crosshair',             'crossHairAction',        '',                         True,   True,       self.spectrumDisplay.toggleCrossHair,                'crossHairAction'),
-      (tType.item, 'Grid',                  'gridAction',             '',                         True,   True,       self.spectrumDisplay.toggleGrid,                      'gridAction'),
+       # type,      action name             icon                      tooltip/name                shortcut  active  checked,    callback,                             method
+      (tType.item, 'ToolBar',               'toolbarAction',          '',                         'TB',     True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
+      (tType.item, 'Crosshair',             'crossHairAction',        '',                         'CH',     True,   True,       self.spectrumDisplay.toggleCrossHair,                'crossHairAction'),
+      (tType.item, 'Grid',                  'gridAction',             '',                         'GS',     True,   True,       self.spectrumDisplay.toggleGrid,                      'gridAction'),
 
-      (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            True,   True,       self.spectrumDisplay.adjustContours, ''),
-      (tType.actn, 'Cycle Peak Labels',     'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', True, True, self.cyclePeakLabelling, ''),
-      (tType.item, 'Share Y Axis',        '',                       '',                         True,   True,       self._toggleLastAxisOnly,             'lastAxisOnlyCheckBox'),
+      (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            '',       True,   True,       self.spectrumDisplay.adjustContours, ''),
+      (tType.actn, 'Cycle Peak Labels',     'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', 'PL',   True, True, self.cyclePeakLabelling, ''),
+      (tType.actn, 'Cycle Peak Symbols',    'icons/peak-symbols', 'Cycle Peak Symbols', 'CS',   True, True, self.cyclePeakSymbols, ''),
+      (tType.item, 'Share Y Axis',        '',                       '',                           'TA',   True,   True,       self._toggleLastAxisOnly,             'lastAxisOnlyCheckBox'),
 
       # (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
       # (tType.actn, 'Remove Contour Level',  'icons/contour-remove',   'Remove One Level',         True,   True,       self.spectrumDisplay.removeContourLevel,''),
@@ -236,20 +237,20 @@ class GuiStripNd(GuiStrip):
       # (tType.actn, 'Lower Base Level',      'icons/contour-base-down','Lower Contour Base Level', True,   True,       self.spectrumDisplay.lowerContourBase,''),
       # (tType.actn, 'Store Zoom',            'icons/zoom-store',       'Store Zoom',               True,   True,       self.spectrumDisplay._storeZoom,      ''),
       # (tType.actn, 'Restore Zoom',          'icons/zoom-restore',     'Restore Zoom',             True,   True,       self.spectrumDisplay._restoreZoom,    ''),
-      (tType.actn, 'Reset Zoom',            'icons/zoom-full',        'Reset Zoom',               True,   True,       self.resetZoom,                       ''),
-      (tType.sep, None, None, None, False, False, None, None),
-      (tType.item, 'H Trace',               'hTraceAction',           '',                         True,   False,      self.toggleHorizontalTrace,                   'hTraceAction'),
-      (tType.item, 'V Trace',               'vTraceAction',           '',                         True,   False,      self.toggleVerticalTrace,                   'vTraceAction'),
-      (tType.actn, 'Enable Phasing Console',     None,                  'Enable Phasing Console',   True, True,   self.spectrumDisplay.togglePhaseConsole, ''),
-      (tType.sep, None, None, None, False, False, None, None),
+      (tType.actn, 'Reset Zoom',            'icons/zoom-full',        'Reset Zoom',               'ZR',   True,   True,       self.resetZoom,                       ''),
+      (tType.sep, None, None, None, None, None, None, None, None),
+      (tType.item, 'H Trace',               'hTraceAction',           '',                         'TH',   True,   False,      self.toggleHorizontalTrace,                   'hTraceAction'),
+      (tType.item, 'V Trace',               'vTraceAction',           '',                         'TV',   True,   False,      self.toggleVerticalTrace,                   'vTraceAction'),
+      (tType.actn, 'Enter Phasing Console',     'icons/phase-console',                  'Enter Phasing Console',   'PC', True, True,   self.spectrumDisplay.togglePhaseConsole, ''),
+      (tType.sep, None, None, None, None, None, None, None, None),
       # (tType.actn, 'Print to File...', 'icons/print', 'Print Spectrum Display to File', True, True,
       #  lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay), ''),
 
-      (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', True, True,   self.showExportDialog, ''),
-      (tType.menu, 'Navigate To',           '',                       '',                         True,   True,       None,                                 'navigateToMenu')
+      (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', 'PT', True, True,   self.showExportDialog, ''),
+      (tType.menu, 'Navigate To',           '',                       '',                         'NT',   True,   True,       None,                                 'navigateToMenu')
     ]
 
-    for aType, aName, icon, tooltip, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
+    for aType, aName, icon, tooltip, shortcut, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
       # self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
       def tempMethod():           # ejb - how does this work?????
         return
@@ -261,7 +262,7 @@ class GuiStripNd(GuiStrip):
 
       elif aType == tType.item:
         # self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
-        action = self.contextMenu.addItem(aName, callback=callback, checkable=active, checked=checked)
+        action = self.contextMenu.addItem(aName, callback=callback, checkable=active, checked=checked, shortcut=shortcut)
         tempMethod.__doc__=''
         tempMethod.__name__=attrib
         setattr(self, tempMethod.__name__, action)
@@ -269,7 +270,7 @@ class GuiStripNd(GuiStrip):
 
       elif aType == tType.actn:
         # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
-        action = self.contextMenu.addAction(aName, callback)
+        action = self.contextMenu.addItem(aName, callback=callback, shortcut=shortcut)
         if icon is not None:
           ic = Icon(icon)
           action.setIcon(ic)
@@ -303,17 +304,17 @@ class GuiStripNd(GuiStrip):
     self.contextMenu = Menu('', self, isFloatWidget=True)     # generate new menu
 
     toolBarItems = [
-       # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
-      (tType.actn, 'Add Trace',               None,                     'Add new trace',          True,   True,       self._newPhasingTrace,''),
-      (tType.actn, 'Remove All Traces',       None,                     'Remove all traces',      True,   True,       self.spectrumDisplay.removePhasingTraces,''),
-      (tType.actn, 'Set Pivot',               None,                     'Set pivot value',        True,   True,       self._setPhasingPivot,''),
-      (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',   True,   True,       self.spectrumDisplay.increaseTraceScale,''),
-      (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',   True,   True,       self.spectrumDisplay.decreaseTraceScale,      ''),
-      (tType.sep, None, None, None, False, False, None, None),
-      (tType.actn, 'Exit Phasing Console', None,                     'Disable phasing console',True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
+       # type,      action name             icon                      tooltip/name                shortcut  active  checked,    callback,                             method
+      (tType.actn, 'Add Trace',               None,                     'Add new trace',          'PT',   True,   True,       self._newPhasingTrace,''),
+      (tType.actn, 'Remove All Traces',       None,                     'Remove all traces',      'TR',   True,   True,       self.spectrumDisplay.removePhasingTraces,''),
+      (tType.actn, 'Set Pivot',               None,                     'Set pivot value',        'PV',   True,   True,       self._setPhasingPivot,''),
+      (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',     'TU',   True,   True,       self.spectrumDisplay.increaseTraceScale,''),
+      (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',     'TD',   True,   True,       self.spectrumDisplay.decreaseTraceScale,      ''),
+      (tType.sep, None, None, None, None, None, None, None, None),
+      (tType.actn, 'Exit Phasing Console', 'icons/phase-console',                     'Exit phasing console',   'PC',   True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
     ]
 
-    for aType, aName, icon, tooltip, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
+    for aType, aName, icon, tooltip, shortcut, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
       # self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
       def tempMethod():           # ejb - how does this work?????
         return
@@ -333,7 +334,7 @@ class GuiStripNd(GuiStrip):
 
       elif aType == tType.actn:
         # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
-        action = self.contextMenu.addAction(aName, callback)
+        action = self.contextMenu.addItem(aName, callback=callback, shortcut=shortcut)
         if icon is not None:
           ic = Icon(icon)
           action.setIcon(ic)

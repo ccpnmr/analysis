@@ -124,12 +124,17 @@ class GuiStrip1d(GuiStrip):
     """
 
     self.contextMenu = Menu('', self, isFloatWidget=True)
-    self.contextMenu.addItem("Auto Scale", callback=self.resetYZoom)
+    action = self.contextMenu.addItem("Auto Scale", callback=self.resetYZoom)
+    action.setIcon(Icon('icons/zoom-best-fit-1d'))
     self.contextMenu.addSeparator()
-    self.contextMenu.addItem("Full", callback=self.resetXZoom)
-    self.contextMenu.addItem("Zoom", callback=self.showZoomPopup)
-    self.contextMenu.addItem("Store Zoom", callback=self._storeZoom)
-    self.contextMenu.addItem("Restore Zoom", callback=self._restoreZoom)
+    action = self.contextMenu.addItem("Full", callback=self.resetXZoom)
+    action.setIcon(Icon('icons/zoom-full-1d'))
+    # self.contextMenu.addItem("Zoom", callback=self.showZoomPopup)
+    action = self.contextMenu.addItem("Store Zoom", callback=self._storeZoom, shortcut='ZS')
+    action.setIcon(Icon('icons/zoom-store'))
+    action = self.contextMenu.addItem("Restore Zoom", callback=self._restoreZoom, shortcut='ZR')
+    action.setIcon(Icon('icons/zoom-restore'))
+
     self.contextMenu.addSeparator()
     self.contextMenu.addItem("Calibrate X...", callback=self._toggleCalibrateXSpectrum)
     self.contextMenu.addItem("Calibrate Y...", callback=self._toggleCalibrateYSpectrum)
@@ -139,18 +144,30 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu.addAction(self.stackAction)
     self.contextMenu.addSeparator()
 
-    self.gridAction = QtWidgets.QAction("Grid", self, triggered=self.spectrumDisplay.toggleGrid, checkable=True)
-    # if self.gridShown:
-    #   self.gridAction.setChecked(True)
-    # else:
-    #   self.gridAction.setChecked(False)
+    def tempMethod():  # ejb - how does this work?????
+      return
 
-    self.gridAction.setChecked(self.gridIsVisible)
+    # add gridAction menu item
+    action = self.contextMenu.addItem('Grid', callback=self.spectrumDisplay.toggleGrid,
+                                      checkable=True, checked=self.gridIsVisible,
+                                      shortcut='GS')
+    tempMethod.__doc__ = ''
+    tempMethod.__name__ = 'gridAction'
+    setattr(self, tempMethod.__name__, action)
 
-    self.contextMenu.addAction(self.gridAction)
+    # self.gridAction = QtWidgets.QAction("Grid", self, triggered=self.spectrumDisplay.toggleGrid, checkable=True)
+    # # if self.gridShown:
+    # #   self.gridAction.setChecked(True)
+    # # else:
+    # #   self.gridAction.setChecked(False)
+    #
+    # self.gridAction.setChecked(self.gridIsVisible)
+    #
+    # self.contextMenu.addAction(self.gridAction)
     self.contextMenu.addSeparator()
 
-    self.contextMenu.addItem("Enter Phasing Console", callback=self.spectrumDisplay.togglePhaseConsole)
+    action = self.contextMenu.addItem("Enter Phasing Console", callback=self.spectrumDisplay.togglePhaseConsole, shortcut='PC')
+    action.setIcon(Icon('icons/phase-console'))
 
     self.contextMenu.addSeparator()
     self.contextMenu.addAction("Print to File...", self.showExportDialog)
@@ -168,17 +185,17 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu = Menu('', self, isFloatWidget=True)     # generate new menu
 
     toolBarItems = [
-       # type,      action name             icon                      tooltip/name                active  checked,    callback,                             method
-      (tType.actn, 'Add Trace',               None,                     'Add new trace',          True,   True,       self._newPhasingTrace, ''),
-      (tType.actn, 'Remove All Traces',       None,                     'Remove all traces',      True,   True,       self.removePhasingTraces,''),
-      (tType.actn, 'Set Pivot',               None,                     'Set pivot value',        True,   True,       self._setPhasingPivot,''),
-      # (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',   True,   True,       self.spectrumDisplay._increaseTraceScale,''),
-      # (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',   True,   True,       self.spectrumDisplay._decreaseTraceScale,      ''),
-      (tType.sep, None, None, None, False, False, None, None),
-      (tType.actn, 'Exit Phasing Console', None,                     'Disable phasing console',True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
+       # type,      action name             icon                      tooltip/name                shortcut  active  checked,    callback,                             method
+      (tType.actn, 'Add Trace',               None,                     'Add new trace',          'PT',   True,   True,       self._newPhasingTrace, ''),
+      (tType.actn, 'Remove All Traces',       None,                     'Remove all traces',      'TR',   True,   True,       self.removePhasingTraces,''),
+      (tType.actn, 'Set Pivot',               None,                     'Set pivot value',        'PV',   True,   True,       self._setPhasingPivot,''),
+      # (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',   'TU',   True,   True,       self.spectrumDisplay._increaseTraceScale,''),
+      # (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',   'TD',   True,   True,       self.spectrumDisplay._decreaseTraceScale,      ''),
+      (tType.sep, None, None, None, None, None, None, None, None),
+      (tType.actn, 'Exit Phasing Console',  'icons/phase-console',   'Exit phasing console',      'PC',   True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
     ]
 
-    for aType, aName, icon, tooltip, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
+    for aType, aName, icon, tooltip, shortcut, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
       # self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
       def tempMethod():           # ejb - how does this work?????
         return
@@ -198,7 +215,7 @@ class GuiStrip1d(GuiStrip):
 
       elif aType == tType.actn:
         # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
-        action = self.contextMenu.addAction(aName, callback)
+        action = self.contextMenu.addItem(aName, callback=callback, shortcut=shortcut)
         if icon is not None:
           ic = Icon(icon)
           action.setIcon(ic)

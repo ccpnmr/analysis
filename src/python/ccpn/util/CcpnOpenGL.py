@@ -4493,10 +4493,10 @@ void main()
       # y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
       #     np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
-      # colour = spectrumView._getColour('sliceColour', '#aaaaaa')
-      # colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      # colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      # colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
       tracesDict.append(GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
@@ -4510,8 +4510,15 @@ void main()
       hSpectrum.indices = numVertices
       hSpectrum.numVertices = numVertices
       hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-      hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
-      hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+      hSpectrum.colors = np.array((self._phasingTraceColour) * numVertices, dtype=np.float32)
+      hSpectrum.vertices = np.zeros((hSpectrum.numVertices * 2), dtype=np.float32)
+
+      # x = np.append(x, [xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
+      #                   xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)])
+      # # y = np.append(y, [positionPixel[1], positionPixel[1]])
+      # hSpectrum.colors = np.append(hSpectrum.colors, ((colR, colG, colB, 1.0),
+      #                                       (colR, colG, colB, 1.0)))
+
       hSpectrum.vertices[::2] = x
       hSpectrum.vertices[1::2] = preData
 
@@ -4596,10 +4603,10 @@ void main()
       x = positionPixel[0] + spectrumView._traceScale * (self.axisL-self.axisR) * \
           np.array([preData[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
 
-      # colour = spectrumView._getColour('sliceColour', '#aaaaaa')
-      # colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      # colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      # colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
       tracesDict.append(GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
@@ -4611,10 +4618,17 @@ void main()
       numVertices = len(x)
       vSpectrum = tracesDict[-1]
       vSpectrum.indices = numVertices
-      vSpectrum.numVertices = numVertices
+      vSpectrum.numVertices = numVertices+2
       vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-      vSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
-      vSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+      vSpectrum.colors = np.array((self._phasingTraceColour) * numVertices, dtype=np.float32)
+      vSpectrum.vertices = np.zeros((vSpectrum.numVertices * 2), dtype=np.float32)
+
+      y = np.append(y, [yDataDim.primaryDataDimRef.pointToValue(yMaxFrequency + 1),
+                        yDataDim.primaryDataDimRef.pointToValue(yMinFrequency)])
+      x = np.append(x, [positionPixel[0], positionPixel[0]])
+      vSpectrum.colors = np.append(vSpectrum.colors, ((colR, colG, colB, 1.0),
+                                            (colR, colG, colB, 1.0)))
+
       vSpectrum.vertices[::2] = x
       vSpectrum.vertices[1::2] = y
 
@@ -4847,7 +4861,7 @@ void main()
           preData = Phasing.phaseRealData(hTrace.data, ph0, ph1, pivot)
 
           if self.is1D:
-            hTrace.vertices[1:-4:2] = preData
+            hTrace.vertices[1::2] = preData
           else:
             y = values[6][1] + values[0]._traceScale * (self.axisT - self.axisB) * \
                 np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
@@ -4875,7 +4889,7 @@ void main()
           x = values[6][0] + values[0]._traceScale * (self.axisL - self.axisR) * \
               np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
 
-          vTrace.vertices[::2] = x
+          vTrace.vertices[:-4:2] = x
 
       for dd in deleteVList:
         self._staticVTraces.remove(dd)

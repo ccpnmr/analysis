@@ -236,13 +236,13 @@ class GuiWindow():
     Changes the scale of a trace in all spectrum displays of the window.
     """
     for spectrumDisplay in window.spectrumDisplays:
-      if not spectrumDisplay.is1D:
-        for strip in spectrumDisplay.strips:
-          for spectrumView in strip.spectrumViews:
-            spectrumView.traceScale *= scale
+        if not spectrumDisplay.is1D:
+          for strip in spectrumDisplay.strips:
+            for spectrumView in strip.spectrumViews:
+              spectrumView.traceScale *= scale
 
-          # spawn a redraw of the strip
-          strip._updatePivot()
+            # spawn a redraw of the strip
+            strip._updatePivot()
     
   def traceScaleUp(self, window:'GuiWindow', scale=1.4):
     """

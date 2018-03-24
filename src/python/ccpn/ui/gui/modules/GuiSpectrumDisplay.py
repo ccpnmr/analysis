@@ -590,7 +590,7 @@ class GuiSpectrumDisplay(CcpnModule):
         inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints \
           = self.spectrumViews[0]._getTraceParams((0.0, 0.0))
 
-        self.phasingFrame.setInitialPivots((xDataDim.primaryDataDimRef.pointToValue((xMinFrequency + xMaxFrequency)/2.0, 0.0)))
+        self.phasingFrame.setInitialPivots((xDataDim.primaryDataDimRef.pointToValue((xMinFrequency + xMaxFrequency)/2.0), 0.0))
 
     else:
       self.hTraceAction = self.current.strip.hTraceAction.isChecked()
@@ -751,10 +751,24 @@ class GuiSpectrumDisplay(CcpnModule):
       self.setColumnStretches(True)
 
   def increaseTraceScale(self):
-    self.mainWindow.traceScaleUp(self.mainWindow)
+    # self.mainWindow.traceScaleUp(self.mainWindow)
+    if not self.is1D:
+      for strip in self.strips:
+        for spectrumView in strip.spectrumViews:
+          spectrumView.traceScale *= 1.4
+
+        # spawn a redraw of the strip
+        strip._updatePivot()
 
   def decreaseTraceScale(self):
-    self.mainWindow.traceScaleDown(self.mainWindow)
+    # self.mainWindow.traceScaleDown(self.mainWindow)
+    if not self.is1D:
+      for strip in self.strips:
+        for spectrumView in strip.spectrumViews:
+          spectrumView.traceScale /= 1.4
+
+        # spawn a redraw of the strip
+        strip._updatePivot()
 
   def increaseStripWidth(self):
     currentWidth = self.strips[0].width() * (100.0+self.application.preferences.general.stripWidthZoomPercent) / 100.0

@@ -358,13 +358,26 @@ class GuiWindow():
         for chemicalShift in chemicalShifts[ii]:
           atomName = chemicalShift.nmrAtom.name
           # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
+
           colour = colourDict.get(atomName[:min(2,len(atomName))])
+
+          # exit if mark exists
+          found = False
+          for mm in project.marks:
+            if atomName in mm.labels and\
+              colour == mm.colour and\
+              abs(chemicalShift.value-mm.positions[0]) < 1e-6:
+                found=True
+                break
+          if found:
+            continue
+
           if colour:
             project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
           else:
             # just use gray rather than checking colourScheme
             project.newMark('#808080', [chemicalShift.value], [axisCode])
-
+          print ('>>>newMark', atomName)
     finally:
       project._endCommandEchoBlock()
 

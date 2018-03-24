@@ -43,9 +43,8 @@ from ccpn.core.Note import Note
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.StructureEnsemble import StructureEnsemble
-
 from ccpn.core.RestraintList import RestraintList
-
+from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
@@ -71,6 +70,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 # from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
+from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+
 
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
@@ -369,8 +370,6 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       project._logger.error("Double-click activation not implemented for Pid %s, object %s"
                             % (dataPid, obj))
 
-  #TODO:RASMUS: assure that there is a save query first before loading a project onto an existing roject
-  #TODO:RASMUS: assure proper message once the project.loadData has been cleaned up
   def _processDroppedItems(self, data):
     "Handle the dropped urls"
     # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviours
@@ -378,13 +377,17 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     for url in data.get('urls',[]):
       getLogger().debug('>>> dropped: '+str(url))
 
+      dataType, subType, usePath = ioFormats.analyseUrl(url)
+      if dataType == 'Project' and subType in (ioFormats.CCPN
+                                               , ioFormats.NEF
+                                               , ioFormats.NMRSTAR
+                                               , ioFormats.SPARKY):
 
-      with progressManager(self.mainWindow, 'Loading...'):
-        objects = self.project.loadData(url)
-        if objects is not None:
-
-          # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner
-          for obj in objects:
+        okToContinue = self.mainWindow._queryCloseProject(title='Load %s project' % subType,
+                                                          phrase='create a new')
+        if okToContinue:
+          with progressManager(self.mainWindow, 'Loading... ' + url):
+            obj = self.application.loadProject(url)
             if isinstance(obj, Project):
               try:
                 obj._mainWindow.sideBar.fillSideBar(obj)
@@ -393,6 +396,14 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
               except Exception as es:
                 getLogger().warning('Error', str(es))
+
+      else:
+        with progressManager(self.mainWindow, 'Loading... ' + url):
+          self.project.loadData(url)
+
+      # if objects is not None:
+      #   # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner
+      #   for obj in objects:
 
       # if objects is None or len(objects) == 0:
       #   showWarning('Invalid File', 'Cannot handle "%s"' % url)

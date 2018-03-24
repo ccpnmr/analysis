@@ -50,6 +50,7 @@ class GuiWindow():
     self.application = application
     self.current = self.application.current
 
+    self.pythonConsoleModule = None # Python console; initialised upon first 'toggle'
 
 
   def _setShortcuts(self):
@@ -58,6 +59,7 @@ class GuiWindow():
     """
     # this trampled the menu py shortcut
     from functools import partial
+
     context = QtCore.Qt.ApplicationShortcut
     QtWidgets.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll, context=context)
@@ -65,11 +67,12 @@ class GuiWindow():
     QtWidgets.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks, context=context)
     # QtWidgets.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project), context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project),
-                    context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("c, a"), self, partial(AssignmentLib.propagateAssignments,
-                                                              current=self.application.current),
-                    context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("f, p"), self,
+                        partial(navigateToPeakPosition, self.application.project),
+                        context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("c, a"), self,
+                        partial(AssignmentLib.propagateAssignments,current=self.application.current),
+                        context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self), context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self), context=context)
@@ -83,7 +86,7 @@ class GuiWindow():
     QtWidgets.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("Tab,Tab"), self, self.moveToNextSpectrum, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("Backspace, Backspace"), self, self.moveToPreviousSpectrum, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("Tab, q"), self, self.moveToPreviousSpectrum, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("m, m"), self, self.switchMouseMode, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
@@ -92,6 +95,7 @@ class GuiWindow():
     QtWidgets.QShortcut(QtGui.QKeySequence("z, o"), self, self.zoomOut, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("p, l"), self, self.cyclePeakLabelling, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("c, s"), self, self.cyclePeakSymbols, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("Space, Space"), self, self.toggleConsole, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
 
   def _setUserShortcuts(self, preferences=None, mainWindow=None):
@@ -289,7 +293,6 @@ class GuiWindow():
     if strip and (strip.spectrumDisplay.window is self):
       strip._newPhasingTrace()
 
-      
   def setPhasingPivot(self):
     
     strip = self.application.current.strip
@@ -518,6 +521,48 @@ class GuiWindow():
         mode = MouseModes[i]
         self.setMouseMode(mode)
 
+  def _findMenuAction(self, menubarText, menuText):
+    # not sure if this function will be needed more widely or just in console context
+    # CCPN internal: now also used in SequenceModule._closeModule
+    # Should be stored in a dictionary upon initialisation!
+
+    for menuBarAction in self._menuBar.actions():
+      if menuBarAction.text() == menubarText:
+        break
+    else:
+      return None
+
+    for menuAction in menuBarAction.menu().actions():
+      if menuAction.text() == menuText:
+        return menuAction
+
+    return None
+
+  def toggleConsole(self):
+    """
+    Toggles whether python console is displayed at bottom of the main window.
+    """
+    from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+
+    mainWindow = self
+
+    openList = [m for m in PythonConsoleModule.getInstances()]
+    # if 'Python Console' in mainWindow.moduleArea.findAll()[1]:
+    # if len(openList)>0:
+    if mainWindow.pythonConsoleModule is not None:
+
+        if mainWindow.pythonConsoleModule.isVisible():
+
+          # TODO:ED causes a problem if the console is in a tempAreaWindow
+          mainWindow.pythonConsoleModule.hide()
+        else:
+          mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
+
+    else:
+      action = self._findMenuAction('View', 'Python Console')
+      closeFunc = action.trigger if action else None
+      mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
+      mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
 
 
 

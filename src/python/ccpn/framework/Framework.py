@@ -1963,43 +1963,51 @@ class Framework:
     # not sure if this function will be needed more widely or just in console context
     # CCPN internal: now also used in SequenceModule._closeModule
 
-    for menuBarAction in self.ui.mainWindow._menuBar.actions():
-      if menuBarAction.text() == menubarText:
-        break
-    else:
-      return None
+    #GWV should not be here; moved to GuiMainWindow
+    self.ui.mainWindow._findMenuAction(menubarText, menuText)
 
-    for menuAction in menuBarAction.menu().actions():
-      if menuAction.text() == menuText:
-        return menuAction
-
-    return None
+    #
+    # for menuBarAction in self.ui.mainWindow._menuBar.actions():
+    #   if menuBarAction.text() == menubarText:
+    #     break
+    # else:
+    #   return None
+    #
+    # for menuAction in menuBarAction.menu().actions():
+    #   if menuAction.text() == menuText:
+    #     return menuAction
+    #
+    # return None
 
   def toggleConsole(self):
     """
     Toggles whether python console is displayed at bottom of the main window.
     """
-    from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
 
-    mainWindow = self.ui.mainWindow
+    #GWV should not be here; moved to GuiMainWindow
+    self.ui.mainWindow.toggleConsole()
 
-    openList = [m for m in PythonConsoleModule.getInstances()]
-    # if 'Python Console' in mainWindow.moduleArea.findAll()[1]:
-    # if len(openList)>0:
-    if mainWindow.pythonConsoleModule is not None:
-
-        if mainWindow.pythonConsoleModule.isVisible():
-
-          # TODO:ED causes a problem if the console is in a tempAreaWindow
-          mainWindow.pythonConsoleModule.hide()
-        else:
-          mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
-
-    else:
-      action = self._findMenuAction('View', 'Python Console')
-      closeFunc = action.trigger if action else None
-      mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
-      mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
+    # from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+    #
+    # mainWindow = self.ui.mainWindow
+    #
+    # openList = [m for m in PythonConsoleModule.getInstances()]
+    # # if 'Python Console' in mainWindow.moduleArea.findAll()[1]:
+    # # if len(openList)>0:
+    # if mainWindow.pythonConsoleModule is not None:
+    #
+    #     if mainWindow.pythonConsoleModule.isVisible():
+    #
+    #       # TODO:ED causes a problem if the console is in a tempAreaWindow
+    #       mainWindow.pythonConsoleModule.hide()
+    #     else:
+    #       mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
+    #
+    # else:
+    #   action = self._findMenuAction('View', 'Python Console')
+    #   closeFunc = action.trigger if action else None
+    #   mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
+    #   mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
 
   def showChemicalShiftMapping(self):
     from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping

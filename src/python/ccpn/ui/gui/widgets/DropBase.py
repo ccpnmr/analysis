@@ -113,10 +113,13 @@ class DropBase:
     """ 
     Interpret drop event; extract urls, text or JSONDATA dicts 
     convert PIDS to Pid object's
-    return a dict with (type, data) key, value pairs
+    return a dict with 
+      - event, source key,values pairs
+      - (type, data) key,value pairs,
     """
     data = dict(
-      event = event
+      event = event,
+      source = event.source()
     )
     mimeData = event.mimeData()
 

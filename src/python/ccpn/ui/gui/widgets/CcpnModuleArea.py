@@ -64,27 +64,19 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     self._modulesNames = {}
     self._ccpnModules = []
 
-    self.setAcceptDrops(True)
+    # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
     self.textLabel = DropAreaLabel
     self.fontLabel = Font('Helvetica', 36, bold=False)
+
     colours = getColours()
-    textColour = colours[LABEL_FOREGROUND]
-    self.colourLabel = hexToRgb(textColour)
+    self.colourLabel = hexToRgb(colours[LABEL_FOREGROUND])
+
     self._dropArea  = None # Needed to know where to add a newmodule when dropping a pid from sideBar
     if self._container is None:
       for i in self.children():
         if isinstance(i, Container):
           self._container = i
-
-  # def dragMoveEvent(self, event:QtGui.QMouseEvent):
-  #   event.accept()
-  #
-  # def dragLeaveEvent(self, event):
-  #   # print ('>>>dragLeaveEvent %s' % str(event.type()))
-  #   super(CcpnModuleArea, self).dragLeaveEvent(event)
-  #   event.accept()
-  #
 
   def dropEvent(self, event, *args):
     data = self.parseEvent(event)
@@ -123,10 +115,6 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       DockDrop.dragEnterEvent(self, *args)
       event.accept()
 
-      # # reset the dock area
-      # self.dropArea = None
-      # self.overlay.setDropArea(self.dropArea)
-
   def dragLeaveEvent(self, *args):
     event = args[0]
     DockArea.dragLeaveEvent(self, *args)
@@ -137,61 +125,13 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     DockArea.dragMoveEvent(self, *args)
     event.accept()
 
-
-  # def _handlePid(self, pid):
-  #   "handle a; return True in case it is a Spectrum or a SpectrumGroup"
-  #   success = False
-  #   obj = self.mainWindow.project.getByPid(pid)
-  #   print(pid)
-  #   if obj is not None and isinstance(obj, Spectrum):
-  #     spectrumDisplay = self._createSpectrumDisplay(obj)
-  #     self.current.strip = spectrumDisplay.strips[0]
-  #     if obj.dimensionCount == 1:
-  #       self.current.strip.plotWidget.autoRange()
-  #     success = True
-  #   elif obj is not None and isinstance(obj, SpectrumGroup):
-  #     self._handleSpectrumGroup(obj)
-  #     success = True
-  #   return success
-
-  # def _createSpectrumDisplay(self, spectrum):
-  #   spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrum)
-  #   # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
-  #   # This routine can then be ommitted and the call above replaced by the one remaining line
-  #   self.mainWindow.pythonConsole.writeConsoleCommand(
-  #     "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
-  #   self.mainWindow.pythonConsole.writeConsoleCommand("application.deleteBlankDisplay()")
-  #   getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
-  #   getLogger().info('application.createSpectrumDisplay(spectrum)')
-  #
-  #   return spectrumDisplay
-  #
-  # def _handleSpectrumGroup(self, spectrumGroup):
-  #   '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.
-  #   Also hides the spectrumToolBar and shows spectrumGroupToolBar '''
-  #
-  #   if len(spectrumGroup.spectra) > 0:
-  #     spectrumDisplay = self.mainWindow.createSpectrumDisplay(spectrumGroup.spectra[0])
-  #     for spectrum in spectrumGroup.spectra: # Add the other spectra
-  #       spectrumDisplay.displaySpectrum(spectrum)
-  #     spectrumDisplay.isGrouped = True
-  #     spectrumDisplay.spectrumToolBar.hide()
-  #     spectrumDisplay.spectrumGroupToolBar.show()
-  #     spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
-  #     self.current.strip = spectrumDisplay.strips[0]
-  #     if spectrumGroup.spectra[0].dimensionCount == 1:
-  #       self.current.strip.plotWidget.autoRange()
-
   def paintEvent(self, ev):
     """
     Draws central label
     """
-
     p = QtGui.QPainter(self)
-
     # set font
     p.setFont(self.fontLabel)
-
     # set colour
     p.setPen(QtGui.QColor(*self.colourLabel))
 
@@ -221,9 +161,6 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
   def ccpnModules(self) -> list:
     'return all current modules in area'
     return self._ccpnModules
-    # if self is not None:
-    #   modules = list(self.findAll()[1].values())
-    #   return modules
 
   @ccpnModules.getter
   def ccpnModules(self):
@@ -240,7 +177,6 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       if hasattr(module, '_repopulateModule'):
         module._repopulateModule()
     pass
-
 
   def addModule(self, module, position=None, relativeTo=None, **kwds):
     """With these settings the user can close all the modules from the label 'close module' or pop up and
@@ -348,23 +284,6 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
         if isinstance(i, Container):
           self._container = i
     return obj.container()
-
-
-  # def movePythonConsole(self):
-  #   if 'PYTHON CONSOLE' in self.findAll()[1]:
-  #     pythonConsole = self.findAll()[1]['PYTHON CONSOLE']
-  #     for container in self.findAll()[0]:
-  #       if container and pythonConsole is not None:
-  #         self.moveModule(pythonConsole, 'bottom', container)
-  #
-  # def makeContainer(self, typ):
-  #   if typ == 'vertical':
-  #     new = VContainer(self)
-  #   elif typ == 'horizontal':
-  #     new = HContainer(self)
-  #   elif typ == 'tab':
-  #     new = TContainer(self)
-  #   return new
 
   def apoptose(self):
     if self.temporary and self.topContainer.count() == 0:

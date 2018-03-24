@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import functools
 import os
 import typing
+from typing import Sequence, Tuple
 import operator
 from collections import OrderedDict
 
@@ -1236,3 +1237,60 @@ class Project(AbstractWrapperObject):
       result = None
     #
     return result
+
+  #===========================================================================================
+  # Hot fixed methods (baahhhhhh)
+  # Copied from their respective locations
+  #===========================================================================================
+  def newMark(self, colour:str, positions:Sequence[float], axisCodes:Sequence,
+               style:str='simple', units:Sequence[str]=(), labels:Sequence[str]=()):
+    """Create new Mark
+  
+    :param str colour: Mark colour
+    :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
+    :param tuple/list axisCodes: Axis codes for all lines in the mark
+    :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
+    :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
+    :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
+    
+    return Mark instance
+    
+    Inserted later ccpn.ui._implementation.Mark
+    """
+    pass
+
+  def _newSimpleMark(self, colour:str, position:float, axisCode:str, style:str='simple',
+              unit:str='ppm', label:str=None):
+    """Create new child Mark with a single line
+  
+    :param str colour: Mark colour
+    :param tuple/list position: Position in unit (default ppm)
+    :param tuple/list axisCode: Axis code
+    :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
+    :param tuple/list unit: Axis unit. Default: all ppm
+    :param tuple/list label: Line label. Default: None
+    
+    return Mark instance
+    
+    Inserted later ccpn.ui._implementation.Mark
+    """
+    pass
+
+  def newSpectrum(self, name:str):
+    """Creation of new Spectrum NOT IMPLEMENTED.
+    Use Project.loadData or Project.createDummySpectrum instead
+    
+    Inserted later ccpn.Core.Spectrum
+    """
+    pass
+
+  def _createDummySpectrum(self, axisCodes:Sequence[str], name=None,
+                           chemicalShiftList=None):
+    """Make dummy spectrum from isotopeCodes list - without data and with 
+    default parameters 
+    
+    return Spectrum instance
+    
+    Inserted later ccpn.Core.Spectrum
+    """
+    pass

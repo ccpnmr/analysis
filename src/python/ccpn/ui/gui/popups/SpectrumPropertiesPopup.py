@@ -243,6 +243,7 @@ class GeneralTab(QtWidgets.QWidget, Base):
     # else:
     #   mainWindow = self.spectrum.project._appBase._mainWindow
     self.pythonConsole = mainWindow.pythonConsole
+    #TODO: change this
     self.logger = self.spectrum.project._logger
 
     self.setWindowTitle("Spectrum Properties")

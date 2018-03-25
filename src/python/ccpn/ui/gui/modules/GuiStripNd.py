@@ -225,12 +225,12 @@ class GuiStripNd(GuiStrip):
       (tType.item, 'ToolBar',               'toolbarAction',          '',                         'TB',     True,   True,       self.spectrumDisplay.toggleToolbar,   'toolbarAction'),
       (tType.item, 'Crosshair',             'crossHairAction',        '',                         'CH',     True,   True,       self.spectrumDisplay.toggleCrossHair,                'crossHairAction'),
       (tType.item, 'Grid',                  'gridAction',             '',                         'GS',     True,   True,       self.spectrumDisplay.toggleGrid,                      'gridAction'),
+      (tType.item, 'Share Y Axis',          '',                       '',                         'TA',     True,   True,       self._toggleLastAxisOnly, 'lastAxisOnlyCheckBox'),
+      (tType.actn, 'Cycle Peak Labels', 'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', 'PL', True,  True,      self.cyclePeakLabelling, ''),
+      (tType.actn, 'Cycle Peak Symbols', 'icons/peak-symbols', 'Cycle Peak Symbols',              'CS',     True,   True,       self.cyclePeakSymbols, ''),
 
+      (tType.sep, None, None, None, None, None, None, None, None),
       (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            '',       True,   True,       self.spectrumDisplay.adjustContours, ''),
-      (tType.actn, 'Cycle Peak Labels',     'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', 'PL',   True, True, self.cyclePeakLabelling, ''),
-      (tType.actn, 'Cycle Peak Symbols',    'icons/peak-symbols', 'Cycle Peak Symbols', 'CS',   True, True, self.cyclePeakSymbols, ''),
-      (tType.item, 'Share Y Axis',        '',                       '',                           'TA',   True,   True,       self._toggleLastAxisOnly,             'lastAxisOnlyCheckBox'),
-
       # (tType.actn, 'Add Contour Level',     'icons/contour-add',      'Add One Level',            True,   True,       self.spectrumDisplay.addContourLevel, ''),
       # (tType.actn, 'Remove Contour Level',  'icons/contour-remove',   'Remove One Level',         True,   True,       self.spectrumDisplay.removeContourLevel,''),
       # (tType.actn, 'Raise Base Level',      'icons/contour-base-up',  'Raise Contour Base Level', True,   True,       self.spectrumDisplay.raiseContourBase,''),
@@ -238,16 +238,19 @@ class GuiStripNd(GuiStrip):
       # (tType.actn, 'Store Zoom',            'icons/zoom-store',       'Store Zoom',               True,   True,       self.spectrumDisplay._storeZoom,      ''),
       # (tType.actn, 'Restore Zoom',          'icons/zoom-restore',     'Restore Zoom',             True,   True,       self.spectrumDisplay._restoreZoom,    ''),
       (tType.actn, 'Reset Zoom',            'icons/zoom-full',        'Reset Zoom',               'ZR',   True,   True,       self.resetZoom,                       ''),
-      (tType.sep, None, None, None, None, None, None, None, None),
-      (tType.item, 'H Trace',               'hTraceAction',           '',                         'TH',   True,   False,      self.toggleHorizontalTrace,                   'hTraceAction'),
-      (tType.item, 'V Trace',               'vTraceAction',           '',                         'TV',   True,   False,      self.toggleVerticalTrace,                   'vTraceAction'),
-      (tType.actn, 'Enter Phasing Console',     'icons/phase-console',                  'Enter Phasing Console',   'PC', True, True,   self.spectrumDisplay.togglePhaseConsole, ''),
-      (tType.sep, None, None, None, None, None, None, None, None),
-      # (tType.actn, 'Print to File...', 'icons/print', 'Print Spectrum Display to File', True, True,
-      #  lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay), ''),
+      (tType.menu, 'Navigate To', '', '', 'NT', True, True, None, 'navigateToMenu'),
 
+      (tType.sep, None, None, None, None, None, None, None, None),
+      (tType.item, 'Horizontal Trace',       'hTraceAction',     'Toggle horizontal trace on/off', 'TH',   True,   False,      self.toggleHorizontalTrace,                   'hTraceAction'),
+      (tType.item, 'Vertical Trace',         'vTraceAction',     'Toggle vertical trace on/off',   'TV',   True,   False,      self.toggleVerticalTrace,                   'vTraceAction'),
+      (tType.actn, 'Enter Phasing Console',  'icons/phase-console',    'Enter Phasing Console',    'PC',   True,   True,       self.spectrumDisplay.togglePhaseConsole, ''),
+
+      (tType.sep, None, None, None, None, None, None, None, None),
+      (tType.actn, 'Mark Positions',          None,                  'Mark positions of all axes', 'MK', True, False,        self.createMark, ''),
+      (tType.actn, 'Clear Marks',             None,                     'Clear all mark',          'MC', True, False,        self.createMark, ''),
+
+      (tType.sep, None, None, None, None, None, None, None, None),
       (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', 'PT', True, True,   self.showExportDialog, ''),
-      (tType.menu, 'Navigate To',           '',                       '',                         'NT',   True,   True,       None,                                 'navigateToMenu')
     ]
 
     for aType, aName, icon, tooltip, shortcut, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
@@ -361,6 +364,16 @@ class GuiStripNd(GuiStrip):
     from ccpn.ui.gui.widgets.CustomExportDialog import CustomGLExportDialog
     self.exportDialog = CustomGLExportDialog(self._testCcpnOpenGLWidget, spectrumDimension='nD')
     self.exportDialog.show(self.viewBox)
+
+  def copyStrip(self):
+    """
+    Copy the strip into new SpectrumDisplay
+    """
+    # create a new spectrum display
+    newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=self.axisOrder)
+    for spectrum in self.spectra:
+      newDisplay.displaySpectrum(spectrum)
+    #TODO: also restore zoom, plane etc settings
 
   def flipXYAxis(self):
     """
@@ -577,6 +590,18 @@ class GuiStripNd(GuiStrip):
     """
     self.lastAxisOnlyCheckBox.setChecked(not self.lastAxisOnlyCheckBox.isChecked())
     self._toggleLastAxisOnly()
+
+  def createMark(self):
+    """
+    Sets the marks at current position
+    """
+    self.spectrumDisplay.mainWindow.createMark()
+
+  def clearMarks(self):
+    """
+    Sets the marks at current position
+    """
+    self.spectrumDisplay.mainWindow.clearMarks()
 
   def _mouseMoved(self, positionPixel):
 

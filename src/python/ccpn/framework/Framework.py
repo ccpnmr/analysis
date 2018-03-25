@@ -916,6 +916,7 @@ class Framework:
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
                    ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
                    (),
+                   ("Copy strip",    self.copyStrip,  []),
                    ("Flip X-Y Axis", self.flipXYAxis, [('shortcut', 'xy')]),
                    ("Flip X-Z Axis", self.flipXZAxis, [('shortcut', 'xz')]),
                    ("Flip Y-Z Axis", self.flipYZAxis, [('shortcut', 'yz')])
@@ -1938,6 +1939,12 @@ class Framework:
   def resetZoom(self):
     if self.current.strip is not None:
       self.current.strip.resetZoom()
+    else:
+      getLogger().warning('No strip selected')
+
+  def copyStrip(self):
+    if self.current.strip is not None:
+      self.current.strip.copyStrip()
     else:
       getLogger().warning('No strip selected')
 

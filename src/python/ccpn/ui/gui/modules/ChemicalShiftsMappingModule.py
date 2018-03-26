@@ -776,7 +776,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                    disappearedBrush = self.disappearedPeakBrush,
                                    )
     if xs and ys:
-      self.barGraphWidget.setViewBoxLimits(0, max(xs)*2, 0,  max(ys)*2)
+      self.barGraphWidget.setViewBoxLimits(0, max(xs)*10, 0,  max(ys)*10)
 
 
   def updateThresholdLineValue(self, value):

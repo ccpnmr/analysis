@@ -196,6 +196,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.Catoms = set()
     self.atomWeightSpinBoxes = []
     self.nmrAtomsCheckBoxes = []
+    self.nmrAtomsLabels = []
     self.atomNames = []
     if self.mainWindow is not None:
       self.project = self.mainWindow.project
@@ -376,6 +377,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.atomWeightSpinBox.setObjectName(name)
       self.atomWeightSpinBox.setMaximumWidth(150)
       self.atomWeightSpinBoxes.append(self.atomWeightSpinBox)
+      self.nmrAtomsLabels.append(labelRelativeContribution)
 
       vFrame += 1
       self.commonAtomsFrame = Frame(atomFrame, setLayout=True, grid=(vFrame, 0))
@@ -569,21 +571,19 @@ class ChemicalShiftsMapping(CcpnModule):
   def _toggleRelativeContribuitions(self):
     value = self.modeButtons.getSelectedText()
     if value == HEIGHT or value ==  VOLUME:
-      print('Refactoring')
-      # self.atomWeightLabel.hide()
-      # self._scrollAreaSpinBoxFrame.hide()
-      # self.atomLabel.hide()
-      # for i in self.atomWeightSpinBoxes: i.hide()
-      # for i in self.atomRadioButtons: i.hide()
+      'hide weight'
+      for i in self.atomWeightSpinBoxes:
+        i.hide()
+      for i in self.nmrAtomsLabels:
+        i.hide()
+
 
 
     else:
-      print('Refactoring')
-      # self.atomWeightLabel.show()
-      # self._scrollAreaSpinBoxFrame.show()
-      # self.atomLabel.show()
-      # for i in self.atomWeightSpinBoxes: i.show()
-      # for i in self.atomRadioButtons: i.show()
+      for i in self.atomWeightSpinBoxes:
+        i.show()
+      for i in self.nmrAtomsLabels:
+        i.show()
 
   def _setThresholdLineBySTD(self):
     nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())

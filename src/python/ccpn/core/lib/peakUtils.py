@@ -132,14 +132,15 @@ def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
       peaks += filteredPeaks
   else:
     for peak in filteredPeaks:
-      av = _traverse(peak.assignedNmrAtoms)
-      av = [na.name for na in av]
-      if len(av) > 1:
-        if list(av) == nmrAtomsNames:
-          peaks += [peak]
-      if len(nmrAtomsNames) == 1:
-        if nmrAtomsNames[0] in av:
-          peaks += [peak]
+      assignedNmrAtoms = _traverse(peak.assignedNmrAtoms)
+      if all(assignedNmrAtoms):
+        assignedNmrAtoms = [na.name for na in assignedNmrAtoms]
+        if len(assignedNmrAtoms) > 1:
+          if list(assignedNmrAtoms) == nmrAtomsNames:
+            peaks += [peak]
+        if len(nmrAtomsNames) == 1:
+          if nmrAtomsNames[0] in assignedNmrAtoms:
+            peaks += [peak]
   return peaks
 
 def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):

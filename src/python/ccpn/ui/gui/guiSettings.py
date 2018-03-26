@@ -116,6 +116,7 @@ MARK_LINE_COLOUR_DICT = {
   'NE': '#7FFF00',
   'NZ': '#BFFF00',
   'NH': '#FFFF00',
+  DEFAULT: '#e0e0e0'
 }
 
 # Widget definitions

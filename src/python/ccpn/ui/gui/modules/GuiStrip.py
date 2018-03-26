@@ -47,6 +47,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 # from ccpn.ui.gui.widgets.Icon import Icon
 # from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui import guiSettings
 
 from ccpn.util import Ticks
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
@@ -883,8 +884,10 @@ class GuiStrip(Frame):
       # positions = [axisPositionDict[axisCode] for axisCode in axisCodes]
       # self._project.newMark('white', positions, axisCodes) # the 'white' is overridden in PlotWidget._addRulerLine()
 
+      colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
+
       positions = [self.current.mouseMovedDict[ax] for ax in self.axisCodes]
-      self._project.newMark('#e0e0e0', positions, self.axisCodes)  # the 'white' is overridden in PlotWidget._addRulerLine()
+      self._project.newMark(colourDict[guiSettings.DEFAULT], positions, self.axisCodes)  # the 'white' is overridden in PlotWidget._addRulerLine()
       # self._project.newMark('#e0e0e0', self.current.cursorPosition[:2], self.axisCodes[:2])  # the 'white' is overridden in PlotWidget._addRulerLine()
 
     except Exception as es:

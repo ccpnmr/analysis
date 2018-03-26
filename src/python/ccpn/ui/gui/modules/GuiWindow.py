@@ -379,7 +379,7 @@ class GuiWindow():
             project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
           else:
             # just use gray rather than checking colourScheme
-            project.newMark('#808080', [chemicalShift.value], [axisCode])
+            project.newMark(colourDict[guiSettings.DEFAULT], [chemicalShift.value], [axisCode])
           # print ('>>>newMark', atomName)
 
         finally:

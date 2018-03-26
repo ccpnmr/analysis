@@ -57,9 +57,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
         grid = (0, i)
       else:
         grid = (i, 0)
-
       button = RadioButton(self, text, tipText=tipTexts[i], grid=grid, hAlign='l')
-
       self.radioButtons.append(button)
 
       buttonGroup.addButton(button)

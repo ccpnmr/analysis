@@ -210,20 +210,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     Sets up SideBar, python console and splitters to divide up main window properly.
 
     """
-    #TODO:GEERTEN: deal with Stylesheet issue; There is a Splitter class in Widgets
-    # self.setStyleSheet("""QSplitter{
-    #                                 background-color: #bec4f3;
-    #                                 }
-    #                       QSplitter::handle:horizontal {
-    #                                                     width: 3px;
-    #                                                     }
-    #
-    #                       QSplitter::handle:vertical {
-    #                                                     height: 3px;
-    #                                                   }
-    #
-    #                                 """)
-    # IPythonConsole
     self.namespace = {'application': self.application,
                       'current': self.application.current,
                       'preferences': self.application.preferences,
@@ -355,7 +341,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     return result
 
-
   def loadProject(self, projectDir=None):
     """
     Opens a loadProject dialog box if project directory is not specified.
@@ -399,7 +384,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     recentFileMenu.addSeparator()
     recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
                                     callback=self.application.clearRecentProjects))
-
 
   def _fillMacrosMenu(self):
     """
@@ -456,7 +440,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     runMacrosMenu.addAction(Action(runMacrosMenu, text='Browse...',
                                     callback=self.runMacro))
 
-
   def _fillRecentMacrosMenu(self):
     """
     Populates recent macros menu with last ten macros ran.
@@ -474,7 +457,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
                                       callback=self.application.clearRecentMacros))
 
-
   def _addPluginSubMenu(self, Plugin):
     targetMenu = pluginsMenu = self.getMenuAction('Plugins')
     if '...' in Plugin.PLUGINNAME:
@@ -488,7 +470,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     action = Action(self, text=name, translate=False,
                     callback=partial(self.startPlugin, Plugin=Plugin))
     targetMenu.addAction(action)
-
 
   def _fillModulesMenu(self):
     modulesMenu = self.searchMenuAction('Show/hide Modules')
@@ -572,7 +553,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     pluginsMenu.addSeparator()
     pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                       callback=self._fillPluginsMenu))
-
 
   def startPlugin(self, Plugin):
     plugin = Plugin(application=self.application)
@@ -681,7 +661,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     text = ''.join([line.strip().split(':', 6)[-1]+'\n' for line in l])
     editor.textBox.setText(text)
 
-
   #TODO:TJ the below is in Framework (slightly different implementation) so presumably does not belong here???
   #Framework owns the command, this part juts get the file to run
   def runMacro(self, macroFile:str=None):
@@ -702,7 +681,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
       self.application.preferences.recentMacros.append(macroFile)
       self._fillRecentMacrosMenu()
       self.pythonConsole._runMacro(macroFile)
-
 
   def _resetRemoveStripAction(self, strips):
     for spectrumDisplay in self.spectrumDisplays:

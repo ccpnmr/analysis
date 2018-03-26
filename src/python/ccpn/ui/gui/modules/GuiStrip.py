@@ -35,6 +35,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import Notifier
 
+from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
 from ccpn.ui.gui.guiSettings import textFontSmall
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
@@ -699,8 +700,8 @@ class GuiStrip(Frame):
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
     return
 
-    # TODO:GEERTEN: Fix with proper stylesheet
-    colour = '#e4e15b' if self.application.colourScheme == 'dark' else '#000000'
+    # TODO:GEERTEN: Fix  (not yet picked-up!; why?)
+    colour = getColours()[GUISTRIP_PIVOT]
     self.hPhasingPivot.setPen({'color': colour})
     self.vPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:

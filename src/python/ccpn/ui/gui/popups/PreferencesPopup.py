@@ -232,15 +232,15 @@ class PreferencesPopup(CcpnDialog):
     self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
                                                        selectedInd=annType,
                                                        callback=self._setAnnotations,
-                                                       direction='v',
+                                                       direction='vertical',
                                                        grid=(row, 1), hAlign='l',
                                                        tipTexts=None,
                                                        )
 
     # row += 1
-    # Spacer(parent, row, 1
-    #        , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
-    #        , grid=(row , 0), gridSpan=(row, 1))
+    Spacer(parent, row, 1
+           , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+           , grid=(row , 0), gridSpan=(row, 1))
 
   def _setspectrumTabWidgets(self, parent):
     ''' Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live'''

@@ -916,7 +916,7 @@ class Framework:
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
                    ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
                    (),
-                   ("Copy strip",    self.copyStrip,  []),
+                   ("New SpectrumDisplay with strip",    self.copyStrip,  []),
                    ("Flip X-Y Axis", self.flipXYAxis, [('shortcut', 'xy')]),
                    ("Flip X-Z Axis", self.flipXZAxis, [('shortcut', 'xz')]),
                    ("Flip Y-Z Axis", self.flipYZAxis, [('shortcut', 'yz')])

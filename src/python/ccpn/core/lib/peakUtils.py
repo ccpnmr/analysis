@@ -155,10 +155,8 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
       if len(av)>1:
         if list(av) == nmrAtomsNames:
           peaks += [peak]
-      else:
-        commonalities = set(av) - (set(av) - set(nmrAtomsNames))
-        print(commonalities)
-        if len(commonalities)>1:
+      if len(nmrAtomsNames) == 1:
+        if nmrAtomsNames[0] in av:
           peaks += [peak]
 
 

@@ -112,6 +112,36 @@ def _traverse(o, tree_types=(list, tuple)):
   else:
     yield o
 
+def __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra):
+  peaks = []
+  nmrAtoms = []
+  for nmrAtomName in nmrAtomsNames:
+    nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
+    if nmrAtom is not None:
+      nmrAtoms.append(nmrAtom)
+  filteredPeaks = []
+  nmrAtomsNamesAvailable = []
+  for nmrAtom in nmrAtoms:
+    for peak in nmrAtom.assignedPeaks:
+      if peak.peakList.spectrum in spectra:
+        if nmrAtom.name in nmrAtomsNames:
+          filteredPeaks.append(peak)
+          nmrAtomsNamesAvailable.append(nmrAtom.name)
+  if len(list(set(filteredPeaks))) == len(spectra): # deals when a residue is assigned to multiple peaks
+    if len(list(set(nmrAtomsNamesAvailable))) == len(nmrAtomsNames):
+      peaks += filteredPeaks
+  else:
+    for peak in filteredPeaks:
+      av = _traverse(peak.assignedNmrAtoms)
+      av = [na.name for na in av]
+      if len(av) > 1:
+        if list(av) == nmrAtomsNames:
+          peaks += [peak]
+      if len(nmrAtomsNames) == 1:
+        if nmrAtomsNames[0] in av:
+          peaks += [peak]
+  return peaks
+
 def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):
   '''
   
@@ -122,43 +152,13 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
   '''
 
   deltas = []
-  peaks = []
 
   if len(spectra) <=1:
     return
+  peaks = __filterPeaksBySelectedNmrAtomOption(nmrResidue, nmrAtomsNames, spectra)
+
   if atomWeights is None:
     atomWeights = DefaultAtomWeights
-  nmrAtoms =[]
-  for nmrAtomName in nmrAtomsNames:
-    nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
-    if nmrAtom is not None:
-      # peaks = [p for p in nmrAtom.assignedPeaks if p.peakList.spectrum in spectra]
-      nmrAtoms.append(nmrAtom)
-
-  testPeaks = []
-  nmrAtomsNamesAvailable = []
-  for nmrAtom in nmrAtoms:
-    for peak in nmrAtom.assignedPeaks:
-      if peak.peakList.spectrum in spectra:
-        if nmrAtom.name in nmrAtomsNames:
-          testPeaks.append(peak)
-          nmrAtomsNamesAvailable.append(nmrAtom.name)
-
-  if len(list(set(testPeaks))) == len(spectra):
-    if len(list(set(nmrAtomsNamesAvailable))) ==  len(nmrAtomsNames):
-      peaks += testPeaks
-  else:
-    # deals when a residue is assigned to multiple peaks
-    for peak in testPeaks:
-      av = _traverse(peak.assignedNmrAtoms)
-      av = [na.name for na in av]
-      if len(av)>1:
-        if list(av) == nmrAtomsNames:
-          peaks += [peak]
-      if len(nmrAtomsNames) == 1:
-        if nmrAtomsNames[0] in av:
-          peaks += [peak]
-
 
   if len(peaks)>0:
     for peak in peaks:
@@ -169,20 +169,16 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
             for i, axisCode in enumerate(peak.axisCodes):
               if axisCode:
                 weight = _getAtomWeight(axisCode, atomWeights)
-                assignedNmrAtomsNames = [na.name for na in peak.dimensionNmrAtoms[i]]
-
-                if len(assignedNmrAtomsNames)>0:
-                  if assignedNmrAtomsNames[0] in nmrAtomsNames:
-                    if delta is None:
-                      delta = 0.0
-                    delta += ((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2
+                if delta is None:
+                  delta = 0.0
+                delta += ((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2
             if delta is not None:
               delta = delta ** 0.5
               deltas += [delta]
 
           if mode == VOLUME:
             delta1Atoms = (peak.volume - list(peaks)[0].volume)
-            deltas += [((delta1Atoms)** 2 ) ** 0.5, ]
+            deltas += [((delta1Atoms)** 2 ) ** 0.5,]
 
           if mode == HEIGHT:
             delta1Atoms = (peak.height - list(peaks)[0].height)

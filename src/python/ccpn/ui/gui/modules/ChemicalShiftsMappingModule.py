@@ -53,7 +53,7 @@ from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
 from ccpn.util.Scripting import getScriptsDirectoryPath
-from ccpn.core.lib.peakUtils import getDeltaShiftsNmrResidue, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
+from ccpn.core.lib.peakUtils import getNmrResidueDeltas, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
@@ -757,7 +757,6 @@ class ChemicalShiftsMapping(CcpnModule):
       self.application.current.clearNmrResidues()
       event.accept()
 
-  # def _customActionCallBack(self, nmrResidue, *args):
   def _customActionCallBack(self, data):
     from ccpn.ui.gui.lib.Strip import navigateToNmrAtomsInStrip, _getCurrentZoomRatio, navigateToNmrResidueInDisplay
 
@@ -812,7 +811,6 @@ class ChemicalShiftsMapping(CcpnModule):
       weights.update({atomWSB.objectName():atomWSB.value()})
 
     selectedAtomNames = [cb.text() for cb in self.nmrAtomsCheckBoxes if cb.isChecked()]
-    print(selectedAtomNames)
     if self.nmrResidueTable:
       if self.nmrResidueTable._nmrChain is not None:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
@@ -824,7 +822,7 @@ class ChemicalShiftsMapping(CcpnModule):
               nmrResidue.spectraCount = len(spectra)
               nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
               nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
-              nmrResidue._delta = getDeltaShiftsNmrResidue(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
+              nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
             else:
               nmrResidue._delta = None
         self.updateTable(self.nmrResidueTable._nmrChain)

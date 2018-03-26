@@ -112,11 +112,11 @@ def _traverse(o, tree_types=(list, tuple)):
   else:
     yield o
 
-def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atomWeights=None):
+def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atomWeights=None):
   '''
   
   :param nmrResidue: 
-  :param nmrAtoms: nmr Atoms to compare. str 'H' , 'N' , 'CA' etc
+  :param nmrAtomsNames: nmr Atoms to compare. str 'H' , 'N' , 'CA' etc
   :param spectra: compare peaks only from given spectra
   :return: 
   '''
@@ -128,12 +128,32 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atom
     return
   if atomWeights is None:
     atomWeights = DefaultAtomWeights
-
-  for nmrAtomName in nmrAtoms:
+  nmrAtoms =[]
+  for nmrAtomName in nmrAtomsNames:
     nmrAtom = nmrResidue.getNmrAtom(str(nmrAtomName))
     if nmrAtom is not None:
-      peaks += [p for p in nmrAtom.assignedPeaks if p.peakList.spectrum in spectra and p not in peaks]
-  print(peaks)
+      # peaks = [p for p in nmrAtom.assignedPeaks if p.peakList.spectrum in spectra]
+      nmrAtoms.append(nmrAtom)
+  testPeaks = []
+  nmrAtomsNamesAvailable = []
+  for nmrAtom in nmrAtoms:
+    for peak in nmrAtom.assignedPeaks:
+      if peak.peakList.spectrum in spectra:
+        if nmrAtom.name in nmrAtomsNames:
+          testPeaks.append(peak)
+          nmrAtomsNamesAvailable.append(nmrAtom.name)
+
+  if len(list(set(testPeaks))) == len(spectra):
+    if len(list(set(nmrAtomsNamesAvailable))) ==  len(nmrAtomsNames):
+      peaks += testPeaks
+  else:
+    print(nmrResidue.pid)
+    print(nmrAtomsNamesAvailable)
+    if len(list(set(nmrAtomsNamesAvailable))) == len(nmrAtomsNames):
+      print([nmrAtom.assignedPeaks for nmrAtom in nmrResidue.nmrAtoms if nmrAtom.name in nmrAtomsNames])
+
+
+  # if an nmrAtoms is assigned to two peaks in the same peakList mark as ambiguous
 
 
   if len(peaks)>0:
@@ -146,23 +166,15 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atom
               if axisCode:
                 weight = _getAtomWeight(axisCode, atomWeights)
                 assignedNmrAtomsNames = [na.name for na in peak.dimensionNmrAtoms[i]]
-                if assignedNmrAtomsNames[0] in nmrAtoms:
 
-                # if axisCode[0] in nmrAtoms:
+                if len(assignedNmrAtomsNames)>0:
+                  if assignedNmrAtomsNames[0] in nmrAtomsNames:
                     if delta is None:
                       delta = 0.0
                     delta += ((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2
-                    delta = delta ** 0.5
-
-            deltas += [delta]
-
-
-
-            # if len(peak.position) == 2:
-            #   delta1Atoms = (peak.position[0] - list(peaks)[0].position[0])
-            #   delta2Atoms = (peak.position[1] - list(peaks)[0].position[1])
-            #
-            #   deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5, ]
+            if delta is not None:
+              delta = delta ** 0.5
+              deltas += [delta]
 
           if mode == VOLUME:
             delta1Atoms = (peak.volume - list(peaks)[0].volume)
@@ -173,10 +185,22 @@ def getDeltaShiftsNmrResidue(nmrResidue, nmrAtoms, spectra, mode=POSITIONS, atom
             deltas += [((delta1Atoms) ** 2) ** 0.5,]
 
           if mode == LINEWIDTHS:
-            if len(peak.lineWidths) == 2:
-              delta1Atoms = (peak.lineWidths[0] - list(peaks)[0].lineWidths[0])
-              delta2Atoms = (peak.lineWidths[1] - list(peaks)[0].lineWidths[1])
-              deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5,]
+            print("LINEWIDTHS REFACTORING ")
+            delta = None
+            for i, axisCode in enumerate(peak.axisCodes):
+              if axisCode:
+                weight = _getAtomWeight(axisCode, atomWeights)
+                if delta is None:
+                  delta = 0.0
+                delta += ((peak.lineWidths[i] - list(peaks)[0].lineWidths[i]) * weight) ** 2
+            if delta is not None:
+              delta = delta ** 0.5
+              deltas += [delta]
+
+            # if len(peak.lineWidths) == 2:
+            # delta1Atoms = (peak.lineWidths[0] - list(peaks)[0].lineWidths[0])
+            # delta2Atoms = (peak.lineWidths[1] - list(peaks)[0].lineWidths[1])
+            # deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5,]
         except Exception as e:
           message = 'Error for calculation mode: %s on %s and %s. ' % (mode, peak.pid, list(peaks)[0].pid) + str(e)
           getLogger().debug(message)

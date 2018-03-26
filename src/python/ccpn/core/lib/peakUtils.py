@@ -134,6 +134,7 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
     if nmrAtom is not None:
       # peaks = [p for p in nmrAtom.assignedPeaks if p.peakList.spectrum in spectra]
       nmrAtoms.append(nmrAtom)
+
   testPeaks = []
   nmrAtomsNamesAvailable = []
   for nmrAtom in nmrAtoms:
@@ -147,13 +148,18 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
     if len(list(set(nmrAtomsNamesAvailable))) ==  len(nmrAtomsNames):
       peaks += testPeaks
   else:
-    print(nmrResidue.pid)
-    print(nmrAtomsNamesAvailable)
-    if len(list(set(nmrAtomsNamesAvailable))) == len(nmrAtomsNames):
-      print([nmrAtom.assignedPeaks for nmrAtom in nmrResidue.nmrAtoms if nmrAtom.name in nmrAtomsNames])
-
-
-  # if an nmrAtoms is assigned to two peaks in the same peakList mark as ambiguous
+    # deals when a residue is assigned to multiple peaks
+    for peak in testPeaks:
+      av = _traverse(peak.assignedNmrAtoms)
+      av = [na.name for na in av]
+      if len(av)>1:
+        if list(av) == nmrAtomsNames:
+          peaks += [peak]
+      else:
+        commonalities = set(av) - (set(av) - set(nmrAtomsNames))
+        print(commonalities)
+        if len(commonalities)>1:
+          peaks += [peak]
 
 
   if len(peaks)>0:

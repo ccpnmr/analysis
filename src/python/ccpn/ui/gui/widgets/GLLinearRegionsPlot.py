@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
+from functools import partial
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Button import Button
@@ -116,8 +117,11 @@ class GLTargetButtonSpinBoxes(Widget, Base):
     # for line in self.linearRegions.lines:
     #   line.sigPositionChanged.connect(self._lineMoved)
 
-    for sb in self.spinBoxes:
-      sb.valueChanged.connect(self._setLinePosition)
+    # for sb in self.spinBoxes:
+    #   sb.valueChanged.connect(self._setLinePosition)
+
+    self.spinBoxes[0].valueChanged.connect(partial(self._setLinePosition, 0))
+    self.spinBoxes[1].valueChanged.connect(partial(self._setLinePosition, 1))
 
     if self.GLWidget:
       self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
@@ -192,40 +196,30 @@ class GLTargetButtonSpinBoxes(Widget, Base):
 
   @pyqtSlot(list)
   def _lineMoved(self, data):
-    # values = []
-    # for line in self.linearRegions.lines:
-    #   if self.orientation == 'h':
-    #     values.append(line.pos().y())
-    #   elif self.orientation == 'v':
-    #     values.append(line.pos().x())
-    # self.pointBox1.setValue(min(values))
-    # self.pointBox2.setValue(max(values))
+    """
+    Get the values from the GLwidget event; values are emitted via pyqtsignal, must be connected to.
+    :param data - a list containing [min, max] for the limits of the region:
+    """
 
-    # for line in self.linearRegions.lines:
-    #   if self.orientation == 'h':
-    #     values.append(line.pos().y())
-    #   elif self.orientation == 'v':
-    #     values.append(line.pos().x())
-    # values = self.GLlinearRegions.values
-
+    # set the spinboxes
     self.pointBox1.setValue(min(data))
     self.pointBox2.setValue(max(data))
+
+    # set the current values
     self.values = [min(data), max(data)]
 
-  def _setLinePosition(self):
-    values = []
-    for sb in self.spinBoxes:
-      values.append(sb.value())
+  def _setLinePosition(self, spinBoxNum):
+    """
+    respond to manual changes to the spin boxes
+    """
+    if self.spinBoxes[spinBoxNum].hasFocus():
+      values = []
+      for sb in self.spinBoxes:
+        values.append(sb.value())
 
-    self.pointBox1.setValue(min(values))
-    self.pointBox2.setValue(max(values))
-    self.values = [min(values), max(values)]
-
-    # self.linearRegions.lines[0].setPos(min(values))
-    # self.linearRegions.lines[1].setPos(max(values))
-
-    if self.GLlinearRegions:
-      self.GLlinearRegions.values = [min(values), max(values)]
+      # pass changes to the GL widget
+      if self.GLlinearRegions:
+        self.GLlinearRegions.values = [min(values), max(values)]
 
   def get(self):
     """
@@ -237,10 +231,13 @@ class GLTargetButtonSpinBoxes(Widget, Base):
       return [0,0]
 
   def setValues(self, values):
-
-
+    """
+    set the values of the spinboxes and update the GL widget
+    :param values - list of [min, max]:
+    """
     self.pointBox1.set(min(values))
     self.pointBox2.set(max(values))
+
     self.values = [min(values), max(values)]
     try:
       if self.GLlinearRegions:

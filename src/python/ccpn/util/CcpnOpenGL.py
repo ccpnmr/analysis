@@ -1712,14 +1712,14 @@ void main()
         if region.orientation == 'h':
           if not self._widthsChangedEnough((0.0, region.values[0]),
                                            (0.0, self.cursorCoordinate[1]),
-                                           tol=abs(2*self.pixelY)):
-            self._dragRegion = (region, 'h', 0)
+                                           tol=abs(3*self.pixelY)):
+            self._dragRegion = (region, 'h', 0)     # line 0 of h-region
             break
 
           elif not self._widthsChangedEnough((0.0, region.values[1]),
                                             (0.0, self.cursorCoordinate[1]),
-                                            tol=abs(2*self.pixelY)):
-            self._dragRegion = (region, 'h', 1)
+                                            tol=abs(3*self.pixelY)):
+            self._dragRegion = (region, 'h', 1)     # line 1 of h-region
             break
           else:
             mid = (region.values[0]+region.values[1])/2.0
@@ -1727,20 +1727,20 @@ void main()
             if not self._widthsChangedEnough((0.0, mid),
                                              (0.0, self.cursorCoordinate[1]),
                                              tol=delta):
-              self._dragRegion = (region, 'h', 3)
+              self._dragRegion = (region, 'h', 3)   # both lines of h-region
               break
 
         elif region.orientation == 'v':
           if not self._widthsChangedEnough((region.values[0], 0.0),
                                            (self.cursorCoordinate[0], 0.0),
-                                           tol=abs(2*self.pixelX)):
-            self._dragRegion = (region, 'v', 0)
+                                           tol=abs(3*self.pixelX)):
+            self._dragRegion = (region, 'v', 0)     # line 0 of v-region
             break
 
           elif not self._widthsChangedEnough((region.values[1], 0.0),
                                             (self.cursorCoordinate[0], 0.0),
-                                            tol=abs(2*self.pixelX)):
-            self._dragRegion = (region, 'v', 1)
+                                            tol=abs(3*self.pixelX)):
+            self._dragRegion = (region, 'v', 1)     # line 1 of v-region
             break
           else:
             mid = (region.values[0]+region.values[1])/2.0
@@ -1748,10 +1748,10 @@ void main()
             if not self._widthsChangedEnough((mid, 0.0),
                                              (self.cursorCoordinate[0], 0.0),
                                              tol=delta):
-              self._dragRegion = (region, 'v', 3)
+              self._dragRegion = (region, 'v', 3)   # both lines of v-region
               break
     else:
-      self._dragRegion = (None, None, None)
+      self._dragRegion = (None, None, None)         # nothing selected
 
     return self._dragRegion[0]
 
@@ -2210,11 +2210,14 @@ void main()
 
     pls = peakListView.peakList
     listColour = pls.symbolColour
-    if listColour == '#':
-      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
-    listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
-    listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
-    listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+    # if listColour == '#':
+    #   listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
+    if listColour == '#':     # auto colour
+      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
+    listCol = hexToRgbRatio(listColour)
+    # listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
+    # listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
+    # listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
 
     if symbolType == 0:
       # for peak in pls.peaks:
@@ -2239,19 +2242,21 @@ void main()
             if self._isSelected(peak):
             # if hasattr(peak, '_isSelected') and peak._isSelected:
               _isSelected = True
-              colR, colG, colB = self.highlightColour[:3]
+              # colR, colG, colB = self.highlightColour[:3]
+              cols = self.highlightColour[:3]
               drawList.indices = np.append(drawList.indices, np.array([index, index+1, index+2, index+3,
                                                                       index, index+2, index+2, index+1,
                                                                       index, index+3, index+3, index+1], dtype=np.uint))
             else:
               # colour = peak.peakList.symbolColour
-              colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-              colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-              colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+              # colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+              # colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+              # colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+              cols = listCol
 
               drawList.indices = np.append(drawList.indices,
                                            np.array([index, index+1, index+2, index+3], dtype=np.uint))
-            drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, fade] * numPoints
+            drawList.colors[offset*4:(offset+numPoints)*4] = [*cols, fade] * numPoints
 
           # list MAY contain out of plane peaks
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
@@ -2288,18 +2293,19 @@ void main()
             if self._isSelected(peak):
             # if hasattr(peak, '_isSelected') and peak._isSelected:
               _isSelected = True
-              colR, colG, colB = self.highlightColour[:3]
+              cols = self.highlightColour[:3]
               drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
                                                               index + np2 + 2, index + np2 + 1,
                                                               index + np2, index + np2 + 3,
                                                               index + np2 + 3, index + np2 + 1])
             else:
               # colour = peak.peakList.symbolColour
-              colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-              colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-              colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+              # colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+              # colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+              # colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+              cols = listCol
 
-            drawList.colors[offset*4:(offset+np2+5)*4] = [colR, colG, colB, fade] * (np2+5)
+            drawList.colors[offset*4:(offset+np2+5)*4] = [*cols, fade] * (np2+5)
 
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
                                       indexPtr, len(drawList.indices)]
@@ -2335,14 +2341,15 @@ void main()
             if self._isSelected(peak):
             # if hasattr(peak, '_isSelected') and peak._isSelected:
               _isSelected = True
-              colR, colG, colB = self.highlightColour[:3]
+              cols = self.highlightColour[:3]
             else:
               # colour = peak.peakList.symbolColour
-              colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-              colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-              colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+              # colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+              # colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+              # colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+              cols = listCol
 
-            drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [colR, colG, colB, fade] * (np2 + 5)
+            drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [*cols, fade] * (np2 + 5)
 
           drawList.pids[pp+3:pp+8] = [_isInPlane, _isInFlankingPlane, _isSelected,
                                       indexPtr, len(drawList.indices)]
@@ -6885,9 +6892,9 @@ class GLRegion(QtWidgets.QWidget):
       self._object.limits = [(min(values), max(values))]
 
   def setValue(self, val):
-    # use the region to simulate an infinite line
+    # use the region to simulate an infinite line - calls setter above
     self.values = (val, val)
-    self.parent.update()
+    # self.parent.update()
 
   @property
   def axisCode(self):

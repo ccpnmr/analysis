@@ -95,7 +95,7 @@ class GuiWindow():
     QtWidgets.QShortcut(QtGui.QKeySequence("z, i"), self, self.zoomIn, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("z, o"), self, self.zoomOut, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("p, l"), self, self.cyclePeakLabelling, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("c, s"), self, self.cyclePeakSymbols, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("p, s"), self, self.cyclePeakSymbols, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("Space, Space"), self, self.toggleConsole, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
 

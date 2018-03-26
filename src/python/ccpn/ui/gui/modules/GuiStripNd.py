@@ -227,7 +227,7 @@ class GuiStripNd(GuiStrip):
       (tType.item, 'Grid',                  'gridAction',             '',                         'GS',     True,   True,       self.spectrumDisplay.toggleGrid,                      'gridAction'),
       (tType.item, 'Share Y Axis',          '',                       '',                         'TA',     True,   True,       self._toggleLastAxisOnly, 'lastAxisOnlyCheckBox'),
       (tType.actn, 'Cycle Peak Labels', 'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', 'PL', True,  True,      self.cyclePeakLabelling, ''),
-      (tType.actn, 'Cycle Peak Symbols', 'icons/peak-symbols', 'Cycle Peak Symbols',              'CS',     True,   True,       self.cyclePeakSymbols, ''),
+      (tType.actn, 'Cycle Peak Symbols', 'icons/peak-symbols', 'Cycle Peak Symbols',              'PS',     True,   True,       self.cyclePeakSymbols, ''),
 
       (tType.sep, None, None, None, None, None, None, None, None),
       (tType.actn, 'Contours...',           'icons/contours',      'Contour Settings',            '',       True,   True,       self.spectrumDisplay.adjustContours, ''),
@@ -247,7 +247,7 @@ class GuiStripNd(GuiStrip):
 
       (tType.sep, None, None, None, None, None, None, None, None),
       (tType.actn, 'Mark Positions',          None,                  'Mark positions of all axes', 'MK', True, False,        self.createMark, ''),
-      (tType.actn, 'Clear Marks',             None,                     'Clear all mark',          'MC', True, False,        self.createMark, ''),
+      (tType.actn, 'Clear Marks',             None,                     'Clear all mark',          'MC', True, False,        self.clearMarks, ''),
 
       (tType.sep, None, None, None, None, None, None, None, None),
       (tType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', 'PT', True, True,   self.showExportDialog, ''),

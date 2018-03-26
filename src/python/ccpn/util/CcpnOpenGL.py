@@ -6054,6 +6054,8 @@ void main()
 
     # p0 = [p0[ii] + deltaPosition[ii] for ii in range(len(p0))]
     peak.position = p0
+    if self.is1D:
+      peak.height = peak.height+deltaPosition[1]
 
   def _processIntegralNotifier(self, data):
     triggers = data[Notifier.TRIGGER]

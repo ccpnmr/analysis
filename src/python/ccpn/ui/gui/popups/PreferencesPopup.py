@@ -40,12 +40,13 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.util.Logging import getLogger
 
 # FIXME separate pure GUI to project/preferences properites
@@ -175,14 +176,16 @@ class PreferencesPopup(CcpnDialog):
     self.autoBackupFrequencyData.setText('%.0f' % self.preferences.general.autoBackupFrequency)
     self.autoBackupFrequencyData.editingFinished.connect(self._setAutoBackupFrequency)
 
-
     row += 1
-    self.dataPathLabel = Label(parent, "Data Path", grid=(row, 0),)
-    self.dataPathText = LineEdit(parent, grid=(row, 1), hAlign='l')
-    self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
-    self.dataPathText.editingFinished.connect(self._setDataPath)
-    self.dataPathText.setText(self.preferences.general.dataPath)
-    self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
+    HLine(parent, grid=(row,0), gridSpan=(1,3), colour=getColours()[DIVIDER], height=15)
+
+    # row += 1
+    # self.dataPathLabel = Label(parent, "Data Path", grid=(row, 0),)
+    # self.dataPathText = LineEdit(parent, grid=(row, 1), hAlign='l')
+    # self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
+    # self.dataPathText.editingFinished.connect(self._setDataPath)
+    # self.dataPathText.setText(self.preferences.general.dataPath)
+    # self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
 
     row += 1
     self.auxiliaryFilesLabel = Label(parent, text="Auxiliary Files Path ", grid=(row, 0))
@@ -222,20 +225,20 @@ class PreferencesPopup(CcpnDialog):
     self.pipesPathData.setDisabled(True)
     self.pipesPathDataButton.setDisabled(True)
 
-    row += 1
-    self.annotationsLabel = Label(parent, text="Annotations", grid=(row, 0))
-    try:
-      annType = self.preferences.general.annotationType
-    except:
-      annType = 0
-      self.preferences.general.annotationType = annType
-    self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
-                                                       selectedInd=annType,
-                                                       callback=self._setAnnotations,
-                                                       direction='vertical',
-                                                       grid=(row, 1), hAlign='l',
-                                                       tipTexts=None,
-                                                       )
+    # row += 1
+    # self.annotationsLabel = Label(parent, text="Annotations", grid=(row, 0))
+    # try:
+    #   annType = self.preferences.general.annotationType
+    # except:
+    #   annType = 0
+    #   self.preferences.general.annotationType = annType
+    # self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
+    #                                                    selectedInd=annType,
+    #                                                    callback=self._setAnnotations,
+    #                                                    direction='horizontal',
+    #                                                    grid=(row, 1), hAlign='l',
+    #                                                    tipTexts=None,
+    #                                                    )
 
     # row += 1
     Spacer(parent, row, 1
@@ -246,18 +249,25 @@ class PreferencesPopup(CcpnDialog):
     ''' Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live'''
 
     row = 0
+    self.dataPathLabel = Label(parent, "Data Path", grid=(row, 0),)
+    self.dataPathText = LineEdit(parent, grid=(row, 1), hAlign='l')
+    self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
+    self.dataPathText.editingFinished.connect(self._setDataPath)
+    self.dataPathText.setText(self.preferences.general.dataPath)
+    self.dataPathButton = Button(parent, grid=(row, 2), callback=self._getDataPath, icon='icons/directory', hPolicy='fixed')
 
+    row += 1
     self.regionPaddingLabel = Label(parent, text="Spectral Padding (%)", grid=(row, 0))
-    self.regionPaddingData = LineEdit(parent, grid=(row, 1), hAlign='l')
+    self.regionPaddingData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
     self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
-    self.regionPaddingData.setText('%.0f' % (100 * self.preferences.general.stripRegionPadding))
+    self.regionPaddingData.setValue(float('%.1f' % (100 * self.preferences.general.stripRegionPadding)))
     self.regionPaddingData.editingFinished.connect(self._setRegionPadding)
 
     row += 1
     self.dropFactorLabel = Label(parent, text="Peak Picking Drop (%)", grid=(row, 0))
-    self.dropFactorData = LineEdit(parent, grid=(row, 1), hAlign='l')
+    self.dropFactorData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
     self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
-    self.dropFactorData.setText('%.1f' % (100*self.preferences.general.peakDropFactor))
+    self.dropFactorData.setValue(float('%.1f' % (100*self.preferences.general.peakDropFactor)))
     self.dropFactorData.editingFinished.connect(self._setDropFactor)
 
     row += 1
@@ -269,6 +279,29 @@ class PreferencesPopup(CcpnDialog):
     self.spectrumBorderLabel = Label(parent, text="Show Spectrum Border: ", grid=(row, 0))
     self.spectrumBorderBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showSpectrumBorder)
     self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'showSpectrumBorder'))
+
+    row += 1
+    self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
+    self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
+    self.showGridBox.toggled.connect(partial(self._toggleGeneralOptions, 'showGrid'))
+
+    row += 1
+    self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
+    self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lastAxisOnly)
+    self.showLastAxisOnlyBox.toggled.connect(partial(self._toggleGeneralOptions, 'lastAxisOnly'))
+
+    row += 1
+    self.matchAxisCodeLabel = Label(parent, text="Match Axis Codes", grid=(row, 0))
+    matchAxisCode = self.preferences.general.matchAxisCode
+    self.matchAxisCode = RadioButtons(parent, texts=['Atom Type', 'Full Axis Code'],
+                                    selectedInd=matchAxisCode,
+                                    callback=self._setMatchAxisCode,
+                                    direction='h',
+                                    grid=(row, 1), hAlign='l',
+                                    tipTexts=None,
+                                    )
+    row += 1
+    HLine(parent, grid=(row,0), gridSpan=(1,3), colour=getColours()[DIVIDER], height=15)
 
     # row += 1
     #self.showDoubleCursorLabel = Label(parent, text="Show Double Cursor: ", grid=(row, 0))
@@ -282,41 +315,41 @@ class PreferencesPopup(CcpnDialog):
     #        , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
     #        , grid=(row , 0), gridSpan=(row, 1))
 
-    row += 1
-    self.peakSymbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))
-    peakSymbol = self.preferences.general.peakSymbolType
-    self.peakSymbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
-                                    selectedInd=peakSymbol,
-                                    callback=self._setPeakSymbol,
-                                    direction='v',
-                                    grid=(row, 1), hAlign='l',
-                                    tipTexts=None,
-                                    )
-    row += 1
-    self.peakSymbolSizeLabel = Label(parent, text="Peak Symbol Size (ppm)", grid=(row, 0))
-    self.peakSymbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01
-                                            , min=0.01, max=1.0, grid=(row, 1), hAlign='l')
-    self.peakSymbolSizeData.setMinimumWidth(LineEditsMinimumWidth)
-    symbolSize = self.preferences.general.peakSymbolSize
-    self.peakSymbolSizeData.setValue(float('%.3f' % symbolSize))
-    self.peakSymbolSizeData.editingFinished.connect(self._setPeakSymbolSize)
-
-    row += 1
-    self.peakSymbolThicknessLabel = Label(parent, text="Peak Symbol Thickness (point)", grid=(row, 0))
-    self.peakSymbolThicknessData = Spinbox(parent, step=1
-                                            , min=1, max=20, grid=(row, 1), hAlign='l')
-    self.peakSymbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
-    symbolThickness = self.preferences.general.peakSymbolThickness
-    self.peakSymbolThicknessData.setValue(int(symbolThickness))
-    self.peakSymbolThicknessData.editingFinished.connect(self._setPeakSymbolThickness)
+    # row += 1
+    # self.peakSymbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))
+    # peakSymbol = self.preferences.general.peakSymbolType
+    # self.peakSymbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
+    #                                 selectedInd=peakSymbol,
+    #                                 callback=self._setPeakSymbol,
+    #                                 direction='v',
+    #                                 grid=(row, 1), hAlign='l',
+    #                                 tipTexts=None,
+    #                                 )
+    # row += 1
+    # self.peakSymbolSizeLabel = Label(parent, text="Peak Symbol Size (ppm)", grid=(row, 0))
+    # self.peakSymbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01
+    #                                         , min=0.01, max=1.0, grid=(row, 1), hAlign='l')
+    # self.peakSymbolSizeData.setMinimumWidth(LineEditsMinimumWidth)
+    # symbolSize = self.preferences.general.peakSymbolSize
+    # self.peakSymbolSizeData.setValue(float('%.3f' % symbolSize))
+    # self.peakSymbolSizeData.editingFinished.connect(self._setPeakSymbolSize)
+    #
+    # row += 1
+    # self.peakSymbolThicknessLabel = Label(parent, text="Peak Symbol Thickness (point)", grid=(row, 0))
+    # self.peakSymbolThicknessData = Spinbox(parent, step=1
+    #                                         , min=1, max=20, grid=(row, 1), hAlign='l')
+    # self.peakSymbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+    # symbolThickness = self.preferences.general.peakSymbolThickness
+    # self.peakSymbolThicknessData.setValue(int(symbolThickness))
+    # self.peakSymbolThicknessData.editingFinished.connect(self._setPeakSymbolThickness)
 
     row += 1
     self.zoomCentreLabel = Label(parent, text="Zoom Centre", grid=(row, 0))
     zoomCentre = self.preferences.general.zoomCentreType
-    self.zoomCentre = RadioButtons(parent, texts=['Centre on Mouse', 'Centre on Screen'],
+    self.zoomCentre = RadioButtons(parent, texts=['Mouse', 'Screen'],
                                     selectedInd=zoomCentre,
                                     callback=self._setZoomCentre,
-                                    direction='v',
+                                    direction='h',
                                     grid=(row, 1), hAlign='l',
                                     tipTexts=None,
                                     )
@@ -340,26 +373,27 @@ class PreferencesPopup(CcpnDialog):
     self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
     self.stripWidthZoomPercentData.editingFinished.connect(self._setStripWidthZoomPercent)
 
-    row += 1
-    self.matchAxisCodeLabel = Label(parent, text="Match Axis Codes", grid=(row, 0))
-    matchAxisCode = self.preferences.general.matchAxisCode
-    self.matchAxisCode = RadioButtons(parent, texts=['Atom Type', 'Full Axis Code'],
-                                    selectedInd=matchAxisCode,
-                                    callback=self._setMatchAxisCode,
-                                    direction='v',
-                                    grid=(row, 1), hAlign='l',
-                                    tipTexts=None,
-                                    )
+    # row += 1
+    # self.matchAxisCodeLabel = Label(parent, text="Match Axis Codes", grid=(row, 0))
+    # matchAxisCode = self.preferences.general.matchAxisCode
+    # self.matchAxisCode = RadioButtons(parent, texts=['Atom Type', 'Full Axis Code'],
+    #                                 selectedInd=matchAxisCode,
+    #                                 callback=self._setMatchAxisCode,
+    #                                 direction='v',
+    #                                 grid=(row, 1), hAlign='l',
+    #                                 tipTexts=None,
+    #                                 )
 
-    row += 1
-    self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
-    self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
-    self.showGridBox.toggled.connect(partial(self._toggleGeneralOptions, 'showGrid'))
+    # row += 1
+    # self.showGridLabel = Label(parent, text="Show Grids: ", grid=(row, 0))
+    # self.showGridBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.showGrid)
+    # self.showGridBox.toggled.connect(partial(self._toggleGeneralOptions, 'showGrid'))
+    #
+    # row += 1
+    # self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
+    # self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lastAxisOnly)
+    # self.showLastAxisOnlyBox.toggled.connect(partial(self._toggleGeneralOptions, 'lastAxisOnly'))
 
-    row += 1
-    self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis: ", grid=(row, 0))
-    self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.lastAxisOnly)
-    self.showLastAxisOnlyBox.toggled.connect(partial(self._toggleGeneralOptions, 'lastAxisOnly'))
 
     row += 1
     self.lockAspectRatioLabel = Label(parent, text="Aspect Ratios: ", grid=(row, 0))
@@ -377,6 +411,51 @@ class PreferencesPopup(CcpnDialog):
       self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
       self.aspectData[aspect].editingFinished.connect(partial(self._setAspect, aspect))
       row += 1
+
+    row += 1
+    HLine(parent, grid=(row,0), gridSpan=(1,3), colour=getColours()[DIVIDER], height=15)
+
+    row += 1
+    self.annotationsLabel = Label(parent, text="Peak Annotations", grid=(row, 0))
+    try:
+      annType = self.preferences.general.annotationType
+    except:
+      annType = 0
+      self.preferences.general.annotationType = annType
+    self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid'],
+                                                       selectedInd=annType,
+                                                       callback=self._setAnnotations,
+                                                       direction='horizontal',
+                                                       grid=(row, 1), hAlign='l',
+                                                       tipTexts=None,
+                                                       )
+    row += 1
+    self.peakSymbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))
+    peakSymbol = self.preferences.general.peakSymbolType
+    self.peakSymbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
+                                    selectedInd=peakSymbol,
+                                    callback=self._setPeakSymbol,
+                                    direction='h',
+                                    grid=(row, 1), hAlign='l',
+                                    tipTexts=None,
+                                    )
+    row += 1
+    self.peakSymbolSizeLabel = Label(parent, text="Peak Symbol Size (ppm)", grid=(row, 0))
+    self.peakSymbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01
+                                            , min=0.01, max=1.0, grid=(row, 1), hAlign='l')
+    self.peakSymbolSizeData.setMinimumWidth(LineEditsMinimumWidth)
+    symbolSize = self.preferences.general.peakSymbolSize
+    self.peakSymbolSizeData.setValue(float('%.3f' % symbolSize))
+    self.peakSymbolSizeData.editingFinished.connect(self._setPeakSymbolSize)
+
+    row += 1
+    self.peakSymbolThicknessLabel = Label(parent, text="Peak Symbol Thickness (point)", grid=(row, 0))
+    self.peakSymbolThicknessData = Spinbox(parent, step=1
+                                            , min=1, max=20, grid=(row, 1), hAlign='l')
+    self.peakSymbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+    symbolThickness = self.preferences.general.peakSymbolThickness
+    self.peakSymbolThicknessData.setValue(int(symbolThickness))
+    self.peakSymbolThicknessData.editingFinished.connect(self._setPeakSymbolThickness)
 
   def _setExternalProgramsTabWidgets(self, parent):
     """

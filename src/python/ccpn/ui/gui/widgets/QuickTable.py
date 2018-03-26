@@ -237,7 +237,8 @@ QuickTable::item::selected {
     self._rowNotifier = None
     self._cellNotifiers = []
     self._selectCurrentNotifier = None
-    self.droppedNotifier = None
+    self._searchNotifier = None
+    self._droppedNotifier = None
     self._icons = [self.ICON_FILE]
     self._stretchLastSection = stretchLastSection
 
@@ -247,7 +248,7 @@ QuickTable::item::selected {
     self._parent.layout().setVerticalSpacing(0)
 
     self.setDefaultTableData()
-    # self.droppedNotifier = GuiNotifier(self,
+    # self._droppedNotifier = GuiNotifier(self,
     #                                    [GuiNotifier.DROPEVENT], [DropBase.PIDS],
     #                                    self._processDroppedItems)
   #
@@ -593,7 +594,7 @@ QuickTable::item::selected {
 
   def _raiseHeaderContextMenu(self, pos):
     if self._enableSearch and self.searchWidget is None:
-      if not attachSearchWidget(self):
+      if not attachSearchWidget(self._parent, self):
         getLogger().warning('Search option not available')
 
     pos = QtCore.QPoint(pos.x(), pos.y()+10) #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
@@ -1242,6 +1243,14 @@ QuickTable::item::selected {
                       , self._tableData['tableSelection']
                       , data['trigger'], data['object'])
 
+  def _searchCallBack(self, data):
+    """
+    Callback to populate the search bar with the selected item
+    """
+    value = getattr(data[CallBack.OBJECT], self._tableData['searchCallBack']._pluralLinkName, None)
+    if value and self.searchWidget and self.searchWidget.isVisible():
+      self.searchWidget.selectSearchOption(self, self._tableData['searchCallBack'], value[0].sequenceCode)
+
   def _selectCurrentCallBack(self, data):
     """
     Callback to handle selection on the table, linked to user defined function
@@ -1249,11 +1258,12 @@ QuickTable::item::selected {
     """
     self._tableData['selectCurrentCallBack'](data)
 
-  def setTableNotifiers(self, tableClass=None, rowClass=None, cellClassNames=None
-                         , tableName=None, rowName=None, className=None
-                         , changeFunc=None, updateFunc=None
-                         , tableSelection=None, pullDownWidget=None
-                         , callBackClass=None, selectCurrentCallBack=None):
+  def setTableNotifiers(self, tableClass=None, rowClass=None, cellClassNames=None,
+                         tableName=None, rowName=None, className=None,
+                         changeFunc=None, updateFunc=None,
+                         tableSelection=None, pullDownWidget=None,
+                         callBackClass=None, selectCurrentCallBack=None,
+                         searchCallBack=None):
     """
     Set a Notifier to call when an object is created/deleted/renamed/changed
     rename calls on name
@@ -1274,66 +1284,76 @@ QuickTable::item::selected {
     self.clearTableNotifiers()
 
     if tableClass:
-      self._tableNotifier = Notifier(self.project
-                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                      , tableClass.__name__
-                                      , self._updateTableCallback
-                                      , onceOnly=True)
+      self._tableNotifier = Notifier(self.project,
+                                     [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                     tableClass.__name__,
+                                     self._updateTableCallback,
+                                     onceOnly=True)
     if rowClass:
 
       # TODO:ED check OnceOnly residue notifiers
       # 'i-1' residue spawns a rename but the 'i' residue only fires a change
-      self._rowNotifier = Notifier(self.project
-                                    , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
-                                    , rowClass.__name__
-                                    , self._updateRowCallback
-                                    , onceOnly=False)           # should be True, be doesn't work
+      self._rowNotifier = Notifier(self.project,
+                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
+                                   rowClass.__name__,
+                                   self._updateRowCallback,
+                                   onceOnly=False)           # should be True, be doesn't work
                                                                 # for 'i-1' nmrResidues
     if isinstance(cellClassNames, list):
       for cellClass in cellClassNames:
-        self._cellNotifiers.append(Notifier(self.project
-                                            , [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                            , cellClass[OBJECT_CLASS].__name__
-                                            , partial(self._updateCellCallback, cellClass[OBJECT_PARENT])
-                                            , onceOnly=False))
+        self._cellNotifiers.append(Notifier(self.project,
+                                            [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                            cellClass[OBJECT_CLASS].__name__,
+                                            partial(self._updateCellCallback, cellClass[OBJECT_PARENT]),
+                                            onceOnly=False))
     else:
       if cellClassNames:
-        self._cellNotifiers.append(Notifier(self.project
-                                            , [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                            , cellClassNames[OBJECT_CLASS].__name__
-                                            , partial(self._updateCellCallback, cellClassNames[OBJECT_PARENT])
-                                            , onceOnly=False))
+        self._cellNotifiers.append(Notifier(self.project,
+                                            [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                            cellClassNames[OBJECT_CLASS].__name__,
+                                            partial(self._updateCellCallback, cellClassNames[OBJECT_PARENT]),
+                                            onceOnly=False))
 
     if selectCurrentCallBack:
-      self._selectCurrentNotifier = Notifier(self.current
-                                             , [Notifier.CURRENT]
-                                             , callBackClass._pluralLinkName
-                                             , self._selectCurrentCallBack)
+      self._selectCurrentNotifier = Notifier(self.current,
+                                             [Notifier.CURRENT],
+                                             callBackClass._pluralLinkName,
+                                             self._selectCurrentCallBack)
 
-    self._tableData = {'updateFunc': updateFunc
-                        , 'changeFunc': changeFunc
-                        , 'tableSelection': tableSelection
-                        , 'pullDownWidget': pullDownWidget
-                        , 'tableClass': tableClass
-                        , 'rowClass': rowClass
-                        , 'cellClassNames': cellClassNames
-                        , 'tableName': tableName
-                        , 'className': className
-                        , 'classCallBack': callBackClass._pluralLinkName if callBackClass else None
-                        , 'selectCurrentCallBack': selectCurrentCallBack}
+    if searchCallBack:
+      self._searchNotifier = Notifier(self.current,
+                                       [Notifier.CURRENT],
+                                       searchCallBack._pluralLinkName,
+                                       self._searchCallBack)
+
+    self._tableData = {'updateFunc': updateFunc,
+                        'changeFunc': changeFunc,
+                        'tableSelection': tableSelection,
+                        'pullDownWidget': pullDownWidget,
+                        'tableClass': tableClass,
+                        'rowClass': rowClass,
+                        'cellClassNames': cellClassNames,
+                        'tableName': tableName,
+                        'className': className,
+                        'classCallBack': callBackClass._pluralLinkName if callBackClass else None,
+                        'selectCurrentCallBack': selectCurrentCallBack,
+                        'searchCallBack': searchCallBack
+                       }
 
   def setDefaultTableData(self):
-    self._tableData = {'updateFunc': None
-                        , 'changeFunc': None
-                        , 'tableSelection': None
-                        , 'pullDownWidget': None
-                        , 'tableClass': None
-                        , 'rowClass': None
-                        , 'cellClassNames': None
-                        , 'tableName': None
-                        , 'className': None
-                        , 'classCallBack': None
-                        , 'selectCurrentCallBack': None }
+    self._tableData = {'updateFunc': None,
+                       'changeFunc': None,
+                       'tableSelection': None,
+                       'pullDownWidget': None,
+                       'tableClass': None,
+                       'rowClass': None,
+                       'cellClassNames': None,
+                       'tableName': None,
+                       'className': None,
+                       'classCallBack': None,
+                       'selectCurrentCallBack': None,
+                       'searchCallBack': None
+                       }
 
   def clearTableNotifiers(self):
     """
@@ -1350,8 +1370,10 @@ QuickTable::item::selected {
     self._cellNotifiers = []
     if self._selectCurrentNotifier is not None:
       self._selectCurrentNotifier.unRegister()
-    if self.droppedNotifier is not None:
-      self.droppedNotifier.unRegister()
+    if self._droppedNotifier is not None:
+      self._droppedNotifier.unRegister()
+    if self._searchNotifier is not None:
+      self._searchNotifier.unRegister()
 
   # def dragEnterEvent(self, event):
   #   ccpnmrJsonData = 'ccpnmr-json'

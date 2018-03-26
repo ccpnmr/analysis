@@ -61,6 +61,7 @@ class QuickTableFilter(Frame):
   def __init__(self, table, parent=None, **kw):
     Frame.__init__(self, parent, setLayout=False, **kw)
     self.table = table
+    self.parent = parent
 
     labelColumn = Label(self,'Search in',)
     self.columnOptions = PulldownList(self,)
@@ -68,10 +69,14 @@ class QuickTableFilter(Frame):
     self.columnOptions.setMinimumWidth(40)
     self.searchLabel = Label(self,'Search for',)
     self.edit = LineEdit(self,)
-    self.searchButtons = ButtonList(self, texts=['Close','Reset','Search'], tipTexts=['Close Search','Restore Table','Search'],
-                                   callbacks=[self.hideSearch
-                                              , partial(self.restoreTable, self.table)
-                                              , partial(self.findOnTable, self.table)])
+    # self.searchButtons = ButtonList(self, texts=['Close','Reset','Search'], tipTexts=['Close Search','Restore Table','Search'],
+    #                                callbacks=[self.hideSearch
+    #                                           , partial(self.restoreTable, self.table)
+    #                                           , partial(self.findOnTable, self.table)])
+    self.searchButtons = ButtonList(self, texts=['Search','Reset','Close'], tipTexts=['Search','Restore Table','Close Search'],
+                                   callbacks=[partial(self.findOnTable, self.table),
+                                              partial(self.restoreTable, self.table),
+                                              self.hideSearch])
     self.searchButtons.buttons[1].setEnabled(False)
     self.searchButtons.setFixedHeight(30)
 
@@ -91,7 +96,7 @@ class QuickTableFilter(Frame):
     # texts = [c.heading for c in columns]
     # objectsRange = range(len(columns))
 
-    texts = self.table._dataFrameObject.headings
+    texts = self.table._dataFrameObject.userHeadings
     objectsRange = range(len(texts))
 
     self.columnOptions.clear()
@@ -147,7 +152,14 @@ class QuickTableFilter(Frame):
       self.restoreTable(table)
       MessageDialog.showWarning('Not found', '')
 
-def attachSearchWidget(table):
+  def selectSearchOption(self, sourceTable, columnObject, value):
+    try:
+      self.columnOptions.setCurrentText(columnObject.__name__)
+      self.edit.setText(value)
+    except Exception as es:
+      getLogger().debug('column not found in table')
+
+def attachSearchWidget(parent, table):
   """
   Attach the search widget to the bottom of the table widget
   """
@@ -170,7 +182,7 @@ def attachSearchWidget(table):
       if location is not None:
         if len(location)>0:
           row, column, rowSpan, columnSpan = location
-          table.searchWidget = QuickTableFilter(table=table, vAlign='b')
+          table.searchWidget = QuickTableFilter(parent=parent, table=table, vAlign='b')
           parentLayout.addWidget(table.searchWidget, row+1, column, 1, columnSpan)
           table.searchWidget.setFixedHeight(30)
           table.searchWidget.hide()

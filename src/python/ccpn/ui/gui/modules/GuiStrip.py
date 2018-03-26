@@ -560,14 +560,14 @@ class GuiStrip(Frame):
 
     # TODO:ED remember direction
     self._newPosition = phasingFrame.pivotEntry.get()
-    self._infiniteLine = self._testCcpnOpenGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')
+    self.pivotLine = self._testCcpnOpenGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')
 
-    if not self._infiniteLine:
+    if not self.pivotLine:
       getLogger().warning('no infiniteLine')
       return
 
     if self._newConsoleDirection == 0:
-      self._infiniteLine.orientation = ('v')
+      self.pivotLine.orientation = ('v')
 
       # TODO:ED don't need as menu will change
       # self.hTraceAction.setChecked(True)
@@ -578,7 +578,7 @@ class GuiStrip(Frame):
         self._testCcpnOpenGLWidget.updateHTrace = True
         self._testCcpnOpenGLWidget.updateVTrace = False
     else:
-      self._infiniteLine.orientation = ('h')
+      self.pivotLine.orientation = ('h')
       # self.hTraceAction.setChecked(False)
       # self.vTraceAction.setChecked(True)
       if not self.spectrumDisplay.is1D:
@@ -587,8 +587,8 @@ class GuiStrip(Frame):
         self._testCcpnOpenGLWidget.updateHTrace = False
         self._testCcpnOpenGLWidget.updateVTrace = True
 
-    self._infiniteLine.valuesChanged.connect(self._newPositionLineCallback)
-    self._infiniteLine.setValue(self._newPosition)
+    self.pivotLine.valuesChanged.connect(self._newPositionLineCallback)
+    self.pivotLine.setValue(self._newPosition)
     phasingFrame.pivotEntry.valueChanged.connect(self._newPositionPivotCallback)
 
     # make sure that all traces are clear
@@ -602,12 +602,12 @@ class GuiStrip(Frame):
   def _newPositionLineCallback(self):
     if not self.isDeleted:
       phasingFrame = self.spectrumDisplay.phasingFrame
-      self._newPosition = self._infiniteLine.values[0]
+      self._newPosition = self.pivotLine.values[0]
       phasingFrame.pivotEntry.setValue(self._newPosition)
 
   def _newPositionPivotCallback(self, value):
     self._newPosition = value
-    self._infiniteLine.setValue(value)
+    self.pivotLine.setValue(value)
 
   def turnOffPhasing(self):
     phasingFrame = self.spectrumDisplay.phasingFrame
@@ -626,8 +626,8 @@ class GuiStrip(Frame):
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
 
-    self._testCcpnOpenGLWidget.removeInfiniteLine(self._infiniteLine)
-    self._infiniteLine.valuesChanged.disconnect(self._newPositionLineCallback)
+    self._testCcpnOpenGLWidget.removeInfiniteLine(self.pivotLine)
+    self.pivotLine.valuesChanged.disconnect(self._newPositionLineCallback)
     phasingFrame.pivotEntry.valueChanged.disconnect(self._newPositionPivotCallback)
 
     if self.spectrumDisplay.is1D:
@@ -656,20 +656,20 @@ class GuiStrip(Frame):
     if direction == 0:
       self.hPhasingPivot.setVisible(True)
       self.vPhasingPivot.setVisible(False)
-      # self._infiniteLine.orientation = ('v')
+      # self.pivotLine.orientation = ('v')
     else:
       self.hPhasingPivot.setVisible(False)
       self.vPhasingPivot.setVisible(True)
-      # self._infiniteLine.orientation = ('h')
+      # self.pivotLine.orientation = ('h')
 
     if direction == 0:
-      self._infiniteLine.orientation = ('v')
+      self.pivotLine.orientation = ('v')
       self.hTraceAction.setChecked(True)
       self.vTraceAction.setChecked(False)
       self._testCcpnOpenGLWidget.updateHTrace = True
       self._testCcpnOpenGLWidget.updateVTrace = False
     else:
-      self._infiniteLine.orientation = ('h')
+      self.pivotLine.orientation = ('h')
       self.hTraceAction.setChecked(False)
       self.vTraceAction.setChecked(True)
       self._testCcpnOpenGLWidget.updateHTrace = False
@@ -696,18 +696,21 @@ class GuiStrip(Frame):
     # update the static traces from the phasing console
     # redraw should update the display
     try:
+      colour = getColours()[GUISTRIP_PIVOT]
+      self._testCcpnOpenGLWidget.setInfiniteLineColour(self.pivotLine, colour)
       self._testCcpnOpenGLWidget.rescaleStaticTraces()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
     return
 
-    # TODO:GEERTEN: Fix  (not yet picked-up!; why?)
+    # TODO:GEERTEN: Fix  (not yet picked-up!; why? - ED: old code, return statement above)
     colour = getColours()[GUISTRIP_PIVOT]
     self.hPhasingPivot.setPen({'color': colour})
     self.vPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:
+      spectrumView.setPivotColour(colour)
       spectrumView._updatePhasing()
-
+      
   def _updateXRegion(self, viewBox):
     # this is called when the viewBox is changed on the screen via the mouse
     # this code is complicated because need to keep viewBox region and axis region in sync

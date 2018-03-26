@@ -22,12 +22,11 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-
-
 import sys
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.util.Colour import hexToRgb
 
 class HLine(Widget, Base):
   def __init__(self, parent=None, style='SolidLine', colour=QtCore.Qt.black, height=10, **kwds):
@@ -63,11 +62,15 @@ class HLine(Widget, Base):
     self.drawLine(qp, self.style)
     qp.end()
 
-  def drawLine(self, qp, style=None, colour=None ,):
+  def drawLine(self, qp, style=None, colour=None):
 
     if style in self.styles:
       style = self.styles[style]
-      pen = QtGui.QPen(self.colour, 2, style)
+      try:
+        pen = QtGui.QPen(self.colour, 2, style)
+      except:
+        pen = QtGui.QPen(QtGui.QColor(*hexToRgb(self.colour)), 2, style)
+
       qp.setPen(pen)
       qp.drawLine(0, self.lineHeight, self.geometry().right(), self.lineHeight)
 

@@ -81,7 +81,7 @@ class Gui1dWidget(CcpnGLWidget):
   YAXISUSEEFORMAT = True
   INVERTXAXIS = True
   INVERTYAXIS = False
-  AXISLOCKEDBUTTON = False
+  AXISLOCKEDBUTTON = True
   is1D = True
   SPECTRUMPOSCOLOUR = 'sliceColour'
 

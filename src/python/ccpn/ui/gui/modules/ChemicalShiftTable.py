@@ -39,6 +39,7 @@ from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.lib.CallBack import CallBack
 from PyQt5 import QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
@@ -201,7 +202,9 @@ class ChemicalShiftTable(QuickTable):
   className = 'ChemicalShiftListTable'
   attributeName = 'chemicalShiftLists'
 
-  def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None, chemicalShiftList=None, **kwds):
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None,
+               actionCallback=None, selectionCallback=None,
+               chemicalShiftList=None, hiddenColumns=['Pid'], **kwds):
     """
     Initialise the widgets for the module.
     """
@@ -253,18 +256,18 @@ class ChemicalShiftTable(QuickTable):
     self._widget.setFixedHeight(30)
 
     # initialise the currently attached dataFrame
-    self._hiddenColumns = ['Pid']
+    self._hiddenColumns = hiddenColumns
     self.dataFrameObject = None
 
     # initialise the table
-    QuickTable.__init__(self, parent=parent
-                        , mainWindow=self.mainWindow
-                        , dataFrameObject=None
-                        , setLayout=True
-                        , autoResize=True
-                        , actionCallback=self._actionCallback
-                        , selectionCallback=self._selectionCallback
-                        , grid=(3, 0), gridSpan=(1, 6)
+    QuickTable.__init__(self, parent=parent,
+                        mainWindow=self.mainWindow,
+                        dataFrameObject=None,
+                        setLayout=True,
+                        autoResize=True,
+                        actionCallback=self._actionCallback,
+                        selectionCallback=self._selectionCallback,
+                        grid=(3, 0), gridSpan=(1, 6),
                         )
     # Notifier object to update the table if the nmrChain changes
     # self._chemicalShiftListNotifier = None
@@ -281,17 +284,18 @@ class ChemicalShiftTable(QuickTable):
     if chemicalShiftList is not None:
         self._selectChemicalShiftList(chemicalShiftList)
 
-    self.setTableNotifiers(tableClass=ChemicalShiftList
-                           , rowClass=ChemicalShift
-                           , cellClassNames=None
-                           , tableName='chemicalShiftList', rowName='chemicalShift'
-                           , changeFunc=self.displayTableForChemicalShift
-                           , className=self.attributeName
-                           , updateFunc=self._update
-                           , tableSelection='chemicalShiftList'
-                           , pullDownWidget=self.CScolumns
-                           , callBackClass=ChemicalShift
-                           , selectCurrentCallBack=None)
+    self.setTableNotifiers(tableClass=ChemicalShiftList,
+                           className=self.attributeName,
+                           tableSelection='chemicalShiftList',
+                           rowClass=ChemicalShift,
+                           cellClassNames=None,
+                           tableName='chemicalShiftList', rowName='chemicalShift',
+                           changeFunc=self.displayTableForChemicalShift,
+                           updateFunc=self._update,
+                           pullDownWidget=self.CScolumns,
+                           callBackClass=ChemicalShift,
+                           selectCurrentCallBack=None,
+                           searchCallBack=NmrResidue)
 
 
     self.droppedNotifier = GuiNotifier(self,

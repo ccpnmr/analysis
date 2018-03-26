@@ -46,6 +46,7 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Spectrum import Spectrum
 
 from ccpn.ui.gui.guiSettings import getColours
+from ccpn.util.Colour import hexToRgb
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, \
                                     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
                                     CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE
@@ -647,6 +648,10 @@ class CcpnGLWidget(QOpenGLWidget):
     self.viewports._devicePixelRatio = self._devicePixelRatio
     self.update()
 
+  def _getValidAspectRatio(self, axisCode):
+    va = [ax for ax in self._preferences.aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
+    return self._preferences.aspectRatios[va[0]]
+
   def resizeGL(self, w, h):
     # must be set here to catch the change of screen
     # self._devicePixelRatio = QApplication.primaryScreen().devicePixelRatio()   #.instance().devicePixelRatio()
@@ -662,18 +667,21 @@ class CcpnGLWidget(QOpenGLWidget):
     self.h = h
 
     if self._axisLocked:
+      # ax0 = self._preferences.aspectRatios[self._axisCodes[0][0]]
+      # ax1 = self._preferences.aspectRatios[self._axisCodes[1][0]]
+      ax0 = self._getValidAspectRatio(self._axisCodes[0])
+      ax1 = self._getValidAspectRatio(self._axisCodes[1])
+
       if (self.h/self.w) > 1:
         mby = 0.5 * (self.axisT + self.axisB)
 
-        ratio = (self.h / self.w) * 0.5 * abs(self.axisL - self.axisR) * self._preferences.aspectRatios[
-          self._axisCodes[1][0]] / self._preferences.aspectRatios[self._axisCodes[0][0]]
+        ratio = (self.h / self.w) * 0.5 * abs(self.axisL - self.axisR) * ax1 / ax0
         self.axisB = mby + ratio * self.sign(self.axisB - mby)
         self.axisT = mby - ratio * self.sign(mby - self.axisT)
       else:
         mbx = 0.5 * (self.axisR + self.axisL)
 
-        ratio = (self.w / self.h) * 0.5 * abs(self.axisT - self.axisB) * self._preferences.aspectRatios[
-          self._axisCodes[0][0]] / self._preferences.aspectRatios[self._axisCodes[1][0]]
+        ratio = (self.w / self.h) * 0.5 * abs(self.axisT - self.axisB) * ax0 / ax1
         self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
         self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
 
@@ -824,7 +832,12 @@ class CcpnGLWidget(QOpenGLWidget):
       else:
         mby = 0.5 * (self.axisT + self.axisB)
 
-        ratio = (self.h/self.w) * 0.5 * abs(self.axisL-self.axisR) * self._preferences.aspectRatios[self._axisCodes[1][0]] / self._preferences.aspectRatios[self._axisCodes[0][0]]
+        # ax0 = self._preferences.aspectRatios[self._axisCodes[0][0]]
+        # ax1 = self._preferences.aspectRatios[self._axisCodes[1][0]]
+        ax0 = self._getValidAspectRatio(self._axisCodes[0])
+        ax1 = self._getValidAspectRatio(self._axisCodes[1])
+
+        ratio = (self.h/self.w) * 0.5 * abs(self.axisL-self.axisR) * ax1 / ax0
         self.axisB = mby + ratio * self.sign(self.axisB - mby)
         self.axisT = mby - ratio * self.sign(mby - self.axisT)
 
@@ -861,7 +874,12 @@ class CcpnGLWidget(QOpenGLWidget):
       else:
         mbx = 0.5 * (self.axisR + self.axisL)
 
-        ratio = (self.w/self.h) * 0.5 * abs(self.axisT-self.axisB) * self._preferences.aspectRatios[self._axisCodes[0][0]] / self._preferences.aspectRatios[self._axisCodes[1][0]]
+        # ax0 = self._preferences.aspectRatios[self._axisCodes[0][0]]
+        # ax1 = self._preferences.aspectRatios[self._axisCodes[1][0]]
+        ax0 = self._getValidAspectRatio(self._axisCodes[0])
+        ax1 = self._getValidAspectRatio(self._axisCodes[1])
+
+        ratio = (self.w/self.h) * 0.5 * abs(self.axisT-self.axisB) * ax0 / ax1
         self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
         self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
 
@@ -2150,7 +2168,7 @@ void main()
       peak = drawStr.object
 
       if peak and not peak.isDeleted:
-        _isSelected = False
+        # _isSelected = False
         _isInPlane = strip.peakIsInPlane(peak)
         if not _isInPlane:
           _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
@@ -2163,7 +2181,7 @@ void main()
 
           if self._isSelected(peak):
           # if hasattr(peak, '_isSelected') and peak._isSelected:
-            _isSelected = True
+          #   _isSelected = True
             colR, colG, colB = self.highlightColour[:3]
           else:
             # colour = pls.textColour
@@ -4160,6 +4178,14 @@ void main()
     GL.glEnd()
 
     GL.glDisable(GL.GL_LINE_STIPPLE)
+
+  def setInfiniteLineColour(self, infLine, colour):
+    for reg in self._infiniteLines:
+      if reg == infLine:
+        colR = int(colour.strip('# ')[0:2], 16) / 255.0
+        colG = int(colour.strip('# ')[2:4], 16) / 255.0
+        colB = int(colour.strip('# ')[4:6], 16) / 255.0
+        reg.brush = (colR, colG, colB, 1.0)
 
   def drawInfiniteLines(self):
     # draw the simulated infinite lines - using deprecated GL :)

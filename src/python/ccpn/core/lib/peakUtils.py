@@ -168,11 +168,14 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
           if mode == POSITIONS:
             delta = None
             for i, axisCode in enumerate(peak.axisCodes):
-              if axisCode:
-                weight = _getAtomWeight(axisCode, atomWeights)
-                if delta is None:
-                  delta = 0.0
-                delta += ((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2
+              if len(axisCode)>0:
+              # if any(s.startswith(axisCode) for s in nmrAtomsNames):
+                test = [s for s in nmrAtomsNames if s.startswith(axisCode[0])]
+                if len(test)>0:
+                  weight = _getAtomWeight(axisCode, atomWeights)
+                  if delta is None:
+                    delta = 0.0
+                  delta += ((peak.position[i] - list(peaks)[0].position[i]) * weight) ** 2
             if delta is not None:
               delta = delta ** 0.5
               deltas += [delta]

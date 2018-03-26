@@ -356,10 +356,11 @@ class ChemicalShiftsMapping(CcpnModule):
     '''
     neededNmrAtoms = self._availableNmrAtoms(source=self.nmrResidueTable._nmrChain)
     for selectedWidget in self.nmrAtomsCheckBoxes:
-      if selectedWidget.text() in neededNmrAtoms:
-        selectedWidget.show()
-      else:
-        selectedWidget.hide()
+      if not isinstance(selectedWidget, EditableCheckBox):
+        if selectedWidget.text() in neededNmrAtoms:
+          selectedWidget.show()
+        else:
+          selectedWidget.hide()
 
   def _updateNmrAtomsOption(self):
     otherAvailable = False
@@ -478,6 +479,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.scrollAreaWidgetContents.setContentsMargins(10, 10, 10, 15) #l,t,r,b
     # self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     self.scrollAreaWidgetContents.getLayout().setSpacing(10)
+    self._splitter.setStretchFactor(1,1) #makes the setting space fully visible when opening
 
     i = 0
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
@@ -505,7 +507,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.thresholdSpinBox = DoubleSpinbox(self.thresholdFrame, value=DefaultThreshould, step=0.01,
                                           decimals=3, callback=self.updateThresholdLineValue, tipText = 'Threshold value for deltas',
                                           grid=(0, 0))
-    self.thresholdButton = Button(self.thresholdFrame, text='Default', callback=self._setDefaultThreshold, tipText = 'Deafult: STD of deltas',
+    self.thresholdButton = Button(self.thresholdFrame, text='Default', callback=self._setDefaultThreshold, tipText = 'Default: STD of deltas',
                                           grid=(0, 1))
     self.thresholdButton.setMaximumWidth(50)
     i += 1

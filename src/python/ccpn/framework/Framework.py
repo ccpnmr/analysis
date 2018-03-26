@@ -617,7 +617,8 @@ class Framework:
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)
 
-
+    if len(self.project.strips)>0:
+      self.current.strip = self.project.strips[0]
 
   def getByPid(self, pid):
     return self.project.getByPid(pid)

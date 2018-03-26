@@ -288,6 +288,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                                    actionCallback= self._customActionCallBack, checkBoxCallback=self._checkBoxCallback,
                                                    setLayout=True, grid = (0, 0))
 
+
       self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
                                        icon=self.showStructureIcon,
                                        callback=self._showOnMolecularViewer,
@@ -305,6 +306,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.splitter.addWidget(self.nmrResidueTable)
       self.splitter.addWidget(self.barGraphWidget)
       self.mainWidget.getLayout().addWidget(self.splitter)
+      self.splitter.setStretchFactor(0, 1)
       self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
 
 

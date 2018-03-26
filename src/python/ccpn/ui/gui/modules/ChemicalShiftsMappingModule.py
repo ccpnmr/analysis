@@ -500,9 +500,14 @@ class ChemicalShiftsMapping(CcpnModule):
 
     i += 1
     self.thresholdLAbel = Label(self.scrollAreaWidgetContents, text='Threshold value', grid=(i, 0))
-    self.thresholdSpinBox = DoubleSpinbox(self.scrollAreaWidgetContents, value=DefaultThreshould, step=0.01,
-                                          decimals=3, callback=self.updateThresholdLineValue, tipText = 'Deafult: STD of deltas',
-                                          grid=(i, 1))
+    self.thresholdFrame = Frame(self.scrollAreaWidgetContents, setLayout=True, grid=(i, 1))
+
+    self.thresholdSpinBox = DoubleSpinbox(self.thresholdFrame, value=DefaultThreshould, step=0.01,
+                                          decimals=3, callback=self.updateThresholdLineValue, tipText = 'Threshold value for deltas',
+                                          grid=(0, 0))
+    self.thresholdButton = Button(self.thresholdFrame, text='Default', callback=self._setDefaultThreshold, tipText = 'Deafult: STD of deltas',
+                                          grid=(0, 1))
+    self.thresholdButton.setMaximumWidth(50)
     i += 1
     self.aboveThresholdColourLabel =  Label(self.scrollAreaWidgetContents,text='Above Threshold Colour', grid=(i,0))
     self.aboveThresholdColourBox = PulldownList(self.scrollAreaWidgetContents,  grid=(i, 1))
@@ -586,6 +591,10 @@ class ChemicalShiftsMapping(CcpnModule):
         i.show()
       for i in self.nmrAtomsLabels:
         i.show()
+
+  def _setDefaultThreshold(self):
+    self.updateModule(silent=True)
+    self._setThresholdLineBySTD()
 
   def _setThresholdLineBySTD(self):
     nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())
@@ -825,7 +834,12 @@ class ChemicalShiftsMapping(CcpnModule):
     except ValueError:
       return False
 
-  def updateModule(self):
+  def updateModule(self, silent=False):
+    '''
+
+    :param silent: if silent does not update the module!
+    :return: deltas
+    '''
 
     mode = self.modeButtons.getSelectedText()
     if not mode in MODES:
@@ -849,8 +863,10 @@ class ChemicalShiftsMapping(CcpnModule):
               nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
             else:
               nmrResidue._delta = None
-        self.updateTable(self.nmrResidueTable._nmrChain)
-        self.updateBarGraph()
+        if not silent:
+          self.updateTable(self.nmrResidueTable._nmrChain)
+          self.updateBarGraph()
+
 
 
   def _updatedPeakCount(self, nmrResidue, spectra):

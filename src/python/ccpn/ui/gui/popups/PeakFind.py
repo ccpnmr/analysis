@@ -41,19 +41,20 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
 
 
 class PeakFindPopup(CcpnDialog):
-# class PeakFindPopup(QtWidgets.QDialog, Base):
-  '''This popup works only for nDs. should be renamed '''
+  """
+  PeakFind for nD spectra
+  This popup works only for nDs. (Should be renamed?)
+  """
   def __init__(self, parent=None, mainWindow=None, **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='', **kw)
-    # super(PeakFindPopup, self).__init__(parent)
-    # Base.__init__(self, **kw)
+
     self.mainWindow = mainWindow
     self.project = self.mainWindow.project
     self.application =  self.mainWindow.application
     self.current = self.application.current
 
     if self.current.strip:
-      if not self.current.strip.spectra[0].peakLists:
+      if not self.current.strip.spectra[-1].peakLists:
         # ejb - if there is no peaklist then create a new one
         self.current.strip.spectra[0].newPeakList()
         showInfo(str(self.windowTitle()), "Current selected spectrum '%s' has no peakList:"
@@ -66,8 +67,9 @@ class PeakFindPopup(CcpnDialog):
       self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
                                      if peakList.spectrum.dimensionCount != 1])
       if self.current is not None and self.current.strip is not None and len(self.current.strip.spectra)>0:
-        self.peakListPulldown.select(self.current.strip.spectra[0].peakLists[0].pid)
+        self.peakListPulldown.select(self.current.strip.spectra[-1].peakLists[-1].pid)
       self.peakList = self.project.getByPid(self.peakListPulldown.currentText())
+
       self.checkBoxWidget = QtWidgets.QWidget()
       layout = QtWidgets.QGridLayout()
       self.checkBoxWidget.setLayout(layout)

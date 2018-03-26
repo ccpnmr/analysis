@@ -147,7 +147,7 @@ def _setupHandler(handler, level):
 
   #format = '%(levelname)s: %(module)s:%(funcName)s:%(asctime)s:%(message)s'
   #format = '%(levelname)-7s: %(module)s.%(funcName)s : %(message)s'
-  format = '%(levelname)-7s: %(message)s   (%(module)s.%(funcName)s)'
+  format = '%(levelname)-7s: %(message)-90s\n         (%(module)s.%(funcName)s:%(lineno)s)'
 
   formatter = logging.Formatter(format)
   handler.setFormatter(formatter)

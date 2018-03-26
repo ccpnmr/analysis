@@ -309,6 +309,7 @@ class NmrResidueTable(QuickTable):
 
     selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
 
+    # GWV: Not sure why spaces are needed, as _setWidgetHeigjt will do fine
     self.spacer = Spacer(self._widget, 5, 5
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
@@ -322,8 +323,7 @@ class NmrResidueTable(QuickTable):
     self.spacer = Spacer(self._widget, 5, 5
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2,0), gridSpan=(1,1))
-
-    self._widget.setFixedHeight(30)
+    self._setWidgetHeight(30)
 
     # initialise the currently attached dataFrame
     self._hiddenColumns = ['Pid']

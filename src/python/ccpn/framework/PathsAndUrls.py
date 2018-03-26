@@ -60,3 +60,6 @@ licensePath                     = os.path.join(ccpnCodePath, 'LICENSE.txt')
 # User settings
 userPreferencesDirectory        = os.path.expanduser('~/.ccpn')
 userPreferencesPath             = os.path.join(userPreferencesDirectory,'v3settings.json')
+
+# others
+CCPN_EXTENSION = '.ccpn'

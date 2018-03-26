@@ -116,7 +116,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsItem):
         # for peakListView in self.peakListViews:
         #   peakListView.setVisible(visible)
     except:
-      getLogger().warning('No visible peaklists')
+      getLogger().debug('No visible peaklists')  # gwv changed to debug to reduce output
 
     # repaint all displays - this is called for each spectrumView in the spectrumDisplay
     # all are attached to the same click

@@ -666,7 +666,7 @@ class CcpnModuleLabel(DockLabel):
     if showSettingsButton:
       self.settingsButton = QtWidgets.QToolButton(self)
       self.settingsButton.setIcon(Icon('icons/settings'))
-      self.settingsButton.setIconSize(QtCore.QSize(self.labelSize, self.labelSize))
+      self.settingsButton.setIconSize(QtCore.QSize(self.labelSize-5, self.labelSize-5)) # GWV hack to make it work
       # hardcoded because stylesheet appears not to work
       # colours = getColours()
       # styleSheet = """

@@ -133,8 +133,8 @@ class _VContainer(SplitContainer):
         scale = self.height() / tot
 
     self.setSizes([int(s*scale) for s in sizes])
-    self.setCollapsible(0, False)
-    self.setCollapsible(1, False)
+    self.setChildrenCollapsible(False)
+    self.setChildrenCollapsible(False)
 
 
 class _PipelineDropAreaOverlay(Widget):
@@ -282,7 +282,7 @@ class PipelineDropArea(DockArea):
 
   def makeContainer(self, typ):
     new = _VContainer(self)
-    new.setCollapsible(1,False)
+    new.setChildrenCollapsible(False)
     return new
 
   def apoptose(self):
@@ -623,19 +623,19 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
   def setExtraButtons(self):
     self.checkBox = QtWidgets.QCheckBox(self)
     self.checkBox.setMaximumHeight(15)
-    self.checkBox.setStyleSheet("""QCheckBox {background-color: transparent;}""")
+    # self.checkBox.setStyleSheet("""QCheckBox {background-color: transparent;}""")
 
 
     self.activeLabel = QtWidgets.QPushButton(self)
     self.activeLabel.setText('Active')
-    self.activeLabel.setStyleSheet("""QPushButton {background-color: transparent;
-                                                  color:black;
-                                                  border: 0px solid transparent}""")
+    # self.activeLabel.setStyleSheet("""QPushButton {background-color: transparent;
+    #                                               color:black;
+    #                                               border: 0px solid transparent}""")
 
     self.closeButton = QtWidgets.QPushButton(self)
-    self.closeButton.setStyleSheet("""QPushButton {background-color: transparent;
-                                                  color:black;
-                                                  border: 0px solid transparent}}""")
+    # self.closeButton.setStyleSheet("""QPushButton {background-color: transparent;
+    #                                               color:black;
+    #                                               border: 0px solid transparent}}""")
     self.closeButton.setIcon(QtWidgets.QApplication.style().standardIcon(QtGui.QStyle.SP_TitleBarCloseButton))
     self.closeButton.setMaximumHeight(15)
     self.activeLabel.clicked.connect(self.checkActiveBox)

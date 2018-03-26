@@ -238,8 +238,16 @@ class GLTargetButtonSpinBoxes(Widget, Base):
 
   def setValues(self, values):
 
-    self.linearRegions.lines[0].setPos(min(values))
-    self.linearRegions.lines[1].setPos(max(values))
+
+    self.pointBox1.set(min(values))
+    self.pointBox2.set(max(values))
+    self.values = [min(values), max(values)]
+    try:
+      if self.GLlinearRegions:
+        self.GLlinearRegions.values = [min(values), max(values)]
+    except Exception as e:
+      getLogger().warn(e)
+
 
 
   # def _deleteLater(self):

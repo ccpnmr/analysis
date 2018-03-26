@@ -185,7 +185,6 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
             deltas += [((delta1Atoms) ** 2) ** 0.5,]
 
           if mode == LINEWIDTHS:
-            print("LINEWIDTHS REFACTORING ")
             delta = None
             for i, axisCode in enumerate(peak.axisCodes):
               if axisCode:
@@ -197,10 +196,6 @@ def getNmrResidueDeltas(nmrResidue, nmrAtomsNames, spectra, mode=POSITIONS, atom
               delta = delta ** 0.5
               deltas += [delta]
 
-            # if len(peak.lineWidths) == 2:
-            # delta1Atoms = (peak.lineWidths[0] - list(peaks)[0].lineWidths[0])
-            # delta2Atoms = (peak.lineWidths[1] - list(peaks)[0].lineWidths[1])
-            # deltas += [((delta1Atoms * weight1) ** 2 + (delta2Atoms * weight2) ** 2) ** 0.5,]
         except Exception as e:
           message = 'Error for calculation mode: %s on %s and %s. ' % (mode, peak.pid, list(peaks)[0].pid) + str(e)
           getLogger().debug(message)

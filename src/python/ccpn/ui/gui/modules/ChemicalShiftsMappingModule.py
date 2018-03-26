@@ -55,6 +55,8 @@ from ccpn.util.Colour import spectrumColours, hexToRgb
 from ccpn.util.Scripting import getScriptsDirectoryPath
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
+from ccpn.core.NmrChain import NmrChain
+from ccpn.core.Project import Project
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
@@ -241,25 +243,32 @@ class ChemicalShiftsMapping(CcpnModule):
       if self.project:
         if len(self.project.nmrChains) > 0:
           self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
-          self._updateNmrAtomsOption()
+          # self._updateNmrAtomsOption()
+          # self._hideNonNecessaryNmrAtomsOption()
           self._setThresholdLineBySTD()
 
 
-  def _availableNmrAtoms(self, nmrAtomType = None):
+  def _availableNmrAtoms(self,source=None, nmrAtomType = None):
     '''
-    returns sorted nmrAtoms names present in nmrResidues of the selected  nmrChain.
+    source = ccpn object: Project or nmrChain, Default project.
+    returns sorted nmrAtoms names present in nmrResidues of the selected  source.
+    Used to init the option. The module starts with all nmr atoms available in the project and hides/shows only for the selected nmrChain in the pulldown.
+    This solutions is a bit slower on opening the first time but makes faster switching between nmrChains.
     '''
-    nmrAtoms = []
-    if self.nmrResidueTable._nmrChain:
-      for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
+    if source is None:
+      source = self.project
+
+    if source is not None and isinstance(source, (NmrChain, Project)):
+      nmrAtoms = []
+      for nmrResidue in source.nmrResidues:
         nmrAtoms += nmrResidue.nmrAtoms
-    if len(nmrAtoms)>0:
-      availableNmrAtoms =  list(set([nmrAtom.name for nmrAtom in nmrAtoms]))
-      allAvailable = sorted(availableNmrAtoms, key=CcpnSorting.stringSortKey)
-      if nmrAtomType:
-        return [na for na in allAvailable if na.startswith(nmrAtomType) ]
-      else:
-        return allAvailable
+      if len(nmrAtoms)>0:
+        availableNmrAtoms =  list(set([nmrAtom.name for nmrAtom in nmrAtoms]))
+        allAvailable = sorted(availableNmrAtoms, key=CcpnSorting.stringSortKey)
+        if nmrAtomType:
+          return [na for na in allAvailable if na.startswith(nmrAtomType) ]
+        else:
+          return allAvailable
     return []
 
   def _setWidgets(self):
@@ -277,6 +286,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
                                                    actionCallback= self._customActionCallBack, checkBoxCallback=self._checkBoxCallback,
                                                    setLayout=True, grid = (0, 0))
+
       self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
                                        icon=self.showStructureIcon,
                                        callback=self._showOnMolecularViewer,
@@ -288,7 +298,6 @@ class ChemicalShiftsMapping(CcpnModule):
                                  grid=(1, 2), hAlign='r' )
       self.updateButton1.setFixedHeight(25)
       # self.showOnViewerButton.setFixedWidth(150)
-
       self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
       self.barGraphWidget.customViewBox.selectAboveThreshold = self._selectNmrResiduesAboveThreshold
 
@@ -296,6 +305,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.splitter.addWidget(self.barGraphWidget)
       self.mainWidget.getLayout().addWidget(self.splitter)
       self.mainWidget.setContentsMargins(5, 5, 5, 5)  # l,t,r,b
+
 
   def _checkSpectraWithPeakListsOnly(self):
     for cb in self.spectraSelectionWidget.allSpectraCheckBoxes:
@@ -337,8 +347,18 @@ class ChemicalShiftsMapping(CcpnModule):
         self.sender().setText(name.replace(LESS,MORE))
         widget.hide()
   
-  
-  def _updateNmrAtomsOption(self ):
+  def _hideNonNecessaryNmrAtomsOption(self):
+    '''
+    :return: hides nmrAtoms not needed for the selected nmrChain.
+    '''
+    neededNmrAtoms = self._availableNmrAtoms(source=self.nmrResidueTable._nmrChain)
+    for selectedWidget in self.nmrAtomsCheckBoxes:
+      if selectedWidget.text() in neededNmrAtoms:
+        selectedWidget.show()
+      else:
+        selectedWidget.hide()
+
+  def _updateNmrAtomsOption(self):
     otherAvailable = False
     i = 0
     availableNmrAtoms = self._availableNmrAtoms()
@@ -470,6 +490,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.atomsLabel = Label(self.scrollAreaWidgetContents, text='Select Nmr Atoms', grid=(i, 0))
     self.nmrAtomsFrame = Frame(self.scrollAreaWidgetContents,setLayout=True, grid=(i, 1))
     self._updateNmrAtomsOption()
+    self._hideNonNecessaryNmrAtomsOption()
     i += 1
 
 
@@ -589,6 +610,7 @@ class ChemicalShiftsMapping(CcpnModule):
 
   def _displayTableForNmrChain(self, nmrChain):
     self.updateModule()
+    self._hideNonNecessaryNmrAtomsOption()
 
     # self.updateTable(nmrChain)
     # self.updateBarGraph()

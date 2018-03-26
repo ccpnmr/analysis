@@ -43,6 +43,11 @@ def hexToRgb(hex):
   lv = len(hex)
   return tuple(int(hex[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
+def hexToRgbRatio(hex):
+  hex = hex.lstrip('#')
+  lv = len(hex)
+  return tuple(float(int(hex[i:i + lv // 3], 16))/255 for i in range(0, lv, lv // 3))
+
 def hexToRgba(hex):
   hex = hex.lstrip('#')
   lv = len(hex)

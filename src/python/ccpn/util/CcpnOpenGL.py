@@ -46,7 +46,7 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Spectrum import Spectrum
 
 from ccpn.ui.gui.guiSettings import getColours
-from ccpn.util.Colour import hexToRgb
+from ccpn.util.Colour import hexToRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, \
                                     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
                                     CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE
@@ -2158,10 +2158,11 @@ void main()
 
     listColour = pls.textColour
     if listColour == '#':
-      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
-    listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
-    listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
-    listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
+    listCol = hexToRgbRatio(listColour)
+    # listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
+    # listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
+    # listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
 
     for drawStr in drawList.stringList:
 
@@ -2182,14 +2183,16 @@ void main()
           if self._isSelected(peak):
           # if hasattr(peak, '_isSelected') and peak._isSelected:
           #   _isSelected = True
-            colR, colG, colB = self.highlightColour[:3]
+          #   colR, colG, colB = self.highlightColour[:3]
+            drawStr.setColour((*self.highlightColour[:3], fade))
           else:
-            # colour = pls.textColour
-            colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-            colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-            colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+            # # colour = pls.textColour
+            # colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+            # colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+            # colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+            drawStr.setColour((*listCol, fade))
 
-          drawStr.setColour((colR, colG, colB, fade))
+          # drawStr.setColour((colR, colG, colB, fade))
 
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum

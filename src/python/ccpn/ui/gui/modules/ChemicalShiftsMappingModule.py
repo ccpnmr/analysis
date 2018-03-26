@@ -30,7 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:43 +0000 (Fri, April 07, 2017) $"
 
 from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+import random
 import os
 import numpy as np
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -515,7 +515,10 @@ class ChemicalShiftsMapping(CcpnModule):
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
       pix.fill(QtGui.QColor(item[0]))
       self.aboveThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-    self.aboveThresholdColourBox.select(list(spectrumColours.values())[-1])
+    try:
+      self.aboveThresholdColourBox.select('light green')
+    except:
+      self.aboveThresholdColourBox.select(random.choice(self.aboveThresholdColourBox.texts))
 
     i += 1
     self.belowThresholdColourLabel = Label(self.scrollAreaWidgetContents, text='Below Threshold Colour', grid=(i, 0))
@@ -524,7 +527,12 @@ class ChemicalShiftsMapping(CcpnModule):
       pix = QtGui.QPixmap(QtCore.QSize(20, 20))
       pix.fill(QtGui.QColor(item[0]))
       self.belowThresholdColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
-    self.belowThresholdColourBox.setCurrentIndex(0)
+    try:
+      self.belowThresholdColourBox.select('red')
+    except:
+      self.belowThresholdColourBox.select(random.choice(self.belowThresholdColourBox.texts))
+
+
 
     i += 1
     disappearedTipText = 'Mark NmrResidue bar with selected colour where assigned peaks have disapperead from the spectra'

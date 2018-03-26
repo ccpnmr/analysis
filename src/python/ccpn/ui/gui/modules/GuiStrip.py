@@ -1190,6 +1190,10 @@ class GuiStrip(Frame):
     else:
       getLogger().warning('No spectra displayed')
 
+  def _showAllSpectrumViews(self):
+    spectrumViews = self.spectrumViews
+    for sp in spectrumViews:
+      sp.setVisible(True)
 
 # Notifiers:
 def _updateDisplayedMarks(data):

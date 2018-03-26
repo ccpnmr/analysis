@@ -87,6 +87,7 @@ class GuiWindow():
     QtWidgets.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("Tab,Tab"), self, self.moveToNextSpectrum, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("Tab, q"), self, self.moveToPreviousSpectrum, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("Tab, a"), self, self.showAllSpectra, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("m, m"), self, self.switchMouseMode, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
@@ -419,6 +420,16 @@ class GuiWindow():
       self.current.strip._moveToPreviousSpectrumView()
     else:
       getLogger().warning('No current strip. Select a strip first.')
+
+  def showAllSpectra(self):
+    """
+    shows all spectra in the spectrum display.
+    """
+    if self.current.strip:
+      self.current.strip._showAllSpectrumViews()
+    else:
+      getLogger().warning('No current strip. Select a strip first.')
+
 
   def snapCurrentPeaksToExtremum(self, parent=None):
     """

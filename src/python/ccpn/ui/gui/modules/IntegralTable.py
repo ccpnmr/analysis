@@ -24,7 +24,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 
 
 from PyQt5 import QtGui, QtWidgets
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule, commonWidgets
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule, CommonWidgets
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
@@ -483,4 +483,4 @@ class IntegralTable(QuickTable):
     self.clearTableNotifiers()
     self._clearRegions()
 
-commonWidgets.update({IntegralTable.__name__: ('_getPullDownSelection', '_selectPullDown')})
+CommonWidgets.update({IntegralTable.__name__: ('_getPullDownSelection', '_selectPullDown')})

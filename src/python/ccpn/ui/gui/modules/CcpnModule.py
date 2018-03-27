@@ -65,7 +65,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, Chec
                                                 ColourSelectionWidget, LineEditPopup
 from ccpn.ui.gui.widgets.PulldownListsForObjects import _Pulldown
 
-commonWidgets =           {
+CommonWidgets =           {
                             CheckBox.__name__:                ('get',         'setChecked'   ),
                             ColourDialog.__name__:            ('getColor',    'setColor'     ),
                             DoubleSpinbox.__name__:           ('value',       'setValue'     ),
@@ -409,9 +409,9 @@ class CcpnModule(Dock, DropBase):
       if isinstance(varObj, _Pulldown):
         widgetsState[varName] = varObj.getText()
         continue
-      if varObj.__class__.__name__ in commonWidgets.keys():
+      if varObj.__class__.__name__ in CommonWidgets.keys():
         try:  # try because widgets can be dinamically deleted
-          widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
+          widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0])()
         except Exception as e:
           getLogger().debug('Error %s', e)
     self._kwargs = widgetsState
@@ -425,8 +425,8 @@ class CcpnModule(Dock, DropBase):
         if isinstance(widget, _Pulldown):
           widget.select(value)
           continue
-        if widget.__class__.__name__ in commonWidgets.keys():
-          setWidget = getattr(widget, commonWidgets[widget.__class__.__name__][1])
+        if widget.__class__.__name__ in CommonWidgets.keys():
+          setWidget = getattr(widget, CommonWidgets[widget.__class__.__name__][1])
           setWidget(value)
 
       except Exception as e:

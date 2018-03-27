@@ -59,7 +59,7 @@ from ccpn.ui.gui.widgets.SearchWidget import attachSearchWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-
+from ccpn.util.Common import makeIterableList
 from functools import partial
 from collections import OrderedDict
 
@@ -1178,21 +1178,6 @@ QuickTable::item::selected {
                       , self._tableData['tableSelection']
                       , data['trigger'], data['object'])
 
-  def _makeIterableList(self, inList):
-    """
-    Take a list of lists and concatenate into a single list.
-    Remove any None's from the list
-    :param inList:
-    :return single list:
-    """
-    if isinstance(inList, Iterable):
-      return [y for x in inList for y in self._makeIterableList(x) if inList]
-    else:
-      if inList:
-        return [inList]
-      else:
-        return []
-
   def _updateCellCallback(self, attr, data):
     """
     Notifier callback for updating the table
@@ -1204,7 +1189,7 @@ QuickTable::item::selected {
     cellData = data[Notifier.OBJECT]
     # row = getattr(cell, self._tableData['rowName'])
     # cells = getattr(cellData, attr)
-    cells = self._makeIterableList(cellData)
+    cells = makeIterableList(cellData)
 
     self._silenceCallback = True
 
@@ -1224,7 +1209,7 @@ QuickTable::item::selected {
         rowCallback = callbacktypes[OBJECT_PARENT]
 
       # concatenate the list - will always return a list
-      rowObjs = self._makeIterableList(rowObj)
+      rowObjs = makeIterableList(rowObj)
 
       # update the correct row by calling row handler
       for rowObj in rowObjs:

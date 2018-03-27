@@ -17,7 +17,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -27,7 +26,6 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -42,7 +40,7 @@ import random
 import sys
 import string
 import itertools
-
+from collections import Iterable
 from . import Constants
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -222,7 +220,6 @@ def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
   Inspired by numpy.isclose()"""
   return (abs(a - b) <= (absTolerance + relTolerance * abs(b)))
 
-
 def getTimeStamp():
   """Get iso-formtted timestamp"""
   return datetime.datetime.today().isoformat()
@@ -232,7 +229,6 @@ def getUuid(programName, timeStamp=None):
   if timeStamp is None:
     timeStamp = getTimeStamp()
   return '%s-%s-%s' % (programName, timeStamp, random.randint(0, maxRandomInt))
-
 
 def name2IsotopeCode(name=None):
   """Get standard isotope code matching atom name or axisCode string
@@ -571,6 +567,21 @@ def resetSerial(apiObject, newSerial):
       serialDict[downlink] = newSerial
     elif oldSerial == maxSerial:
       serialDict[downlink] = max(downdict)
+
+def makeIterableList(inList):
+  """
+  Take a list of lists and concatenate into a single list.
+  Remove any None's from the list
+  :param inList:
+  :return single list:
+  """
+  if isinstance(inList, Iterable):
+    return [y for x in inList for y in makeIterableList(x) if inList]
+  else:
+    if inList:
+      return [inList]
+    else:
+      return []
 
 
 class LocalFormatter(string.Formatter):

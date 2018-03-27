@@ -602,6 +602,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
       else:
         dy = -1.0 if self.INVERTYAXIS else -1.0       # dy = self.sign(self.axisT - self.axisB)
+        # FIXME Check for Nones
         fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
         dyAF = fy0 - fy1
         yScale = dy * dyAF / 1.0

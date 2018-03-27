@@ -33,7 +33,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import pandas as pd
 from ccpn.core.lib import CcpnSorting
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule, commonWidgets
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -717,3 +717,10 @@ class NmrResidueTable(QuickTable):
     self.clearTableNotifiers()
 
 
+  def _getPullDownSelection(self):
+    return self.ncWidget.getText()
+
+  def _selectPullDown(self, value):
+    self.ncWidget.select(value)
+
+commonWidgets.update({NmrResidueTable.__name__: ('_getPullDownSelection', '_selectPullDown')})

@@ -30,7 +30,7 @@ import numpy as np
 import pandas as pd
 from collections import OrderedDict
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule, commonWidgets
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
@@ -338,6 +338,13 @@ class QuickTableStructure(QuickTable):
                         , rowItem = None)
 
         self._selectionCallback(data)
+
+  def _getPullDownSelection(self):
+    return self.stWidget.getText()
+
+  def _selectPullDown(self, value):
+    self.stWidget.select(value)
+
 
   def _doubleClickCallback(self, itemSelection):
     model = self.selectionModel()
@@ -982,3 +989,4 @@ class StructureTable(QuickTableStructure):
   #   self.paintCount+=1
   #   return super(StructureTable, self).paintEvent(event)
 
+commonWidgets.update({StructureTable.__name__: ('_getPullDownSelection', '_selectPullDown')})

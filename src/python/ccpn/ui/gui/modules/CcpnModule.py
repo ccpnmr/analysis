@@ -406,13 +406,14 @@ class CcpnModule(Dock, DropBase):
     '''return  {"variableName":"value"}  of all gui Variables  '''
     widgetsState = {}
     for varName, varObj in vars(self).items():
-      if isinstance(type(varObj), _Pulldown):
-        print( varName, varObj.__class__)
+      if isinstance(varObj, _Pulldown):
+        widgetsState[varName] = varObj.getText()
+        continue
       if varObj.__class__.__name__ in commonWidgets.keys():
         try:  # try because widgets can be dinamically deleted
           widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
         except Exception as e:
-          print('Error', e)
+          getLogger().debug('Error %s', e)
     self._kwargs = widgetsState
     return widgetsState
 
@@ -421,9 +422,13 @@ class CcpnModule(Dock, DropBase):
     for variableName, value in widgetsState.items():
       try:
         widget = getattr(self, str(variableName))
+        if isinstance(widget, _Pulldown):
+          widget.select(value)
+          continue
         if widget.__class__.__name__ in commonWidgets.keys():
           setWidget = getattr(widget, commonWidgets[widget.__class__.__name__][1])
           setWidget(value)
+
       except Exception as e:
         getLogger().warn('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
 

@@ -858,6 +858,7 @@ QuickTable::item::selected {
         if self.getSelectedRows():
           self.scrollTo(self.model().index(self.getSelectedRows()[0], i),
                                         self.PositionAtCenter)
+          break
 
   def getSelectedRows(self):
 
@@ -1014,6 +1015,7 @@ QuickTable::item::selected {
       # self.blockSignals(False)
       self._silenceCallback = False
       self.setFocus(QtCore.Qt.OtherFocusReason)
+      self.scrollToSelectedIndex()
 
   def clearTable(self):
     "remove all objects from the table"

@@ -418,6 +418,12 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
     "Convenience: Return whether checkBox is checked"
     return self.checkBox.isChecked()
 
+  def get(self):
+    return self.checkBox.isChecked()
+
+  def set(self, checked):
+    self.checkBox.setChecked(checked)
+
 
 class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
   """
@@ -510,6 +516,13 @@ class SelectorWidget(QtWidgets.QWidget, Base):
     label1 = Label(self, text=label, grid=(0, 0))
     self.pulldownList = InputPulldown(self, grid=(0, 1), texts=data, callback=callback)
 
+  def getText(self):
+    "Convenience: Return selected text in Pulldown"
+    return self.pulldownList.currentText()
+
+  def select(self, item):
+    "Convenience: Set item in Pulldown; works with text or item"
+    return self.pulldownList.select(item)
 
 class InputPulldown(PulldownList):
 
@@ -554,6 +567,13 @@ class LineEditPopup(QtWidgets.QDialog, Base):
   def returnItem(self):
     self.accept()
 
+  def get(self):
+
+    return self.inputField.text()
+
+  def set(self, text=''):
+    #text = translator.translate(text)
+    self.inputField.setText(text)
 
 class ColourSelectionWidget(Widget):
 
@@ -582,6 +602,9 @@ class ColourSelectionWidget(Widget):
   def colour(self):
     return list(spectrumColours.keys())[self.pulldownList.currentIndex()]
 
+  def currentText(self):
+    self.pulldownList.currentText()
+
   def setColour(self, value):
     self.pulldownList.select(spectrumColours[value])
 
@@ -589,7 +612,7 @@ class ColourSelectionWidget(Widget):
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.BasePopup import BasePopup
-
+  from ccpn.ui.gui.popups.Dialog import CcpnDialog
   app = TestApplication()
 
   def callback1(obj):
@@ -598,7 +621,8 @@ if __name__ == '__main__':
   def callback2():
     print('callback2')
 
-  popup = BasePopup(title='Testing widgets')
+
+  popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
 
   # policyDict = dict(
   #   vAlign='top',
@@ -656,4 +680,7 @@ if __name__ == '__main__':
                                               showButtons=False, callback = callback1
                                               )
 
+  doubleSpinBox2.set(10.3)
+  popup.show()
+  popup.raise_()
   app.start()

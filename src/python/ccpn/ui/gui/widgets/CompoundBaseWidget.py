@@ -32,6 +32,30 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.core.lib.Notifiers import Notifier
 
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Slider import Slider
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
+
+commonWidgets = {
+                CheckBox.__name__     : ('get', 'setChecked'),
+                ColourDialog.__name__ : ('getColor', 'setColor'),
+                DoubleSpinbox.__name__: ('value', 'setValue'),
+                LineEdit.__name__     : ('get', 'setText'),
+                PulldownList.__name__ : ('currentText', 'set'),
+                RadioButton.__name__  : ('get', 'set'),
+                RadioButtons.__name__ : ('get', 'set'),
+                Slider.__name__       : ('get', 'setValue'),
+                Spinbox.__name__      : ('value', 'set'),
+                TextEditor.__name__   : ('get', 'setText'),
+                }
+
 
 NULL = object()
 

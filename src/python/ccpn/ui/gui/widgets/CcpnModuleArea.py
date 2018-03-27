@@ -315,7 +315,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
   def childState(self, obj):
 
     if isinstance(obj, Dock):
-      return ('dock', obj.name(), {})
+      return ('dock', obj.name(), obj.widgetsState)
     else:
       childs = []
       if obj is not None:
@@ -377,6 +377,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       # try:
       if contents in openedModulesNames:
         obj = docks[contents]
+        obj.restoreWidgetsState(**state)
         del docks[contents]
       else:
         obj = CcpnModule(self.mainWindow, contents)

@@ -57,7 +57,6 @@ from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
 from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.framework.lib.Pipeline import Pipeline
-from ccpn.ui.gui.widgets.LinearRegionsPlot import TargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 
 commonWidgets =           {
@@ -77,7 +76,9 @@ commonWidgets =           {
                             ExcludeRegions.__name__:        ('_getExcludedRegions', '_set' ),
 
 
-                            # ObjectTable.__name__:    ('getSelectedRows',         '_highLightObjs'), works only with objs
+
+
+  # ObjectTable.__name__:    ('getSelectedRows',         '_highLightObjs'), works only with objs
                           }
 
 

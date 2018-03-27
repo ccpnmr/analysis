@@ -26,27 +26,76 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+
+from ccpn.util import Logging
+from ccpn.util.Logging import getLogger
 from weakref import ref
 
-from ccpn.ui.gui.widgets.DropBase import DropBase
 from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from pyqtgraph.dockarea.DockArea import TempAreaWindow
 
-from ccpn.ui.gui.guiSettings import getColours, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND
+from PyQt5 import QtCore, QtGui, QtWidgets
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.RadioButton import RadioButton
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.Slider import Slider
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
+from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
+from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
-from ccpn.ui.gui.widgets.Widget import ScrollableWidget
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
-from ccpn.util import Logging
-from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget,\
+                                                DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
+                                                ColourSelectionWidget, LineEditPopup
+from ccpn.ui.gui.widgets.PulldownListsForObjects import _Pulldown
+
+commonWidgets =           {
+                            CheckBox.__name__:                ('get',         'setChecked'   ),
+                            ColourDialog.__name__:            ('getColor',    'setColor'     ),
+                            DoubleSpinbox.__name__:           ('value',       'setValue'     ),
+                            Label.__name__:                   ('get',         'setText'      ),
+                            LineEdit.__name__:                ('get',         'setText'      ),
+                            LineEditButtonDialog.__name__:    ('get',         'setText'      ),
+                            PulldownList.__name__:            ('currentText', 'set'          ),
+                            RadioButton.__name__:             ('get',         'set'          ),
+                            RadioButtons.__name__:            ('get',         'set'          ),
+                            Slider.__name__:                  ('get',         'setValue'     ),
+                            Spinbox.__name__:                 ('value',       'set'          ),
+                            TextEditor.__name__:              ('get',         'setText'      ),
+                            GLTargetButtonSpinBoxes.__name__: ('get',         'setValues'    ),
+                            ExcludeRegions.__name__:          ('_getExcludedRegions', '_set' ),
+
+                            PulldownListCompoundWidget.__name__: ('getText' ,        'select'), #PulldownList
+                            CheckBoxCompoundWidget.__name__:     ('get'     ,    'setChecked'),
+                            DoubleSpinBoxCompoundWidget.__name__:('getValue',      'setValue'), #D oubleSpinbox
+                            SelectorWidget.__name__:             ('getText',         'select'), #PulldownList
+                            InputPulldown.__name__:              ('currentText',        'set'), #PulldownList
+                            ColourSelectionWidget.__name__:      ('currentText',  'setColour'), #PulldownList
+                            LineEditPopup.__name__:              ('get',                'set'),
+
+
+
+
+                            # ADD TABLES
+                            # ADD Others
+                          }
+
 
 settingsWidgetPositions = {
                            'top':    {'settings':(0,0), 'widget':(1,0)},
@@ -344,6 +393,45 @@ class CcpnModule(Dock, DropBase):
     else:
       getLogger().warning('Cannot set attribute. Serial must be an Int type')
 
+  @property
+  def widgetsState(self):
+    return self._widgetsState
+
+  # @widgetsState.setter
+  # def widgetsState(self, value):
+  #   self._widgetsState = value
+
+  @widgetsState.getter
+  def widgetsState(self):
+    '''return  {"variableName":"value"}  of all gui Variables  '''
+    widgetsState = {}
+    for varName, varObj in vars(self).items():
+      if isinstance(type(varObj), _Pulldown):
+        print( varName, varObj.__class__)
+      if varObj.__class__.__name__ in commonWidgets.keys():
+        try:  # try because widgets can be dinamically deleted
+          widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
+        except Exception as e:
+          print('Error', e)
+    self._kwargs = widgetsState
+    return widgetsState
+
+  def restoreWidgetsState(self, **widgetsState):
+    'Restore the gui params. To Call it: _setParams(**{"variableName":"value"})  '
+    for variableName, value in widgetsState.items():
+      try:
+        widget = getattr(self, str(variableName))
+        if widget.__class__.__name__ in commonWidgets.keys():
+          setWidget = getattr(widget, commonWidgets[widget.__class__.__name__][1])
+          setWidget(value)
+      except Exception as e:
+        getLogger().warn('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+
+  def _updateWidgets(self):
+    '''
+    Override this method to update the widgets that are fed by input data
+    '''
+    pass
 
   def rename(self, newName):
     self.label.setText(newName)

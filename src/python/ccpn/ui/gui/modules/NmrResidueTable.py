@@ -145,12 +145,12 @@ class NmrResidueTableModule(CcpnModule):
                                             )
 
     # initialise the table
-    self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget
-                                           , mainWindow=self.mainWindow
-                                           , moduleParent=self
-                                           , setLayout=True
-                                           , actionCallback=self.navigateToNmrResidueCallBack
-                                           , grid=(0,0))
+    self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget,
+                                           mainWindow=self.mainWindow,
+                                           moduleParent=self,
+                                           setLayout=True,
+                                           actionCallback=self.navigateToNmrResidueCallBack,
+                                           grid=(0,0))
 
     if nmrChain is not None:
       self.selectNmrChain(nmrChain)
@@ -330,16 +330,16 @@ class NmrResidueTable(QuickTable):
     self.dataFrameObject = None
 
     # initialise the table
-    QuickTable.__init__(self, parent=parent
-                        , mainWindow=self.mainWindow
-                        , dataFrameObject=None
-                        , setLayout=True
-                        , autoResize=True,  multiSelect=multiSelect
-                        , actionCallback=actionCallback
-                        , selectionCallback=selectionCallback
-                        , checkBoxCallback = checkBoxCallback
-                        , grid = (3, 0), gridSpan = (1, 6)
-                        , enableDelete=True
+    QuickTable.__init__(self, parent=parent,
+                        mainWindow=self.mainWindow,
+                        dataFrameObject=None,
+                        setLayout=True,
+                        autoResize=True,  multiSelect=multiSelect,
+                        actionCallback=actionCallback,
+                        selectionCallback=selectionCallback,
+                        checkBoxCallback = checkBoxCallback,
+                        grid = (3, 0), gridSpan = (1, 6),
+                        enableDelete=True
                         )
 
     # Notifier object to update the table if the nmrChain changes

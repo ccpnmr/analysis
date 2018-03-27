@@ -75,53 +75,54 @@ class ChemicalShiftTableModule(CcpnModule):
 
     # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
     # backBoneAssignment modules
-    self._CSTwidget = Widget(self.settingsWidget, setLayout=True,
-                             grid=(0,0), vAlign='top', hAlign='left')
+    if self.includeSettingsWidget:
+      self._CSTwidget = Widget(self.settingsWidget, setLayout=True,
+                               grid=(0,0), vAlign='top', hAlign='left')
 
-    # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
-    # underpinning the addNotifier call do not allow for it either
-    colwidth = 140
-    self.displaysWidget = ListCompoundWidget(self._CSTwidget,
-                                             grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
-                                             vPolicy='minimal',
-                                             #minimumWidths=(colwidth, 0, 0),
-                                             fixedWidths=(colwidth, 2*colwidth, None),
-                                             orientation = 'left',
-                                             labelText='Display(s):',
-                                             tipText = 'SpectrumDisplay modules to respond to double-click',
-                                             texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
-                                             )
-    self.displaysWidget.setPreSelect(self._fillDisplayWidget)
-    self.displaysWidget.setFixedHeights((None, None, 40))
+      # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
+      # underpinning the addNotifier call do not allow for it either
+      colwidth = 140
+      self.displaysWidget = ListCompoundWidget(self._CSTwidget,
+                                               grid=(0,0), vAlign='top', stretch=(0,0), hAlign='left',
+                                               vPolicy='minimal',
+                                               #minimumWidths=(colwidth, 0, 0),
+                                               fixedWidths=(colwidth, 2*colwidth, None),
+                                               orientation = 'left',
+                                               labelText='Display(s):',
+                                               tipText = 'SpectrumDisplay modules to respond to double-click',
+                                               texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
+                                               )
+      self.displaysWidget.setPreSelect(self._fillDisplayWidget)
+      self.displaysWidget.setFixedHeights((None, None, 40))
 
-    self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                                             self._CSTwidget,
-                                             grid=(1,0), vAlign='top', stretch=(0,0), hAlign='left',
-                                             #minimumWidths=(colwidth, 0),
-                                             fixedWidths=(colwidth, 30),
-                                             orientation = 'left',
-                                             labelText = 'Show sequential strips:',
-                                             checked = False
-                                            )
+      self.sequentialStripsWidget = CheckBoxCompoundWidget(
+                                               self._CSTwidget,
+                                               grid=(1,0), vAlign='top', stretch=(0,0), hAlign='left',
+                                               #minimumWidths=(colwidth, 0),
+                                               fixedWidths=(colwidth, 30),
+                                               orientation = 'left',
+                                               labelText = 'Show sequential strips:',
+                                               checked = False
+                                              )
 
-    self.markPositionsWidget = CheckBoxCompoundWidget(
-                                             self._CSTwidget,
-                                             grid=(2,0), vAlign='top', stretch=(0,0), hAlign='left',
-                                             #minimumWidths=(colwidth, 0),
-                                             fixedWidths=(colwidth, 30),
-                                             orientation = 'left',
-                                             labelText = 'Mark positions:',
-                                             checked = True
-                                            )
-    self.autoClearMarksWidget = CheckBoxCompoundWidget(
-                                             self._CSTwidget,
-                                             grid=(3,0), vAlign='top', stretch=(0,0), hAlign='left',
-                                             #minimumWidths=(colwidth, 0),
-                                             fixedWidths=(colwidth, 30),
-                                             orientation = 'left',
-                                             labelText = 'Auto clear marks:',
-                                             checked = True
-                                            )
+      self.markPositionsWidget = CheckBoxCompoundWidget(
+                                               self._CSTwidget,
+                                               grid=(2,0), vAlign='top', stretch=(0,0), hAlign='left',
+                                               #minimumWidths=(colwidth, 0),
+                                               fixedWidths=(colwidth, 30),
+                                               orientation = 'left',
+                                               labelText = 'Mark positions:',
+                                               checked = True
+                                              )
+      self.autoClearMarksWidget = CheckBoxCompoundWidget(
+                                               self._CSTwidget,
+                                               grid=(3,0), vAlign='top', stretch=(0,0), hAlign='left',
+                                               #minimumWidths=(colwidth, 0),
+                                               fixedWidths=(colwidth, 30),
+                                               orientation = 'left',
+                                               labelText = 'Auto clear marks:',
+                                               checked = True
+                                              )
 
     # main window
     self.chemicalShiftTable = ChemicalShiftTable(parent=self.mainWidget
@@ -265,8 +266,8 @@ class ChemicalShiftTable(QuickTable):
                         dataFrameObject=None,
                         setLayout=True,
                         autoResize=True,
-                        actionCallback=self._actionCallback,
-                        selectionCallback=self._selectionCallback,
+                        actionCallback=actionCallback if actionCallback else self._actionCallback,
+                        selectionCallback=selectionCallback if selectionCallback else self._selectionCallback,
                         grid=(3, 0), gridSpan=(1, 6),
                         )
     # Notifier object to update the table if the nmrChain changes
@@ -296,7 +297,6 @@ class ChemicalShiftTable(QuickTable):
                            callBackClass=ChemicalShift,
                            selectCurrentCallBack=None,
                            searchCallBack=NmrResidue)
-
 
     self.droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.PIDS],

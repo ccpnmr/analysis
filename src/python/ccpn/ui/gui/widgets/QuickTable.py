@@ -1248,7 +1248,7 @@ QuickTable::item::selected {
     """
     value = getattr(data[CallBack.OBJECT], self._tableData['searchCallBack']._pluralLinkName, None)
     if value and self.searchWidget and self.searchWidget.isVisible():
-      self.searchWidget.selectSearchOption(self, self._tableData['searchCallBack'], value[0].sequenceCode)
+      self.searchWidget.selectSearchOption(self, self._tableData['searchCallBack'], value[0].id)
 
   def _selectCurrentCallBack(self, data):
     """

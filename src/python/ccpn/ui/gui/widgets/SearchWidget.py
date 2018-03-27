@@ -120,28 +120,34 @@ class QuickTableFilter(Frame):
     self.edit.clear()
     self.searchButtons.buttons[1].setEnabled(False)
 
-  def findOnTable(self, table):
+  def findOnTable(self, table, matchExactly=False, ignoreNotFound=False):
     if self.edit.text() == '' or None:
       self.restoreTable(table)
       return
 
     self.table = table
     text = self.edit.text()
+
+    if matchExactly:
+      func = lambda x:text == str(x)
+    else:
+      func = lambda x:text in str(x)
+
     columns = self.table._dataFrameObject.headings
 
     if self.columnOptions.currentObject() is None:
 
       df = self.table._dataFrameObject.dataFrame
-      idx = df[columns[0]].apply(lambda x:text in str(x))
+      idx = df[columns[0]].apply(func)
       for col in range(1, len(columns)):
-        idx = idx | df[columns[col]].apply(lambda x:text in str(x))
+        idx = idx | df[columns[col]].apply(func)
       self._searchedDataFrame = df.loc[idx]
 
     else:
       objCol = columns[self.columnOptions.currentObject()]
 
       df = self.table._dataFrameObject.dataFrame
-      self._searchedDataFrame = df.loc[df[objCol].apply(lambda x:text in str(x))]
+      self._searchedDataFrame = df.loc[df[objCol].apply(func)]
 
     if not self._searchedDataFrame.empty:
       self.table.setData(self._searchedDataFrame.values)
@@ -150,13 +156,14 @@ class QuickTableFilter(Frame):
     else:
       self.searchButtons.buttons[1].setEnabled(False)
       self.restoreTable(table)
-      MessageDialog.showWarning('Not found', '')
+      if not ignoreNotFound:
+        MessageDialog.showWarning('Not found', text)
 
   def selectSearchOption(self, sourceTable, columnObject, value):
     try:
       self.columnOptions.setCurrentText(columnObject.__name__)
       self.edit.setText(value)
-      self.findOnTable(self.table)
+      self.findOnTable(self.table, matchExactly=False, ignoreNotFound=True)
     except Exception as es:
       getLogger().debug('column not found in table')
 

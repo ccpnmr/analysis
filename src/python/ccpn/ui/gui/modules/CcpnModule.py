@@ -82,7 +82,7 @@ CommonWidgets =           {
                             ExcludeRegions.__name__:          ('_getExcludedRegions', '_set' ),
 
                             PulldownListCompoundWidget.__name__: ('getText' ,        'select'), #PulldownList
-                            CheckBoxCompoundWidget.__name__:     ('get'     ,    'setChecked'),
+                            CheckBoxCompoundWidget.__name__:     ('get'     ,    'set'),
                             DoubleSpinBoxCompoundWidget.__name__:('getValue',      'setValue'), #D oubleSpinbox
                             SelectorWidget.__name__:             ('getText',         'select'), #PulldownList
                             InputPulldown.__name__:              ('currentText',        'set'), #PulldownList

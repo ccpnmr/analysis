@@ -141,6 +141,7 @@ class CustomNmrResidueTable(NmrResidueTable):
       ])        #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     self._widget.setFixedHeight(45)
+    self.chemicalShiftsMappingModule = None
 
 
   @staticmethod
@@ -173,6 +174,16 @@ class CustomNmrResidueTable(NmrResidueTable):
       return ', '.join(nmrResidue.selectedNmrAtomNames)
     except:
       return None
+
+  def _selectPullDown(self, value):
+    ''' Used for automatic restoring of widgets '''
+    self.ncWidget.select(value)
+    try:
+      if self.chemicalShiftsMappingModule is not None:
+        self.chemicalShiftsMappingModule.updateModule()
+    except Exception as e:
+      getLogger().warn('Impossible update chemicalShiftsMappingModule from restoring %s' %e)
+
 
 
 class ChemicalShiftsMapping(CcpnModule):
@@ -287,7 +298,7 @@ class ChemicalShiftsMapping(CcpnModule):
       self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
                                                    actionCallback= self._customActionCallBack, checkBoxCallback=self._checkBoxCallback,
                                                    setLayout=True, grid = (0, 0))
-
+      self.nmrResidueTable.chemicalShiftsMappingModule = self
 
       self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
                                        icon=self.showStructureIcon,
@@ -1044,3 +1055,5 @@ class ChemicalShiftsMapping(CcpnModule):
 
     super(ChemicalShiftsMapping, self)._closeModule()
 
+from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
+CommonWidgets.update({CustomNmrResidueTable.__name__: ('_getPullDownSelection', '_selectPullDown')})

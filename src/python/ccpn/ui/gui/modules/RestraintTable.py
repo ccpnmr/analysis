@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule, CommonWidgets
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -486,4 +486,5 @@ class RestraintTable(QuickTable):
     """
     self.clearTableNotifiers()
 
+from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
 CommonWidgets.update({RestraintTable.__name__: ('_getPullDownSelection', '_selectPullDown')})

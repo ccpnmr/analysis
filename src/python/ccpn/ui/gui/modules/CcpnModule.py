@@ -62,7 +62,7 @@ from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget,\
                                                 DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
-                                                ColourSelectionWidget, LineEditPopup
+                                                ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import _Pulldown
 
 CommonWidgets =           {
@@ -82,6 +82,7 @@ CommonWidgets =           {
                             ExcludeRegions.__name__:          ('_getExcludedRegions', '_set' ),
 
                             PulldownListCompoundWidget.__name__: ('getText' ,        'select'), #PulldownList
+                            ListCompoundWidget.__name__:         ('getTexts','setTexts'), #PulldownList based
                             CheckBoxCompoundWidget.__name__:     ('get'     ,    'set'),
                             DoubleSpinBoxCompoundWidget.__name__:('getValue',      'setValue'), #D oubleSpinbox
                             SelectorWidget.__name__:             ('getText',         'select'), #PulldownList

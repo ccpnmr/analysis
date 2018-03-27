@@ -168,6 +168,12 @@ class ListCompoundWidget(CompoundBaseWidget):
     else:
       self.pulldownList.hide()
 
+  def setTexts(self, ll:list=[]):
+    self.listWidget.clear()
+    for i in ll:
+      if isinstance(i, str):
+        self.listWidget.addItem(i)
+
   def getTexts(self):
     "Convenience: Return list of texts in listWidget"
     return [self.listWidget.item(i).text() for i in range(self.listWidget.count())]

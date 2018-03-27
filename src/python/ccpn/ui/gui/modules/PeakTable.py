@@ -499,4 +499,4 @@ class PeakListTableWidget(QuickTable):
   #   if self._selectOnTableCurrentPeaksNotifier is not None:
   #     self._selectOnTableCurrentPeaksNotifier.unRegister()
 
-CommonWidgets.update({PeakListTableWidget.__name__: ('_getPullDownSelection', '_selectPullDown')})
+CommonWidgets.update({PeakListTableWidget.__name__: (PeakListTableWidget._getPullDownSelection, PeakListTableWidget._selectPullDown)})

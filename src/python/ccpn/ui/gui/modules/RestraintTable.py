@@ -487,4 +487,4 @@ class RestraintTable(QuickTable):
     self.clearTableNotifiers()
 
 from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
-CommonWidgets.update({RestraintTable.__name__: ('_getPullDownSelection', '_selectPullDown')})
+CommonWidgets.update({RestraintTable.__name__: (RestraintTable._getPullDownSelection, RestraintTable._selectPullDown)})

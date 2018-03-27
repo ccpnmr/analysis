@@ -65,32 +65,29 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, Chec
                                                 ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import _Pulldown
 
-CommonWidgets =           {
-                            CheckBox.__name__:                ('get',         'setChecked'   ),
-                            ColourDialog.__name__:            ('getColor',    'setColor'     ),
-                            DoubleSpinbox.__name__:           ('value',       'setValue'     ),
-                            Label.__name__:                   ('get',         'setText'      ),
-                            LineEdit.__name__:                ('get',         'setText'      ),
-                            LineEditButtonDialog.__name__:    ('get',         'setText'      ),
-                            PulldownList.__name__:            ('currentText', 'set'          ),
-                            RadioButton.__name__:             ('get',         'set'          ),
-                            RadioButtons.__name__:            ('get',         'set'          ),
-                            Slider.__name__:                  ('get',         'setValue'     ),
-                            Spinbox.__name__:                 ('value',       'set'          ),
-                            TextEditor.__name__:              ('get',         'setText'      ),
-                            GLTargetButtonSpinBoxes.__name__: ('get',         'setValues'    ),
-                            ExcludeRegions.__name__:          ('_getExcludedRegions', '_set' ),
+CommonWidgets =            {
+                            CheckBox.__name__:                (CheckBox.get,                CheckBox.setChecked),
+                            ColourDialog.__name__:            (ColourDialog.getColor,       ColourDialog.setColour),
+                            DoubleSpinbox.__name__:           (DoubleSpinbox.value,         DoubleSpinbox.setValue),
+                            # Label.__name__:                   (Label.get,                   Label.setText),
+                            LineEdit.__name__:                (LineEdit.get,                LineEdit.setText),
+                            LineEditButtonDialog.__name__:    (LineEditButtonDialog.get,    LineEditButtonDialog.setText),
+                            PulldownList.__name__:            (PulldownList.currentText,    PulldownList.set),
+                            RadioButton.__name__:             (RadioButton.get,             RadioButton.set),
+                            RadioButtons.__name__:            (RadioButtons.get,            RadioButtons.set),
+                            Slider.__name__:                  (Slider.get,                  Slider.setValue),
+                            Spinbox.__name__:                 (Spinbox.value,               Spinbox.set),
+                            TextEditor.__name__:              (TextEditor.get,              TextEditor.setText),
+                            GLTargetButtonSpinBoxes.__name__: (GLTargetButtonSpinBoxes.get, GLTargetButtonSpinBoxes.setValues),
 
-                            PulldownListCompoundWidget.__name__: ('getText' ,        'select'), #PulldownList
-                            ListCompoundWidget.__name__:         ('getTexts','setTexts'), #PulldownList based
-                            CheckBoxCompoundWidget.__name__:     ('get'     ,    'set'),
-                            DoubleSpinBoxCompoundWidget.__name__:('getValue',      'setValue'), #D oubleSpinbox
-                            SelectorWidget.__name__:             ('getText',         'select'), #PulldownList
-                            InputPulldown.__name__:              ('currentText',        'set'), #PulldownList
-                            ColourSelectionWidget.__name__:      ('currentText',  'setColour'), #PulldownList
-                            LineEditPopup.__name__:              ('get',                'set'),
-
-
+                            PulldownListCompoundWidget.__name__: (PulldownListCompoundWidget.getText , PulldownListCompoundWidget.select), #PulldownList
+                            ListCompoundWidget.__name__:         (ListCompoundWidget.getTexts,         ListCompoundWidget.setTexts), #PulldownList based
+                            CheckBoxCompoundWidget.__name__:     (CheckBoxCompoundWidget.get     ,     CheckBoxCompoundWidget.set),
+                            DoubleSpinBoxCompoundWidget.__name__:(DoubleSpinBoxCompoundWidget.getValue,DoubleSpinBoxCompoundWidget.setValue), #D oubleSpinbox
+                            SelectorWidget.__name__:             (SelectorWidget.getText,              SelectorWidget.select), #PulldownList
+                            InputPulldown.__name__:              (InputPulldown.currentText,          InputPulldown.set), #PulldownList
+                            ColourSelectionWidget.__name__:      (ColourSelectionWidget.currentText,          ColourSelectionWidget.setColour), #PulldownList
+                            LineEditPopup.__name__:              (LineEditPopup.get,                  LineEditPopup.set)
 
 
                             # ADD TABLES
@@ -412,7 +409,7 @@ class CcpnModule(Dock, DropBase):
         continue
       if varObj.__class__.__name__ in CommonWidgets.keys():
         try:  # try because widgets can be dinamically deleted
-          widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0])()
+          widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0].__name__)()
         except Exception as e:
           getLogger().debug('Error %s', e)
     self._kwargs = widgetsState
@@ -427,7 +424,7 @@ class CcpnModule(Dock, DropBase):
           widget.select(value)
           continue
         if widget.__class__.__name__ in CommonWidgets.keys():
-          setWidget = getattr(widget, CommonWidgets[widget.__class__.__name__][1])
+          setWidget = getattr(widget, CommonWidgets[widget.__class__.__name__][1].__name__)
           setWidget(value)
 
       except Exception as e:

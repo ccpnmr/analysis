@@ -30,7 +30,8 @@ from PyQt5 import QtCore, QtWidgets
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 
-OBJECT_DATAFRAME = '_object'
+DATAFRAME_OBJECT = '_object'
+DATAFRAME_PID = 'Pid'
 
 
 class DataFrameObject(object):
@@ -98,11 +99,11 @@ class DataFrameObject(object):
 
   @property
   def visibleColumnHeadings(self):
-    return [col for col in self._columnDefinitions.headings if col not in self._hiddenColumns and col != OBJECT_DATAFRAME]
+    return [col for col in self._columnDefinitions.headings if col not in self._hiddenColumns and col != DATAFRAME_OBJECT]
 
   @property
   def userHeadings(self):
-    return [col for col in self._columnDefinitions.headings if col != OBJECT_DATAFRAME]
+    return [col for col in self._columnDefinitions.headings if col != DATAFRAME_OBJECT]
 
   @property
   def headings(self):
@@ -156,7 +157,7 @@ class DataFrameObject(object):
         self._objects.remove(obj)
 
         # remove from dataFrame by obj
-        self._dataFrame = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] != obj]
+        self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
         # remove from table by pid
         row = self.find(self._table, str(obj.pid), column='Pid')
@@ -237,8 +238,8 @@ class DataFrameObject(object):
         for header in self._columnDefinitions.columns:
           listDict[header.headerText] = header.getValue(obj)
 
-        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] == obj]
-        self._dataFrame = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] != obj]
+        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
+        self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
         # keep the Index if it exists
         if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:
@@ -281,8 +282,8 @@ class DataFrameObject(object):
         for header in self._columnDefinitions.columns:
           listDict[header.headerText] = header.getValue(obj)
 
-        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] == obj]
-        self._dataFrame = self._dataFrame.ix[self._dataFrame[OBJECT_DATAFRAME] != obj]
+        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
+        self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
         # keep the Index if it exists
         if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:

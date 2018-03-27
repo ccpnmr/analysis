@@ -35,7 +35,7 @@ from pyqtgraph import TableWidget
 from pyqtgraph.widgets.TableWidget import _defersort
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.DataFrameObject import DataFrameObject, OBJECT_DATAFRAME
+from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, DATAFRAME_PID
 
 from ccpn.ui.gui.guiSettings import getColours
 
@@ -501,8 +501,8 @@ QuickTable::item::selected {
     for i, colName in enumerate(dataFrameObject.headings):
       if dataFrameObject.hiddenColumns:
 
-        # always hide the special column OBJECT_DATAFRAME
-        if colName in dataFrameObject.hiddenColumns or colName == OBJECT_DATAFRAME:
+        # always hide the special column DATAFRAME_OBJECT
+        if colName in dataFrameObject.hiddenColumns or colName == DATAFRAME_OBJECT:
           self.hideColumn(i)
         else:
           self.showColumn(i)
@@ -521,7 +521,7 @@ QuickTable::item::selected {
             if header:
               header.setIcon(icon)
       else:
-        if colName == OBJECT_DATAFRAME:
+        if colName == DATAFRAME_OBJECT:
           self.hideColumn(i)
 
   def _setDefaultRowHeight(self):
@@ -1414,22 +1414,19 @@ class QuickTableDelegate(QtWidgets.QStyledItemDelegate):
       for ii in range(self._parent.columnCount()):
         rowData.append(self._parent.item(row, ii).text())
 
-      if OBJECT_DATAFRAME in self._parent._dataFrameObject.headings:
-        # pidCol = self._parent._dataFrameObject.headings.index('Pid')
-        # thisPid = rowData[pidCol]
-        # obj = self._parent.project.getByPid(thisPid)
+      if DATAFRAME_PID in self._parent._dataFrameObject.headings:
 
         # get the object to apply the data to
-        obj = self._parent._dataFrameObject.headings.index(OBJECT_DATAFRAME)
+        pidCol = self._parent._dataFrameObject.headings.index(DATAFRAME_PID)
+        pid = rowData[pidCol]
+        obj = self._parent.project.getByPid(pid)
 
         # set the data which will fire notifiers to populate all tables
         func = self._parent._dataFrameObject.setEditValues[col]
-        if func:
+        if func and obj:
           func(obj, text)
       else:
-        # TODO:ED write into the table
-        # index.model().setItem(row, col, QtGui.QTableWidgetItem(text))
-        pass
+        getLogger().debug('table %s does not contain a Pid' % self)
 
     except Exception as es:
       getLogger().warning('Error handling cell editing: %i %i %s' % (row, col, str(es)))

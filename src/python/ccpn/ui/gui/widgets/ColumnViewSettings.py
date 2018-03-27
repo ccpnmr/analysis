@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.DataFrameObject import OBJECT_DATAFRAME
+from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 
 
 class ColumnViewSettingsPopup(CcpnDialog):
@@ -78,7 +78,7 @@ class ColumnViewSettings(Widget):
       for i, colum in enumerate(columns):
 
         # always ignore the special column
-        if colum != OBJECT_DATAFRAME:
+        if colum != DATAFRAME_OBJECT:
           if self.direction=='v':
             i+=1
             cb = CheckBox(self, text=colum, grid=(i, 1), callback=self.checkBoxCallBack

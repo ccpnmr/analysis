@@ -256,6 +256,20 @@ QuickTable::item::selected {
   #   self._currentRow = row
   #   self._currentCol = col
 
+  def setActionCallback(self, actionCallback):
+    # enable callbacks
+    self._actionCallback = actionCallback
+    if self._actionCallback:
+      self.doubleClicked.connect(self._doubleClickCallback)
+    else:
+      self.doubleClicked.connect(self._defaultDoubleClick)
+
+  def setSelectionCallback(self, selectionCallback):
+    # enable callbacks
+    self._selectionCallback = selectionCallback
+    if self._selectionCallback:
+      self.itemClicked.connect(self._cellClicked)
+
   def _handleDroppedItems(self, pids, objType, pulldown):
     '''
 

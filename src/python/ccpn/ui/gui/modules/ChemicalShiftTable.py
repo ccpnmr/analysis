@@ -54,7 +54,7 @@ class ChemicalShiftTableModule(CcpnModule):
   """
   This class implements the module by wrapping a NmrResidueTable instance
   """
-  includeSettingsWidget = True
+  includeSettingsWidget = False
   maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsPosition = 'left'
 
@@ -390,12 +390,18 @@ class ChemicalShiftTable(QuickTable):
     """
     obj = data[CallBack.OBJECT]
 
-    getLogger().debug('ChemicalShiftTable>>>', obj)
+    getLogger().debug('ChemicalShiftTable>>> action', obj)
 
   def _selectionCallback(self, data):
     """
     Notifier Callback for selecting a row in the table
     """
+    obj = data[CallBack.OBJECT]
+
+    getLogger().debug('ChemicalShiftTable>>> selection', obj)
+    return
+
+    # TODO:ED not worked out correct behaviour yet
     selected = data[CallBack.OBJECT]
 
     if selected:

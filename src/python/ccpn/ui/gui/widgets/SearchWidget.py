@@ -156,6 +156,7 @@ class QuickTableFilter(Frame):
     try:
       self.columnOptions.setCurrentText(columnObject.__name__)
       self.edit.setText(value)
+      self.findOnTable(self.table)
     except Exception as es:
       getLogger().debug('column not found in table')
 

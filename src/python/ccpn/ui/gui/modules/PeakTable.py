@@ -352,10 +352,14 @@ class PeakListTableWidget(QuickTable):
     peak = data[Notifier.OBJECT]
 
     if self.current.strip is not None:
-      widths = None
-      if peak.peakList.spectrum.dimensionCount <= 2:
-        widths = _getCurrentZoomRatio(self.current.strip.viewRange())
-      navigateToPositionInStrip(strip = self.current.strip, positions=peak.position, widths=widths)
+      validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if isinstance(pp.peakList, PeakList)]
+
+      if peak.peakList in validPeakListViews:
+        widths = None
+
+        if peak.peakList.spectrum.dimensionCount <= 2:
+          widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+        navigateToPositionInStrip(strip = self.current.strip, positions=peak.position, widths=widths)
     else:
       logger.warning('Impossible to navigate to peak position. Set a current strip first')
 

@@ -457,7 +457,7 @@ def nmrAtomPairsByDimensionTransfer(peakLists:typing.Sequence[PeakList]) -> dict
       for peak in peakList.peaks:
         for assignment in peak.assignedNmrAtoms:
           for mt, aSet in result.items():
-            nmrAtoms = (assignment[mt[0]-1], assignment[mt[1]-1])
+            nmrAtoms = (assignment[mt[0]-1], assignment[mt[1]-1], peak)
             if not None in nmrAtoms:
               aSet.add(nmrAtoms)
 

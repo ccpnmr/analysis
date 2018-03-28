@@ -700,7 +700,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         # parent has changed - we must move and rename the entire item tree.
         # NB this is relevant for NmrAtom (NmrResidue is handled elsewhere)
         objects = self._itemObjects(item, recursive=True)
-        print(objects, '$$$')
+        # print(objects, '$$$')
         sip.delete(item) # this also removes child items
 
         # NB the first object cannot be found from its pid (as it has already been renamed)

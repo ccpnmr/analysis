@@ -139,20 +139,13 @@ class SequenceModule(CcpnModule):
 
     item = self._getGuiItem(self.scrollArea.scene)
     if item:
-      self._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[SEQUENCEMODULE_DRAGMOVE] +
+      # _highlight is an overlay of the guiNmrResidue but with a highlight colour
+      self._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_DRAGENTER] +
                               item.toPlainText() + '</strong></div>')
       self._highlight.setPos(item.pos())
     else:
       self._highlight.setPlainText('')
 
-    # item = self.scrollArea.scene.itemAt({"pids": ["NC:@2", "NR:@2.@142."]}pos)
-    # ###item = self.scene.itemAt(event.scenePos())
-    # if isinstance(item, GuiChainResidue):
-    #   item.setDefaultTextColor(QtGui.QColor('orange'))
-    #   self._highlight.setPlainText(item.toPlainText())
-    #   self._highlight.setPos(item.pos())
-    # else:
-    #   self._highlight.setPlainText('')
     event.accept()
 
   def _dropEvent(self, event):
@@ -461,17 +454,12 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     position = labelPosition+(fontSpacing*index)
     self.setPos(QtCore.QPointF(position, yPosition))
     self.residueNumber = residue.sequenceCode
-    # WB: TODO: below is terrible code (the scene functions are trampled over and over)
-    # but somehow this seems to be the way it has to be done
-    # and this then means there is that awful itemAt(position) check in the drag functions
-    # scene.dragLeaveEvent = self._dragLeaveEvent
-    # scene.dragEnterEvent = self._dragEnterEvent
-    # scene.dropEvent = self.dropEvent
+
     self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable | self.flags())
     self._styleResidue()
 
-  def mousePressEvent(self, ev):
-    pass
+  # def mousePressEvent(self, ev):
+  #   pass
 
   def _styleResidue(self):
     """
@@ -506,78 +494,3 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
     format = QtGui.QTextCharFormat()
     format.setFontWeight(75)
     self.textCursor().mergeCharFormat(format)
-
-  def _dragEnterEvent(self, event:QtGui.QMouseEvent):
-    """
-    A re-implementation of the QGraphicsTextItem.dragEnterEvent to facilitate the correct colouring
-    of GuiChainResidues during drag-and-drop.
-    Required for processNmrChains to work properly.
-    """
-    # WB: TODO: this is awful, having to check what item is at the position
-    # the trampling of the scene drag functions above means that self is always
-    # the last GuiChainResidue, and a much better way would be if self was the
-    # GuiChainResidue of interest, which would then eliminate this itemAt check
-    pos = event.scenePos()
-    pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
-
-    # item = self.scene.itemAt(pos)
-    item = self.scene.itemAt(pos, QtGui.QTransform())     # ejb - pyqt5
-
-    ###item = self.scene.itemAt(event.scenePos())
-    if isinstance(item, GuiChainResidue):
-      item.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_DRAGENTER]))
-      self.scene.update()
-    event.accept()
-
-  def _dragLeaveEvent(self, event:QtGui.QMouseEvent):
-    """
-    A re-implementation of the QGraphicsTextItem.dragLeaveEvent to facilitate the correct colouring
-    of GuiChainResidues during drag-and-drop.
-    Required for processNmrChains to work properly.
-    """
-
-    pos = event.scenePos()
-    pos = QtCore.QPointF(pos.x(), pos.y()-25) # WB: TODO: -25 is a hack to take account of scrollbar height
-
-    # item = self.scene.itemAt(pos)
-    item = self.scene.itemAt(pos, QtGui.QTransform())     # ejb - pyqt5
-
-    ###item = self.scene.itemAt(event.scenePos())
-    if isinstance(item, GuiChainResidue):
-      item.setDefaultTextColor(QtGui.QColor(self.colours[GUICHAINRESIDUE_DRAGLEAVE]))
-      self.scene.update()
-
-  # WB: TODO: a version of this used to be in DropBase but that has
-  # been changed but it is not clear (to me) how to use this new
-  # system so stick with the old for now
-  def _dropEvent(self, event):
-
-    data, dataType = _interpretEvent(event)
-    if dataType == 'pids':
-
-      # check that the drop event contains the corrcect information
-      if isinstance(data, Iterable) and len(data) == 2:
-        nmrChain = self.mainWindow.project.getByPid(data[0])
-        nmrResidue = self.mainWindow.project.getByPid(data[1])
-        if isinstance(nmrChain, NmrChain) and isinstance(nmrResidue, NmrResidue):
-          if nmrResidue.nmrChain == nmrChain:
-            self._processNmrChains(data, event)
-
-
-    #   if self._appBase is not None:
-    #     appBase = self._appBase
-    #   else:
-    #     appBase = self._appBase
-    #   if hasattr(appBase, 'backboneModule'):
-    #     nmrResidueTable = appBase.backboneModule.nmrResidueTable
-    #     nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
-    #     nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
-    #
-    #   event.accept()
-    # self.guiChainLabel.sequenceModule.overlay.hide()
-    # self.project._appBase.sequenceGraph.resetSequenceGraph()
-
-
-
-
-

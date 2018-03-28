@@ -602,7 +602,7 @@ class CcpnModule(Dock, DropBase):
           CcpnModule._lastActionWasDrop = False
 
     except Exception as es:
-      print('>>>TEMP Error', obj, event, str(es))
+      getLogger().debug('TempWindow Error %s; %s; %s', obj, event, str(es))
     finally:
       return False
 

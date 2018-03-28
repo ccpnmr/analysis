@@ -32,7 +32,7 @@ from ccpn.util.Logging import getLogger
 
 DATAFRAME_OBJECT = '_object'
 DATAFRAME_PID = 'Pid'
-
+DATAFRAME_HASH = '#'
 
 class DataFrameObject(object):
   # class to handle pandas dataframe and matching object pid list

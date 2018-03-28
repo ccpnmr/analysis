@@ -29,10 +29,11 @@ import re
 from PyQt5 import QtGui, QtCore, QtWidgets
 import pandas as pd
 import os
+from types import MethodType
 
 from collections import Iterable
 from pyqtgraph import TableWidget
-from pyqtgraph.widgets.TableWidget import _defersort
+from pyqtgraph.widgets.TableWidget import _defersort, TableWidgetItem
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, DATAFRAME_PID
@@ -71,6 +72,31 @@ from ccpn.util.Logging import getLogger
 
 OBJECT_CLASS = 0
 OBJECT_PARENT = 1
+
+
+def __ltForTableWidgetItem__(self, other):
+  # new routine to overload TableWidgetItem that crashes when sorting None
+  try:
+    if self.sortMode == 'index' and hasattr(other, 'index'):
+      return self.index < other.index
+    if self.sortMode == 'value' and hasattr(other, 'value'):
+      return self.value < other.value
+    else:
+      if self.text() and other.text():
+        return self.text() < other.text()
+      else:
+        return False
+
+  except Exception as es:
+    getLogger().debug('table contains None')
+    return False
+
+def __sortByColumn__(self, col, newOrder):
+  try:
+    QtWidgets.QTableWidget.sortByColumn(self, col, newOrder)
+  except Exception as es:
+    print (str(es))
+  print('>>>sorting')
 
 
 class QuickTable(TableWidget, Base):
@@ -229,6 +255,7 @@ QuickTable::item::selected {
     # set the callback for changing selection on table
     model = self.selectionModel()
     model.selectionChanged.connect(self._selectionTableCallback)
+    # self.horizontalHeader().sortIndicatorChanged.connect(self._sortChanged)
 
     # set internal flags
     self._mousePressed = False
@@ -248,13 +275,41 @@ QuickTable::item::selected {
     self._parent.layout().setVerticalSpacing(0)
 
     self.setDefaultTableData()
-    # self._droppedNotifier = GuiNotifier(self,
-    #                                    [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-    #                                    self._processDroppedItems)
-  #
-  # def _cellClicked(self, row, col):
-  #   self._currentRow = row
-  #   self._currentCol = col
+
+    self._currentSorted = False
+    self._newSorted = False
+
+    TableWidgetItem.__lt__ = __ltForTableWidgetItem__
+    # TableWidget.sortByColumn = __sortByColumn__   #MethodType(__sortByColumn__, TableWidget)
+
+  def _sortChanged(self, col, sortOrder:QtCore.Qt.SortOrder):
+    # sort the _dataFrame to match
+    # need to read the sorted state when repopulating table
+    # this is also called when the table is populated from the pulldown :)
+    return
+
+    print ('>>>tableSorting', col, sortOrder)
+    print ('>>>currentIndex', self.currentIndex())
+
+    rows = list(range(self.rowCount()))
+    columns = list(range(self.columnCount()))
+    headings = []
+    for c in columns:
+      hi = self.horizontalHeaderItem(c)
+      if hi:
+        headings.append(self.horizontalHeaderItem(c).text())
+      else:
+        headings.append('*')
+
+    print (headings)
+    if DATAFRAME_PID in headings:
+      pidCol = headings.index(DATAFRAME_PID)
+      pids = []
+      for r in rows:
+        pids.append(self.item(r,pidCol).value)
+      print (pids)
+
+    self._newSorted = True
 
   def setActionCallback(self, actionCallback):
     # enable callbacks
@@ -1011,11 +1066,12 @@ QuickTable::item::selected {
         # selectionModel.setCurrentIndex(self.model().index(row, 0)
         #                                , selectionModel.SelectCurrent | selectionModel.Rows)
 
+      self.scrollToSelectedIndex()
+
       self.setUpdatesEnabled(True)
       # self.blockSignals(False)
       self._silenceCallback = False
       self.setFocus(QtCore.Qt.OtherFocusReason)
-      self.scrollToSelectedIndex()
 
   def clearTable(self):
     "remove all objects from the table"
@@ -1257,6 +1313,7 @@ QuickTable::item::selected {
     Callback to handle selection on the table, linked to user defined function
     :param data:
     """
+    # self._sortChanged(0, 0)
     self._tableData['selectCurrentCallBack'](data)
 
   def setTableNotifiers(self, tableClass=None, rowClass=None, cellClassNames=None,

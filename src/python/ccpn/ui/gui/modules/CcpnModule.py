@@ -326,8 +326,10 @@ class CcpnModule(Dock, DropBase):
     # and to check when the dock has been floated - it needs to have a callback
     # that fires when the window has been maximised
     self._maximiseFunc = None
+    self._closeFunc = None
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
+    CcpnModule._lastActionWasDrop = False
 
     # attach the mouse events to the widget
     # self.mainWidget.dragMoveEvent = self.dragMoveEvent
@@ -577,6 +579,7 @@ class CcpnModule(Dock, DropBase):
     :return:
     """
     self._maximiseFunc = None
+    self._closeFunc = None
 
   def _tempAreaWindowEventFilter(self, obj, event):
     """
@@ -587,13 +590,16 @@ class CcpnModule(Dock, DropBase):
       if event.type() == QtCore.QEvent.WindowStateChange:
         if event.oldState() & QtCore.Qt.WindowMinimized:
 
-          # TODO:ED check that this is unique if changed to another window
           if self._maximiseFunc:
             self._maximiseFunc()
 
       elif event.type() == QtCore.QEvent.Close:
-        if self._closeFunc:
+
+        # catch whether the close event is from closing the tempWindow or moving back to a different module area
+        if self._closeFunc and not CcpnModule._lastActionWasDrop:
           self._closeFunc()
+        else:
+          CcpnModule._lastActionWasDrop = False
 
     except Exception as es:
       print('>>>TEMP Error', obj, event, str(es))
@@ -735,6 +741,7 @@ class CcpnModule(Dock, DropBase):
         self.overlay.setDropArea(self.dropArea)
 
       if hasattr(source, 'implements') and source.implements('dock'):
+        CcpnModule._lastActionWasDrop = True
         DockDrop.dropEvent(self, *args)
       else:
         args[0].ignore()

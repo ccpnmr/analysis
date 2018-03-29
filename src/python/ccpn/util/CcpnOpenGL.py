@@ -406,7 +406,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._updateVTrace = False
 
     # set a minimum size so that the strips resize nicely
-    # self.setMinimumSize(150, 100)
+    self.setMinimumSize(self.AXIS_MARGINRIGHT+10, self.AXIS_MARGINBOTTOM+10)
 
     # set the pyqtsignal responders
     self.GLSignals = GLNotifier(parent=self, strip=parent)
@@ -5116,7 +5116,7 @@ void main()
   #   self.createBubbles(20 - len(self.bubbles))
 
   def sizeHint(self):
-    return QSize(400, 400)
+    return QSize(self.w, self.h)
 
   def normalizeAngle(self, angle):
     while angle < 0:

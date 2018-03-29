@@ -167,6 +167,7 @@ TEXT_COLOUR = '#555D85'
 LIGHT_GREY  = 'rgb(250,250,250)'
 STEEL       = 'rgb(102,102,102)' # from apple
 MARISHINO   = '#004D81'  # rgb(0,77,129) ; red colour (from apple)
+MEDIUM_BLUE = '#7777FF'
 GREEN1      = '#009a00'
 
 # Colour schemes definitions
@@ -205,7 +206,7 @@ colourSchemes = {
     SEQUENCEGRAPHMODULE_LINE   : 'black',
     SEQUENCEGRAPHMODULE_TEXT   : TEXT_COLOUR,
 
-    SEQUENCEMODULE_DRAGMOVE    : 'orange',
+    SEQUENCEMODULE_DRAGMOVE    : MEDIUM_BLUE,
     SEQUENCEMODULE_TEXT        : TEXT_COLOUR,
 
     QUICKTABLE_BACKGROUND          : 'white',

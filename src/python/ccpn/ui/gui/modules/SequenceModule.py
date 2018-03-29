@@ -140,7 +140,7 @@ class SequenceModule(CcpnModule):
     item = self._getGuiItem(self.scrollArea.scene)
     if item:
       # _highlight is an overlay of the guiNmrResidue but with a highlight colour
-      self._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_DRAGENTER] +
+      self._highlight.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[SEQUENCEMODULE_DRAGMOVE] +
                               item.toPlainText() + '</strong></div>')
       self._highlight.setPos(item.pos())
     else:

@@ -203,7 +203,9 @@ class GLNotifier(QtWidgets.QWidget):
 
   def emitPaintEvent(self, source=None):
     if source:
-      self.glEvent.emit({GLNotifier.GLSOURCE: source})
+      self.glEvent.emit({GLNotifier.GLSOURCE: source,
+                          GLNotifier.GLTARGETS: [],
+                          GLNotifier.GLTRIGGERS: []})
     else:
       self.glEvent.emit({})
 
@@ -3108,7 +3110,7 @@ void main()
     # self._rescalePeakListLabels(spectrumView, peakListView, drawList)
     drawList.stringList = tempList
     drawList.renderMode = GLRENDERMODE_RESCALE
-    glStrip.GLSignals.emitPaintEvent(glStrip)
+    glStrip.GLSignals.emitPaintEvent(source=glStrip)
 
   def _buildPeakListLabels(self, spectrumView, peakListView):
     # spectrum = spectrumView.spectrum
@@ -5640,85 +5642,86 @@ void main()
         triggers = aDict[GLNotifier.GLTRIGGERS]
         targets = aDict[GLNotifier.GLTARGETS]
 
-        if GLNotifier.GLPEAKLISTS in triggers:
-          for spectrumView in self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
-              for peakList in targets:
-                if peakList == peakListView.peakList:
+        if triggers or targets:
+          if GLNotifier.GLPEAKLISTS in triggers:
+            for spectrumView in self._parent.spectrumViews:
+              for peakListView in spectrumView.peakListViews:
+                for peakList in targets:
+                  if peakList == peakListView.peakList:
+                    peakListView.buildPeakLists = True
+            # self.buildPeakLists()
+
+          if GLNotifier.GLPEAKLISTLABELS in triggers:
+            for spectrumView in self._parent.spectrumViews:
+              for peakListView in spectrumView.peakListViews:
+                for peakList in targets:
+                  if peakList == peakListView.peakList:
+                    peakListView.buildPeakListLabels = True
+            # self.buildPeakListLabels()
+
+          if GLNotifier.GLMARKS in triggers:
+            self.buildMarks = True
+
+          # TODO:ED test trigger for the minute
+          if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
+
+            for spectrumView in self._parent.spectrumViews:
+              for peakListView in spectrumView.peakListViews:
+
+                if peakListView in self._GLPeakLists.keys():
+                  self._updateHighlightedPeaks(spectrumView, peakListView)
+                  self._updateHighlightedPeakLabels(spectrumView, peakListView)
+
+          if GLNotifier.GLALLPEAKS in triggers:
+
+            for spectrumView in self._parent.spectrumViews:
+              for peakListView in spectrumView.peakListViews:
+
+                if peakListView in self._GLPeakLists.keys():
                   peakListView.buildPeakLists = True
-          # self.buildPeakLists()
-
-        if GLNotifier.GLPEAKLISTLABELS in triggers:
-          for spectrumView in self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
-              for peakList in targets:
-                if peakList == peakListView.peakList:
                   peakListView.buildPeakListLabels = True
-          # self.buildPeakListLabels()
 
-        if GLNotifier.GLMARKS in triggers:
-          self.buildMarks = True
+            # self.buildPeakLists()
+            # self.buildPeakListLabels()
 
-        # TODO:ED test trigger for the minute
-        if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
+          if GLNotifier.GLANY in targets:
+            self._rescaleXAxis(update=False)
 
-          for spectrumView in self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
+          if GLNotifier.GLPEAKNOTIFY in targets:
 
-              if peakListView in self._GLPeakLists.keys():
-                self._updateHighlightedPeaks(spectrumView, peakListView)
-                self._updateHighlightedPeakLabels(spectrumView, peakListView)
+            for spectrumView in self._parent.spectrumViews:
+              for peakListView in spectrumView.peakListViews:
 
-        if GLNotifier.GLALLPEAKS in triggers:
+                if peakListView in self._GLPeakLists.keys():
+                  peakListView.buildPeakLists = True
+                  peakListView.buildPeakListLabels = True
 
-          for spectrumView in self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
+            # self.buildPeakLists()
+            # self.buildPeakListLabels()
 
-              if peakListView in self._GLPeakLists.keys():
-                peakListView.buildPeakLists = True
-                peakListView.buildPeakListLabels = True
+          if GLNotifier.GLINTEGRALLISTS in triggers:
 
-          # self.buildPeakLists()
-          # self.buildPeakListLabels()
+            for spectrumView in self._parent.spectrumViews:
+              for peakListView in spectrumView.peakListViews:
 
-        if GLNotifier.GLANY in targets:
-          self._rescaleXAxis(update=False)
+                if peakListView in self._GLIntegralLists.keys():
+                  peakListView.buildPeakLists = True
 
-        if GLNotifier.GLPEAKNOTIFY in targets:
+            # for ils in self._GLIntegralLists.values():
+            #   if ils.integralListView.peakList in targets:
+            #     # ils.renderMode = GLRENDERMODE_REBUILD
+            #     ils.integralListView.buildPeakLists = True
 
-          for spectrumView in self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
+            # self._processPeakNotifier(targets)
 
-              if peakListView in self._GLPeakLists.keys():
-                peakListView.buildPeakLists = True
-                peakListView.buildPeakListLabels = True
+          if GLNotifier.GLCLEARPHASING in triggers:
+            if self._parent.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
+              self.clearStaticTraces()
 
-          # self.buildPeakLists()
-          # self.buildPeakListLabels()
-
-        if GLNotifier.GLINTEGRALLISTS in triggers:
-
-          for spectrumView in self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
-
-              if peakListView in self._GLIntegralLists.keys():
-                peakListView.buildPeakLists = True
-
-          # for ils in self._GLIntegralLists.values():
-          #   if ils.integralListView.peakList in targets:
-          #     # ils.renderMode = GLRENDERMODE_REBUILD
-          #     ils.integralListView.buildPeakLists = True
-
-          # self._processPeakNotifier(targets)
-
-        if GLNotifier.GLCLEARPHASING in triggers:
-          if self._parent.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
-            self.clearStaticTraces()
-
-        if GLNotifier.GLADD1DPHASING in triggers:
-          if self._parent.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
-            self.clearStaticTraces()
-            self.newTrace()
+          if GLNotifier.GLADD1DPHASING in triggers:
+            if self._parent.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
+              self.clearStaticTraces()
+              self.newTrace()
 
     # repaint
     self.update()

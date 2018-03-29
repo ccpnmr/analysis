@@ -551,7 +551,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                 obj.delete()
 
             except Exception as es:
-              getLogger().warn('Delete', 'Object %s cannot be deleted' % obj.pid)
+              getLogger().warning('Object %s: %s' % (obj.pid, str(es)))
             finally:
 
               self.project._endCommandEchoBlock()

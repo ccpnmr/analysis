@@ -205,7 +205,7 @@ class GuiStripNd(GuiStrip):
     from ccpn.util.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
 
-    for specNum, thisSpecView in enumerate(self.spectrumDisplay.spectrumViews):
+    for specNum, thisSpecView in enumerate(self.spectrumViews):
       thisSpecView.buildContours = True
 
     GLSignals.emitPaintEvent()

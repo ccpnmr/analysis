@@ -27,11 +27,9 @@ import sys, os
 import math, random
 import ctypes
 import functools
+import threading
+
 from imageio import imread
-
-# import the freetype2 library
-# import freetype
-
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 from PyQt5.QtCore import (QPoint, QPointF, QRect, QRectF, QSize, Qt, QTime,
         QTimer, pyqtSignal, pyqtSlot)
@@ -203,8 +201,11 @@ class GLNotifier(QtWidgets.QWidget):
     self._parent = parent
     self._strip = strip
 
-  def emitPaintEvent(self):
-    self.glEvent.emit({})
+  def emitPaintEvent(self, source=None):
+    if source:
+      self.glEvent.emit({GLNotifier.GLSOURCE: source})
+    else:
+      self.glEvent.emit({})
 
   def emitEvent(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
     aDict = {GLNotifier.GLSOURCE: source,
@@ -307,6 +308,8 @@ class CcpnGLWidget(QOpenGLWidget):
       self.application = None
       self.project = None
       self.current = None
+
+    self._threads = {}
 
     # TODO:ED need to check how this works
     # for spectrumView in self._parent.spectrumViews:
@@ -2032,8 +2035,8 @@ void main()
 
     GL.glCallList(self.GLMarkList[0])
 
-  def _rescalePeakListLabels(self, spectrumView, peakListView):
-    drawList = self._GLPeakListLabels[peakListView]
+  def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
+    # drawList = self._GLPeakListLabels[peakListView]
     # strip = self._parent
 
     # pls = peakListView.peakList
@@ -2668,7 +2671,9 @@ void main()
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
       self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
-      self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
+      self._rescalePeakListLabels(spectrumView=spectrumView,
+                                  peakListView=peakListView,
+                                  drawList=self._GLPeakListLabels[peakListView])
 
     elif drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -2975,7 +2980,7 @@ void main()
           if spectrumView in self._parent.spectrumViews:
             drawList = self._GLPeakListLabels[peakListView]
             self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
-            self._rescalePeakListLabels(spectrumView, peakListView)
+            self._rescalePeakListLabels(spectrumView, peakListView, drawList)
 
   def _processPeakNotifier(self, data):
     # TODO:ED change this for the quick one
@@ -3088,6 +3093,23 @@ void main()
                                   color=(colR, colG, colB, fade), GLContext=self,
                                   object=peak))
 
+  def _threadBuildPeakListLabels(self, spectrumView, peakListView, drawList, glStrip):
+    tempList = []
+
+    pls = peakListView.peakList
+
+    # trap IntegralLists that are stored under the peakListView
+    if isinstance(pls, IntegralList):
+      return
+
+    for peak in pls.peaks:
+      self._appendPeakListLabel(spectrumView, peakListView, tempList, peak)
+
+    # self._rescalePeakListLabels(spectrumView, peakListView, drawList)
+    drawList.stringList = tempList
+    drawList.renderMode = GLRENDERMODE_RESCALE
+    glStrip.GLSignals.emitPaintEvent(glStrip)
+
   def _buildPeakListLabels(self, spectrumView, peakListView):
     # spectrum = spectrumView.spectrum
 
@@ -3099,6 +3121,16 @@ void main()
     drawList = self._GLPeakListLabels[peakListView]
     if drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
+
+      # drawList.clearArrays()
+      drawList.stringList = []
+      buildPeaks = threading.Thread(name=str(self._parent.pid+spectrumView.pid),
+                                    target=self._threadBuildPeakListLabels,
+                                    args=(spectrumView, peakListView, drawList, self))
+      # self._threads[spectrumView] = buildPeaks
+      buildPeaks.start()
+      return
+
 
       drawList.clearArrays()
       drawList.stringList = []
@@ -3117,7 +3149,7 @@ void main()
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
-      self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
+      self._rescalePeakListLabels(spectrumView, peakListView, drawList)
 
   def _drawVertexColor(self, drawList):
     # new bit to use a vertex array to draw the peaks, very fast and easy
@@ -3409,6 +3441,11 @@ void main()
       for peakListView in spectrumView.peakListViews:
 
         if isinstance(peakListView.peakList, PeakList):
+
+          if peakListView in self._GLPeakListLabels.keys():
+            if self._GLPeakListLabels[peakListView].renderMode == GLRENDERMODE_RESCALE:
+              self._rescalePeakListLabels(spectrumView, peakListView, self._GLPeakListLabels[peakListView])
+
           if peakListView.buildPeakListLabels:
             peakListView.buildPeakListLabels = False
 
@@ -3416,7 +3453,7 @@ void main()
               self._GLPeakListLabels[peakListView].renderMode = GLRENDERMODE_REBUILD
 
             self._buildPeakListLabels(spectrumView, peakListView)
-            self._rescalePeakListLabels(spectrumView, peakListView)
+            # self._rescalePeakListLabels(spectrumView, peakListView, self._GLPeakListLabels[peakListView])
 
   def drawIntegralLists(self):
     if self._parent.isDeleted:
@@ -7104,7 +7141,7 @@ class GLPeakLabelsArray(GLVertexArray):
                                           dimension=2, GLContext=GLContext)
     self.spectrumView = spectrumView
     self.peakListView = peakListView
-
+    self.stringList = []
 
 class GLIntegralArray(GLVertexArray):
   def __init__(self, GLContext=None, spectrumView=None, integralListView=None):

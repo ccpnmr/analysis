@@ -414,6 +414,9 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     """
     self.project = project
 
+    # TODO:ED use return to disable sidebar notifiers
+    # return
+
     # Register notifiers to maintain sidebar
     for cls in classesInSideBar.values():
       className = cls.className

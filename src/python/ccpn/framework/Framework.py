@@ -674,6 +674,10 @@ class Framework:
     if undo is not None:                # ejb - changed from if undo:
       # set undo step
       undo.newWaypoint()                # DO NOT CHANGE
+
+      # if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
+      #   self._storedState = self.ui.mainWindow.sideBar._saveExpandedState()
+
       undo.increaseWaypointBlocking()
     if not self._echoBlocking:
 
@@ -713,6 +717,9 @@ class Framework:
 
     if undo is not None:                # ejb - changed from if undo:
       undo.decreaseWaypointBlocking()
+
+      # if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
+      #   self.ui.mainWindow.sideBar._restoreExpandedState(self._storedState)
 
     if self._echoBlocking > 0:
       # If statement should always be True, but to avoid weird behaviour in error situations we check

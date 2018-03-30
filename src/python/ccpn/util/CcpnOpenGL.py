@@ -5479,7 +5479,7 @@ void main()
         else:
           labelling['0'] = lStrings[1::2]     # [ls for ls in lStrings if check(ls)]
 
-      while len(labelling['1']) > 12:
+      while len(labelling['1']) > (self.h/20.0):
         #restrict Y axis labelling
         lStrings = labelling['1']
         if check(lStrings[0]):

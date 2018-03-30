@@ -27,7 +27,9 @@ import sys, os
 import math, random
 import ctypes
 import functools
-import threading
+from time import sleep
+from threading import Thread
+from multiprocessing import Process, Manager
 
 from imageio import imread
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
@@ -312,6 +314,7 @@ class CcpnGLWidget(QOpenGLWidget):
       self.current = None
 
     self._threads = {}
+    self._threadUpdate = False
 
     # TODO:ED need to check how this works
     # for spectrumView in self._parent.spectrumViews:
@@ -432,6 +435,9 @@ class CcpnGLWidget(QOpenGLWidget):
     self.GLSignals.glMouseMoved.disconnect()
     self.GLSignals.glEvent.disconnect()
     self.GLSignals.glAxisLockChanged.disconnect()
+
+  def threadUpdate(self):
+    self.update()
 
   def rescale(self):
     """
@@ -3097,7 +3103,6 @@ void main()
 
   def _threadBuildPeakListLabels(self, spectrumView, peakListView, drawList, glStrip):
     tempList = []
-
     pls = peakListView.peakList
 
     # trap IntegralLists that are stored under the peakListView
@@ -3110,7 +3115,33 @@ void main()
     # self._rescalePeakListLabels(spectrumView, peakListView, drawList)
     drawList.stringList = tempList
     drawList.renderMode = GLRENDERMODE_RESCALE
+
+  def _threadBuildAllPeakListLabels(self, viewList, glStrip):
+    for ii, view in enumerate(viewList):
+      spectrumView = view[0]
+      peakListView = view[1]
+      self._threadBuildPeakListLabels(spectrumView, peakListView,
+                                      self._GLPeakListLabels[peakListView],
+                                      glStrip)
+
     glStrip.GLSignals.emitPaintEvent(source=glStrip)
+
+  def _buildAllPeakListLabels(self, viewList):
+    for ii, view in enumerate(viewList):
+      spectrumView = view[0]
+      peakListView = view[1]
+      if peakListView not in self._GLPeakListLabels.keys():
+        self._GLPeakListLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
+                                                                 spectrumView=spectrumView,
+                                                                 peakListView=peakListView)
+        drawList = self._GLPeakListLabels[peakListView]
+        drawList.stringList = []
+
+    buildPeaks = Thread(name=str(self._parent.pid),
+                        target=self._threadBuildAllPeakListLabels,
+                        args=(viewList, self))
+    buildPeaks.daemon = True
+    buildPeaks.start()
 
   def _buildPeakListLabels(self, spectrumView, peakListView):
     # spectrum = spectrumView.spectrum
@@ -3126,9 +3157,13 @@ void main()
 
       # drawList.clearArrays()
       drawList.stringList = []
-      buildPeaks = threading.Thread(name=str(self._parent.pid+spectrumView.pid),
-                                    target=self._threadBuildPeakListLabels,
-                                    args=(spectrumView, peakListView, drawList, self))
+
+      # if spectrumView in self._threads:
+      #   self._threads[spectrumView].terminate()
+
+      buildPeaks = Thread(name=str(self._parent.pid+spectrumView.pid),
+                          target=self._threadBuildPeakListLabels,
+                          args=(spectrumView, peakListView, drawList, self))
       # self._threads[spectrumView] = buildPeaks
       buildPeaks.start()
       return
@@ -3439,6 +3474,7 @@ void main()
     if self._parent.isDeleted:
       return
 
+    _buildList = []
     for spectrumView in self._parent.spectrumViews:
       for peakListView in spectrumView.peakListViews:
 
@@ -3454,7 +3490,11 @@ void main()
             if peakListView in self._GLPeakListLabels.keys():
               self._GLPeakListLabels[peakListView].renderMode = GLRENDERMODE_REBUILD
 
-            self._buildPeakListLabels(spectrumView, peakListView)
+            # self._buildPeakListLabels(spectrumView, peakListView)
+            _buildList.append([spectrumView, peakListView])
+
+    if _buildList:
+      self._buildAllPeakListLabels(_buildList)
             # self._rescalePeakListLabels(spectrumView, peakListView, self._GLPeakListLabels[peakListView])
 
   def drawIntegralLists(self):

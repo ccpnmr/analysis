@@ -62,6 +62,11 @@ if __name__ == '__main__':
   from PyQt5 import QtGui, QtWidgets
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+  from ccpn.ui.gui.widgets.CheckBox import EditableCheckBox, CheckBox
+  from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
+
+
+
 
   app = TestApplication()
   win = QtWidgets.QMainWindow()
@@ -69,6 +74,20 @@ if __name__ == '__main__':
   moduleArea = CcpnModuleArea(mainWindow=None)
 
   module = MyModule(mainWindow=None, name='My Module')
+  cb = EditableCheckBox(module.settingsWidget, text='HELLO', checked=False,  grid=(0,0))
+
+  state = module.widgetsState
+  cb.setText('HEY')
+  cb.setChecked(True)
+  print(cb.text())
+  module.restoreWidgetsState(**state)
+
+  # module._findChildren(module)
+  # for w in module._allChildren:
+  #   if w.__class__.__name__ in CommonWidgets:
+  #     if w not in module.widgetsState:
+  #       print('@@', w)
+
   moduleArea.addModule(module)
 
   win.setCentralWidget(moduleArea)
@@ -76,8 +95,9 @@ if __name__ == '__main__':
   win.setWindowTitle('Testing %s' % module.moduleName)
   win.show()
 
-  app.start()
 
+  app.start()
+  win.close()
 
 
 

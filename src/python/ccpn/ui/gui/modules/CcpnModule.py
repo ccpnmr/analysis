@@ -348,6 +348,13 @@ class CcpnModule(Dock, DropBase):
     self.update()     # ejb - make sure that the widgetArea starts the correct size
 
     self._instances.add(ref(self))
+    self._allChildren = set()
+
+  def _findChildren(self, widget):
+    for i in widget.children():
+      self._allChildren.update({i})
+      self._findChildren(i)
+
 
   @classmethod
   def getInstances(cls):
@@ -399,17 +406,29 @@ class CcpnModule(Dock, DropBase):
   # def widgetsState(self, value):
   #   self._widgetsState = value
 
+
+
   @widgetsState.getter
   def widgetsState(self):
     '''return  {"variableName":"value"}  of all gui Variables  '''
     widgetsState = {}
+    allStorableWidgets = []
+    self._findChildren(self)
+    for num, w in enumerate(self._allChildren):
+      if w.__class__.__name__ in CommonWidgets:
+        allStorableWidgets.append(w)
+        setattr(self, w.__class__.__name__+str(num), w)
+        print('Storing', w.__class__.__name__ + str(num))
+
     for varName, varObj in vars(self).items():
+
       if isinstance(varObj, _Pulldown):
         widgetsState[varName] = varObj.getText()
         continue
       if varObj.__class__.__name__ in CommonWidgets.keys():
         try:  # try because widgets can be dinamically deleted
           widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0].__name__)()
+
         except Exception as e:
           getLogger().debug('Error %s', e)
     self._kwargs = widgetsState
@@ -417,6 +436,16 @@ class CcpnModule(Dock, DropBase):
 
   def restoreWidgetsState(self, **widgetsState):
     'Restore the gui params. To Call it: _setParams(**{"variableName":"value"})  '
+    allStorableWidgets = []
+    self._findChildren(self)
+
+    for num, w in enumerate(self._allChildren):
+      if w.__class__.__name__ in CommonWidgets:
+        allStorableWidgets.append(w)
+        setattr(self, w.__class__.__name__ + str(num), w)
+        print('Restoring', w.__class__.__name__ + str(num))
+
+
     for variableName, value in widgetsState.items():
       try:
         widget = getattr(self, str(variableName))

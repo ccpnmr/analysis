@@ -99,6 +99,9 @@ class SpectraSelectionWidget(Widget,Base):
         self.scrollAreaWidgetContents = Frame(self, setLayout=True)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.scrollAreaWidgetContents.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        self.allSpectraCheckBoxes.append(self.selectAllSpectraCheckBox)
+        self.allSG_CheckBoxes.append(self.selectAllSpectrumGroupsCheckBox)
+
 
 
         self._addSpectrumCheckBoxes()
@@ -121,6 +124,7 @@ class SpectraSelectionWidget(Widget,Base):
       for i, spectrum in enumerate(self.project.spectra, start=2):
         self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(spectrum.pid), grid=(i, 0), callback=self._toggleCheckBoxSelectAllSpectra, hAlign='l',vAlign='t')
         self.allSpectraCheckBoxes.append(self.spectrumCheckBox)
+
 
   def _checkSpectraFromCurrentStrip(self):
     if self.current.strip is not None:

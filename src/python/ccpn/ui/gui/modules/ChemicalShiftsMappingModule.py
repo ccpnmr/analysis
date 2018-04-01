@@ -259,6 +259,13 @@ class ChemicalShiftsMapping(CcpnModule):
           # self._hideNonNecessaryNmrAtomsOption()
           self._setThresholdLineBySTD()
 
+      self.__addCheckBoxesAttr(self.nmrAtomsCheckBoxes)
+
+  def __addCheckBoxesAttr(self, checkboxes):
+    '''For restoring layouts only '''
+    for n, w in enumerate(checkboxes):
+      setattr(self,w.text(), w )
+
 
   def _availableNmrAtoms(self,source=None, nmrAtomType = None):
     '''
@@ -496,6 +503,8 @@ class ChemicalShiftsMapping(CcpnModule):
     self.inputLabel = Label(self.scrollAreaWidgetContents, text='Select Data Input', grid=(i, 0), vAlign='t')
     self.spectraSelectionWidget = SpectraSelectionWidget(self.scrollAreaWidgetContents, mainWindow=self.mainWindow, grid=(i,1), gridSpan=(1,2))
     self._checkSpectraWithPeakListsOnly()
+    self.__addCheckBoxesAttr(self.spectraSelectionWidget.allSpectraCheckBoxes)
+    self.__addCheckBoxesAttr(self.spectraSelectionWidget.allSG_CheckBoxes)
 
     # self.spectraSelectionWidget.setMaximumHeight(150)
     i += 1

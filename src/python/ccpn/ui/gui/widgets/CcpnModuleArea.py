@@ -273,7 +273,8 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     # self.modules[CcpnModule.name(module)] = module
     self.modules[module.name()] = module                # ejb - testing
     # self.movePythonConsole()
-    self.mainWindow.application.ccpnModules = self.ccpnModules
+    if self.mainWindow is not None:
+      self.mainWindow.application.ccpnModules = self.ccpnModules
     return module
 
   def getContainer(self, obj):

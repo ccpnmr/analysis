@@ -990,4 +990,4 @@ class StructureTable(QuickTableStructure):
   #   return super(StructureTable, self).paintEvent(event)
 
 from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
-CommonWidgets.update({StructureTable.__name__: (StructureTable._getPullDownSelection, StructureTable._selectPullDown)})
+CcpnModule.CommonWidgets.update({StructureTable.__name__: (StructureTable._getPullDownSelection, StructureTable._selectPullDown)})

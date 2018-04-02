@@ -47,6 +47,7 @@ from ccpn.util.CcpnOpenGL import CcpnGLWidget, GLPeakListArray, GLVertexArray, G
                                   GLString
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 from ccpn.core.lib.Notifiers import Notifier
+import ccpn.util.Phasing as Phasing
 
 REGION_COLOURS = {
   'green': (0, 1.0, 0.1, 0.15),
@@ -158,7 +159,13 @@ class Gui1dWidget(CcpnGLWidget):
 
     drawList = self._GLPeakLists[peakListView]
 
-    if drawList.renderMode == GLRENDERMODE_REBUILD:
+    if drawList.renderMode == GLRENDERMODE_RESCALE:
+      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
+      self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
+      self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView,
+                                  drawList=self._GLPeakListLabels[peakListView])
+
+    elif drawList.renderMode == GLRENDERMODE_REBUILD:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
 
       # drawList.refreshMode = GLRENDERMODE_DRAW
@@ -170,12 +177,12 @@ class Gui1dWidget(CcpnGLWidget):
 
       symbolType = self._preferences.peakSymbolType
       symbolWidth = self._preferences.peakSymbolSize / 2.0
-      lineThickness = self._preferences.peakSymbolThickness / 2.0
+      # lineThickness = self._preferences.peakSymbolThickness / 2.0
 
       x = abs(self.pixelX)
       y = abs(self.pixelY)
       # fix the aspect ratio of the cross to match the screen
-      minIndex = 0 if x <= y else 1
+      # minIndex = 0 if x <= y else 1
       # pos = [symbolWidth, symbolWidth * y / x]
       # w = r = pos[minIndex]
 
@@ -293,11 +300,6 @@ class Gui1dWidget(CcpnGLWidget):
 
           index += 4
           drawList.numVertices += 4
-
-    elif drawList.renderMode == GLRENDERMODE_RESCALE:
-      drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
-      self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
-      self._rescalePeakListLabels(spectrumView=spectrumView, peakListView=peakListView)
 
   def _rescalePeakList(self, spectrumView, peakListView):
     drawList = self._GLPeakLists[peakListView]
@@ -582,8 +584,8 @@ class Gui1dWidget(CcpnGLWidget):
                                 color=(colR, colG, colB, 1.0), GLContext=self,
                                 object=peak))
 
-  def _rescalePeakListLabels(self, spectrumView, peakListView):
-    drawList = self._GLPeakListLabels[peakListView]
+  def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
+    # drawList = self._GLPeakListLabels[peakListView]
     # strip = self._parent
 
     # pls = peakListView.peakList
@@ -653,3 +655,62 @@ class Gui1dWidget(CcpnGLWidget):
 
     self.current.peaks = peaks
 
+  def _newStatic1DTraceData(self, spectrumView, tracesDict,
+                            point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
+                            ph0=None, ph1=None, pivot=None):
+
+    try:
+      # ignore for 1D if already in the traces list
+      for thisTrace in tracesDict:
+        if spectrumView == thisTrace.spectrumView:
+          return
+
+      pointInt = [1 + int(pnt + 0.5) for pnt in point]
+      data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
+      preData = data
+
+      if ph0 is not None and ph1 is not None and pivot is not None:
+        preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
+
+      x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency)])
+      # y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
+      #     np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
+
+      colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
+      colR = int(colour.strip('# ')[0:2], 16) / 255.0
+      colG = int(colour.strip('# ')[2:4], 16) / 255.0
+      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+      tracesDict.append(GLVertexArray(numLists=1,
+                                      renderMode=GLRENDERMODE_REBUILD,
+                                      blendMode=False,
+                                      drawMode=GL.GL_LINE_STRIP,
+                                      dimension=2,
+                                      GLContext=self))
+
+      numVertices = len(x)
+      hSpectrum = tracesDict[-1]
+      hSpectrum.indices = numVertices
+      hSpectrum.numVertices = numVertices
+      hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+      hSpectrum.colors = np.array((self._phasingTraceColour) * numVertices, dtype=np.float32)
+      hSpectrum.vertices = np.zeros((hSpectrum.numVertices * 2), dtype=np.float32)
+
+      # x = np.append(x, [xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
+      #                   xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)])
+      # # y = np.append(y, [positionPixel[1], positionPixel[1]])
+      # hSpectrum.colors = np.append(hSpectrum.colors, ((colR, colG, colB, 1.0),
+      #                                       (colR, colG, colB, 1.0)))
+
+      hSpectrum.vertices[::2] = x
+      hSpectrum.vertices[1::2] = preData
+
+      # store the pre-phase data
+      hSpectrum.data = data
+      hSpectrum.values = [spectrumView, point, xDataDim,
+                          xMinFrequency, xMaxFrequency,
+                          xNumPoints, positionPixel]
+      hSpectrum.spectrumView = spectrumView
+
+    except Exception as es:
+      tracesDict = []

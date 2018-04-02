@@ -77,6 +77,20 @@ def _calibrateX1D(spectrum, currentPosition, newPosition):
   shift = newPosition - currentPosition
   spectrum.positions = spectrum.positions+shift
 
+  # TODO:ED - LUCA these need to change with the shift in position
+  # lims = list(spectrum.aliasingLimits[0])
+  # val0 = spectrum.mainSpectrumReferences[0].valueToPoint(lims[0])
+  # val1 = spectrum.mainSpectrumReferences[0].valueToPoint(lims[1])
+  # valSh = spectrum.mainSpectrumReferences[0].valueToPoint(newPosition) - \
+  #           spectrum.mainSpectrumReferences[0].valueToPoint(currentPosition)
+  # lims[0] = np.round(lims[0]+shift, 5)
+  # lims[1] = np.round(lims[1]+shift, 5)
+  #
+  # spectrum.aliasingLimits = ((spectrum.mainSpectrumReferences[0].pointToValue(val0+valSh),
+  #                             spectrum.mainSpectrumReferences[0].pointToValue(val1+valSh)),)
+  # lim2 = spectrum.aliasingLimits
+  # pass
+
 def _calibrateY1D(spectrum, currentPosition, newPosition):
   shift = newPosition - currentPosition
   spectrum.intensities = spectrum.intensities+shift

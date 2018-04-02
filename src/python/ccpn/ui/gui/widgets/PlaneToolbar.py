@@ -261,4 +261,4 @@ class PlaneToolbar(ToolBar):
       if self.nextPlaneCallback:
         self.nextPlaneCallback(n)
 
-    self.strip._rebuildContours()
+    self.strip._rebuildStripContours()

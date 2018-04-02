@@ -2677,7 +2677,6 @@ void main()
 
     if drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
-
       self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
       self._rescalePeakListLabels(spectrumView=spectrumView,
                                   peakListView=peakListView,
@@ -4587,66 +4586,6 @@ void main()
       GL.glVertex2d(self._startCoordinate[0], self._startCoordinate[1])
       GL.glVertex2d(self.cursorCoordinate[0], self.cursorCoordinate[1])
       GL.glEnd()
-
-  def _newStatic1DTraceData(self, spectrumView, tracesDict,
-                            point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
-                            ph0=None, ph1=None, pivot=None):
-
-    try:
-      # ignore for 1D if already in the traces list
-      for thisTrace in tracesDict:
-        if spectrumView == thisTrace.spectrumView:
-          return
-
-      pointInt = [1 + int(pnt + 0.5) for pnt in point]
-      data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
-      preData = data
-
-      if ph0 is not None and ph1 is not None and pivot is not None:
-        preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
-
-      x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency)])
-      # y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
-      #     np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
-
-      colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
-
-      tracesDict.append(GLVertexArray(numLists=1,
-                                      renderMode=GLRENDERMODE_REBUILD,
-                                      blendMode=False,
-                                      drawMode=GL.GL_LINE_STRIP,
-                                      dimension=2,
-                                      GLContext=self))
-
-      numVertices = len(x)
-      hSpectrum = tracesDict[-1]
-      hSpectrum.indices = numVertices
-      hSpectrum.numVertices = numVertices
-      hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
-      hSpectrum.colors = np.array((self._phasingTraceColour) * numVertices, dtype=np.float32)
-      hSpectrum.vertices = np.zeros((hSpectrum.numVertices * 2), dtype=np.float32)
-
-      # x = np.append(x, [xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
-      #                   xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)])
-      # # y = np.append(y, [positionPixel[1], positionPixel[1]])
-      # hSpectrum.colors = np.append(hSpectrum.colors, ((colR, colG, colB, 1.0),
-      #                                       (colR, colG, colB, 1.0)))
-
-      hSpectrum.vertices[::2] = x
-      hSpectrum.vertices[1::2] = preData
-
-      # store the pre-phase data
-      hSpectrum.data = data
-      hSpectrum.values = [spectrumView, point, xDataDim,
-                          xMinFrequency, xMaxFrequency,
-                          xNumPoints, positionPixel]
-      hSpectrum.spectrumView = spectrumView
-
-    except Exception as es:
-      tracesDict = []
 
   def _newStaticHTraceData(self, spectrumView, tracesDict,
                             point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,

@@ -104,7 +104,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       self._spectrumUtilActions[aName] = action
 
   def _rebuildContours(self):
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
 
     for specViews in self.spectrumViews:

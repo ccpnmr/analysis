@@ -97,7 +97,7 @@ class SpectrumToolBar(ToolBar):
     return contextMenu
 
   def _updateVisiblePeakLists(self, spectrumView=None, visible=True):
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
 
@@ -156,7 +156,7 @@ class SpectrumToolBar(ToolBar):
       st.removeSpectrumView(None)
 
     # spawn a redraw of the GL windows
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitPaintEvent()
 

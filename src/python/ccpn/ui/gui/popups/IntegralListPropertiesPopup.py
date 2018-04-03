@@ -122,7 +122,7 @@ class IntegralListPropertiesPopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
 
     self.project._startCommandEchoBlock('_applyChanges', quiet=True)

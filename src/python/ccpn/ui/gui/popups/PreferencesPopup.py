@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore
 
 import os
 from functools import partial
@@ -86,7 +86,7 @@ class PreferencesPopup(CcpnDialog):
     self.accept()
 
     # prompt the GLwidgets to update
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS])

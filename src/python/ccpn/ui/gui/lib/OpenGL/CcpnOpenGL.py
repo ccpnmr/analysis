@@ -29,8 +29,8 @@ import ctypes
 import functools
 from time import sleep
 from threading import Thread
-from multiprocessing import Process, Manager
-
+from multiprocessing import Process, Manager, pool
+from queue import Queue
 from imageio import imread
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 from PyQt5.QtCore import (QPoint, QPointF, QRect, QRectF, QSize, Qt, QTime,
@@ -3114,13 +3114,19 @@ void main()
     # self._rescalePeakListLabels(spectrumView, peakListView, drawList)
     drawList.stringList = tempList
     drawList.renderMode = GLRENDERMODE_RESCALE
+    # glStrip.GLSignals.emitPaintEvent(source=glStrip)
 
-  def _threadBuildAllPeakListLabels(self, viewList, glStrip):
+  def _threadBuildAllPeakListLabels(self, viewList, glStrip, _outList):
+  # def _threadBuildAllPeakListLabels(self, threadQueue):#viewList, glStrip, _outList):
+  #   viewList = threadQueue[0]
+  #   glStrip = threadQueue[1]
+  #   _outList = threadQueue[2]
+
     for ii, view in enumerate(viewList):
       spectrumView = view[0]
       peakListView = view[1]
       self._threadBuildPeakListLabels(spectrumView, peakListView,
-                                      self._GLPeakListLabels[peakListView],
+                                      _outList[peakListView],
                                       glStrip)
 
     glStrip.GLSignals.emitPaintEvent(source=glStrip)
@@ -3136,10 +3142,27 @@ void main()
         drawList = self._GLPeakListLabels[peakListView]
         drawList.stringList = []
 
+    # if self._parent in self._threads:
+    #   print('>>>here')
+    #   # if self._threads[self._parent]._pool[0].is_alive():
+    #   if self._threads[self._parent].is_alive():
+    #     print('  >>>kill')
+    #     # self._threads[self._parent].terminate()
+    #     # self._threads[self._parent].join()
+
+    # buildQueue = Queue()
+    buildQueue = (viewList, self, self._GLPeakListLabels)
     buildPeaks = Thread(name=str(self._parent.pid),
                         target=self._threadBuildAllPeakListLabels,
-                        args=(viewList, self))
-    buildPeaks.daemon = True
+                        args=buildQueue)
+    # buildPeaks.daemon = True
+
+    # buildPeaks = pool.ThreadPool(processes=1)
+    self._threads[self._parent] = buildPeaks
+
+    # buildPeaks.apply_async(self._threadBuildAllPeakListLabels,
+    #                         args=(viewList, self))
+
     buildPeaks.start()
 
   def _buildPeakListLabels(self, spectrumView, peakListView):

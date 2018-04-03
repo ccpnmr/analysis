@@ -149,7 +149,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
       self.strip = self.current.strip
       if self.strip is not None:
         try:
-          self.GLWidget = self.strip._testCcpnOpenGLWidget
+          self.GLWidget = self.strip._CcpnGLWidget
         except Exception as es:
           getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.strip)
 
@@ -170,7 +170,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
 
     if not self.GLWidget and self.current.strip:
       try:
-        self.setGLWidget(self.current.strip._testCcpnOpenGLWidget)
+        self.setGLWidget(self.current.strip._CcpnGLWidget)
       except Exception as es:
         getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.current.strip)
 

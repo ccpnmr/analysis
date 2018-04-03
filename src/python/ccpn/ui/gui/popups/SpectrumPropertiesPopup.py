@@ -26,7 +26,6 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 import os
-import sys
 from functools import partial
 
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -137,7 +136,7 @@ class SpectrumPropertiesPopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
 
     self.project._startCommandEchoBlock('_applyChanges', quiet=True)
@@ -1177,7 +1176,7 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
     applyAccept = False
     oldUndo = self.project._undo.numItems()
 
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
 
     self.project._startCommandEchoBlock('_applyChanges', quiet=True)

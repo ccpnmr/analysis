@@ -30,7 +30,7 @@ import collections
 from ccpn.util import Colour
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
-from ccpn.core.IntegralList import IntegralList
+
 #import pyqtgraph as pg
 
 #from ccpn.ui.gui.modules.spectrumPane.PeakListItem import PeakListItem
@@ -120,7 +120,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsItem):
 
     # repaint all displays - this is called for each spectrumView in the spectrumDisplay
     # all are attached to the same click
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
 

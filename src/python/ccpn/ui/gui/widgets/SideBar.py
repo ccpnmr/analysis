@@ -44,7 +44,6 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintList import RestraintList
-from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 from ccpn.ui.gui.guiSettings import sidebarFont
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListPopup
@@ -509,7 +508,6 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     """Removes the specified item from the sidebar and deletes it from the project.
     NB, the clean-up of the side bar is done through notifiers
     """
-    from ccpnmodel.ccpncore.memops.ApiError import ApiError
     ll = self._saveExpandedState()
 
     for obj in objs:
@@ -560,7 +558,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
               self.project._endCommandEchoBlock()
 
     #  Force redrawing
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS])
 

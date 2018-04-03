@@ -44,7 +44,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore
 
 # import math
 import numpy
@@ -62,7 +62,6 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar #, PlaneSelectorWidget
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Logging import getLogger
-import typing
 
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 
@@ -202,7 +201,7 @@ class GuiStripNd(GuiStrip):
     # self._rebuildContours()
 
     # redraw the contours
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
 
     for specNum, thisSpecView in enumerate(self.spectrumViews):
@@ -362,7 +361,7 @@ class GuiStripNd(GuiStrip):
 
   def showExportDialog(self):
     from ccpn.ui.gui.widgets.CustomExportDialog import CustomGLExportDialog
-    self.exportDialog = CustomGLExportDialog(self._testCcpnOpenGLWidget, spectrumDimension='nD')
+    self.exportDialog = CustomGLExportDialog(self._CcpnGLWidget, spectrumDimension='nD')
     self.exportDialog.show(self.viewBox)
 
   def copyStrip(self):
@@ -524,8 +523,8 @@ class GuiStripNd(GuiStrip):
   def _updateTraces(self):
 
     try:
-      self._testCcpnOpenGLWidget.updateHTrace = self.hTraceAction.isChecked()
-      self._testCcpnOpenGLWidget.updateVTrace = self.vTraceAction.isChecked()
+      self._CcpnGLWidget.updateHTrace = self.hTraceAction.isChecked()
+      self._CcpnGLWidget.updateVTrace = self.vTraceAction.isChecked()
 
       # don't need this now - should be turned on with togglePhasingConsole, mode: PC
       # for strip in self.spectrumDisplay.strips:

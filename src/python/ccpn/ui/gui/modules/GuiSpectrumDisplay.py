@@ -47,7 +47,7 @@ from ccpn.ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
 #from ccpn.ui.gui.widgets.Widget import ScrollableWidget, Widget
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, showInfo
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 #from ccpn.ui.gui.widgets.BasePopup import BasePopup
 #from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -277,7 +277,7 @@ class GuiSpectrumDisplay(CcpnModule):
           self.current.strip = self.strips[0]
 
         # spawn a redraw of the GL windows
-        from ccpn.util.CcpnOpenGL import GLNotifier
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
         GLSignals = GLNotifier(parent=None)
         GLSignals.emitPaintEvent()
 
@@ -419,13 +419,13 @@ class GuiSpectrumDisplay(CcpnModule):
     # event = data['event']
     # mousePosition = event.pos()
     # if self.current.strip:
-    #   position = list(self.current.strip._testCcpnOpenGLWidget.mapMouseToAxis(mousePosition))
+    #   position = list(self.current.strip._CcpnGLWidget.mapMouseToAxis(mousePosition))
     #   orderedAxes = self.current.strip.orderedAxes
     #   if self.current.peak:
     #     peakPosition = self.current.peak.position
     #     minPeakPos = min(peakPosition)
-    #     bw = self.current.strip._testCcpnOpenGLWidget.boxWidth
-    #     bh = self.current.strip._testCcpnOpenGLWidget.boxHeight
+    #     bw = self.current.strip._CcpnGLWidget.boxWidth
+    #     bh = self.current.strip._CcpnGLWidget.boxHeight
     #     pW = 0
     #     pH = 0
     #     if len(peakPosition) > 0:
@@ -729,14 +729,14 @@ class GuiSpectrumDisplay(CcpnModule):
         for ss in self.strips[:-1]:
           ss.plotWidget.plotItem.axes['right']['item'].hide()
           try:
-            ss._testCcpnOpenGLWidget.setRightAxisVisible(axisVisible=False)
+            ss._CcpnGLWidget.setRightAxisVisible(axisVisible=False)
           except Exception as es:
             getLogger().debug('Error: OpenGL widget not instantiated')
 
         self.strips[-1].plotWidget.plotItem.axes['right']['item'].show()
 
         try:
-          self.strips[-1]._testCcpnOpenGLWidget.setRightAxisVisible(axisVisible=True)
+          self.strips[-1]._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
         except Exception as es:
           getLogger().debug('Error: OpenGL widget not instantiated')
 
@@ -744,7 +744,7 @@ class GuiSpectrumDisplay(CcpnModule):
         for ss in self.strips:
           ss.plotWidget.plotItem.axes['right']['item'].show()
           try:
-            ss._testCcpnOpenGLWidget.setRightAxisVisible(axisVisible=True)
+            ss._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
           except Exception as es:
             getLogger().debug('Error: OpenGL widget not instantiated')
 
@@ -793,10 +793,10 @@ class GuiSpectrumDisplay(CcpnModule):
       traceScale = fromStrip.spectrumViews[0].traceScale
       toStrip.setTraceScale(traceScale)
 
-      # hTrace = fromStrip._testCcpnOpenGLWidget._updateHTrace
-      # vTrace = fromStrip._testCcpnOpenGLWidget._updateVTrace
-      # toStrip._testCcpnOpenGLWidget._updateHTrace = hTrace
-      # toStrip._testCcpnOpenGLWidget._updateVTrace = vTrace
+      # hTrace = fromStrip._CcpnGLWidget._updateHTrace
+      # vTrace = fromStrip._CcpnGLWidget._updateVTrace
+      # toStrip._CcpnGLWidget._updateHTrace = hTrace
+      # toStrip._CcpnGLWidget._updateVTrace = vTrace
       # toStrip.hTraceAction.setChecked(hTrace)
       # toStrip.vTraceAction.setChecked(vTrace)
 

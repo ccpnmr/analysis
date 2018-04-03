@@ -411,7 +411,7 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
 
     # repaint all displays - this is called for each spectrumView in the spectrumDisplay
     # all are attached to the same click
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
     

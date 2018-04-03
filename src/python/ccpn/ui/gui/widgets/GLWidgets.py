@@ -25,7 +25,7 @@ __date__ = "$Date$"
 
 import sys
 import numpy as np
-from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
+from PyQt5 import QtWidgets
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -35,18 +35,12 @@ except ImportError:
             "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
-from ccpn.util.Logging import getLogger
-from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
-from ccpn.util.CcpnOpenGL import CcpnGLWidget, GLPeakListArray, GLVertexArray, GLIntegralArray, \
-                                  GLRENDERMODE_IGNORE,\
-                                  GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE,\
-                                  GLRENDERMODE_REBUILD, GLREFRESHMODE_NEVER,\
-                                  GLREFRESHMODE_ALWAYS, GLREFRESHMODE_REBUILD,\
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLPeakListArray, GLVertexArray, GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE,\
+                                  GLRENDERMODE_REBUILD, GLREFRESHMODE_REBUILD,\
                                   LENCOLORS, LENPID,\
                                   GLString
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
-from ccpn.core.lib.Notifiers import Notifier
 import ccpn.util.Phasing as Phasing
 
 REGION_COLOURS = {

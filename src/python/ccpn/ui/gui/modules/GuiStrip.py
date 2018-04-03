@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 
 import pyqtgraph as pg
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore
 
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
@@ -108,14 +108,14 @@ class GuiStrip(Frame):
       else:
         from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
 
-      self._testCcpnOpenGLWidget = CcpnGLWidget(parent=self, mainWindow=self.mainWindow)
-      self.getLayout().addWidget(self._testCcpnOpenGLWidget, 1, 0)    # (3,0) if not hiding plotWidget
-      self._testCcpnOpenGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding
+      self._CcpnGLWidget = CcpnGLWidget(parent=self, mainWindow=self.mainWindow)
+      self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)    # (3,0) if not hiding plotWidget
+      self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding
                                                , QtWidgets.QSizePolicy.Expanding)
 
       # set the ID label in the new widget
-      self._testCcpnOpenGLWidget.setStripID('.'.join(self.id.split('.')))
-      self._testCcpnOpenGLWidget.gridVisible = self.application.preferences.general.showGrid
+      self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
+      self._CcpnGLWidget.gridVisible = self.application.preferences.general.showGrid
 
     # self.plotWidgetOverlay = pg.PlotWidget(self, useOpenGL=useOpenGL)  #    make a copy
     # self.plotWidgetOverlay.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
@@ -225,12 +225,12 @@ class GuiStrip(Frame):
       self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
 
       try:
-        self._testCcpnOpenGLWidget._axisLocked = spectrumDisplay.strips[0]._testCcpnOpenGLWidget._axisLocked
+        self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
 
-        # self._testCcpnOpenGLWidget._updateHTrace = spectrumDisplay.strips[0]._testCcpnOpenGLWidget._updateHTrace
-        # self._testCcpnOpenGLWidget._updateVTrace = spectrumDisplay.strips[0]._testCcpnOpenGLWidget._updateVTrace
-        # self.hTraceAction.setChecked(self._testCcpnOpenGLWidget._updateHTrace)
-        # self.vTraceAction.setChecked(self._testCcpnOpenGLWidget._updateVTrace)
+        # self._CcpnGLWidget._updateHTrace = spectrumDisplay.strips[0]._CcpnGLWidget._updateHTrace
+        # self._CcpnGLWidget._updateVTrace = spectrumDisplay.strips[0]._CcpnGLWidget._updateVTrace
+        # self.hTraceAction.setChecked(self._CcpnGLWidget._updateHTrace)
+        # self.vTraceAction.setChecked(self._CcpnGLWidget._updateVTrace)
 
       except Exception as es:
         getLogger().debug('OpenGL widget not instantiated')
@@ -247,7 +247,7 @@ class GuiStrip(Frame):
     self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
 
     try:
-      self._testCcpnOpenGLWidget.gridVisible = self.application.preferences.general.showGrid
+      self._CcpnGLWidget.gridVisible = self.application.preferences.general.showGrid
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 
@@ -258,14 +258,14 @@ class GuiStrip(Frame):
     # self.show()
 
   def viewRange(self):
-    return self._testCcpnOpenGLWidget.viewRange()
+    return self._CcpnGLWidget.viewRange()
 
   @property
   def gridIsVisible(self):
     "True if grid is visible"
 
     try:
-      return self._testCcpnOpenGLWidget.gridVisible
+      return self._CcpnGLWidget.gridVisible
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 
@@ -276,7 +276,7 @@ class GuiStrip(Frame):
     "True if crosshair is visible"
 
     try:
-      return self._testCcpnOpenGLWidget.crossHairVisible
+      return self._CcpnGLWidget.crossHairVisible
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 
@@ -314,7 +314,7 @@ class GuiStrip(Frame):
       self.setStripLabelText(callbackDict['object'].pid)
 
     try:
-      self._testCcpnOpenGLWidget.setStripIDString(callbackDict['object'].pid)
+      self._CcpnGLWidget.setStripIDString(callbackDict['object'].pid)
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 
@@ -333,7 +333,7 @@ class GuiStrip(Frame):
     # GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKNOTIFY], targets=data)
 
     try:
-      self._testCcpnOpenGLWidget._processPeakNotifier(data)
+      self._CcpnGLWidget._processPeakNotifier(data)
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 
@@ -346,7 +346,7 @@ class GuiStrip(Frame):
     # GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKNOTIFY], targets=data)
 
     try:
-      self._testCcpnOpenGLWidget._processIntegralNotifier(data)
+      self._CcpnGLWidget._processIntegralNotifier(data)
     except Exception as es:
       getLogger().debug('OpenGL widget not instantiated')
 
@@ -355,7 +355,7 @@ class GuiStrip(Frame):
     # self.plotWidget.highlightAxes(self is self.current.strip)
 
     try:
-      self._testCcpnOpenGLWidget.highlightCurrentStrip(self is self.current.strip)
+      self._CcpnGLWidget.highlightCurrentStrip(self is self.current.strip)
 
       # # spawn a redraw of the GL windows
       # from ccpn.util.CcpnOpenGL import GLNotifier
@@ -418,7 +418,7 @@ class GuiStrip(Frame):
   def _newPhasingTrace(self):
 
     try:
-      self._testCcpnOpenGLWidget.newTrace()
+      self._CcpnGLWidget.newTrace()
     except Exception as es:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -464,7 +464,7 @@ class GuiStrip(Frame):
   def removePhasingTraces(self):
 
     try:
-      self._testCcpnOpenGLWidget.clearStaticTraces()
+      self._CcpnGLWidget.clearStaticTraces()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -484,7 +484,7 @@ class GuiStrip(Frame):
     # update the static traces from the phasing console
     # redraw should update the display
     try:
-      self._testCcpnOpenGLWidget.rescaleStaticTraces()
+      self._CcpnGLWidget.rescaleStaticTraces()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
     return
@@ -560,7 +560,7 @@ class GuiStrip(Frame):
 
     # TODO:ED remember direction
     self._newPosition = phasingFrame.pivotEntry.get()
-    self.pivotLine = self._testCcpnOpenGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')
+    self.pivotLine = self._CcpnGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')
 
     if not self.pivotLine:
       getLogger().warning('no infiniteLine')
@@ -575,8 +575,8 @@ class GuiStrip(Frame):
       if not self.spectrumDisplay.is1D:
         self.hTraceAction.setChecked(True)
         self.vTraceAction.setChecked(False)
-        self._testCcpnOpenGLWidget.updateHTrace = True
-        self._testCcpnOpenGLWidget.updateVTrace = False
+        self._CcpnGLWidget.updateHTrace = True
+        self._CcpnGLWidget.updateVTrace = False
     else:
       self.pivotLine.orientation = ('h')
       # self.hTraceAction.setChecked(False)
@@ -584,15 +584,15 @@ class GuiStrip(Frame):
       if not self.spectrumDisplay.is1D:
         self.hTraceAction.setChecked(False)
         self.vTraceAction.setChecked(True)
-        self._testCcpnOpenGLWidget.updateHTrace = False
-        self._testCcpnOpenGLWidget.updateVTrace = True
+        self._CcpnGLWidget.updateHTrace = False
+        self._CcpnGLWidget.updateVTrace = True
 
     self.pivotLine.valuesChanged.connect(self._newPositionLineCallback)
     self.pivotLine.setValue(self._newPosition)
     phasingFrame.pivotEntry.valueChanged.connect(self._newPositionPivotCallback)
 
     # make sure that all traces are clear
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     if self.spectrumDisplay.is1D:
       GLSignals.emitEvent(triggers=[GLNotifier.GLADD1DPHASING], display=self.spectrumDisplay)
@@ -622,23 +622,23 @@ class GuiStrip(Frame):
       spectrumView._turnOffPhasing()
 
     # make sure that all traces are clear
-    from ccpn.util.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitEvent(triggers=[GLNotifier.GLCLEARPHASING], display=self.spectrumDisplay)
 
-    self._testCcpnOpenGLWidget.removeInfiniteLine(self.pivotLine)
+    self._CcpnGLWidget.removeInfiniteLine(self.pivotLine)
     self.pivotLine.valuesChanged.disconnect(self._newPositionLineCallback)
     phasingFrame.pivotEntry.valueChanged.disconnect(self._newPositionPivotCallback)
 
     if self.spectrumDisplay.is1D:
-      self._testCcpnOpenGLWidget.updateHTrace = False
-      self._testCcpnOpenGLWidget.updateVTrace = False
+      self._CcpnGLWidget.updateHTrace = False
+      self._CcpnGLWidget.updateVTrace = False
     else:
       # TODO:ED remember trace direction
       self.hTraceAction.setChecked(False)     #self._hTraceActive)
       self.vTraceAction.setChecked(False)     #self._vTraceActive)
-      self._testCcpnOpenGLWidget.updateHTrace = False     #self._hTraceActive
-      self._testCcpnOpenGLWidget.updateVTrace = False     #self._vTraceActive
+      self._CcpnGLWidget.updateHTrace = False     #self._hTraceActive
+      self._CcpnGLWidget.updateVTrace = False     #self._vTraceActive
 
   def _changedPhasingDirection(self):
 
@@ -666,14 +666,14 @@ class GuiStrip(Frame):
       self.pivotLine.orientation = ('v')
       self.hTraceAction.setChecked(True)
       self.vTraceAction.setChecked(False)
-      self._testCcpnOpenGLWidget.updateHTrace = True
-      self._testCcpnOpenGLWidget.updateVTrace = False
+      self._CcpnGLWidget.updateHTrace = True
+      self._CcpnGLWidget.updateVTrace = False
     else:
       self.pivotLine.orientation = ('h')
       self.hTraceAction.setChecked(False)
       self.vTraceAction.setChecked(True)
-      self._testCcpnOpenGLWidget.updateHTrace = False
-      self._testCcpnOpenGLWidget.updateVTrace = True
+      self._CcpnGLWidget.updateHTrace = False
+      self._CcpnGLWidget.updateVTrace = True
 
     vals = phasingFrame.getValues(direction)
     # phasingFrame.slider0.setValue(self.spectrumDisplay._storedPhasingData[direction][0])
@@ -684,7 +684,7 @@ class GuiStrip(Frame):
     phasingFrame.pivotEntry.set(vals[2])
 
     try:
-      self._testCcpnOpenGLWidget.clearStaticTraces()
+      self._CcpnGLWidget.clearStaticTraces()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -697,8 +697,8 @@ class GuiStrip(Frame):
     # redraw should update the display
     try:
       colour = getColours()[GUISTRIP_PIVOT]
-      self._testCcpnOpenGLWidget.setInfiniteLineColour(self.pivotLine, colour)
-      self._testCcpnOpenGLWidget.rescaleStaticTraces()
+      self._CcpnGLWidget.setInfiniteLineColour(self.pivotLine, colour)
+      self._CcpnGLWidget.rescaleStaticTraces()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
     return
@@ -787,7 +787,7 @@ class GuiStrip(Frame):
 
     try:
       self.crosshairVisible = not self.crosshairVisible
-      self._testCcpnOpenGLWidget.crossHairVisible = self.crosshairVisible
+      self._CcpnGLWidget.crossHairVisible = self.crosshairVisible
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -799,7 +799,7 @@ class GuiStrip(Frame):
 
     try:
       self.crosshairVisible = True
-      self._testCcpnOpenGLWidget.crossHairVisible = True
+      self._CcpnGLWidget.crossHairVisible = True
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -811,7 +811,7 @@ class GuiStrip(Frame):
 
     try:
       self.crosshairVisible = False
-      self._testCcpnOpenGLWidget.crossHairVisible = False
+      self._CcpnGLWidget.crossHairVisible = False
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -821,7 +821,7 @@ class GuiStrip(Frame):
 
     try:
       self.gridVisible = not self.gridVisible
-      self._testCcpnOpenGLWidget.gridVisible = self.gridVisible
+      self._CcpnGLWidget.gridVisible = self.gridVisible
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -839,7 +839,7 @@ class GuiStrip(Frame):
           peakListView.buildPeakListLabels = True
 
       # spawn a redraw of the GL windows
-      from ccpn.util.CcpnOpenGL import GLNotifier
+      from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
       GLSignals = GLNotifier(parent=None)
       GLSignals.emitPaintEvent()
 
@@ -857,7 +857,7 @@ class GuiStrip(Frame):
           # peakListView.buildPeakListLabels = True
 
       # spawn a redraw of the GL windows
-      from ccpn.util.CcpnOpenGL import GLNotifier
+      from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
       GLSignals = GLNotifier(parent=None)
       GLSignals.emitPaintEvent()
 
@@ -1042,7 +1042,7 @@ class GuiStrip(Frame):
     self.storedZooms.append(self.viewBox.viewRange())
 
     try:
-      self._testCcpnOpenGLWidget.storeZoom()
+      self._CcpnGLWidget.storeZoom()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -1060,7 +1060,7 @@ class GuiStrip(Frame):
       self.resetZoom()
 
     try:
-      self._testCcpnOpenGLWidget.restoreZoom()
+      self._CcpnGLWidget.restoreZoom()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -1074,7 +1074,7 @@ class GuiStrip(Frame):
 
   def resetZoom(self):
     try:
-      self._testCcpnOpenGLWidget.resetZoom()
+      self._CcpnGLWidget.resetZoom()
       self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
       getLogger().info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
     except:
@@ -1102,7 +1102,7 @@ class GuiStrip(Frame):
     self.plotWidget.setYRange(nb, nt, padding=padding)
 
     try:
-      self._testCcpnOpenGLWidget.zoomIn()
+      self._CcpnGLWidget.zoomIn()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -1128,7 +1128,7 @@ class GuiStrip(Frame):
     self.plotWidget.setYRange(nb, nt, padding=padding)
 
     try:
-      self._testCcpnOpenGLWidget.zoomOut()
+      self._CcpnGLWidget.zoomOut()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -1217,14 +1217,14 @@ class GuiStrip(Frame):
 def _updateDisplayedMarks(data):
   "Callback when marks have changed"
 
-  from ccpn.util.CcpnOpenGL import GLNotifier
+  from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
   GLSignals = GLNotifier(parent=None)
   GLSignals.emitEvent(triggers=[GLNotifier.GLMARKS])
 
 def _updateSelectedPeaks(data):
   "Callback when peaks have changed"
 
-  from ccpn.util.CcpnOpenGL import GLNotifier
+  from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
   GLSignals = GLNotifier(parent=None)
   GLSignals.emitEvent(triggers=[GLNotifier.GLHIGHLIGHTPEAKS], targets=data[Notifier.OBJECT].peaks)
 
@@ -1328,7 +1328,7 @@ def _setupGuiStrip(project:Project, apiStrip):
   strip.viewBox.sigYRangeChanged.connect(strip._updateYRegion)
 
   try:
-    strip._testCcpnOpenGLWidget.initialiseAxes(strip=strip)
-    # strip._testCcpnOpenGLWidget._resetAxisRange()
+    strip._CcpnGLWidget.initialiseAxes(strip=strip)
+    # strip._CcpnGLWidget._resetAxisRange()
   except:
     getLogger().debug('Error: OpenGL widget not instantiated for %s' % strip)

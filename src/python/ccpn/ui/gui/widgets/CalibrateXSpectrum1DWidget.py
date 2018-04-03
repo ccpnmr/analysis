@@ -60,7 +60,7 @@ class CalibrateX1DWidgets(Frame):
       self.strip = strip
 
       try:
-        self.GLWidget = self.current.strip._testCcpnOpenGLWidget
+        self.GLWidget = self.current.strip._CcpnGLWidget
       except Exception as es:
         getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.current.strip)
 

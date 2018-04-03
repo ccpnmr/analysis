@@ -240,7 +240,7 @@ class GuiStrip1d(GuiStrip):
 
   def showExportDialog(self):
     from ccpn.ui.gui.widgets.CustomExportDialog import CustomGLExportDialog
-    self.exportDialog = CustomGLExportDialog(self._testCcpnOpenGLWidget, spectrumDimension='1D')
+    self.exportDialog = CustomGLExportDialog(self._CcpnGLWidget, spectrumDimension='1D')
     self.exportDialog.show(self.viewBox)
 
   def resetYZoom(self):
@@ -251,7 +251,7 @@ class GuiStrip1d(GuiStrip):
     # y1 = y2 + self.viewBox.childrenBoundingRect().height()
     # self.viewBox.setYRange(y2, y1)
     try:
-      self._testCcpnOpenGLWidget.resetYZoom()
+      self._CcpnGLWidget.resetYZoom()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -264,7 +264,7 @@ class GuiStrip1d(GuiStrip):
     # padding = self.application.preferences.general.stripRegionPadding
     # self.viewBox.setXRange(x2, x1, padding=padding)
     try:
-      self._testCcpnOpenGLWidget.resetXZoom()
+      self._CcpnGLWidget.resetXZoom()
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -358,7 +358,7 @@ class GuiStrip1d(GuiStrip):
       self.toggleOffsetWidget()
 
       try:
-        self._testCcpnOpenGLWidget.setStackingValue(None)
+        self._CcpnGLWidget.setStackingValue(None)
       except:
         getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 
@@ -366,7 +366,7 @@ class GuiStrip1d(GuiStrip):
   def _stack1DSpectra(self, offSet=None):
 
     try:
-      self._testCcpnOpenGLWidget.setStackingValue(offSet)
+      self._CcpnGLWidget.setStackingValue(offSet)
     except:
       getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
 

@@ -660,13 +660,22 @@ class Gui1dWidget(CcpnGLWidget):
           return
 
       pointInt = [1 + int(pnt + 0.5) for pnt in point]
-      data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
+      # data = spectrumView.spectrum.getSliceData()
+      # data = spectrumView.spectrum.get1dSpectrumData()
+
+      # TODO:ED this does not change the data model
+      data = spectrumView.spectrum.intensities
+
       preData = data
 
       if ph0 is not None and ph1 is not None and pivot is not None:
         preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
-      x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency)])
+      # x = np.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency)])
+      x = spectrumView.spectrum.positions
+
+      # y = np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
+
       # y = positionPixel[1] + spectrumView._traceScale * (self.axisT-self.axisB) * \
       #     np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
@@ -707,4 +716,5 @@ class Gui1dWidget(CcpnGLWidget):
       hSpectrum.spectrumView = spectrumView
 
     except Exception as es:
+      print ('>>>', str(es))
       tracesDict = []

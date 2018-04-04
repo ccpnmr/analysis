@@ -111,7 +111,8 @@ class SpectraSelectionWidget(Widget,Base):
         if self.selectAllSpectraCheckBox.isChecked():
           self._checkAllSpectra(QtCore.Qt.Checked)
         self.showSpectraOption()
-
+      else:
+        self.selectSpectraOption = None
   def updateWidgets(self):
     self._deleteAllCheckBoxes()
     self._addSpectrumCheckBoxes()
@@ -242,11 +243,13 @@ class SpectraSelectionWidget(Widget,Base):
     return spectra
 
   def getSelections(self):
-    if self.selectSpectraOption.getIndex() == 0:
-      return self._getSelectedSpectra()
+    if self.selectSpectraOption is not None:
+      if self.selectSpectraOption.getIndex() == 0:
+        return self._getSelectedSpectra()
+      else:
+        return list(set(self._getSpectrumGroupsSpectra()))
     else:
-      return list(set(self._getSpectrumGroupsSpectra()))
-
+      return  []
 
   def showSpectraOption(self):
 

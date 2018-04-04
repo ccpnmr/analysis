@@ -118,6 +118,7 @@ class ListCompoundWidget(CompoundBaseWidget):
     # pulldown
     texts = ['> select-to-add <'] + list(texts)
     self.pulldownList = PulldownList(parent=self, texts=texts, callback=self._addToListWidget, index=0)
+    self.pulldownList.setObjectName(labelText)
     self._addWidget(self.pulldownList)
 
     # listWidget
@@ -270,6 +271,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
           pass
     self.pulldownList = PulldownList(parent=self, texts=texts, callback=callback, index=index)
     self._addWidget(self.pulldownList)
+    self.pulldownList.setObjectName(labelText)
 
     if minimumWidths is not None:
       self.setMinimumWidths(minimumWidths)
@@ -409,6 +411,8 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
 
     hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
     self.checkBox = CheckBox(parent=self, checked=checked, text=text, callback=callback, hAlign=hAlign)
+    self.checkBox.setObjectName(labelText)
+    self.setObjectName(labelText)
     self._addWidget(self.checkBox)
 
     if minimumWidths is not None:
@@ -490,6 +494,7 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
                                        callback=callback
                                       )
     self._addWidget(self.doubleSpinBox)
+    self.doubleSpinBox.setObjectName(labelText)
 
     if minimumWidths is not None:
       self.setMinimumWidths(minimumWidths)
@@ -521,6 +526,7 @@ class SelectorWidget(QtWidgets.QWidget, Base):
       data.insert(0, '')
     label1 = Label(self, text=label, grid=(0, 0))
     self.pulldownList = InputPulldown(self, grid=(0, 1), texts=data, callback=callback)
+    self.pulldownList.setObjectName(label)
 
   def getText(self):
     "Convenience: Return selected text in Pulldown"

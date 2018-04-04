@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule, CommonWidgets
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
@@ -499,4 +499,3 @@ class PeakListTableWidget(QuickTable):
   #   if self._selectOnTableCurrentPeaksNotifier is not None:
   #     self._selectOnTableCurrentPeaksNotifier.unRegister()
 
-CommonWidgets.update({PeakListTableWidget.__name__: (PeakListTableWidget._getPullDownSelection, PeakListTableWidget._selectPullDown)})

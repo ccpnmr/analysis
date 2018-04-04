@@ -84,6 +84,9 @@ class Base(DropBase):
 
                      # keywords related to dropable properties
                      acceptDrops=False,
+
+
+                     objectName = None
                ):
     """
     
@@ -133,6 +136,9 @@ class Base(DropBase):
 
     # add the widget to parent if it is not a float widget and either grid[0] (horizontal)
     # or grid[1] (vertical) are defined
+    self._col = grid[0]
+    self._row = grid[1]
+    self._grid = grid
     if not isFloatWidget and (grid[0] is not None or grid[1] is not None):
       self._addToParent(grid=grid, gridSpan=gridSpan, stretch=stretch,
                         hAlign=hAlign, vAlign=vAlign)
@@ -192,6 +198,8 @@ class Base(DropBase):
 
       vAlign = VALIGN_DICT.get(vAlign, 0)
       align = hAlign | vAlign
+      self._col = col
+      self._row = row
       layout.addWidget(self, row, col, rowSpan, colSpan, QtCore.Qt.Alignment(align))
 
   @staticmethod

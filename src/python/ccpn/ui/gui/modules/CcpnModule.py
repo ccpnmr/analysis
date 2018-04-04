@@ -30,7 +30,8 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
 from weakref import ref
-
+import itertools
+import collections
 from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
@@ -58,6 +59,7 @@ from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
+
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget,\
@@ -73,7 +75,6 @@ CommonWidgets =            {
                             LineEdit.__name__:                (LineEdit.get,                LineEdit.setText),
                             LineEditButtonDialog.__name__:    (LineEditButtonDialog.get,    LineEditButtonDialog.setText),
                             PulldownList.__name__:            (PulldownList.currentText,    PulldownList.set),
-                            RadioButton.__name__:             (RadioButton.get,             RadioButton.set),
                             RadioButtons.__name__:            (RadioButtons.get,            RadioButtons.set),
                             Slider.__name__:                  (Slider.get,                  Slider.setValue),
                             Spinbox.__name__:                 (Spinbox.value,               Spinbox.set),
@@ -406,46 +407,57 @@ class CcpnModule(Dock, DropBase):
   # def widgetsState(self, value):
   #   self._widgetsState = value
 
+  def _setNestedWidgetsAttrToModule(self):
+    '''
+    :return: nestedWidgets
+    '''
+    allStorableWidgets = []
+    self._findChildren(self)
+    for num, w in enumerate(self._allChildren):
+      if w.__class__.__name__ in CommonWidgets:
+        allStorableWidgets.append(w)
+    widgtesWithinSelf = []
+    for varName, varObj in vars(self).items():
+      if varObj.__class__.__name__ in CommonWidgets.keys():
+        widgtesWithinSelf.append(varObj)
+    nestedWidgtes = [widget for widget in allStorableWidgets if widget not in widgtesWithinSelf]
+    nestedWidgts = [widget for widget in nestedWidgtes if widget.parent() not in widgtesWithinSelf]
+    nestedWidgts.sort(key=lambda x: str(type(x)), reverse=False)
+    grouppedNestedWidgtes = [list(v) for k, v in itertools.groupby(nestedWidgts, lambda x: str(type(x)), )]
+    for widgetsGroup in grouppedNestedWidgtes:
+      for count, widget in enumerate(widgetsGroup):
+        if widget.objectName():
+          setattr(self, widget.objectName(), widget)
+        else:
+          if isinstance(widget.parent(), CheckBoxCompoundWidget):
+            print('NOT YOU')
+          setattr(self, widget.__class__.__name__+str(count), widget)
 
 
   @widgetsState.getter
   def widgetsState(self):
     '''return  {"variableName":"value"}  of all gui Variables  '''
     widgetsState = {}
-    allStorableWidgets = []
-    self._findChildren(self)
-    for num, w in enumerate(self._allChildren):
-      if w.__class__.__name__ in CommonWidgets:
-        allStorableWidgets.append(w)
-        setattr(self, w.__class__.__name__+str(num), w)
-        print('Storing', w.__class__.__name__ + str(num))
-
+    self._setNestedWidgetsAttrToModule()
     for varName, varObj in vars(self).items():
-
       if isinstance(varObj, _Pulldown):
         widgetsState[varName] = varObj.getText()
         continue
       if varObj.__class__.__name__ in CommonWidgets.keys():
         try:  # try because widgets can be dinamically deleted
           widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0].__name__)()
-
         except Exception as e:
           getLogger().debug('Error %s', e)
-    self._kwargs = widgetsState
-    return widgetsState
+    self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
+
+    return  collections.OrderedDict(sorted(widgetsState.items()))
 
   def restoreWidgetsState(self, **widgetsState):
     'Restore the gui params. To Call it: _setParams(**{"variableName":"value"})  '
-    allStorableWidgets = []
-    self._findChildren(self)
 
-    for num, w in enumerate(self._allChildren):
-      if w.__class__.__name__ in CommonWidgets:
-        allStorableWidgets.append(w)
-        setattr(self, w.__class__.__name__ + str(num), w)
-        print('Restoring', w.__class__.__name__ + str(num))
+    nestedWidgtes = self._setNestedWidgetsAttrToModule()
 
-
+    widgetsState = collections.OrderedDict(sorted(widgetsState.items()))
     for variableName, value in widgetsState.items():
       try:
         widget = getattr(self, str(variableName))
@@ -455,6 +467,8 @@ class CcpnModule(Dock, DropBase):
         if widget.__class__.__name__ in CommonWidgets.keys():
           setWidget = getattr(widget, CommonWidgets[widget.__class__.__name__][1].__name__)
           setWidget(value)
+        # if widget in nestedWidgtes:
+        #   delattr(widget, str(variableName))
 
       except Exception as e:
         getLogger().warn('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))

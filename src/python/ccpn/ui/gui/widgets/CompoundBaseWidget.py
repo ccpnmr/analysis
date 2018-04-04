@@ -43,19 +43,6 @@ from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
-commonWidgets = {
-                CheckBox.__name__     : ('get', 'setChecked'),
-                ColourDialog.__name__ : ('getColor', 'setColor'),
-                DoubleSpinbox.__name__: ('value', 'setValue'),
-                LineEdit.__name__     : ('get', 'setText'),
-                PulldownList.__name__ : ('currentText', 'set'),
-                RadioButton.__name__  : ('get', 'set'),
-                RadioButtons.__name__ : ('get', 'set'),
-                Slider.__name__       : ('get', 'setValue'),
-                Spinbox.__name__      : ('value', 'set'),
-                TextEditor.__name__   : ('get', 'setText'),
-                }
-
 
 NULL = object()
 

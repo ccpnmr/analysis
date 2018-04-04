@@ -226,7 +226,6 @@ class NmrResidueTableModule(CcpnModule):
     finally:
         self.application._endCommandBlock()
 
-
   def _closeModule(self):
     """
     CCPN-INTERNAL: used to close the module

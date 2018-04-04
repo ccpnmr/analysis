@@ -673,6 +673,8 @@ class GuiStripNd(GuiStrip):
     Changes the position of the z axis of the strip by number of planes or a ppm position, depending
     on which is specified.
     """
+    if self.isDeleted:
+      return
 
     zAxis = self.orderedAxes[n+2]
     planeLabel = self.planeToolbar.planeLabels[n]

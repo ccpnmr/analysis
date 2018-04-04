@@ -1621,10 +1621,18 @@ class Framework:
       if event:
         event.ignore()
 
+  def _closeMainWindows(self):
+    tempModules = self.ui.mainWindow.application.ccpnModules
+    if len(tempModules) > 0:
+      for tempModule in tempModules:
+        getLogger().debug('closing module: %s' % tempModule)
+        tempModule.close()
+
   def _closeExtraWindows(self):
     tempAreas = self.ui.mainWindow.moduleArea.tempAreas
     if len(tempAreas) > 0:
       for tempArea in tempAreas:
+        getLogger().debug('closing external module: %s' % tempArea.window())
         tempArea.window().close()
 
   def _closeProject(self):
@@ -1632,14 +1640,17 @@ class Framework:
 
     # NB: this function must clan up both wrapper and ui/gui
 
+    if self.ui.mainWindow:
+      # ui/gui cleanup
+      self._closeMainWindows()
+      self._closeExtraWindows()
+      self.ui.mainWindow.deleteLater()
+
     if self.project is not None:
       # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
       self.project._close()
       self.project = None
-    if self.ui.mainWindow:
-      # ui/gui cleanup
-      self._closeExtraWindows()
-      self.ui.mainWindow.deleteLater()
+
     self.ui.mainWindow = None
     self.current = None
     self.project = None

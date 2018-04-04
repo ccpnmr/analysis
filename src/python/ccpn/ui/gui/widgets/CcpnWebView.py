@@ -44,9 +44,15 @@ class CcpnWebView(CcpnModule):
     self.webView.load(QUrl(urlPath))
     self.webView.show()
 
-  def __del__(self):
-    del self.webView
-    # super(CcpnWebView, self).__del__()
-
   def _closeModule(self):
-    self.close()
+    """
+    CCPN-INTERNAL: used to close the module
+    """
+    del self.webView
+    super(CcpnWebView, self)._closeModule()
+
+  def close(self):
+    """
+    Close the table from the commandline
+    """
+    self._closeModule()

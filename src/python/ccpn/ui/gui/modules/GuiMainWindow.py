@@ -646,6 +646,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
       prefFile = open(userPreferencesPath, 'w+')
       json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
+
       self.application._closeProject()
       QtWidgets.QApplication.quit()
     else:

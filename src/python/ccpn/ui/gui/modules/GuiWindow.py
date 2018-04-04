@@ -60,7 +60,7 @@ class GuiWindow():
     from functools import partial
 
     # TODO:ED test that the shortcuts can be added to the modules
-    return
+    # return
 
     context = QtCore.Qt.ApplicationShortcut
     QtWidgets.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll, context=context)

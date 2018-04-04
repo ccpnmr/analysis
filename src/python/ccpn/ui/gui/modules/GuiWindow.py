@@ -52,13 +52,15 @@ class GuiWindow():
 
     self.pythonConsoleModule = None # Python console; initialised upon first 'toggle'
 
-
   def _setShortcuts(self):
     """
     Sets shortcuts for functions not specified in the main window menubar
     """
     # this trampled the menu py shortcut
     from functools import partial
+
+    # TODO:ED test that the shortcuts can be added to the modules
+    return
 
     context = QtCore.Qt.ApplicationShortcut
     QtWidgets.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll, context=context)

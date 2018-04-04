@@ -122,6 +122,32 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     self.mouseMode = SELECT
     self.show()
 
+  #   self.installEventFilter(self)
+  #   # for action in self.actions():
+  #   #   print (action)
+  #   # QtWidgets.QShortcut.activated.connect(self._activatedkeySequence)
+  #     # action.activatedAmbiguously.connect(self._ambiguouskeySequence)
+  #
+  # def eventFilter(self, obj, event):
+  #   if event.type() == QtGui.QKeySequence.ExactMatch or event.type() == QtGui.QKeySequence.PartialMatch:
+  #     try:
+  #       print ('>>>key')
+  #       self.statusBar().showMessage('key: %s' % str(event.key()))
+  #       QtGui.QKeySequence.count = 0
+  #
+  #     except Exception as es:
+  #       print (str(es))
+  #
+  #   return False
+
+  def _activatedkeySequence(self, ev):
+    key = ev.key()
+    self.statusBar().showMessage('key: %s' % str(key))
+
+  def _ambiguouskeySequence(self, ev):
+    key = ev.key()
+    self.statusBar().showMessage('key: %s' % str(key))
+
   def changeEvent(self, event):
     if event.type() == QtCore.QEvent.WindowStateChange:
       if self.windowState() & QtCore.Qt.WindowMinimized:

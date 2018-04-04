@@ -22,6 +22,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -30,6 +31,8 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 class CcpnWebView(CcpnModule):
 
   className = 'CcpnWebView'
+
+  IGNORE_SHORTCUTS = True
 
   def __init__(self, mainWindow=None, name='CcpNmr V3 Documentation', urlPath=None):
     """

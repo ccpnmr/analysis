@@ -69,6 +69,8 @@ class Gui(Ui):
     # On the Mac (at least) it does not matter what you set the applicationName to be,
     # it will come out as the executable you are running (e.g. "python3")
 
+    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
     self.qtApp = Application(self.application.applicationName,
                                    self.application.applicationVersion,
                                    organizationName='CCPN', organizationDomain='ccpn.ac.uk')

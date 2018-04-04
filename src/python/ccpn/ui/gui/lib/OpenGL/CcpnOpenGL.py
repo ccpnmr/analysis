@@ -54,19 +54,20 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGR
 from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 import ccpn.util.Phasing as Phasing
+from ccpn.util.decorators import singleton
 from ccpn.ui.gui.lib.mouseEvents import \
-  leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
-  middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
-  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
+              leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
+              middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
+              rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
 from ccpn.core.lib.Notifiers import Notifier
 
 try:
-    from OpenGL import GL, GLU, GLUT
+  from OpenGL import GL, GLU, GLUT
 except ImportError:
-    app = QtWidgets.QApplication(sys.argv)
-    QtWidgets.QMessageBox.critical(None, "OpenGL hellogl",
-            "PyOpenGL must be installed to run this example.")
-    sys.exit(1)
+  app = QtWidgets.QApplication(sys.argv)
+  QtWidgets.QMessageBox.critical(None, "OpenGL hellogl",
+          "PyOpenGL must be installed to run this example.")
+  sys.exit(1)
 
 GLRENDERMODE_IGNORE = 0
 GLRENDERMODE_DRAW = 1
@@ -129,29 +130,11 @@ GLLINE_STYLES = {
 
 FADE_FACTOR = 0.3
 
-def singleton(cls):
-  """ Use class as singleton.
-  From: https://wiki.python.org/moin/PythonDecoratorLibrary#Singleton
-  Annotated by GWV
-  """
-  @functools.wraps(cls.__new__)
-  def singleton_new(cls, *args, **kw):
-    # check if it already exists
-    it = cls.__dict__.get('__it__')
-    if it is not None:
-      return it
-    # it did not yet exist; generate an instance
-    cls.__it__ = it = cls.__new_original__(cls, *args, **kw)
-    it.__init_original__(*args, **kw)
-    return it
 
-  # keep the new method and replace by singleton_new
-  cls.__new_original__ = cls.__new__
-  cls.__new__ = singleton_new
-  # keep the init method and replace by the object init
-  cls.__init_original__ = cls.__init__
-  cls.__init__ = object.__init__
-  return cls
+@singleton
+class GLGlobalLists():
+  def __init__(self, parent=None, strip=None):
+    pass
 
 
 @singleton

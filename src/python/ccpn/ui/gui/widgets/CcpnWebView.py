@@ -43,3 +43,10 @@ class CcpnWebView(CcpnModule):
     urlPath = 'file://'+urlPath               # webEngine needs to prefix
     self.webView.load(QUrl(urlPath))
     self.webView.show()
+
+  def __del__(self):
+    del self.webView
+    # super(CcpnWebView, self).__del__()
+
+  def _closeModule(self):
+    self.close()

@@ -36,10 +36,10 @@ def trace(f):
 
 
 def singleton(cls):
-    ''' Use class as singleton.
+    """ Use class as singleton.
     From: https://wiki.python.org/moin/PythonDecoratorLibrary#Singleton
     Annotated by GWV
-    '''
+    """
     @functools.wraps(cls.__new__)
 
     def singleton_new(cls, *args, **kw):

@@ -3108,8 +3108,11 @@ void main()
     if isinstance(pls, IntegralList):
       return
 
-    for peak in pls.peaks:
-      self._appendPeakListLabel(spectrumView, peakListView, tempList, peak)
+    try:
+      for peak in pls.peaks:
+        self._appendPeakListLabel(spectrumView, peakListView, tempList, peak)
+    except Exception as es:
+      print ('    >>>', str(es))
 
     # self._rescalePeakListLabels(spectrumView, peakListView, drawList)
     drawList.stringList = tempList
@@ -3149,7 +3152,10 @@ void main()
     #     print('  >>>kill')
     #     # self._threads[self._parent].terminate()
     #     # self._threads[self._parent].join()
-
+    #
+    # for a process:
+    # if not p.is_alive(): continue
+    # os.kill(p.pid, signal.SIGKILL)
     # buildQueue = Queue()
     buildQueue = (viewList, self, self._GLPeakListLabels)
     buildPeaks = Thread(name=str(self._parent.pid),

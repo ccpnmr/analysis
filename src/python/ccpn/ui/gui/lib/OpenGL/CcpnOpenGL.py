@@ -29,9 +29,10 @@ import ctypes
 import functools
 from time import sleep
 from threading import Thread
-from multiprocessing import Process, Manager, pool
-from queue import Queue
+from multiprocessing import Process, Manager, pool, Queue
+# from queue import Queue
 from imageio import imread
+from copy import deepcopy
 from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 from PyQt5.QtCore import (QPoint, QPointF, QRect, QRectF, QSize, Qt, QTime,
         QTimer, pyqtSignal, pyqtSlot)
@@ -3108,22 +3109,21 @@ void main()
     if isinstance(pls, IntegralList):
       return
 
-    try:
-      for peak in pls.peaks:
-        self._appendPeakListLabel(spectrumView, peakListView, tempList, peak)
-    except Exception as es:
-      print ('    >>>', str(es))
+    for peak in pls.peaks:
+      self._appendPeakListLabel(spectrumView, peakListView, tempList, peak)
 
     # self._rescalePeakListLabels(spectrumView, peakListView, drawList)
     drawList.stringList = tempList
     drawList.renderMode = GLRENDERMODE_RESCALE
-    # glStrip.GLSignals.emitPaintEvent(source=glStrip)
+    glStrip.GLSignals.emitPaintEvent(source=glStrip)
 
   def _threadBuildAllPeakListLabels(self, viewList, glStrip, _outList):
   # def _threadBuildAllPeakListLabels(self, threadQueue):#viewList, glStrip, _outList):
+  #   print ([obj for obj in threadQueue])
   #   viewList = threadQueue[0]
   #   glStrip = threadQueue[1]
   #   _outList = threadQueue[2]
+  #   stringList = threadQueue[3]
 
     for ii, view in enumerate(viewList):
       spectrumView = view[0]

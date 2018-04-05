@@ -30,6 +30,7 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 import pandas as pd
 import os
 from types import MethodType
+from contextlib import contextmanager
 
 from collections import Iterable
 from pyqtgraph import TableWidget
@@ -223,7 +224,8 @@ QuickTable::item::selected {
     self.setDragDropMode(self.InternalMove)
     self.setDropIndicatorShown(True)
 
-    # set the last column to expanding
+    # set Interactive and last column to expanding
+    self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
     self.horizontalHeader().setStretchLastSection(stretchLastSection)
 
     # enable the right click menu
@@ -724,6 +726,7 @@ QuickTable::item::selected {
   def refreshHeaders(self):
     self.hide()
     self._silenceCallback = True
+    # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
     self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
     self.showColumns(self._dataFrameObject)
@@ -733,10 +736,73 @@ QuickTable::item::selected {
 
     self.show()
     self._silenceCallback = False
+    # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+
+  # def resizeColumnsToContents(self):
+  #   self.hide()
+  #   self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+  #   super(QuickTable, self).resizeColumnsToContents()
+  #   self.show()
+  #   self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+
+  def setData(self, data):
+    """Set the data displayed in the table.
+    Allowed formats are:
+
+    * numpy arrays
+    * numpy record arrays
+    * metaarrays
+    * list-of-lists  [[1,2,3], [4,5,6]]
+    * dict-of-lists  {'x': [1,2,3], 'y': [4,5,6]}
+    * list-of-dicts  [{'x': 1, 'y': 4}, {'x': 2, 'y': 5}, ...]
+    """
+    self.clear()
+    self.appendData(data)
+
+  @contextmanager
+  def _updateTable(self, dataFrameObject):
+    # keep the original sorting method
+    sortOrder = self.horizontalHeader().sortIndicatorOrder()
+    sortColumn = self.horizontalHeader().sortIndicatorSection()
+
+    try:
+      self.hide()
+      self._silenceCallback = True
+      self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+
+      # self.setData(dataFrameObject.dataFrame.values)
+      yield
+
+    finally:
+      # needed after setting the column headings
+      self.setHorizontalHeaderLabels(dataFrameObject.headings)
+      self.showColumns(dataFrameObject)
+      # self.resizeColumnsToContents()
+      self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+
+      # required to make the header visible
+      self.setColumnCount(dataFrameObject.numColumns)
+
+      # re-sort the table
+      if sortColumn < self.columnCount():
+        self.sortByColumn(sortColumn, sortOrder)
+
+      self.show()
+      self._silenceCallback = False
+      self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
   def setTableFromDataFrameObject(self, dataFrameObject):
     # populate the table from the the Pandas dataFrame
-    self._dataFrameObject = dataFrameObject
+    # self._dataFrameObject = dataFrameObject
+    #
+    # if dataFrameObject.dataFrame.empty:
+    #   self.clearTable()
+    # else:
+    #   with self._updateTable(self._dataFrameObject):
+    #     self.setData(dataFrameObject.dataFrame.values)
+    #
+    # return
+
 
     self.hide()
     self._silenceCallback = True
@@ -746,17 +812,19 @@ QuickTable::item::selected {
     sortColumn = self.horizontalHeader().sortIndicatorSection()
 
     if not dataFrameObject.dataFrame.empty:
+      self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+
       self.setData(dataFrameObject.dataFrame.values)
       # needed after setting the column headings
       self.setHorizontalHeaderLabels(dataFrameObject.headings)
       self.showColumns(dataFrameObject)
-      self.resizeColumnsToContents()
+      # self.resizeColumnsToContents()
       self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
 
       # required to make the header visible
       self.setColumnCount(dataFrameObject.numColumns)
     else:
-      self.clearTable()
+      self.clearTableContents()
 
     # re-sort the table
     if sortColumn < self.columnCount():
@@ -764,6 +832,7 @@ QuickTable::item::selected {
 
     self.show()
     self._silenceCallback = False
+    self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
   def getDataFrameFromList(self, table=None
                            , buildList=None
@@ -1075,13 +1144,24 @@ QuickTable::item::selected {
 
   def clearTable(self):
     "remove all objects from the table"
+    self.hide()
     self._silenceCallback = True
+
+    self.clearTableContents()
+
+    self.show()
+    self._silenceCallback = False
+    # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+
+  def clearTableContents(self):
     self.clearContents()
     self.verticalHeadersSet = True
     self.horizontalHeadersSet = True
     self.sortModes = {}
 
     if self._dataFrameObject:
+      # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+
       # there must be something in the table to set the headers against
       self.setData([list(range(self._dataFrameObject.numColumns)),])
 
@@ -1095,7 +1175,6 @@ QuickTable::item::selected {
 
     self.setRowCount(0)
     self.items = []
-    self._silenceCallback = False
 
   def _updateTableCallback(self, data):
     """
@@ -1171,7 +1250,7 @@ QuickTable::item::selected {
       return
 
     self._silenceCallback = True
-
+    _update = False
     # try:
 
     # multiple delete from deleteObjFromTable messes with this
@@ -1190,6 +1269,7 @@ QuickTable::item::selected {
 
       if row in self._dataFrameObject._objects:
         self._dataFrameObject.removeObject(row)
+        _update = True
 
     elif trigger == Notifier.CREATE:
 
@@ -1205,11 +1285,12 @@ QuickTable::item::selected {
 
             # add the row to the dataFrame and table
             self._dataFrameObject.appendObject(row)
+            _update = True
 
     elif trigger == Notifier.CHANGE:
 
       # modify the line in the table
-      self._dataFrameObject.changeObject(row)
+      _update = self._dataFrameObject.changeObject(row)
 
     elif trigger == Notifier.RENAME:
       # get the old pid before the rename
@@ -1237,18 +1318,22 @@ QuickTable::item::selected {
           else:
             self.clearTable()
 
-    self.update()
-    # re-sort the table
-    if sortColumn < self.columnCount():
-      self.sortByColumn(sortColumn, sortOrder)
+          _update = True
 
-    # except Exception as es:
-    #   getLogger().warning(str(es)+str(data))
-
-    self._silenceCallback = False
-    getLogger().debug('>updateRowCallback>', data['notifier']
-                      , self._tableData['tableSelection']
-                      , data['trigger'], data['object'])
+    if _update:
+      # self.update()
+      # re-sort the table
+      # if sortColumn < self.columnCount():
+      #   self.sortByColumn(sortColumn, sortOrder)
+      #
+      # # except Exception as es:
+      # #   getLogger().warning(str(es)+str(data))
+      #
+      # self._silenceCallback = False
+      getLogger().debug('>updateRowCallback>', data['notifier']
+                        , self._tableData['tableSelection']
+                        , data['trigger'], data['object'])
+    return _update
 
   def _updateCellCallback(self, attr, data):
     """
@@ -1264,6 +1349,7 @@ QuickTable::item::selected {
     cells = makeIterableList(cellData)
 
     self._silenceCallback = True
+    _update = False
 
     for cell in cells:
       callbacktypes = self._tableData['cellClassNames']

@@ -296,9 +296,12 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
   def modifyTextList(self, texts):
     "Retain the current selection"
     current = self.getText()
+
+    self.pulldownList.blockSignals(True)
     self.pulldownList.clear()
     self.pulldownList.setData(texts=texts)
     self.select(current)
+    self.pulldownList.blockSignals(False)
 
   def updatePulldownList(self, theObject, triggers, targetName, func, *args, **kwds):
     """

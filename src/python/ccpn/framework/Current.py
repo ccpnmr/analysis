@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import operator
 import typing
+from ccpn.util.Logging import getLogger
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
@@ -232,6 +233,64 @@ Use print(current) to get a list of attribute, value pairs')
     # fmt = 'current.%-' + str(maxlen) + 's : %s'
     # #return "current\n" + '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in _definitions))
     # return '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in self._definitions))
+  @property
+  def currentState(self):
+    return self._currentState
+
+  @currentState.getter
+  def _currentState(self):
+    """
+    Return a storable representation of self listing all attribute, value pairs
+    """
+    ll = []
+    for cls in sorted(_currentClasses.keys(), key=operator.attrgetter('className')):
+      ss = noCap(cls.className)
+      item = getattr(self, ss)
+      if item is not None:
+        pid = item.pid
+        ll.append((ss, pid))
+      else:
+        ll.append((ss, item))
+
+      if not _currentClasses[cls].get('singularOnly'):
+        ss = noCap(cls._pluralLinkName)
+        objs = getattr(self, ss)
+        pids = [obj.pid for obj in objs]
+        ll.append((ss, pids))
+
+    for field in sorted(_currentExtraFields.keys()):
+      ss = field[:-1]
+      ll.append((ss, getattr(self, ss)))
+      if not _currentExtraFields[field].get('singularOnly'):
+        ss = field
+        ll.append((ss, getattr(self, ss)))
+
+    from collections import OrderedDict
+    return OrderedDict(ll)
+
+  def _restoreFromState(self, state):
+
+    try:
+      _allowedClasses = [x._pluralLinkName for x in _currentClasses] + [cls.className for cls in _currentClasses]
+      for attName, values in state.items():
+        if values is None:
+          continue
+        if isinstance(values, str):
+          obj = self.project.getByPid(values)
+          setattr(self, attName, obj)
+
+        if attName in _allowedClasses:
+
+          if isinstance(values, (list,tuple)):
+            objs = [self.project.getByPid(value) for value in values]
+            for value in values:
+              if isinstance(value, str):
+                obj = self.project.getByPid(value)
+                if obj is not None:
+                  objs.append(obj)
+            setattr(self, attName, objs)
+    except Exception as e:
+      getLogger().warn('Impossible to restore current. %s' % e)
 
   @classmethod
   def  _addClassField(cls, param:typing.Union[str, AbstractWrapperObject]):

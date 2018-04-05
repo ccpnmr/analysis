@@ -83,4 +83,4 @@ def clearShortcuts(widget=None):
   context = QtCore.Qt.WidgetWithChildrenShortcut
   for obj in _shortcutList.values():
     for shortcutItem in obj.values():
-      QtWidgets.QShortcut(shortcutItem[SHORTCUT_KEYS], widget)
+      QtWidgets.QShortcut(shortcutItem[SHORTCUT_KEYS], widget, context=context)

@@ -32,7 +32,7 @@ class CcpnWebView(CcpnModule):
 
   className = 'CcpnWebView'
 
-  IGNORE_SHORTCUTS = True
+  IGNORE_SHORTCUTS = False
 
   def __init__(self, mainWindow=None, name='CcpNmr V3 Documentation', urlPath=None):
     """
@@ -59,17 +59,3 @@ class CcpnWebView(CcpnModule):
     Close the table from the commandline
     """
     self._closeModule()
-
-
-# original
-# from PyQt4.QtCore import QUrl
-# from PyQt4.QtWebKit import QWebView
-#
-#
-# class CcpnWebView(QWebView):
-#
-#   def __init__(self, urlPath, parent=None):
-#
-#     QWebView.__init__(self, parent)
-#     self.load(QUrl(urlPath))
-#     self.show()

@@ -32,11 +32,11 @@ class RadioButton(QtWidgets.QRadioButton, Base):
     return self.text()
 
   def set(self, text=''):
-
     if len(text) > 0:
       text = translator.translate(text)
-
     self.setText(text)
+
+
 
   def setCallback(self, callback):
     #

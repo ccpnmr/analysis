@@ -76,6 +76,8 @@ CommonWidgets =            {
                             LineEditButtonDialog.__name__:    (LineEditButtonDialog.get,    LineEditButtonDialog.setText),
                             PulldownList.__name__:            (PulldownList.currentText,    PulldownList.set),
                             RadioButtons.__name__:            (RadioButtons.get,            RadioButtons.set),
+                            RadioButton.__name__:             (RadioButton.isChecked,       RadioButton.setChecked),
+
                             Slider.__name__:                  (Slider.get,                  Slider.setValue),
                             Spinbox.__name__:                 (Spinbox.value,               Spinbox.set),
                             TextEditor.__name__:              (TextEditor.get,              TextEditor.setText),
@@ -103,7 +105,7 @@ settingsWidgetPositions = {
                            'right':  {'settings':(0,1), 'widget':(0,0)},
                            }
 ALL = '<all>'
-
+DoubleUnderscore = '__'
 
 class CcpnModule(Dock, DropBase):
   """
@@ -427,11 +429,9 @@ class CcpnModule(Dock, DropBase):
     for widgetsGroup in grouppedNestedWidgtes:
       for count, widget in enumerate(widgetsGroup):
         if widget.objectName():
-          setattr(self, widget.objectName(), widget)
+          setattr(self, DoubleUnderscore+widget.objectName(), widget)
         else:
-          if isinstance(widget.parent(), CheckBoxCompoundWidget):
-            print('NOT YOU')
-          setattr(self, widget.__class__.__name__+str(count), widget)
+          setattr(self, DoubleUnderscore+widget.__class__.__name__+str(count), widget)
 
 
   @widgetsState.getter
@@ -468,16 +468,11 @@ class CcpnModule(Dock, DropBase):
           setWidget = getattr(widget, CommonWidgets[widget.__class__.__name__][1].__name__)
           setWidget(value)
         # if widget in nestedWidgtes:
-        #   delattr(widget, str(variableName))
+        #   print(variableName, widget)
+          # delattr(widget, str(variableName))
 
       except Exception as e:
         getLogger().warn('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
-
-  def _updateWidgets(self):
-    '''
-    Override this method to update the widgets that are fed by input data
-    '''
-    pass
 
   def rename(self, newName):
     self.label.setText(newName)

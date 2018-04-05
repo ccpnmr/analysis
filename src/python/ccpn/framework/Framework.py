@@ -43,7 +43,6 @@ from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.ui import interfaces, defaultInterface
-from ccpn.ui.gui.lib.Window import MODULE_DICT
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
@@ -611,7 +610,7 @@ class Framework:
 
   def initGraphics(self):
     """Set up graphics system after loading"""
-    from ccpn.ui.gui.modules import GuiStrip
+    from ccpn.ui.gui.lib import GuiStrip
 
     project = self.project
     try:
@@ -2121,8 +2120,8 @@ class Framework:
 
   def defineUserShortcuts(self):
 
-    from ccpn.ui.gui.modules.ShortcutModule import ShortcutModule
-    ShortcutModule(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
+    from ccpn.ui.gui.popups.ShortcutsPopup import ShortcutsPopup
+    ShortcutsPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
 
   def runMacro(self, macroFile:str=None):
     """

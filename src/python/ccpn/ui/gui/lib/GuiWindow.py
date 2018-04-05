@@ -27,16 +27,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import typing
 from ccpn.core.lib import AssignmentLib
 from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-from ccpn.core.lib.AssignmentLib import propagateAssignments
-from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 from ccpn.ui.gui import guiSettings
 from ccpn.util.Logging import getLogger
+from functools import partial
+from ccpn.ui.gui.lib.Shortcuts import addShortCut
+from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
 # For readability there should be a class
@@ -56,57 +55,51 @@ class GuiWindow():
     """
     Sets shortcuts for functions not specified in the main window menubar
     """
-    # this trampled the menu py shortcut
-    from functools import partial
-
     # TODO:ED test that the shortcuts can be added to the modules
     # return
 
     context = QtCore.Qt.ApplicationShortcut
-    QtWidgets.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("Del"), self, partial(self.deleteSelectedPeaks), context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks, context=context)
-    # QtWidgets.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project), context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("f, p"), self,
+    addShortCut("c, h", self, self.toggleCrossHairAll, context=context)
+    addShortCut("g, s", self, self.toggleGridAll, context=context)
+    addShortCut("Del", self, partial(self.deleteSelectedPeaks), context=context)
+    addShortCut("m, k", self, self.createMark, context=context)
+    addShortCut("m, c", self, self.clearMarks, context=context)
+    # addShortCut("f, n", self, partial(navigateToNmrResidue, self._parent.project), context=context)
+    addShortCut("f, p", self,
                         partial(navigateToPeakPosition, self.application.project),
                         context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("c, a"), self,
+    addShortCut("c, a", self,
                         partial(AssignmentLib.propagateAssignments,current=self.application.current),
                         context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self), context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self), context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self), context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self), context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("t, a"), self, partial(self.toggleLastAxisOnly, self), context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("t, r"), self, self.removePhasingTraces, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("i, 1"), self, self.addIntegral1D, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("Tab,Tab"), self, self.moveToNextSpectrum, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("Tab, q"), self, self.moveToPreviousSpectrum, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("Tab, a"), self, self.showAllSpectra, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("Tab, z"), self, self.hideAllSpectra, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("Tab, x"), self, self.invertSelectedSpectra, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("m, m"), self, self.switchMouseMode, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("z, r"), self, self.restoreZoom, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("z, i"), self, self.zoomIn, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("z, o"), self, self.zoomOut, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("p, l"), self, self.cyclePeakLabelling, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("p, s"), self, self.cyclePeakSymbols, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence("Space, Space"), self, self.toggleConsole, context=context)
-    QtWidgets.QShortcut(QtGui.QKeySequence.SelectAll, self, self.selectAllPeaks, context=context )
+    addShortCut("c, z", self, self._clearCurrentPeaks, context=context)
+    addShortCut("t, u", self, partial(self.traceScaleUp, self), context=context)
+    addShortCut("t, d", self, partial(self.traceScaleDown, self), context=context)
+    addShortCut("t, h", self, partial(self.toggleHTrace, self), context=context)
+    addShortCut("t, v", self, partial(self.toggleVTrace, self), context=context)
+    addShortCut("t, a", self, partial(self.toggleLastAxisOnly, self), context=context)
+    addShortCut("p, v", self, self.setPhasingPivot, context=context)
+    addShortCut("t, r", self, self.removePhasingTraces, context=context)
+    addShortCut("p, t", self, self.newPhasingTrace, context=context)
+    addShortCut("i, 1", self, self.addIntegral1D, context=context)
+    addShortCut("w, 1", self, self.getCurrentPositionAndStrip, context=context)
+    addShortCut("r, p", self, self.refitCurrentPeaks, context=context)
+    addShortCut("Tab,Tab", self, self.moveToNextSpectrum, context=context)
+    addShortCut("Tab, q", self, self.moveToPreviousSpectrum, context=context)
+    addShortCut("Tab, a", self, self.showAllSpectra, context=context)
+    addShortCut("Tab, z", self, self.hideAllSpectra, context=context)
+    addShortCut("Tab, x", self, self.invertSelectedSpectra, context=context)
+    addShortCut("m, m", self, self.switchMouseMode, context=context)
+    addShortCut("s, e", self, self.snapCurrentPeaksToExtremum, context=context)
+    addShortCut("z, s", self, self.storeZoom, context=context)
+    addShortCut("z, r", self, self.restoreZoom, context=context)
+    addShortCut("z, i", self, self.zoomIn, context=context)
+    addShortCut("z, o", self, self.zoomOut, context=context)
+    addShortCut("p, l", self, self.cyclePeakLabelling, context=context)
+    addShortCut("p, s", self, self.cyclePeakSymbols, context=context)
+    addShortCut("Space, Space", self, self.toggleConsole, context=context)
+    addShortCut("CTRL+a", self, self.selectAllPeaks, context=context)
 
   def _setUserShortcuts(self, preferences=None, mainWindow=None):
-
-    from functools import reduce, partial
-    from ccpn.ui.gui.modules.ShortcutModule import UserShortcuts
 
     # TODO:ED fix this circular link
     self.application._userShortcuts = UserShortcuts(mainWindow=mainWindow)   # set a new set of shortcuts
@@ -118,8 +111,10 @@ class GuiWindow():
       try:
         self.application._userShortcuts.addUserShortcut(shortcut, function)
 
-        QtWidgets.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
-                            partial(UserShortcuts.runUserShortcut, self.application._userShortcuts, shortcut))
+        addShortCut("%s, %s" % (shortcut[0], shortcut[1]), self,
+                    partial(UserShortcuts.runUserShortcut, self.application._userShortcuts, shortcut),
+                    context)
+
       except:
         getLogger().warning('Error setting user shortcuts function')
 
@@ -541,8 +536,6 @@ class GuiWindow():
 
   def switchMouseMode(self):
     from ccpn.ui.gui.lib.mouseEvents import MouseModes
-    from ccpn.ui.gui.widgets.Icon import Icon
-    from ccpn.ui.gui.popups.Dialog import CcpnDialog
     mode = self.mouseMode
     modesCount = len(MouseModes)
     if mode in MouseModes:

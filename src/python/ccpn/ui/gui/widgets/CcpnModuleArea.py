@@ -22,25 +22,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import json
-from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.util.Constants import ccpnmrJsonData
-from ccpn.core.Spectrum import Spectrum
-from ccpn.core.SpectrumGroup import SpectrumGroup
+from PyQt5 import QtGui, QtCore
 
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea, DockDrop
 from pyqtgraph.dockarea.Container import Container
 from ccpn.util.Logging import getLogger
-import collections
-from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.SideBar import SideBar, OpenObjAction, _openItemObject
+from ccpn.ui.gui.widgets.SideBar import SideBar, _openItemObject
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.widgets.MainWindow import MainWindow
-from ccpn.ui.gui.guiSettings import getColourScheme, getColours, LABEL_FOREGROUND
+from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 from ccpn.util.Colour import  hexToRgb
 
 ModuleArea = DockArea

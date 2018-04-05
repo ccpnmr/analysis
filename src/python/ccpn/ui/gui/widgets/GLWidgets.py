@@ -40,7 +40,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLPeakListArray, GLV
                                   GLRENDERMODE_REBUILD, GLREFRESHMODE_REBUILD,\
                                   LENCOLORS, LENPID,\
                                   GLString
-from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
+from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 import ccpn.util.Phasing as Phasing
 
 REGION_COLOURS = {

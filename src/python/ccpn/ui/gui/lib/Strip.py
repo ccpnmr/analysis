@@ -30,8 +30,7 @@ import typing
 from ccpn.util import Common as commonUtil
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.ui.gui.modules.GuiStrip import GuiStrip
-from ccpn.ui.gui.lib import Window
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip
 
 from ccpn.util.Logging import getLogger
 

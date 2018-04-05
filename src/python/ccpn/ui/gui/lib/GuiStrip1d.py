@@ -25,11 +25,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
 from ccpn.core.PeakList import PeakList
 
-from ccpn.ui.gui.modules.GuiStrip import GuiStrip
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
 import numpy as np

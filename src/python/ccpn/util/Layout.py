@@ -30,10 +30,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import ntpath
 import glob
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.util.AttrDict import AttrDict
+from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 import json
-from collections import defaultdict
 import sys, os
 
 

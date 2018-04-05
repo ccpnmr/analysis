@@ -38,6 +38,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetSelector
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
+from collections import Iterable
 
 
 def _nextChainCode(project):
@@ -112,6 +113,15 @@ class CreateChainPopup(CcpnDialog):
     """
     # check the sequence for consistency
     seq = self.sequence
+
+    # trap rogue spaces and lower case residues entered by 3-letter code
+    if seq and len(seq) == 1 and not isinstance(seq, str):
+      seq = seq[0]
+    elif not isinstance(seq, str) and isinstance(seq, Iterable):
+      newSeq = []
+      for s in seq:
+        newSeq.append(s.upper())
+      seq = tuple(newSeq)
 
     self.project.createChain(sequence=seq, compoundName=self.moleculeName,
                                  startNumber=self.sequenceStart, shortName=self.chainCode,

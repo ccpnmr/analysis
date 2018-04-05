@@ -58,7 +58,7 @@ class GuiWindow():
     # TODO:ED test that the shortcuts can be added to the modules
     # return
 
-    context = QtCore.Qt.ApplicationShortcut
+    context = QtCore.Qt.WidgetWithChildrenShortcut
     addShortCut("c, h", self, self.toggleCrossHairAll, context=context)
     addShortCut("g, s", self, self.toggleGridAll, context=context)
     addShortCut("Del", self, partial(self.deleteSelectedPeaks), context=context)

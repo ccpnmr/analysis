@@ -32,7 +32,7 @@ import json
 import os
 from functools import partial
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
@@ -122,21 +122,25 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     self.mouseMode = SELECT
     self.show()
 
-  #   self.installEventFilter(self)
+  #   QtWidgets.QShortcut.installEventFilter(self)
   #   # for action in self.actions():
   #   #   print (action)
   #   # QtWidgets.QShortcut.activated.connect(self._activatedkeySequence)
   #     # action.activatedAmbiguously.connect(self._ambiguouskeySequence)
   #
   # def eventFilter(self, obj, event):
-  #   if event.type() == QtGui.QKeySequence.ExactMatch or event.type() == QtGui.QKeySequence.PartialMatch:
-  #     try:
-  #       print ('>>>key')
-  #       self.statusBar().showMessage('key: %s' % str(event.key()))
-  #       QtGui.QKeySequence.count = 0
+  #   # if event.type() == QtGui.QKeySequence.ExactMatch or event.type() == QtGui.QKeySequence.PartialMatch:
+  #   #   try:
+  #   #     print ('>>>key')
+  #   #     self.statusBar().showMessage('key: %s' % str(event.key()))
+  #   #     QtGui.QKeySequence.count = 0
+  #   #
+  #   #   except Exception as es:
+  #   #     print (str(es))
   #
-  #     except Exception as es:
-  #       print (str(es))
+  #   if event.type() == QtCore.QEvent.KeyPress:
+  #     print ('key: %s' % str(event.key()))
+  #     return True
   #
   #   return False
 

@@ -1,4 +1,4 @@
-PYTHON_DIR = /Users/geerten/Code/CCPNv3/CcpNmr/miniconda
+PYTHON_DIR = /Users/ejb66/PycharmProjects/Git/AnalysisV3/miniconda
 
 # should work if suitably edited for Linux, Irix, Solaris, OSX, Windows
 
@@ -32,10 +32,12 @@ FPIC_FLAG = -fPIC
 # use below for everything without -fPIC option (e.g. Windows)
 #FPIC_FLAG =
 
+NOWARNING_FLAG = -w
+
 # optimisation flag
 OPT_FLAG = -O
 
-CC_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG) $(MALLOC_FLAG)
+CC_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG) $(MALLOC_FLAG) $(NOWARNING_FLAG)
 LINK_FLAGS = $(WIN_FLAG) $(OPT_FLAG) $(FPIC_FLAG)
 
 # linking command for C libraries into Python world

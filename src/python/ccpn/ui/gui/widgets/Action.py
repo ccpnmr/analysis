@@ -30,6 +30,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 from ccpn.framework.Translation import getTranslator
+from ccpn.ui.gui.lib.Shortcuts import storeShortcut
 
 
 class Action(Base, QtWidgets.QAction):
@@ -45,6 +46,10 @@ class Action(Base, QtWidgets.QAction):
         shortcut = QtGui.QKeySequence(", ".join(tuple(shortcut)))
       QtWidgets.QAction.__init__(self, text, parent, shortcut=shortcut, checkable=checkable)
       self.setShortcutContext(QtCore.Qt.ApplicationShortcut)
+
+      # ED: new - store the keySequence in the shortcuts dict
+      storeShortcut(shortcut, parent)
+
     # elif icon:
     #   QtGui.QAction.__init__(self, icon, text, parent, triggered=callback, checkable=checkable)
 

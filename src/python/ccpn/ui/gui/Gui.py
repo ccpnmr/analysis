@@ -37,12 +37,9 @@ from ccpn.core.lib.SpectrumLib import getExperimentClassifications
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui.widgets.Application import Application
-from functools import partial
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.NmrAtom import NmrAtom
 
 # This import initializes relative paths for QT style-sheets.  Do not remove!
-from ccpn.ui.gui.widgets import resources_rc
 
 from ccpn.util import Logging
 
@@ -90,7 +87,7 @@ class Gui(Ui):
     project = self.application.project
 
     # Wrapper Notifiers
-    from ccpn.ui.gui.modules import GuiStrip
+    from ccpn.ui.gui.lib import GuiStrip
     notifier = project.registerNotifier('Strip', 'create', GuiStrip.GuiStrip._resetRemoveStripAction)
     project.duplicateNotifier('Strip', 'delete', notifier)
 
@@ -103,16 +100,16 @@ class Gui(Ui):
     # TODO:ED sorry - don't actually want _appBase
     self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
 
-    from ccpn.ui.gui.modules import GuiSpectrumDisplay
+    from ccpn.ui.gui.lib import GuiSpectrumDisplay
     project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
     project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
 
-    from ccpn.ui.gui.modules.GuiSpectrumView import GuiSpectrumView
+    from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
     project.registerNotifier('SpectrumView', 'delete', GuiSpectrumView._deletedSpectrumView)
     project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
     project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
 
-    from ccpn.ui.gui.modules import GuiPeakListView
+    from ccpn.ui.gui.lib import GuiPeakListView
     project.registerNotifier('PeakListView', 'create',
                              GuiPeakListView.GuiPeakListView._createdPeakListView)
     project.registerNotifier('PeakListView', 'delete',
@@ -122,9 +119,9 @@ class Gui(Ui):
 
     # TODO:ED need to unregister these notifiers on close
     self._updateNotifier1 = Notifier(project
-                                    , triggers=[Notifier.RENAME]
-                                    , targetName='NmrAtom'
-                                    , callback=GuiPeakListView._updateAssignmentsNmrAtom)
+                                     , triggers=[Notifier.RENAME]
+                                     , targetName='NmrAtom'
+                                     , callback=GuiPeakListView._updateAssignmentsNmrAtom)
     # self._updateNotifier2 = Notifier(project
     #                                 , triggers=[Notifier.CREATE]
     #                                 , targetName='NmrAtom'
@@ -142,9 +139,7 @@ class Gui(Ui):
     project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
                                 'ccp.nmr.Nmr.AbstractPeakDimContrib', 'delete')
 
-
-
-    from ccpn.ui.gui.modules import GuiStripDisplayNd
+    from ccpn.ui.gui.lib import GuiStripDisplayNd
     project._registerApiNotifier(GuiStripDisplayNd._changedBoundDisplayAxisOrdering,
                                  GuiStripDisplayNd.ApiBoundDisplay, 'axisOrder')
 
@@ -277,7 +272,7 @@ coreClass = _coreClassMap['Window']
 #TODO:RASMUS move to individual files containing the wrapped class and Gui-class
 # Any Factory function to _implementation or abstractWrapper
 #
-from ccpn.ui.gui.modules.GuiMainWindow import GuiMainWindow as _GuiMainWindow
+from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow as _GuiMainWindow
 class MainWindow(coreClass, _GuiMainWindow):
   """GUI main window, corresponds to OS window"""
 
@@ -306,7 +301,7 @@ class MainWindow(coreClass, _GuiMainWindow):
     logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
     logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
 
-from ccpn.ui.gui.modules.GuiWindow import GuiWindow as _GuiWindow
+from ccpn.ui.gui.lib.GuiWindow import GuiWindow as _GuiWindow
 #TODO:RASMUS: copy from MainWindow
 class SideWindow(coreClass, _GuiWindow):
   """GUI side window, corresponds to OS window"""
@@ -342,7 +337,7 @@ Mark = _coreClassMap['Mark']
 
 ## SpectrumDisplay class
 coreClass = _coreClassMap['SpectrumDisplay']
-from ccpn.ui.gui.modules.GuiStripDisplay1d import GuiStripDisplay1d as _GuiStripDisplay1d
+from ccpn.ui.gui.lib.GuiStripDisplay1d import GuiStripDisplay1d as _GuiStripDisplay1d
 #TODO:RASMUS: also change for this class as done for the Nd variant below; this involves
 #chaning the init signature of the GuiStripDisplay1d and passing the parameters along to
 # GuiSpectrumDisplay
@@ -367,7 +362,7 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
                                                           , relativeTo=self.application.ui.mainWindow.moduleArea)
 
 
-from ccpn.ui.gui.modules.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
+from ccpn.ui.gui.lib.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
 #TODO:RASMUS Need to check on the consequences of hiding name from the wrapper
 # NB: GWV had to comment out the name property to make it work
 # conflicts existed between the 'name' and 'window' attributes of the two classes
@@ -409,7 +404,7 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 
 ## Strip class
 coreClass = _coreClassMap['Strip']
-from ccpn.ui.gui.modules.GuiStrip1d import GuiStrip1d as _GuiStrip1d
+from ccpn.ui.gui.lib.GuiStrip1d import GuiStrip1d as _GuiStrip1d
 class Strip1d(coreClass, _GuiStrip1d):
   """1D strip"""
   def __init__(self, project:Project, wrappedData:'ApiBoundStrip'):
@@ -426,7 +421,7 @@ class Strip1d(coreClass, _GuiStrip1d):
     self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
 
-from ccpn.ui.gui.modules.GuiStripNd import GuiStripNd as _GuiStripNd
+from ccpn.ui.gui.lib.GuiStripNd import GuiStripNd as _GuiStripNd
 class StripNd(coreClass, _GuiStripNd):
   """ND strip """
   def __init__(self, project:Project, wrappedData:'ApiBoundStrip'):
@@ -466,7 +461,7 @@ Axis = _coreClassMap['Axis']
 #
 ## SpectrumView class
 coreClass = _coreClassMap['SpectrumView']
-from ccpn.ui.gui.modules.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
+from ccpn.ui.gui.lib.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
 class _SpectrumView1d(coreClass, _GuiSpectrumView1d):
   """1D Spectrum View"""
   def __init__(self, project:Project, wrappedData:'ApiStripSpectrumView'):
@@ -481,7 +476,7 @@ class _SpectrumView1d(coreClass, _GuiSpectrumView1d):
     _GuiSpectrumView1d.__init__(self)
 
 
-from ccpn.ui.gui.modules.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
+from ccpn.ui.gui.lib.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
 class _SpectrumViewNd(coreClass, _GuiSpectrumViewNd):
   """ND Spectrum View"""
   def __init__(self, project:Project, wrappedData:'ApiStripSpectrumView'):
@@ -511,7 +506,7 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 #
 ## PeakListView class
 coreClass = _coreClassMap['PeakListView']
-from ccpn.ui.gui.modules.GuiPeakListView import GuiPeakListView as _GuiPeakListView
+from ccpn.ui.gui.lib.GuiPeakListView import GuiPeakListView as _GuiPeakListView
 class _PeakListView(coreClass, _GuiPeakListView):
   """Peak List View for 1D or nD PeakList"""
   def __init__(self, project:Project, wrappedData:'ApiStripPeakListView'):

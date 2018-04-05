@@ -24,41 +24,30 @@ __date__ = "$Date$"
 #=========================================================================================
 
 import sys, os
-import math, random
-import ctypes
-import functools
-from time import sleep
+import math
 from threading import Thread
-from multiprocessing import Process, Manager, pool, Queue
 # from queue import Queue
 from imageio import imread
-from copy import deepcopy
-from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
-from PyQt5.QtCore import (QPoint, QPointF, QRect, QRectF, QSize, Qt, QTime,
-        QTimer, pyqtSignal, pyqtSlot)
-from PyQt5.QtGui import (QBrush, QColor, QFontMetrics, QImage, QPainter,
-        QRadialGradient, QSurfaceFormat)
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import (QPoint, QSize, Qt, pyqtSignal, pyqtSlot)
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
 import numpy as np
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
-from ccpn.core.Spectrum import Spectrum
 
 from ccpn.ui.gui.guiSettings import getColours
 from ccpn.util.Colour import hexToRgbRatio
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, \
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
                                     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
                                     CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE
-from ccpn.ui.gui.lib.Strip import GuiStrip
-from ccpn.ui.gui.modules.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
+from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 import ccpn.util.Phasing as Phasing
 from ccpn.util.decorators import singleton
 from ccpn.ui.gui.lib.mouseEvents import \
               leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
-              middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
-              rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
+              middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
 from ccpn.core.lib.Notifiers import Notifier
 
 try:
@@ -383,6 +372,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.colours = getColours()
     self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
     self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
+    self.mousePickColour = self.colours[CCPNGLWIDGET_PICKCOLOUR]
     self.gridColour = self.colours[CCPNGLWIDGET_GRID]
     self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
     self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
@@ -4237,7 +4227,7 @@ void main()
 
       # TODO:ED may want to put other icons for other modes
       if self.mainWindow.mouseMode == PICK:
-        GL.glColor4f(0.2, 0.5, 0.9, 0.3)
+        GL.glColor4f(*self.mousePickColour)
         x = self.pixelX * 8
         y = self.pixelY * 8
         GL.glVertex2d(self.cursorCoordinate[0]-x, self.cursorCoordinate[1]-y)

@@ -40,7 +40,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.util.Logging import getLogger
 
 
-class ShortcutModule(CcpnDialog):
+class ShortcutsPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, title='Define User Shortcuts', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 

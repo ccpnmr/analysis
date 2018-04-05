@@ -63,7 +63,7 @@ from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar #, PlaneSelectorWidget
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Logging import getLogger
 
-from ccpn.ui.gui.modules.GuiStrip import GuiStrip
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip
 
 # from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 

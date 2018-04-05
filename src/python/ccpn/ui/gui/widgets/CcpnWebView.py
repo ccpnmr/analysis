@@ -59,3 +59,17 @@ class CcpnWebView(CcpnModule):
     Close the table from the commandline
     """
     self._closeModule()
+
+
+# original
+# from PyQt4.QtCore import QUrl
+# from PyQt4.QtWebKit import QWebView
+#
+#
+# class CcpnWebView(QWebView):
+#
+#   def __init__(self, urlPath, parent=None):
+#
+#     QWebView.__init__(self, parent)
+#     self.load(QUrl(urlPath))
+#     self.show()

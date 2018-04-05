@@ -4,8 +4,8 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project
 from typing import List
-from ccpn.ui.gui.modules.GuiStrip import GuiStrip
-from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip
+from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, navigateToNmrAtomsInStrip
 from ccpn.util.Logging import getLogger
 

@@ -32,7 +32,7 @@ import os
 from OpenGL import GL
 from OpenGL.error import GLError
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 import pyqtgraph as pg
 
@@ -42,14 +42,12 @@ from ccpn.util import Phasing
 from ccpnc.contour import Contourer2d
 
 #from ccpn.ui.gui.modules import GuiStripDisplayNd
-from ccpn.ui.gui.modules.GuiSpectrumView import GuiSpectrumView
+from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 ###from ccpn.ui.gui.widgets.ToolButton import ToolButton
 ###from ccpnc.peak import Peak
 ###from ccpn.ui.gui.modules.spectrumPane.PeakListNdItem import PeakListNdItem
 
 # TBD: for now ignore fact that apiSpectrumView can override contour colour and/or contour levels
-
-from ccpnmodel.ccpncore.memops import Notifiers
 
 
 #TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels

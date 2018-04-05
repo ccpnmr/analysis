@@ -29,8 +29,8 @@ import typing
 
 from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project
-from ccpn.ui.gui.modules import GuiPeakListView
-from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.lib import GuiPeakListView
+from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopup

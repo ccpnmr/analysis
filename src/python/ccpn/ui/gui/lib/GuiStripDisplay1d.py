@@ -27,13 +27,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from typing import Sequence
 
-from PyQt5 import QtCore, QtWidgets
-
-from ccpn.core.Project import Project
-from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 
 
 class GuiStripDisplay1d(GuiSpectrumDisplay):
@@ -60,7 +55,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     """
 
     # NB should not be imported at top of file to avoid potential cyclic imports
-    from ccpn.ui.gui.modules import GuiPeakListView
+    from ccpn.ui.gui.lib import GuiPeakListView
 
     viewBox = peakListView.spectrumView.strip.viewBox
     activePeakItemDict = self.activePeakItemDict

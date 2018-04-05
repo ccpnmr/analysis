@@ -32,14 +32,14 @@ import json
 import os
 from functools import partial
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
-from ccpn.ui.gui.lib.mouseEvents import PICK, SELECT
-from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.modules.GuiStrip import GuiStrip
-from ccpn.ui.gui.modules.GuiWindow import GuiWindow
+from ccpn.ui.gui.lib.mouseEvents import SELECT
+from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip
+from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
@@ -544,8 +544,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.setMouseMode(SELECT)
 
   def _fillPluginsMenu(self):
-    from ccpn.framework.lib.ExtensionLoader import getPlugins
-    from ccpn.framework.PathsAndUrls import pluginPath
 
     from ccpn.plugins import loadedPlugins
 

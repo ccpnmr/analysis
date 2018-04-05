@@ -27,13 +27,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import numpy as np
 
-from OpenGL import GL
-from OpenGL.error import GLError
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore
 
 import pyqtgraph as pg
 
-from ccpn.ui.gui.modules.GuiSpectrumView import GuiSpectrumView
+from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 
 from ccpn.util.Colour import spectrumColours
 from ccpn.util import Phasing

@@ -189,19 +189,9 @@ class DataFrameObject(object):
           # set the initial objects; dataFrame needed to populate the first table
           self._objects = [obj]
           self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
-          self._table.setData(self._dataFrame.values)
-          self._table.setHorizontalHeaderLabels(self.headings)
 
-          # store the actual object in the dataFrame
-          # needs to be done again as the pid needs to be an object
-          # if 'Pid' in listDict.keys():
-          #   listDict['Pid'] = obj
-          self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
-
-          # needed after setting the column headings
-          self._table.resizeColumnsToContents()
-          self._table.showColumns(self)
-          self._table.show()
+          with self._table._updateTable(self):
+            self._table.setData(self._dataFrame.values)
 
         else:
           # append a new line to the end
@@ -214,13 +204,11 @@ class DataFrameObject(object):
 
           # update internal list
           self._objects.append(obj)
-          self._table.appendRow(list(listDict.values()))
-
-          # store the actual object in the dataFrame
-          # if 'Pid' in listDict.keys():
-          #   listDict['Pid'] = obj
           appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
           self._dataFrame = self._dataFrame.append(appendDataFrame)
+
+          with self._table._updateTable(self):
+            self._table.appendRow(list(listDict.values()))
 
       except Exception as es:
         getLogger().warning(str(es))
@@ -273,6 +261,7 @@ class DataFrameObject(object):
 
   def changeObject(self, obj):
     row = self.find(self._table, str(obj.pid), column='Pid')
+    _update = False
     if row is not None:
       self._table.silenceCallBack = True
 
@@ -292,18 +281,22 @@ class DataFrameObject(object):
             listDict['Index'] = newIndex
 
         # store to the table
-        self._table.setRow(row, list(listDict.values()))
+        with self._table._updateTable(self):
+          self._table.setRow(row, list(listDict.values()))
 
         # store the actual object in the dataFrame
         # if 'Pid' in listDict.keys():
         #   listDict['Pid'] = obj
         appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
         self._dataFrame = self._dataFrame.append(appendDataFrame)
+        _update = True
 
       except Exception as es:
         getLogger().warning(str(es))
       finally:
         self._table.silenceCallBack = False
+
+    return _update
 
   def objectExists(self, obj):
     return self.find(self._table, str(obj.pid), column='Pid') is not None

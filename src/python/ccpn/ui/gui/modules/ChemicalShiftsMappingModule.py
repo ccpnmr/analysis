@@ -1064,5 +1064,3 @@ class ChemicalShiftsMapping(CcpnModule):
 
     super(ChemicalShiftsMapping, self)._closeModule()
 
-from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
-CommonWidgets.update({CustomNmrResidueTable.__name__: (CustomNmrResidueTable._getPullDownSelection, CustomNmrResidueTable._selectPullDown)})

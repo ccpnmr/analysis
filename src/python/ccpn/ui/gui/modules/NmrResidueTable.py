@@ -722,6 +722,3 @@ class NmrResidueTable(QuickTable):
 
   def _selectPullDown(self, value):
     self.ncWidget.select(value)
-
-from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
-CommonWidgets.update({NmrResidueTable.__name__: (NmrResidueTable._getPullDownSelection, NmrResidueTable._selectPullDown)})

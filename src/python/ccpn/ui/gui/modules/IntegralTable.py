@@ -482,6 +482,3 @@ class IntegralTable(QuickTable):
     """
     self.clearTableNotifiers()
     self._clearRegions()
-
-from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
-CommonWidgets.update({IntegralTable.__name__: (IntegralTable._getPullDownSelection, IntegralTable._selectPullDown)})

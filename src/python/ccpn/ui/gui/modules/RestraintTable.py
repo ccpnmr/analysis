@@ -485,6 +485,3 @@ class RestraintTable(QuickTable):
     Cleanup the notifiers when the window is closed
     """
     self.clearTableNotifiers()
-
-from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
-CommonWidgets.update({RestraintTable.__name__: (RestraintTable._getPullDownSelection, RestraintTable._selectPullDown)})

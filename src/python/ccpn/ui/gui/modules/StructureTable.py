@@ -988,6 +988,3 @@ class StructureTable(QuickTableStructure):
   #   getLogger().info('table.paint '+str(self.paintCount))
   #   self.paintCount+=1
   #   return super(StructureTable, self).paintEvent(event)
-
-from ccpn.ui.gui.modules.CcpnModule import CommonWidgets
-CcpnModule.CommonWidgets.update({StructureTable.__name__: (StructureTable._getPullDownSelection, StructureTable._selectPullDown)})

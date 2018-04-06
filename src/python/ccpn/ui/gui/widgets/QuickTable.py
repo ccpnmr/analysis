@@ -773,7 +773,7 @@ QuickTable::item::selected {
     self.appendData(data)
 
   @contextmanager
-  def _updateTable(self, dataFrameObject):
+  def _quickTableUpdate(self, dataFrameObject):
     # keep the original sorting method
     sortOrder = self.horizontalHeader().sortIndicatorOrder()
     sortColumn = self.horizontalHeader().sortIndicatorSection()

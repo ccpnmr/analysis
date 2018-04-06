@@ -183,24 +183,26 @@ class SequenceModule(CcpnModule):
 
       with progressManager(self.mainWindow, 'Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
 
-        try:
-          if nmrChain.id == '@-':
-            # assume that it is the only one
-            nmrChain.assignSingleResidue(selectedNmrResidue, guiRes.residue)
-          else:
-            for ii in range(len(toAssign)-1):
-              resid = residues[ii]
-              next = resid.nextResidue    #TODO:ED may not have a .nextResidue
-              residues.append(next)
-            nmrChain.assignConnectedResidues(guiRes.residue)
-          for ii, res in enumerate(residues):
-            if hasattr(self, 'guiChainLabel'):
-              guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
-              guiResidue._setStyleAssigned()
-              # guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_ASSIGNED] +
-              #                      res.shortName+'</strong></div>')
-        except Exception as es:
-          getLogger().warning('Sequence Module: %s' % str(es))
+        # try:
+
+        if nmrChain.id == '@-':
+          # assume that it is the only one
+          nmrChain.assignSingleResidue(selectedNmrResidue, guiRes.residue)
+        else:
+          for ii in range(len(toAssign)-1):
+            resid = residues[ii]
+            next = resid.nextResidue    #TODO:ED may not have a .nextResidue
+            residues.append(next)
+          nmrChain.assignConnectedResidues(guiRes.residue)
+        for ii, res in enumerate(residues):
+          if hasattr(self, 'guiChainLabel'):
+            guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
+            guiResidue._setStyleAssigned()
+            # guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_ASSIGNED] +
+            #                      res.shortName+'</strong></div>')
+
+        # except Exception as es:
+        #   getLogger().warning('Sequence Module: %s' % str(es))
 
   def populateFromSequenceGraphs(self):
     """

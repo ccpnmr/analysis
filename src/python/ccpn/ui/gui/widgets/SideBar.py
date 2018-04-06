@@ -414,7 +414,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     self.project = project
 
     # TODO:ED use return to disable sidebar notifiers
-    # return
+    return
 
     # Register notifiers to maintain sidebar
     for cls in classesInSideBar.values():
@@ -530,26 +530,31 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
           else:
             self.project._startCommandEchoBlock('_deleteItemObject')
+
+            # # try:
+            # ll = self._getChildren(obj)
+            # z = [i for i in self._traverse(ll)]
+            # # self.project.blankNotification()
+            # if len(z)>0:
+            #   ii = list(set([type(i) for i in z]))
+            #   index = {k: list(set(filter(lambda x: isinstance(x, k), z))) for k in ii}
+            #   for i in ii:
+            #     children = index[i]
+            #     if len(children)>1:
+            #       self.project.blankNotification()
+            #
+            #       print ('>>>', children)
+            #       for child in children[:-1]:
+            #         if child != obj:
+            #           if child is not None and not child.isDeleted:
+            #             print ('  >>>', child)
+            #             child.delete()
+            #       self.project.unblankNotification()
+            #       if children[-1] is not None and not children[-1].isDeleted:
+            #         children[-1].delete()
+            # if not obj.isDeleted:
             try:
-              ll = self._getChildren(obj)
-              z = [i for i in self._traverse(ll)]
-              # self.project.blankNotification()
-              if len(z)>0:
-                ii = list(set([type(i) for i in z]))
-                index = {k: list(set(filter(lambda x: isinstance(x, k), z))) for k in ii}
-                for i in ii:
-                  children = index[i]
-                  if len(children)>1:
-                    self.project.blankNotification()
-                    for child in children[:-1]:
-                      if child != obj:
-                        if child is not None and not child.isDeleted:
-                          child.delete()
-                    self.project.unblankNotification()
-                    if children[-1] is not None and not children[-1].isDeleted:
-                      children[-1].delete()
-              if not obj.isDeleted:
-                obj.delete()
+              obj.delete()
 
             except Exception as es:
               getLogger().warning('Object %s: %s' % (obj.pid, str(es)))
@@ -724,6 +729,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     # TODO:ED see if this is feasible
     self.fillSideBar(self.project)
 
+    print ('>>>_restore')
     for lItem in list:
       items = self.findItems(lItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
       if len(items)> 1:

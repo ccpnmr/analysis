@@ -635,12 +635,14 @@ class GuiSpectrumDisplay(CcpnModule):
     """
     Closes spectrum display and deletes it from the project.
     """
-    for strip in self.strips:
-      strip._unregisterStrip()
-    # self.module.close()
-    #self.delete()
-    CcpnModule._closeModule(self)
-    self.delete()
+    try:
+      for strip in self.strips:
+        strip._unregisterStrip()
+      # self.module.close()
+      #self.delete()
+    finally:
+      CcpnModule._closeModule(self)
+      self.delete()
 
   def _unDelete(self, strip):
     _undo = self.project._undo

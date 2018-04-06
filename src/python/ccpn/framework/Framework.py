@@ -396,7 +396,10 @@ class Framework:
     self.project = project
     if hasattr(self, '_mainWindow'):
       Logging.getLogger().debug('>>>framework._initialiseProject')
+
+      project._blockSideBar = True
       self.ui.initialize(self._mainWindow)
+      project._blockSideBar = False
 
       # Get the mainWindow out of the application top level once it's been transferred to ui
       del self._mainWindow
@@ -674,8 +677,9 @@ class Framework:
       # set undo step
       undo.newWaypoint()                # DO NOT CHANGE
 
-      # if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-      #   self._storedState = self.ui.mainWindow.sideBar._saveExpandedState()
+      if not self.project._blockSideBar and not undo._blocked:
+        if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
+          self._storedState = self.ui.mainWindow.sideBar._saveExpandedState()
 
       undo.increaseWaypointBlocking()
     if not self._echoBlocking:
@@ -717,8 +721,9 @@ class Framework:
     if undo is not None:                # ejb - changed from if undo:
       undo.decreaseWaypointBlocking()
 
-      # if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-      #   self.ui.mainWindow.sideBar._restoreExpandedState(self._storedState)
+      if not self.project._blockSideBar and not undo._blocked:
+        if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
+          self.ui.mainWindow.sideBar._restoreExpandedState(self._storedState)
 
     if self._echoBlocking > 0:
       # If statement should always be True, but to avoid weird behaviour in error situations we check
@@ -1408,7 +1413,10 @@ class Framework:
 
         self.ui.echoCommands(['application.undo()'])
         self._echoBlocking += 1
+
+        expandedState = self.ui.mainWindow.sideBar._saveExpandedState()
         self.project._undo.undo()
+        self.ui.mainWindow.sideBar._restoreExpandedState(expandedState)
 
         # TODO:ED this is a hack until guiNotifiers are working
         try:
@@ -1425,7 +1433,10 @@ class Framework:
       with MessageDialog.progressManager(self.ui.mainWindow, 'performing Redo'):
         self.ui.echoCommands(['application.redo()'])
         self._echoBlocking += 1
+
+        expandedState = self.ui.mainWindow.sideBar._saveExpandedState()
         self.project._undo.redo()
+        self.ui.mainWindow.sideBar._restoreExpandedState(expandedState)
 
         # TODO:ED this is a hack until guiNotifiers are working
         try:

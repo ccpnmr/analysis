@@ -51,7 +51,6 @@ class CcpnWebView(CcpnModule):
     """
     CCPN-INTERNAL: used to close the module
     """
-    del self.webView
     super(CcpnWebView, self)._closeModule()
 
   def close(self):

@@ -627,8 +627,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
   @pyqtSlot()
   def _screenChanged(self, *args):
-    screens = QtGui.QApplication.screens()
-    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QCursor().pos())
+    screens = QApplication.screens()
+    screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
     # print ('>>>', screens, screen)
     self._devicePixelRatio = screens[screen].devicePixelRatio()
     self.viewports._devicePixelRatio = self._devicePixelRatio
@@ -643,8 +643,8 @@ class CcpnGLWidget(QOpenGLWidget):
     # self._devicePixelRatio = QApplication.primaryScreen().devicePixelRatio()   #.instance().devicePixelRatio()
     # self.viewports._devicePixelRatio = self._devicePixelRatio
 
-    screens = QtGui.QApplication.screens()
-    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QCursor().pos())
+    screens = QApplication.screens()
+    screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
     # print ('>>>', screens, screen)
     self._devicePixelRatio = screens[screen].devicePixelRatio()
     self.viewports._devicePixelRatio = self._devicePixelRatio
@@ -6772,8 +6772,6 @@ class GLVertexArray():
     self.numVertices = 0
 
   def drawIndexArray(self):
-    # self._GLContext.makeCurrent()
-
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
     if self.fillMode is not None:
@@ -6781,26 +6779,16 @@ class GLVertexArray():
 
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-    # GL.glEnableClientState(GL.GL_TEXTURE_2D_ARRAY)
+
     GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
     GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
-    # GL.glTexCoordPointer(2, gl.GL_FLOAT, 0, self.texcoords)
-
-    # this is for passing extra attributes in
-    # GL.glEnableVertexAttribArray(1)
-    # GL.glVertexAttribPointer(1, 1, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
-
     GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
 
-    # GL.glDisableVertexAttribArray(1)
-    # GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
     if self.blendMode:
       GL.glDisable(GL.GL_BLEND)
-
-    # self._GLContext.doneCurrent()
 
   def drawVertexColor(self):
     if self.blendMode:
@@ -6820,8 +6808,6 @@ class GLVertexArray():
       GL.glDisable(GL.GL_BLEND)
 
   def drawTextArray(self):
-    # self._GLContext.makeCurrent()
-
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
 
@@ -6838,7 +6824,6 @@ class GLVertexArray():
 
     GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
 
-    # GL.glDisableVertexAttribArray(1)
     GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
@@ -6846,23 +6831,6 @@ class GLVertexArray():
 
     if self.blendMode:
       GL.glDisable(GL.GL_BLEND)
-
-  # def bindBuffers(self):
-  #   return
-  #   # self._vertexBuffer = GL.glGenBuffers(1)
-  #   # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._vertexBuffer)
-  #   # GL.glBufferData(GL.GL_ARRAY_BUFFER, len(self.vertices), self.vertices, GL.GL_STATIC_DRAW)
-  #   # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-  #   #
-  #   # self._colorBuffer = GL.glGenBuffers(1)
-  #   # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self._colorBuffer)
-  #   # GL.glBufferData(GL.GL_ARRAY_BUFFER, len(self.colors), self.colors, GL.GL_STATIC_DRAW)
-  #   # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-  #
-  #   self._indexBuffer = GL.glGenBuffers(1)
-  #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self._indexBuffer)
-  #   GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, len(self.indices), self.indices, GL.GL_STATIC_DRAW)
-  #   GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
 
 
 class GLRegion(QtWidgets.QWidget):

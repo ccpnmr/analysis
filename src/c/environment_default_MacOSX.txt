@@ -32,6 +32,7 @@ FPIC_FLAG = -fPIC
 # use below for everything without -fPIC option (e.g. Windows)
 #FPIC_FLAG =
 
+# disable warning messages flag
 NOWARNING_FLAG = -w
 
 # optimisation flag

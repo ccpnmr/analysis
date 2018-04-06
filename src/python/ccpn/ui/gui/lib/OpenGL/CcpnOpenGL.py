@@ -289,10 +289,6 @@ class CcpnGLWidget(QOpenGLWidget):
     self._threads = {}
     self._threadUpdate = False
 
-    # TODO:ED need to check how this works
-    # for spectrumView in self._parent.spectrumViews:
-    #   spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
-
     self.lastPos = QPoint()
     self._mouseX = 0
     self._mouseY = 0
@@ -525,7 +521,6 @@ class CcpnGLWidget(QOpenGLWidget):
     currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
     currentShader.setGLUniform4fv('viewport', 1, self._view)
 
-    # TODO:ED marks and horizontal/vertical traces
     self._rescaleOverlayText()
     self.rescaleMarksRulers()
     self.rescaleIntegralLists()
@@ -629,7 +624,6 @@ class CcpnGLWidget(QOpenGLWidget):
   def _screenChanged(self, *args):
     screens = QApplication.screens()
     screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
-    # print ('>>>', screens, screen)
     self._devicePixelRatio = screens[screen].devicePixelRatio()
     self.viewports._devicePixelRatio = self._devicePixelRatio
     self.update()
@@ -645,7 +639,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     screens = QApplication.screens()
     screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
-    # print ('>>>', screens, screen)
     self._devicePixelRatio = screens[screen].devicePixelRatio()
     self.viewports._devicePixelRatio = self._devicePixelRatio
 
@@ -653,8 +646,6 @@ class CcpnGLWidget(QOpenGLWidget):
     self.h = h
 
     if self._axisLocked:
-      # ax0 = self._preferences.aspectRatios[self._axisCodes[0][0]]
-      # ax1 = self._preferences.aspectRatios[self._axisCodes[1][0]]
       ax0 = self._getValidAspectRatio(self._axisCodes[0])
       ax1 = self._getValidAspectRatio(self._axisCodes[1])
 
@@ -678,8 +669,6 @@ class CcpnGLWidget(QOpenGLWidget):
       li.renderMode = GLRENDERMODE_REBUILD
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
-    # for pp in self._GLPeakListLabels.values():
-    #   pp.renderMode = GLRENDERMODE_RESCALE
 
     self.update()
 
@@ -692,7 +681,7 @@ class CcpnGLWidget(QOpenGLWidget):
       return (l-val)*(r-val) <= 0
 
     numPixels = event.pixelDelta()
-    numDegrees = event.angleDelta() / 8
+    numDegrees = event.angleDelta()
     zoomCentre = self._preferences.zoomCentreType
 
     zoomScale = 0.0
@@ -710,7 +699,7 @@ class CcpnGLWidget(QOpenGLWidget):
     elif numDegrees:
 
       # this may work when using Linux
-      scrollDirection = numDegrees.y()
+      scrollDirection = numDegrees.y() / 8
       zoomscale = 8.0
 
       # stop the very sensitive movements
@@ -730,24 +719,16 @@ class CcpnGLWidget(QOpenGLWidget):
     zoomIn = (100.0+zoomScale)/100.0
     zoomOut = 100.0/(100.0+zoomScale)
 
-    axisLine = 5
     h = self.h
     w = self.w
 
     # find the correct viewport
-    # mw = [0, 35, w-36, h-1]
-    # ba = [0, 0, w - 36, 34]
-    # ra = [w-36, 35, w, h]
-
     mw = [0, self.AXIS_MARGINBOTTOM, w-self.AXIS_MARGINRIGHT, h-1]
     ba = [0, 0, w-self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM-1]
     ra = [w-self.AXIS_MARGINRIGHT, self.AXIS_MARGINBOTTOM, w, h]
 
     mx = event.pos().x()
     my = self.height() - event.pos().y()
-
-    updateX = False
-    updateY = False
 
     if between(mx, mw[0], mw[2]) and between(my, mw[1], mw[3]):
       # if in the mainView
@@ -779,19 +760,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB = mby + zoomOut * (self.axisB - mby)
         self.axisT = mby - zoomOut * (mby - self.axisT)
 
-      # TODO:ED check that the axes limits are not exceeded
-
-
       self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
                                          axisB=self.axisB, axisT=self.axisT,
                                          axisL=self.axisL, axisR=self.axisR)
 
       self._rescaleAllAxes()
-      # self.buildMouseCoords(refresh=True)
-
-      # # spawn rebuild event for the grid
-      # for li in self.gridList:
-      #   li.renderMode = GLRENDERMODE_REBUILD
 
     elif between(mx, ba[0], ba[2]) and between(my, ba[1], ba[3]):
       # in the bottomAxisBar
@@ -818,8 +791,6 @@ class CcpnGLWidget(QOpenGLWidget):
       else:
         mby = 0.5 * (self.axisT + self.axisB)
 
-        # ax0 = self._preferences.aspectRatios[self._axisCodes[0][0]]
-        # ax1 = self._preferences.aspectRatios[self._axisCodes[1][0]]
         ax0 = self._getValidAspectRatio(self._axisCodes[0])
         ax1 = self._getValidAspectRatio(self._axisCodes[1])
 
@@ -832,8 +803,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                            axisL=self.axisL, axisR=self.axisR)
 
         self._rescaleAllAxes()
-
-      # self.buildMouseCoords(refresh=True)
 
     elif between(mx, ra[0], ra[2]) and between(my, ra[1], ra[3]):
       # in the rightAxisBar
@@ -860,8 +829,6 @@ class CcpnGLWidget(QOpenGLWidget):
       else:
         mbx = 0.5 * (self.axisR + self.axisL)
 
-        # ax0 = self._preferences.aspectRatios[self._axisCodes[0][0]]
-        # ax1 = self._preferences.aspectRatios[self._axisCodes[1][0]]
         ax0 = self._getValidAspectRatio(self._axisCodes[0])
         ax1 = self._getValidAspectRatio(self._axisCodes[1])
 
@@ -874,20 +841,10 @@ class CcpnGLWidget(QOpenGLWidget):
                                            axisL=self.axisL, axisR=self.axisR)
 
         self._rescaleAllAxes()
-      # self.buildMouseCoords(refresh=True)
 
     event.accept()
 
   def _rescaleXAxis(self, update=True):
-
-    # if self._preferences.lockAspectRatio:
-    #   midY = (self.axisT+self.axisB)/2.0
-    #
-    #   xAxis = self._axisCodes[0][0]
-    #   yAxis = self._axisCodes[1][0]
-    #
-    #   ratio = self._preferences.Aspect[yAxis] / self._preferences.Aspect[xAxis]
-
     self._testAxisLimits()
     self.rescale()
 
@@ -898,8 +855,6 @@ class CcpnGLWidget(QOpenGLWidget):
     # ratios have changed so rescale the peaks symbols
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
-    # for pp in self._GLPeakListLabels.values():
-    #   pp.renderMode = GLRENDERMODE_RESCALE
 
     self._rescaleOverlayText()
 
@@ -907,23 +862,11 @@ class CcpnGLWidget(QOpenGLWidget):
       self.update()
 
     try:
-      # self._parent.viewBox.setXRange(min(self.axisL, self.axisR),
-      #                                 max(self.axisL, self.axisR), padding=0)
       self._orderedAxes[0].region = (self.axisL, self.axisR)
     except:
       getLogger().debug('error setting viewbox X-range')
 
   def _rescaleYAxis(self, update=True):
-
-    # if self._preferences.lockAspectRatio:
-    #   if self._preferences.lockAspectRatio:
-    #     midX = (self.axisL + self.axisR) / 2.0
-    #
-    #     xAxis = self._axisCodes[0][0]
-    #     yAxis = self._axisCodes[1][0]
-    #
-    #     ratio = self._preferences.Aspect[xAxis] / self._preferences.Aspect[yAxis]
-
     self._testAxisLimits()
     self.rescale()
 
@@ -934,8 +877,6 @@ class CcpnGLWidget(QOpenGLWidget):
     # ratios have changed so rescale the peaks symbols
     for pp in self._GLPeakLists.values():
       pp.renderMode = GLRENDERMODE_RESCALE
-    # for pp in self._GLPeakListLabels.values():
-    #   pp.renderMode = GLRENDERMODE_RESCALE
 
     self._rescaleOverlayText()
 
@@ -943,10 +884,8 @@ class CcpnGLWidget(QOpenGLWidget):
       self.update()
 
     try:
-      # self._parent.viewBox.setYRange(min(self.axisT, self.axisB),
-      #                                 max(self.axisT, self.axisB), padding=0)
       self._orderedAxes[1].region = (self.axisT, self.axisB)
-    except:
+    except Exception:
       getLogger().debug('error setting viewbox Y-range')
 
   def _rebuildMarks(self, update=True):
@@ -992,16 +931,6 @@ class CcpnGLWidget(QOpenGLWidget):
       self.axisB = yMid - self._maxYRange * np.sign(self.pixelY)
       self._maxReached = True
 
-    #   getLogger().warning('out of X range')
-    #
-    # yRange = abs(self.axisT-self.axisB)
-    # if yRange < self._minYRange or xRange > self._maxYRange:
-    #   getLogger().warning('out of Y range')
-    #
-    # if xRange < self._minXRange or xRange > self._maxXRange or yRange < self._minYRange or xRange > self._maxYRange:
-    #   # limit the display
-
-
   def _rescaleAllAxes(self, update=True):
     self._testAxisLimits()
     self.rescale()
@@ -1009,8 +938,6 @@ class CcpnGLWidget(QOpenGLWidget):
     # spawn rebuild event for the grid
     for li in self.gridList:
       li.renderMode = GLRENDERMODE_REBUILD
-    # self.buildGrid()
-    # self.buildAxisLabels()
 
     if self._axisLocked:
       # ratios have changed so rescale the peaks symbols
@@ -1023,11 +950,6 @@ class CcpnGLWidget(QOpenGLWidget):
       self.update()
 
     try:
-      # self._parent.viewBox.setXRange(min(self.axisL, self.axisR),
-      #                                 max(self.axisL, self.axisR), padding=0)
-      # self._parent.viewBox.setYRange(min(self.axisT, self.axisB),
-      #                                 max(self.axisT, self.axisB), padding=0)
-
       self._orderedAxes[0].region = (self.axisL, self.axisR)
       self._orderedAxes[1].region = (self.axisT, self.axisB)
 
@@ -1041,13 +963,6 @@ class CcpnGLWidget(QOpenGLWidget):
       event.accept()
       return True
     return super(CcpnGLWidget, self).eventFilter(obj, event)
-
-  # def _connectSpectra(self):
-  #   """
-  #   haven't tested this yet
-  #   """
-  #   for spectrumView in self._parent.spectrumViews:
-  #     spectrumView._buildSignal._buildSignal.connect(self.paintGLsignal)
 
   def setXRotation(self, angle):
     angle = self.normalizeAngle(angle)
@@ -1067,8 +982,6 @@ class CcpnGLWidget(QOpenGLWidget):
   def initialiseAxes(self, strip=None):
     """
     setup the correct axis range and padding
-    :param axes - list of axis objects:
-    :param padding - x, y padding values:
     """
     self.orderedAxes = strip.axes
     self._axisCodes = strip.axisCodes
@@ -1432,7 +1345,6 @@ void main()
     from ccpn.framework.PathsAndUrls import fontsPath
     self.glSmallFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallFont.fnt'), activeTexture=0)
     self.glSmallTransparentFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallTransparentFont.fnt'), fontTransparency=0.5, activeTexture=1)
-    # TODO:ED modify transparent font to be half transparency
 
     self._buildTextFlag = True
 
@@ -1442,12 +1354,8 @@ void main()
     self.diffMouseString = None
     self.peakLabelling = 0
 
-    self._contourList = {}            #GLVertexArray(numLists=1,
-                                      # renderMode=GLRENDERMODE_REBUILD,
-                                      # blendMode=True,
-                                      # drawMode=GL.GL_TRIANGLES,
-                                      # dimension=3,
-                                      # GLContext=self)
+    self._contourList = {}
+
     self._selectionBox = GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
                                       blendMode=True,
@@ -1481,24 +1389,6 @@ void main()
     self._hTraceVisible = False
     self._vTraceVisible = False
 
-    # self._hTrace = GLVertexArray(numLists=1,
-    #                                 renderMode=GLRENDERMODE_IGNORE,
-    #                                 blendMode=False,
-    #                                 drawMode=GL.GL_LINE_STRIP,
-    #                                 dimension=2,
-    #                                 GLContext=self)
-    # self._vTrace = GLVertexArray(numLists=1,
-    #                                 renderMode=GLRENDERMODE_IGNORE,
-    #                                 blendMode=False,
-    #                                 drawMode=GL.GL_LINE_STRIP,
-    #                                 dimension=2,
-    #                                 GLContext=self)
-
-    # self._axisLabels = GLVertexArray(numLists=1
-    #                                   , renderMode=GLRENDERMODE_REBUILD
-    #                                   , blendMode=True
-    #                                   , drawMode=GL.GL_TRIANGLES)
-
     self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
                                         fragment=self._fragmentShader1,
                                         attributes={'pMatrix':(16, np.float32),
@@ -1524,12 +1414,6 @@ void main()
                                                       'viewport':(4, np.float32),
                                                       'texture':(1, np.uint)})
 
-    # these are the links to the GL projection.model matrices
-    # self.uPMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'pMatrix')
-    # self.uMVMatrix = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'mvMatrix')
-    # self.positiveContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'positiveContour')
-    # self.negativeContours = GL.glGetUniformLocation(self._shaderProgram2.program_id, 'negativeContour')
-
     self._uPMatrix = np.zeros((16,), dtype=np.float32)
     self._uMVMatrix = np.zeros((16,), dtype=np.float32)
     self._uVMatrix = np.zeros((16,), dtype=np.float32)
@@ -1546,9 +1430,6 @@ void main()
     self._parameterList = np.zeros((4,), dtype=np.int32)
     self._view = np.zeros((4,), dtype=np.float32)
     self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
-
-    # self._positiveContours = np.zeros((4,), dtype=np.float32)
-    # self._negativeContours = np.zeros((4,), dtype=np.float32)
 
     self._testSpectrum = GLVertexArray(numLists=1
                                        , renderMode=GLRENDERMODE_REBUILD
@@ -1604,17 +1485,6 @@ void main()
     # define the full viewport
     self.viewports.addViewport(FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
 
-    # def set2DProjection                GL.glViewport(0, 35, w - 35, h - 35)
-    # def set2DProjectionRightAxis       GL.glViewport(w - 35 - axisLine, 35, axisLine, h - 35)
-    # def set2DProjectionRightAxisBar    GL.glViewport(w - AXIS_MARGIN, AXIS_MARGIN, AXIS_MARGIN, h - AXIS_MARGIN)
-    # def set2DProjectionBottomAxis      GL.glViewport(0, 35, w - 35, axisLine)
-    # def set2DProjectionBottomAxisBar   GL.glViewport(0, 0, w - AXIS_MARGIN, AXIS_MARGIN)
-    # def set2DProjectionFlat            GL.glViewport(0, 35, w - 35, h - 35)
-
-    # testing string
-    # self._testStrings = [GLString(text='The quick brown fox jumped over the lazy dog.', font=self.glSmallFont, x=2.813*xx, y=15.13571*xx
-    #                             , color=(0.15, 0.6, 0.25, 1.0), GLContext=self) for xx in list(range(50))]
-
     self._lockStringFalse = GLString(text='Lock', font=self.glSmallFont, x=0, y=0, color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
     self._lockStringTrue = GLString(text='Lock', font=self.glSmallFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
 
@@ -1639,15 +1509,6 @@ void main()
     self._maxYRange = 0.0
     self._minReached = False
     self._maxReached = False
-
-    # self.addRegion(values=(3,4), orientation='v', colour='green')
-    # self.addRegion(values=(5,6), orientation='h', colour='blue')
-    # self.addRegion(values=(7,8), orientation='v', colour='yellow')
-    # self.addRegion(values=(9,10), orientation='h', colour='grey')
-    # self.addRegion(values=(11,12), orientation='v', colour='purple')
-    # self.addRegion(values=(13,14), orientation='v', colour='red')
-    # self.addRegion(values=(15,16), orientation='v', colour='transparent')
-    # self.addRegion(values=(110, 114), axisCode='N', colour='green')
 
   def setBackgroundColour(self, col):
     """

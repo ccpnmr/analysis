@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-03-16 18:20:01 +0000 (Thu, March 16, 2017) $"
 import sys
 import typing
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore
 
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
@@ -216,9 +216,9 @@ class Gui(Ui):
   def getByGid(self, gid):
     return self.application.project.getByPid(gid)
 
-
   from ccpn.core.IntegralList import IntegralList
   from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+
   def showIntegralTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:IntegralList=None):
     logParametersString = "position={position}, relativeTo={relativeTo}, selectedList={selectedList}".format(
       position="'" + position + "'" if isinstance(position, str) else position,

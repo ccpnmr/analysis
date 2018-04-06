@@ -265,37 +265,37 @@ class DataFrameObject(object):
     if row is not None:
       self._table.silenceCallBack = True
 
-      try:
+      # try:
 
-        # generate a new row
-        listDict = OrderedDict()
-        for header in self._columnDefinitions.columns:
-          listDict[header.headerText] = header.getValue(obj)
+      # generate a new row
+      listDict = OrderedDict()
+      for header in self._columnDefinitions.columns:
+        listDict[header.headerText] = header.getValue(obj)
 
-        self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
-        self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
+      self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
+      self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
 
-        # keep the Index if it exists
-        if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:
-          newIndex = self._dataFrame_foundPid['Index'].iloc[0]
-          if 'Index' in listDict.keys():
-            listDict['Index'] = newIndex
+      # keep the Index if it exists
+      if not self._dataFrame_foundPid.empty and 'Index' in self._dataFrame_foundPid:
+        newIndex = self._dataFrame_foundPid['Index'].iloc[0]
+        if 'Index' in listDict.keys():
+          listDict['Index'] = newIndex
 
-        # store to the table
-        with self._table._quickTableUpdate(self):
-          self._table.setRow(row, list(listDict.values()))
+      # store to the table
+      with self._table._quickTableUpdate(self):
+        self._table.setRow(row, list(listDict.values()))
 
-        # store the actual object in the dataFrame
-        # if 'Pid' in listDict.keys():
-        #   listDict['Pid'] = obj
-        appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
-        self._dataFrame = self._dataFrame.append(appendDataFrame)
-        _update = True
+      # store the actual object in the dataFrame
+      # if 'Pid' in listDict.keys():
+      #   listDict['Pid'] = obj
+      appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
+      self._dataFrame = self._dataFrame.append(appendDataFrame)
+      _update = True
 
-      except Exception as es:
-        getLogger().warning(str(es))
-      finally:
-        self._table.silenceCallBack = False
+      # except Exception as es:
+      #   getLogger().warning(str(es))
+      # finally:
+      self._table.silenceCallBack = False
 
     return _update
 

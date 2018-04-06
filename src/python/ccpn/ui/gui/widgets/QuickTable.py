@@ -1303,7 +1303,10 @@ QuickTable::item::selected {
     elif trigger == Notifier.CHANGE:
 
       # modify the line in the table
-      _update = self._dataFrameObject.changeObject(row)
+      try:
+        _update = self._dataFrameObject.changeObject(row)
+      except:
+        getLogger().debug('Error updating row in table')
 
     elif trigger == Notifier.RENAME:
       # get the old pid before the rename

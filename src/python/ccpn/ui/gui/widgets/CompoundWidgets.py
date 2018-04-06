@@ -302,6 +302,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
     self.pulldownList.setData(texts=texts)
     self.select(current)
     self.pulldownList.blockSignals(False)
+    self.pulldownList.update()
 
   def updatePulldownList(self, theObject, triggers, targetName, func, *args, **kwds):
     """

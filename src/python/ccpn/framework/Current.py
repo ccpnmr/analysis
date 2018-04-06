@@ -271,22 +271,26 @@ Use print(current) to get a list of attribute, value pairs')
             pids.append(obj.pid)
         ll.append((ss, pids))
 
-    for field in sorted(_currentExtraFields.keys()):
-      ss = field[:-1]
-      ll.append((ss, getattr(self, ss)))
-      if not _currentExtraFields[field].get('singularOnly'):
-        ss = field
-        ll.append((ss, getattr(self, ss)))
+    # for field in sorted(_currentExtraFields.keys()):
+    #   ss = field[:-1]
+    #   ll.append((ss, getattr(self, ss)))
+    #   if not _currentExtraFields[field].get('singularOnly'):
+    #     ss = field
+    #     ll.append((ss, getattr(self, ss)))
 
 
     return OrderedDict(ll)
 
   def _restoreFromState(self, state):
+    '''
 
+    :param state: current state as dict.
+    :return: Restores first the singular classes if
+    '''
     sortedState = OrderedDict(state)
     try:
-      pluralClasses = [x._pluralLinkName for x in _currentClasses]
-      singularClasses = [cls.className for cls in _currentClasses]
+      pluralClasses = [cls._pluralLinkName for cls in _currentClasses if not _currentClasses[cls].get(SingularOnly)]
+      singularClasses = [cls.className.lower() for cls in _currentClasses if _currentClasses[cls].get(SingularOnly)]
       for attName, values in sortedState.items():
         if values is None:
           continue
@@ -294,8 +298,6 @@ Use print(current) to get a list of attribute, value pairs')
           if isinstance(values, str):
             obj = self.project.getByPid(values)
             setattr(self, attName, obj)
-
-      for attName, values in sortedState.items():
         if attName in pluralClasses:
           if isinstance(values, (list,tuple)):
             objs = [self.project.getByPid(value) for value in values]

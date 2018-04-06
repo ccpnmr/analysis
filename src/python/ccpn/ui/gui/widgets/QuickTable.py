@@ -77,21 +77,15 @@ OBJECT_PARENT = 1
 
 def __ltForTableWidgetItem__(self, other):
   # new routine to overload TableWidgetItem that crashes when sorting None
-  try:
-    if self.sortMode == 'index' and hasattr(other, 'index'):
-      return self.index < other.index
-    if self.sortMode == 'value' and hasattr(other, 'value'):
-      # return self.value < other.value
-      return (universalSortKey(self.value) < universalSortKey(other.value))
+  if self.sortMode == 'index' and hasattr(other, 'index'):
+    return self.index < other.index
+  if self.sortMode == 'value' and hasattr(other, 'value'):
+    return (universalSortKey(self.value) < universalSortKey(other.value))
+  else:
+    if self.text() and other.text():
+      return (universalSortKey(self.text()) < universalSortKey(other.text()))
     else:
-      if self.text() and other.text():
-        return (universalSortKey(self.text()) < universalSortKey(other.text()))
-      else:
-        return False
-
-  except Exception as es:
-    getLogger().debug('Error sorting table')
-    return False
+      return False
 
 def __sortByColumn__(self, col, newOrder):
   try:

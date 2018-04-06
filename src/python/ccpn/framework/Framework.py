@@ -1625,14 +1625,22 @@ class Framework:
     if len(tempModules) > 0:
       for tempModule in tempModules:
         getLogger().debug('closing module: %s' % tempModule)
-        tempModule.close()
+        try:
+          tempModule.close()
+        except:
+          # wrapped C/C++ object of type StripDisplay1d has been deleted
+          pass
 
   def _closeExtraWindows(self):
     tempAreas = self.ui.mainWindow.moduleArea.tempAreas
     if len(tempAreas) > 0:
       for tempArea in tempAreas:
         getLogger().debug('closing external module: %s' % tempArea.window())
-        tempArea.window().close()
+        try:
+          tempArea.window().close()
+        except:
+          # wrapped C/C++ object of type StripDisplay1d has been deleted
+          pass
 
   def _closeProject(self):
     """Close project and clean up - when opening another or quitting application"""

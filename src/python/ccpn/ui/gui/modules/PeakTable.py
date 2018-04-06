@@ -114,7 +114,7 @@ class PeakListTableWidget(QuickTable):
 
   positionsUnit = UNITS[0] #default
 
-  def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, **kwds):
+  def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, actionCallback=None, selectionCallback=None, **kwds):
     self.mainWindow = mainWindow
     self.application = mainWindow.application
     self.project = mainWindow.application.project
@@ -132,7 +132,7 @@ class PeakListTableWidget(QuickTable):
     ## create peakList table widget
     # ObjectTable.__init__(self, parent=self._widget, setLayout=True, columns=[], objects=[]
     #                      , autoResize=True, multiSelect=True
-    #                      , actionCallback=self._actionCallback, selectionCallback=self._selectionCallback
+    #                      , actionCallback=self._actionCallback, selectionCallback=self._setCurrentSpectrumHit
     #                      , grid=(1, 0), gridSpan=(1, 6))
 
     ## create Pulldown for selection of peakList
@@ -155,14 +155,17 @@ class PeakListTableWidget(QuickTable):
 
     self._hiddenColumns = ['Pid']
     self.dataFrameObject = None
+    selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
+    actionCallback = self._actionCallback if actionCallback is None else actionCallback
+
 
     QuickTable.__init__(self, parent=parent
                         , mainWindow=self.mainWindow
                         , dataFrameObject=None
                         , setLayout=True
                         , autoResize=True, multiSelect=True
-                        , actionCallback=self._actionCallback
-                        , selectionCallback=self._selectionCallback
+                        , actionCallback=actionCallback
+                        , selectionCallback=selectionCallback
                         , grid=(3, 0), gridSpan=(1, 6))
 
     # self._selectOnTableCurrentPeaksNotifier = None

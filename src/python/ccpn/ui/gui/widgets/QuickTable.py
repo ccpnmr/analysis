@@ -279,6 +279,24 @@ QuickTable::item::selected {
     TableWidgetItem.__lt__ = __ltForTableWidgetItem__
     # TableWidget.sortByColumn = __sortByColumn__   #MethodType(__sortByColumn__, TableWidget)
 
+  # def resizeEvent(self, event):
+  #   """ Resize all sections to content and user interactive """
+  #
+  #   super(QuickTable, self).resizeEvent(event)
+  #   self.hide()
+  #   header = self.horizontalHeader()
+  #   header.setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+  #   self.show()
+  #   header.setResizeMode(QtWidgets.QHeaderView.Interactive)
+
+    # super(QuickTable, self).resizeEvent(event)
+    # header = self.horizontalHeader()
+    # for column in range(header.count()):
+    #   header.setSectionResizeMode(column, QtWidgets.QHeaderView.ResizeToContents)
+    #   width = header.sectionSize(column)
+    #   header.setSectionResizeMode(column, QtWidgets.QHeaderView.Interactive)
+    #   header.resizeSection(column, width)
+
   def _sortChanged(self, col, sortOrder:QtCore.Qt.SortOrder):
     # sort the _dataFrame to match
     # need to read the sorted state when repopulating table

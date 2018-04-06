@@ -472,7 +472,7 @@ class CcpnModule(Dock, DropBase):
           # delattr(widget, str(variableName))
 
       except Exception as e:
-        getLogger().warn('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+        getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
 
   def rename(self, newName):
     self.label.setText(newName)

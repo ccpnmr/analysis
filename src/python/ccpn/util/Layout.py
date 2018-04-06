@@ -97,7 +97,7 @@ def _createLayoutFile(application):
     json.dump(DefaultLayoutFile, file, sort_keys=False, indent=4, separators=(',', ': '))
     file.close()
   except Exception as e:
-    getLogger().warning('Impossible to create a layout File.', e)
+    getLogger().debug('Impossible to create a layout File.', e)
 
 
 def getLayoutDirectoryPath(projectPath):
@@ -213,7 +213,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
     json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
     file.close()
   except Exception as e:
-    getLogger().warning('Impossible to save Layout %s' %e)
+    getLogger().debug('Impossible to save Layout %s' %e)
 
 
 def _ccpnModulesImporter(path, neededModules):
@@ -244,7 +244,7 @@ def _ccpnModulesImporter(path, neededModules):
                 _ccpnModules.append(obj)
                 # print ('>>>     append')
       except Exception as es:
-        getLogger().warning('Error loading module: %s' % str(es))
+        getLogger().debug('Error loading module: %s' % str(es))
   return _ccpnModules
 
 
@@ -260,7 +260,7 @@ def _openCcpnModule(mainWindow, ccpnModules, className, moduleName=None):
           mainWindow.moduleArea.addModule(newCcpnModule)
 
         except Exception as e:
-          getLogger().warning("Layout restore failed: %s" % e)
+          getLogger().debug("Layout restore failed: %s" % e)
 
 
 def _getApplicationSpecificModules(mainWindow, applicationName):
@@ -273,28 +273,28 @@ def _getApplicationSpecificModules(mainWindow, applicationName):
       from ccpn.AnalysisScreen.gui import modules as aS
       modules.append(aS)
     except Exception as e:
-      getLogger().warning("Import Error for AnalysisScreen , %s" % e)
+      getLogger().debug("Import Error for AnalysisScreen , %s" % e)
 
   if applicationName == AnalysisAssign:
     try:
       from ccpn.AnalysisAssign import modules as aA
       modules.append(aA)
     except Exception as e:
-      getLogger().warning("Import Error for AnalysisAssign , %s" % e)
+      getLogger().debug("Import Error for AnalysisAssign , %s" % e)
 
   if applicationName == AnalysisMetabolomics:
     try:
       from ccpn.AnalysisMetabolomics.ui.gui import modules as aM
       modules.append(aM)
     except Exception as e:
-      getLogger().warning("Import Error for AnalysisMetabolomics , %s" % e)
+      getLogger().debug("Import Error for AnalysisMetabolomics , %s" % e)
 
   if applicationName == AnalysisStructure:
     try:
       from ccpn.AnalysisStructure import modules as aS
       modules.append(aS)
     except Exception as e:
-      getLogger().warning("Import Error for AnalysisStructure , %s" % e)
+      getLogger().debug("Import Error for AnalysisStructure , %s" % e)
 
   return modules
 
@@ -374,7 +374,7 @@ def restoreLayout(mainWindow, layout):
                 _openCcpnModule(mainWindow, ccpnModules, className, moduleName=guiModuleName)
 
           except Exception as e:
-            getLogger().warning("Failed to restore Layout")
+            getLogger().debug("Failed to restore Layout")
 
   if LayoutState in layout:
     # Very important step:
@@ -391,6 +391,6 @@ def restoreLayout(mainWindow, layout):
         try:
           mainWindow.moduleArea.restoreState(state)
         except Exception as e:
-            getLogger().warning("Layout error: %s" % e)
+            getLogger().debug("Layout error: %s" % e)
       else:
-        getLogger().warning("Layout error: Some of the modules are missing. Geometries could not be restored")
+        getLogger().debug("Layout error: Some of the modules are missing. Geometries could not be restored")

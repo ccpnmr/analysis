@@ -26,8 +26,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import json
 import operator
 import typing
+from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Chain import Chain
@@ -47,20 +49,23 @@ from ccpn.core.Peak import Peak
 from ccpn.ui._implementation.Strip import Strip
 # from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
+SingularOnly = 'singularOnly'
+
+
 _currentClasses = {
-  SpectrumGroup:{'singularOnly':True},
+  SpectrumGroup:{SingularOnly:True},
   Peak:{},
   Integral:{},
   NmrChain:{},
   NmrResidue:{},
   NmrAtom:{},
-  Strip:{'singularOnly':True},
+  Strip:{SingularOnly:True},
   Chain:{},
   Residue:{},
   ChemicalShiftList:{},
   ChemicalShift:{},
   Sample:{},
-  SpectrumHit:{'singularOnly':True},
+  SpectrumHit:{SingularOnly:True},
   Substance:{}
 
 
@@ -255,7 +260,10 @@ Use print(current) to get a list of attribute, value pairs')
       if not _currentClasses[cls].get('singularOnly'):
         ss = noCap(cls._pluralLinkName)
         objs = getattr(self, ss)
-        pids = [obj.pid for obj in objs]
+        pids = []
+        for obj in objs:
+          if obj is not None:
+            pids.append(obj.pid)
         ll.append((ss, pids))
 
     for field in sorted(_currentExtraFields.keys()):
@@ -265,22 +273,25 @@ Use print(current) to get a list of attribute, value pairs')
         ss = field
         ll.append((ss, getattr(self, ss)))
 
-    from collections import OrderedDict
+
     return OrderedDict(ll)
 
   def _restoreFromState(self, state):
 
+    sortedState = OrderedDict(state)
     try:
-      _allowedClasses = [x._pluralLinkName for x in _currentClasses] + [cls.className for cls in _currentClasses]
-      for attName, values in state.items():
+      pluralClasses = [x._pluralLinkName for x in _currentClasses]
+      singularClasses = [cls.className for cls in _currentClasses]
+      for attName, values in sortedState.items():
         if values is None:
           continue
-        if isinstance(values, str):
-          obj = self.project.getByPid(values)
-          setattr(self, attName, obj)
+        if attName in singularClasses:
+          if isinstance(values, str):
+            obj = self.project.getByPid(values)
+            setattr(self, attName, obj)
 
-        if attName in _allowedClasses:
-
+      for attName, values in sortedState.items():
+        if attName in pluralClasses:
           if isinstance(values, (list,tuple)):
             objs = [self.project.getByPid(value) for value in values]
             for value in values:
@@ -290,7 +301,7 @@ Use print(current) to get a list of attribute, value pairs')
                   objs.append(obj)
             setattr(self, attName, objs)
     except Exception as e:
-      getLogger().warn('Impossible to restore current. %s' % e)
+      getLogger().debug('Impossible to restore current. %s' % e)
 
   @classmethod
   def  _addClassField(cls, param:typing.Union[str, AbstractWrapperObject]):
@@ -392,6 +403,35 @@ Use print(current) to get a list of attribute, value pairs')
       cleanup.__name__ = 'current_%s_deletion_cleanup' % singular
       #
       param._setupCoreNotifier('delete', cleanup)
+
+  def _dumpStateToFile(self):
+    try:
+      path = self.project.path + '/' + self.className
+      file = open(path, "w")
+      json.dump(self.currentState, file, sort_keys=False, indent=2,)
+      file.close()
+    except Exception as e:
+      getLogger().debug('Impossible to create a Current File.', e)
+
+  def _restroreStateFromFile(self,):
+    """
+    """
+    import os
+    try:
+
+      if not os.path.exists(self.project.path + '/' + self.className):
+        pass
+      else:
+        path = self.project.path + '/' + self.className
+        if path:
+          with open(path) as fp:
+            state = json.load(fp)
+            if state:
+              self._restoreFromState(state)
+
+    except Exception as e:
+      getLogger().debug('No state found. %s' %e)
+
 
 # Add fields to current
 for cls in _currentClasses:

@@ -255,7 +255,7 @@ class Project(AbstractWrapperObject):
       application = self._appBase
       if application is not None:
         application._refreshAfterSave()
-    #
+
     return savedOk
 
   

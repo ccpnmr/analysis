@@ -72,7 +72,6 @@ AnalysisScreen = 'AnalysisScreen'
 AnalysisMetabolomics = 'AnalysisMetabolomics'
 AnalysisStructure = 'AnalysisStructure'
 ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
-
 interfaceNames = ('NoUi', 'Gui')
 
 
@@ -311,7 +310,6 @@ class Framework:
 
     else:
       project = self.newProject()
-
     self._updateCheckableMenuItems()
 
     if not self._checkRegistration():
@@ -382,6 +380,10 @@ class Framework:
 
     # Adapt project to preferences
     self.applyPreferences(project)
+
+    # restore current
+    self.current._restroreStateFromFile()
+
 
     # Add Layout Folder
     Layout.createLayoutDirectory(project)
@@ -1217,6 +1219,7 @@ class Framework:
       self.ui.mainWindow._updateWindowTitle()
       self.ui.mainWindow.getMenuAction('Project->Archive').setEnabled(True)
       self.ui.mainWindow._fillRecentProjectsMenu()
+      self.current._dumpStateToFile()
       try:
         if self.preferences.general.autoSaveLayoutOnQuit:
           Layout.saveLayoutToJson(self.ui.mainWindow)
@@ -1224,7 +1227,6 @@ class Framework:
         getLogger().warning('Impossible to save Layout %s' % e)
 
       # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
-
       sys.stderr.write('==> Project successfully saved\n')
       # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
       #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)

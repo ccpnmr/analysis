@@ -66,14 +66,15 @@ class Gui(Ui):
     # On the Mac (at least) it does not matter what you set the applicationName to be,
     # it will come out as the executable you are running (e.g. "python3")
 
-    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+    # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+    # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts, True)
 
     self.qtApp = Application(self.application.applicationName,
                                    self.application.applicationVersion,
                                    organizationName='CCPN', organizationDomain='ccpn.ac.uk')
     #self.qtApp.setStyleSheet(self.application.styleSheet)
 
-    styles = QtGui.QStyleFactory()
+    styles = QtWidgets.QStyleFactory()
     self.qtApp.setStyle(styles.create('fusion'))
 
   def initialize(self, mainWindow):

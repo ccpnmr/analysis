@@ -382,7 +382,7 @@ class Framework:
     self.applyPreferences(project)
 
     # restore current
-    self.current._restroreStateFromFile()
+    self.current._restoreStateFromFile()
 
 
     # Add Layout Folder

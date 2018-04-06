@@ -239,11 +239,16 @@ Use print(current) to get a list of attribute, value pairs')
     # #return "current\n" + '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in _definitions))
     # return '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in self._definitions))
   @property
-  def currentState(self):
-    return self._currentState
+  def state(self):
+    """
+    Returns a storable representation of current objs in a ordered Dict.
+    Keys the class name, values: pids, float/int or Nones. [] for plural cases.
+    Used to dump in json file to save a restore the state when opening/closing a project
+    """
+    return self._state
 
-  @currentState.getter
-  def _currentState(self):
+  @state.getter
+  def _state(self):
     """
     Return a storable representation of self listing all attribute, value pairs
     """
@@ -408,13 +413,14 @@ Use print(current) to get a list of attribute, value pairs')
     try:
       path = self.project.path + '/' + self.className
       file = open(path, "w")
-      json.dump(self.currentState, file, sort_keys=False, indent=2,)
+      json.dump(self.state, file, sort_keys=False, indent=2, )
       file.close()
     except Exception as e:
       getLogger().debug('Impossible to create a Current File.', e)
 
-  def _restroreStateFromFile(self,):
+  def _restoreStateFromFile(self):
     """
+    restore current from the default File in the project directory
     """
     import os
     try:

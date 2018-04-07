@@ -23,34 +23,9 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-import sys, os
-import math
-from threading import Thread
-# from queue import Queue
-from imageio import imread
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import (QPoint, QSize, Qt, pyqtSignal, pyqtSlot)
-from PyQt5.QtWidgets import QApplication, QOpenGLWidget
-from ccpn.util.Logging import getLogger
+import sys
+from PyQt5 import QtWidgets
 import numpy as np
-from pyqtgraph import functions as fn
-from ccpn.core.PeakList import PeakList
-from ccpn.core.IntegralList import IntegralList
-
-from ccpn.ui.gui.guiSettings import getColours
-from ccpn.util.Colour import hexToRgbRatio
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
-                                    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
-                                    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE
-from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
-import ccpn.util.Phasing as Phasing
-from ccpn.util.decorators import singleton
-from ccpn.ui.gui.lib.mouseEvents import \
-              leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
-              middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.framework.PathsAndUrls import fontsPath
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 try:
   from OpenGL import GL, GLU, GLUT
 except ImportError:

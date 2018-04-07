@@ -85,6 +85,9 @@ class CcpnGLFont():
     hdx = dx / 10.0
     hdy = dy / 10.0
 
+    line = ''
+    chrNum = 0
+
     while exitDims is False and row < len(self.fontInfo):
       line = self.fontInfo[row]
       # print (line)
@@ -255,7 +258,7 @@ class CcpnGLFont():
 
 
 class GLString(GLVertexArray):
-  def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0),
+  def __init__(self, text=None, font=None, obj=None, color=(1.0, 1.0, 1.0, 1.0),
                x=0.0, y=0.0,
                ox=0.0, oy=0.0,
                angle=0.0, width=None, height=None, GLContext=None):
@@ -267,8 +270,8 @@ class GLString(GLVertexArray):
 
     self.text = text
     self.font = font
-    self.object = object
-    self.pid = object.pid if hasattr(object, 'pid') else None
+    self.object = obj
+    self.pid = obj.pid if hasattr(obj, 'pid') else None
     self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
     self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
     self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)

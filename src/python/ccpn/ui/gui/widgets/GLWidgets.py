@@ -576,7 +576,7 @@ class Gui1dWidget(CcpnGLWidget):
                                 ox=symbolWidth, oy=symbolWidth,
                                 # x=self._screenZero[0], y=self._screenZero[1]
                                 color=(colR, colG, colB, 1.0), GLContext=self,
-                                object=peak))
+                                obj=peak))
 
   def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
     # drawList = self._GLPeakListLabels[peakListView]

@@ -1564,7 +1564,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     for drawStr in drawList.stringList:
 
-      peak = drawStr.obj
+      peak = drawStr.object
 
       if peak and not peak.isDeleted:
         # _isSelected = False
@@ -2359,7 +2359,7 @@ class CcpnGLWidget(QOpenGLWidget):
       drawList = self._GLPeakListLabels[pll]
 
       for drawStr in drawList.stringList:
-        if drawStr.obj == peak:
+        if drawStr.object == peak:
           drawList.stringList.remove(drawStr)
           break
 

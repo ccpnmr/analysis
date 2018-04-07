@@ -162,3 +162,22 @@ class GLVertexArray():
 
     if self.blendMode:
       GL.glDisable(GL.GL_BLEND)
+
+
+class GLPeakListArray(GLVertexArray):
+  def __init__(self, GLContext=None, spectrumView=None, peakListView=None):
+    super(GLPeakListArray, self).__init__(renderMode=GLRENDERMODE_REBUILD,
+                                          blendMode=False, drawMode=GL.GL_LINES,
+                                          dimension=2, GLContext=GLContext)
+    self.spectrumView = spectrumView
+    self.peakListView = peakListView
+
+
+class GLPeakLabelsArray(GLVertexArray):
+  def __init__(self, GLContext=None, spectrumView=None, peakListView=None):
+    super(GLPeakLabelsArray, self).__init__(renderMode=GLRENDERMODE_REBUILD,
+                                          blendMode=False, drawMode=GL.GL_LINES,
+                                          dimension=2, GLContext=GLContext)
+    self.spectrumView = spectrumView
+    self.peakListView = peakListView
+    self.stringList = []

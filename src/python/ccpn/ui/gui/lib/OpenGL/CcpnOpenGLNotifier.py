@@ -1,5 +1,8 @@
 """
-Module Documentation here
+A Small class to control the communication of information across strips.
+E.g.  Mouse co-ordinates
+      Signals to other connected strips to rescale on axis changes
+      Signal other strips to update
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -23,8 +26,8 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import (QPoint, QSize, Qt, pyqtSignal, pyqtSlot)
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSignal
 from ccpn.util.decorators import singleton
 
 

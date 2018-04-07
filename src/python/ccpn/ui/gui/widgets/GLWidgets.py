@@ -38,8 +38,8 @@ except ImportError:
 from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLPeakListArray, GLVertexArray, GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE,\
                                   GLRENDERMODE_REBUILD, GLREFRESHMODE_REBUILD,\
-                                  LENCOLORS, LENPID,\
-                                  GLString
+                                  LENCOLORS, LENPID
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 import ccpn.util.Phasing as Phasing
 

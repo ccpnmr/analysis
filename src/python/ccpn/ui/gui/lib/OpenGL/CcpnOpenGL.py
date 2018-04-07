@@ -51,6 +51,13 @@ from ccpn.ui.gui.lib.mouseEvents import \
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.framework.PathsAndUrls import fontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
+                                                    GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
+                                                    GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
+                                                    GLREFRESHMODE_REBUILD, \
+                                                    GLVertexArray
 try:
   from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -59,14 +66,6 @@ except ImportError:
           "PyOpenGL must be installed to run this example.")
   sys.exit(1)
 
-GLRENDERMODE_IGNORE = 0
-GLRENDERMODE_DRAW = 1
-GLRENDERMODE_RESCALE = 2
-GLRENDERMODE_REBUILD = 3
-
-GLREFRESHMODE_NEVER = 0
-GLREFRESHMODE_ALWAYS = 1
-GLREFRESHMODE_REBUILD = 2
 
 SPECTRUM_STACKEDMATRIX = 'stackedMatrix'
 SPECTRUM_MATRIX = 'spectrumMatrix'
@@ -250,273 +249,273 @@ FADE_FACTOR = 0.3
 #     self.glAxisLockChanged.emit(aDict)
 
 
-@singleton
-class GLGlobalData(QtWidgets.QWidget):
-  def __init__(self, parent=None, strip=None):
-
-    super(GLGlobalData, self).__init__()
-    self.parent = parent
-    self.strip = strip
-    
-    self.glSmallFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallFont.fnt'), activeTexture=0)
-    self.glSmallTransparentFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallTransparentFont.fnt'), fontTransparency=0.5, activeTexture=1)
-    self.initialiseShaders()
-    
-  def initialiseShaders(self):
-    # simple shader for standard plotting of contours
-    self._vertexShader1 = """
-    #version 120
-
-    uniform mat4 mvMatrix;
-    uniform mat4 pMatrix;
-    varying vec4 FC;
-    uniform vec4 axisScale;
-    attribute vec2 offset;
-
-    void main()
-    {
-      gl_Position = pMatrix * mvMatrix * gl_Vertex;
-      FC = gl_Color;
-    }
-    """
-
-    self._fragmentShader1 = """
-    #version 120
-
-    varying vec4  FC;
-    uniform vec4  background;
-    //uniform ivec4 parameterList;
-
-    void main()
-    {
-      gl_FragColor = FC;
-
-    //  if (FC.w < 0.05)
-    //    discard;
-    //  else if (parameterList.x == 0)
-    //    gl_FragColor = FC;
-    //  else
-    //    gl_FragColor = vec4(FC.xyz, 1.0) * FC.w + background * (1-FC.w);
-    }
-    """
-
-    # shader for plotting antialiased text to the screen
-    self._vertexShaderTex = """
-    #version 120
-
-    uniform mat4 mvMatrix;
-    uniform mat4 pMatrix;
-    uniform vec4 axisScale;
-    uniform vec4 viewport;
-    varying vec4 FC;
-    varying vec4 FO;
-    varying vec4 varyingTexCoord;
-    attribute vec2 offset;
-
-    void main()
-    {
-      // viewport is scaled to axis
-      vec4 pos = pMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
-                        // character_pos              world_coord
-
-      // centre on the nearest pixel in NDC - shouldn't be needed but textures not correct yet
-      gl_Position = pos;       //vec4( pos.x,        //floor(0.5 + viewport.x*pos.x) / viewport.x,
-                               //pos.y,        //floor(0.5 + viewport.y*pos.y) / viewport.y,
-                               //pos.zw );
-
-      varyingTexCoord = gl_MultiTexCoord0;
-      FC = gl_Color;
-    }
-    """
-
-    self._fragmentShaderTex = """
-    #version 120
-
-    uniform sampler2D texture;
-    varying vec4 FC;
-    vec4    filter;
-    uniform vec4    background;
-    varying vec4 FO;
-    varying vec4 varyingTexCoord;
-
-    void main()
-    {
-      filter = texture2D(texture, varyingTexCoord.xy);
-      // colour for blending enabled
-      gl_FragColor = vec4(FC.xyz, filter.w);
-
-    //  if (filter.w < 0.01)
-    //    discard;
-    //  gl_FragColor = vec4(FC.xyz * filter.w, 1.0);
-    }
-    """
-
-    #     # shader for plotting antialiased text to the screen
-    #     self._vertexShaderTex = """
-    #     #version 120
-    #
-    #     uniform mat4 mvMatrix;
-    #     uniform mat4 pMatrix;
-    #     varying vec4 FC;
-    #     uniform vec4 axisScale;
-    #     attribute vec2 offset;
-    #
-    #     void main()
-    #     {
-    #       gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
-    #       gl_TexCoord[0] = gl_MultiTexCoord0;
-    #       FC = gl_Color;
-    #     }
-    #     """
-    #
-    #     self._fragmentShaderTex = """
-    # #version 120
-    #
-    # #ifdef GL_ES
-    # precision mediump float;
-    # #endif
-    #
-    # uniform sampler2D texture;
-    # varying vec4 FC;
-    # vec4    filter;
-    #
-    # varying vec4 v_color;
-    # varying vec2 v_texCoord;
-    #
-    # const float smoothing = 1.0/16.0;
-    #
-    # void main() {
-    #     float distance = texture2D(texture, v_texCoord).a;
-    #     float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
-    #     gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
-    # }
-    # """
-
-    # advanced shader for plotting contours
-    self._vertexShader2 = """
-    #version 120
-
-    varying vec4  P;
-    varying vec4  C;
-    uniform mat4  mvMatrix;
-    uniform mat4  pMatrix;
-    uniform vec4  positiveContour;
-    uniform vec4  negativeContour;
-    //uniform float gsize = 5.0;      // size of the grid
-    //uniform float gwidth = 1.0;     // grid lines' width in pixels
-    //varying float   f = min(abs(fract(P.z * gsize)-0.5), 0.2);
-
-    void main()
-    {
-      P = gl_Vertex;
-      C = gl_Color;
-    //  gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);
-    //  vec4 glVect = pMatrix * mvMatrix * vec4(P, 1.0);
-    //  gl_Position = vec4(glVect.x, glVect.y, 0.0, 1.0);
-      gl_Position = pMatrix * mvMatrix * vec4(P.xy, 0.0, 1.0);
-    }
-    """
-
-    self._fragmentShader2 = """
-    #version 120
-
-    //  uniform float gsize = 50.0;       // size of the grid
-    uniform float gwidth = 0.5;       // grid lines' width in pixels
-    uniform float mi = 0.0;           // mi=max(0.0,gwidth-1.0)
-    uniform float ma = 1.0;           // ma=max(1.0,gwidth);
-    varying vec4 P;
-    varying vec4 C;
-
-    void main()
-    {
-    //  vec3 f  = abs(fract (P * gsize)-0.5);
-    //  vec3 df = fwidth(P * gsize);
-    //  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
-    //  vec3 g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);//max(0.0,1.0-gwidth) should also be sent as uniform
-    //  float c = g.x * g.y * g.z;
-    //  gl_FragColor = vec4(c, c, c, 1.0);
-    //  gl_FragColor = gl_FragColor * gl_Color;
-
-      float   f = min(abs(fract(P.z)-0.5), 0.2);
-      float   df = fwidth(P.z);
-    //  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);                 //  should be uniforms
-      float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);      //  max(0.0,1.0-gwidth) should also be sent as uniform
-    //  float   g=clamp((f-df*mi), 0.0, df*(ma-mi));  //  max(0.0,1.0-gwidth) should also be sent as uniform
-
-    //  g = g/(df*(ma-mi));
-    //  float   cAlpha = 1.0-(g*g);
-    //  if (cAlpha < 0.25)            //  this actually causes branches in the shader - bad
-    //    discard;
-    //  gl_FragColor = vec4(0.8-g, 0.3, 0.4-g, 1.0-(g*g));
-      gl_FragColor = vec4(P.w, P.w, P.w, 1.0-(g*g));
-    }
-    """
-
-    self._vertexShader3 = """
-        #version 120
-
-        uniform mat4 u_projTrans;
-
-        attribute vec4 a_position;
-        attribute vec2 a_texCoord0;
-        attribute vec4 a_color;
-
-        varying vec4 v_color;
-        varying vec2 v_texCoord;
-
-        void main() {
-          gl_Position = u_projTrans * a_position;
-          v_texCoord = a_texCoord0;
-          v_color = a_color;
-        }
-        """
-
-    self._fragmentShader3 = """
-        #version 120
-
-        #ifdef GL_ES
-        precision mediump float;
-        #endif
-
-        uniform sampler2D u_texture;
-
-        varying vec4 v_color;
-        varying vec2 v_texCoord;
-
-        const float smoothing = 1.0/16.0;
-
-        void main() {
-          float distance = texture2D(u_texture, v_texCoord).a;
-          float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
-          gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
-        }
-        """
-
-    self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
-                                        fragment=self._fragmentShader1,
-                                        attributes={'pMatrix':(16, np.float32),
-                                                      'mvMatrix':(16, np.float32),
-                                                      'parameterList':(4, np.int32),
-                                                      'background':(4, np.float32)})
-    self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2,
-                                        fragment=self._fragmentShader2,
-                                        attributes={'pMatrix':(16, np.float32),
-                                                      'mvMatrix':(16, np.float32),
-                                                      'positiveContours':(4, np.float32),
-                                                      'negativeContours':(4, np.float32)})
-    self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3,
-                                        fragment=self._fragmentShader3,
-                                        attributes={'pMatrix':(16, np.float32),
-                                                      'mvMatrix':(16, np.float32)})
-    self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex,
-                                        fragment=self._fragmentShaderTex,
-                                        attributes={'pMatrix':(16, np.float32),
-                                                      'mvMatrix':(16, np.float32),
-                                                      'axisScale':(4, np.float32),
-                                                      'background':(4, np.float32),
-                                                      'viewport':(4, np.float32),
-                                                      'texture':(1, np.uint)})
-
+# @singleton
+# class GLGlobalData(QtWidgets.QWidget):
+#   def __init__(self, parent=None, strip=None):
+#
+#     super(GLGlobalData, self).__init__()
+#     self.parent = parent
+#     self.strip = strip
+#
+#     self.glSmallFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallFont.fnt'), activeTexture=0)
+#     self.glSmallTransparentFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallTransparentFont.fnt'), fontTransparency=0.5, activeTexture=1)
+#     self.initialiseShaders()
+#
+#   def initialiseShaders(self):
+#     # simple shader for standard plotting of contours
+#     self._vertexShader1 = """
+#     #version 120
+#
+#     uniform mat4 mvMatrix;
+#     uniform mat4 pMatrix;
+#     varying vec4 FC;
+#     uniform vec4 axisScale;
+#     attribute vec2 offset;
+#
+#     void main()
+#     {
+#       gl_Position = pMatrix * mvMatrix * gl_Vertex;
+#       FC = gl_Color;
+#     }
+#     """
+#
+#     self._fragmentShader1 = """
+#     #version 120
+#
+#     varying vec4  FC;
+#     uniform vec4  background;
+#     //uniform ivec4 parameterList;
+#
+#     void main()
+#     {
+#       gl_FragColor = FC;
+#
+#     //  if (FC.w < 0.05)
+#     //    discard;
+#     //  else if (parameterList.x == 0)
+#     //    gl_FragColor = FC;
+#     //  else
+#     //    gl_FragColor = vec4(FC.xyz, 1.0) * FC.w + background * (1-FC.w);
+#     }
+#     """
+#
+#     # shader for plotting antialiased text to the screen
+#     self._vertexShaderTex = """
+#     #version 120
+#
+#     uniform mat4 mvMatrix;
+#     uniform mat4 pMatrix;
+#     uniform vec4 axisScale;
+#     uniform vec4 viewport;
+#     varying vec4 FC;
+#     varying vec4 FO;
+#     varying vec4 varyingTexCoord;
+#     attribute vec2 offset;
+#
+#     void main()
+#     {
+#       // viewport is scaled to axis
+#       vec4 pos = pMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+#                         // character_pos              world_coord
+#
+#       // centre on the nearest pixel in NDC - shouldn't be needed but textures not correct yet
+#       gl_Position = pos;       //vec4( pos.x,        //floor(0.5 + viewport.x*pos.x) / viewport.x,
+#                                //pos.y,        //floor(0.5 + viewport.y*pos.y) / viewport.y,
+#                                //pos.zw );
+#
+#       varyingTexCoord = gl_MultiTexCoord0;
+#       FC = gl_Color;
+#     }
+#     """
+#
+#     self._fragmentShaderTex = """
+#     #version 120
+#
+#     uniform sampler2D texture;
+#     varying vec4 FC;
+#     vec4    filter;
+#     uniform vec4    background;
+#     varying vec4 FO;
+#     varying vec4 varyingTexCoord;
+#
+#     void main()
+#     {
+#       filter = texture2D(texture, varyingTexCoord.xy);
+#       // colour for blending enabled
+#       gl_FragColor = vec4(FC.xyz, filter.w);
+#
+#     //  if (filter.w < 0.01)
+#     //    discard;
+#     //  gl_FragColor = vec4(FC.xyz * filter.w, 1.0);
+#     }
+#     """
+#
+#     #     # shader for plotting antialiased text to the screen
+#     #     self._vertexShaderTex = """
+#     #     #version 120
+#     #
+#     #     uniform mat4 mvMatrix;
+#     #     uniform mat4 pMatrix;
+#     #     varying vec4 FC;
+#     #     uniform vec4 axisScale;
+#     #     attribute vec2 offset;
+#     #
+#     #     void main()
+#     #     {
+#     #       gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+#     #       gl_TexCoord[0] = gl_MultiTexCoord0;
+#     #       FC = gl_Color;
+#     #     }
+#     #     """
+#     #
+#     #     self._fragmentShaderTex = """
+#     # #version 120
+#     #
+#     # #ifdef GL_ES
+#     # precision mediump float;
+#     # #endif
+#     #
+#     # uniform sampler2D texture;
+#     # varying vec4 FC;
+#     # vec4    filter;
+#     #
+#     # varying vec4 v_color;
+#     # varying vec2 v_texCoord;
+#     #
+#     # const float smoothing = 1.0/16.0;
+#     #
+#     # void main() {
+#     #     float distance = texture2D(texture, v_texCoord).a;
+#     #     float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+#     #     gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+#     # }
+#     # """
+#
+#     # advanced shader for plotting contours
+#     self._vertexShader2 = """
+#     #version 120
+#
+#     varying vec4  P;
+#     varying vec4  C;
+#     uniform mat4  mvMatrix;
+#     uniform mat4  pMatrix;
+#     uniform vec4  positiveContour;
+#     uniform vec4  negativeContour;
+#     //uniform float gsize = 5.0;      // size of the grid
+#     //uniform float gwidth = 1.0;     // grid lines' width in pixels
+#     //varying float   f = min(abs(fract(P.z * gsize)-0.5), 0.2);
+#
+#     void main()
+#     {
+#       P = gl_Vertex;
+#       C = gl_Color;
+#     //  gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);
+#     //  vec4 glVect = pMatrix * mvMatrix * vec4(P, 1.0);
+#     //  gl_Position = vec4(glVect.x, glVect.y, 0.0, 1.0);
+#       gl_Position = pMatrix * mvMatrix * vec4(P.xy, 0.0, 1.0);
+#     }
+#     """
+#
+#     self._fragmentShader2 = """
+#     #version 120
+#
+#     //  uniform float gsize = 50.0;       // size of the grid
+#     uniform float gwidth = 0.5;       // grid lines' width in pixels
+#     uniform float mi = 0.0;           // mi=max(0.0,gwidth-1.0)
+#     uniform float ma = 1.0;           // ma=max(1.0,gwidth);
+#     varying vec4 P;
+#     varying vec4 C;
+#
+#     void main()
+#     {
+#     //  vec3 f  = abs(fract (P * gsize)-0.5);
+#     //  vec3 df = fwidth(P * gsize);
+#     //  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
+#     //  vec3 g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);//max(0.0,1.0-gwidth) should also be sent as uniform
+#     //  float c = g.x * g.y * g.z;
+#     //  gl_FragColor = vec4(c, c, c, 1.0);
+#     //  gl_FragColor = gl_FragColor * gl_Color;
+#
+#       float   f = min(abs(fract(P.z)-0.5), 0.2);
+#       float   df = fwidth(P.z);
+#     //  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);                 //  should be uniforms
+#       float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);      //  max(0.0,1.0-gwidth) should also be sent as uniform
+#     //  float   g=clamp((f-df*mi), 0.0, df*(ma-mi));  //  max(0.0,1.0-gwidth) should also be sent as uniform
+#
+#     //  g = g/(df*(ma-mi));
+#     //  float   cAlpha = 1.0-(g*g);
+#     //  if (cAlpha < 0.25)            //  this actually causes branches in the shader - bad
+#     //    discard;
+#     //  gl_FragColor = vec4(0.8-g, 0.3, 0.4-g, 1.0-(g*g));
+#       gl_FragColor = vec4(P.w, P.w, P.w, 1.0-(g*g));
+#     }
+#     """
+#
+#     self._vertexShader3 = """
+#         #version 120
+#
+#         uniform mat4 u_projTrans;
+#
+#         attribute vec4 a_position;
+#         attribute vec2 a_texCoord0;
+#         attribute vec4 a_color;
+#
+#         varying vec4 v_color;
+#         varying vec2 v_texCoord;
+#
+#         void main() {
+#           gl_Position = u_projTrans * a_position;
+#           v_texCoord = a_texCoord0;
+#           v_color = a_color;
+#         }
+#         """
+#
+#     self._fragmentShader3 = """
+#         #version 120
+#
+#         #ifdef GL_ES
+#         precision mediump float;
+#         #endif
+#
+#         uniform sampler2D u_texture;
+#
+#         varying vec4 v_color;
+#         varying vec2 v_texCoord;
+#
+#         const float smoothing = 1.0/16.0;
+#
+#         void main() {
+#           float distance = texture2D(u_texture, v_texCoord).a;
+#           float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+#           gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+#         }
+#         """
+#
+#     self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
+#                                         fragment=self._fragmentShader1,
+#                                         attributes={'pMatrix':(16, np.float32),
+#                                                       'mvMatrix':(16, np.float32),
+#                                                       'parameterList':(4, np.int32),
+#                                                       'background':(4, np.float32)})
+#     self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2,
+#                                         fragment=self._fragmentShader2,
+#                                         attributes={'pMatrix':(16, np.float32),
+#                                                       'mvMatrix':(16, np.float32),
+#                                                       'positiveContours':(4, np.float32),
+#                                                       'negativeContours':(4, np.float32)})
+#     self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3,
+#                                         fragment=self._fragmentShader3,
+#                                         attributes={'pMatrix':(16, np.float32),
+#                                                       'mvMatrix':(16, np.float32)})
+#     self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex,
+#                                         fragment=self._fragmentShaderTex,
+#                                         attributes={'pMatrix':(16, np.float32),
+#                                                       'mvMatrix':(16, np.float32),
+#                                                       'axisScale':(4, np.float32),
+#                                                       'background':(4, np.float32),
+#                                                       'viewport':(4, np.float32),
+#                                                       'texture':(1, np.uint)})
+#
 
 class CcpnGLWidget(QOpenGLWidget):
 
@@ -1450,7 +1449,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.h = 0
     self.viewports = GLViewports(self._devicePixelRatio)
 
-    # TODO:ED error here when calulating the top offset, FOUND
+    # TODO:ED error here when calculating the top offset, FOUND
 
     # define the main viewports
     self.viewports.addViewport(MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
@@ -6048,222 +6047,222 @@ class CcpnGLWidget(QOpenGLWidget):
           return
 
 
-GlyphXpos = 'Xpos'
-GlyphYpos = 'Ypos'
-GlyphWidth = 'Width'
-GlyphHeight = 'Height'
-GlyphXoffset = 'Xoffset'
-GlyphYoffset = 'Yoffset'
-GlyphOrigW = 'OrigW'
-GlyphOrigH = 'OrigH'
-GlyphKerns = 'Kerns'
-GlyphTX0 = 'tx0'
-GlyphTY0 = 'ty0'
-GlyphTX1 = 'tx1'
-GlyphTY1 = 'ty1'
-GlyphPX0 = 'px0'
-GlyphPY0 = 'py0'
-GlyphPX1 = 'px1'
-GlyphPY1 = 'py1'
-
-
-class CcpnGLFont():
-  def __init__(self, fileName=None, size=12, base=0, fontTransparency=None, activeTexture=0):
-    self.fontName = None
-    self.fontGlyph = [None] * 256
-    self.base = base
-
-    with open(fileName, 'r') as op:
-      self.fontInfo = op.read().split('\n')
-
-    # no checking yet
-    self.fontFile = self.fontInfo[0].replace('textures: ', '')
-    self.fontPNG = imread(os.path.join(os.path.dirname(fileName), self.fontFile))
-    self.fontName = self.fontInfo[1].split()[0]
-    self.fontSize = self.fontInfo[1].split()[1]
-    self.width = 0
-    self.height = 0
-    self.activeTexture = GL.GL_TEXTURE0+activeTexture
-    self.activeTextureNum = activeTexture
-    self.fontTransparency = fontTransparency
-
-    row = 2
-    exitDims = False
-
-    # texture sizes
-    dx = 1.0 / float(self.fontPNG.shape[1])
-    dy = 1.0 / float(self.fontPNG.shape[0])
-    hdx = dx / 10.0
-    hdy = dy / 10.0
-
-    while exitDims is False and row < len(self.fontInfo):
-      line = self.fontInfo[row]
-      # print (line)
-      if line.startswith('kerning'):
-        exitDims = True
-      else:
-        try:
-          lineVals = [int(ll) for ll in line.split()]
-          if len(lineVals) == 9:
-            chrNum, a0, b0, c0, d0, e0, f0, g0, h0 = lineVals
-
-            # only keep the simple chars for the minute
-            if chrNum < 256:
-              self.fontGlyph[chrNum] = {}
-              self.fontGlyph[chrNum][GlyphXpos] = a0
-              self.fontGlyph[chrNum][GlyphYpos] = b0
-              self.fontGlyph[chrNum][GlyphWidth] = c0
-              self.fontGlyph[chrNum][GlyphHeight] = d0
-              self.fontGlyph[chrNum][GlyphXoffset] = e0
-              self.fontGlyph[chrNum][GlyphYoffset] = f0
-              self.fontGlyph[chrNum][GlyphOrigW]= g0
-              self.fontGlyph[chrNum][GlyphOrigH] = h0
-              self.fontGlyph[chrNum][GlyphKerns] = {}
-
-              # TODO:ED okay for now, but need to check for rounding errors
-
-              # calculate the coordinated within the texture
-              x = a0#+0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
-              y = b0#-0.005           # self.fontGlyph[chrNum][GlyphYpos])
-              px = e0           # self.fontGlyph[chrNum][GlyphXoffset]
-              py = f0           # self.fontGlyph[chrNum][GlyphYoffset]
-              w = c0#-1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
-              h = d0+0.5           # self.fontGlyph[chrNum][GlyphHeight]+1
-              gw = g0           # self.fontGlyph[chrNum][GlyphOrigW]
-              gh = h0           # self.fontGlyph[chrNum][GlyphOrigH]
-
-              # coordinates in the texture
-              self.fontGlyph[chrNum][GlyphTX0] = x*dx
-              self.fontGlyph[chrNum][GlyphTY0] = (y+h)*dy
-              self.fontGlyph[chrNum][GlyphTX1] = (x+w)*dx
-              self.fontGlyph[chrNum][GlyphTY1] = y*dy
-
-              # coordinates mapped to the quad
-              self.fontGlyph[chrNum][GlyphPX0] = px
-              self.fontGlyph[chrNum][GlyphPY0] = gh-(py+h)
-              self.fontGlyph[chrNum][GlyphPX1] = px+(w)
-              self.fontGlyph[chrNum][GlyphPY1] = gh-py
-
-              # draw the quad
-              # GL.glTexCoord2f( tx0, ty0);         GL.glVertex(px0, py0)
-              # GL.glTexCoord2f( tx0, ty1);         GL.glVertex(px0, py1)
-              # GL.glTexCoord2f( tx1, ty1);         GL.glVertex(px1, py1)
-              # GL.glTexCoord2f( tx1, ty0);         GL.glVertex(px1, py0)
-
-              if chrNum == 65:
-                # use 'A' for the referencing the tab size
-                self.width = gw
-                self.height = gh
-
-          else:
-            exitDims = True
-        except:
-          exitDims = True
-      row += 1
-
-    if line.startswith('kerning'):
-      # kerning list is included
-
-      exitKerns = False
-      while exitKerns is False and row < len(self.fontInfo):
-        line = self.fontInfo[row]
-        # print(line)
-
-        try:
-          lineVals = [int(ll) for ll in line.split()]
-          chrNum, chrNext, val = lineVals
-
-          if chrNum < 256 and chrNext < 256:
-            self.fontGlyph[chrNum][GlyphKerns][chrNext] = val
-        except:
-          exitKerns = True
-        row += 1
-
-    width, height, ascender, descender = 0, 0, 0, 0
-    for c in range(0, 256):
-      if chrNum < 256 and self.fontGlyph[chrNum]:
-        width = max( width, self.fontGlyph[chrNum][GlyphOrigW] )
-        height = max( height, self.fontGlyph[chrNum][GlyphOrigH] )
-
-    self.textureId = GL.glGenTextures(1)
-    # GL.glEnable(GL.GL_TEXTURE_2D)
-    GL.glActiveTexture(self.activeTexture)
-    GL.glBindTexture( GL.GL_TEXTURE_2D, self.textureId )
-
-    if fontTransparency:
-      for fontI in self.fontPNG:
-        for fontJ in fontI:
-          fontJ[3] = int(fontJ[3] * fontTransparency)
-
-    GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
-                     , self.fontPNG.shape[1], self.fontPNG.shape[0]
-                     , 0
-                     , GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, self.fontPNG.data )
-
-    # generate a MipMap to cope with smaller text (may not be needed soon)
-    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST )
-    GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST )
-
-    # the following 2 lines generate a multitexture mipmap - shouldn't need here
-    # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
-    # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
-    GL.glDisable(GL.GL_TEXTURE_2D)
-
-    # create a list of GLdisplayLists to handle each character - deprecated, changing to VBOs
-    self.base = GL.glGenLists(256)
-    dx = 1.0 / float(self.fontPNG.shape[1])
-    dy = 1.0 / float(self.fontPNG.shape[0])
-    for i in range(256):
-      if self.fontGlyph[i] or i == 10 or i == 9:    # newline and tab
-        # c = chr(i)
-
-        GL.glNewList(self.base + i, GL.GL_COMPILE)
-        if (i == 10):                                 # newline
-          GL.glPopMatrix()
-          GL.glTranslatef(0.0, -height, 0.0)
-          GL.glPushMatrix()
-        elif (i == 9):                                # tab
-          GL.glTranslatef(4.0 * width, 0.0, 0.0)
-        elif (i >= 32):
-          x = float(self.fontGlyph[i][GlyphXpos])   # try +0.5 for centre of texel
-          y = float(self.fontGlyph[i][GlyphYpos])
-          px = self.fontGlyph[i][GlyphXoffset]
-          py = self.fontGlyph[i][GlyphYoffset]
-          w = self.fontGlyph[i][GlyphWidth]+1       # if 0.5 above, remove the +1
-          h = self.fontGlyph[i][GlyphHeight]+1
-          gw = self.fontGlyph[i][GlyphOrigW]
-          gh = self.fontGlyph[i][GlyphOrigH]
-
-          GL.glBegin(GL.GL_QUADS)
-
-          # coordinates in the texture
-          tx0 = x*dx
-          ty0 = (y+h)*dy
-          tx1 = (x+w)*dx
-          ty1 = y*dy
-          # coordinates mapped to the quad
-          px0 = px
-          py0 = gh-(py+h)
-          px1 = px+w
-          py1 = gh-py
-
-          # draw the quad
-          GL.glTexCoord2f( tx0, ty0);         GL.glVertex(px0, py0)
-          GL.glTexCoord2f( tx0, ty1);         GL.glVertex(px0, py1)
-          GL.glTexCoord2f( tx1, ty1);         GL.glVertex(px1, py1)
-          GL.glTexCoord2f( tx1, ty0);         GL.glVertex(px1, py0)
-
-          GL.glEnd()
-          GL.glTranslatef(gw, 0.0, 0.0)
-        GL.glEndList()
-
-  def get_kerning(self, fromChar, prevChar):
-    if self.fontGlyph[ord(fromChar)]:
-      if prevChar and ord(prevChar) in self.fontGlyph[ord(fromChar)][GlyphKerns]:
-        return self.fontGlyph[ord(fromChar)][GlyphKerns][ord(prevChar)]
-
-    return 0
-
+# GlyphXpos = 'Xpos'
+# GlyphYpos = 'Ypos'
+# GlyphWidth = 'Width'
+# GlyphHeight = 'Height'
+# GlyphXoffset = 'Xoffset'
+# GlyphYoffset = 'Yoffset'
+# GlyphOrigW = 'OrigW'
+# GlyphOrigH = 'OrigH'
+# GlyphKerns = 'Kerns'
+# GlyphTX0 = 'tx0'
+# GlyphTY0 = 'ty0'
+# GlyphTX1 = 'tx1'
+# GlyphTY1 = 'ty1'
+# GlyphPX0 = 'px0'
+# GlyphPY0 = 'py0'
+# GlyphPX1 = 'px1'
+# GlyphPY1 = 'py1'
+#
+#
+# class CcpnGLFont():
+#   def __init__(self, fileName=None, size=12, base=0, fontTransparency=None, activeTexture=0):
+#     self.fontName = None
+#     self.fontGlyph = [None] * 256
+#     self.base = base
+#
+#     with open(fileName, 'r') as op:
+#       self.fontInfo = op.read().split('\n')
+#
+#     # no checking yet
+#     self.fontFile = self.fontInfo[0].replace('textures: ', '')
+#     self.fontPNG = imread(os.path.join(os.path.dirname(fileName), self.fontFile))
+#     self.fontName = self.fontInfo[1].split()[0]
+#     self.fontSize = self.fontInfo[1].split()[1]
+#     self.width = 0
+#     self.height = 0
+#     self.activeTexture = GL.GL_TEXTURE0+activeTexture
+#     self.activeTextureNum = activeTexture
+#     self.fontTransparency = fontTransparency
+#
+#     row = 2
+#     exitDims = False
+#
+#     # texture sizes
+#     dx = 1.0 / float(self.fontPNG.shape[1])
+#     dy = 1.0 / float(self.fontPNG.shape[0])
+#     hdx = dx / 10.0
+#     hdy = dy / 10.0
+#
+#     while exitDims is False and row < len(self.fontInfo):
+#       line = self.fontInfo[row]
+#       # print (line)
+#       if line.startswith('kerning'):
+#         exitDims = True
+#       else:
+#         try:
+#           lineVals = [int(ll) for ll in line.split()]
+#           if len(lineVals) == 9:
+#             chrNum, a0, b0, c0, d0, e0, f0, g0, h0 = lineVals
+#
+#             # only keep the simple chars for the minute
+#             if chrNum < 256:
+#               self.fontGlyph[chrNum] = {}
+#               self.fontGlyph[chrNum][GlyphXpos] = a0
+#               self.fontGlyph[chrNum][GlyphYpos] = b0
+#               self.fontGlyph[chrNum][GlyphWidth] = c0
+#               self.fontGlyph[chrNum][GlyphHeight] = d0
+#               self.fontGlyph[chrNum][GlyphXoffset] = e0
+#               self.fontGlyph[chrNum][GlyphYoffset] = f0
+#               self.fontGlyph[chrNum][GlyphOrigW]= g0
+#               self.fontGlyph[chrNum][GlyphOrigH] = h0
+#               self.fontGlyph[chrNum][GlyphKerns] = {}
+#
+#               # TODO:ED okay for now, but need to check for rounding errors
+#
+#               # calculate the coordinated within the texture
+#               x = a0#+0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
+#               y = b0#-0.005           # self.fontGlyph[chrNum][GlyphYpos])
+#               px = e0           # self.fontGlyph[chrNum][GlyphXoffset]
+#               py = f0           # self.fontGlyph[chrNum][GlyphYoffset]
+#               w = c0#-1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
+#               h = d0+0.5           # self.fontGlyph[chrNum][GlyphHeight]+1
+#               gw = g0           # self.fontGlyph[chrNum][GlyphOrigW]
+#               gh = h0           # self.fontGlyph[chrNum][GlyphOrigH]
+#
+#               # coordinates in the texture
+#               self.fontGlyph[chrNum][GlyphTX0] = x*dx
+#               self.fontGlyph[chrNum][GlyphTY0] = (y+h)*dy
+#               self.fontGlyph[chrNum][GlyphTX1] = (x+w)*dx
+#               self.fontGlyph[chrNum][GlyphTY1] = y*dy
+#
+#               # coordinates mapped to the quad
+#               self.fontGlyph[chrNum][GlyphPX0] = px
+#               self.fontGlyph[chrNum][GlyphPY0] = gh-(py+h)
+#               self.fontGlyph[chrNum][GlyphPX1] = px+(w)
+#               self.fontGlyph[chrNum][GlyphPY1] = gh-py
+#
+#               # draw the quad
+#               # GL.glTexCoord2f( tx0, ty0);         GL.glVertex(px0, py0)
+#               # GL.glTexCoord2f( tx0, ty1);         GL.glVertex(px0, py1)
+#               # GL.glTexCoord2f( tx1, ty1);         GL.glVertex(px1, py1)
+#               # GL.glTexCoord2f( tx1, ty0);         GL.glVertex(px1, py0)
+#
+#               if chrNum == 65:
+#                 # use 'A' for the referencing the tab size
+#                 self.width = gw
+#                 self.height = gh
+#
+#           else:
+#             exitDims = True
+#         except:
+#           exitDims = True
+#       row += 1
+#
+#     if line.startswith('kerning'):
+#       # kerning list is included
+#
+#       exitKerns = False
+#       while exitKerns is False and row < len(self.fontInfo):
+#         line = self.fontInfo[row]
+#         # print(line)
+#
+#         try:
+#           lineVals = [int(ll) for ll in line.split()]
+#           chrNum, chrNext, val = lineVals
+#
+#           if chrNum < 256 and chrNext < 256:
+#             self.fontGlyph[chrNum][GlyphKerns][chrNext] = val
+#         except:
+#           exitKerns = True
+#         row += 1
+#
+#     width, height, ascender, descender = 0, 0, 0, 0
+#     for c in range(0, 256):
+#       if chrNum < 256 and self.fontGlyph[chrNum]:
+#         width = max( width, self.fontGlyph[chrNum][GlyphOrigW] )
+#         height = max( height, self.fontGlyph[chrNum][GlyphOrigH] )
+#
+#     self.textureId = GL.glGenTextures(1)
+#     # GL.glEnable(GL.GL_TEXTURE_2D)
+#     GL.glActiveTexture(self.activeTexture)
+#     GL.glBindTexture( GL.GL_TEXTURE_2D, self.textureId )
+#
+#     if fontTransparency:
+#       for fontI in self.fontPNG:
+#         for fontJ in fontI:
+#           fontJ[3] = int(fontJ[3] * fontTransparency)
+#
+#     GL.glTexImage2D( GL.GL_TEXTURE_2D, 0, GL.GL_RGBA
+#                      , self.fontPNG.shape[1], self.fontPNG.shape[0]
+#                      , 0
+#                      , GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, self.fontPNG.data )
+#
+#     # generate a MipMap to cope with smaller text (may not be needed soon)
+#     GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST )
+#     GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST )
+#
+#     # the following 2 lines generate a multitexture mipmap - shouldn't need here
+#     # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
+#     # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
+#     GL.glDisable(GL.GL_TEXTURE_2D)
+#
+#     # create a list of GLdisplayLists to handle each character - deprecated, changing to VBOs
+#     self.base = GL.glGenLists(256)
+#     dx = 1.0 / float(self.fontPNG.shape[1])
+#     dy = 1.0 / float(self.fontPNG.shape[0])
+#     for i in range(256):
+#       if self.fontGlyph[i] or i == 10 or i == 9:    # newline and tab
+#         # c = chr(i)
+#
+#         GL.glNewList(self.base + i, GL.GL_COMPILE)
+#         if (i == 10):                                 # newline
+#           GL.glPopMatrix()
+#           GL.glTranslatef(0.0, -height, 0.0)
+#           GL.glPushMatrix()
+#         elif (i == 9):                                # tab
+#           GL.glTranslatef(4.0 * width, 0.0, 0.0)
+#         elif (i >= 32):
+#           x = float(self.fontGlyph[i][GlyphXpos])   # try +0.5 for centre of texel
+#           y = float(self.fontGlyph[i][GlyphYpos])
+#           px = self.fontGlyph[i][GlyphXoffset]
+#           py = self.fontGlyph[i][GlyphYoffset]
+#           w = self.fontGlyph[i][GlyphWidth]+1       # if 0.5 above, remove the +1
+#           h = self.fontGlyph[i][GlyphHeight]+1
+#           gw = self.fontGlyph[i][GlyphOrigW]
+#           gh = self.fontGlyph[i][GlyphOrigH]
+#
+#           GL.glBegin(GL.GL_QUADS)
+#
+#           # coordinates in the texture
+#           tx0 = x*dx
+#           ty0 = (y+h)*dy
+#           tx1 = (x+w)*dx
+#           ty1 = y*dy
+#           # coordinates mapped to the quad
+#           px0 = px
+#           py0 = gh-(py+h)
+#           px1 = px+w
+#           py1 = gh-py
+#
+#           # draw the quad
+#           GL.glTexCoord2f( tx0, ty0);         GL.glVertex(px0, py0)
+#           GL.glTexCoord2f( tx0, ty1);         GL.glVertex(px0, py1)
+#           GL.glTexCoord2f( tx1, ty1);         GL.glVertex(px1, py1)
+#           GL.glTexCoord2f( tx1, ty0);         GL.glVertex(px1, py0)
+#
+#           GL.glEnd()
+#           GL.glTranslatef(gw, 0.0, 0.0)
+#         GL.glEndList()
+#
+#   def get_kerning(self, fromChar, prevChar):
+#     if self.fontGlyph[ord(fromChar)]:
+#       if prevChar and ord(prevChar) in self.fontGlyph[ord(fromChar)][GlyphKerns]:
+#         return self.fontGlyph[ord(fromChar)][GlyphKerns][ord(prevChar)]
+#
+#     return 0
+#
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # need to use the class below to make everything more generic
@@ -6417,289 +6416,289 @@ class GLViewports(object):
     else:
       raise RuntimeError('Error: viewport %s does not exist' % name)
 
-class ShaderProgram(object):
-  def __init__(self, vertex, fragment, attributes):
-    self.program_id = GL.glCreateProgram()
-    self.vs_id = self.add_shader(vertex, GL.GL_VERTEX_SHADER)
-    self.frag_id = self.add_shader(fragment, GL.GL_FRAGMENT_SHADER)
-    self.attributes = attributes
-    self.uniformLocations = {}
+# class ShaderProgram(object):
+#   def __init__(self, vertex, fragment, attributes):
+#     self.program_id = GL.glCreateProgram()
+#     self.vs_id = self.add_shader(vertex, GL.GL_VERTEX_SHADER)
+#     self.frag_id = self.add_shader(fragment, GL.GL_FRAGMENT_SHADER)
+#     self.attributes = attributes
+#     self.uniformLocations = {}
+#
+#     GL.glAttachShader(self.program_id, self.vs_id)
+#     GL.glAttachShader(self.program_id, self.frag_id)
+#     GL.glLinkProgram(self.program_id)
+#
+#     if GL.glGetProgramiv(self.program_id, GL.GL_LINK_STATUS) != GL.GL_TRUE:
+#       info = GL.glGetProgramInfoLog(self.program_id)
+#       GL.glDeleteProgram(self.program_id)
+#       GL.glDeleteShader(self.vs_id)
+#       GL.glDeleteShader(self.frag_id)
+#       raise RuntimeError('Error linking program: %s' % (info))
+#
+#     # detach after successful link
+#     GL.glDetachShader(self.program_id, self.vs_id)
+#     GL.glDetachShader(self.program_id, self.frag_id)
+#
+#     # define attributes to be passed to the shaders
+#     for att in attributes.keys():
+#       self.uniformLocations[att] = GL.glGetUniformLocation(self.program_id, att)
+#       self.uniformLocations['_'+att] = np.zeros((attributes[att][0],), dtype=attributes[att][1])
+#
+#   def makeCurrent(self):
+#     GL.glUseProgram(self.program_id)
+#     return self
+#
+#   def setBackground(self, col):
+#     self.setGLUniform4fv('background', 1, col)
+#
+#   # def setParameterList(self, params):
+#   #   self.setGLUniform4iv('parameterList', 1, params)
+#
+#   def setProjectionAxes(self, attMatrix, left, right, bottom, top, near, far):
+#     # of = 1.0
+#     # on = -1.0
+#     # oa = 2.0/(self.axisR-self.axisL)
+#     # ob = 2.0/(self.axisT-self.axisB)
+#     # oc = -2.0/(of-on)
+#     # od = -(of+on)/(of-on)
+#     # oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
+#     # og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
+#     # # orthographic
+#     # self._uPMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
+#     #                         0.0,  ob, 0.0,  0.0,
+#     #                         0.0, 0.0,  oc,  0.0,
+#     #                         og, oe, od, 1.0]
+#
+#     oa = 2.0/(right-left)
+#     ob = 2.0/(top-bottom)
+#     oc = -2.0/(far-near)
+#     od = -(far+near)/(far-near)
+#     oe = -(top+bottom)/(top-bottom)
+#     og = -(right+left)/(right-left)
+#     # orthographic
+#     attMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
+#                         0.0,  ob, 0.0,  0.0,
+#                         0.0, 0.0,  oc,  0.0,
+#                         og, oe, od, 1.0]
+#
+#   def setViewportMatrix(self, viewMatrix, left, right, bottom, top, near, far):
+#     # return the viewport transformation matrix - mapping screen to NDC
+#     #   normalised device coordinates
+#     #   viewport * NDC_cooord = world_coord
+#     oa = (right-left)/2.0
+#     ob = (top-bottom)/2.0
+#     oc = (far-near)/2.0
+#     og = (right+left)/2.0
+#     oe = (top+bottom)/2.0
+#     od = (near+far)/2.0
+#     # orthographic
+#     # viewMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
+#     #                     0.0,  ob, 0.0,  0.0,
+#     #                     0.0, 0.0,  oc,  0.0,
+#     #                     og, oe, od, 1.0]
+#     viewMatrix[0:16] = [oa, 0.0, 0.0,  og,
+#                         0.0,  ob, 0.0,  oe,
+#                         0.0, 0.0,  oc,  od,
+#                         0.0, 0.0, 0.0, 1.0]
+#
+#   def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
+#     if uniformLocation in self.uniformLocations:
+#       GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation]
+#                             , count, transpose, value)
+#     else:
+#       raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
+#
+#   def setGLUniform4fv(self, uniformLocation=None, count=1, value=None):
+#     if uniformLocation in self.uniformLocations:
+#       GL.glUniform4fv(self.uniformLocations[uniformLocation]
+#                       , count, value)
+#     else:
+#       raise RuntimeError('Error setting setGLUniform4fv: %s' % uniformLocation)
+#
+#   def setGLUniform4iv(self, uniformLocation=None, count=1, value=None):
+#     if uniformLocation in self.uniformLocations:
+#       GL.glUniform4iv(self.uniformLocations[uniformLocation]
+#                       , count, value)
+#     else:
+#       raise RuntimeError('Error setting setGLUniform4iv: %s' % uniformLocation)
+#
+#   def setGLUniform1i(self, uniformLocation=None, value=None):
+#     if uniformLocation in self.uniformLocations:
+#       GL.glUniform1i(self.uniformLocations[uniformLocation], value)
+#     else:
+#       raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
+#
+#   def add_shader(self, source, shader_type):
+#     """ Helper function for compiling a GLSL shader
+#     Parameters
+#     ----------
+#     source : str
+#         String containing shader source code
+#     shader_type : valid OpenGL shader type
+#         Type of shader to compile
+#     Returns
+#     -------
+#     value : int
+#         Identifier for shader if compilation is successful
+#     """
+#     shader_id = 0
+#     try:
+#       shader_id = GL.glCreateShader(shader_type)
+#       GL.glShaderSource(shader_id, source)
+#       GL.glCompileShader(shader_id)
+#       if GL.glGetShaderiv(shader_id, GL.GL_COMPILE_STATUS) != GL.GL_TRUE:
+#         info = GL.glGetShaderInfoLog(shader_id)
+#         raise RuntimeError('Shader compilation failed: %s' % (info))
+#       return shader_id
+#     except:
+#       GL.glDeleteShader(shader_id)
+#       raise
+#
+#   def uniform_location(self, name):
+#     """ Helper function to get location of an OpenGL uniform variable
+#     Parameters
+#     ----------
+#     name : str
+#         Name of the variable for which location is to be returned
+#     Returns
+#     -------
+#     value : int
+#         Integer describing location
+#     """
+#     return GL.glGetUniformLocation(self.program_id, name)
+#
+#   def attribute_location(self, name):
+#     """ Helper function to get location of an OpenGL attribute variable
+#     Parameters
+#     ----------
+#     name : str
+#         Name of the variable for which location is to be returned
+#     Returns
+#     -------
+#     value : int
+#         Integer describing location
+#     """
+#     return GL.glGetAttribLocation(self.program_id, name)
 
-    GL.glAttachShader(self.program_id, self.vs_id)
-    GL.glAttachShader(self.program_id, self.frag_id)
-    GL.glLinkProgram(self.program_id)
 
-    if GL.glGetProgramiv(self.program_id, GL.GL_LINK_STATUS) != GL.GL_TRUE:
-      info = GL.glGetProgramInfoLog(self.program_id)
-      GL.glDeleteProgram(self.program_id)
-      GL.glDeleteShader(self.vs_id)
-      GL.glDeleteShader(self.frag_id)
-      raise RuntimeError('Error linking program: %s' % (info))
-
-    # detach after successful link
-    GL.glDetachShader(self.program_id, self.vs_id)
-    GL.glDetachShader(self.program_id, self.frag_id)
-
-    # define attributes to be passed to the shaders
-    for att in attributes.keys():
-      self.uniformLocations[att] = GL.glGetUniformLocation(self.program_id, att)
-      self.uniformLocations['_'+att] = np.zeros((attributes[att][0],), dtype=attributes[att][1])
-
-  def makeCurrent(self):
-    GL.glUseProgram(self.program_id)
-    return self
-
-  def setBackground(self, col):
-    self.setGLUniform4fv('background', 1, col)
-
-  # def setParameterList(self, params):
-  #   self.setGLUniform4iv('parameterList', 1, params)
-
-  def setProjectionAxes(self, attMatrix, left, right, bottom, top, near, far):
-    # of = 1.0
-    # on = -1.0
-    # oa = 2.0/(self.axisR-self.axisL)
-    # ob = 2.0/(self.axisT-self.axisB)
-    # oc = -2.0/(of-on)
-    # od = -(of+on)/(of-on)
-    # oe = -(self.axisT+self.axisB)/(self.axisT-self.axisB)
-    # og = -(self.axisR+self.axisL)/(self.axisR-self.axisL)
-    # # orthographic
-    # self._uPMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
-    #                         0.0,  ob, 0.0,  0.0,
-    #                         0.0, 0.0,  oc,  0.0,
-    #                         og, oe, od, 1.0]
-
-    oa = 2.0/(right-left)
-    ob = 2.0/(top-bottom)
-    oc = -2.0/(far-near)
-    od = -(far+near)/(far-near)
-    oe = -(top+bottom)/(top-bottom)
-    og = -(right+left)/(right-left)
-    # orthographic
-    attMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
-                        0.0,  ob, 0.0,  0.0,
-                        0.0, 0.0,  oc,  0.0,
-                        og, oe, od, 1.0]
-
-  def setViewportMatrix(self, viewMatrix, left, right, bottom, top, near, far):
-    # return the viewport transformation matrix - mapping screen to NDC
-    #   normalised device coordinates
-    #   viewport * NDC_cooord = world_coord
-    oa = (right-left)/2.0
-    ob = (top-bottom)/2.0
-    oc = (far-near)/2.0
-    og = (right+left)/2.0
-    oe = (top+bottom)/2.0
-    od = (near+far)/2.0
-    # orthographic
-    # viewMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
-    #                     0.0,  ob, 0.0,  0.0,
-    #                     0.0, 0.0,  oc,  0.0,
-    #                     og, oe, od, 1.0]
-    viewMatrix[0:16] = [oa, 0.0, 0.0,  og,
-                        0.0,  ob, 0.0,  oe,
-                        0.0, 0.0,  oc,  od,
-                        0.0, 0.0, 0.0, 1.0]
-
-  def setGLUniformMatrix4fv(self, uniformLocation=None, count=1, transpose=GL.GL_FALSE, value=None):
-    if uniformLocation in self.uniformLocations:
-      GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation]
-                            , count, transpose, value)
-    else:
-      raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
-
-  def setGLUniform4fv(self, uniformLocation=None, count=1, value=None):
-    if uniformLocation in self.uniformLocations:
-      GL.glUniform4fv(self.uniformLocations[uniformLocation]
-                      , count, value)
-    else:
-      raise RuntimeError('Error setting setGLUniform4fv: %s' % uniformLocation)
-
-  def setGLUniform4iv(self, uniformLocation=None, count=1, value=None):
-    if uniformLocation in self.uniformLocations:
-      GL.glUniform4iv(self.uniformLocations[uniformLocation]
-                      , count, value)
-    else:
-      raise RuntimeError('Error setting setGLUniform4iv: %s' % uniformLocation)
-
-  def setGLUniform1i(self, uniformLocation=None, value=None):
-    if uniformLocation in self.uniformLocations:
-      GL.glUniform1i(self.uniformLocations[uniformLocation], value)
-    else:
-      raise RuntimeError('Error setting setGLUniformMatrix4fv: %s' % uniformLocation)
-
-  def add_shader(self, source, shader_type):
-    """ Helper function for compiling a GLSL shader
-    Parameters
-    ----------
-    source : str
-        String containing shader source code
-    shader_type : valid OpenGL shader type
-        Type of shader to compile
-    Returns
-    -------
-    value : int
-        Identifier for shader if compilation is successful
-    """
-    shader_id = 0
-    try:
-      shader_id = GL.glCreateShader(shader_type)
-      GL.glShaderSource(shader_id, source)
-      GL.glCompileShader(shader_id)
-      if GL.glGetShaderiv(shader_id, GL.GL_COMPILE_STATUS) != GL.GL_TRUE:
-        info = GL.glGetShaderInfoLog(shader_id)
-        raise RuntimeError('Shader compilation failed: %s' % (info))
-      return shader_id
-    except:
-      GL.glDeleteShader(shader_id)
-      raise
-
-  def uniform_location(self, name):
-    """ Helper function to get location of an OpenGL uniform variable
-    Parameters
-    ----------
-    name : str
-        Name of the variable for which location is to be returned
-    Returns
-    -------
-    value : int
-        Integer describing location
-    """
-    return GL.glGetUniformLocation(self.program_id, name)
-
-  def attribute_location(self, name):
-    """ Helper function to get location of an OpenGL attribute variable
-    Parameters
-    ----------
-    name : str
-        Name of the variable for which location is to be returned
-    Returns
-    -------
-    value : int
-        Integer describing location
-    """
-    return GL.glGetAttribLocation(self.program_id, name)
-
-
-class GLVertexArray():
-  def __init__(self, numLists=1,
-               renderMode=GLRENDERMODE_IGNORE,
-               refreshMode = GLREFRESHMODE_NEVER,
-               blendMode=False,
-               drawMode=GL.GL_LINES,
-               fillMode=None,
-               dimension=3,
-               GLContext=None):
-
-    self.initialise(numLists=numLists, renderMode=renderMode, refreshMode = refreshMode
-                    , blendMode=blendMode, drawMode=drawMode, fillMode=fillMode, dimension=dimension, GLContext=GLContext)
-
-  def initialise(self, numLists=1, renderMode=GLRENDERMODE_IGNORE,
-                refreshMode=GLREFRESHMODE_NEVER,
-                blendMode=False, drawMode=GL.GL_LINES, fillMode=None,
-                dimension=3,
-                GLContext=None):
-
-    self.parent = GLContext
-    self.renderMode = renderMode
-    self.refreshMode = refreshMode
-    self.vertices = np.empty(0, dtype=np.float32)
-    self.indices = np.empty(0, dtype=np.uint)
-    self.colors = np.empty(0, dtype=np.float32)
-    self.texcoords= np.empty(0, dtype=np.float32)
-    self.attribs = np.empty(0, dtype=np.float32)
-    self.offsets = np.empty(0, dtype=np.float32)
-    self.pids = np.empty(0, dtype=np.object_)
-    self.lineWidths = [0.0, 0.0]
-
-    self.numVertices = 0
-
-    self.numLists = numLists
-    self.blendMode = blendMode
-    self.drawMode = drawMode
-    self.fillMode = fillMode
-    self.dimension = int(dimension)
-    self._GLContext = GLContext
-
-  def _close(self):
-    # GL.glDeleteLists(self.GLLists, self.numLists)
-    pass
-
-  def clearArrays(self):
-    self.vertices = np.empty(0, dtype=np.float32)
-    self.indices = np.empty(0, dtype=np.uint)
-    self.colors = np.empty(0, dtype=np.float32)
-    self.texcoords= np.empty(0, dtype=np.float32)
-    self.attribs = np.empty(0, dtype=np.float32)
-    self.offsets = np.empty(0, dtype=np.float32)
-    self.pids = np.empty(0, dtype=np.object_)
-    self.numVertices = 0
-
-  def clearVertices(self):
-    self.vertices = np.empty(0, dtype=np.float32)
-    self.numVertices = 0
-
-  def drawIndexArray(self):
-    if self.blendMode:
-      GL.glEnable(GL.GL_BLEND)
-    if self.fillMode is not None:
-      GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
-
-    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-
-    GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
-    GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
-    GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
-
-    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-
-    if self.blendMode:
-      GL.glDisable(GL.GL_BLEND)
-
-  def drawVertexColor(self):
-    if self.blendMode:
-      GL.glEnable(GL.GL_BLEND)
-
-    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-
-    GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
-    GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
-    GL.glDrawArrays(self.drawMode, 0, self.numVertices)
-
-    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-
-    if self.blendMode:
-      GL.glDisable(GL.GL_BLEND)
-
-  def drawTextArray(self):
-    if self.blendMode:
-      GL.glEnable(GL.GL_BLEND)
-
-    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-    GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-    GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
-    GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
-    GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, self.texcoords)
-
-    # this is for passing extra attributes in
-    GL.glEnableVertexAttribArray(1)
-    GL.glVertexAttribPointer(1, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
-
-    GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
-
-    GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
-    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-    GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-    GL.glDisableVertexAttribArray(1)
-
-    if self.blendMode:
-      GL.glDisable(GL.GL_BLEND)
+# class GLVertexArray():
+#   def __init__(self, numLists=1,
+#                renderMode=GLRENDERMODE_IGNORE,
+#                refreshMode = GLREFRESHMODE_NEVER,
+#                blendMode=False,
+#                drawMode=GL.GL_LINES,
+#                fillMode=None,
+#                dimension=3,
+#                GLContext=None):
+#
+#     self.initialise(numLists=numLists, renderMode=renderMode, refreshMode = refreshMode
+#                     , blendMode=blendMode, drawMode=drawMode, fillMode=fillMode, dimension=dimension, GLContext=GLContext)
+#
+#   def initialise(self, numLists=1, renderMode=GLRENDERMODE_IGNORE,
+#                 refreshMode=GLREFRESHMODE_NEVER,
+#                 blendMode=False, drawMode=GL.GL_LINES, fillMode=None,
+#                 dimension=3,
+#                 GLContext=None):
+#
+#     self.parent = GLContext
+#     self.renderMode = renderMode
+#     self.refreshMode = refreshMode
+#     self.vertices = np.empty(0, dtype=np.float32)
+#     self.indices = np.empty(0, dtype=np.uint)
+#     self.colors = np.empty(0, dtype=np.float32)
+#     self.texcoords= np.empty(0, dtype=np.float32)
+#     self.attribs = np.empty(0, dtype=np.float32)
+#     self.offsets = np.empty(0, dtype=np.float32)
+#     self.pids = np.empty(0, dtype=np.object_)
+#     self.lineWidths = [0.0, 0.0]
+#
+#     self.numVertices = 0
+#
+#     self.numLists = numLists
+#     self.blendMode = blendMode
+#     self.drawMode = drawMode
+#     self.fillMode = fillMode
+#     self.dimension = int(dimension)
+#     self._GLContext = GLContext
+#
+#   def _close(self):
+#     # GL.glDeleteLists(self.GLLists, self.numLists)
+#     pass
+#
+#   def clearArrays(self):
+#     self.vertices = np.empty(0, dtype=np.float32)
+#     self.indices = np.empty(0, dtype=np.uint)
+#     self.colors = np.empty(0, dtype=np.float32)
+#     self.texcoords= np.empty(0, dtype=np.float32)
+#     self.attribs = np.empty(0, dtype=np.float32)
+#     self.offsets = np.empty(0, dtype=np.float32)
+#     self.pids = np.empty(0, dtype=np.object_)
+#     self.numVertices = 0
+#
+#   def clearVertices(self):
+#     self.vertices = np.empty(0, dtype=np.float32)
+#     self.numVertices = 0
+#
+#   def drawIndexArray(self):
+#     if self.blendMode:
+#       GL.glEnable(GL.GL_BLEND)
+#     if self.fillMode is not None:
+#       GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
+#
+#     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+#     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+#
+#     GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+#     GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+#     GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
+#
+#     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+#     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+#
+#     if self.blendMode:
+#       GL.glDisable(GL.GL_BLEND)
+#
+#   def drawVertexColor(self):
+#     if self.blendMode:
+#       GL.glEnable(GL.GL_BLEND)
+#
+#     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+#     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+#
+#     GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+#     GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+#     GL.glDrawArrays(self.drawMode, 0, self.numVertices)
+#
+#     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+#     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+#
+#     if self.blendMode:
+#       GL.glDisable(GL.GL_BLEND)
+#
+#   def drawTextArray(self):
+#     if self.blendMode:
+#       GL.glEnable(GL.GL_BLEND)
+#
+#     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+#     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+#     GL.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+#     GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+#     GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+#     GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, self.texcoords)
+#
+#     # this is for passing extra attributes in
+#     GL.glEnableVertexAttribArray(1)
+#     GL.glVertexAttribPointer(1, 2, GL.GL_FLOAT, GL.GL_FALSE, 0, self.attribs)
+#
+#     GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
+#
+#     GL.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY)
+#     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+#     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+#     GL.glDisableVertexAttribArray(1)
+#
+#     if self.blendMode:
+#       GL.glDisable(GL.GL_BLEND)
 
 
 class GLRegion(QtWidgets.QWidget):
@@ -6840,111 +6839,111 @@ class GLRegion(QtWidgets.QWidget):
     self.parent.update()
 
 
-class GLString(GLVertexArray):
-  def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0),
-               x=0.0, y=0.0,
-               ox=0.0, oy=0.0,
-               angle=0.0, width=None, height=None, GLContext=None):
-    super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=True
-                                   , GLContext=GLContext, drawMode=GL.GL_TRIANGLES
-                                   , dimension=2)
-    if text is None:
-      text = ''
-
-    self.text = text
-    self.font = font
-    self.object = object
-    self.pid = object.pid if hasattr(object, 'pid') else None
-    self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
-    self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
-    self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
-    self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
-    # self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
-    # self.offsets = np.zeros((len(text) * 4, 2), dtype=np.float32)
-    self.indexOffset = 0
-    penX = penY = 0              # offset the string from (0,0) and use (x,y) in shader
-    prev = None
-
-    # cs, sn = math.cos(angle), math.sin(angle)
-    # rotate = np.matrix([[cs, sn], [-sn, cs]])
-
-    for i, charCode in enumerate(text):
-      c = ord(charCode)
-      glyph = font.fontGlyph[c]
-
-      if glyph or c == 10 or c == 9:    # newline and tab
-
-        if (c == 10):                                 # newline
-          penX = 0
-          penY = 0      #penY + font.height
-          # for vt in self.vertices:
-          #   vt[1] = vt[1] + font.height
-          self.vertices[:, 1] += font.height
-
-        elif (c == 9):                                # tab
-          penX = penX + 4 * font.width
-
-        elif (c >= 32):
-
-          kerning = font.get_kerning(charCode, prev)
-
-          # TODO:ED check that these are correct
-          x0 = penX + glyph[GlyphPX0] + kerning     # penX + glyph.offset[0] + kerning
-          y0 = penY + glyph[GlyphPY0]               # penY + glyph.offset[1]
-          x1 = penX + glyph[GlyphPX1] + kerning     # x0 + glyph.size[0]
-          y1 = penY + glyph[GlyphPY1]               # y0 - glyph.size[1]
-          u0 = glyph[GlyphTX0]          # glyph.texcoords[0]
-          v0 = glyph[GlyphTY0]          # glyph.texcoords[1]
-          u1 = glyph[GlyphTX1]          # glyph.texcoords[2]
-          v1 = glyph[GlyphTY1]          # glyph.texcoords[3]
-
-          # # apply rotation to the text
-          # xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
-          # xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
-          # xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
-          # xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
-
-          index = i * 4
-          indices = [index, index + 1, index + 2, index, index + 2, index + 3]
-          vertices = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
-          texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
-          colors = [color, ] * 4
-          # attribs = [[x, y], [x, y], [x, y], [x, y]]
-          # offsets = [[x, y], [x, y], [x, y], [x, y]]
-
-          self.vertices[i * 4:i * 4 + 4] = vertices
-          self.indices[i * 6:i * 6 + 6] = indices
-          self.texcoords[i * 4:i * 4 + 4] = texcoords
-          self.colors[i * 4:i * 4 + 4] = colors
-          # self.attribs[i * 4:i * 4 + 4] = attribs
-          # self.offsets[i * 4:i * 4 + 4] = offsets
-
-          penX = penX + glyph[GlyphOrigW] + kerning
-          # penY = penY + glyph[GlyphHeight]
-          prev = charCode
-
-      self.numVertices = len(self.vertices)
-      self.attribs = np.array([x+ox, y+oy] * self.numVertices, dtype=np.float32)
-      self.offsets = np.array([x, y] * self.numVertices, dtype=np.float32)
-      self.lineWidths = [ox, oy]
-
-    # total width of text - probably don't need
-    # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
-
-  def drawTextArray(self):
-    # TODO:ED need to sort out the speed of this
-    # GL.glActiveTexture(GL.GL_TEXTURE0)
-    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.font.textureId)
-
-    self._GLContext.globalGL._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
-
-    super(GLString, self).drawTextArray()
-
-  def setColour(self, col):
-    self.colors = np.array(col*self.numVertices, dtype=np.float32)
-
-  def setStringOffset(self, attrib):
-    self.attribs = self.offsets + np.array(attrib*self.numVertices, dtype=np.float32)
+# class GLString(GLVertexArray):
+#   def __init__(self, text=None, font=None, object=None, color=(1.0, 1.0, 1.0, 1.0),
+#                x=0.0, y=0.0,
+#                ox=0.0, oy=0.0,
+#                angle=0.0, width=None, height=None, GLContext=None):
+#     super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=True
+#                                    , GLContext=GLContext, drawMode=GL.GL_TRIANGLES
+#                                    , dimension=2)
+#     if text is None:
+#       text = ''
+#
+#     self.text = text
+#     self.font = font
+#     self.object = object
+#     self.pid = object.pid if hasattr(object, 'pid') else None
+#     self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
+#     self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
+#     self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
+#     self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
+#     # self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
+#     # self.offsets = np.zeros((len(text) * 4, 2), dtype=np.float32)
+#     self.indexOffset = 0
+#     penX = penY = 0              # offset the string from (0,0) and use (x,y) in shader
+#     prev = None
+#
+#     # cs, sn = math.cos(angle), math.sin(angle)
+#     # rotate = np.matrix([[cs, sn], [-sn, cs]])
+#
+#     for i, charCode in enumerate(text):
+#       c = ord(charCode)
+#       glyph = font.fontGlyph[c]
+#
+#       if glyph or c == 10 or c == 9:    # newline and tab
+#
+#         if (c == 10):                                 # newline
+#           penX = 0
+#           penY = 0      #penY + font.height
+#           # for vt in self.vertices:
+#           #   vt[1] = vt[1] + font.height
+#           self.vertices[:, 1] += font.height
+#
+#         elif (c == 9):                                # tab
+#           penX = penX + 4 * font.width
+#
+#         elif (c >= 32):
+#
+#           kerning = font.get_kerning(charCode, prev)
+#
+#           # TODO:ED check that these are correct
+#           x0 = penX + glyph[GlyphPX0] + kerning     # penX + glyph.offset[0] + kerning
+#           y0 = penY + glyph[GlyphPY0]               # penY + glyph.offset[1]
+#           x1 = penX + glyph[GlyphPX1] + kerning     # x0 + glyph.size[0]
+#           y1 = penY + glyph[GlyphPY1]               # y0 - glyph.size[1]
+#           u0 = glyph[GlyphTX0]          # glyph.texcoords[0]
+#           v0 = glyph[GlyphTY0]          # glyph.texcoords[1]
+#           u1 = glyph[GlyphTX1]          # glyph.texcoords[2]
+#           v1 = glyph[GlyphTY1]          # glyph.texcoords[3]
+#
+#           # # apply rotation to the text
+#           # xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
+#           # xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
+#           # xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
+#           # xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
+#
+#           index = i * 4
+#           indices = [index, index + 1, index + 2, index, index + 2, index + 3]
+#           vertices = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
+#           texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
+#           colors = [color, ] * 4
+#           # attribs = [[x, y], [x, y], [x, y], [x, y]]
+#           # offsets = [[x, y], [x, y], [x, y], [x, y]]
+#
+#           self.vertices[i * 4:i * 4 + 4] = vertices
+#           self.indices[i * 6:i * 6 + 6] = indices
+#           self.texcoords[i * 4:i * 4 + 4] = texcoords
+#           self.colors[i * 4:i * 4 + 4] = colors
+#           # self.attribs[i * 4:i * 4 + 4] = attribs
+#           # self.offsets[i * 4:i * 4 + 4] = offsets
+#
+#           penX = penX + glyph[GlyphOrigW] + kerning
+#           # penY = penY + glyph[GlyphHeight]
+#           prev = charCode
+#
+#       self.numVertices = len(self.vertices)
+#       self.attribs = np.array([x+ox, y+oy] * self.numVertices, dtype=np.float32)
+#       self.offsets = np.array([x, y] * self.numVertices, dtype=np.float32)
+#       self.lineWidths = [ox, oy]
+#
+#     # total width of text - probably don't need
+#     # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
+#
+#   def drawTextArray(self):
+#     # TODO:ED need to sort out the speed of this
+#     # GL.glActiveTexture(GL.GL_TEXTURE0)
+#     # GL.glBindTexture(GL.GL_TEXTURE_2D, self.font.textureId)
+#
+#     self._GLContext.globalGL._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
+#
+#     super(GLString, self).drawTextArray()
+#
+#   def setColour(self, col):
+#     self.colors = np.array(col*self.numVertices, dtype=np.float32)
+#
+#   def setStringOffset(self, attrib):
+#     self.attribs = self.offsets + np.array(attrib*self.numVertices, dtype=np.float32)
 
 
 class GLPeakListArray(GLVertexArray):

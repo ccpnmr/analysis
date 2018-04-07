@@ -479,9 +479,9 @@ QuickTable::item::selected {
                         , col = col
                         , rowItem = data)
 
-        if self._actionCallback and not self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback
+        if self._actionCallback and self._dataFrameObject and not self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback
           self._actionCallback(data)
-        elif self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback:
+        elif self._dataFrameObject and self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback:
           item = self.item(row, col)
           item.setEditable(True)
           # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
@@ -843,7 +843,7 @@ QuickTable::item::selected {
 
   def setTableFromDataFrameObject(self, dataFrameObject):
     # populate the table from the the Pandas dataFrame
-    # self._dataFrameObject = dataFrameObject
+    self._dataFrameObject = dataFrameObject
     #
     # if dataFrameObject.dataFrame.empty:
     #   self.clearTable()

@@ -31,7 +31,7 @@ from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 
 
-class GuiStripDisplay1d(GuiSpectrumDisplay):
+class SpectrumDisplay1d(GuiSpectrumDisplay):
 
   def __init__(self, mainWindow, name):
     # if not apiSpectrumDisplay1d.strips:

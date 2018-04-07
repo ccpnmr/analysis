@@ -140,17 +140,17 @@ class Gui(Ui):
     project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
                                 'ccp.nmr.Nmr.AbstractPeakDimContrib', 'delete')
 
-    from ccpn.ui.gui.lib import GuiStripDisplayNd
-    project._registerApiNotifier(GuiStripDisplayNd._changedBoundDisplayAxisOrdering,
-                                 GuiStripDisplayNd.ApiBoundDisplay, 'axisOrder')
+    from ccpn.ui.gui.lib import SpectrumDisplayNd
+    project._registerApiNotifier(SpectrumDisplayNd._changedBoundDisplayAxisOrdering,
+                                 SpectrumDisplayNd.ApiBoundDisplay, 'axisOrder')
 
     # # TODO:ED remove if not needed
-    # from ccpn.ui.gui.modules import GuiStripDisplay1d
-    # project._registerApiNotifier(GuiStripDisplay1d._updateSpectrumPlotColour,
-    #                              GuiStripDisplay1d.ApiDataSource, 'setSliceColour')
+    # from ccpn.ui.gui.modules import SpectrumDisplay1d
+    # project._registerApiNotifier(SpectrumDisplay1d._updateSpectrumPlotColour,
+    #                              SpectrumDisplay1d.ApiDataSource, 'setSliceColour')
     #
-    # project._registerApiNotifier(GuiStripDisplay1d._updateSpectrumViewPlotColour,
-    #                              GuiStripDisplay1d.ApiSpectrumView, 'setSliceColour')
+    # project._registerApiNotifier(SpectrumDisplay1d._updateSpectrumViewPlotColour,
+    #                              SpectrumDisplay1d.ApiSpectrumView, 'setSliceColour')
 
     project._registerApiNotifier(GuiStrip._rulerCreated, 'ccpnmr.gui.Task.Ruler', 'postInit')
     project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')
@@ -338,12 +338,12 @@ Mark = _coreClassMap['Mark']
 
 ## SpectrumDisplay class
 coreClass = _coreClassMap['SpectrumDisplay']
-from ccpn.ui.gui.lib.GuiStripDisplay1d import GuiStripDisplay1d as _GuiStripDisplay1d
+from ccpn.ui.gui.lib.SpectrumDisplay1d import SpectrumDisplay1d as _SpectrumDisplay1d
 #TODO:RASMUS: also change for this class as done for the Nd variant below; this involves
-#chaning the init signature of the GuiStripDisplay1d and passing the parameters along to
+#chaning the init signature of the SpectrumDisplay1d and passing the parameters along to
 # GuiSpectrumDisplay
 
-class StripDisplay1d(coreClass, _GuiStripDisplay1d):
+class StripDisplay1d(coreClass, _SpectrumDisplay1d):
   """1D bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
@@ -353,7 +353,7 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
     # hack for now
     self.application = project._appBase
 
-    _GuiStripDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
+    _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
                                       name=self._wrappedData.name)
     if not project._isNew:
       # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
@@ -363,14 +363,14 @@ class StripDisplay1d(coreClass, _GuiStripDisplay1d):
                                                           , relativeTo=self.application.ui.mainWindow.moduleArea)
 
 
-from ccpn.ui.gui.lib.GuiStripDisplayNd import GuiStripDisplayNd as _GuiStripDisplayNd
+from ccpn.ui.gui.lib.SpectrumDisplayNd import SpectrumDisplayNd as _SpectrumDisplayNd
 #TODO:RASMUS Need to check on the consequences of hiding name from the wrapper
 # NB: GWV had to comment out the name property to make it work
 # conflicts existed between the 'name' and 'window' attributes of the two classes
 # the pyqtgraph decendents need name(), GuiStripNd had 'window', but that could be replaced with
 # mainWindow throughout
 
-class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
+class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
   """ND bound display"""
   def __init__(self, project:Project, wrappedData:'ApiBoundDisplay'):
     """Local override init for Qt subclass"""
@@ -381,7 +381,7 @@ class SpectrumDisplayNd(coreClass, _GuiStripDisplayNd):
     self.application = project._appBase
     self._appBase = project._appBase
 
-    _GuiStripDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
+    _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
                                 name=self._wrappedData.name
                                 )
 

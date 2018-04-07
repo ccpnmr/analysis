@@ -38,7 +38,8 @@ from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayProperties
 
 from ccpn.util.Logging import getLogger
 
-class GuiStripDisplayNd(GuiSpectrumDisplay):
+
+class SpectrumDisplayNd(GuiSpectrumDisplay):
 
   def __init__(self, mainWindow, name):
     """

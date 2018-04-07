@@ -1495,7 +1495,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._lockStringFalse = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0, color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
     self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
 
-    self.stripIDString = GLString(text='', font=self.globalGL.glSmallFont, x=0, y=0, GLContext=self, object=None)
+    self.stripIDString = GLString(text='', font=self.globalGL.glSmallFont, x=0, y=0, GLContext=self, obj=None)
 
     # This is the correct blend function to ignore stray surface blending functions
     GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
@@ -2020,7 +2020,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     for drawStr in drawList.stringList:
 
-      peak = drawStr.object
+      peak = drawStr.obj
 
       if peak and not peak.isDeleted:
         # _isSelected = False
@@ -2815,7 +2815,7 @@ class CcpnGLWidget(QOpenGLWidget):
       drawList = self._GLPeakListLabels[pll]
 
       for drawStr in drawList.stringList:
-        if drawStr.object == peak:
+        if drawStr.obj == peak:
           drawList.stringList.remove(drawStr)
           break
 
@@ -2940,7 +2940,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                   ox=r, oy=w,
                                   # x=self._screenZero[0], y=self._screenZero[1]
                                   color=(colR, colG, colB, fade), GLContext=self,
-                                  object=peak))
+                                  obj=peak))
 
   def _threadBuildPeakListLabels(self, spectrumView, peakListView, drawList, glStrip):
     tempList = []
@@ -3578,7 +3578,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                   , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE-self.globalGL.glSmallFont.height
 
                                   , color=labelColour, GLContext=self
-                                  , object=None))
+                                  , obj=None))
 
       # append the axisCode to the end
       self._axisXLabelling.append(GLString(text=self.axisCodes[0]
@@ -3586,7 +3586,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                 , x=self.axisL+(5*self.pixelX)
                                 , y=self.AXIS_LINE
                                 , color=labelColour, GLContext=self
-                                , object=None))
+                                , obj=None))
 
       self._axisYLabelling = []
 
@@ -3603,7 +3603,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                   , x=self.AXIS_LINE
                                   , y=axisY-(10.0*self.pixelY)
                                   , color=labelColour, GLContext=self
-                                  , object=None))
+                                  , obj=None))
 
       # append the axisCode to the end
       self._axisYLabelling.append(GLString(text=self.axisCodes[1]
@@ -3611,7 +3611,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                 , x=self.AXIS_LINE
                                 , y=self.axisT-(1.5*self.globalGL.glSmallFont.height*self.pixelY)
                                 , color=labelColour, GLContext=self
-                                , object=None))
+                                , obj=None))
 
   def drawAxisLabels(self):
     # draw axes labelling
@@ -3651,7 +3651,7 @@ class CcpnGLWidget(QOpenGLWidget):
   def addInfiniteLine(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None,
-                object=None, lineStyle='dashed', **kw):
+                obj=None, lineStyle='dashed', **kw):
 
     if colour in REGION_COLOURS.keys():
       if colour == 'highlight':
@@ -3696,7 +3696,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                   movable=movable,
                                   visible=visible,
                                   bounds=bounds,
-                                  object=object,
+                                  obj=obj,
                                   lineStyle=lineStyle))
 
     self.update()
@@ -3713,12 +3713,12 @@ class CcpnGLWidget(QOpenGLWidget):
   def addExternalRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None,
-                object=None, **kw):
+                obj=None, **kw):
 
     newRegion = self._externalRegions._addRegion(values=values, axisCode=axisCode, orientation=orientation,
                 brush=brush, colour=colour,
                 movable=movable, visible=visible, bounds=bounds,
-                object=object, **kw)
+                obj=obj, **kw)
 
     self._externalRegions.renderMode = GLRENDERMODE_REBUILD
     self.update()
@@ -3728,7 +3728,7 @@ class CcpnGLWidget(QOpenGLWidget):
   def addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None,
-                object=None, **kw):
+                obj=None, **kw):
 
     if colour in REGION_COLOURS.keys():
       brush = REGION_COLOURS[colour]
@@ -3770,7 +3770,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                   movable=movable,
                                   visible=visible,
                                   bounds=bounds,
-                                  object=object))
+                                  obj=obj))
 
     self._regionList.renderMode = GLRENDERMODE_REBUILD
     self.update()
@@ -3908,7 +3908,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                         y=textY,
                                         color=(colR, colG, colB, 1.0),
                                         GLContext=self,
-                                        object=None))
+                                        obj=None))
             # this is in the attribs
             self._marksAxisCodes[-1].axisIndex = axisIndex
             self._marksAxisCodes[-1].axisPosition = pos
@@ -4197,7 +4197,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                   , y=self.axisT-(1.5*self.globalGL.glSmallFont.height*self.pixelY)
                                   # self._screenZero[0], y=self._screenZero[1]
                                   , color=colour, GLContext=self
-                                  , object=None)
+                                  , obj=None)
 
       self._oldStripIDLabel = self.stripIDLabel
 
@@ -4387,7 +4387,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                   x=self.cursorCoordinate[0],
                                   y=self.cursorCoordinate[1],
                                   color=self.foreground, GLContext=self,
-                                  object=None)
+                                  obj=None)
       self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
       if self._drawSelectionBox:
@@ -4401,7 +4401,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                     x=self.cursorCoordinate[0],
                                     y=self.cursorCoordinate[1] - (self.globalGL.glSmallFont.height*2.0*self.pixelY),
                                     color=self.foreground, GLContext=self,
-                                    object=None)
+                                    obj=None)
 
   def drawMouseCoords(self):
     if self.underMouse():
@@ -6708,7 +6708,7 @@ class GLRegion(QtWidgets.QWidget):
   def __init__(self, parent, glList, values=(0,0), axisCode=None, orientation='h',
                brush=None, colour='blue',
                movable=True, visible=True, bounds=None,
-               object=None, objectView=None, lineStyle='dashed'):
+               obj=None, objectView=None, lineStyle='dashed'):
 
     super(GLRegion, self).__init__(parent)
 
@@ -6722,10 +6722,10 @@ class GLRegion(QtWidgets.QWidget):
     self.movable = movable
     self._visible = visible
     self._bounds = bounds
-    self._object = object
+    self._object = obj
     self._objectView = objectView
     self.lineStyle = lineStyle
-    self.pid = object.pid if hasattr(object, 'pid') else None
+    self.pid = obj.pid if hasattr(obj, 'pid') else None
 
   def _mouseDrag(self, values):
     self.valuesChanged.emit(list(values))
@@ -6984,7 +6984,7 @@ class GLIntegralArray(GLVertexArray):
 
   def addIntegral(self, integral, integralListView, colour='blue', brush=None):
     return self._addRegion(values=integral.limits[0], orientation='v', movable=True,
-                           object=integral, objectView=integralListView, colour=colour, brush=brush)
+                           obj=integral, objectView=integralListView, colour=colour, brush=brush)
 
   def _removeRegion(self, region):
     if region in self._regions:
@@ -6993,7 +6993,7 @@ class GLIntegralArray(GLVertexArray):
   def _addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None,
-                object=None, objectView=None,
+                obj=None, objectView=None,
                 **kw):
 
     if colour in REGION_COLOURS.keys() and not brush:
@@ -7036,7 +7036,7 @@ class GLIntegralArray(GLVertexArray):
                                   movable=movable,
                                   visible=visible,
                                   bounds=bounds,
-                                  object=object,
+                                  obj=obj,
                                   objectView=objectView))
 
     axisIndex = 0

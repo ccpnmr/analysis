@@ -24,7 +24,7 @@ __date__ = "$Date$"
 #=========================================================================================
 
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 try:
   from OpenGL import GL, GLU, GLUT
 except ImportError:

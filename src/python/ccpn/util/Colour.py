@@ -234,3 +234,9 @@ def getSpectrumColour(colourName, defaultReturn=None):
   except:
     # colour not found in the list
     return defaultReturn
+
+def getAutoColourRgbRatio(inColour=None, sourceObject=None, colourAttribute=None, defaultColour=None):
+  listColour = inColour
+  if listColour == '#':
+    listColour = getattr(sourceObject, colourAttribute, defaultColour)
+  return hexToRgbRatio(listColour)

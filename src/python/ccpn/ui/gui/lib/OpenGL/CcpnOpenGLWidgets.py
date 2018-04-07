@@ -24,38 +24,11 @@ __date__ = "$Date$"
 #=========================================================================================
 
 import sys
-import math
-from threading import Thread
-# from queue import Queue
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import (QPoint, QSize, Qt, pyqtSignal, pyqtSlot)
-from PyQt5.QtWidgets import QApplication, QOpenGLWidget
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSignal
 from ccpn.util.Logging import getLogger
 import numpy as np
-from pyqtgraph import functions as fn
-from ccpn.core.PeakList import PeakList
-from ccpn.core.IntegralList import IntegralList
-
-from ccpn.ui.gui.guiSettings import getColours
-from ccpn.util.Colour import hexToRgbRatio
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
-                                    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
-                                    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE
-from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
-import ccpn.util.Phasing as Phasing
-from ccpn.ui.gui.lib.mouseEvents import \
-              leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
-              middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
-                                                    GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
-                                                    GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
-                                                    GLREFRESHMODE_REBUILD, \
-                                                    GLVertexArray
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 try:
   from OpenGL import GL, GLU, GLUT

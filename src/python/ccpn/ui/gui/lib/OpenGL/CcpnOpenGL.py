@@ -28,7 +28,7 @@ import math
 from threading import Thread
 # from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import (QPoint, QSize, Qt, pyqtSignal, pyqtSlot)
+from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
 import numpy as np
@@ -36,11 +36,10 @@ from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
 
-from ccpn.ui.gui.guiSettings import getColours
-from ccpn.util.Colour import hexToRgbRatio
+from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
                                     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
-                                    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE
+                                    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours
 from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
@@ -1542,14 +1541,7 @@ class CcpnGLWidget(QOpenGLWidget):
     strip = self._parent
 
     pls = peakListView.peakList
-
-    listColour = pls.textColour
-    if listColour == '#':
-      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
-    listCol = hexToRgbRatio(listColour)
-    # listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
-    # listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
-    # listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+    listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
     for drawStr in drawList.stringList:
 
@@ -1568,18 +1560,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if _isInPlane or _isInFlankingPlane:
 
           if self._isSelected(peak):
-          # if hasattr(peak, '_isSelected') and peak._isSelected:
-          #   _isSelected = True
-          #   colR, colG, colB = self.highlightColour[:3]
             drawStr.setColour((*self.highlightColour[:3], fade))
           else:
-            # # colour = pls.textColour
-            # colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-            # colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-            # colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
             drawStr.setColour((*listCol, fade))
-
-          # drawStr.setColour((colR, colG, colB, fade))
 
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
@@ -1596,15 +1579,7 @@ class CcpnGLWidget(QOpenGLWidget):
     indexPtr = 0
 
     pls = peakListView.peakList
-    listColour = pls.symbolColour
-    # if listColour == '#':
-    #   listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
-    if listColour == '#':     # auto colour
-      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
-    listCol = hexToRgbRatio(listColour)
-    # listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
-    # listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
-    # listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+    listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
     if symbolType == 0:
       # for peak in pls.peaks:
@@ -1627,18 +1602,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
           if _isInPlane or _isInFlankingPlane:
             if self._isSelected(peak):
-            # if hasattr(peak, '_isSelected') and peak._isSelected:
               _isSelected = True
-              # colR, colG, colB = self.highlightColour[:3]
               cols = self.highlightColour[:3]
               drawList.indices = np.append(drawList.indices, np.array([index, index+1, index+2, index+3,
                                                                       index, index+2, index+2, index+1,
                                                                       index, index+3, index+3, index+1], dtype=np.uint))
             else:
-              # colour = peak.peakList.symbolColour
-              # colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-              # colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-              # colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
               cols = listCol
 
               drawList.indices = np.append(drawList.indices,
@@ -1678,7 +1647,6 @@ class CcpnGLWidget(QOpenGLWidget):
           if _isInPlane or _isInFlankingPlane:
             drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
             if self._isSelected(peak):
-            # if hasattr(peak, '_isSelected') and peak._isSelected:
               _isSelected = True
               cols = self.highlightColour[:3]
               drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
@@ -1686,10 +1654,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                                               index + np2, index + np2 + 3,
                                                               index + np2 + 3, index + np2 + 1])
             else:
-              # colour = peak.peakList.symbolColour
-              # colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-              # colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-              # colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
               cols = listCol
 
             drawList.colors[offset*4:(offset+np2+5)*4] = [*cols, fade] * (np2+5)
@@ -1726,14 +1690,9 @@ class CcpnGLWidget(QOpenGLWidget):
           if _isInPlane or _isInFlankingPlane:
             drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4] for an in ang])
             if self._isSelected(peak):
-            # if hasattr(peak, '_isSelected') and peak._isSelected:
               _isSelected = True
               cols = self.highlightColour[:3]
             else:
-              # colour = peak.peakList.symbolColour
-              # colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-              # colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-              # colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
               cols = listCol
 
             drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [*cols, fade] * (np2 + 5)
@@ -1860,15 +1819,9 @@ class CcpnGLWidget(QOpenGLWidget):
       return
 
     if self._isSelected(peak):
-    # if hasattr(peak, '_isSelected') and peak._isSelected:
-      colR, colG, colB = self.highlightColour[:3]
+      listCol = self.highlightColour[:3]
     else:
-      colour = pls.symbolColour
-      if colour == '#':
-        colour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
     # get the correct coordinates based on the axisCodes
     p0 = [0.0] * 2  # len(self.axisOrder)
@@ -1915,7 +1868,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                         , p0[0] + r, p0[1] + w
                                                         , p0[0] + r, p0[1] - w
                                                         , p0[0] - r, p0[1] + w])
-        drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * 4)
+        drawList.colors = np.append(drawList.colors, [*listCol, fade] * 4)
         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
                                                         , p0[0], p0[1]
                                                         , p0[0], p0[1]
@@ -1954,7 +1907,6 @@ class CcpnGLWidget(QOpenGLWidget):
           drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
 
           if self._isSelected(peak):
-          # if hasattr(peak, '_isSelected') and peak._isSelected:
             _isSelected = True
             drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
                                                             index + np2 + 2, index + np2 + 1,
@@ -1975,7 +1927,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                         , p0[0] - r, p0[1] + w
                                                         , p0[0], p0[1]])
 
-        drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * (np2 + 5))
+        drawList.colors = np.append(drawList.colors, [*listCol, fade] * (np2 + 5))
         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
         drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
         drawList.lineWidths = (r, w)
@@ -2027,7 +1979,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                         , p0[0] - r, p0[1] + w
                                                         , p0[0], p0[1]])
 
-        drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * (np2 + 5))
+        drawList.colors = np.append(drawList.colors, [*listCol, fade] * (np2 + 5))
         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
         drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
         drawList.lineWidths = (r, w)
@@ -2103,12 +2055,7 @@ class CcpnGLWidget(QOpenGLWidget):
       indexPtr = 0
 
       pls = peakListView.peakList
-      listColour = pls.symbolColour
-      if listColour == '#':
-        listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
-      listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
-      listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
-      listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+      listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
       spectrumFrequency = spectrum.spectrometerFrequencies
 
@@ -2128,13 +2075,9 @@ class CcpnGLWidget(QOpenGLWidget):
           continue
 
         if self._isSelected(peak):
-        # if hasattr(peak, '_isSelected') and peak._isSelected:
-          colR, colG, colB = self.highlightColour[:3]
+          cols = self.highlightColour[:3]
         else:
-          # colour = pls.symbolColour
-          colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-          colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-          colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+          cols = listCol
 
         # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2            #len(self.axisOrder)
@@ -2170,7 +2113,6 @@ class CcpnGLWidget(QOpenGLWidget):
             # unselected
             if _isInPlane or _isInFlankingPlane:
               if self._isSelected(peak):
-              # if hasattr(peak, '_isSelected') and peak._isSelected:
                 _isSelected = True
                 drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3,
                                                                 index, index+2, index+2, index+1,
@@ -2182,7 +2124,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                               , p0[0]+r, p0[1]+w
                                                               , p0[0]+r, p0[1]-w
                                                               , p0[0]-r, p0[1]+w])
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * LENCOLORS)
+            drawList.colors = np.append(drawList.colors, [*cols, fade] * LENCOLORS)
             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
                                                             ,p0[0], p0[1]
                                                             ,p0[0], p0[1]
@@ -2221,7 +2163,6 @@ class CcpnGLWidget(QOpenGLWidget):
             if _isInPlane or _isInFlankingPlane:
               drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
               if self._isSelected(peak):
-              # if hasattr(peak, '_isSelected') and peak._isSelected:
                 _isSelected = True
                 drawList.indices = np.append(drawList.indices, [index+np2, index+np2+2,
                                                                  index+np2+2, index+np2+1,
@@ -2239,7 +2180,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                               , p0[0] - r, p0[1] + w
                                                               , p0[0], p0[1]])
 
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * (np2+5))
+            drawList.colors = np.append(drawList.colors, [*cols, fade] * (np2+5))
             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+5))
             drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2+5))
             drawList.lineWidths = (r, w)
@@ -2288,7 +2229,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                               , p0[0] - r, p0[1] + w
                                                               , p0[0], p0[1]])
 
-            drawList.colors = np.append(drawList.colors, [colR, colG, colB, fade] * (np2+5))
+            drawList.colors = np.append(drawList.colors, [*cols, fade] * (np2+5))
             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2+5))
             drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2+5))
             drawList.lineWidths = (r, w)
@@ -2448,16 +2389,9 @@ class CcpnGLWidget(QOpenGLWidget):
         return
 
       if self._isSelected(peak):
-      # if hasattr(peak, '_isSelected') and peak._isSelected:
-        colR, colG, colB = self.highlightColour[:3]
+        listCol = self.highlightColour[:3]
       else:
-        colour = pls.textColour
-        if colour == '#':
-          colour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
-
-        colR = int(colour.strip('# ')[0:2], 16) / 255.0
-        colG = int(colour.strip('# ')[2:4], 16) / 255.0
-        colB = int(colour.strip('# ')[4:6], 16) / 255.0
+        listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
       if self._parent.peakLabelling == 0:
         text = _getScreenPeakAnnotation(peak, useShortCode=True)
@@ -2472,7 +2406,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                   x=p0[0], y=p0[1],
                                   ox=r, oy=w,
                                   # x=self._screenZero[0], y=self._screenZero[1]
-                                  color=(colR, colG, colB, fade), GLContext=self,
+                                  color=(*listCol, fade), GLContext=self,
                                   obj=peak))
 
   def _threadBuildPeakListLabels(self, spectrumView, peakListView, drawList, glStrip):
@@ -2810,16 +2744,10 @@ class CcpnGLWidget(QOpenGLWidget):
       drawList._clearRegions()
 
       ils = integralListView.peakList
-      colour = ils.symbolColour
-      if colour == '#':
-        colour = getattr(ils.spectrum, self.SPECTRUMPOSCOLOUR)
-
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
       for integral in ils.integrals:
-        drawList.addIntegral(integral, integralListView, colour=None, brush=(colR, colG, colB, 0.15))
+        drawList.addIntegral(integral, integralListView, colour=None, brush=(*listCol, 0.15))
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -5205,15 +5133,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
       # confusing as peakList and integralList share the same list :)
       if integral.integralList == ils.integralListView.peakList:
-        colour = ils.integralListView.symbolColour
-        if colour == '#':
-          colour = getattr(ils.integralListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR)
+        listCol = getAutoColourRgbRatio(ils.integralListView.symbolColour, ils.integralListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
-        colR = int(colour.strip('# ')[0:2], 16) / 255.0
-        colG = int(colour.strip('# ')[2:4], 16) / 255.0
-        colB = int(colour.strip('# ')[4:6], 16) / 255.0
-
-        ils.addIntegral(integral, ils.integralListView, colour=None, brush=(colR, colG, colB, 0.15))
+        ils.addIntegral(integral, ils.integralListView, colour=None, brush=(*listCol, 0.15))
         self.update()
         return
 

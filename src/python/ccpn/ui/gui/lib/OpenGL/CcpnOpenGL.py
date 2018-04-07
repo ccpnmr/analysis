@@ -49,7 +49,8 @@ from ccpn.ui.gui.lib.mouseEvents import \
               leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
               middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
 from ccpn.core.lib.Notifiers import Notifier
-
+from ccpn.framework.PathsAndUrls import fontsPath
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 try:
   from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -120,139 +121,401 @@ GLLINE_STYLES = {
 FADE_FACTOR = 0.3
 
 
-@singleton
-class GLGlobalLists():
-  def __init__(self, parent=None, strip=None):
-    pass
+# @singleton
+# class GLNotifier(QtWidgets.QWidget):
+#   """
+#   Class to control the communication between different strips
+#   """
+#   GLSOURCE = 'source'
+#   GLAXISVALUES = 'axisValues'
+#   GLMOUSECOORDS = 'mouseCoords'
+#   GLMOUSEMOVEDDICT = 'mouseMovedict'
+#   GLSPECTRUMDISPLAY = 'spectrumDisplay'
+#   GLSTRIP = 'strip'
+#   GLBOTTOMAXISVALUE = 'bottomAxis'
+#   GLTOPAXISVALUE = 'topAxis'
+#   GLLEFTAXISVALUE = 'leftAxis'
+#   GLRIGHTAXISVALUE = 'rightAxis'
+#   GLADD1DPHASING = 'add1DPhasing'
+#   GLCLEARPHASING = 'clearPhasing'
+#   GLCONTOURS = 'updateContours'
+#   GLHIGHLIGHTPEAKS = 'glHighlightPeaks'
+#   GLALLPEAKS = 'glAllPeaks'
+#   GLPEAKNOTIFY = 'glPeakNotify'
+#   GLPEAKLISTS = 'glUpdatePeakLists'
+#   GLPEAKLISTLABELS = 'glUpdatePeakListLabels'
+#   GLINTEGRALLISTS = 'glUpdateIntegralLists'
+#   GLGRID = 'glUpdateGrid'
+#   GLAXES = 'glUpdateAxes'
+#   GLCURSOR = 'glUpdateCursor'
+#   GLANY = 'glUpdateAny'
+#   GLMARKS = 'glUpdateMarks'
+#   GLTARGETS = 'glTargets'
+#   GLTRIGGERS = 'glTriggers'
+#   GLVALUES = 'glValues'
+#   GLDATA = 'glData'
+#
+#   _triggerKeywords = (GLHIGHLIGHTPEAKS, GLALLPEAKS,
+#                       GLPEAKNOTIFY, GLPEAKLISTS, GLPEAKLISTLABELS, GLGRID, GLAXES,
+#                       GLCURSOR, GLANY, GLMARKS, GLTARGETS, GLTRIGGERS, GLVALUES, GLDATA)
+#
+#   glXAxisChanged = pyqtSignal(dict)
+#   glYAxisChanged = pyqtSignal(dict)
+#   glAllAxesChanged = pyqtSignal(dict)
+#   glMouseMoved = pyqtSignal(dict)
+#   glEvent = pyqtSignal(dict)
+#   glAxisLockChanged = pyqtSignal(dict)
+#
+#   def __init__(self, parent=None, strip=None):
+#     super(GLNotifier, self).__init__()
+#     self._parent = parent
+#     self._strip = strip
+#
+#   def emitPaintEvent(self, source=None):
+#     if source:
+#       self.glEvent.emit({GLNotifier.GLSOURCE: source,
+#                           GLNotifier.GLTARGETS: [],
+#                           GLNotifier.GLTRIGGERS: []})
+#     else:
+#       self.glEvent.emit({})
+#
+#   def emitEvent(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
+#     aDict = {GLNotifier.GLSOURCE: source,
+#              GLNotifier.GLSTRIP: strip,
+#              GLNotifier.GLSPECTRUMDISPLAY: display,
+#              GLNotifier.GLTARGETS: tuple(targets),
+#              GLNotifier.GLTRIGGERS: tuple(triggers),
+#              GLNotifier.GLVALUES: values,
+#              }
+#     self.glEvent.emit(aDict)
+#
+#   def emitEventToSpectrumDisplay(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
+#     aDict = {GLNotifier.GLSOURCE: source,
+#              GLNotifier.GLSTRIP: strip,
+#              GLNotifier.GLSPECTRUMDISPLAY: display,
+#              GLNotifier.GLTARGETS: tuple(targets),
+#              GLNotifier.GLTRIGGERS: tuple(triggers),
+#              GLNotifier.GLVALUES: values,
+#              }
+#     self.glEvent.emit(aDict)
+#
+#   def _emitAllAxesChanged(self, source=None, strip=None,
+#                          axisB=None, axisT=None, axisL=None, axisR=None):
+#     aDict = {GLNotifier.GLSOURCE: source,
+#              GLNotifier.GLSTRIP: strip,
+#              GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+#              GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+#                                        GLNotifier.GLTOPAXISVALUE: axisT,
+#                                        GLNotifier.GLLEFTAXISVALUE: axisL,
+#                                        GLNotifier.GLRIGHTAXISVALUE: axisR}
+#              }
+#     self.glAllAxesChanged.emit(aDict)
+#
+#   def _emitXAxisChanged(self, source=None, strip=None,
+#                          axisB=None, axisT=None, axisL=None, axisR=None):
+#     aDict = {GLNotifier.GLSOURCE: source,
+#              GLNotifier.GLSTRIP: strip,
+#              GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+#              GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+#                                        GLNotifier.GLTOPAXISVALUE: axisT,
+#                                        GLNotifier.GLLEFTAXISVALUE: axisL,
+#                                        GLNotifier.GLRIGHTAXISVALUE: axisR}
+#              }
+#     self.glXAxisChanged.emit(aDict)
+#
+#   def _emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None):
+#     aDict = { GLNotifier.GLSOURCE: source,
+#               GLNotifier.GLMOUSECOORDS: coords,
+#               GLNotifier.GLMOUSEMOVEDDICT: mouseMovedDict }
+#     self.glMouseMoved.emit(aDict)
+#
+#   def _emitYAxisChanged(self, source=None, strip=None,
+#                          axisB=None, axisT=None, axisL=None, axisR=None):
+#     aDict = {GLNotifier.GLSOURCE: source,
+#              GLNotifier.GLSTRIP: strip,
+#              GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+#              GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
+#                                        GLNotifier.GLTOPAXISVALUE: axisT,
+#                                        GLNotifier.GLLEFTAXISVALUE: axisL,
+#                                        GLNotifier.GLRIGHTAXISVALUE: axisR}
+#              }
+#     self.glYAxisChanged.emit(aDict)
+#
+#   def _emitAxisLockChanged(self, source=None, strip=None, lock=False):
+#     aDict = {GLNotifier.GLSOURCE: source,
+#              GLNotifier.GLSTRIP: strip,
+#              GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
+#              GLNotifier.GLVALUES: lock
+#              }
+#     self.glAxisLockChanged.emit(aDict)
 
 
 @singleton
-class GLNotifier(QtWidgets.QWidget):
-  """
-  Class to control the communication between different strips
-  """
-  GLSOURCE = 'source'
-  GLAXISVALUES = 'axisValues'
-  GLMOUSECOORDS = 'mouseCoords'
-  GLMOUSEMOVEDDICT = 'mouseMovedict'
-  GLSPECTRUMDISPLAY = 'spectrumDisplay'
-  GLSTRIP = 'strip'
-  GLBOTTOMAXISVALUE = 'bottomAxis'
-  GLTOPAXISVALUE = 'topAxis'
-  GLLEFTAXISVALUE = 'leftAxis'
-  GLRIGHTAXISVALUE = 'rightAxis'
-  GLADD1DPHASING = 'add1DPhasing'
-  GLCLEARPHASING = 'clearPhasing'
-  GLCONTOURS = 'updateContours'
-  GLHIGHLIGHTPEAKS = 'glHighlightPeaks'
-  GLALLPEAKS = 'glAllPeaks'
-  GLPEAKNOTIFY = 'glPeakNotify'
-  GLPEAKLISTS = 'glUpdatePeakLists'
-  GLPEAKLISTLABELS = 'glUpdatePeakListLabels'
-  GLINTEGRALLISTS = 'glUpdateIntegralLists'
-  GLGRID = 'glUpdateGrid'
-  GLAXES = 'glUpdateAxes'
-  GLCURSOR = 'glUpdateCursor'
-  GLANY = 'glUpdateAny'
-  GLMARKS = 'glUpdateMarks'
-  GLTARGETS = 'glTargets'
-  GLTRIGGERS = 'glTriggers'
-  GLVALUES = 'glValues'
-  GLDATA = 'glData'
-
-  _triggerKeywords = (GLHIGHLIGHTPEAKS, GLALLPEAKS,
-                      GLPEAKNOTIFY, GLPEAKLISTS, GLPEAKLISTLABELS, GLGRID, GLAXES,
-                      GLCURSOR, GLANY, GLMARKS, GLTARGETS, GLTRIGGERS, GLVALUES, GLDATA)
-
-  glXAxisChanged = pyqtSignal(dict)
-  glYAxisChanged = pyqtSignal(dict)
-  glAllAxesChanged = pyqtSignal(dict)
-  glMouseMoved = pyqtSignal(dict)
-  glEvent = pyqtSignal(dict)
-  glAxisLockChanged = pyqtSignal(dict)
-
+class GLGlobalData(QtWidgets.QWidget):
   def __init__(self, parent=None, strip=None):
-    super(GLNotifier, self).__init__()
-    self._parent = parent
-    self._strip = strip
 
-  def emitPaintEvent(self, source=None):
-    if source:
-      self.glEvent.emit({GLNotifier.GLSOURCE: source,
-                          GLNotifier.GLTARGETS: [],
-                          GLNotifier.GLTRIGGERS: []})
-    else:
-      self.glEvent.emit({})
+    super(GLGlobalData, self).__init__()
+    self.parent = parent
+    self.strip = strip
+    
+    self.glSmallFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallFont.fnt'), activeTexture=0)
+    self.glSmallTransparentFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallTransparentFont.fnt'), fontTransparency=0.5, activeTexture=1)
+    self.initialiseShaders()
+    
+  def initialiseShaders(self):
+    # simple shader for standard plotting of contours
+    self._vertexShader1 = """
+    #version 120
 
-  def emitEvent(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
-    aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSTRIP: strip,
-             GLNotifier.GLSPECTRUMDISPLAY: display,
-             GLNotifier.GLTARGETS: tuple(targets),
-             GLNotifier.GLTRIGGERS: tuple(triggers),
-             GLNotifier.GLVALUES: values,
-             }
-    self.glEvent.emit(aDict)
+    uniform mat4 mvMatrix;
+    uniform mat4 pMatrix;
+    varying vec4 FC;
+    uniform vec4 axisScale;
+    attribute vec2 offset;
 
-  def emitEventToSpectrumDisplay(self, source=None, strip=None, display=None, targets=[], triggers=[], values={}):
-    aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSTRIP: strip,
-             GLNotifier.GLSPECTRUMDISPLAY: display,
-             GLNotifier.GLTARGETS: tuple(targets),
-             GLNotifier.GLTRIGGERS: tuple(triggers),
-             GLNotifier.GLVALUES: values,
-             }
-    self.glEvent.emit(aDict)
+    void main()
+    {
+      gl_Position = pMatrix * mvMatrix * gl_Vertex;
+      FC = gl_Color;
+    }
+    """
 
-  def _emitAllAxesChanged(self, source=None, strip=None,
-                         axisB=None, axisT=None, axisL=None, axisR=None):
-    aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSTRIP: strip,
-             GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-             GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
-                                       GLNotifier.GLTOPAXISVALUE: axisT,
-                                       GLNotifier.GLLEFTAXISVALUE: axisL,
-                                       GLNotifier.GLRIGHTAXISVALUE: axisR}
-             }
-    self.glAllAxesChanged.emit(aDict)
+    self._fragmentShader1 = """
+    #version 120
 
-  def _emitXAxisChanged(self, source=None, strip=None,
-                         axisB=None, axisT=None, axisL=None, axisR=None):
-    aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSTRIP: strip,
-             GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-             GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
-                                       GLNotifier.GLTOPAXISVALUE: axisT,
-                                       GLNotifier.GLLEFTAXISVALUE: axisL,
-                                       GLNotifier.GLRIGHTAXISVALUE: axisR}
-             }
-    self.glXAxisChanged.emit(aDict)
+    varying vec4  FC;
+    uniform vec4  background;
+    //uniform ivec4 parameterList;
 
-  def _emitMouseMoved(self, source=None, coords=None, mouseMovedDict=None):
-    aDict = { GLNotifier.GLSOURCE: source,
-              GLNotifier.GLMOUSECOORDS: coords,
-              GLNotifier.GLMOUSEMOVEDDICT: mouseMovedDict }
-    self.glMouseMoved.emit(aDict)
+    void main()
+    {
+      gl_FragColor = FC;
 
-  def _emitYAxisChanged(self, source=None, strip=None,
-                         axisB=None, axisT=None, axisL=None, axisR=None):
-    aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSTRIP: strip,
-             GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-             GLNotifier.GLAXISVALUES: {GLNotifier.GLBOTTOMAXISVALUE: axisB,
-                                       GLNotifier.GLTOPAXISVALUE: axisT,
-                                       GLNotifier.GLLEFTAXISVALUE: axisL,
-                                       GLNotifier.GLRIGHTAXISVALUE: axisR}
-             }
-    self.glYAxisChanged.emit(aDict)
+    //  if (FC.w < 0.05)
+    //    discard;
+    //  else if (parameterList.x == 0)
+    //    gl_FragColor = FC;
+    //  else
+    //    gl_FragColor = vec4(FC.xyz, 1.0) * FC.w + background * (1-FC.w);
+    }
+    """
 
-  def _emitAxisLockChanged(self, source=None, strip=None, lock=False):
-    aDict = {GLNotifier.GLSOURCE: source,
-             GLNotifier.GLSTRIP: strip,
-             GLNotifier.GLSPECTRUMDISPLAY: strip.spectrumDisplay,
-             GLNotifier.GLVALUES: lock
-             }
-    self.glAxisLockChanged.emit(aDict)
+    # shader for plotting antialiased text to the screen
+    self._vertexShaderTex = """
+    #version 120
+
+    uniform mat4 mvMatrix;
+    uniform mat4 pMatrix;
+    uniform vec4 axisScale;
+    uniform vec4 viewport;
+    varying vec4 FC;
+    varying vec4 FO;
+    varying vec4 varyingTexCoord;
+    attribute vec2 offset;
+
+    void main()
+    {
+      // viewport is scaled to axis
+      vec4 pos = pMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+                        // character_pos              world_coord
+
+      // centre on the nearest pixel in NDC - shouldn't be needed but textures not correct yet
+      gl_Position = pos;       //vec4( pos.x,        //floor(0.5 + viewport.x*pos.x) / viewport.x,
+                               //pos.y,        //floor(0.5 + viewport.y*pos.y) / viewport.y,
+                               //pos.zw );
+
+      varyingTexCoord = gl_MultiTexCoord0;
+      FC = gl_Color;
+    }
+    """
+
+    self._fragmentShaderTex = """
+    #version 120
+
+    uniform sampler2D texture;
+    varying vec4 FC;
+    vec4    filter;
+    uniform vec4    background;
+    varying vec4 FO;
+    varying vec4 varyingTexCoord;
+
+    void main()
+    {
+      filter = texture2D(texture, varyingTexCoord.xy);
+      // colour for blending enabled
+      gl_FragColor = vec4(FC.xyz, filter.w);
+
+    //  if (filter.w < 0.01)
+    //    discard;
+    //  gl_FragColor = vec4(FC.xyz * filter.w, 1.0);
+    }
+    """
+
+    #     # shader for plotting antialiased text to the screen
+    #     self._vertexShaderTex = """
+    #     #version 120
+    #
+    #     uniform mat4 mvMatrix;
+    #     uniform mat4 pMatrix;
+    #     varying vec4 FC;
+    #     uniform vec4 axisScale;
+    #     attribute vec2 offset;
+    #
+    #     void main()
+    #     {
+    #       gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+    #       gl_TexCoord[0] = gl_MultiTexCoord0;
+    #       FC = gl_Color;
+    #     }
+    #     """
+    #
+    #     self._fragmentShaderTex = """
+    # #version 120
+    #
+    # #ifdef GL_ES
+    # precision mediump float;
+    # #endif
+    #
+    # uniform sampler2D texture;
+    # varying vec4 FC;
+    # vec4    filter;
+    #
+    # varying vec4 v_color;
+    # varying vec2 v_texCoord;
+    #
+    # const float smoothing = 1.0/16.0;
+    #
+    # void main() {
+    #     float distance = texture2D(texture, v_texCoord).a;
+    #     float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+    #     gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+    # }
+    # """
+
+    # advanced shader for plotting contours
+    self._vertexShader2 = """
+    #version 120
+
+    varying vec4  P;
+    varying vec4  C;
+    uniform mat4  mvMatrix;
+    uniform mat4  pMatrix;
+    uniform vec4  positiveContour;
+    uniform vec4  negativeContour;
+    //uniform float gsize = 5.0;      // size of the grid
+    //uniform float gwidth = 1.0;     // grid lines' width in pixels
+    //varying float   f = min(abs(fract(P.z * gsize)-0.5), 0.2);
+
+    void main()
+    {
+      P = gl_Vertex;
+      C = gl_Color;
+    //  gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);
+    //  vec4 glVect = pMatrix * mvMatrix * vec4(P, 1.0);
+    //  gl_Position = vec4(glVect.x, glVect.y, 0.0, 1.0);
+      gl_Position = pMatrix * mvMatrix * vec4(P.xy, 0.0, 1.0);
+    }
+    """
+
+    self._fragmentShader2 = """
+    #version 120
+
+    //  uniform float gsize = 50.0;       // size of the grid
+    uniform float gwidth = 0.5;       // grid lines' width in pixels
+    uniform float mi = 0.0;           // mi=max(0.0,gwidth-1.0)
+    uniform float ma = 1.0;           // ma=max(1.0,gwidth);
+    varying vec4 P;
+    varying vec4 C;
+
+    void main()
+    {
+    //  vec3 f  = abs(fract (P * gsize)-0.5);
+    //  vec3 df = fwidth(P * gsize);
+    //  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
+    //  vec3 g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);//max(0.0,1.0-gwidth) should also be sent as uniform
+    //  float c = g.x * g.y * g.z;
+    //  gl_FragColor = vec4(c, c, c, 1.0);
+    //  gl_FragColor = gl_FragColor * gl_Color;
+
+      float   f = min(abs(fract(P.z)-0.5), 0.2);
+      float   df = fwidth(P.z);
+    //  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);                 //  should be uniforms
+      float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);      //  max(0.0,1.0-gwidth) should also be sent as uniform
+    //  float   g=clamp((f-df*mi), 0.0, df*(ma-mi));  //  max(0.0,1.0-gwidth) should also be sent as uniform
+
+    //  g = g/(df*(ma-mi));
+    //  float   cAlpha = 1.0-(g*g);
+    //  if (cAlpha < 0.25)            //  this actually causes branches in the shader - bad
+    //    discard;
+    //  gl_FragColor = vec4(0.8-g, 0.3, 0.4-g, 1.0-(g*g));
+      gl_FragColor = vec4(P.w, P.w, P.w, 1.0-(g*g));
+    }
+    """
+
+    self._vertexShader3 = """
+        #version 120
+
+        uniform mat4 u_projTrans;
+
+        attribute vec4 a_position;
+        attribute vec2 a_texCoord0;
+        attribute vec4 a_color;
+
+        varying vec4 v_color;
+        varying vec2 v_texCoord;
+
+        void main() {
+          gl_Position = u_projTrans * a_position;
+          v_texCoord = a_texCoord0;
+          v_color = a_color;
+        }
+        """
+
+    self._fragmentShader3 = """
+        #version 120
+
+        #ifdef GL_ES
+        precision mediump float;
+        #endif
+
+        uniform sampler2D u_texture;
+
+        varying vec4 v_color;
+        varying vec2 v_texCoord;
+
+        const float smoothing = 1.0/16.0;
+
+        void main() {
+          float distance = texture2D(u_texture, v_texCoord).a;
+          float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+          gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+        }
+        """
+
+    self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
+                                        fragment=self._fragmentShader1,
+                                        attributes={'pMatrix':(16, np.float32),
+                                                      'mvMatrix':(16, np.float32),
+                                                      'parameterList':(4, np.int32),
+                                                      'background':(4, np.float32)})
+    self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2,
+                                        fragment=self._fragmentShader2,
+                                        attributes={'pMatrix':(16, np.float32),
+                                                      'mvMatrix':(16, np.float32),
+                                                      'positiveContours':(4, np.float32),
+                                                      'negativeContours':(4, np.float32)})
+    self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3,
+                                        fragment=self._fragmentShader3,
+                                        attributes={'pMatrix':(16, np.float32),
+                                                      'mvMatrix':(16, np.float32)})
+    self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex,
+                                        fragment=self._fragmentShaderTex,
+                                        attributes={'pMatrix':(16, np.float32),
+                                                      'mvMatrix':(16, np.float32),
+                                                      'axisScale':(4, np.float32),
+                                                      'background':(4, np.float32),
+                                                      'viewport':(4, np.float32),
+                                                      'texture':(1, np.uint)})
 
 
 class CcpnGLWidget(QOpenGLWidget):
@@ -286,6 +549,7 @@ class CcpnGLWidget(QOpenGLWidget):
       self.project = None
       self.current = None
 
+    self.globalGL = None
     self._threads = {}
     self._threadUpdate = False
 
@@ -423,7 +687,7 @@ class CcpnGLWidget(QOpenGLWidget):
     symbolWidth = self._parent.peakSymbolSize / 2.0
     # lineThickness = self._parent.peakSymbolThickness / 2.0
 
-    currentShader = self._shaderProgram1.makeCurrent()
+    currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
     # set projection to axis coordinates
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
@@ -503,7 +767,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.viewport = (GL.GLint * 4)()
 
     # change to the text shader
-    currentShader = self._shaderProgramTex.makeCurrent()
+    currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
@@ -1082,239 +1346,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisT, self.axisB = axisLimits[2:4]
 
   def initializeGL(self):
-
-    # simple shader for standard plotting of contours
-    self._vertexShader1 = """
-#version 120
-
-uniform mat4 mvMatrix;
-uniform mat4 pMatrix;
-varying vec4 FC;
-uniform vec4 axisScale;
-attribute vec2 offset;
-
-void main()
-{
-  gl_Position = pMatrix * mvMatrix * gl_Vertex;
-  FC = gl_Color;
-}
-"""
-
-    self._fragmentShader1 = """
-#version 120
-
-varying vec4  FC;
-uniform vec4  background;
-//uniform ivec4 parameterList;
-
-void main()
-{
-  gl_FragColor = FC;
-  
-//  if (FC.w < 0.05)
-//    discard;
-//  else if (parameterList.x == 0)
-//    gl_FragColor = FC;
-//  else
-//    gl_FragColor = vec4(FC.xyz, 1.0) * FC.w + background * (1-FC.w);
-}
-"""
-
-    # shader for plotting antialiased text to the screen
-    self._vertexShaderTex = """
-#version 120
-
-uniform mat4 mvMatrix;
-uniform mat4 pMatrix;
-uniform vec4 axisScale;
-uniform vec4 viewport;
-varying vec4 FC;
-varying vec4 FO;
-varying vec4 varyingTexCoord;
-attribute vec2 offset;
-
-void main()
-{
-  // viewport is scaled to axis
-  vec4 pos = pMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
-                    // character_pos              world_coord
-                      
-  // centre on the nearest pixel in NDC - shouldn't be needed but textures not correct yet
-  gl_Position = pos;       //vec4( pos.x,        //floor(0.5 + viewport.x*pos.x) / viewport.x,
-                           //pos.y,        //floor(0.5 + viewport.y*pos.y) / viewport.y,
-                           //pos.zw );
-               
-  varyingTexCoord = gl_MultiTexCoord0;
-  FC = gl_Color;
-}
-"""
-
-    self._fragmentShaderTex = """
-#version 120
-
-uniform sampler2D texture;
-varying vec4 FC;
-vec4    filter;
-uniform vec4    background;
-varying vec4 FO;
-varying vec4 varyingTexCoord;
-
-void main()
-{
-  filter = texture2D(texture, varyingTexCoord.xy);
-  // colour for blending enabled
-  gl_FragColor = vec4(FC.xyz, filter.w);
-  
-//  if (filter.w < 0.01)
-//    discard;
-//  gl_FragColor = vec4(FC.xyz * filter.w, 1.0);
-}
-"""
-
-#     # shader for plotting antialiased text to the screen
-#     self._vertexShaderTex = """
-#     #version 120
-#
-#     uniform mat4 mvMatrix;
-#     uniform mat4 pMatrix;
-#     varying vec4 FC;
-#     uniform vec4 axisScale;
-#     attribute vec2 offset;
-#
-#     void main()
-#     {
-#       gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
-#       gl_TexCoord[0] = gl_MultiTexCoord0;
-#       FC = gl_Color;
-#     }
-#     """
-#
-#     self._fragmentShaderTex = """
-# #version 120
-#
-# #ifdef GL_ES
-# precision mediump float;
-# #endif
-#
-# uniform sampler2D texture;
-# varying vec4 FC;
-# vec4    filter;
-#
-# varying vec4 v_color;
-# varying vec2 v_texCoord;
-#
-# const float smoothing = 1.0/16.0;
-#
-# void main() {
-#     float distance = texture2D(texture, v_texCoord).a;
-#     float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
-#     gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
-# }
-# """
-
-    # advanced shader for plotting contours
-    self._vertexShader2 = """
-#version 120
-
-varying vec4  P;
-varying vec4  C;
-uniform mat4  mvMatrix;
-uniform mat4  pMatrix;
-uniform vec4  positiveContour;
-uniform vec4  negativeContour;
-//uniform float gsize = 5.0;      // size of the grid
-//uniform float gwidth = 1.0;     // grid lines' width in pixels
-//varying float   f = min(abs(fract(P.z * gsize)-0.5), 0.2);
-
-void main()
-{
-  P = gl_Vertex;
-  C = gl_Color;
-//  gl_Position = vec4(gl_Vertex.x, gl_Vertex.y, 0.0, 1.0);
-//  vec4 glVect = pMatrix * mvMatrix * vec4(P, 1.0);
-//  gl_Position = vec4(glVect.x, glVect.y, 0.0, 1.0);
-  gl_Position = pMatrix * mvMatrix * vec4(P.xy, 0.0, 1.0);
-}
-"""
-
-    self._fragmentShader2 = """
-#version 120
-
-//  uniform float gsize = 50.0;       // size of the grid
-uniform float gwidth = 0.5;       // grid lines' width in pixels
-uniform float mi = 0.0;           // mi=max(0.0,gwidth-1.0)
-uniform float ma = 1.0;           // ma=max(1.0,gwidth);
-varying vec4 P;
-varying vec4 C;
-
-void main()
-{
-//  vec3 f  = abs(fract (P * gsize)-0.5);
-//  vec3 df = fwidth(P * gsize);
-//  float mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);//should be uniforms
-//  vec3 g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);//max(0.0,1.0-gwidth) should also be sent as uniform
-//  float c = g.x * g.y * g.z;
-//  gl_FragColor = vec4(c, c, c, 1.0);
-//  gl_FragColor = gl_FragColor * gl_Color;
-
-  float   f = min(abs(fract(P.z)-0.5), 0.2);
-  float   df = fwidth(P.z);
-//  float   mi=max(0.0,gwidth-1.0), ma=max(1.0,gwidth);                 //  should be uniforms
-  float   g=clamp((f-df*mi)/(df*(ma-mi)),max(0.0,1.0-gwidth),1.0);      //  max(0.0,1.0-gwidth) should also be sent as uniform
-//  float   g=clamp((f-df*mi), 0.0, df*(ma-mi));  //  max(0.0,1.0-gwidth) should also be sent as uniform
-
-//  g = g/(df*(ma-mi));
-//  float   cAlpha = 1.0-(g*g);
-//  if (cAlpha < 0.25)            //  this actually causes branches in the shader - bad
-//    discard;
-//  gl_FragColor = vec4(0.8-g, 0.3, 0.4-g, 1.0-(g*g));
-  gl_FragColor = vec4(P.w, P.w, P.w, 1.0-(g*g));
-}
-"""
-
-    self._vertexShader3 = """
-    #version 120
-
-    uniform mat4 u_projTrans;
-
-    attribute vec4 a_position;
-    attribute vec2 a_texCoord0;
-    attribute vec4 a_color;
-
-    varying vec4 v_color;
-    varying vec2 v_texCoord;
-
-    void main() {
-      gl_Position = u_projTrans * a_position;
-      v_texCoord = a_texCoord0;
-      v_color = a_color;
-    }
-    """
-
-    self._fragmentShader3 = """
-    #version 120
-
-    #ifdef GL_ES
-    precision mediump float;
-    #endif
-
-    uniform sampler2D u_texture;
-
-    varying vec4 v_color;
-    varying vec2 v_texCoord;
-
-    const float smoothing = 1.0/16.0;
-
-    void main() {
-      float distance = texture2D(u_texture, v_texCoord).a;
-      float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
-      gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
-    }
-    """
-
     GL = self.context().versionFunctions()
     GL.initializeOpenGLFunctions()
     self._GLVersion = GL.glGetString(GL.GL_VERSION)
+
+    # initialise a common to all OpenGL windows
+    self.globalGL = GLGlobalData(parent=self, strip=self._parent)
 
     self._devicePixelRatio = QApplication.instance().devicePixelRatio()
 
@@ -1341,10 +1378,6 @@ void main()
     self._GLIntegralLists = {}
     self._externalRegions = GLIntegralArray(GLContext=self, spectrumView=None, integralListView=None)
     self._infiniteLines = []
-
-    from ccpn.framework.PathsAndUrls import fontsPath
-    self.glSmallFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallFont.fnt'), activeTexture=0)
-    self.glSmallTransparentFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallTransparentFont.fnt'), fontTransparency=0.5, activeTexture=1)
 
     self._buildTextFlag = True
 
@@ -1388,31 +1421,6 @@ void main()
     self._stackingValue = None
     self._hTraceVisible = False
     self._vTraceVisible = False
-
-    self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
-                                        fragment=self._fragmentShader1,
-                                        attributes={'pMatrix':(16, np.float32),
-                                                      'mvMatrix':(16, np.float32),
-                                                      'parameterList':(4, np.int32),
-                                                      'background':(4, np.float32)})
-    self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2,
-                                        fragment=self._fragmentShader2,
-                                        attributes={'pMatrix':(16, np.float32),
-                                                      'mvMatrix':(16, np.float32),
-                                                      'positiveContours':(4, np.float32),
-                                                      'negativeContours':(4, np.float32)})
-    self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3,
-                                        fragment=self._fragmentShader3,
-                                        attributes={'pMatrix':(16, np.float32),
-                                                      'mvMatrix':(16, np.float32)})
-    self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex,
-                                        fragment=self._fragmentShaderTex,
-                                        attributes={'pMatrix':(16, np.float32),
-                                                      'mvMatrix':(16, np.float32),
-                                                      'axisScale':(4, np.float32),
-                                                      'background':(4, np.float32),
-                                                      'viewport':(4, np.float32),
-                                                      'texture':(1, np.uint)})
 
     self._uPMatrix = np.zeros((16,), dtype=np.float32)
     self._uMVMatrix = np.zeros((16,), dtype=np.float32)
@@ -1485,10 +1493,10 @@ void main()
     # define the full viewport
     self.viewports.addViewport(FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
 
-    self._lockStringFalse = GLString(text='Lock', font=self.glSmallFont, x=0, y=0, color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
-    self._lockStringTrue = GLString(text='Lock', font=self.glSmallFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
+    self._lockStringFalse = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0, color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
+    self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
 
-    self.stripIDString = GLString(text='', font=self.glSmallFont, x=0, y=0, GLContext=self, object=None)
+    self.stripIDString = GLString(text='', font=self.globalGL.glSmallFont, x=0, y=0, GLContext=self, object=None)
 
     # This is the correct blend function to ignore stray surface blending functions
     GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
@@ -1518,10 +1526,10 @@ void main()
     GL.glClearColor(*col)
     self._background[0:4] = col
 
-    self._shaderProgram1.makeCurrent()
-    self._shaderProgram1.setBackground(self._background)
-    self._shaderProgramTex.makeCurrent()
-    self._shaderProgramTex.setBackground(self._background)
+    self.globalGL._shaderProgram1.makeCurrent()
+    self.globalGL._shaderProgram1.setBackground(self._background)
+    self.globalGL._shaderProgramTex.makeCurrent()
+    self.globalGL._shaderProgramTex.setBackground(self._background)
 
   def mapMouseToAxis(self, pnt):
     if isinstance(pnt, QPoint):
@@ -1917,7 +1925,7 @@ void main()
     if self.stripIDString:
       vertices = self.stripIDString.numVertices
       offsets = [self.axisL+(10.0*self.pixelX)
-                 , self.axisT-(1.5*self.glSmallFont.height*self.pixelY)]
+                 , self.axisT-(1.5*self.globalGL.glSmallFont.height*self.pixelY)]
       for pp in range(0, 2*vertices, 2):
         self.stripIDString.attribs[pp:pp+2] = offsets
 
@@ -2499,7 +2507,7 @@ void main()
 
         index += np2 + 5
         drawList.numVertices += np2 + 5
-  
+
   def _buildPeakLists(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
 
@@ -2928,7 +2936,7 @@ void main()
 
       # TODO:ED check axisCodes and ordering
       stringList.append(GLString(text=text,
-                                  font=self.glSmallFont if _isInPlane else self.glSmallTransparentFont,
+                                  font=self.globalGL.glSmallFont if _isInPlane else self.globalGL.glSmallTransparentFont,
                                   x=p0[0], y=p0[1],
                                   ox=r, oy=w,
                                   # x=self._screenZero[0], y=self._screenZero[1]
@@ -3079,8 +3087,8 @@ void main()
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
     # GL.glEnable(GL.GL_TEXTURE_2D)
-    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.glSmallFont.textureId)
-    # GL.glListBase( self.glSmallFont.base )
+    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
+    # GL.glListBase( self.globalGL.glSmallFont.base )
     # GL.glCallList(drawList[0])        # temporarily call the drawing of the text
     # GL.glDisable(GL.GL_TEXTURE_2D)
 
@@ -3107,7 +3115,7 @@ void main()
     if self._blankDisplay:
       return
 
-    currentShader = self._shaderProgram1.makeCurrent()
+    currentShader = self.globalGL._shaderProgram1.makeCurrent()
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                     self.axisT, -1.0, 1.0)
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
@@ -3126,7 +3134,7 @@ void main()
     # draw the phase plots of the mouse is in the current window
 
     # change to the text shader
-    currentShader = self._shaderProgramTex.makeCurrent()
+    currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
     currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
@@ -3138,7 +3146,7 @@ void main()
     self.drawPeakListLabels()
     self.drawMarksAxisCodes()
 
-    currentShader = self._shaderProgram1.makeCurrent()
+    currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
     self.drawSelectionBox()
     self.drawMouseMoveLine()
@@ -3153,7 +3161,7 @@ void main()
 
     self.drawInfiniteLines()
 
-    currentShader = self._shaderProgramTex.makeCurrent()
+    currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
     if self._parent.crosshairVisible:
       self.drawMouseCoords()
@@ -3163,7 +3171,7 @@ void main()
     self.disableTexture()
 
     # use the current viewport matrix to display the last bit of the axes
-    currentShader = self._shaderProgram1.makeCurrent()
+    currentShader = self.globalGL._shaderProgram1.makeCurrent()
     currentShader.setProjectionAxes(self._uVMatrix, 0, w-self.AXIS_MARGINRIGHT, -1, h-self.AXIS_MARGINBOTTOM, -1.0, 1.0)
 
     self.viewports.setViewport(self._currentView)
@@ -3193,12 +3201,12 @@ void main()
   def enableTexture(self):
     GL.glEnable(GL.GL_BLEND)
     # GL.glEnable(GL.GL_TEXTURE_2D)
-    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.glSmallFont.textureId)
+    # GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
 
     GL.glActiveTexture(GL.GL_TEXTURE0)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, self.glSmallFont.textureId)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
     GL.glActiveTexture(GL.GL_TEXTURE1)
-    GL.glBindTexture(GL.GL_TEXTURE_2D, self.glSmallTransparentFont.textureId)
+    GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallTransparentFont.textureId)
 
     # # specific blend function for text overlay
     # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_DST_COLOR, GL.GL_ONE, GL.GL_ONE)
@@ -3431,7 +3439,7 @@ void main()
 
         if spectrumView.spectrum.dimensionCount > 1:
           if spectrumView in self._spectrumSettings.keys():
-            self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
+            self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
                                                        , 1, GL.GL_FALSE
                                                        , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
@@ -3442,7 +3450,7 @@ void main()
             if self._stackingValue:
 
               # use the stacking matrix to offset the 1D spectra
-              self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
+              self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
                                                          , 1, GL.GL_FALSE
                                                          , self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX])
 
@@ -3453,7 +3461,7 @@ void main()
         #
         #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
-    self._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+    self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
     # draw the bounding boxes
     GL.glEnable(GL.GL_BLEND)
@@ -3562,20 +3570,20 @@ void main()
         axisXText = str(int(axisX)) if axLabel[3] >= 1 else str(axisX)
 
         self._axisXLabelling.append(GLString(text=axisXText
-                                  , font=self.glSmallFont
+                                  , font=self.globalGL.glSmallFont
                                   # , angle=np.pi/2.0
                                   # , x=axisX-(10.0*self.pixelX) #*len(str(axisX)))
                                   # , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE
 
-                                  , x=axisX-(0.4*self.glSmallFont.width*self.pixelX*len(axisXText)) #*len(str(axisX)))
-                                  , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE-self.glSmallFont.height
+                                  , x=axisX-(0.4*self.globalGL.glSmallFont.width*self.pixelX*len(axisXText)) #*len(str(axisX)))
+                                  , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE-self.globalGL.glSmallFont.height
 
                                   , color=labelColour, GLContext=self
                                   , object=None))
 
       # append the axisCode to the end
       self._axisXLabelling.append(GLString(text=self.axisCodes[0]
-                                , font=self.glSmallFont
+                                , font=self.globalGL.glSmallFont
                                 , x=self.axisL+(5*self.pixelX)
                                 , y=self.AXIS_LINE
                                 , color=labelColour, GLContext=self
@@ -3592,7 +3600,7 @@ void main()
           axisYText = str(int(axisY)) if ayLabel[3] >= 1 else str(axisY)
 
         self._axisYLabelling.append(GLString(text=axisYText
-                                  , font=self.glSmallFont
+                                  , font=self.globalGL.glSmallFont
                                   , x=self.AXIS_LINE
                                   , y=axisY-(10.0*self.pixelY)
                                   , color=labelColour, GLContext=self
@@ -3600,9 +3608,9 @@ void main()
 
       # append the axisCode to the end
       self._axisYLabelling.append(GLString(text=self.axisCodes[1]
-                                , font=self.glSmallFont
+                                , font=self.globalGL.glSmallFont
                                 , x=self.AXIS_LINE
-                                , y=self.axisT-(1.5*self.glSmallFont.height*self.pixelY)
+                                , y=self.axisT-(1.5*self.globalGL.glSmallFont.height*self.pixelY)
                                 , color=labelColour, GLContext=self
                                 , object=None))
 
@@ -3616,10 +3624,10 @@ void main()
         # put the axis labels into the bottom bar
         self.viewports.setViewport(self._currentBottomAxisBarView)
         self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
-        self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-        self._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
+        self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+        self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
                                                  self.AXIS_MARGINBOTTOM, -1.0, 1.0)
-        self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         for lb in self._axisXLabelling:
           lb.drawTextArray()
@@ -3628,10 +3636,10 @@ void main()
         # put the axis labels into the right bar
         self.viewports.setViewport(self._currentRightAxisBarView)
         self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
-        self._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-        self._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT
+        self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+        self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT
                                                  , self.axisB, self.axisT, -1.0, 1.0)
-        self._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         for lb in self._axisYLabelling:
           lb.drawTextArray()
@@ -3896,7 +3904,7 @@ void main()
             label = rr.label if rr.label else rr.axisCode
 
             self._marksAxisCodes.append(GLString(text=label,
-                                        font=self.glSmallFont,
+                                        font=self.globalGL.glSmallFont,
                                         x=textX,
                                         y=textY,
                                         color=(colR, colG, colB, 1.0),
@@ -4040,7 +4048,7 @@ void main()
 
     # don't need the above bit
     # if self._testSpectrum.renderMode == GLRENDERMODE_DRAW:
-    #   GL.glUseProgram(self._shaderProgram2.program_id)
+    #   GL.glUseProgram(self.globalGL._shaderProgram2.program_id)
     #
     #   # must be called after glUseProgram
     #   # GL.glUniformMatrix4fv(self.uPMatrix, 1, GL.GL_FALSE, self._uPMatrix)
@@ -4066,8 +4074,8 @@ void main()
     #                            0.0, 0.0, 1.0, 0.0,
     #                            0.0, 0.0, 0.0, 1.0]
     #
-    #   self._shaderProgram2.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-    #   self._shaderProgram2.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
+    #   self.globalGL._shaderProgram2.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+    #   self.globalGL._shaderProgram2.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._uMVMatrix)
     #
     #   self.set2DProjectionFlat()
     #   self._testSpectrum.drawIndexArray()
@@ -4185,9 +4193,9 @@ void main()
 
       # if refresh or self.stripIDLabel != self._oldStripIDLabel:
       self.stripIDString = GLString(text=self.stripIDLabel
-                                  , font=self.glSmallFont
+                                  , font=self.globalGL.glSmallFont
                                   , x=self.axisL+(10.0*self.pixelX)
-                                  , y=self.axisT-(1.5*self.glSmallFont.height*self.pixelY)
+                                  , y=self.axisT-(1.5*self.globalGL.glSmallFont.height*self.pixelY)
                                   # self._screenZero[0], y=self._screenZero[1]
                                   , color=colour, GLContext=self
                                   , object=None)
@@ -4296,7 +4304,7 @@ void main()
   def gridVisible(self):
     return self._gridVisible
 
-  @gridVisible.setter  
+  @gridVisible.setter
   def gridVisible(self, visible):
     self._gridVisible = visible
     self.update()
@@ -4376,7 +4384,7 @@ void main()
                                       , self._axisOrder[1], self.cursorCoordinate[1])
 
       self.mouseString = GLString(text=newCoords,
-                                  font=self.glSmallFont,
+                                  font=self.globalGL.glSmallFont,
                                   x=self.cursorCoordinate[0],
                                   y=self.cursorCoordinate[1],
                                   color=self.foreground, GLContext=self,
@@ -4390,9 +4398,9 @@ void main()
                                                                    self._startCoordinate[1]))
 
         self.diffMouseString = GLString(text=diffCoords,
-                                    font=self.glSmallFont,
+                                    font=self.globalGL.glSmallFont,
                                     x=self.cursorCoordinate[0],
-                                    y=self.cursorCoordinate[1] - (self.glSmallFont.height*2.0*self.pixelY),
+                                    y=self.cursorCoordinate[1] - (self.globalGL.glSmallFont.height*2.0*self.pixelY),
                                     color=self.foreground, GLContext=self,
                                     object=None)
 
@@ -5013,7 +5021,7 @@ void main()
   #     radius = min(self.width(), self.height()) * (0.0125 + 0.0875 * random.random())
   #     velocity = QPointF(self.width() * 0.0125 * (-0.5 + random.random()),
   #                        self.height() * 0.0125 * (-0.5 + random.random()))
-  # 
+  #
   #     self.bubbles.append(Bubble(position, radius, velocity))
 
   def setupViewport(self, width, height):
@@ -6872,7 +6880,7 @@ class GLString(GLVertexArray):
           # for vt in self.vertices:
           #   vt[1] = vt[1] + font.height
           self.vertices[:, 1] += font.height
-          
+
         elif (c == 9):                                # tab
           penX = penX + 4 * font.width
 
@@ -6928,7 +6936,7 @@ class GLString(GLVertexArray):
     # GL.glActiveTexture(GL.GL_TEXTURE0)
     # GL.glBindTexture(GL.GL_TEXTURE_2D, self.font.textureId)
 
-    self._GLContext._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
+    self._GLContext.globalGL._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
 
     super(GLString, self).drawTextArray()
 

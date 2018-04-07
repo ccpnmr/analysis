@@ -30,7 +30,7 @@ def _addRow(grid):
 
 def _addVerticalSpacer(layout, grid):
     grid = _addRow(grid)
-    Spacer(layout, 0, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed, grid=grid, gridSpan=(1, 1))
+    Spacer(layout, 0, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed, grid=grid, gridSpan=(1, 1))
     grid = _addRow(grid)
     return grid
 

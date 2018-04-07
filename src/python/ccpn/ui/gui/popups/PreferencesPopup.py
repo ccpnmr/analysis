@@ -242,7 +242,7 @@ class PreferencesPopup(CcpnDialog):
 
     # row += 1
     Spacer(parent, row, 1
-           , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+           , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
            , grid=(row , 0), gridSpan=(row, 1))
 
   def _setspectrumTabWidgets(self, parent):
@@ -312,7 +312,7 @@ class PreferencesPopup(CcpnDialog):
 
     # row += 1
     # Spacer(parent, row, 1
-    #        , QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding
+    #        , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
     #        , grid=(row , 0), gridSpan=(row, 1))
 
     # row += 1

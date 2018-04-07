@@ -89,7 +89,8 @@ def __ltForTableWidgetItem__(self, other):
 
 def __sortByColumn__(self, col, newOrder):
   try:
-    QtWidgets.QTableWidget.sortByColumn(self, col, newOrder)
+    # QtWidgets.QTableWidget.sortByColumn(self, col, newOrder)
+    super(QtWidgets.QTableWidget, self).sortByColumn(col, newOrder)
   except Exception as es:
     print (str(es))
   print('>>>sorting')
@@ -220,8 +221,10 @@ QuickTable::item::selected {
     self.setDropIndicatorShown(True)
 
     # set Interactive and last column to expanding
-    self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+    self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
     self.horizontalHeader().setStretchLastSection(stretchLastSection)
+    self.horizontalHeader().setResizeContentsPrecision(0)
+    self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
 
     # enable the right click menu
     self.searchWidget = None
@@ -252,7 +255,10 @@ QuickTable::item::selected {
     # set the callback for changing selection on table
     model = self.selectionModel()
     model.selectionChanged.connect(self._selectionTableCallback)
+
     # self.horizontalHeader().sortIndicatorChanged.connect(self._sortChanged)
+    # self.horizontalHeader().sectionPressed.connect(self._preSort)
+    self.horizontalHeader().sectionClicked.connect(self._postSort)
 
     # set internal flags
     self._mousePressed = False
@@ -277,7 +283,38 @@ QuickTable::item::selected {
     self._newSorted = False
 
     TableWidgetItem.__lt__ = __ltForTableWidgetItem__
+
     # TableWidget.sortByColumn = __sortByColumn__   #MethodType(__sortByColumn__, TableWidget)
+
+  def _preSort(self, *args):
+    """
+    catch the press event on a header
+    """
+    # header = self.horizontalHeader()
+    # print ([header.columnSpan(0, col) for col in range(header.count())])
+    pass
+
+  def _postSort(self, *args):
+    """
+    catch the click event on a header
+    """
+    self.resizeColumnsToContents()
+
+  #   self.horizontalHeader().installEventFilter(self.horizontalHeader())
+  #
+  # def eventFilter(self, obj, event):
+  #   """
+  #   Replace all the events with a single filter process
+  #   Not sure if this is the best solution, but doesn't interfere with _processDroppedItems
+  #   and allows changing of the cursor - ejb
+  #   """
+  #   if event.type() == QtCore.QEvent.MouseButtonPress:
+  #     print ('>>>press')
+  #
+  #   elif event.type() == QtCore.QEvent.MouseButtonRelease:
+  #     print ('>>>release')
+  #
+  #   return False
 
   # def resizeEvent(self, event):
   #   """ Resize all sections to content and user interactive """
@@ -341,15 +378,13 @@ QuickTable::item::selected {
       self.itemClicked.connect(self._cellClicked)
 
   def _handleDroppedItems(self, pids, objType, pulldown):
-    '''
-
+    """
     :param pids: the selected objects pids
     :param objType: the instance of the obj to handle. Eg. PeakList
     :param pulldown: the pulldown of the module wich updates the table
     :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
     If multiple different obj instances, then asks first.
-    '''
-
+    """
     from ccpn.ui.gui.widgets.SideBar import _openItemObject
     objs = [self.project.getByPid(pid) for pid in pids]
 
@@ -743,12 +778,13 @@ QuickTable::item::selected {
 
     self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
     self.showColumns(self._dataFrameObject)
-    self.resizeColumnsToContents()
+    # self.resizeColumnsToContents()
     self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
     self.setColumnCount(self._dataFrameObject.numColumns)
 
     self.show()
     self._silenceCallback = False
+    self.resizeColumnsToContents()
     # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
   # def resizeColumnsToContents(self):
@@ -781,7 +817,7 @@ QuickTable::item::selected {
     try:
       self.hide()
       self._silenceCallback = True
-      self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+      # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
       # self.setData(dataFrameObject.dataFrame.values)
       yield
@@ -802,7 +838,8 @@ QuickTable::item::selected {
 
       self.show()
       self._silenceCallback = False
-      self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+      self.resizeColumnsToContents()
+      # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
   def setTableFromDataFrameObject(self, dataFrameObject):
     # populate the table from the the Pandas dataFrame
@@ -825,7 +862,7 @@ QuickTable::item::selected {
     sortColumn = self.horizontalHeader().sortIndicatorSection()
 
     if not dataFrameObject.dataFrame.empty:
-      self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+      # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
       self.setData(dataFrameObject.dataFrame.values)
       # needed after setting the column headings
@@ -845,7 +882,8 @@ QuickTable::item::selected {
 
     self.show()
     self._silenceCallback = False
-    self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+    # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+    self.resizeColumnsToContents()
 
   def getDataFrameFromList(self, table=None
                            , buildList=None
@@ -1164,6 +1202,7 @@ QuickTable::item::selected {
 
     self.show()
     self._silenceCallback = False
+    self.resizeColumnsToContents()
     # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
   def clearTableContents(self):
@@ -1180,7 +1219,7 @@ QuickTable::item::selected {
 
       self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
       self.showColumns(self._dataFrameObject)
-      self.resizeColumnsToContents()
+      # self.resizeColumnsToContents()
       self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
 
       # required to make the header visible

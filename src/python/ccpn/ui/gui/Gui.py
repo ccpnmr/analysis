@@ -140,7 +140,7 @@ class Gui(Ui):
     project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
                                 'ccp.nmr.Nmr.AbstractPeakDimContrib', 'delete')
 
-    from ccpn.ui.gui.lib import SpectrumDisplayNd
+    from ccpn.ui.gui.modules import SpectrumDisplayNd
     project._registerApiNotifier(SpectrumDisplayNd._changedBoundDisplayAxisOrdering,
                                  SpectrumDisplayNd.ApiBoundDisplay, 'axisOrder')
 
@@ -338,7 +338,7 @@ Mark = _coreClassMap['Mark']
 
 ## SpectrumDisplay class
 coreClass = _coreClassMap['SpectrumDisplay']
-from ccpn.ui.gui.lib.SpectrumDisplay1d import SpectrumDisplay1d as _SpectrumDisplay1d
+from ccpn.ui.gui.modules.SpectrumDisplay1d import SpectrumDisplay1d as _SpectrumDisplay1d
 #TODO:RASMUS: also change for this class as done for the Nd variant below; this involves
 #chaning the init signature of the SpectrumDisplay1d and passing the parameters along to
 # GuiSpectrumDisplay
@@ -363,7 +363,7 @@ class StripDisplay1d(coreClass, _SpectrumDisplay1d):
                                                           , relativeTo=self.application.ui.mainWindow.moduleArea)
 
 
-from ccpn.ui.gui.lib.SpectrumDisplayNd import SpectrumDisplayNd as _SpectrumDisplayNd
+from ccpn.ui.gui.modules.SpectrumDisplayNd import SpectrumDisplayNd as _SpectrumDisplayNd
 #TODO:RASMUS Need to check on the consequences of hiding name from the wrapper
 # NB: GWV had to comment out the name property to make it work
 # conflicts existed between the 'name' and 'window' attributes of the two classes

@@ -26,7 +26,15 @@ __date__ = "$Date$"
 import sys
 import numpy as np
 from PyQt5 import QtWidgets
-
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_FOREGROUND, getColours
+from ccpn.util.Colour import getAutoColourRgbRatio
+from ccpn.core.PeakList import PeakList
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLPeakListArray, GLVertexArray, GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE,\
+                                  GLRENDERMODE_REBUILD, GLREFRESHMODE_REBUILD,\
+                                  LENCOLORS, LENPID
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
+from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation
+import ccpn.util.Phasing as Phasing
 try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -34,14 +42,6 @@ except ImportError:
     QtWidgets.QMessageBox.critical(None, "OpenGL hellogl",
             "PyOpenGL must be installed to run this example.")
     sys.exit(1)
-
-from ccpn.core.PeakList import PeakList
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLPeakListArray, GLVertexArray, GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE,\
-                                  GLRENDERMODE_REBUILD, GLREFRESHMODE_REBUILD,\
-                                  LENCOLORS, LENPID
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
-from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
-import ccpn.util.Phasing as Phasing
 
 REGION_COLOURS = {
   'green': (0, 1.0, 0.1, 0.15),
@@ -104,12 +104,7 @@ class Gui1dWidget(CcpnGLWidget):
     if symbolType is not None:
       # for peak in pls.peaks:
 
-      listColour = peakListView.peakList.symbolColour
-      if listColour == '#':
-        listColour = getattr(peakListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR)
-      listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
-      listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
-      listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+      listCol = getAutoColourRgbRatio(peakListView.peakList.symbolColour, peakListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
       for pp in range(0, len(drawList.pids), LENPID):
 
@@ -123,19 +118,20 @@ class Gui1dWidget(CcpnGLWidget):
           if self._isSelected(peak):
           # if hasattr(peak, '_isSelected') and peak._isSelected:
             _isSelected = True
-            colR, colG, colB = self.highlightColour[:3]
+            cols = self.highlightColour[:3]
             drawList.indices = np.append(drawList.indices, np.array([index, index+1, index+2, index+3,
                                                                     index, index+2, index+2, index+1,
                                                                     index, index+3, index+3, index+1], dtype=np.uint))
           else:
             # colour = peak.peakList.symbolColour
-            colR = listColR   #int(colour.strip('# ')[0:2], 16) / 255.0
-            colG = listColG   #int(colour.strip('# ')[2:4], 16) / 255.0
-            colB = listColB   #int(colour.strip('# ')[4:6], 16) / 255.0
+            cols = listCol
+            # colR = listColR   #int(colour.strip('# ')[0:2], 16) / 255.0
+            # colG = listColG   #int(colour.strip('# ')[2:4], 16) / 255.0
+            # colB = listColB   #int(colour.strip('# ')[4:6], 16) / 255.0
 
             drawList.indices = np.append(drawList.indices,
                                          np.array([index, index+1, index+2, index+3], dtype=np.uint))
-          drawList.colors[offset*4:(offset+numPoints)*4] = [colR, colG, colB, 1.0] * numPoints
+          drawList.colors[offset*4:(offset+numPoints)*4] = [*cols, 1.0] * numPoints
 
           drawList.pids[pp+3:pp+8] = [True, True, _isSelected,
                                       indexPtr, len(drawList.indices)]
@@ -214,13 +210,7 @@ class Gui1dWidget(CcpnGLWidget):
       # for pls in spectrum.peakLists:
 
       pls = peakListView.peakList
-
-      listColour = pls.symbolColour
-      if listColour == '#':
-        listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
-      listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
-      listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
-      listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+      listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
       for peak in pls.peaks:
 
@@ -237,12 +227,13 @@ class Gui1dWidget(CcpnGLWidget):
 
         if self._isSelected(peak):
         # if hasattr(peak, '_isSelected') and peak._isSelected:
-          colR, colG, colB = self.highlightColour[:3]
+          cols = self.highlightColour[:3]
         else:
           # colour = pls.symbolColour
-          colR = listColR   # int(colour.strip('# ')[0:2], 16)/255.0
-          colG = listColG   # int(colour.strip('# ')[2:4], 16)/255.0
-          colB = listColB   # int(colour.strip('# ')[4:6], 16)/255.0
+          cols = listCol
+          # colR = listColR   # int(colour.strip('# ')[0:2], 16)/255.0
+          # colG = listColG   # int(colour.strip('# ')[2:4], 16)/255.0
+          # colB = listColB   # int(colour.strip('# ')[4:6], 16)/255.0
 
         # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2            #len(self.axisOrder)
@@ -280,7 +271,7 @@ class Gui1dWidget(CcpnGLWidget):
                                                             , p0[0]+r, p0[1]+w
                                                             , p0[0]+r, p0[1]-w
                                                             , p0[0]-r, p0[1]+w])
-          drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * LENCOLORS)
+          drawList.colors = np.append(drawList.colors, [*cols, 1.0] * LENCOLORS)
           drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
                                                           ,p0[0], p0[1]
                                                           ,p0[0], p0[1]
@@ -378,13 +369,7 @@ class Gui1dWidget(CcpnGLWidget):
 
     pls = peakListView.peakList
     spectrumFrequency = spectrum.spectrometerFrequencies
-
-    listColour = pls.symbolColour
-    if listColour == '#':
-      listColour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
-    listColR = int(listColour.strip('# ')[0:2], 16) / 255.0
-    listColG = int(listColour.strip('# ')[2:4], 16) / 255.0
-    listColB = int(listColour.strip('# ')[4:6], 16) / 255.0
+    listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
     # TODO:ED display the required peaks - possibly build all then on draw selected later
     strip = spectrumView.strip
@@ -399,12 +384,13 @@ class Gui1dWidget(CcpnGLWidget):
 
     if self._isSelected(peak):
     # if hasattr(peak, '_isSelected') and peak._isSelected:
-      colR, colG, colB = self.highlightColour[:3]
+      cols = self.highlightColour[:3]
     else:
       # colour = pls.symbolColour
-      colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
-      colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
-      colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
+      cols = listCol
+      # colR = listColR  # int(colour.strip('# ')[0:2], 16)/255.0
+      # colG = listColG  # int(colour.strip('# ')[2:4], 16)/255.0
+      # colB = listColB  # int(colour.strip('# ')[4:6], 16)/255.0
 
     # get the correct coordinates based on the axisCodes
     p0 = [0.0] * 2  # len(self.axisOrder)
@@ -441,7 +427,7 @@ class Gui1dWidget(CcpnGLWidget):
                                                       , p0[0] + r, p0[1] + w
                                                       , p0[0] + r, p0[1] - w
                                                       , p0[0] - r, p0[1] + w])
-      drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 4)
+      drawList.colors = np.append(drawList.colors, [*cols, 1.0] * 4)
       drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
                                                       , p0[0], p0[1]
                                                       , p0[0], p0[1]
@@ -549,15 +535,9 @@ class Gui1dWidget(CcpnGLWidget):
       #   return
 
     if self._isSelected(peak):
-    # if hasattr(peak, '_isSelected') and peak._isSelected:
-      colR, colG, colB = self.highlightColour[:3]
+      listCol = self.highlightColour[:3]
     else:
-      colour = pls.textColour
-      if colour == '#':
-        colour = getattr(pls.spectrum, self.SPECTRUMPOSCOLOUR)
-      colR = int(colour.strip('# ')[0:2], 16) / 255.0
-      colG = int(colour.strip('# ')[2:4], 16) / 255.0
-      colB = int(colour.strip('# ')[4:6], 16) / 255.0
+      listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
     if self._parent.peakLabelling == 0:
       text = _getScreenPeakAnnotation(peak, useShortCode=True)
@@ -575,7 +555,7 @@ class Gui1dWidget(CcpnGLWidget):
                                 x=p0[0], y=p0[1],
                                 ox=symbolWidth, oy=symbolWidth,
                                 # x=self._screenZero[0], y=self._screenZero[1]
-                                color=(colR, colG, colB, 1.0), GLContext=self,
+                                color=(*listCol, 1.0), GLContext=self,
                                 obj=peak))
 
   def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):

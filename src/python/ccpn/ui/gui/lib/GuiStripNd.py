@@ -612,7 +612,7 @@ class GuiStripNd(GuiStrip):
 
   def _setZWidgets(self):
     """
-    # CCPN INTERNAL - called in _changedBoundDisplayAxisOrdering function of GuiStripDisplayNd.py
+    # CCPN INTERNAL - called in _changedBoundDisplayAxisOrdering function of SpectrumDisplayNd.py
     Sets values for the widgets in the plane toolbar.
     """
 

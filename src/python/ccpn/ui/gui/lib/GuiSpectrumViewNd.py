@@ -41,7 +41,7 @@ from ccpn.util import Phasing
 
 from ccpnc.contour import Contourer2d
 
-#from ccpn.ui.gui.modules import GuiStripDisplayNd
+#from ccpn.ui.gui.modules import SpectrumDisplayNd
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 ###from ccpn.ui.gui.widgets.ToolButton import ToolButton
 ###from ccpnc.peak import Peak

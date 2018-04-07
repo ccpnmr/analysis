@@ -391,7 +391,7 @@ class StructureFromRestraintsGuiPlugin(PluginModule):
         widget = ButtonList(parent=self.scrollAreaLayout, texts=texts, callbacks=callbacks, tipTexts=tipTexts, grid=grid, gridSpan=(1,5))
         _setWidgetProperties(widget,heightType='Minimum')
 
-        Spacer(self.scrollAreaLayout, 5, 5, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding,
+        Spacer(self.scrollAreaLayout, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(grid[0]+1, 10),
                gridSpan=(1, 1))
 

@@ -89,7 +89,7 @@ class QuickTableFilter(Frame):
     self.widgetLayout.setContentsMargins(0,0,0,0)
     self.setContentsMargins(0,0,0,0)
 
-    self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Minimum)
+    self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
 
   def setColumnOptions(self):
     # columns = self.table._dataFrameObject.columns

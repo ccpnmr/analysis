@@ -62,8 +62,9 @@ from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Icon import Icon
-
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 import random
+
 
 def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues, belowThresholdResidues,
                                       missingdResidues, colourMissing, colourAboveThreshold,
@@ -98,7 +99,7 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
 DefaultThreshould = 0.1
 PymolScriptName = 'chemicalShiftMapping_Pymol_Template.py'
 
-MORE, LESS = 'More', 'Less'
+MORE, LESS = 'More', 'Fewer'
 PreferredNmrAtoms = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
 
 
@@ -384,7 +385,8 @@ class ChemicalShiftsMapping(CcpnModule):
     otherAvailable = False
     i = 0
     availableNmrAtoms = self._availableNmrAtoms()
-    line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
+    # line = HLine(self.nmrAtomsFrame,  style='DashLine',  height=1, grid=(i, 1))
+    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
     i += 1
     for name, value in DefaultAtomWeights.items():
       atomFrame = Frame(self.nmrAtomsFrame, setLayout=True, grid=(i, 1))
@@ -472,7 +474,8 @@ class ChemicalShiftsMapping(CcpnModule):
 
         atomFrame.hide()
 
-    line = HLine(self.nmrAtomsFrame, style='DashLine', height=1, grid=(i, 1))
+    # line = HLine(self.nmrAtomsFrame, style='DashLine', height=1, grid=(i, 1))
+    line = HLine(self.nmrAtomsFrame, grid=(i, 1), colour=getColours()[DIVIDER], height=10)
 
   def _addOtherNmrAtomsAvailable(self, availableNmrAtoms):
     '''Adds more nmr atoms if not in the default atoms'''

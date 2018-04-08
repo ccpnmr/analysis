@@ -320,6 +320,9 @@ class CcpnGLWidget(QOpenGLWidget):
       self.pixelX = (self.axisR - self.axisL) / w
       self.pixelY = (self.axisT - self.axisB) / h
 
+    # self.pixelX = max(1.0e-6, abs(self.pixelX)) * self.sign(self.pixelX)
+    # self.pixelY = max(1.0e-6, abs(self.pixelY)) * self.sign(self.pixelY)
+
     x = abs(self.pixelX)
     y = abs(self.pixelY)
     if x <= y:
@@ -329,10 +332,6 @@ class CcpnGLWidget(QOpenGLWidget):
       self.boxHeight = symbolWidth
       self.boxWidth = symbolWidth * x / y
 
-    # self._uMVMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-    #                         0.0, 1.0, 0.0, 0.0,
-    #                         0.0, 0.0, 1.0, 0.0,
-    #                         0.0, 0.0, 0.0, 1.0]     # set to identity matrix
     currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
     # map mouse coordinates to world coordinates - only needs to change on resize, move soon
@@ -342,7 +341,10 @@ class CcpnGLWidget(QOpenGLWidget):
     self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))     # projection
     # self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))   # modelView
     self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))     # viewport
-    self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
+    try:
+      self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
+    except Exception as es:
+      pass
 
     self.modelViewMatrix = (GL.GLdouble * 16)()
     self.projectionMatrix = (GL.GLdouble * 16)()
@@ -1274,6 +1276,12 @@ class CcpnGLWidget(QOpenGLWidget):
     self._clearAndUpdate()
 
   def mouseMoveEvent(self, event):
+    if not self._parent.spectrumViews:
+      return
+
+    if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
+      return
+
     self.setFocus()
     dx = event.pos().x() - self.lastPos.x()
     dy = event.pos().y() - self.lastPos.y()

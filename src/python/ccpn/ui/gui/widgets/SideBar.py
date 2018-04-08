@@ -70,7 +70,7 @@ from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 # from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-
+from ccpn.core.lib.Notifiers import Notifier
 
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
@@ -412,6 +412,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     Sets the specified project as a class attribute so it can be accessed from elsewhere
     """
     self.project = project
+    self._registerNotifiers()
 
     # TODO:ED use return to disable sidebar notifiers
     return
@@ -431,6 +432,67 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     project.duplicateNotifier('SpectrumGroup', 'create', notifier)
     project.duplicateNotifier('SpectrumGroup', 'delete', notifier)
     # TODO:RASMUS Add similar set of notifiers, and similar function for Complex/Chain
+
+  def _registerNotifiers(self):
+    self._notifierList = []
+
+    # Register notifiers to maintain sidebar
+    for cls in classesInSideBar.values():
+      className = cls.className
+      # self._notifierList.append(self.project.registerNotifier(className, 'delete', self._removeItem, onceOnly=True))
+      self._notifierList.append(Notifier(self.project,
+                                        [Notifier.DELETE],
+                                        className,
+                                        self._removeItem,
+                                        onceOnly=True))
+
+      if className != 'NmrResidue':
+        # self._notifierList.append(self.project.registerNotifier(className, 'create', self._createItem, ))
+        self._notifierList.append(Notifier(self.project,
+                                           [Notifier.CREATE],
+                                           className,
+                                           self._createItem))
+        # self._notifierList.append(self.project.registerNotifier(className, 'rename', self._renameItem, onceOnly=True))
+        self._notifierList.append(Notifier(self.project,
+                                          [Notifier.RENAME],
+                                          className,
+                                          self._renameItem,
+                                          onceOnly=True))
+
+    # self._notifierList.append(self.project.registerNotifier('NmrResidue', 'create', self._refreshParentNmrChain, onceOnly=True))
+    self._notifierList.append(Notifier(self.project,
+                                       [Notifier.CREATE],
+                                       'NmrResidue',
+                                       self._refreshParentNmrChain,
+                                       onceOnly=True))
+    # self._notifierList.append(self.project.registerNotifier('NmrResidue', 'rename', self._renameNmrResidueItem, onceOnly=True))
+    self._notifierList.append(Notifier(self.project,
+                                       [Notifier.RENAME],
+                                       'NmrResidue',
+                                       self._renameNmrResidueItem,
+                                       onceOnly=True))
+
+    # self._notifierList.append(self.project.registerNotifier('SpectrumGroup', 'Spectrum', self._refreshSidebarSpectra,
+    #                                     onceOnly=True))
+    # self._notifierList.append(Notifier(self.project,
+    #                                    'Spectrum',
+    #                                    'SpectrumGroup',
+    #                                    self._refreshSidebarSpectra,
+    #                                    onceOnly=True))
+    # notifier = self._notifierList[-1]
+
+    # self._notifierList.append(self.project.duplicateNotifier('SpectrumGroup', 'create', notifier))
+    # self._notifierList.append(self.project.duplicateNotifier('SpectrumGroup', 'delete', notifier))
+    self._notifierList.append(Notifier(self.project,
+                                       [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE],
+                                       'SpectrumGroup',
+                                       self._refreshSidebarSpectra))
+    # TODO:RASMUS Add similar set of notifiers, and similar function for Complex/Chain
+
+  def _unregisterNotifiers(self):
+    for notifier in self._notifierList:
+      if notifier:
+        notifier.unRegister()
 
   def _refreshSidebarSpectra(self, dummy:Project):
     """Reset spectra in sidebar - to be called from notifiers
@@ -718,6 +780,8 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     self._restoreExpandedState(ll)
 
   def _saveExpandedState(self):
+    self._unregisterNotifiers()
+
     sideBarState = {}
     items = self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive, 0)
     for item in items:
@@ -728,6 +792,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def _restoreExpandedState(self, list):
     # TODO:ED see if this is feasible
     self.fillSideBar(self.project)
+    self._registerNotifiers()
 
     print ('>>>_restore')
     for lItem in list:

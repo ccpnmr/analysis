@@ -640,13 +640,13 @@ class Project(AbstractWrapperObject):
 
   def suspendNotification(self):
     """Suspend notifier execution and accumulate notifiers for later execution"""
-    # return
+    return
     # TODO suspension temporarily disabled
     self._notificationSuspension += 1
 
   def resumeNotification(self):
     """Execute accumulated notifiers and resume immediate notifier execution"""
-    # return
+    return
     # TODO suspension temporarily disabled
     # This was broken at one point, and we never found time to fix it
     # It is a time-saving measure, allowing you to e.g. execute a

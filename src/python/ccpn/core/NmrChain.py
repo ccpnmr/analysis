@@ -252,6 +252,9 @@ class NmrChain(AbstractWrapperObject):
     self._startCommandEchoBlock('assignConnectedResidues', firstResidue)
     try:
 
+      # TODO:ED could check if the nmrChain exists and create if not
+      label = firstResidue.chain.shortName
+      tempChain = self.project.fetchNmrChain(label)
       for ii,res in enumerate(residues):
         apiStretch[ii].assignedResidue = res._wrappedData
       apiNmrChain.delete()

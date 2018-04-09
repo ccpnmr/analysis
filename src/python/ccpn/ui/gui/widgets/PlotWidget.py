@@ -317,6 +317,8 @@ class PlotWidget(pg.PlotWidget):
        Called from a notifier in GuiStrip
        Puts axis code labels in the correct place on the PlotWidget
     """
+    return
+
     if not self.strip._finaliseDone: return
     self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
     self.yAxisTextItem.setPos(self.viewBox.boundingRect().topRight())

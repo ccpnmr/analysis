@@ -37,7 +37,7 @@ import sys, os
 
 
 StateDirName = 'state'
-DefaultLayoutFileName = 'v3Layout.json'
+DefaultLayoutFileName = 'Layout.json'
 Warning =  "warning"
 WarningMessage =  "Warning. Any changes in this file will be overwritten when saving a new layout."
 General = "general"

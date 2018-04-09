@@ -36,7 +36,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 #from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
-from contextlib import contextmanager
+from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 #import typing
 
 from ccpn.ui.gui.widgets.Frame import Frame #, ScrollableFrame
@@ -253,15 +253,6 @@ class GuiSpectrumDisplay(CcpnModule):
     # for pid in data.get('pids',[]):
     #   getLogger().debug('dropped:', pid)
 
-  @contextmanager
-  def _guiContextHandler(self):
-    try:
-      self.project._startCommandEchoBlock('HandleDroppedItem', quiet=True)
-      yield
-
-    finally:
-      self.project._endCommandEchoBlock()
-
   def _handlePids(self, pids, strip=None):
     "handle a; return True in case it is a Spectrum or a SpectrumGroup"
     success = False
@@ -280,7 +271,7 @@ class GuiSpectrumDisplay(CcpnModule):
           showWarning('Forbidden drop','A Single spectrum cannot be dropped onto grouped displays.')
           return success
 
-        with self._guiContextHandler():
+        with suspendSideBarNotifications(self.project):
           self.displaySpectrum(obj)
 
         if strip in self.strips:
@@ -295,11 +286,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
         success = True
       elif obj is not None and isinstance(obj, PeakList):
-        with self._guiContextHandler():
+        with suspendSideBarNotifications(self.project):
           self._handlePeakList(obj)
         success = True
       elif obj is not None and isinstance(obj, SpectrumGroup):
-        with self._guiContextHandler():
+        with suspendSideBarNotifications(self.project):
           self._handleSpectrumGroup(obj)
         success = True
       elif obj is not None and isinstance(obj, NmrAtom):
@@ -312,10 +303,10 @@ class GuiSpectrumDisplay(CcpnModule):
         showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, PeakList,'
                                                    ' NmrResidue or NmrAtom')
     if nmrResidues:
-      with self._guiContextHandler():
+      with suspendSideBarNotifications(self.project):
         self._handleNmrResidues(nmrResidues)
     if nmrAtoms:
-      with self._guiContextHandler():
+      with suspendSideBarNotifications(self.project):
         self._handleNmrAtoms(nmrAtoms)
 
     return success

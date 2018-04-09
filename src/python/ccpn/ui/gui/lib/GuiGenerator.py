@@ -3,7 +3,6 @@ from functools import partial
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5 import QtCore
-from PyQt5.QtGui import QWidget
 
 from ccpn.ui.gui.widgets.Frame import Frame
 

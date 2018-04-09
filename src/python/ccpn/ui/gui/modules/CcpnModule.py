@@ -63,7 +63,7 @@ from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
-
+from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget,\
@@ -723,15 +723,6 @@ class CcpnModule(Dock, DropBase):
       if hasattr(src, 'implements') and src.implements('dock'):
         DockDrop.dragEnterEvent(self, *args)
 
-  @contextmanager
-  def _guiContextHandler(self):
-    try:
-      self.project._startCommandEchoBlock('HandleDroppedItem', quiet=True)
-      yield
-
-    finally:
-      self.project._endCommandEchoBlock()
-
   def dropEvent(self, *args):
     self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
     if args:
@@ -742,7 +733,7 @@ class CcpnModule(Dock, DropBase):
         pids = data[DropBase.PIDS]
         objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
 
-        with self._guiContextHandler():
+        with suspendSideBarNotifications(self.mainWindow.project):
           _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
 
         event.accept()

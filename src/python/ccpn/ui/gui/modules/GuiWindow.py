@@ -88,6 +88,8 @@ class GuiWindow():
     QtWidgets.QShortcut(QtGui.QKeySequence("Tab,Tab"), self, self.moveToNextSpectrum, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("Tab, q"), self, self.moveToPreviousSpectrum, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("Tab, a"), self, self.showAllSpectra, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("Tab, z"), self, self.hideAllSpectra, context=context)
+    QtWidgets.QShortcut(QtGui.QKeySequence("Tab, x"), self, self.invertSelectedSpectra, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("m, m"), self, self.switchMouseMode, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("s, e"), self, self.snapCurrentPeaksToExtremum, context=context)
     QtWidgets.QShortcut(QtGui.QKeySequence("z, s"), self, self.storeZoom, context=context)
@@ -426,7 +428,26 @@ class GuiWindow():
     shows all spectra in the spectrum display.
     """
     if self.current.strip:
-      self.current.strip._showAllSpectrumViews()
+      self.current.strip._showAllSpectrumViews(True)
+    else:
+      getLogger().warning('No current strip. Select a strip first.')
+
+  def hideAllSpectra(self):
+    """
+    hides all spectra in the spectrum display.
+    """
+    if self.current.strip:
+      self.current.strip._showAllSpectrumViews(False)
+    else:
+      getLogger().warning('No current strip. Select a strip first.')
+
+
+  def invertSelectedSpectra(self):
+    """
+    invertes the selected spectra in the spectrum display. The toggled in will be hided and the hidden spectra will be displayed.
+    """
+    if self.current.strip:
+      self.current.strip._invertSelectedSpectra()
     else:
       getLogger().warning('No current strip. Select a strip first.')
 

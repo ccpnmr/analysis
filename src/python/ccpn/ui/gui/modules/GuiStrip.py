@@ -1158,7 +1158,7 @@ class GuiStrip(Frame):
     pass  # GWV: poor soultion self.spectrumDisplay._resetRemoveStripAction()
 
   def _moveToNextSpectrumView(self):
-    spectrumViews = self.spectrumViews
+    spectrumViews = self.orderedSpectrumViews()
     countSpvs = len(spectrumViews)
     if countSpvs > 0:
       visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
@@ -1173,12 +1173,12 @@ class GuiStrip(Frame):
             visibleSpectrumView.setVisible(False)
           spectrumViews[0].setVisible(True)
       else:
-        getLogger().warning('Option available if only one spectrum per time is toggled on')
+        spectrumViews[-1].setVisible(True) #starts the loop again if none is selected
     else:
       getLogger().warning('No spectra displayed')
 
   def _moveToPreviousSpectrumView(self):
-    spectrumViews = self.spectrumViews
+    spectrumViews = self.orderedSpectrumViews()
     countSpvs = len(spectrumViews)
     if countSpvs > 0:
       visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
@@ -1188,15 +1188,30 @@ class GuiStrip(Frame):
         for visibleSpectrumView in visibleSpectrumViews:
           visibleSpectrumView.setVisible(False)
         spectrumViews[currentIndex - 1].setVisible(True)
-      # else:
-      #   getLogger().warning('Option available if only one spectrum per time is toggled on')
+      else:
+        spectrumViews[-1].setVisible(True)  # starts the loop again if none is selected
+
     else:
       getLogger().warning('No spectra displayed')
 
-  def _showAllSpectrumViews(self):
-    spectrumViews = self.spectrumViews
+  def _showAllSpectrumViews(self, value:bool=True):
+    spectrumViews = self.orderedSpectrumViews()
     for sp in spectrumViews:
-      sp.setVisible(True)
+      sp.setVisible(value)
+
+  def _invertSelectedSpectra(self):
+    spectrumViews = self.orderedSpectrumViews()
+    countSpvs = len(spectrumViews)
+    if countSpvs > 0:
+
+      visibleSpectrumViews = [i.isVisible() for i in spectrumViews]
+      if any(visibleSpectrumViews):
+        changeState = [i.setVisible(not i.isVisible()) for i in spectrumViews]
+      else:
+        self._showAllSpectrumViews(True)
+
+
+
 
 # Notifiers:
 def _updateDisplayedMarks(data):

@@ -30,7 +30,7 @@ import typing
 from typing import Sequence, Tuple
 import operator
 from collections import OrderedDict
-
+from ccpn.util.Common import _traverse, _getChildren
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.util import Undo
@@ -293,7 +293,15 @@ class Project(AbstractWrapperObject):
       for obj in objs:
         if obj and not obj.isDeleted:
           # If statement in case deleting one obj triggers the deletion of another
+
+          # if the object is a Spectrum then delete peak/integralLists
+          if obj.pid.startswith('SP'):
+            for peakList in obj.peakLists:
+              peakList.delete()
+            for integralList in obj.integralLists:
+              integralList.delete()
           obj.delete()
+
     finally:
       self._endDeleteCommandBlock(*apiObjs)
 

@@ -4803,7 +4803,7 @@ class CcpnGLWidget(QOpenGLWidget):
     for orderedAxis in self._orderedAxes[2:]:
       position.append(orderedAxis.position)
 
-    newPeaks, peakLists = self._parent.peakPickPosition(self.current.mouseMovedDict)
+    newPeaks, peakLists = self._parent.peakPickPosition(position)#self.current.mouseMovedDict)
 
     # should fire peak notifier
     # self.GLSignals.emitEvent(targets=peakLists, triggers=[GLNotifier.GLPEAKLISTS,

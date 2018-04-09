@@ -385,8 +385,13 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         okToContinue = self.mainWindow._queryCloseProject(title='Load %s project' % subType,
                                                           phrase='create a new')
         if okToContinue:
-          with progressManager(self.mainWindow, 'Loading... ' + url):
-            obj = self.application.loadProject(url)
+          with progressManager(self.mainWindow, 'Loading project... ' + url):
+            try:
+              obj = self.application.loadProject(url)
+            except Exception as es:
+              getLogger().warning('loadProject Error: %s' % str(es))
+              obj = None
+
             if isinstance(obj, Project):
               try:
                 obj._mainWindow.sideBar.fillSideBar(obj)
@@ -394,11 +399,14 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                 QtWidgets.QApplication.setActiveWindow(obj._mainWindow)
 
               except Exception as es:
-                getLogger().warning('Error', str(es))
+                getLogger().warning('Error: %s' % str(es))
 
       else:
-        with progressManager(self.mainWindow, 'Loading... ' + url):
-          self.project.loadData(url)
+        with progressManager(self.mainWindow, 'Loading data... ' + url):
+          try:
+            self.project.loadData(url)
+          except Exception as es:
+            getLogger().warning('loadData Error: %s' % str(es))
 
       # if objects is not None:
       #   # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner
@@ -581,7 +589,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
           if isinstance(obj, Spectrum):
 
             # need to delete all peakLists and integralLists first, treat as single undo
-            self.project._startCommandEchoBlock('_deleteSpectrum')
+            self.project._startCommandEchoBlock('deleteObjects', str(obj.pid))
             try:
               for peakList in obj.peakLists:
                 peakList.delete()
@@ -594,7 +602,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
               self.project._endCommandEchoBlock()
 
           else:
-            self.project._startCommandEchoBlock('_deleteItemObject')
+            self.project._startCommandEchoBlock('deleteObjects', str(obj.pid))
 
             # # try:
             # ll = self._getChildren(obj)
@@ -633,28 +641,28 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS])
 
 
-  def _traverse(self, o, tree_types=(list, tuple)):
-    '''used to flat the state in a long list '''
-    if isinstance(o, tree_types):
-      for value in o:
-        for subvalue in self._traverse(value, tree_types):
-          yield subvalue
-    else:
-      yield o
-
-  def _getChildren(self, obj, path=None):
-    "Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...] ."
-    children = []
-    if path is None:
-      path = []
-    path.append(obj)
-    if obj._childClasses:
-      for att in obj._childClasses:
-        for child in getattr(obj, att._pluralLinkName):
-          children.extend(self._getChildren(child, path[:]))
-    else:
-      children.append(path)
-    return children
+  # def _traverse(self, o, tree_types=(list, tuple)):
+  #   '''used to flat the state in a long list '''
+  #   if isinstance(o, tree_types):
+  #     for value in o:
+  #       for subvalue in self._traverse(value, tree_types):
+  #         yield subvalue
+  #   else:
+  #     yield o
+  #
+  # def _getChildren(self, obj, path=None):
+  #   "Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...] ."
+  #   children = []
+  #   if path is None:
+  #     path = []
+  #   path.append(obj)
+  #   if obj._childClasses:
+  #     for att in obj._childClasses:
+  #       for child in getattr(obj, att._pluralLinkName):
+  #         children.extend(self._getChildren(child, path[:]))
+  #   else:
+  #     children.append(path)
+  #   return children
 
   def _cloneObject(self, objs):
     """Clones the specified objects"""

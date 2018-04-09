@@ -339,7 +339,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                            self.axisT, -1.0, 1.0)
 
     self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))     # projection
-    # self.mvInv = np.linalg.inv(self._uMVMatrix.reshape((4, 4)))   # modelView
     self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))     # viewport
     try:
       self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))      # axis scale
@@ -519,8 +518,12 @@ class CcpnGLWidget(QOpenGLWidget):
             (self.axisT, self.axisB))
 
   def wheelEvent(self, event):
-    def between(val, l, r):
-      return (l-val)*(r-val) <= 0
+    # def between(val, l, r):
+    #   return (l-val)*(r-val) <= 0
+
+    if self._parent and not self._parent.spectrumViews:
+      event.accept()
+      return
 
     numPixels = event.pixelDelta()
     numDegrees = event.angleDelta()
@@ -572,7 +575,7 @@ class CcpnGLWidget(QOpenGLWidget):
     mx = event.pos().x()
     my = self.height() - event.pos().y()
 
-    if between(mx, mw[0], mw[2]) and between(my, mw[1], mw[3]):
+    if self.between(mx, mw[0], mw[2]) and self.between(my, mw[1], mw[3]):
       # if in the mainView
       if zoomCentre == 0:       # centre on mouse
         mb = (mx - mw[0]) / (mw[2] - mw[0])
@@ -608,7 +611,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
       self._rescaleAllAxes()
 
-    elif between(mx, ba[0], ba[2]) and between(my, ba[1], ba[3]):
+    elif self.between(mx, ba[0], ba[2]) and self.between(my, ba[1], ba[3]):
       # in the bottomAxisBar
       if zoomCentre == 0:       # centre on mouse
         mb = (mx - ba[0]) / (ba[2] - ba[0])
@@ -646,7 +649,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._rescaleAllAxes()
 
-    elif between(mx, ra[0], ra[2]) and between(my, ra[1], ra[3]):
+    elif self.between(mx, ra[0], ra[2]) and self.between(my, ra[1], ra[3]):
       # in the rightAxisBar
       if zoomCentre == 0:       # centre on mouse
         mb = (my - ra[1]) / (ra[3] - ra[1])
@@ -2577,7 +2580,7 @@ class CcpnGLWidget(QOpenGLWidget):
   def _round_sig(self, x, sig=6, small_value=1.0e-9):
     return 0 if x==0 else round(x, sig - int(math.floor(math.log10(max(abs(x), abs(small_value))))) - 1)
 
-  def between(val, l, r):
+  def between(self, val, l, r):
     return (l-val)*(r-val) <= 0
 
   def paintGL(self):

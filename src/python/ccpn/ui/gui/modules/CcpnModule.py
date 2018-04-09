@@ -26,10 +26,10 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 # Start of code
 #=========================================================================================
 
-
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
 from weakref import ref
+from contextlib import contextmanager
 import itertools
 import collections
 from functools import partial
@@ -723,6 +723,15 @@ class CcpnModule(Dock, DropBase):
       if hasattr(src, 'implements') and src.implements('dock'):
         DockDrop.dragEnterEvent(self, *args)
 
+  @contextmanager
+  def _guiContextHandler(self):
+    try:
+      self.project._startCommandEchoBlock('HandleDroppedItem', quiet=True)
+      yield
+
+    finally:
+      self.project._endCommandEchoBlock()
+
   def dropEvent(self, *args):
     self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
     if args:
@@ -732,7 +741,10 @@ class CcpnModule(Dock, DropBase):
       if DropBase.PIDS in data:
         pids = data[DropBase.PIDS]
         objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
-        _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
+
+        with self._guiContextHandler():
+          _openItemObject(self.mainWindow, objs, position=self.dropArea, relativeTo=self)
+
         event.accept()
         # print('DONE')
 

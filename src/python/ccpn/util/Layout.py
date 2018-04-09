@@ -36,7 +36,7 @@ import sys, os
 
 
 
-LayoutDirName = 'layout'
+StateDirName = 'state'
 DefaultLayoutFileName = 'v3Layout.json'
 Warning =  "warning"
 WarningMessage =  "Warning. Any changes in this file will be overwritten when saving a new layout."
@@ -72,17 +72,19 @@ DefaultLayoutFile = {
                    }
 
 
-def createLayoutDirectory(project):
+def createStateDirectory(project):
   '''
 
   :param project:
   :return: creates a new folder : layout, where all the layout json files will be contained
   '''
   if project is not None:
-    layoutDirectory = os.path.join(project.path, LayoutDirName)
-    if not os.path.exists(layoutDirectory):
-      os.makedirs(layoutDirectory)
-      return layoutDirectory
+    stateDir = os.path.join(project.path, StateDirName)
+    if not os.path.exists(stateDir):
+      os.makedirs(stateDir)
+      return stateDir
+    else:
+      return stateDir
 
 def _createLayoutFile(application):
   try:
@@ -101,7 +103,7 @@ def _createLayoutFile(application):
 
 
 def getLayoutDirectoryPath(projectPath):
-  return os.path.join(projectPath, LayoutDirName)
+  return os.path.join(projectPath, StateDirName)
 
 
 def getLayoutFile(projectPath):

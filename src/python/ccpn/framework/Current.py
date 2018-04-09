@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 import operator
 import typing
+import os
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -411,27 +412,29 @@ Use print(current) to get a list of attribute, value pairs')
       #
       param._setupCoreNotifier('delete', cleanup)
 
-  def _dumpStateToFile(self):
+  def _dumpStateToFile(self, statePath):
     try:
-      path = self.project.path + '/' + self.className
+      path = os.path.join(statePath, self.className)
       file = open(path, "w")
       json.dump(self.state, file, sort_keys=False, indent=2, )
       file.close()
     except Exception as e:
       getLogger().debug('Impossible to create a Current File.', e)
 
-  def _restoreStateFromFile(self):
+  def _createStateFile(self,statePath):
+    path = os.path.join(statePath, self.className)
+    if not os.path.exists(path):
+      self._dumpStateToFile(statePath)
+
+    return path
+
+  def _restoreStateFromFile(self,statePath):
     """
     restore current from the default File in the project directory
     """
-    import os
     try:
-
-      if not os.path.exists(self.project.path + '/' + self.className):
-        pass
-      else:
-        path = self.project.path + '/' + self.className
-        if path:
+      path = self._createStateFile(statePath)
+      if path:
           with open(path) as fp:
             state = json.load(fp)
             if state:

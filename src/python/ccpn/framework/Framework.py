@@ -381,18 +381,17 @@ class Framework:
     # Adapt project to preferences
     self.applyPreferences(project)
 
-    # restore current
-    self.current._restoreStateFromFile()
 
-
-    # Add Layout Folder
-    Layout.createLayoutDirectory(project)
-
-
+    # Add Folders
+    # Add state Path
+    self.statePath = Layout.createStateDirectory(project)
 
     # Add Scripts Folder
-    createScriptsDirectory(project)
+    self.scriptPath = createScriptsDirectory(project)
     addScriptSubDirectory(project, 'pymol')
+
+    # restore current
+    self.current._restoreStateFromFile(self.statePath)
 
     self.project = project
     if hasattr(self, '_mainWindow'):
@@ -404,6 +403,7 @@ class Framework:
     else:
       # The NoUi version has no mainWindow
       self.ui.initialize(None)
+
 
   def _refreshAfterSave(self):
     """Refresh user interface after project save (which may have caused project rename)"""
@@ -1219,7 +1219,7 @@ class Framework:
       self.ui.mainWindow._updateWindowTitle()
       self.ui.mainWindow.getMenuAction('Project->Archive').setEnabled(True)
       self.ui.mainWindow._fillRecentProjectsMenu()
-      self.current._dumpStateToFile()
+      self.current._dumpStateToFile(self.statePath)
       try:
         if self.preferences.general.autoSaveLayoutOnQuit:
           Layout.saveLayoutToJson(self.ui.mainWindow)

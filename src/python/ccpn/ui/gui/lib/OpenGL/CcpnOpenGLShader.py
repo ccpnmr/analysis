@@ -75,12 +75,12 @@ class ShaderProgram(object):
 
   def setProjectionAxes(self, attMatrix, left, right, bottom, top, near, far):
 
-    oa = 2.0/(right-left) if abs(right-left) > 1.0e-7 else 1.0
-    ob = 2.0/(top-bottom) if abs(top-bottom) > 1.0e-7 else 1.0
-    oc = -2.0/(far-near) if abs(far-near) > 1.0e-7 else 1.0
-    od = -(far+near)/(far-near) if abs(far-near) > 1.0e-7 else 0.0
-    oe = -(top+bottom)/(top-bottom) if abs(top-bottom) > 1.0e-7 else 0.0
-    og = -(right+left)/(right-left) if abs(right-left) > 1.0e-7 else 0.0
+    oa = 2.0/(right-left) #if abs(right-left) > 1.0e-7 else 1.0
+    ob = 2.0/(top-bottom) #if abs(top-bottom) > 1.0e-7 else 1.0
+    oc = -2.0/(far-near) #if abs(far-near) > 1.0e-7 else 1.0
+    od = -(far+near)/(far-near) #if abs(far-near) > 1.0e-7 else 0.0
+    oe = -(top+bottom)/(top-bottom) #if abs(top-bottom) > 1.0e-7 else 0.0
+    og = -(right+left)/(right-left) #if abs(right-left) > 1.0e-7 else 0.0
     # orthographic
     attMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
                         0.0,  ob, 0.0,  0.0,
@@ -91,9 +91,9 @@ class ShaderProgram(object):
     # return the viewport transformation matrix - mapping screen to NDC
     #   normalised device coordinates
     #   viewport * NDC_cooord = world_coord
-    oa = (right-left)/2.0 if abs(right-left) > 1.0e-7 else 1.0
-    ob = (top-bottom)/2.0 if abs(top-bottom) > 1.0e-7 else 1.0
-    oc = (far-near)/2.0 if abs(far-near) > 1.0e-7 else 1.0
+    oa = (right-left)/2.0 #if abs(right-left) > 1.0e-7 else 1.0
+    ob = (top-bottom)/2.0 #if abs(top-bottom) > 1.0e-7 else 1.0
+    oc = (far-near)/2.0 #if abs(far-near) > 1.0e-7 else 1.0
     og = (right+left)/2.0
     oe = (top+bottom)/2.0
     od = (near+far)/2.0

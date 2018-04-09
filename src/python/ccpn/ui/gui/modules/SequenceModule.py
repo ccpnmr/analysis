@@ -44,7 +44,7 @@ from ccpn.ui.gui.guiSettings import getColours
 from ccpn.ui.gui.guiSettings import GUICHAINLABEL_TEXT, \
                                     GUICHAINRESIDUE_DRAGENTER, GUICHAINRESIDUE_DRAGLEAVE, \
                                     GUICHAINRESIDUE_UNASSIGNED, GUICHAINRESIDUE_ASSIGNED, \
-                                    GUICHAINRESIDUE_POSSIBLE, \
+                                    GUICHAINRESIDUE_POSSIBLE, GUICHAINRESIDUE_WARNING, \
                                     SEQUENCEMODULE_DRAGMOVE, SEQUENCEMODULE_TEXT
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.guiSettings import fixedWidthFont, fixedWidthLargeFont, helvetica8
@@ -52,7 +52,7 @@ from ccpn.ui.gui.guiSettings import textFontHugeSpacing as fontSpacing
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.ui.gui.widgets.MessageDialog import progressManager, showWarning
 
 
 class SequenceModule(CcpnModule):
@@ -193,7 +193,12 @@ class SequenceModule(CcpnModule):
             resid = residues[ii]
             next = resid.nextResidue    #TODO:ED may not have a .nextResidue
             residues.append(next)
-          nmrChain.assignConnectedResidues(guiRes.residue)
+
+          try:
+            nmrChain.assignConnectedResidues(guiRes.residue)
+          except Exception as es:
+            showWarning(str(self.windowTitle()), str(es))
+
         for ii, res in enumerate(residues):
           if hasattr(self, 'guiChainLabel'):
             guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
@@ -234,7 +239,13 @@ class SequenceModule(CcpnModule):
       for residue in residues:
         guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
         guiResidues.append(guiResidue)
-        guiResidue._setStylePossibleAssigned()
+
+        if guiResidue.residue.nmrResidue is not None:
+          guiResidue._setStyleWarningAssigned()
+        else:
+          guiResidue._setStylePossibleAssigned()
+        # guiResidue._setStylePossibleAssigned()
+
         # guiResidue.setHtml('<div style="color: %s;text-align: center; padding: 0px;">' %
         #                     self.colours[GUICHAINRESIDUE_POSSIBLE] +  residue.shortName+'</div>')
     except Exception as es:
@@ -486,6 +497,10 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
 
   def _setStylePossibleAssigned(self):
     self.setHtml('<div style="color: %s; "text-align: center;">' % self.colours[GUICHAINRESIDUE_POSSIBLE] +
+                 self.residue.shortName + '</div')
+
+  def _setStyleWarningAssigned(self):
+    self.setHtml('<div style="color: %s; "text-align: center;">' % self.colours[GUICHAINRESIDUE_WARNING] +
                  self.residue.shortName + '</div')
 
   def _setFontBold(self):

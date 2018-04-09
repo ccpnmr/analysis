@@ -71,17 +71,19 @@ def getLogger():
   return logger
 
 def _debug1(logger, msg, *args, **kwargs):
-  for s in args:
-    msg += ', '+str(s)
-  for ky in kwargs.keys():
-    msg += str(ky)+'='+kwargs[ky]
+  msg += ', '.join([str(arg) for arg in args])
+  msg += ', '.join([str(ky)+'='+kwargs[ky] for ky in kwargs.keys()])
   logger.log(DEBUG1, msg)
 
 def _debug2(logger, msg, *args, **kwargs):
-  logger.log(DEBUG2, msg, *args, **kwargs)
+  msg += ', '.join([str(arg) for arg in args])
+  msg += ', '.join([str(ky)+'='+kwargs[ky] for ky in kwargs.keys()])
+  logger.log(DEBUG2, msg)
 
 def _debug3(logger, msg, *args, **kwargs):
-  logger.log(DEBUG3, msg, *args, **kwargs)
+  msg += ', '.join([str(arg) for arg in args])
+  msg += ', '.join([str(ky)+'='+kwargs[ky] for ky in kwargs.keys()])
+  logger.log(DEBUG3, msg)
 
 def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):

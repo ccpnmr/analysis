@@ -1283,7 +1283,7 @@ QuickTable::item::selected {
     #   self.clearTable()
 
     self._silenceCallback = False
-    getLogger().debug('>updateTableCallback>', data['notifier']
+    getLogger().debug2('>updateTableCallback>', data['notifier']
                       , tableSelect
                       , data['trigger'], data['object'])
 
@@ -1345,7 +1345,7 @@ QuickTable::item::selected {
       try:
         _update = self._dataFrameObject.changeObject(row)
       except:
-        getLogger().debug('Error updating row in table')
+        getLogger().debug2('Error updating row in table')
 
     elif trigger == Notifier.RENAME:
       # get the old pid before the rename
@@ -1385,7 +1385,7 @@ QuickTable::item::selected {
       # #   getLogger().warning(str(es)+str(data))
       #
       # self._silenceCallback = False
-      getLogger().debug('>updateRowCallback>', data['notifier']
+      getLogger().debug2('>updateRowCallback>', data['notifier']
                         , self._tableData['tableSelection']
                         , data['trigger'], data['object'])
     return _update
@@ -1437,7 +1437,7 @@ QuickTable::item::selected {
           self._updateCellCallback(rowCallback, newData)
 
     self._silenceCallback = False
-    getLogger().debug('>updateCellCallback>', data['notifier']
+    getLogger().debug2('>updateCellCallback>', data['notifier']
                       , self._tableData['tableSelection']
                       , data['trigger'], data['object'])
 

@@ -583,6 +583,32 @@ def makeIterableList(inList):
     else:
       return []
 
+def _traverse(obj, tree_types=(list, tuple)):
+  """
+  used to flat the state in a long list
+  """
+  if isinstance(obj, tree_types):
+    for value in obj:
+      for subvalue in _traverse(value, tree_types):
+        yield subvalue
+  else:
+    yield obj
+
+def _getChildren(obj, path=None):
+  """
+  Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...]
+  """
+  children = []
+  if path is None:
+    path = []
+  path.append(obj)
+  if obj._childClasses:
+    for att in obj._childClasses:
+      for child in getattr(obj, att._pluralLinkName):
+        children.extend(_getChildren(child, path[:]))
+  else:
+    children.append(path)
+  return children
 
 class LocalFormatter(string.Formatter):
   """Overrides the string formatter to change the float formatting"""

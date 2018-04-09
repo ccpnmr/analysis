@@ -1315,17 +1315,17 @@ def _setupGuiStrip(project:Project, apiStrip):
 
   if not strip._finaliseDone: return
 
-  orderedAxes = strip.orderedAxes
-  padding = strip.application.preferences.general.stripRegionPadding
-
-  strip.viewBox.setXRange(*orderedAxes[0].region, padding=padding)
-  strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)
-  strip.plotWidget._initTextItems()
-  strip.viewBox.sigStateChanged.connect(strip.plotWidget._moveAxisCodeLabels)
-
-  # signal for communicating zoom across strips
-  strip.viewBox.sigXRangeChanged.connect(strip._updateXRegion)
-  strip.viewBox.sigYRangeChanged.connect(strip._updateYRegion)
+  # orderedAxes = strip.orderedAxes
+  # padding = strip.application.preferences.general.stripRegionPadding
+  #
+  # strip.viewBox.setXRange(*orderedAxes[0].region, padding=padding)
+  # strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)
+  # strip.plotWidget._initTextItems()
+  # strip.viewBox.sigStateChanged.connect(strip.plotWidget._moveAxisCodeLabels)
+  #
+  # # signal for communicating zoom across strips
+  # strip.viewBox.sigXRangeChanged.connect(strip._updateXRegion)
+  # strip.viewBox.sigYRangeChanged.connect(strip._updateYRegion)
 
   try:
     strip._CcpnGLWidget.initialiseAxes(strip=strip)

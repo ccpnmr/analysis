@@ -699,14 +699,16 @@ class Strip(AbstractWrapperObject):
     #
     return tuple(result)
 
-  def peakPickPosition(self, position:List[float]) -> Tuple[Peak]:
+  def peakPickPosition(self, positionDict:List) -> Tuple[Peak]:
     """
     Pick peak at position for all spectra currently displayed in strip
     """
+    _preferences = self.application.preferences.general
+
     result = []
     peakLists = []
 
-    self._startCommandEchoBlock('peakPickPosition', position)
+    self._startCommandEchoBlock('peakPickPosition', positionDict)
     self._project.blankNotification()
     try:
       for spectrumView in self.spectrumViews:
@@ -726,7 +728,7 @@ class Strip(AbstractWrapperObject):
           # find the first visible peakList
           peakList = thisPeakListView.peakList
 
-        # for peakListView in spectrumView.peakListViews:
+          # for peakListView in spectrumView.peakListViews:
           # find the first visible peakList
           # if not peakListView.isVisible() or not spectrumView.isVisible():
           #   continue
@@ -735,6 +737,33 @@ class Strip(AbstractWrapperObject):
 
           # if isinstance(peakList, PeakList):
           peak = peakList.newPeak()
+
+          # change dict to position
+          position = [0.0] * len(peak.axisCodes)
+
+          for n, axis in enumerate(peak.axisCodes):
+            if _preferences.matchAxisCode == 0:  # default - match atom type
+              for ax in positionDict.keys():
+                if ax and axis and ax[0] == axis[0]:
+                  position[n] = positionDict[ax]
+                  break
+
+            elif _preferences.matchAxisCode == 1:  # match full code
+              if axis in positionDict.keys():
+                position[n] = positionDict[axis]
+
+          # if spectrumView.spectrum.dimensionCount > 1:
+          #   # sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
+          #   spectrumAxisCodes = spectrumView.spectrum.axisCodes
+          #   stripAxisCodes = self.axisCodes
+          #   sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+          #
+          #   remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+          #   for n, axisCode in enumerate(spectrumAxisCodes):
+          #     # idx = stripAxisCodes.index(axisCode)
+          #     idx = remapIndices[n]
+          #     # sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+          #     sortedSpectrumRegion[n] = position[idx]
 
           if peak.peakList.spectrum.dimensionCount == 1:
             if len(position) > 1:
@@ -870,6 +899,7 @@ class Strip(AbstractWrapperObject):
               # idx = stripAxisCodes.index(axisCode)
               idx = remapIndices[n]
               sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+
             newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
                                             doPos=spectrumView.displayPositiveContours,
                                             doNeg=spectrumView.displayNegativeContours,

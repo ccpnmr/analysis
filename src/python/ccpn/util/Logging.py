@@ -70,6 +70,13 @@ def getLogger():
 
   return logger
 
+def _debug1(logger, msg, *args, **kwargs):
+  for s in args:
+    msg += ', '+str(s)
+  for ky in kwargs.keys():
+    msg += str(ky)+'='+kwargs[ky]
+  logger.log(DEBUG1, msg)
+
 def _debug2(logger, msg, *args, **kwargs):
   logger.log(DEBUG2, msg, *args, **kwargs)
 
@@ -130,7 +137,9 @@ def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
     handler = logging.StreamHandler(stream)
     _setupHandler(handler, level)
 
-  logger.debug1 = logger.debug
+  # logger.debug1 = logger.debug
+  logger.debug1 = functools.partial(_debug1, logger)
+  logger.debug = logger.debug1
   logger.debug2 = functools.partial(_debug2, logger)
   logger.debug3 = functools.partial(_debug3, logger)
 

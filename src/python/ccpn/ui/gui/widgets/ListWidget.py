@@ -83,7 +83,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
     else:
       self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
-    self.contextMenuItem = 'Delete'
+    self.contextMenuItem = 'Remove'
     self.currentContextMenu = self.getContextMenu
 
     # self.setStyleSheet(self._styleSheet)
@@ -191,10 +191,10 @@ class ListWidget(QtWidgets.QListWidget, Base):
     # FIXME this context menu must be more generic and editable
     contextMenu = Menu('', self, isFloatWidget=True)
     if self.rightMouseCallback is None:
-      contextMenu.addItem("Delete", callback=self.removeItem)
-      contextMenu.addItem("Delete All", callback=self._deleteAll)
+      contextMenu.addItem("Remove", callback=self.removeItem)
+      contextMenu.addItem("Remove All", callback=self._deleteAll)
     else:
-      contextMenu.addItem("Delete", callback=self.contextCallback)
+      contextMenu.addItem("Remove", callback=self.contextCallback)
     return contextMenu
 
   # TODO:ED these are not very generic yet
@@ -216,7 +216,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
     contextMenu = Menu('', self, isFloatWidget=True)
     contextMenu.addItem("Select All", callback=self._selectAll)
     contextMenu.addItem("Clear Selection", callback=self._selectNone)
-    contextMenu.addItem("Delete", callback=self.removeItem)
+    contextMenu.addItem("Remove", callback=self.removeItem)
     return contextMenu
 
   def _selectAll(self):

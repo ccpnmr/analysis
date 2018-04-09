@@ -292,6 +292,12 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       if self.home:
         self.home.removeTempArea(self)
 
+  def _closeOthers(self, moduleToClose):
+    modules = [module for module in self.ccpnModules if module != moduleToClose]
+    for module in modules:
+      module._closeModule()
+
+
   def _closeAll(self):
     for module in self.ccpnModules:
       module._closeModule()

@@ -32,6 +32,8 @@ from ccpn.util.Logging import getLogger
 from weakref import ref
 import itertools
 import collections
+from functools import partial
+
 from pyqtgraph.dockarea.Container import Container
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
@@ -40,6 +42,8 @@ from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Menu import Menu
+
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
@@ -777,6 +781,8 @@ class CcpnModuleLabel(DockLabel):
 
     self.setAlignment(QtCore.Qt.AlignVCenter|QtCore.Qt.AlignHCenter)
 
+
+
     if showCloseButton:
       # button is already there because of the DockLabel init
       self.closeButton.setIconSize(QtCore.QSize(self.labelSize, self.labelSize))
@@ -813,6 +819,26 @@ class CcpnModuleLabel(DockLabel):
         self.settingsButton.clicked.connect(settingsCallback)
 
     self.updateStyle()
+
+  def _createContextMenu(self):
+
+    contextMenu = Menu('', self, isFloatWidget=True)
+    close = contextMenu.addAction('Close', self.module._closeModule)
+    if len(self.module.mainWindow.moduleArea.ccpnModules)>1:
+      closeOthers = contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
+      closeAllModules = contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
+
+    return contextMenu
+
+  def mousePressEvent(self, event:QtGui.QMouseEvent):
+    """
+    Re-implementation of the Toolbar mouse event so a right mouse context menu can be raised.
+    """
+    if event.button() == QtCore.Qt.RightButton:
+      menu = self._createContextMenu()
+      if menu:
+        menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+        menu.exec()
 
   # GWV: not sure why this was copied as it is identical to the routine in the parent class
   # def mousePressEvent(self, ev):

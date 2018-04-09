@@ -4803,7 +4803,7 @@ class CcpnGLWidget(QOpenGLWidget):
     for orderedAxis in self._orderedAxes[2:]:
       position.append(orderedAxis.position)
 
-    newPeaks, peakLists = self._parent.peakPickPosition(position)
+    newPeaks, peakLists = self._parent.peakPickPosition(self.current.mouseMovedDict)
 
     # should fire peak notifier
     # self.GLSignals.emitEvent(targets=peakLists, triggers=[GLNotifier.GLPEAKLISTS,
@@ -4865,11 +4865,21 @@ class CcpnGLWidget(QOpenGLWidget):
                                      (self._successiveClicks[0], self._successiveClicks[1]),
                                      3*max(abs(self.pixelX),
                                            abs(self.pixelY))):
-          # TODO:ED check limits and aspect ratio
-          self.axisL = max(self.cursorCoordinate[0], self._successiveClicks[0])
-          self.axisR = min(self.cursorCoordinate[0], self._successiveClicks[0])
-          self.axisB = max(self.cursorCoordinate[1], self._successiveClicks[1])
-          self.axisT = min(self.cursorCoordinate[1], self._successiveClicks[1])
+
+          if self.INVERTXAXIS:
+            self.axisL = max(self._startCoordinate[0], self._endCoordinate[0])
+            self.axisR = min(self._startCoordinate[0], self._endCoordinate[0])
+          else:
+            self.axisL = min(self._startCoordinate[0], self._endCoordinate[0])
+            self.axisR = max(self._startCoordinate[0], self._endCoordinate[0])
+
+          if self.INVERTYAXIS:
+            self.axisB = max(self._startCoordinate[1], self._endCoordinate[1])
+            self.axisT = min(self._startCoordinate[1], self._endCoordinate[1])
+          else:
+            self.axisB = min(self._startCoordinate[1], self._endCoordinate[1])
+            self.axisT = max(self._startCoordinate[1], self._endCoordinate[1])
+
           self._rescaleXAxis()
 
         self._resetBoxes()

@@ -494,38 +494,41 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       if notifier:
         notifier.unRegister()
 
-  def _refreshSidebarSpectra(self, dummy:Project):
+  def _refreshSidebarSpectra(self, data):     # dummy:Project):
     """Reset spectra in sidebar - to be called from notifiers
     """
     sideBarState = self._saveExpandedState()
 
     for spectrum in self.project.spectra:
       # self._removeItem( self.project, spectrum)
-      self._removeItem(spectrum)
-      self._createItem(spectrum)
+      self._removeItem({Notifier.OBJECT: spectrum})
+      self._createItem({Notifier.OBJECT: spectrum})
       for obj in spectrum.peakLists + spectrum.integralLists:
-        self._createItem(obj)
+        self._createItem({Notifier.OBJECT: obj})
 
     self._restoreExpandedState(sideBarState)
 
-  def _refreshParentNmrChain(self, nmrResidue:NmrResidue, oldPid:Pid=None):     # ejb - catch oldName
+  def _refreshParentNmrChain(self, data):     #nmrResidue:NmrResidue, oldPid:Pid=None):     # ejb - catch oldName
     """Reset NmrChain sidebar - needed when NmrResidue is created or renamed to trigger re-sort
 
     Replaces normal _createItem notifier for NmrResidues"""
+
+    nmrResidue = data[Notifier.OBJECT]
+    oldPid = data[Notifier.OLDPID]
 
     sideBarState = self._saveExpandedState()
 
     nmrChain = nmrResidue._parent
 
     # Remove NmrChain item and contents
-    self._removeItem(nmrChain)
+    self._removeItem({Notifier.OBJECT: nmrChain})
 
     # Create NmrResidue items again - this gives them in correctly sorted order
-    self._createItem(nmrChain)
+    self._createItem({Notifier.OBJECT: nmrChain})
     for nr in nmrChain.nmrResidues:
-      self._createItem(nr)
+      self._createItem({Notifier.OBJECT: nr})
       for nmrAtom in nr.nmrAtoms:
-        self._createItem(nmrAtom)
+        self._createItem({Notifier.OBJECT: nmrAtom})
 
     self._restoreExpandedState(sideBarState)
 
@@ -658,10 +661,12 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     for obj in objs:
       obj.clone()
 
-  def _createItem(self, obj:AbstractWrapperObject):
+  def _createItem(self, data):        #obj:AbstractWrapperObject):
     """Create a new sidebar item from a new object.
     Called by notifier when a new object is created or undeleted (so need to check for duplicates).
     NB Obj may be of a type that does not have an item"""
+
+    obj = data[Notifier.OBJECT]
 
     if not isinstance(obj, AbstractWrapperObject):
       return
@@ -751,8 +756,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
     return objects
 
-  def _renameItem(self, obj:AbstractWrapperObject, oldPid:str):
+  def _renameItem(self, data):      #obj:AbstractWrapperObject, oldPid:str):
     """rename item(s) from previous pid oldPid to current object pid"""
+
+    obj = data[Notifier.OBJECT]
+    oldPid = data[Notifier.OLDPID]
 
     ll = self._saveExpandedState()
 
@@ -773,9 +781,9 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
         # NB the first object cannot be found from its pid (as it has already been renamed)
         # So we do it this way
-        self._createItem(obj)
+        self._createItem({Notifier.OBJECT: obj})
         for xx in objects[1:]:
-          self._createItem(xx)
+          self._createItem({Notifier.OBJECT: xx})
 
     self._restoreExpandedState(ll)
 
@@ -805,11 +813,13 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         for item in items:
           item.setExpanded(True)    # list[lItem])
 
-  def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
+  def _renameNmrResidueItem(self, data):      #obj:NmrResidue, oldPid:str):
     """rename NmrResidue(s) from previous pid oldPid to current object pid"""
 
     dd = self._saveExpandedState()
 
+    obj = data[Notifier.OBJECT]
+    oldPid = data[Notifier.OLDPID]
 
     if not oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
       # Parent has changed - remove items from old location
@@ -821,18 +831,20 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     # else:
     #   pass        # ejb - here just for a breakpoint
 
-    self._refreshParentNmrChain(obj, oldPid)
+    self._refreshParentNmrChain({Notifier.OBJECT: obj, Notifier.OLDPID: oldPid})        #obj, oldPid)
 
     # for item in self._findItems(oldPid):
     #   item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
     self._restoreExpandedState(dd)
 
-  def _removeItem(self, wrapperObject:AbstractWrapperObject):
+  def _removeItem(self, data):        # wrapperObject:AbstractWrapperObject):
     """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.
     Called when objects are deleted."""
     import sip
-    for item in self._findItems(wrapperObject.pid):
+
+    obj = data[Notifier.OBJECT]
+    for item in self._findItems(obj.pid):
       sip.delete(item)
 
   def _findItems(self, objPid:str) -> list:     #QtGui.QTreeWidgetItem
@@ -883,7 +895,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
     for className, cls in new_dict.items():       # ejb - classesInSideBar.items()
       for obj in getattr(project, cls._pluralLinkName):
-        self._createItem(obj)
+        self._createItem({Notifier.OBJECT: obj})
       # dd = pid2Obj.get(className)
       # if dd:
       #   for obj in sorted(dd.values()):

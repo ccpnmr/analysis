@@ -831,10 +831,10 @@ class StructureTable(QuickTableStructure):
     Notifier Callback for updating the table
     """
     thisEnsembleList = getattr(data[Notifier.THEOBJECT], self.attributeName)   # get the object
-    getLogger().debug('>updateCallback>', data['notifier'], self.thisObj, data['trigger'], data['object'], self._updateSilence)
+    getLogger().debug('>updateCallback> %s %s %s %s %s' % (data['notifier'], self.thisObj, data['trigger'], data['object'], self._updateSilence))
     if self.thisObj in thisEnsembleList:
       item = self.stButtons.get()
-      getLogger().debug('>selectionPulldownCallback>', item, type(item), self.thisObj)
+      getLogger().debug('>selectionPulldownCallback> %s %s %s' % (item, type(item), self.thisObj))
       if item is 'Ensemble':
         self.displayTableForStructure(self.thisObj)
       elif item is 'average':

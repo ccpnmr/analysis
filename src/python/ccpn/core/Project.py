@@ -1283,6 +1283,7 @@ class Project(AbstractWrapperObject):
     Inserted later ccpn.Core.Spectrum
     """
     pass
+    pass
 
   def _createDummySpectrum(self, axisCodes:Sequence[str], name=None,
                            chemicalShiftList=None):

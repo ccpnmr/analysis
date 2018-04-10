@@ -452,9 +452,9 @@ class CcpnModule(Dock, DropBase):
           widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0].__name__)()
         except Exception as e:
           getLogger().debug('Error %s', e)
-    self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
+    # self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
 
-    return  collections.OrderedDict(sorted(widgetsState.items()))
+    return collections.OrderedDict(sorted(widgetsState.items()))
 
   def restoreWidgetsState(self, **widgetsState):
     'Restore the gui params. To Call it: _setParams(**{"variableName":"value"})  '

@@ -133,7 +133,6 @@ class GuiPipeline(CcpnModule, Pipeline):
       self.generalPreferences = self.application.preferences.general
       self.templatePath = self.generalPreferences.auxiliaryFilesPath
       self.savingDataPath = str(self.generalPreferences.dataPath)
-      self.savingDataPath = str(self.generalPreferences.dataPath)
 
 
     if pipes is None:
@@ -149,7 +148,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.pipelineSettingsParams = OrderedDict([('name', 'NewPipeline'),
                                                ('rename', 'NewPipeline'),
                                                ('inputData', []),
-                                               ('savePath', self.savingDataPath),
+                                               ('savePath', self.application.pipelinePath),
                                                ('autoRun', False), ('addPosit', 'bottom'),
                                                ('autoActive', True), ])
 
@@ -180,6 +179,31 @@ class GuiPipeline(CcpnModule, Pipeline):
 
     # stop the blue overlay popping up when dragging over a spectrum
     self.allowedAreas = ['top', 'left', 'right', 'bottom']
+
+  @property
+  def widgetsState(self):
+    return self._widgetsState
+
+  @widgetsState.getter
+  def widgetsState(self):
+    '''Special case of saving widgets for this module. the only thing to be saved is the filePath of the pipeline.
+    The guiPipeline has its own mechanism for restoring '''
+    return {self.className:self._savePipeline()}
+
+  def restoreWidgetsState(self, **widgetsState):
+    ''' Overriden method from ccpnModule
+        Special case of restoring widgets for this module.
+      the only thing to be saved is the filePath of the pipeline. The guiPipeline has its own mechanism for restoring
+    '''
+
+    if self.className in widgetsState:
+      if widgetsState[self.className]:
+        if os.path.exists(widgetsState[self.className]):
+          print('widgetsState[self.className]', widgetsState[self.className])
+          self._openSavedPipeline(widgetsState[self.className])
+        else:
+          print('widgetsState[self.className]', 'NOPE')
+
 
   def _getGuiFromPipes(self, pipes):
     allGuiPipes = []
@@ -504,8 +528,14 @@ class GuiPipeline(CcpnModule, Pipeline):
           pipelineBoxes.append(pipelineBox)
     return pipelineBoxes
 
-  def _openSavedPipeline(self):
-    path = self._getPathFromDialogBox()
+  def _getPipelineStatePath(self):
+    ''' used to auto-restore when opening/saving modules in projects'''
+    return self._savePipeline()
+
+
+  def _openSavedPipeline(self, path=None):
+    if not path:
+      path = self._getPathFromDialogBox()
     state, guiPipesState, pipelineSettings = self._openJsonFile(path)
     self._closeAllGuiPipes()
 
@@ -528,17 +558,22 @@ class GuiPipeline(CcpnModule, Pipeline):
 
   def _savePipeline(self):
     '''jsonData = [{pipelineArea.state}, [guiPipesState], pipelineSettingsParams]   '''
+    self._applySettingsCallBack()
     guiPipesState = self.pipelineArea.guiPipesState
-    if len(guiPipesState)>0:
-      self.jsonData = []
-      self.jsonData.append(self.pipelineArea.saveState())
-      self.jsonData.append(guiPipesState)
-      self.jsonData.append(list(self.pipelineSettingsParams.items()))
-
-      self._saveToJson()
+    # if len(guiPipesState)>0:
+    self.jsonData = []
+    self.jsonData.append(self.pipelineArea.saveState())
+    self.jsonData.append(guiPipesState)
+    self.jsonData.append(list(self.pipelineSettingsParams.items()))
+    pipelineFilePath = self._saveToJson()
+    return pipelineFilePath
+    # else:
+    #   getLogger().warn('No Gui Pipes to save.')
 
   def _saveToJson(self):
     '''Tries to catch various error in giving the saving path '''
+    pipelineFilePath = None
+
     savingPath  = str(self.savePipelineLineEdit.lineEdit.text())
     pipelineName = str(self.pipelineNameLabel.text())
     if not savingPath.endswith('.json'):
@@ -552,16 +587,16 @@ class GuiPipeline(CcpnModule, Pipeline):
             savingPath+='.json'
       except:
         getLogger().warning('Insert a valid directory path. E.g /Users/user1/Desktop/')
-    self.savingDataPath = str(savingPath)
+    pipelineFilePath = str(savingPath)
 
     try:
-      with open(self.savingDataPath, 'w') as fp:
+      with open(pipelineFilePath, 'w') as fp:
         json.dump(self.jsonData, fp, indent=2)
         fp.close()
-        self.project._logger.info('File saved in: ' + self.savingDataPath)
+        self.project._logger.info('File saved in: ' + pipelineFilePath)
     except:
       getLogger().warning('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
-
+    return pipelineFilePath
 
 
 

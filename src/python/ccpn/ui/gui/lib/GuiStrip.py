@@ -314,10 +314,10 @@ class GuiStrip(Frame):
     if callbackDict['oldPid'] == text:
       self.setStripLabelText(callbackDict['object'].pid)
 
-    try:
-      self._CcpnGLWidget.setStripIDString(callbackDict['object'].pid)
-    except Exception as es:
-      getLogger().debugGL('OpenGL widget not instantiated')
+    # try:
+    #   self._CcpnGLWidget.setStripID(callbackDict['object'].pid)
+    # except Exception as es:
+    #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()
@@ -333,10 +333,10 @@ class GuiStrip(Frame):
     # GLSignals = GLNotifier(parent=self)
     # GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKNOTIFY], targets=data)
 
-    try:
-      self._CcpnGLWidget._processPeakNotifier(data)
-    except Exception as es:
-      getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+    # try:
+    self._CcpnGLWidget._processPeakNotifier(data)
+    # except Exception as es:
+    #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
   def _updateDisplayedIntegrals(self, data):
     "Callback when peaks have changed"

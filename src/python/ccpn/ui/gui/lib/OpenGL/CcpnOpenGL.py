@@ -197,6 +197,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._dottedCursorCoordinate = None
     self._dottedCursorVisible = None
 
+    self.gridList = []
     self._gridVisible = True
     self._crossHairVisible = True
     self._axesVisible = True
@@ -268,6 +269,8 @@ class CcpnGLWidget(QOpenGLWidget):
     change to axes of the view, axis visibility, scale and rebuild matrices when necessary
     to improve display speed
     """
+    if self._parent.isDeleted or not self.globalGL:
+      return
 
     # use the upated size
     w = self.w
@@ -2258,27 +2261,29 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def _deletePeakListItem(self, peak):
     pls = peak.peakList
-    spectrum = pls.spectrum
+    if pls:
+      spectrum = pls.spectrum
 
-    for peakListView in pls.peakListViews:
-      if peakListView in self._GLPeakLists.keys():
-        for spectrumView in spectrum.spectrumViews:
-          if spectrumView in self._parent.spectrumViews:
+      for peakListView in pls.peakListViews:
+        if peakListView in self._GLPeakLists.keys():
+          for spectrumView in spectrum.spectrumViews:
+            if spectrumView in self._parent.spectrumViews:
 
-            self._removePeakListItem(spectrumView, peakListView, peak)
-            self._updateHighlightedPeaks(spectrumView, peakListView)
+              self._removePeakListItem(spectrumView, peakListView, peak)
+              self._updateHighlightedPeaks(spectrumView, peakListView)
 
   def _createPeakListItem(self, peak):
     pls = peak.peakList
-    spectrum = pls.spectrum
+    if pls:
+      spectrum = pls.spectrum
 
-    for peakListView in pls.peakListViews:
-      if peakListView in self._GLPeakLists.keys():
-        for spectrumView in spectrum.spectrumViews:
-          if spectrumView in self._parent.spectrumViews:
+      for peakListView in pls.peakListViews:
+        if peakListView in self._GLPeakLists.keys():
+          for spectrumView in spectrum.spectrumViews:
+            if spectrumView in self._parent.spectrumViews:
 
-            self._appendPeakListItem(spectrumView, peakListView, peak)
-            self._updateHighlightedPeaks(spectrumView, peakListView)
+              self._appendPeakListItem(spectrumView, peakListView, peak)
+              self._updateHighlightedPeaks(spectrumView, peakListView)
 
   def _changePeakListLabel(self, peak):
     self._deletePeakListLabel(peak)
@@ -2286,16 +2291,17 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def _changePeakListItem(self, peak):
     pls = peak.peakList
-    spectrum = pls.spectrum
+    if pls:
+      spectrum = pls.spectrum
 
-    for peakListView in pls.peakListViews:
-      if peakListView in self._GLPeakListLabels.keys():
-        for spectrumView in spectrum.spectrumViews:
-          if spectrumView in self._parent.spectrumViews:
+      for peakListView in pls.peakListViews:
+        if peakListView in self._GLPeakListLabels.keys():
+          for spectrumView in spectrum.spectrumViews:
+            if spectrumView in self._parent.spectrumViews:
 
-            self._removePeakListItem(spectrumView, peakListView, peak)
-            self._appendPeakListItem(spectrumView, peakListView, peak)
-            self._updateHighlightedPeaks(spectrumView, peakListView)
+              self._removePeakListItem(spectrumView, peakListView, peak)
+              self._appendPeakListItem(spectrumView, peakListView, peak)
+              self._updateHighlightedPeaks(spectrumView, peakListView)
 
   def _deletePeakListLabel(self, peak):
     for pll in self._GLPeakListLabels.keys():
@@ -2308,15 +2314,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def _createPeakListLabel(self, peak):
     pls = peak.peakList
-    spectrum = pls.spectrum
+    if pls:
+      spectrum = pls.spectrum
 
-    for peakListView in pls.peakListViews:
-      if peakListView in self._GLPeakListLabels.keys():
-        for spectrumView in spectrum.spectrumViews:
-          if spectrumView in self._parent.spectrumViews:
-            drawList = self._GLPeakListLabels[peakListView]
-            self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
-            self._rescalePeakListLabels(spectrumView, peakListView, drawList)
+      for peakListView in pls.peakListViews:
+        if peakListView in self._GLPeakListLabels.keys():
+          for spectrumView in spectrum.spectrumViews:
+            if spectrumView in self._parent.spectrumViews:
+              drawList = self._GLPeakListLabels[peakListView]
+              self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
+              self._rescalePeakListLabels(spectrumView, peakListView, drawList)
 
   def _processPeakNotifier(self, data):
     # TODO:ED change this for the quick one
@@ -3502,6 +3509,7 @@ class CcpnGLWidget(QOpenGLWidget):
   def setStripID(self, name):
     self.stripIDLabel = name
     self._newStripID = True
+    self.update()
 
   def drawOverlayText(self, refresh=False):
     """
@@ -4305,7 +4313,8 @@ class CcpnGLWidget(QOpenGLWidget):
       # self.buildGrid()
       # self.buildAxisLabels()
 
-      self.stripIDString.renderMode = GLRENDERMODE_REBUILD
+      if self.stripIDString:
+        self.stripIDString.renderMode = GLRENDERMODE_REBUILD
       # self.drawOverlayText(refresh=True)
 
       # set axes colour
@@ -4319,7 +4328,8 @@ class CcpnGLWidget(QOpenGLWidget):
       # self.buildGrid()
       # self.buildAxisLabels()
 
-      self.stripIDString.renderMode = GLRENDERMODE_REBUILD
+      if self.stripIDString:
+        self.stripIDString.renderMode = GLRENDERMODE_REBUILD
       # self.drawOverlayText(refresh=True)
 
       # set axes colour

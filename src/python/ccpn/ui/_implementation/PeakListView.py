@@ -184,7 +184,7 @@ def getter(peakList:PeakList) -> typing.Tuple[PeakListView, ...]:
   data2ObjDict = peakList._project._data2Obj
   return tuple(data2ObjDict[y]
                for x in peakList._wrappedData.sortedPeakListViews()
-               for y in x.sortedStripPeakListViews())
+               for y in x.sortedStripPeakListViews() if not x.isDeleted)
 PeakList.peakListViews = property(getter, None, None,
                                   "PeakListViews showing Spectrum")
 del getter

@@ -31,7 +31,6 @@ from ccpn.core.SpectrumGroup import SpectrumGroup
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea, DockDrop
 from pyqtgraph.dockarea.Container import Container
-from pyqtgraph.dockarea.DockArea import TempAreaWindow
 from ccpn.util.Logging import getLogger
 import collections
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
@@ -40,6 +39,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.SideBar import SideBar, OpenObjAction, _openItemObject
 from ccpn.ui.gui.widgets.Font import Font
+from ccpn.ui.gui.widgets.MainWindow import MainWindow
 from ccpn.ui.gui.guiSettings import getColourScheme, getColours, LABEL_FOREGROUND
 from ccpn.util.Colour import  hexToRgb
 
@@ -48,11 +48,28 @@ Module = Dock
 DropAreaLabel = 'Drop Area'
 Failed = 'Failed'
 
+
+class TempAreaWindow(MainWindow):
+    def __init__(self, area, **kwargs):
+      MainWindow.__init__(self, **kwargs)
+      self.setCentralWidget(area)
+      self.tempModuleArea = area
+      self.mainModuleArea =  self.tempModuleArea.home
+
+    def closeEvent(self, *args, **kwargs):
+      for module in self.tempModuleArea.ccpnModules:
+        module._closeModule()
+      if self.tempModuleArea in self.mainModuleArea.tempAreas:
+       self.mainModuleArea.tempAreas.remove(self.tempModuleArea)
+      self.close()
+      # MainWindow.closeEvent(self, *args, **kwargs)
+
+
 class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
-  def __init__(self, mainWindow):
+  def __init__(self, mainWindow, **kwargs):
 
-    ModuleArea.__init__(self, mainWindow)
+    ModuleArea.__init__(self, mainWindow, **kwargs)
     DropBase.__init__(self, acceptDrops=True)
 
     self.mainWindow = mainWindow  # a link back to the parent MainWindow
@@ -287,10 +304,17 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     return obj.container()
 
   def apoptose(self):
-    if self.temporary and self.topContainer.count() == 0:
-      self.topContainer = None
-      if self.home:
-        self.home.removeTempArea(self)
+    if hasattr(self.topContainer, 'count'):
+      if self.temporary and self.topContainer.count() == 0:
+        self.topContainer = None
+        if self.home:
+          self.home.removeTempArea(self)
+    else:
+      try:
+        if self.temporary and len(self.ccpnModules) == 1:
+          self.win.close()
+      except Exception as e:
+        print(e)
 
   def _closeOthers(self, moduleToClose):
     modules = [module for module in self.ccpnModules if module != moduleToClose]
@@ -330,6 +354,19 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
           childs.append(self.childState(obj.widget(i)))
         return (obj.type(), childs, obj.saveState())
 
+  def addTempArea(self):
+    if self.home is None:
+      area = CcpnModuleArea(mainWindow=self.mainWindow)
+      area.temporary = True
+      area.home = self
+      self.tempAreas.append(area)
+      win = TempAreaWindow(area)
+      area.win = win
+      win.show()
+    else:
+      area = self.home.addTempArea()
+    # print "added temp area", area, area.window()
+    return area
 
   def restoreState(self, state):
     """

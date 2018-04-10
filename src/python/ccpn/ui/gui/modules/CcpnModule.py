@@ -632,7 +632,6 @@ class CcpnModule(Dock, DropBase):
       self._instances.remove(ref(self))
 
     getLogger().debug('Closing %s' % str(self.container()))
-
     if not self._container:
       area = self.mainWindow.moduleArea
       if area:
@@ -640,11 +639,11 @@ class CcpnModule(Dock, DropBase):
           for i in area.children():
             if isinstance(i, Container):
               self._container = i
-    try:
-      super(CcpnModule, self).close()
+    # try:
+    super(CcpnModule, self).close()
       # self.deleteLater()   # ejb - remove recursion when closing table from commandline
-    except Exception as es:
-      getLogger().debug('>>>delete CcpnModule Error %s' %es)
+    # except Exception as es:
+    #   getLogger().debug('>>>delete CcpnModule Error %s' %es)
 
   def dragMoveEvent(self, *args):
     DockDrop.dragMoveEvent(self, *args)

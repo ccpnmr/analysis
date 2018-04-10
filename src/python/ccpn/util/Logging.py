@@ -34,6 +34,7 @@ import functools
 import logging
 import os
 import time
+from inspect import stack
 
 DEBUG1 = logging.DEBUG  # = 10
 DEBUG2 = 9
@@ -70,20 +71,31 @@ def getLogger():
 
   return logger
 
+def _debugGLError(logger, msg, *args, **kwargs):
+  stk = stack()
+  stk = [stk[st][3] for st in range(min(3, len(stk)), 0, -1)]
+  fmsg = ['['+'/'.join(stk)+'] ' + msg]
+  if args: fmsg.append(', '.join([str(arg) for arg in args]))
+  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
+  logger.log(DEBUG1, '; '.join(fmsg))
+
 def _debug1(logger, msg, *args, **kwargs):
-  msg += ', '.join([str(arg) for arg in args])
-  msg += ', '.join([str(ky)+'='+kwargs[ky] for ky in kwargs.keys()])
-  logger.log(DEBUG1, msg)
+  fmsg = [msg]
+  if args: fmsg.append(', '.join([str(arg) for arg in args]))
+  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
+  logger.log(DEBUG1, '; '.join(fmsg))
 
 def _debug2(logger, msg, *args, **kwargs):
-  msg += ', '.join([str(arg) for arg in args])
-  msg += ', '.join([str(ky)+'='+kwargs[ky] for ky in kwargs.keys()])
-  logger.log(DEBUG2, msg)
+  fmsg = [msg]
+  if args: fmsg.append(', '.join([str(arg) for arg in args]))
+  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
+  logger.log(DEBUG2, '; '.join(fmsg))
 
 def _debug3(logger, msg, *args, **kwargs):
-  msg += ', '.join([str(arg) for arg in args])
-  msg += ', '.join([str(ky)+'='+kwargs[ky] for ky in kwargs.keys()])
-  logger.log(DEBUG3, msg)
+  fmsg = [msg]
+  if args: fmsg.append(', '.join([str(arg) for arg in args]))
+  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
+  logger.log(DEBUG3, '; '.join(fmsg))
 
 def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):
@@ -144,6 +156,7 @@ def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
   logger.debug = logger.debug1
   logger.debug2 = functools.partial(_debug2, logger)
   logger.debug3 = functools.partial(_debug3, logger)
+  logger.debugGL = functools.partial(_debugGLError, logger)
 
   logging.addLevelName(DEBUG2, 'DEBUG2')
   logging.addLevelName(DEBUG3, 'DEBUG3')

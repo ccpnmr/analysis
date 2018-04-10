@@ -4,15 +4,12 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpn.util.Path import joinPath
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -22,7 +19,6 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
@@ -30,7 +26,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import collections
+import inspect
+from typing import Optional
 from ccpn.core.lib import Pid
+from ccpn.util.Path import joinPath
+
 
 def pid2PluralName(pid:str) -> str:
   """Get plural class name, (e.g. 'peaks', 'spectra' from short-form or long-form, Pid string
@@ -126,13 +126,23 @@ def commandParameterString(*params, values:dict=None, defaults:dict=None):
   #
   return ', '.join(ll)
 
+def funcCaller() -> Optional[str]:
+  """
+  return the name of the current function
+  (actually the parent caller to this function, hence the index of '1')
+  :return string name:
+  """
+  try:
+    return inspect.stack()[1][3]
+  except:
+    return None
+
 def callList(fn):
   """
   Wrapper to give the call stack for then current function
   Add callList=None, callStr=None to the parameter list for the function
   """
   def inner(*args, **kwargs):
-    import inspect
     stack = inspect.stack()
     minStack = len(stack)     # min(stack_size, len(stack))
     modules = [(index, inspect.getmodule(stack[index][0]))

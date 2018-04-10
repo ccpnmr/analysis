@@ -1187,6 +1187,7 @@ class PeakNdAnnotation(QtWidgets.QGraphicsSimpleTextItem):
   # should not ever call setupPeakAnnotationItem in paint()
   # instead make sure that you have appropriate notifiers call _refreshPeakAnnotation()
   def setupPeakAnnotationItem(self, peakItem, clearLabel=False):
+    return
 
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setParentItem(peakItem)

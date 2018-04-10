@@ -199,10 +199,9 @@ class GuiPipeline(CcpnModule, Pipeline):
     if self.className in widgetsState:
       if widgetsState[self.className]:
         if os.path.exists(widgetsState[self.className]):
-          print('widgetsState[self.className]', widgetsState[self.className])
           self._openSavedPipeline(widgetsState[self.className])
-        else:
-          print('widgetsState[self.className]', 'NOPE')
+
+
 
 
   def _getGuiFromPipes(self, pipes):

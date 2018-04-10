@@ -304,17 +304,11 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     return obj.container()
 
   def apoptose(self):
-    if hasattr(self.topContainer, 'count'):
-      if self.temporary and self.topContainer.count() == 0:
-        self.topContainer = None
-        if self.home:
-          self.home.removeTempArea(self)
-    else:
-      try:
-        if self.temporary and len(self.ccpnModules) == 1:
-          self.win.close()
-      except Exception as e:
-        getLogger().debug(e)
+    if self.temporary and self.topContainer.count() == 0:
+      self.topContainer = None
+      if self.home:
+        self.home.removeTempArea(self)
+
 
   def _closeOthers(self, moduleToClose):
     modules = [module for module in self.ccpnModules if module != moduleToClose]
@@ -389,7 +383,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       ## 3) create floating areas, populate
       for s in state['float']:
         a = self.addTempArea()
-        a._buildFromState = self._buildFromState
+        # a._buildFromState = self._buildFromState
         a._buildFromState(modulesNames,s[0]['main'], docks, a)
         a.win.setGeometry(*s[1])
 
@@ -399,9 +393,11 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
       # print "\nKill old containers:"
       ## 5) kill old containers
-      for c in containers:
-        if c is not None:
-          c.close()
+      # if is not none  delete
+      if state['main'] is not None:
+        for c in containers:
+          if c is not None:
+            c.close()
       for a in oldTemps:
         if a is not None:
           a.apoptose()

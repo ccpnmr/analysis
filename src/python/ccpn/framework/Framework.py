@@ -55,6 +55,7 @@ from ccpn.util.Common import uniquify
 from ccpn.util.Logging import getLogger
 from ccpn.util.Scripting import createScriptsDirectory, addScriptSubDirectory
 from ccpn.util import Layout
+from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
@@ -2010,25 +2011,29 @@ class Framework:
 
   def copyStrip(self):
     if self.current.strip is not None:
-      self.current.strip.copyStrip()
+      with suspendSideBarNotifications(self.project, "getByPid('%s').copyStrip" % self.current.strip.pid, quiet=False):
+        self.current.strip.copyStrip()
     else:
       getLogger().warning('No strip selected')
 
   def flipXYAxis(self):
     if self.current.strip is not None:
-      self.current.strip.flipXYAxis()
+      with suspendSideBarNotifications(self.project, "getByPid('%s').flipXYAxis" % self.current.strip.pid, quiet=False):
+        self.current.strip.flipXYAxis()
     else:
       getLogger().warning('No strip selected')
 
   def flipXZAxis(self):
     if self.current.strip is not None:
-      self.current.strip.flipXZAxis()
+      with suspendSideBarNotifications(self.project, "getByPid('%s').flipXZAxis" % self.current.strip.pid, quiet=False):
+        self.current.strip.flipXZAxis()
     else:
       getLogger().warning('No strip selected')
 
   def flipYZAxis(self):
     if self.current.strip is not None:
-      self.current.strip.flipYZAxis()
+      with suspendSideBarNotifications(self.project, "getByPid('%s').flipYZAxis" % self.current.strip.pid, quiet=False):
+        self.current.strip.flipYZAxis()
     else:
       getLogger().warning('No strip selected')
 

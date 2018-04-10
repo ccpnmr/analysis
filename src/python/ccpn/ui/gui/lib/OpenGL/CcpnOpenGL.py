@@ -165,6 +165,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self._selectionMode = 0
     self._startCoordinate = None
     self._endCoordinate = None
+    self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
+
     self._shift = False
     self._command = False
     self._key = ''

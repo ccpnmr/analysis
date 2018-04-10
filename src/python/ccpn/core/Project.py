@@ -47,7 +47,7 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
-
+from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from time import time
 from ccpn.util.Logging import getLogger
 from contextlib import contextmanager
@@ -1057,16 +1057,19 @@ class Project(AbstractWrapperObject):
       # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
       # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
       #TODO:RASMUS: return type is not a list
+
       return open(usePath).read()
 
     elif dataType == 'Macro' and subType == ioFormats.PYTHON:
       # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
+      # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
       self._appBase.runMacro(usePath)
 
     elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
+      # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
       projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
       project = self.loadProject(projectPath, ioFormats.CCPN)
-      #TODO:RASMUS: use python tmpdir or V3 calss
+      #TODO:RASMUS: use python tmpdir or V3 class
       # NBNB _unpackCcpnTarfile *does* use the Python tempfile module
       project._wrappedData.root._temporaryDirectory = temporaryDirectory
       return [project]
@@ -1076,12 +1079,16 @@ class Project(AbstractWrapperObject):
       #TODO: use a dictionary to define
       funcname = '_load' + dataType
       if funcname == '_loadProject':
-        return [self.loadProject(usePath, subType)]
+        # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+        thisProj = [self.loadProject(usePath, subType)]
+        return thisProj
 
       elif funcname == '_loadSpectrum':
         # NBNB TBD #TODO:RASMUS:FIXME check if loadSpectrum should start with underscore
         # (NB referred to elsewhere
-        return self.loadSpectrum(usePath, subType)
+        with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
+          thisSpec = self.loadSpectrum(usePath, subType)
+        return thisSpec
 
       elif hasattr(self, funcname):
         pids = getattr(self, funcname)(usePath, subType)

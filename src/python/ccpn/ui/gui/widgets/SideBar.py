@@ -810,7 +810,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     self.fillSideBar(self.project)
     self._registerNotifiers()
 
-    print ('>>>_restore')
+    # print ('>>>_restore')
     for lItem in list:
       items = self.findItems(lItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
       if len(items)> 1:

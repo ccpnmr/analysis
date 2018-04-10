@@ -27,13 +27,13 @@ from contextlib import contextmanager
 
 
 @contextmanager
-def suspendSideBarNotifications(project):
+def suspendSideBarNotifications(project, funcName='suspendSideBarNotifications', *args, quiet=True):
   """
   Context manager to wrap the function with a command block and suspend notifications
   to the sideBar until commandBlock has finished
   """
   try:
-    project._startCommandEchoBlock('HandleDroppedItem', quiet=True)
+    project._startCommandEchoBlock(funcName, *args, quiet=quiet)
     yield
 
   finally:

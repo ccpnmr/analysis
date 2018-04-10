@@ -314,7 +314,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
         if self.temporary and len(self.ccpnModules) == 1:
           self.win.close()
       except Exception as e:
-        print(e)
+        getLogger().debug(e)
 
   def _closeOthers(self, moduleToClose):
     modules = [module for module in self.ccpnModules if module != moduleToClose]
@@ -382,9 +382,9 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       ## 1) make dict of all docks and list of existing containers
       containers, docks = self.findAll()
       oldTemps = self.tempAreas[:]
-
+      if state['main'] is not None:
       # 2) create container structure, move docks into new containers
-      self._buildFromState(modulesNames, state['main'], docks, self)
+        self._buildFromState(modulesNames, state['main'], docks, self)
 
       ## 3) create floating areas, populate
       for s in state['float']:

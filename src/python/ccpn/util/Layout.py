@@ -372,6 +372,6 @@ def restoreLayout(mainWindow, layout):
         try:
           mainWindow.moduleArea.restoreState(state)
         except Exception as e:
-            getLogger().debug("Layout error: %s" % e)
+            getLogger().warn("Layout error: %s" % e)
       else:
         getLogger().debug("Layout error: Some of the modules are missing. Geometries could not be restored")

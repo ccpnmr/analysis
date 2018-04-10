@@ -832,13 +832,15 @@ class CcpnModuleLabel(DockLabel):
 
   def mousePressEvent(self, event:QtGui.QMouseEvent):
     """
-    Re-implementation of the Toolbar mouse event so a right mouse context menu can be raised.
+    Re-implementation of the  mouse event so a right mouse context menu can be raised.
     """
     if event.button() == QtCore.Qt.RightButton:
       menu = self._createContextMenu()
       if menu:
         menu.move(event.globalPos().x(), event.globalPos().y() + 10)
         menu.exec()
+    else:
+      super(CcpnModuleLabel, self).mousePressEvent(event)
 
   # GWV: not sure why this was copied as it is identical to the routine in the parent class
   # def mousePressEvent(self, ev):

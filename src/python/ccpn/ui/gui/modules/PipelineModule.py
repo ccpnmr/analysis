@@ -136,7 +136,9 @@ class GuiPipeline(CcpnModule, Pipeline):
       self.savingDataPath = str(self.generalPreferences.dataPath)
 
 
-
+    if pipes is None:
+      from ccpn.pipes import loadedPipes
+      pipes = loadedPipes
 
     # init the CcpnModule
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=self._closeAllGuiPipes)

@@ -1229,7 +1229,7 @@ class Framework:
       # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
       sys.stderr.write('==> Project successfully saved\n')
       # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
-      #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
+      #                            iconPath=saveIconPath)
 
     return successful
 
@@ -1430,7 +1430,7 @@ class Framework:
                                     includeArchives=False, includeSummaries=True)
 
     MessageDialog.showInfo('Project Archived',
-                           'Project archived to %s' % fileName, colourScheme=getColourScheme())
+                           'Project archived to %s' % fileName,)
 
     self.ui.mainWindow._updateRestoreArchiveMenu()
 
@@ -2249,7 +2249,7 @@ def getSaveDirectory(parent, preferences=None):
       # so if it exists but is empty then don't bother asking the question
       title = 'Overwrite path'
       msg = 'Path "%s" already exists, continue?' % newPath
-      if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.colourScheme):
+      if not MessageDialog.showYesNo(title, msg):
         newPath = ''
 
     return newPath

@@ -74,8 +74,7 @@ DefaultLayoutFile = {
 
 def _createLayoutFile(application):
   try:
-    project = application.project
-    path =  getLayoutDirectoryPath(project.path)+'/'+DefaultLayoutFileName
+    path =  application.statePath +'/'+DefaultLayoutFileName
     file = open(path, "w")
     if General in DefaultLayoutFile:
       if ApplicationName in DefaultLayoutFile[General]:
@@ -88,20 +87,14 @@ def _createLayoutFile(application):
     getLogger().debug('Impossible to create a layout File.', e)
 
 
-def getLayoutDirectoryPath(projectPath):
-  return os.path.join(projectPath, StateDirName)
+
+def getLayoutFile(application):
+  path = os.path.join(application.statePath, DefaultLayoutFileName)
+  if not os.path.exists(path):
+    _createLayoutFile(application)
+  return path
 
 
-def getLayoutFile(projectPath):
-  if projectPath:
-    fileType = '.json'
-    layoutDirPath = getLayoutDirectoryPath(projectPath)
-    if layoutDirPath:
-      layoutFilepaths = glob.glob(layoutDirPath + "/*" + fileType)  # * means all if need specific format then *.fileType
-      if len(layoutFilepaths)>0:
-        latest_file = max(layoutFilepaths, key=os.path.getctime)
-        getLogger().debug('Loaded User Layout')
-        return latest_file
 
 def _updateGeneral(mainWindow, layout):
   application = mainWindow.application
@@ -196,7 +189,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
     layout = mainWindow.application.layout
     project = mainWindow.application.project
     if not jsonFilePath:
-      jsonFilePath = getLayoutDirectoryPath(project.path) + '/' + DefaultLayoutFileName
+      jsonFilePath =  mainWindow.application.statePath + '/' + DefaultLayoutFileName
     file = open(jsonFilePath, "w")
     json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
     file.close()

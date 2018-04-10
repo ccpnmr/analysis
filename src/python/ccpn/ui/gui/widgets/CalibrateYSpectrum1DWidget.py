@@ -60,7 +60,7 @@ class CalibrateY1DWidgets(Frame):
     try:
       self.GLWidget = self.current.strip._CcpnGLWidget
     except Exception as es:
-      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.current.strip)
+      getLogger().debugGL('OpenGL widget not instantiated')
 
     i=0
     self.labelOriginalPosition = Label(self, OP,grid=(0, i))

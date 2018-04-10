@@ -535,7 +535,7 @@ class GuiStripNd(GuiStrip):
       #   self.spectrumDisplay.phasingFrame.setVisible(False)
 
     except Exception as es:
-      getLogger().debug('OpenGL widget not instantiated')
+      getLogger().debugGL('OpenGL widget not instantiated')
 
     return
 

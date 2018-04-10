@@ -253,7 +253,7 @@ class GuiStrip1d(GuiStrip):
     try:
       self._CcpnGLWidget.resetYZoom()
     except:
-      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+      getLogger().debugGL('OpenGL widget not instantiated')
 
   def resetXZoom(self):
     """
@@ -266,7 +266,7 @@ class GuiStrip1d(GuiStrip):
     try:
       self._CcpnGLWidget.resetXZoom()
     except:
-      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+      getLogger().debugGL('OpenGL widget not instantiated')
 
   def flipXYAxis(self):
     """
@@ -360,15 +360,14 @@ class GuiStrip1d(GuiStrip):
       try:
         self._CcpnGLWidget.setStackingValue(None)
       except:
-        getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
-
+        getLogger().debugGL('OpenGL widget not instantiated')
 
   def _stack1DSpectra(self, offSet=None):
 
     try:
       self._CcpnGLWidget.setStackingValue(offSet)
     except:
-      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self)
+      getLogger().debugGL('OpenGL widget not instantiated')
 
     return
 

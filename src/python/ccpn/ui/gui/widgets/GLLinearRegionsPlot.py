@@ -151,7 +151,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
         try:
           self.GLWidget = self.strip._CcpnGLWidget
         except Exception as es:
-          getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.strip)
+          getLogger().debugGL('OpenGL widget not instantiated')
 
     if self.GLWidget:
       if self.pickOnSpectrumButton.isChecked():
@@ -172,7 +172,7 @@ class GLTargetButtonSpinBoxes(Widget, Base):
       try:
         self.setGLWidget(self.current.strip._CcpnGLWidget)
       except Exception as es:
-        getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.current.strip)
+        getLogger().debugGL('OpenGL widget not instantiated')
 
     else:
       if not self.GLlinearRegions:

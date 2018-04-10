@@ -72,20 +72,6 @@ DefaultLayoutFile = {
                    }
 
 
-def createStateDirectory(project):
-  '''
-
-  :param project:
-  :return: creates a new folder : layout, where all the layout json files will be contained
-  '''
-  if project is not None:
-    stateDir = os.path.join(project.path, StateDirName)
-    if not os.path.exists(stateDir):
-      os.makedirs(stateDir)
-      return stateDir
-    else:
-      return stateDir
-
 def _createLayoutFile(application):
   try:
     project = application.project

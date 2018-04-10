@@ -259,3 +259,17 @@ def suggestFileLocations(fileNames, startDir=None):
         baseDir = None
   #
   return baseDir, paths
+
+def makeDir(path, dirName):
+  '''
+
+  :param project:
+  :return: creates a new folder with the given name, return the new path as str
+  '''
+  if path is not None:
+    newPath = os.path.join(path, dirName)
+    if not os.path.exists(newPath):
+      os.makedirs(newPath)
+      return newPath
+    else:
+      return newPath

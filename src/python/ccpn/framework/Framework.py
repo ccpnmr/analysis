@@ -39,6 +39,7 @@ from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
 from ccpn.framework import Version
 from ccpn.framework.Current import Current
+from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.ui import interfaces, defaultInterface
@@ -383,8 +384,9 @@ class Framework:
 
 
     # Add Folders
-    # Add state Path
-    self.statePath = Layout.createStateDirectory(project)
+
+    self.statePath = Path.makeDir(project.path, Layout.StateDirName)
+    self.pipelinePath = Path.makeDir(self.statePath, Pipeline.className)
 
     # Add Scripts Folder
     self.scriptPath = createScriptsDirectory(project)

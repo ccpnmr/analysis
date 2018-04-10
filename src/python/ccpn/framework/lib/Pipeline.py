@@ -36,7 +36,7 @@ class Pipeline(object):
   To run insert the pipes in the queue.
 
   '''
-
+  className = 'Pipeline'
 
   def __init__(self, application=None, pipelineName=None, pipes=None ):
 

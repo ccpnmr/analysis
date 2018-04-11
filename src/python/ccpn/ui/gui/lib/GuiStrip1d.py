@@ -252,8 +252,8 @@ class GuiStrip1d(GuiStrip):
     # self.viewBox.setYRange(y2, y1)
     try:
       self._CcpnGLWidget.resetYZoom()
-    except:
-      getLogger().debugGL('OpenGL widget not instantiated')
+    except Exception as es:
+      getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
   def resetXZoom(self):
     """

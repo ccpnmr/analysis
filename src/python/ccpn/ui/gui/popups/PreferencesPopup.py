@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 
 import os
 from functools import partial
@@ -241,9 +241,9 @@ class PreferencesPopup(CcpnDialog):
     #                                                    )
 
     # row += 1
-    Spacer(parent, row, 1
-           , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-           , grid=(row , 0), gridSpan=(row, 1))
+    Spacer(parent, row, 1,
+           QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+           grid=(row , 0), gridSpan=(row, 1))
 
   def _setspectrumTabWidgets(self, parent):
     ''' Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live'''

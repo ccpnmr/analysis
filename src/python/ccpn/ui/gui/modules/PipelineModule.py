@@ -571,10 +571,11 @@ class GuiPipeline(CcpnModule, Pipeline):
     savingPath  = str(self.savePipelineLineEdit.lineEdit.text())
     if not os.path.exists(savingPath):
       savingPath = self.application.pipelinePath
+
       # This could happen when saving for the first time a project, which dynamically changes path
       getLogger().debug('Saving path not existing. %s. Directory path changed to default %s' %(str(self.savePipelineLineEdit.lineEdit.text()), savingPath))
       self.savePipelineLineEdit.lineEdit.setText(str(savingPath))
-
+      self.pipelineSettingsParams['savePath'] = savingPath
     pipelineName = str(self.pipelineNameLabel.text())
     if not savingPath.endswith('.json'):
       # try:

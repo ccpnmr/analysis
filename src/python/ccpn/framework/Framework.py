@@ -384,9 +384,12 @@ class Framework:
 
 
 
-    # Add Scripts Folder
+    # Add Folders
     self.scriptPath = createScriptsDirectory(project)
     addScriptSubDirectory(project, 'pymol')
+    self.statePath = self.statePath
+    self.savingDataPath = self.pipelinePath
+
 
     # restore current
     self.current._restoreStateFromFile(self.statePath)
@@ -411,6 +414,10 @@ class Framework:
     'This because the paths can change dynamically when saving!!'
     return Path.makeDir(self.project.path, Layout.StateDirName)
 
+  @statePath.setter
+  def statePath(self, path):
+    self._statePath = path
+
   @property
   def pipelinePath(self):
     return self._pipelinePath
@@ -420,7 +427,9 @@ class Framework:
     'This because the paths can change dynamically when saving!!'
     return Path.makeDir(self.statePath, Pipeline.className)
 
-
+  @pipelinePath.setter
+  def pipelinePath(self, path):
+    self._pipelinePath = path
 
   def _refreshAfterSave(self):
     """Refresh user interface after project save (which may have caused project rename)"""

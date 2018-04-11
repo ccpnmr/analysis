@@ -410,7 +410,6 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
 
   def _buildFromState(self, openedModulesNames, state, docks, root, depth=0):
-
     typ, contents, state = state
     pfx = "  " * depth
     if typ == 'dock':

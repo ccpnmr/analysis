@@ -67,6 +67,7 @@ preferredPipeLabel = '-- Preferred Pipes --'
 applicationPipeLabel = '-- Application Pipes --'
 otherPipeLabel = '-- Other Pipes --'
 PipelineName = 'NewPipeline'
+PipelinePath = 'PipelinePath'
 
 class PipelineWorker(QtCore.QObject):
   'Object managing the  auto run pipeline simulation'
@@ -101,11 +102,11 @@ class GuiPipeline(CcpnModule, Pipeline):
   maxSettingsState = 2
   settingsPosition = 'left'
   className = 'GuiPipeline'
-  moduleName = 'Pipeline-'
+  moduleName = 'Pipeline'
 
 
 
-  def __init__(self, mainWindow, name='', pipes=None, templates=None, **kw):
+  def __init__(self, mainWindow, name=moduleName, pipes=None, templates=None, **kw):
     super(GuiPipeline, self)
 
 
@@ -123,16 +124,10 @@ class GuiPipeline(CcpnModule, Pipeline):
       self.preferences = self.application.preferences
       self.current = self.application.current
 
-      # FIXME hack to give serial number to the pipeline module
-      nameCount = 1
-      for module in self.mainWindow.moduleArea.ccpnModules:
-        if isinstance(module, GuiPipeline):
-          nameCount += 1
-      name = self.moduleName + str(nameCount)
 
       self.generalPreferences = self.application.preferences.general
       self.templatePath = self.generalPreferences.auxiliaryFilesPath
-      self.savingDataPath = str(self.generalPreferences.dataPath)
+      self.savingDataPath = self.application.pipelinePath
 
 
     if pipes is None:
@@ -188,18 +183,17 @@ class GuiPipeline(CcpnModule, Pipeline):
   def widgetsState(self):
     '''Special case of saving widgets for this module. the only thing to be saved is the filePath of the pipeline.
     The guiPipeline has its own mechanism for restoring '''
-    return {self.className:self._savePipeline()}
+    return {PipelinePath:self._savePipeline()}
 
   def restoreWidgetsState(self, **widgetsState):
     ''' Overriden method from ccpnModule
         Special case of restoring widgets for this module.
       the only thing to be saved is the filePath of the pipeline. The guiPipeline has its own mechanism for restoring
     '''
-
-    if self.className in widgetsState:
-      if widgetsState[self.className]:
-        if os.path.exists(widgetsState[self.className]):
-          self._openSavedPipeline(widgetsState[self.className])
+    if PipelinePath in widgetsState:
+      if widgetsState[PipelinePath]:
+        if os.path.exists(widgetsState[PipelinePath]):
+          self._openSavedPipeline(widgetsState[PipelinePath])
 
 
 
@@ -208,7 +202,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     allGuiPipes = []
     for pipe in pipes:
       if pipe:
-        try:
+        # try:
           if pipe.guiPipe is not None:
             guiPipe = pipe.guiPipe
             guiPipe.pipe = pipe
@@ -220,9 +214,9 @@ class GuiPipeline(CcpnModule, Pipeline):
             newEmptyPipe.pipeName = pipe.pipeName
             newEmptyPipe.preferredPipe = False
             allGuiPipes.append(newEmptyPipe)
-        except:
-          # TODO handle exceptions if any
-          pass
+        # except:
+        #   # TODO handle exceptions if any
+        #   pass
     return allGuiPipes
 
   @property
@@ -565,6 +559,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.jsonData.append(guiPipesState)
     self.jsonData.append(list(self.pipelineSettingsParams.items()))
     pipelineFilePath = self._saveToJson()
+    print(pipelineFilePath, 'pipelineFilePath')
     return pipelineFilePath
     # else:
     #   getLogger().warn('No Gui Pipes to save.')
@@ -574,9 +569,15 @@ class GuiPipeline(CcpnModule, Pipeline):
     pipelineFilePath = None
 
     savingPath  = str(self.savePipelineLineEdit.lineEdit.text())
+    if not os.path.exists(savingPath):
+      savingPath = self.application.pipelinePath
+      # This could happen when saving for the first time a project, which dynamically changes path
+      getLogger().debug('Saving path not existing. %s. Directory path changed to default %s' %(str(self.savePipelineLineEdit.lineEdit.text()), savingPath))
+      self.savePipelineLineEdit.lineEdit.setText(str(savingPath))
+
     pipelineName = str(self.pipelineNameLabel.text())
     if not savingPath.endswith('.json'):
-      try:
+      # try:
         if savingPath.endswith('/'):
           savingPath += pipelineName + '.json'
         else:
@@ -584,17 +585,17 @@ class GuiPipeline(CcpnModule, Pipeline):
             savingPath += '/'+ pipelineName + '.json'
           else:
             savingPath+='.json'
-      except:
-        getLogger().warning('Insert a valid directory path. E.g /Users/user1/Desktop/')
+      # except:
+      #   getLogger().warning('Insert a valid directory path. E.g /Users/user1/Desktop/')
     pipelineFilePath = str(savingPath)
 
-    try:
-      with open(pipelineFilePath, 'w') as fp:
-        json.dump(self.jsonData, fp, indent=2)
-        fp.close()
-        self.project._logger.info('File saved in: ' + pipelineFilePath)
-    except:
-      getLogger().warning('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
+    # try:
+    with open(pipelineFilePath, 'w') as fp:
+      json.dump(self.jsonData, fp, indent=2)
+      fp.close()
+      self.project._logger.info('File saved in: ' + pipelineFilePath)
+    # except:
+    #   getLogger().warning('File not saved. Insert a valid directory path. E.g /Users/user1/Desktop/')
     return pipelineFilePath
 
 

@@ -89,6 +89,10 @@ FULLBOTTOMAXIS = 'fullBottomAxis'
 FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
 FULLVIEW = 'fullView'
 
+AXISLIMITS = [-1.0e2, 1.0e2]
+INVERTED_AXISLIMITS = [1.0e2, -1.0e2]
+DEFAULT_AXISLIMITS = [0.0, 1.0]
+
 LENPID = 8
 LENVERTICES = 2
 LENINDICES = 1
@@ -237,6 +241,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self._gridVisible = self._preferences.showGrid
     self._updateHTrace = False
     self._updateVTrace = False
+
+    self._initialiseAll()
 
     # set a minimum size so that the strips resize nicely
     self.setMinimumSize(self.AXIS_MARGINRIGHT+10, self.AXIS_MARGINBOTTOM+10)
@@ -721,8 +727,9 @@ class CcpnGLWidget(QOpenGLWidget):
     self.rescale()
 
     # spawn rebuild event for the grid
-    self.gridList[0].renderMode = GLRENDERMODE_REBUILD
-    self.gridList[1].renderMode = GLRENDERMODE_REBUILD
+    if self.gridList:
+      self.gridList[0].renderMode = GLRENDERMODE_REBUILD
+      self.gridList[1].renderMode = GLRENDERMODE_REBUILD
 
     # ratios have changed so rescale the peaks symbols
     for pp in self._GLPeakLists.values():
@@ -735,7 +742,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     try:
       self._orderedAxes[1].region = (self.axisT, self.axisB)
-    except Exception:
+    except Exception as es:
       getLogger().debug('error setting viewbox Y-range')
 
   def _rebuildMarks(self, update=True):
@@ -923,7 +930,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # initialise a common to all OpenGL windows
     self.globalGL = GLGlobalData(parent=self, strip=self._parent)
-
     self._devicePixelRatio = QApplication.instance().devicePixelRatio()
 
     # initialise the arrays for the grid and axes
@@ -936,23 +942,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                          dimension=2,
                                          GLContext=self))
 
-    self._GLPeakLists = {}
-    self._GLPeakListLabels = {}
-    self._marksAxisCodes = []
-    self._regions = []
-    self._GLIntegralLists = {}
     self._externalRegions = GLIntegralArray(GLContext=self, spectrumView=None, integralListView=None)
-    self._infiniteLines = []
-
-    self._buildTextFlag = True
-
-    self._buildMouse = True
-    self._mouseCoords = [-1.0, -1.0]
-    self.mouseString = None
-    self.diffMouseString = None
-    self.peakLabelling = 0
-
-    self._contourList = {}
 
     self._selectionBox = GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
@@ -979,31 +969,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                     dimension=2,
                                     GLContext=self)
 
-    self._hTraces = {}
-    self._vTraces = {}
-    self._staticHTraces = []
-    self._staticVTraces = []
-    self._stackingValue = None
-    self._hTraceVisible = False
-    self._vTraceVisible = False
-
-    self._uPMatrix = np.zeros((16,), dtype=np.float32)
-    self._uMVMatrix = np.zeros((16,), dtype=np.float32)
-    self._uVMatrix = np.zeros((16,), dtype=np.float32)
-    self._aMatrix = np.zeros((16,), dtype=np.float32)
-    self._IMatrix = np.zeros((16,), dtype=np.float32)
-    self._IMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                           0.0, 1.0, 0.0, 0.0,
-                           0.0, 0.0, 1.0, 0.0,
-                           0.0, 0.0, 0.0, 1.0]
-
-    self._useTexture = np.zeros((1,), dtype=np.int)
-    self._axisScale = np.zeros((4,), dtype=np.float32)
-    self._background = np.zeros((4,), dtype=np.float32)
-    self._parameterList = np.zeros((4,), dtype=np.int32)
-    self._view = np.zeros((4,), dtype=np.float32)
-    self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
-
     self._testSpectrum = GLVertexArray(numLists=1
                                        , renderMode=GLRENDERMODE_REBUILD
                                        , blendMode=True
@@ -1011,8 +976,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                        , dimension=4
                                        , GLContext=self)
 
-    self.w = 0
-    self.h = 0
     self.viewports = GLViewports(self._devicePixelRatio)
 
     # TODO:ED error here when calculating the top offset, FOUND
@@ -1066,6 +1029,53 @@ class CcpnGLWidget(QOpenGLWidget):
     # This is the correct blend function to ignore stray surface blending functions
     GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
     self.setBackgroundColour(self.background)
+
+    if self._parent:
+      self.initialiseAxes(self._parent)
+
+  def _initialiseAll(self):
+    self._GLPeakLists = {}
+    self._GLPeakListLabels = {}
+    self._marksAxisCodes = []
+    self._regions = []
+    self._GLIntegralLists = {}
+    self._infiniteLines = []
+    self._buildTextFlag = True
+
+    self._buildMouse = True
+    self._mouseCoords = [-1.0, -1.0]
+    self.mouseString = None
+    self.diffMouseString = None
+    self.peakLabelling = 0
+
+    self._contourList = {}
+
+    self._hTraces = {}
+    self._vTraces = {}
+    self._staticHTraces = []
+    self._staticVTraces = []
+    self._stackingValue = None
+    self._hTraceVisible = False
+    self._vTraceVisible = False
+    self.w = 0
+    self.h = 0
+
+    self._uPMatrix = np.zeros((16,), dtype=np.float32)
+    self._uMVMatrix = np.zeros((16,), dtype=np.float32)
+    self._uVMatrix = np.zeros((16,), dtype=np.float32)
+    self._aMatrix = np.zeros((16,), dtype=np.float32)
+    self._IMatrix = np.zeros((16,), dtype=np.float32)
+    self._IMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                           0.0, 1.0, 0.0, 0.0,
+                           0.0, 0.0, 1.0, 0.0,
+                           0.0, 0.0, 0.0, 1.0]
+
+    self._useTexture = np.zeros((1,), dtype=np.int)
+    self._axisScale = np.zeros((4,), dtype=np.float32)
+    self._background = np.zeros((4,), dtype=np.float32)
+    self._parameterList = np.zeros((4,), dtype=np.int32)
+    self._view = np.zeros((4,), dtype=np.float32)
+    self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
 
     # get information from the parent class (strip)
     self.orderedAxes = self._parent.orderedAxes
@@ -3509,7 +3519,6 @@ class CcpnGLWidget(QOpenGLWidget):
   def setStripID(self, name):
     self.stripIDLabel = name
     self._newStripID = True
-    self.update()
 
   def drawOverlayText(self, refresh=False):
     """

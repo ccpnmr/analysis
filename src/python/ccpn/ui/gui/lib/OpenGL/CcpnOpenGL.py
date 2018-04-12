@@ -1325,6 +1325,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self._clearAndUpdate()
 
   def mouseMoveEvent(self, event):
+    if self._parent.isDeleted:
+      return
     if not self._parent.spectrumViews:
       return
 

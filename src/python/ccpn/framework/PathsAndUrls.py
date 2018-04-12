@@ -32,7 +32,9 @@ from ccpn.util import Path
 ccpnUrl                         = 'http://www.ccpn.ac.uk'
 ccpn2Url                        = 'http://www2.ccpn.ac.uk'
 ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/v3-software/downloads/license'
-ccpnIssuesUrl                   = 'https://sourceforge.net/p/ccpn/bugs/'
+oldCcpnIssuesUrl                = 'https://sourceforge.net/p/ccpn/bugs/'
+ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/issues?status=new&status=open'
+
 
 # CCPN code
 ccpnCodePath                    = Path.getTopDirectory()

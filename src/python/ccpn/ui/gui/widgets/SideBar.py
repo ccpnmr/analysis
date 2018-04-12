@@ -142,13 +142,14 @@ def _openItemObject(mainWindow, objs, **args):
 
 def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
   spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
-  mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 
   if len(spectrumDisplay.strips)>0:
     mainWindow.current.strip = spectrumDisplay.strips[0]
-    # if spectrum.dimensionCount == 1:
-    #   spectrumDisplay.resetYZooms()
+    if spectrum.dimensionCount == 1:
+      spectrumDisplay._maximiseRegions()
       # mainWindow.current.strip.plotWidget.autoRange()
+
+  mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
 
   # TODO:LUCA: the mainWindow.createSpectrumDisplay should do the reporting to console and log
   # This routine can then be ommitted and the call above replaced by the one remaining line

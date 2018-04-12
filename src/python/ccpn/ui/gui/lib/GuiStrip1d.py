@@ -243,6 +243,12 @@ class GuiStrip1d(GuiStrip):
     self.exportDialog = CustomGLExportDialog(self._CcpnGLWidget, spectrumDimension='1D')
     self.exportDialog.show(self.viewBox)
 
+  def _maximiseRegions(self):
+    try:
+      self._CcpnGLWidget._maximiseRegions()
+    except Exception as es:
+      getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
   def resetYZoom(self):
     """
     Zooms y axis to maximum of data.

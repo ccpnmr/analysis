@@ -89,9 +89,9 @@ FULLBOTTOMAXIS = 'fullBottomAxis'
 FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
 FULLVIEW = 'fullView'
 
-AXISLIMITS = [-1.0e2, 1.0e2]
-INVERTED_AXISLIMITS = [1.0e2, -1.0e2]
-DEFAULT_AXISLIMITS = [0.0, 1.0]
+AXISLIMITS = [-1.0e12, 1.0e12]
+INVERTED_AXISLIMITS = [1.0e12, -1.0e12]
+RANGELIMITS = [1.0e12, 0.0]
 
 LENPID = 8
 LENVERTICES = 2
@@ -141,7 +141,40 @@ class CcpnGLWidget(QOpenGLWidget):
       self.project = None
       self.current = None
 
+    self._preferences = self._parent.application.preferences.general
     self.globalGL = None
+    self.stripIDLabel = stripIDLabel if stripIDLabel else ''
+
+    self.setMouseTracking(True)                 # generate mouse events when button not pressed
+
+    # always respond to mouse events
+    self.setFocusPolicy(Qt.StrongFocus)
+
+    # initialise all attributes
+    self._initialiseAll()
+
+    # set a minimum size so that the strips resize nicely
+    self.setMinimumSize(self.AXIS_MARGINRIGHT+10, self.AXIS_MARGINBOTTOM+10)
+
+    # set the pyqtsignal responders
+    self.GLSignals = GLNotifier(parent=self, strip=parent)
+    self.GLSignals.glXAxisChanged.connect(self._glXAxisChanged)
+    self.GLSignals.glYAxisChanged.connect(self._glYAxisChanged)
+    self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
+    self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
+    self.GLSignals.glEvent.connect(self._glEvent)
+    self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
+
+    # install handler to resize when moving between displays
+    self.mainWindow.window().windowHandle().screenChanged.connect(self._screenChanged)
+
+  def _initialiseAll(self):
+    """
+    Initialise all attributes for the display
+    """
+    self.w = self.width()
+    self.h = self.height()
+
     self._threads = {}
     self._threadUpdate = False
 
@@ -150,15 +183,16 @@ class CcpnGLWidget(QOpenGLWidget):
     self._mouseY = 0
 
     self._devicePixelRatio = 1.0      # set in the initialiseGL routine
-    self.w = self.width()
-    self.h = self.height()
     self.peakWidthPixels = 16
     self.boxWidth = 0.0
     self.boxHeight = 0.0
 
-    # self.eventFilter = self._eventFilter
-    # self.installEventFilter(self)
-    self.setMouseTracking(True)                 # generate mouse events when button not pressed
+    # set initial axis limits - should be changed by strip.display..
+    self.axisL = 0.0
+    self.axisR = 1.0
+    self.axisT = 1.0
+    self.axisB = 0.0
+    self.storedZooms = []
 
     self.base = None
     self.spectrumValues = []
@@ -178,16 +212,6 @@ class CcpnGLWidget(QOpenGLWidget):
     self._isCTRL = ''
     self._isALT = ''
     self._isMETA = ''
-
-    # always respond to mouse events
-    self.setFocusPolicy(Qt.StrongFocus)
-
-    # set initial axis limits - should be changed by strip.display..
-    self.axisL = 12
-    self.axisR = 4
-    self.axisT = 20
-    self.axisB = 80
-    self.storedZooms = []
 
     self.buildMarks = True
     self._marksList = None
@@ -218,7 +242,6 @@ class CcpnGLWidget(QOpenGLWidget):
     self._currentBottomAxisBarView = BOTTOMAXISBAR
 
     self._oldStripIDLabel = None
-    self.stripIDLabel = stripIDLabel if stripIDLabel else ''
     self.stripIDString = None
     self._spectrumSettings = {}
     self._newStripID = False
@@ -233,31 +256,68 @@ class CcpnGLWidget(QOpenGLWidget):
     self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
     self._phasingTraceColour = self.colours[CCPNGLWIDGET_PHASETRACE]
 
-    self._preferences = self._parent.application.preferences.general
-
-    # self._peakLabelling = self._preferences.annotationType
-    # self._peakSymbols = self._parent.peakSymbolType
-
     self._gridVisible = self._preferences.showGrid
     self._updateHTrace = False
     self._updateVTrace = False
 
-    self._initialiseAll()
+    self._GLPeakLists = {}
+    self._GLPeakListLabels = {}
+    self._marksAxisCodes = []
+    self._regions = []
+    self._GLIntegralLists = {}
+    self._infiniteLines = []
+    self._buildTextFlag = True
 
-    # set a minimum size so that the strips resize nicely
-    self.setMinimumSize(self.AXIS_MARGINRIGHT+10, self.AXIS_MARGINBOTTOM+10)
+    self._buildMouse = True
+    self._mouseCoords = [-1.0, -1.0]
+    self.mouseString = None
+    self.diffMouseString = None
+    self.peakLabelling = 0
 
-    # set the pyqtsignal responders
-    self.GLSignals = GLNotifier(parent=self, strip=parent)
-    self.GLSignals.glXAxisChanged.connect(self._glXAxisChanged)
-    self.GLSignals.glYAxisChanged.connect(self._glYAxisChanged)
-    self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
-    self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
-    self.GLSignals.glEvent.connect(self._glEvent)
-    self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
+    self._contourList = {}
 
-    # print (dir(QtGui.QWindow))
-    self.mainWindow.window().windowHandle().screenChanged.connect(self._screenChanged)
+    self._hTraces = {}
+    self._vTraces = {}
+    self._staticHTraces = []
+    self._staticVTraces = []
+    self._stackingValue = None
+    self._hTraceVisible = False
+    self._vTraceVisible = False
+    self.w = 0
+    self.h = 0
+
+    self._uPMatrix = np.zeros((16,), dtype=np.float32)
+    self._uMVMatrix = np.zeros((16,), dtype=np.float32)
+    self._uVMatrix = np.zeros((16,), dtype=np.float32)
+    self._aMatrix = np.zeros((16,), dtype=np.float32)
+    self._IMatrix = np.zeros((16,), dtype=np.float32)
+    self._IMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
+                           0.0, 1.0, 0.0, 0.0,
+                           0.0, 0.0, 1.0, 0.0,
+                           0.0, 0.0, 0.0, 1.0]
+
+    self._useTexture = np.zeros((1,), dtype=np.int)
+    self._axisScale = np.zeros((4,), dtype=np.float32)
+    self._background = np.zeros((4,), dtype=np.float32)
+    self._parameterList = np.zeros((4,), dtype=np.int32)
+    self._view = np.zeros((4,), dtype=np.float32)
+    self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
+
+    # get information from the parent class (strip)
+    self.orderedAxes = self._parent.orderedAxes
+    self.axisOrder = self._parent.axisOrder
+    self.axisCodes = self._parent.axisCodes
+    self.initialiseTraces()
+
+    self._dragRegion = (None, None, None)
+
+    # define zoom limits for the display
+    self._minXRange, self._maxXRange = RANGELIMITS
+    self._minYRange, self._maxYRange = RANGELIMITS
+    self._minReached = False
+    self._maxReached = False
+    self._maxX, self._minX = AXISLIMITS
+    self._maxY, self._minY = AXISLIMITS
 
   def close(self):
     self.GLSignals.glXAxisChanged.disconnect()
@@ -392,10 +452,10 @@ class CcpnGLWidget(QOpenGLWidget):
     # rescale the matrices each spectrumView
     stackCount = 0
 
-    self._minXRange = 1e12
-    self._maxXRange = 0.0
-    self._minYRange = 1e12
-    self._maxYRange = 0.0
+    self._minXRange, self._maxXRange = RANGELIMITS
+    self._minYRange, self._maxYRange = RANGELIMITS
+    self._maxX, self._minX = AXISLIMITS
+    self._maxY, self._minY = AXISLIMITS
 
     for spectrumView in self._parent.spectrumViews:       #.orderedSpectrumViews():
       # self._spectrumSettings[spectrumView] = {}
@@ -407,6 +467,32 @@ class CcpnGLWidget(QOpenGLWidget):
       self._buildSpectrumSetting(spectrumView, stackCount)
       if self._stackingValue:
         stackCount += 1
+
+  def _maximiseRegions(self):
+    for spectrumView in self._parent.spectrumViews:       #.orderedSpectrumViews():
+      if spectrumView.isDeleted:
+        self._spectrumSettings[spectrumView] = {}
+        continue
+
+      self._buildSpectrumSetting(spectrumView)
+
+      axis = self._orderedAxes[0]
+      axis.region = (float(self._minX), float(self._maxX))
+      if self.INVERTXAXIS:
+        self.axisL = max(axis.region[0], axis.region[1])
+        self.axisR = min(axis.region[0], axis.region[1])
+      else:
+        self.axisL = min(axis.region[0], axis.region[1])
+        self.axisR = max(axis.region[0], axis.region[1])
+
+      axis = self._orderedAxes[1]
+      axis.region = (float(self._minY), float(self._maxY))
+      if self.INVERTYAXIS:
+        self.axisB = max(axis.region[0], axis.region[1])
+        self.axisT = min(axis.region[0], axis.region[1])
+      else:
+        self.axisB = min(axis.region[0], axis.region[1])
+        self.axisT = max(axis.region[0], axis.region[1])
 
   def _buildSpectrumSetting(self, spectrumView, stackCount=0):
       self._spectrumSettings[spectrumView] = {}
@@ -471,6 +557,10 @@ class CcpnGLWidget(QOpenGLWidget):
       self._spectrumSettings[spectrumView][SPECTRUM_XSCALE] = xScale
       self._spectrumSettings[spectrumView][SPECTRUM_YSCALE] = yScale
 
+      self._maxX = max(self._maxX, fx0)
+      self._minX = min(self._minX, fx1)
+      self._maxY = max(self._maxY, fy0)
+      self._minY = min(self._minY, fy1)
 
   @pyqtSlot()
   def _screenChanged(self, *args):
@@ -1032,66 +1122,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     if self._parent:
       self.initialiseAxes(self._parent)
-
-  def _initialiseAll(self):
-    self._GLPeakLists = {}
-    self._GLPeakListLabels = {}
-    self._marksAxisCodes = []
-    self._regions = []
-    self._GLIntegralLists = {}
-    self._infiniteLines = []
-    self._buildTextFlag = True
-
-    self._buildMouse = True
-    self._mouseCoords = [-1.0, -1.0]
-    self.mouseString = None
-    self.diffMouseString = None
-    self.peakLabelling = 0
-
-    self._contourList = {}
-
-    self._hTraces = {}
-    self._vTraces = {}
-    self._staticHTraces = []
-    self._staticVTraces = []
-    self._stackingValue = None
-    self._hTraceVisible = False
-    self._vTraceVisible = False
-    self.w = 0
-    self.h = 0
-
-    self._uPMatrix = np.zeros((16,), dtype=np.float32)
-    self._uMVMatrix = np.zeros((16,), dtype=np.float32)
-    self._uVMatrix = np.zeros((16,), dtype=np.float32)
-    self._aMatrix = np.zeros((16,), dtype=np.float32)
-    self._IMatrix = np.zeros((16,), dtype=np.float32)
-    self._IMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
-                           0.0, 1.0, 0.0, 0.0,
-                           0.0, 0.0, 1.0, 0.0,
-                           0.0, 0.0, 0.0, 1.0]
-
-    self._useTexture = np.zeros((1,), dtype=np.int)
-    self._axisScale = np.zeros((4,), dtype=np.float32)
-    self._background = np.zeros((4,), dtype=np.float32)
-    self._parameterList = np.zeros((4,), dtype=np.int32)
-    self._view = np.zeros((4,), dtype=np.float32)
-    self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
-
-    # get information from the parent class (strip)
-    self.orderedAxes = self._parent.orderedAxes
-    self.axisOrder = self._parent.axisOrder
-    self.axisCodes = self._parent.axisCodes
-    self.initialiseTraces()
-
-    self._dragRegion = (None, None, None)
-
-    # define zoom limits for the display
-    self._minXRange = 0.0
-    self._maxXRange = 0.0
-    self._minYRange = 0.0
-    self._maxYRange = 0.0
-    self._minReached = False
-    self._maxReached = False
 
   def setBackgroundColour(self, col):
     """

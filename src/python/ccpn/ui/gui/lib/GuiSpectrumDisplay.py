@@ -638,15 +638,22 @@ class GuiSpectrumDisplay(CcpnModule):
     else:
       self.hideToolbar()
 
+  def close(self):
+    """
+    Close the module from the commandline
+    """
+    self._closeModule()
+
   def _closeModule(self):
     """
+    CCPN-INTERNAL: used to close the module
     Closes spectrum display and deletes it from the project.
     """
     try:
       for strip in self.strips:
+        getLogger().debug2('unregistering strip: %s' % strip)
         strip._unregisterStrip()
-      # self.module.close()
-      #self.delete()
+
     finally:
       CcpnModule._closeModule(self)
       self.delete()
@@ -913,6 +920,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
         thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
         thisLayout.itemAt(maxCol).widget().setMinimumWidth(firstStripWidth)
+
+  def _maximiseRegions(self):
+    """Zooms Y axis of current strip to show entire region"""
+    for strip in self.strips:
+      strip._maximiseRegions()
 
   def resetYZooms(self):
     """Zooms Y axis of current strip to show entire region"""

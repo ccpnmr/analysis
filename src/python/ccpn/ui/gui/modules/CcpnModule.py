@@ -855,8 +855,31 @@ class CcpnModuleLabel(DockLabel):
     if len(self.module.mainWindow.moduleArea.ccpnModules)>1:
       closeOthers = contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
       closeAllModules = contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
+      # contextMenu.addSeparator()
+      # moveMenu = Menu('Move', self, isFloatWidget=True)
+      # popout = moveMenu.addAction('Out', self.module.float)
+      # # position has to be one of str  'bottom', 'top', 'left', 'right', 'above' as pyqtgraph wants!
+      # positions = ['top','bottom', 'left', 'right']
+      # for position in positions:
+      #   mm = self._modulesMenu(position, self.module)
+      #   moveMenu._addQMenu(mm)
+      #
+      # contextMenu._addQMenu(moveMenu)
+
 
     return contextMenu
+
+  def _modulesMenu(self, menuName, module):
+
+    menu = Menu(menuName.title(), self, isFloatWidget=True)
+    if module:
+      toAll = menu.addAction('All', partial(module.mainWindow.moduleArea.moveModule, module,menuName, None ))
+      for availableModule in module.mainWindow.moduleArea.ccpnModules:
+        if availableModule != module:
+          toModule = menu.addAction(str(availableModule.name()),
+                                 partial(module.mainWindow.moduleArea.moveModule, module, menuName, availableModule))
+      return menu
+
 
   def mousePressEvent(self, event:QtGui.QMouseEvent):
     """

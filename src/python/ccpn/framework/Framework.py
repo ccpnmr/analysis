@@ -74,7 +74,9 @@ AnalysisMetabolomics = 'AnalysisMetabolomics'
 AnalysisStructure = 'AnalysisStructure'
 ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
 interfaceNames = ('NoUi', 'Gui')
-
+DataDirName = 'data'
+SpectraDirName = 'spectra'
+PluginDataDirName = 'pluginData'
 
 def _ccpnExceptionhook(type, value, tback):
   '''This because PyQT raises and catches exceptions,
@@ -384,12 +386,14 @@ class Framework:
 
 
 
-    # Add Folders
+    # init application directory
     self.scriptPath = createScriptsDirectory(project)
     addScriptSubDirectory(project, 'pymol')
     self.statePath = self.statePath
-    self.savingDataPath = self.pipelinePath
-
+    self.dataPath = self.dataPath
+    self.pipelinePath = self.pipelinePath
+    self.spectraPath = self.spectraPath
+    self.pluginDataPath = self.pluginDataPath
 
     # restore current
     self.current._restoreStateFromFile(self.statePath)
@@ -407,32 +411,6 @@ class Framework:
     else:
       # The NoUi version has no mainWindow
       self.ui.initialize(None)
-
-  @property
-  def statePath(self):
-    return self._statePath
-
-  @statePath.getter
-  def statePath(self):
-    'This because the paths can change dynamically when saving!!'
-    return Path.makeDir(self.project.path, Layout.StateDirName)
-
-  @statePath.setter
-  def statePath(self, path):
-    self._statePath = path
-
-  @property
-  def pipelinePath(self):
-    return self._pipelinePath
-
-  @pipelinePath.getter
-  def pipelinePath(self):
-    'This because the paths can change dynamically when saving!!'
-    return Path.makeDir(self.statePath, Pipeline.className)
-
-  @pipelinePath.setter
-  def pipelinePath(self, path):
-    self._pipelinePath = path
 
   def _refreshAfterSave(self):
     """Refresh user interface after project save (which may have caused project rename)"""
@@ -602,6 +580,7 @@ class Framework:
     NBNB project should be impliclt rather than a parameter (once reorganisation is finished)
     """
     # Reset remoteData DataStores to match preferences setting
+    # FIXME with new default data path
     dataPath = self.preferences.general.dataPath
     if not dataPath or not os.path.isdir(dataPath):
       dataPath = os.path.expanduser('~')
@@ -748,6 +727,70 @@ class Framework:
     """Add a new items to an existing menu starting at specified position"""
     for n, menuItem in enumerate(menuItems):
       self.addApplicationMenuItem(menuName, menuItem, position+n)
+
+
+  #########################################    Create dir links      ############################
+  # dirs are created with decorators because the  project path can change dynamically'
+
+  @property
+  def statePath(self):
+    return self._statePath
+
+  @statePath.getter
+  def statePath(self):
+    return Path.makeDir(self.project.path, Layout.StateDirName)
+
+  @statePath.setter
+  def statePath(self, path):
+    self._statePath = path
+
+  @property
+  def pipelinePath(self):
+    return self._pipelinePath
+
+  @pipelinePath.getter
+  def pipelinePath(self):
+    return Path.makeDir(self.statePath, Pipeline.className)
+
+  @pipelinePath.setter
+  def pipelinePath(self, path):
+    self._pipelinePath = path
+
+  @property
+  def dataPath(self):
+    return self._dataPath
+
+  @dataPath.getter
+  def dataPath(self):
+    return Path.makeDir(self.project.path, DataDirName)
+
+  @dataPath.setter
+  def dataPath(self, path):
+    self._dataPath = path
+
+  @property
+  def spectraPath(self):
+    return self._spectraPath
+
+  @spectraPath.getter
+  def spectraPath(self):
+    return Path.makeDir(self.dataPath, SpectraDirName)
+
+  @spectraPath.setter
+  def spectraPath(self, path):
+    self._spectraPath = path
+
+  @property
+  def pluginDataPath(self):
+    return self._pluginDataPath
+
+  @pluginDataPath.getter
+  def pluginDataPath(self):
+    return Path.makeDir(self.dataPath, PluginDataDirName)
+
+  @pluginDataPath.setter
+  def pluginDataPath(self, path):
+    self._pluginDataPath = path
 
   #########################################    Start setup Menus      ############################
 

@@ -263,7 +263,8 @@ def suggestFileLocations(fileNames, startDir=None):
 def makeDir(path, dirName):
   '''
 
-  :param project:
+  :param path: string of parent path where to add a new subdir
+  :param dirName: str of the new sub dir
   :return: creates a new folder with the given name, return the new path as str
   '''
   if path is not None:

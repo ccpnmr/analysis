@@ -211,4 +211,3 @@ def setLevel(logger, level=logging.INFO):
   logger.setLevel(level)
   for handler in logger.handlers:
     handler.setLevel(level)
-    

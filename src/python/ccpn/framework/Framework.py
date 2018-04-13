@@ -729,8 +729,10 @@ class Framework:
       self.addApplicationMenuItem(menuName, menuItem, position+n)
 
 
-  #########################################    Create dir links      ############################
-  # dirs are created with decorators because the  project path can change dynamically'
+  #########################################    Create sub dirs   ########################################################
+
+  ## dirs are created with decorators because the project path can change dynamically.
+  ##  When a project is saved in a new location, all the dirs get refreshed automatically'
 
   @property
   def statePath(self):

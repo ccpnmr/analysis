@@ -249,7 +249,7 @@ class PreferencesPopup(CcpnDialog):
     ''' Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live'''
 
     row = 0
-    self.dataPathLabel = Label(parent, "Data Path", grid=(row, 0),)
+    self.dataPathLabel = Label(parent, "User Data Path", grid=(row, 0),)
     self.dataPathText = LineEdit(parent, grid=(row, 1), hAlign='l')
     self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
     self.dataPathText.editingFinished.connect(self._setDataPath)

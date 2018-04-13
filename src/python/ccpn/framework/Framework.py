@@ -53,7 +53,6 @@ from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify
 from ccpn.util.Logging import getLogger
-from ccpn.util.Scripting import createScriptsDirectory, addScriptSubDirectory
 from ccpn.util import Layout
 from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpnmodel.ccpncore.api.memops import Implementation
@@ -77,6 +76,7 @@ interfaceNames = ('NoUi', 'Gui')
 DataDirName = 'data'
 SpectraDirName = 'spectra'
 PluginDataDirName = 'pluginData'
+ScriptsDirName = 'scripts'
 
 def _ccpnExceptionhook(type, value, tback):
   '''This because PyQT raises and catches exceptions,
@@ -387,8 +387,8 @@ class Framework:
 
 
     # init application directory
-    self.scriptPath = createScriptsDirectory(project)
-    addScriptSubDirectory(project, 'pymol')
+    self.scriptsPath = self.scriptsPath
+    self.pymolScriptsPath = Path.fetchDir(self.scriptsPath, 'pymol')
     self.statePath = self.statePath
     self.dataPath = self.dataPath
     self.pipelinePath = self.pipelinePath
@@ -738,7 +738,7 @@ class Framework:
 
   @statePath.getter
   def statePath(self):
-    return Path.makeDir(self.project.path, Layout.StateDirName)
+    return Path.fetchDir(self.project.path, Layout.StateDirName)
 
   @statePath.setter
   def statePath(self, path):
@@ -750,7 +750,7 @@ class Framework:
 
   @pipelinePath.getter
   def pipelinePath(self):
-    return Path.makeDir(self.statePath, Pipeline.className)
+    return Path.fetchDir(self.statePath, Pipeline.className)
 
   @pipelinePath.setter
   def pipelinePath(self, path):
@@ -762,7 +762,7 @@ class Framework:
 
   @dataPath.getter
   def dataPath(self):
-    return Path.makeDir(self.project.path, DataDirName)
+    return Path.fetchDir(self.project.path, DataDirName)
 
   @dataPath.setter
   def dataPath(self, path):
@@ -774,7 +774,7 @@ class Framework:
 
   @spectraPath.getter
   def spectraPath(self):
-    return Path.makeDir(self.dataPath, SpectraDirName)
+    return Path.fetchDir(self.dataPath, SpectraDirName)
 
   @spectraPath.setter
   def spectraPath(self, path):
@@ -786,11 +786,25 @@ class Framework:
 
   @pluginDataPath.getter
   def pluginDataPath(self):
-    return Path.makeDir(self.dataPath, PluginDataDirName)
+    return Path.fetchDir(self.dataPath, PluginDataDirName)
 
   @pluginDataPath.setter
   def pluginDataPath(self, path):
     self._pluginDataPath = path
+
+
+
+  @property
+  def scriptsPath(self):
+    return self._scriptsPath
+
+  @scriptsPath.getter
+  def scriptsPath(self):
+    return Path.fetchDir(self.project.path, ScriptsDirName)
+
+  @scriptsPath.setter
+  def scriptsPath(self, path):
+    self._scriptsPath = path
 
   #########################################    Start setup Menus      ############################
 

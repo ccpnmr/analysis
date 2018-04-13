@@ -260,12 +260,12 @@ def suggestFileLocations(fileNames, startDir=None):
   #
   return baseDir, paths
 
-def makeDir(path, dirName):
+def fetchDir(path, dirName):
   '''
 
   :param path: string of parent path where to add a new subdir
   :param dirName: str of the new sub dir
-  :return: creates a new folder with the given name, return the new path as str
+  :return: if not already existing, creates a new folder with the given name, return the full path as str
   '''
   if path is not None:
     newPath = os.path.join(path, dirName)

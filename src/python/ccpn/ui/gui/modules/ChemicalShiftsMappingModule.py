@@ -52,7 +52,6 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Colour import spectrumColours, hexToRgb
-from ccpn.util.Scripting import getScriptsDirectoryPath
 from ccpn.core.lib.peakUtils import getNmrResidueDeltas, MODES, LINEWIDTHS, HEIGHT, POSITIONS, VOLUME, DefaultAtomWeights, H, N, OTHER, C
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.NmrChain import NmrChain
@@ -593,8 +592,8 @@ class ChemicalShiftsMapping(CcpnModule):
     self.pdbLabel = Label(self.mvWidgetContents, text='PDB File Path', grid=(0, 0))
     scriptPath = None
     if self.mainWindow:
-      scriptPath = os.path.join(getScriptsDirectoryPath(self.project),'pymol')
-
+      # scriptPath = os.path.join(getScriptsDirectoryPath(self.project),'pymol')
+      scriptPath = self.application.pymolScriptsPath
     self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, textDialog='Select PDB File',
                                         filter="PDB files (*.pdb)", directory=scriptPath, grid=(0,1))
 
@@ -927,7 +926,7 @@ class ChemicalShiftsMapping(CcpnModule):
     import json
     import subprocess
 
-    filePath = os.path.join(getScriptsDirectoryPath(self.project),'pymol', PymolScriptName)
+    filePath = os.path.join(self.application.pymolScriptsPath, PymolScriptName)
 
     pymolPath = self.application.preferences.externalPrograms.pymol
     pdbPath = self.pathPDB.get()

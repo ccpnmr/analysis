@@ -44,6 +44,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Menu import Menu
 
+from ccpn.ui.gui.guiSettings import getColours, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Label import Label
@@ -354,6 +355,7 @@ class CcpnModule(Dock, DropBase):
     # stop the blue overlay popping up when dragging over a spectrum
     self.allowedAreas = ['top', 'left', 'right', 'bottom']
 
+    self._updateStyle()
     self.update()     # ejb - make sure that the widgetArea starts the correct size
 
     self._instances.add(ref(self))
@@ -767,6 +769,25 @@ class CcpnModule(Dock, DropBase):
     else:
         displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
     return displays
+
+  def _updateStyle(self):
+    """
+    Copied from the parent class to allow for modification in StyleSheet
+    However, that appears not to work (fully);
+
+    GWV: many calls to the updateStyle are triggered during initialization
+         probably from paint event
+    """
+
+    # Padding apears not to work; overriden somewhere else?
+    colours = getColours()
+
+    tempStyle = """{
+            background-color : %s;
+            color : %s;
+            border-width: 0px;
+        }""" % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])
+    self.setStyleSheet(tempStyle)
 
 class CcpnModuleLabel(DockLabel):
   """

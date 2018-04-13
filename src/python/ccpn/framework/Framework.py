@@ -580,7 +580,6 @@ class Framework:
     NBNB project should be impliclt rather than a parameter (once reorganisation is finished)
     """
     # Reset remoteData DataStores to match preferences setting
-    # FIXME with new default data path
     dataPath = self.preferences.general.dataPath
     if not dataPath or not os.path.isdir(dataPath):
       dataPath = os.path.expanduser('~')

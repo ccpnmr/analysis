@@ -782,11 +782,9 @@ class CcpnModule(Dock, DropBase):
     # Padding apears not to work; overriden somewhere else?
     colours = getColours()
 
-    tempStyle = """{
-            background-color : %s;
-            color : %s;
-            border-width: 0px;
-        }""" % (colours[CCPNMODULELABEL_BACKGROUND], colours[CCPNMODULELABEL_FOREGROUND])
+    tempStyle = """CcpnModule {
+                      border: 0px;
+                   }"""
     self.setStyleSheet(tempStyle)
 
 class CcpnModuleLabel(DockLabel):

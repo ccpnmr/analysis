@@ -1321,7 +1321,8 @@ class Framework:
           destinationPath = os.path.join(self.spectraPath, brukerName)
           copy_tree(brukerDir, destinationPath)
           clonedPath = os.path.join(destinationPath, *ss[ss.index('pdata'):])
-          spectrum.filePath = clonedPath
+          # needs to repoint the path but doesn't seem to work!! troubles with $INSIDE!!
+          # spectrum.filePath = clonedPath
         else:
           # copy the file and or other files containing params
           from ntpath import basename
@@ -1335,10 +1336,11 @@ class Framework:
             copyfile(otherFileTocopy, otherFilePath)
           if oldPath != clonedPath:
             copyfile(oldPath,clonedPath)
-            spectrum.filePath = clonedPath
+            # needs to repoint the path but doesn't seem to work!! troubles with $INSIDE!!
+            # spectrum.filePath = clonedPath
 
     except Exception as e:
-      getLogger().debug(e)
+      getLogger().debug(str(e))
 
   def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""
@@ -1367,6 +1369,7 @@ class Framework:
       sys.stderr.write('==> Project successfully saved\n')
       # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
       #                            iconPath=saveIconPath)
+
 
     return successful
 

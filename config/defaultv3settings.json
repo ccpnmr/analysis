@@ -13,6 +13,7 @@
         "dataPath": "",
         "useNative": false,
         "useNativeWebbrowser": false,
+        "keepSpectraInsideProject": false,
         "showToolbar": true,
         "showSpectrumBorder": true,
         "autoBackupEnabled": false,

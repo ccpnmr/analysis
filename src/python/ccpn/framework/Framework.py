@@ -1302,9 +1302,42 @@ class Framework:
     for path in paths:
       self.project.loadData(path)
 
+  def _cloneSpectraToProjectDir(self):
+    ''' Keep a copy of spectra inside the project directory "myproject.ccpn/data/spectra".
+    This is useful when saving the project in an external driver and want to keep the spectra together with the project.
+    '''
+    from shutil import copyfile
+    from distutils.dir_util import copy_tree
+    try:
+      for spectrum in self.project.spectra:
+        oldPath = spectrum.filePath
+        # For Bruker need to keep all the tree structure.
+        # Uses the fact that there is a folder called "pdata" and start to copy from the dir before.
+        ss = oldPath.split('/')
+        if 'pdata' in ss:
+          brukerDir = os.path.join(os.sep, *ss[:ss.index('pdata')])
+          brukerName = brukerDir.split('/')[-1]
+          os.mkdir(os.path.join(self.spectraPath, brukerName))
+          destinationPath = os.path.join(self.spectraPath, brukerName)
+          copy_tree(brukerDir, destinationPath)
+          clonedPath = os.path.join(destinationPath, *ss[ss.index('pdata'):])
+          spectrum.filePath = clonedPath
+        else:
+          # copy only the file
+          from ntpath import basename
+          clonedPath = os.path.join(self.spectraPath, basename(oldPath))
+          if oldPath != clonedPath:
+            copyfile(oldPath,clonedPath)
+            spectrum.filePath = clonedPath
+
+    except Exception as e:
+      getLogger().debug(e)
 
   def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""
+    if self.preferences.general.keepSpectraInsideProject:
+      self._cloneSpectraToProjectDir()
+
     successful = self.project.save(newPath=newPath, createFallback=createFallback,
                                    overwriteExisting=overwriteExisting)
     if not successful:
@@ -2383,35 +2416,38 @@ def getSaveDirectory(parent, preferences=None):
 ########
 
 def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
-
-  def _updateDict(d, u):
-    import collections
-    # recursive update of dictionary
-    # this deletes every key in u that is not in d
-    # if we want every key regardless, then remove first if check below
-    for k, v in u.items():
-      if k not in d:
-        continue
-      if isinstance(v, collections.Mapping):
-        r = _updateDict(d.get(k, {}), v)
-        d[k] = r
-      else:
-        d[k] = u[k]
-    return d
-
-  # read the default settings
   from ccpn.framework.PathsAndUrls import defaultPreferencesPath
-  preferencesPath = (defaultPath if defaultPath else defaultPreferencesPath)
-  with open(preferencesPath) as fp:
-    preferences = json.load(fp, object_hook=AttrDict)
+  try:
+    def _updateDict(d, u):
+      import collections
+      # recursive update of dictionary
+      # this deletes every key in u that is not in d
+      # if we want every key regardless, then remove first if check below
+      for k, v in u.items():
+        if k not in d:
+          continue
+        if isinstance(v, collections.Mapping):
+          r = _updateDict(d.get(k, {}), v)
+          d[k] = r
+        else:
+          d[k] = u[k]
+      return d
 
-  # read user settings and update if not skipped
-  if not skipUserPreferences:
-    from ccpn.framework.PathsAndUrls import userPreferencesPath
-    preferencesPath = (userPath if userPath else os.path.expanduser(userPreferencesPath))
-    if os.path.isfile(preferencesPath):
-      with open(preferencesPath) as fp:
-        userPreferences = json.load(fp, object_hook=AttrDict)
-      preferences = _updateDict(preferences, userPreferences)
+    # read the default settings
+    preferencesPath = (defaultPath if defaultPath else defaultPreferencesPath)
+    with open(preferencesPath) as fp:
+      preferences = json.load(fp, object_hook=AttrDict)
+
+    # read user settings and update if not skipped
+    if not skipUserPreferences:
+      from ccpn.framework.PathsAndUrls import userPreferencesPath
+      preferencesPath = (userPath if userPath else os.path.expanduser(userPreferencesPath))
+      if os.path.isfile(preferencesPath):
+        with open(preferencesPath) as fp:
+          userPreferences = json.load(fp, object_hook=AttrDict)
+        preferences = _updateDict(preferences, userPreferences)
+  except: #should we have the preferences hard coded as py dict for extra safety? if json goes wrong the whole project crashes!
+    with open(defaultPreferencesPath) as fp:
+      preferences = json.load(fp, object_hook=AttrDict)
 
   return preferences

@@ -1323,9 +1323,16 @@ class Framework:
           clonedPath = os.path.join(destinationPath, *ss[ss.index('pdata'):])
           spectrum.filePath = clonedPath
         else:
-          # copy only the file
+          # copy the file and or other files containing params
           from ntpath import basename
+          pathWithoutFileName = os.path.join(os.sep, *ss[:ss.index(basename(oldPath))])
+          fullpath = os.path.join(pathWithoutFileName, basename(oldPath))
+          import glob
+          otherFilesWithSameName = glob.glob(fullpath+".*")
           clonedPath = os.path.join(self.spectraPath, basename(oldPath))
+          for otherFileTocopy in otherFilesWithSameName:
+            otherFilePath = os.path.join(self.spectraPath, basename(otherFileTocopy))
+            copyfile(otherFileTocopy, otherFilePath)
           if oldPath != clonedPath:
             copyfile(oldPath,clonedPath)
             spectrum.filePath = clonedPath

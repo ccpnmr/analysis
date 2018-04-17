@@ -107,8 +107,7 @@ GLLINE_STYLES = {
   'dotted': 0xAAAA
 }
 
-FADE_FACTOR = 0.3
-
+FADE_FACTOR = 0.25
 
 class CcpnGLWidget(QOpenGLWidget):
 

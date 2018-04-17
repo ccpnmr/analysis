@@ -4788,16 +4788,27 @@ class CcpnGLWidget(QOpenGLWidget):
           if not isinstance(peakList, PeakList):
             continue
 
+          spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+          xAxis = spectrumIndices[0]
+          yAxis = spectrumIndices[1]
+
           for peak in peakList.peaks:
-            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-              and yPositions[0] < float(peak.position[1]) < yPositions[1]):
-              if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
+            if len(peak.axisCodes) > 2 and zPositions is not None:
 
-                # if peak in self.current.peaks:
-                #   self.current._peaks.remove(peak)
-                # else:
-                #   self.current.addPeak(peak)
+              zAxis = spectrumIndices[2]
+              # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+              if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                  and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
 
+                if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                  if peak in peaks:
+                    peaks.remove(peak)
+                  else:
+                    peaks.append(peak)
+            else:
+              # 2d check
+              if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+                  and yPositions[0] < float(peak.position[1]) < yPositions[1]):
                 if peak in peaks:
                   peaks.remove(peak)
                 else:
@@ -5065,7 +5076,7 @@ class CcpnGLWidget(QOpenGLWidget):
             for peak in peakList.peaks:
               if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
                       and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-                if zPositions is not None:
+                if len(peak.axisCodes) > 2 and zPositions is not None:
                   zAxis = spectrumIndices[2]
                   # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
                   if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:

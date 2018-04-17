@@ -36,6 +36,7 @@ from ccpn.util.Logging import getLogger
 from functools import partial
 from ccpn.ui.gui.lib.Shortcuts import addShortCut
 from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
+from ccpn.ui.gui.widgets.MessageDialog import progressManager
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
 # For readability there should be a class
@@ -462,8 +463,9 @@ class GuiWindow():
       title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
       msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
       if MessageDialog.showYesNo(title, msg, parent):
-        for peak in peaks:
-          peak.snapToExtremum()
+        with progressManager(self, 'Snapping peaks to extrema'):
+          for peak in peaks:
+            peak.snapToExtremum()
     else:
       getLogger().warning('No selected peak/s. Select a peak first.')
 

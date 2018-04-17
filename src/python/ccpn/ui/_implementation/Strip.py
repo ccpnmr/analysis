@@ -759,11 +759,15 @@ class Strip(AbstractWrapperObject):
             position = [0] * spectrumView.spectrum.dimensionCount
 
             remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-            for n, axisCode in enumerate(spectrumAxisCodes):
+            if remapIndices:
+              for n, axisCode in enumerate(spectrumAxisCodes):
               # idx = stripAxisCodes.index(axisCode)
-              idx = remapIndices[n]
-              # sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-              position[n] = inPosition[idx]
+
+                idx = remapIndices[n]
+                # sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+                position[n] = inPosition[idx]
+            else:
+              position = inPosition
 
           if peak.peakList.spectrum.dimensionCount == 1:
             if len(position) > 1:
@@ -776,6 +780,9 @@ class Strip(AbstractWrapperObject):
             peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
           result.append(peak)
           peakLists.append(peakList)
+
+    except Exception as es:
+      pass
 
     finally:
       self._endCommandEchoBlock()
@@ -895,10 +902,13 @@ class Strip(AbstractWrapperObject):
             sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
 
             remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-            for n, axisCode in enumerate(spectrumAxisCodes):
-              # idx = stripAxisCodes.index(axisCode)
-              idx = remapIndices[n]
-              sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+            if remapIndices:
+              for n, axisCode in enumerate(spectrumAxisCodes):
+                # idx = stripAxisCodes.index(axisCode)
+                idx = remapIndices[n]
+                sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+            else:
+              sortedSpectrumRegion = sortedSelectedRegion
 
             newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
                                             doPos=spectrumView.displayPositiveContours,

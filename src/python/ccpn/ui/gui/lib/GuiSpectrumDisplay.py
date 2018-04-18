@@ -56,6 +56,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrChain import NmrChain
 
 AXIS_WIDTH = 30
 
@@ -257,6 +258,7 @@ class GuiSpectrumDisplay(CcpnModule):
     "handle a; return True in case it is a Spectrum or a SpectrumGroup"
     success = False
     objs = []
+    nmrChains = []
     nmrResidues = []
     nmrAtoms = []
 
@@ -299,9 +301,15 @@ class GuiSpectrumDisplay(CcpnModule):
       elif obj is not None and isinstance(obj, NmrResidue):
         nmrResidues.append(obj)
 
+      elif obj is not None and isinstance(obj, NmrChain):
+        nmrChains.append(obj)
+
       else:
         showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, PeakList,'
-                                                   ' NmrResidue or NmrAtom')
+                                                   ' NmrChain, NmrResidue or NmrAtom')
+    if nmrChains:
+      with suspendSideBarNotifications(self.project):
+        self._handleNmrChains(nmrChains)
     if nmrResidues:
       with suspendSideBarNotifications(self.project):
         self._handleNmrResidues(nmrResidues)
@@ -336,6 +344,10 @@ class GuiSpectrumDisplay(CcpnModule):
       self.displaySpectrum(spectrum)
     if self.current.strip not in self.strips:
       self.current.strip = self.strips[0]
+
+  def _handleNmrChains(self, nmrChains):
+    for chain in nmrChains:
+      self._handleNmrResidues(chain.nmrResidues)
 
   def _handleNmrResidues(self, nmrResidues):
     if not self.current.peak:

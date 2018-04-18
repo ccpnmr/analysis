@@ -270,12 +270,14 @@ class PreferencesPopup(CcpnDialog):
     self.dropFactorData.setValue(float('%.1f' % (100*self.preferences.general.peakDropFactor)))
     self.dropFactorData.editingFinished.connect(self._setDropFactor)
 
-    row += 1
-    self.keepSPWithinProjectTipText = 'Keep a copy of spectra inside the project directory. Useful when changing the original spectra location path'
-    self.keepSPWithinProject = Label(parent, text="Keep a Copy Inside Project: ", grid=(row, 0))
-    self.keepSPWithinProjectBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.keepSpectraInsideProject,
-                                           tipText=self.keepSPWithinProjectTipText)
-    self.keepSPWithinProjectBox.toggled.connect(partial(self._toggleGeneralOptions, 'keepSpectraInsideProject'))
+    ### Not fully Tested, Had some issues with $Path routines in setting the path of the copied spectra.
+    ###  Needs more testing for different spectra formats etc. Disabled until completion.
+    # row += 1
+    # self.keepSPWithinProjectTipText = 'Keep a copy of spectra inside the project directory. Useful when changing the original spectra location path'
+    # self.keepSPWithinProject = Label(parent, text="Keep a Copy Inside Project: ", grid=(row, 0))
+    # self.keepSPWithinProjectBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.keepSpectraInsideProject,
+    #                                        tipText=self.keepSPWithinProjectTipText)
+    # self.keepSPWithinProjectBox.toggled.connect(partial(self._toggleGeneralOptions, 'keepSpectraInsideProject'))
 
     row += 1
     self.showToolbarLabel = Label(parent, text="Show ToolBar(s): ", grid=(row, 0))

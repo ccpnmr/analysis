@@ -4947,6 +4947,14 @@ class CcpnGLWidget(QOpenGLWidget):
       # self._clearIntegralRegions()
       self._selectPeak(xPosition, yPosition)
 
+      for reg in self._GLIntegralLists.values():
+        if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
+          continue
+        integralPressed = self.mousePressInRegion(reg._regions)
+        if integralPressed:
+          self.current.integrals = [integralPressed._object]
+          break
+
       # if self._dragRegion[0]:   # and isinstance(self._dragRegion[0]._object, Integral):
       #   self.current.integrals = [self._dragRegion[0]._object]
 

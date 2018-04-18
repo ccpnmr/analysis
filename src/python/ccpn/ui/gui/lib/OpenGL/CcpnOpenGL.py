@@ -1623,6 +1623,26 @@ class CcpnGLWidget(QOpenGLWidget):
           else:
             drawStr.setColour((*listCol, fade))
 
+  def _updateHighlightedIntegrals(self, spectrumView, peakListView):
+    if not isinstance(peakListView.peakList, IntegralList):
+      return
+
+    drawList = self._GLIntegralLists[peakListView]
+
+    pls = peakListView.peakList
+    listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
+
+    for integral in pls.integrals:
+      if integral in self.current.integrals:
+        cols = self.highlightColour[:3]
+      else:
+        cols = self.highlightColour[:3]
+
+    for reg in drawList._regions:
+      # if reg._object == integral:
+      reg._integralArea.colors = np.array((*cols, CCPNGLWIDGET_INTEGRALSHADE) * reg._integralArea.numVertices)
+      pass
+
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
     spectrum = spectrumView.spectrum
     strip = self._parent
@@ -4707,6 +4727,13 @@ class CcpnGLWidget(QOpenGLWidget):
                   self._updateHighlightedPeaks(spectrumView, peakListView)
                   self._updateHighlightedPeakLabels(spectrumView, peakListView)
 
+          if GLNotifier.GLHIGHLIGHTINTEGRALS in triggers:
+
+            for spectrumView in self._parent.spectrumViews:
+              for peakListView in spectrumView.peakListViews:
+
+                self._updateHighlightedIntegrals(spectrumView, peakListView)
+
           if GLNotifier.GLALLPEAKS in triggers:
 
             for spectrumView in self._parent.spectrumViews:
@@ -5226,9 +5253,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
       # confusing as peakList and integralList share the same list :)
       if integral.integralList == ils.integralListView.peakList:
-        listCol = getAutoColourRgbRatio(ils.integralListView.symbolColour, ils.integralListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
+        listCol = getAutoColourRgbRatio(ils.integralListView.peakList.symbolColour, ils.integralListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
-        ils.addIntegral(integral, ils.integralListView, colour=None, brush=(*listCol, 0.15))
+        ils.addIntegral(integral, ils.integralListView, colour=None, brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
         self.update()
         return
 

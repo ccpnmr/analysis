@@ -50,6 +50,7 @@ class GLNotifier(QtWidgets.QWidget):
   GLCLEARPHASING = 'clearPhasing'
   GLCONTOURS = 'updateContours'
   GLHIGHLIGHTPEAKS = 'glHighlightPeaks'
+  GLHIGHLIGHTINTEGRALS = 'glHighlightIntegrals'
   GLALLPEAKS = 'glAllPeaks'
   GLPEAKNOTIFY = 'glPeakNotify'
   GLPEAKLISTS = 'glUpdatePeakLists'

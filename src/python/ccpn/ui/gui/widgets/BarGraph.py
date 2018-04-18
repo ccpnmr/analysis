@@ -110,14 +110,16 @@ class BarGraph(pg.BarGraphItem):
           nmrResidue = object
           if hasattr(nmrResidue, 'sequenceCode'):
 
-            # if nmrResidue.residue:
-            if nmrResidue.sequenceCode is not None:
-              # if str(nmrResidue.sequenceCode) == label.text():
-              ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)
-              lbl = label.text()
-              if str(ind) == lbl:
-                # label.setData(int(nmrResidue.sequenceCode), object)
-                label.setData(ind, object)
+            if nmrResidue.residue:
+              if nmrResidue.sequenceCode is not None:
+                if str(nmrResidue.sequenceCode) == label.text():
+                  label.setData(int(nmrResidue.sequenceCode), object)
+
+            # if nmrResidue.sequenceCode is not None:
+            #   ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)
+            #   lbl = label.text()
+            #   if str(ind) == lbl:
+            #     label.setData(ind, object)
 
         # else:
           # pass

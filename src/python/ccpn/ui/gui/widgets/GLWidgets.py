@@ -79,6 +79,8 @@ class Gui1dWidget(CcpnGLWidget):
   AXISLOCKEDBUTTON = True
   is1D = True
   SPECTRUMPOSCOLOUR = 'sliceColour'
+  SPECTRUMXZOOM = 1.0e2
+  SPECTRUMYZOOM = 1.0e6
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(Gui1dWidget, self).__init__(parent=parent,

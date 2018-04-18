@@ -118,6 +118,8 @@ class CcpnGLWidget(QOpenGLWidget):
   INVERTXAXIS = True
   INVERTYAXIS = True
   AXISLOCKEDBUTTON = True
+  SPECTRUMXZOOM = 1.0e2
+  SPECTRUMYZOOM = 1.0e2
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(CcpnGLWidget, self).__init__(parent)
@@ -524,9 +526,9 @@ class CcpnGLWidget(QOpenGLWidget):
         dyAF = fy0 - fy1
         yScale = dy * dyAF / 1.0
 
-        self._minXRange = min(self._minXRange, 3.0*(fx0-fx1) / self._spectrumValues[0].totalPointCount)
+        self._minXRange = min(self._minXRange, 3.0*(fx0-fx1) / max(self._spectrumValues[0].totalPointCount, self.SPECTRUMXZOOM))
         self._maxXRange = max(self._maxXRange, (fx0-fx1))
-        self._minYRange = min(self._minYRange, 3.0*(fy0-fy1) / 2048.0)
+        self._minYRange = min(self._minYRange, 3.0*(fy0-fy1) / self.SPECTRUMYZOOM)
         self._maxYRange = max(self._maxYRange, (fy0-fy1))
 
         if self._stackingValue:

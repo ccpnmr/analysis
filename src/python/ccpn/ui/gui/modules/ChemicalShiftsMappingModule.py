@@ -739,8 +739,9 @@ class ChemicalShiftsMapping(CcpnModule):
             if hasattr(nmrResidue, '_spectraWithMissingPeaks'):
               if len(nmrResidue._spectraWithMissingPeaks) != 0:
                 if nmrResidue.sequenceCode:
-                  # x = int(nmrResidue.sequenceCode)
-                  x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
+
+                  x = int(nmrResidue.sequenceCode)
+                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
                   if nmrResidue._delta:
                     y = nmrResidue._delta
                   else:
@@ -756,8 +757,8 @@ class ChemicalShiftsMapping(CcpnModule):
               if not nmrResidue.missingPeaks:
                 if nmrResidue.sequenceCode:
 
-                  # x = int(nmrResidue.sequenceCode)
-                  x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
+                  x = int(nmrResidue.sequenceCode)
+                  # x = self.nmrResidueTable._dataFrameObject.objects.index(nmrResidue)
                   y = float(nmrResidue._delta)
 
                   xs.append(x)
@@ -890,17 +891,17 @@ class ChemicalShiftsMapping(CcpnModule):
       if self.nmrResidueTable._nmrChain is not None:
         for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
 
-          # if self._isInt(nmrResidue.sequenceCode):
+          if self._isInt(nmrResidue.sequenceCode):
 
-          spectra = self.spectraSelectionWidget.getSelections()
-          self._updatedPeakCount(nmrResidue, spectra)
-          if nmrResidue._includeInDeltaShift:
-            nmrResidue.spectraCount = len(spectra)
-            nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
-            nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
-            nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
-          else:
-            nmrResidue._delta = None
+            spectra = self.spectraSelectionWidget.getSelections()
+            self._updatedPeakCount(nmrResidue, spectra)
+            if nmrResidue._includeInDeltaShift:
+              nmrResidue.spectraCount = len(spectra)
+              nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
+              nmrResidue.selectedNmrAtomNames =  [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
+              nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
+            else:
+              nmrResidue._delta = None
         if not silent:
           self.updateTable(self.nmrResidueTable._nmrChain)
           self.updateBarGraph()

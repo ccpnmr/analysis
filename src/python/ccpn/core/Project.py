@@ -275,6 +275,20 @@ class Project(AbstractWrapperObject):
     return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
 
   @property
+  def backupPath(self):
+    """path to directory containing  backup Project"""
+    backupRepository = self._wrappedData.parent.findFirstRepository(name="backup")
+
+    if not backupRepository:
+      self._logger.warning('Warning: no backup path set, so no backup done')
+      return
+
+
+    backupUrl = backupRepository.url
+    backupPath = backupUrl.path
+    return  backupPath
+
+  @property
   def programName(self) -> str:
     """Name of running program - defaults to 'CcpNmr'"""
     appBase = self._appBase if hasattr(self, '_appBase') else None

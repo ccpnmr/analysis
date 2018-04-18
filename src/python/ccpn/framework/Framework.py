@@ -31,6 +31,7 @@ import tarfile
 import tempfile
 import re
 from PyQt5 import QtWidgets
+from distutils.dir_util import copy_tree
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
@@ -363,7 +364,21 @@ class Framework:
 
   def backupProject(self):
     apiIo.backupProject(self.project._wrappedData.parent)
+    backupPath = self.project.backupPath
 
+    backupStatePath = Path.fetchDir(backupPath, Layout.StateDirName)
+
+    copy_tree(self.statePath, backupStatePath)
+    layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
+    Layout.saveLayoutToJson(self.ui.mainWindow, layoutFile)
+    self.current._dumpStateToFile(backupStatePath)
+
+    #Spectra should not be copied over. Dangerous for disk space
+    # backupDataPath = Path.fetchDir(backupPath, DataDirName)
+
+    #   TODO add other files inside this dirs
+    backupScriptsPath = Path.fetchDir(backupPath, ScriptsDirName)
+    backupLogsPath = Path.fetchDir(backupPath, ScriptsDirName)
 
   def _initialiseProject(self, project: Project):
     """Initialise project and set up links and objects that involve it"""
@@ -1307,7 +1322,6 @@ class Framework:
     This is useful when saving the project in an external driver and want to keep the spectra together with the project.
     '''
     from shutil import copyfile
-    from distutils.dir_util import copy_tree
     try:
       for spectrum in self.project.spectra:
         oldPath = spectrum.filePath

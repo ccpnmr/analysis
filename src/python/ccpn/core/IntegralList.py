@@ -208,7 +208,11 @@ class IntegralList(AbstractWrapperObject):
         if lineWidth > minimalLineWidth:
           index01 = np.where((x <= i[0]) & (x >= i[1]))
           # integral = trapz(index01)
-          integrals.append(self.newIntegral(value= None, limits=[[min(i), max(i)],]))
+          newIntegral = self.newIntegral(value= None, limits=[[min(i), max(i)],])
+          if intersectingLine:
+            newIntegral._baseline = intersectingLine[0]
+
+          integrals.append(newIntegral)
 
     finally:
       self._project.resumeNotification()

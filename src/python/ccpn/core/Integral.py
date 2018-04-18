@@ -61,6 +61,8 @@ class Integral(AbstractWrapperObject):
   # Notifiers are handled through the Peak class (which shares the ApiPeak wrapped object)
   _registerClassNotifiers = False
 
+  _baseline = None
+
   # CCPN properties  
   @property
   def _apiPeak(self) -> Nmr.Peak:
@@ -233,6 +235,23 @@ class Integral(AbstractWrapperObject):
     """get wrappedData (Peaks) for all Integral children of parent IntegralList"""
     return parent._wrappedData.sortedPeaks()
 
+
+
+  @property
+  def _1Dregions(self):
+    '''
+    :return:baseline of the integral, x regions and y regions in  separate arrays
+    '''
+    baseline =  self._baseline
+    if not baseline:
+      baseline = 0
+    for i in self.limits:
+      x = self.integralList.spectrum.positions
+      y =  self.integralList.spectrum.intensities
+      index01 = np.where((x <= max(i)) & (x >= min(i)))
+      for dd in index01:
+        # should be just one for 1D
+        return ([baseline]*len(x), x[dd], y[dd])
 # Connections to parents:
 
 def _newIntegral(self:IntegralList, value:List[float]=None,

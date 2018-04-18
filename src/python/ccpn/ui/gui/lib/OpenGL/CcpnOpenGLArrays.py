@@ -124,6 +124,8 @@ class GLVertexArray():
   def drawVertexColor(self):
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
+    if self.fillMode is not None:
+      GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
 
     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
     GL.glEnableClientState(GL.GL_COLOR_ARRAY)

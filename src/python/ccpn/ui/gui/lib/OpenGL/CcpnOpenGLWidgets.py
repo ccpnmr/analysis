@@ -206,11 +206,12 @@ class GLRegion(QtWidgets.QWidget):
     intArea.vertices[3::4] = self._object._1Dregions[2]
 
     if self._object and self._object in self._glList.parent.current.integrals:
-      solidColour = self._glList.parent.highlightColour[:3]
+      solidColour = list(self._glList.parent.highlightColour)
     else:
-      solidColour = list(self._brush)[:3]
+      solidColour = list(self._brush)
+    solidColour[3] = 1.0
 
-    intArea.colors = np.array((*solidColour, 1.0) * intArea.numVertices)
+    intArea.colors = np.array(solidColour * intArea.numVertices)
 
 
 
@@ -318,7 +319,8 @@ class GLIntegralArray(GLVertexArray):
       x1 = self.parent.axisR+self.parent.pixelX
 
     if obj and obj in self.parent.current.integrals:
-      colour = (self.parent.highlightColour[:3], CCPNGLWIDGET_INTEGRALSHADE)
+      colour = list(self.parent.highlightColour)
+      colour[3] = CCPNGLWIDGET_INTEGRALSHADE
     else:
       colour = (brush)
 
@@ -339,7 +341,7 @@ class GLIntegralArray(GLVertexArray):
     # add the quads to the region
     if obj and hasattr(obj, '_1Dregions'):
       intArea = newRegion._integralArea = GLVertexArray(numLists=1,
-                                              renderMode=GLRENDERMODE_REBUILD, blendMode=False,
+                                              renderMode=GLRENDERMODE_REBUILD, blendMode=True,
                                               drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
                                               dimension=2, GLContext=self.GLContext)
 
@@ -352,9 +354,9 @@ class GLIntegralArray(GLVertexArray):
 
       if obj in self.parent.current.integrals:
         solidColour = list(self.parent.highlightColour)
-        solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
       else:
-        solidColour = (brush)
+        solidColour = list(brush)
+      solidColour[3] = 1.0
 
       # solidColour = list(colour)
       # solidColour[3] = 1.0
@@ -495,9 +497,9 @@ class GLIntegralArray(GLVertexArray):
       # else:
       if reg._object in self.parent.current.integrals:
         solidColour = list(self.parent.highlightColour)
-        solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
       else:
-        solidColour = (reg.brush)
+        solidColour = list(reg.brush)
+      solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
 
       index = self.numVertices
       self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,

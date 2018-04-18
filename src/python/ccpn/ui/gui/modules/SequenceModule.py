@@ -154,15 +154,22 @@ class SequenceModule(CcpnModule):
     data, dataType = _interpretEvent(event)
     if dataType == 'pids':
 
-      # check that the drop event contains the corrcect information
-      if isinstance(data, Iterable) and len(data) == 2:
-        nmrChain = self.mainWindow.project.getByPid(data[0])
-        nmrResidue = self.mainWindow.project.getByPid(data[1])
-        if isinstance(nmrChain, NmrChain) and isinstance(nmrResidue, NmrResidue):
-          if nmrResidue.nmrChain == nmrChain:
-            self._processNmrChains(data, event)
+      # check that the drop event contains the correct information
+      # if isinstance(data, Iterable) and len(data) == 2:
+      #   nmrChain = self.mainWindow.project.getByPid(data[0])
+      #   nmrResidue = self.mainWindow.project.getByPid(data[1])
+      #   if isinstance(nmrChain, NmrChain) and isinstance(nmrResidue, NmrResidue):
+      #     if nmrResidue.nmrChain == nmrChain:
+      #       self._processNmrChains(data, event)
 
-  def _processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
+      if isinstance(data, Iterable):
+        for dataItem in data:
+          obj = self.mainWindow.project.getByPid(dataItem)
+          if isinstance(obj, NmrChain) or isinstance(obj, NmrResidue):
+            self._processNmrChains(obj)
+
+
+  def _processNmrChains(self, data:typing.Union[NmrChain, NmrResidue]):
     """
     Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
     all succeeding residues according to the length of the list.
@@ -174,40 +181,73 @@ class SequenceModule(CcpnModule):
     # if not hasattr(guiRes, 'residue'):
     #   return
 
-    nmrChain = self.mainWindow.project.getByPid(data[0])
-    selectedNmrResidue = self.mainWindow.project.getByPid(data[1])   # ejb - new, pass in selected nmrResidue
+    if isinstance(data, NmrChain):
+      nmrChain = data     #self.mainWindow.project.getByPid(data)
+      selectedNmrResidue = nmrChain.nmrResidues[0]
+    elif isinstance(data, NmrResidue):
+      selectedNmrResidue = data
+      nmrChain = data.nmrChain
+    else:
+      return
+
+    # selectedNmrResidue = self.mainWindow.project.getByPid(data[1])   # ejb - new, pass in selected nmrResidue
     residues = [guiRes.residue]
     toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
-    result = showYesNo('Assignment', 'Assign nmrChain: %s to residue: %s?' % (toAssign[0].nmrChain.id, residues[0].id))
-    if result:
+    chainRes = guiRes.residue
 
-      with progressManager(self.mainWindow, 'Assigning nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)):
+    if toAssign:
+      if isinstance(data, NmrChain):
+        selectedNmrResidue = toAssign[0]
+        residues = [chainRes]
+        idStr = 'nmrChain: %s to residue: %s' % (toAssign[0].nmrChain.id, residues[0].id)
+      else:
+        try:
+          selectedNmrResidue = selectedNmrResidue.mainNmrResidue
 
-        # try:
+          for resLeft in range(toAssign.index(selectedNmrResidue)):
+            chainRes = chainRes.previousResidue
+        except:
+          showWarning(str(self.windowTitle()), 'Cannot connect at the beginning of the chain')
+          return
 
-        if nmrChain.id == '@-':
-          # assume that it is the only one
-          nmrChain.assignSingleResidue(selectedNmrResidue, guiRes.residue)
-        else:
-          for ii in range(len(toAssign)-1):
-            resid = residues[ii]
-            next = resid.nextResidue    #TODO:ED may not have a .nextResidue
-            residues.append(next)
+        if not chainRes:
+          showWarning(str(self.windowTitle()), 'Cannot connect at the beginning of the chain')
+          return
 
-          try:
-            nmrChain.assignConnectedResidues(guiRes.residue)
-          except Exception as es:
-            showWarning(str(self.windowTitle()), str(es))
+        residues = [chainRes]
 
-        for ii, res in enumerate(residues):
-          if hasattr(self, 'guiChainLabel'):
-            guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
-            guiResidue._setStyleAssigned()
-            # guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_ASSIGNED] +
-            #                      res.shortName+'</strong></div>')
+        idStr = 'nmrChain: %s;\nnmrResidue: %s to residue: %s' % (toAssign[0].nmrChain.id, selectedNmrResidue.id, guiRes.residue.id)
 
-        # except Exception as es:
-        #   getLogger().warning('Sequence Module: %s' % str(es))
+      result = showYesNo('Assignment', 'Assign %s?' % idStr)
+      if result:
+
+        with progressManager(self.mainWindow, 'Assigning %s' % idStr):
+
+          # try:
+
+          if nmrChain.id == '@-':
+            # assume that it is the only one
+            nmrChain.assignSingleResidue(selectedNmrResidue, residues[0])
+          else:
+            for ii in range(len(toAssign)-1):
+              resid = residues[ii]
+              next = resid.nextResidue    #TODO:ED may not have a .nextResidue
+              residues.append(next)
+
+            try:
+              nmrChain.assignConnectedResidues(residues[0])
+            except Exception as es:
+              showWarning(str(self.windowTitle()), str(es))
+
+          for ii, res in enumerate(residues):
+            if hasattr(self, 'guiChainLabel'):
+              guiResidue = self.guiChainLabel.residueDict.get(res.sequenceCode)
+              guiResidue._setStyleAssigned()
+              # guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colours[GUICHAINRESIDUE_ASSIGNED] +
+              #                      res.shortName+'</strong></div>')
+
+          # except Exception as es:
+          #   getLogger().warning('Sequence Module: %s' % str(es))
 
   def populateFromSequenceGraphs(self):
     """

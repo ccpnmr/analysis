@@ -336,9 +336,9 @@ class GuiSpectrumDisplay(CcpnModule):
     # showInfo(title='Copy PeakList "%s"' % peakList.pid, message='Copy to selected spectra')
 
   def _handleSpectrumGroup(self, spectrumGroup):
-    '''
+    """
     Add spectrumGroup on the display and its button on the toolBar
-    '''
+    """
     self.spectrumGroupToolBar._addAction(spectrumGroup)
     for spectrum in spectrumGroup.spectra:
       self.displaySpectrum(spectrum)

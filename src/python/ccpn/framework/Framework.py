@@ -709,7 +709,6 @@ class Framework:
     getLogger().debug('echoBlocking=%s' % self._echoBlocking)
     undo = self.project._undo
 
-    # TODO:ED testing moving this to here
     self.project.resumeNotification()
 
     if undo is not None:                # ejb - changed from if undo:

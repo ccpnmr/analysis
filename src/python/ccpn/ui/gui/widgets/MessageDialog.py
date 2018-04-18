@@ -329,10 +329,10 @@ import math, sys
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import *
 
-class busyOverlay(QWidget):
+class busyOverlay(QtWidgets.QWidget):
   def __init__(self, parent = None):
 
-    QWidget.__init__(self, parent)
+    QtWidgets.QWidget.__init__(self, parent)
     palette = QPalette(self.palette())
     palette.setColor(palette.Background, Qt.transparent)
     self.setPalette(palette)

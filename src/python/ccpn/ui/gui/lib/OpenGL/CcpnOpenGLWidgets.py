@@ -38,16 +38,18 @@ except ImportError:
           "PyOpenGL must be installed to run this example.")
   sys.exit(1)
 
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE, CCPNGLWIDGET_INTEGRALSHADE
+
 REGION_COLOURS = {
-  'green': (0, 1.0, 0.1, 0.15),
-  'yellow': (0.9, 1.0, 0.05, 0.15),
-  'blue': (0.2, 0.1, 1.0, 0.15),
+  'green': (0, 1.0, 0.1, CCPNGLWIDGET_REGIONSHADE),
+  'yellow': (0.9, 1.0, 0.05, CCPNGLWIDGET_REGIONSHADE),
+  'blue': (0.2, 0.1, 1.0, CCPNGLWIDGET_REGIONSHADE),
   'transparent': (1.0, 1.0, 1.0, 0.01),
-  'grey': (1.0, 1.0, 1.0, 0.15),
-  'red': (1.0, 0.1, 0.2, 0.15),
-  'purple': (0.7, 0.4, 1.0, 0.15),
-  None: (0.2, 0.1, 1.0, 0.15),
-  'highlight': (0.5, 0.5, 0.5, 0.15)
+  'grey': (1.0, 1.0, 1.0, CCPNGLWIDGET_REGIONSHADE),
+  'red': (1.0, 0.1, 0.2, CCPNGLWIDGET_REGIONSHADE),
+  'purple': (0.7, 0.4, 1.0, CCPNGLWIDGET_REGIONSHADE),
+  None: (0.2, 0.1, 1.0, CCPNGLWIDGET_REGIONSHADE),
+  'highlight': (0.5, 0.5, 0.5, CCPNGLWIDGET_REGIONSHADE)
 }
 
 
@@ -197,6 +199,7 @@ class GLIntegralArray(GLVertexArray):
     self._regions = []
     self.spectrumView = spectrumView
     self.integralListView = integralListView
+    self.GLContext=GLContext
 
   def drawIndexArray(self):
     # draw twice top cover the outline
@@ -303,8 +306,43 @@ class GLIntegralArray(GLVertexArray):
 
     index += 4
     self.numVertices += 4
+    newRegion = self._regions[-1]
 
-    return self._regions[-1]
+    # add the quads to the region
+    if obj and hasattr(obj, '_1Dregions'):
+      intArea = newRegion._integralArea = GLVertexArray(numLists=1,
+                                              renderMode=GLRENDERMODE_REBUILD, blendMode=False,
+                                              drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
+                                              dimension=2, GLContext=self.GLContext)
+
+      intArea.numVertices = len(obj._1Dregions[1]) * 2
+      intArea.vertices = np.empty(intArea.numVertices * 2)
+      intArea.vertices[::4] = obj._1Dregions[1]
+      intArea.vertices[2::4] = obj._1Dregions[1]
+      intArea.vertices[1::4] = obj._1Dregions[0]
+      intArea.vertices[3::4] = obj._1Dregions[2]
+      solidColour = list(colour)
+      solidColour[3] = 1.0
+      intArea.colors = np.array(solidColour * intArea.numVertices)
+
+    return newRegion
+
+  def _rebuildIntegralAreas(self):
+    for reg in self._regions:
+      intArea = reg._integralArea = GLVertexArray(numLists=1,
+                                                  renderMode=GLRENDERMODE_REBUILD, blendMode=False,
+                                                  drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
+                                                  dimension=2, GLContext=self.GLContext)
+
+      intArea.numVertices = len(reg._object._1Dregions[1]) * 2
+      intArea.vertices = np.empty(intArea.numVertices * 2)
+      intArea.vertices[::4] = reg._object._1Dregions[1]
+      intArea.vertices[2::4] = reg._object._1Dregions[1]
+      intArea.vertices[1::4] = reg._object._1Dregions[0]
+      intArea.vertices[3::4] = reg._object._1Dregions[2]
+      solidColour = list(reg._brush)
+      solidColour[3] = 1.0
+      intArea.colors = np.array(solidColour * intArea.numVertices)
 
   def _rescale(self):
     vertices = self.numVertices

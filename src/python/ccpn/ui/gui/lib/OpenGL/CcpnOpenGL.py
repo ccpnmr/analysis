@@ -38,7 +38,7 @@ from ccpn.core.IntegralList import IntegralList
 
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
-                                    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
+                                    CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \
                                     CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours
 from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation    # temp until I rewrite
 import ccpn.util.Phasing as Phasing
@@ -118,8 +118,8 @@ class CcpnGLWidget(QOpenGLWidget):
   INVERTXAXIS = True
   INVERTYAXIS = True
   AXISLOCKEDBUTTON = True
-  SPECTRUMXZOOM = 1.0e2
-  SPECTRUMYZOOM = 1.0e2
+  SPECTRUMXZOOM = 1.0e1
+  SPECTRUMYZOOM = 1.0e1
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
     super(CcpnGLWidget, self).__init__(parent)
@@ -2810,11 +2810,12 @@ class CcpnGLWidget(QOpenGLWidget):
       listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
       for integral in ils.integrals:
-        drawList.addIntegral(integral, integralListView, colour=None, brush=(*listCol, 0.15))
+        drawList.addIntegral(integral, integralListView, colour=None, brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
       drawList._resize()
+      drawList._rebuildIntegralAreas()
 
   def buildIntegralLists(self):
     if self._parent.isDeleted:
@@ -2903,6 +2904,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
           if peakListView in self._GLIntegralLists.keys():
             self._GLIntegralLists[peakListView].drawIndexArray()
+
+            # draw the integralAreas if they exist
+            for integralArea in self._GLIntegralLists[peakListView]._regions:
+              if hasattr(integralArea, '_integralArea'):
+                integralArea._integralArea.drawVertexColor()
+
 
     # for il in self._GLIntegralLists.values():
     #   if il.spectrumView.isVisible() and il.integralListView.isVisible():

@@ -173,6 +173,10 @@ MEDIUM_BLUE = '#7777FF'
 GREEN1      = '#009a00'
 WARNING_RED = '#e01010'
 
+# Shades
+CCPNGLWIDGET_REGIONSHADE = 0.3
+CCPNGLWIDGET_INTEGRALSHADE = 0.125
+
 # Colour schemes definitions
 colourSchemes = {
   # all colours defined here

@@ -43,17 +43,6 @@ except ImportError:
             "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
-REGION_COLOURS = {
-  'green': (0, 1.0, 0.1, 0.15),
-  'yellow': (0.9, 1.0, 0.05, 0.15),
-  'blue': (0.2, 0.1, 1.0, 0.15),
-  'transparent': (1.0, 1.0, 1.0, 0.01),
-  'grey': (1.0, 1.0, 1.0, 0.15),
-  'red': (1.0, 0.1, 0.2, 0.15),
-  'purple': (0.7, 0.4, 1.0, 0.15),
-  None: (0.2, 0.1, 1.0, 0.15)
-}
-
 
 class GuiNdWidget(CcpnGLWidget):
 

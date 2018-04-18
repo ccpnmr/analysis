@@ -28,8 +28,10 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
 from ccpn.util.Logging import getLogger
 import numpy as np
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
+                                                    GLRENDERMODE_DRAW
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
+
 try:
   from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -190,12 +192,34 @@ class GLRegion(QtWidgets.QWidget):
     self._glList.renderMode = GLRENDERMODE_REBUILD
     self.parent.update()
 
+  def _rebuildIntegral(self):
+    intArea = self._integralArea = GLVertexArray(numLists=1,
+                                                renderMode=GLRENDERMODE_DRAW, blendMode=False,
+                                                drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
+                                                dimension=2, GLContext=self.parent)
+
+    intArea.numVertices = len(self._object._1Dregions[1]) * 2
+    intArea.vertices = np.empty(intArea.numVertices * 2)
+    intArea.vertices[::4] = self._object._1Dregions[1]
+    intArea.vertices[2::4] = self._object._1Dregions[1]
+    intArea.vertices[1::4] = self._object._1Dregions[0]
+    intArea.vertices[3::4] = self._object._1Dregions[2]
+
+    if self._object and self._object in self._glList.parent.current.integrals:
+      solidColour = self._glList.parent.highlightColour[:3]
+    else:
+      solidColour = list(self._brush)[:3]
+
+    intArea.colors = np.array((*solidColour, 1.0) * intArea.numVertices)
+
+
 
 class GLIntegralArray(GLVertexArray):
-  def __init__(self, GLContext=None, spectrumView=None, integralListView=None):
+  def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
     super(GLIntegralArray, self).__init__(renderMode=GLRENDERMODE_REBUILD, blendMode=True,
                                           GLContext=GLContext, drawMode=GL.GL_QUADS,
                                           dimension=2)
+    self.project = project
     self._regions = []
     self.spectrumView = spectrumView
     self.integralListView = integralListView
@@ -293,7 +317,11 @@ class GLIntegralArray(GLVertexArray):
       x0 = self.parent.axisL-self.parent.pixelX
       x1 = self.parent.axisR+self.parent.pixelX
 
-    colour = brush
+    if obj and obj in self.parent.current.integrals:
+      colour = (self.parent.highlightColour[:3], CCPNGLWIDGET_INTEGRALSHADE)
+    else:
+      colour = (brush)
+
     index = self.numVertices
     self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
                                                     index, index + 1, index, index + 1,
@@ -321,28 +349,40 @@ class GLIntegralArray(GLVertexArray):
       intArea.vertices[2::4] = obj._1Dregions[1]
       intArea.vertices[1::4] = obj._1Dregions[0]
       intArea.vertices[3::4] = obj._1Dregions[2]
-      solidColour = list(colour)
-      solidColour[3] = 1.0
+
+      if obj in self.parent.current.integrals:
+        solidColour = list(self.parent.highlightColour)
+        solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
+      else:
+        solidColour = (brush)
+
+      # solidColour = list(colour)
+      # solidColour[3] = 1.0
       intArea.colors = np.array(solidColour * intArea.numVertices)
 
     return newRegion
 
+  # def _rebuildIntegral(self, reg):
+  #   intArea = reg._integralArea = GLVertexArray(numLists=1,
+  #                                               renderMode=GLRENDERMODE_DRAW, blendMode=False,
+  #                                               drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
+  #                                               dimension=2, GLContext=self.GLContext)
+  #
+  #   intArea.numVertices = len(reg._object._1Dregions[1]) * 2
+  #   intArea.vertices = np.empty(intArea.numVertices * 2)
+  #   intArea.vertices[::4] = reg._object._1Dregions[1]
+  #   intArea.vertices[2::4] = reg._object._1Dregions[1]
+  #   intArea.vertices[1::4] = reg._object._1Dregions[0]
+  #   intArea.vertices[3::4] = reg._object._1Dregions[2]
+  #   solidColour = list(reg._brush)
+  #   solidColour[3] = 1.0
+  #   intArea.colors = np.array(solidColour * intArea.numVertices)
+
   def _rebuildIntegralAreas(self):
     for reg in self._regions:
-      intArea = reg._integralArea = GLVertexArray(numLists=1,
-                                                  renderMode=GLRENDERMODE_REBUILD, blendMode=False,
-                                                  drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
-                                                  dimension=2, GLContext=self.GLContext)
-
-      intArea.numVertices = len(reg._object._1Dregions[1]) * 2
-      intArea.vertices = np.empty(intArea.numVertices * 2)
-      intArea.vertices[::4] = reg._object._1Dregions[1]
-      intArea.vertices[2::4] = reg._object._1Dregions[1]
-      intArea.vertices[1::4] = reg._object._1Dregions[0]
-      intArea.vertices[3::4] = reg._object._1Dregions[2]
-      solidColour = list(reg._brush)
-      solidColour[3] = 1.0
-      intArea.colors = np.array(solidColour * intArea.numVertices)
+      if reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
+        reg._integralArea.renderMode = GLRENDERMODE_DRAW
+        reg._rebuildIntegral()
 
   def _rescale(self):
     vertices = self.numVertices
@@ -450,7 +490,15 @@ class GLIntegralArray(GLVertexArray):
         x0 = axisL-pixelX
         x1 = axisR+pixelX
 
-      colour = reg.brush
+      # if self._object in self.current.integrals:
+      #   colour = (*self.parent.highlightColour[:3], CCPNGLWIDGET_INTEGRALSHADE)
+      # else:
+      if reg._object in self.parent.current.integrals:
+        solidColour = list(self.parent.highlightColour)
+        solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
+      else:
+        solidColour = (reg.brush)
+
       index = self.numVertices
       self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
                                                       index, index + 1, index, index + 1,
@@ -458,8 +506,10 @@ class GLIntegralArray(GLVertexArray):
                                                       index + 2, index + 3, index + 2, index + 3,
                                                       index, index + 3, index, index + 3])
       self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
-      self.colors = np.append(self.colors, colour * 4)
+      self.colors = np.append(self.colors, solidColour * 4)
       self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
 
       index += 4
       self.numVertices += 4
+
+      reg._rebuildIntegral()

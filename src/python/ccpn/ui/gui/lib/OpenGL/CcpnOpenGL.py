@@ -1138,6 +1138,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self.globalGL._shaderProgramTex.makeCurrent()
     self.globalGL._shaderProgramTex.setBackground(self._background)
 
+    self.update()
+    
   def mapMouseToAxis(self, pnt):
     if isinstance(pnt, QPoint):
       mx = pnt.x()

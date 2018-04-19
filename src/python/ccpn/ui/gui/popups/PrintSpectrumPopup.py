@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.RadioButton import RadioButton
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
+from ccpn.ui.gui.widgets.CustomExportDialog import CustomGLExportDialog
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 import os
@@ -53,6 +53,7 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
     if self.mainWindow:
       self.application = mainWindow.application
       self.project = mainWindow.application.project
+      self.current = self.application.current
     else:
       self.application = None
       self.project = None
@@ -64,7 +65,7 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
     # self.setFixedWidth(400)
     # self.setFixedHeight(300)
 
-    self.label = Label(self, text='Select Spectrum Display to Print', grid=(0,0), gridSpan=(1,2)
+    self.label = Label(self, text='Select Strip to Print', grid=(0,0), gridSpan=(1,2)
                        , hAlign='centre', vAlign='centre')
     # self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2, 2), setLayout=True)
 
@@ -78,10 +79,10 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
     # self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
     # TODO:ED remove scroll area
-    self.spectrumDisplayIds = [sd.title for sd in self.project.spectrumDisplays]
-    self.spectrumDisplayPids = [sd.pid for sd in self.project.spectrumDisplays]
+    self.stripIds = [sd.id for sd in self.project.strips]
+    self.stripPids = [sd.pid for sd in self.project.strips]
     self.radioButtonBox = RadioButtons(self       #self.scrollAreaWidgetContents
-                                       , self.spectrumDisplayIds
+                                       , self.stripIds
                                        , grid=(3,0), gridSpan=(1,2)
                                        , direction='v')
 
@@ -91,44 +92,42 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
     # self.scrollArea.setWidget(self.radioButtonBox)
 
     # self.spectrumSelectionWidget = SpectrumDisplaySelectionWidget(self._sequenceGraphScrollArea, project, setLayout=True)
-    self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self.getDisplayToPrint],
-                                texts=['Cancel', 'Select Display'])
+    self.buttonBox = ButtonList(self, grid=(4, 1), callbacks=[self.reject, self.getStripToPrint],
+                                texts=['Cancel', 'Select Strip'])
+    if self.mainWindow:
+      self.radioButtonBox.set(self.current.strip.id)
 
     self.radioButtonBox.setMinimumSize(self.radioButtonBox.sizeHint())
     self.radioButtonBox.setContentsMargins(15, 15, 15, 15)  # L,T,R,B
     self.setFixedSize(self.sizeHint())
 
-  def _getViewBox(self, spectrumDisplay):
-    if len(spectrumDisplay.spectrumViews)>0:
-      return spectrumDisplay.spectrumViews[0].strip.viewBox
+  # def _getViewBox(self, spectrumDisplay):
+  #   if len(spectrumDisplay.spectrumViews)>0:
+  #     return spectrumDisplay.spectrumViews[0].strip.viewBox
 
-  def _getSelection(self):
-    self.reject() #close the popup, not needed anymore
-    pid = self.getDisplayToPrint()
-    spectrumDisplay = self.project.getByPid(pid)
-    if spectrumDisplay:
-      if spectrumDisplay.is1D:
-        self._open1DExporter(spectrumDisplay)
-      else:
-        self.application.ui.mainWindow.printToFile(spectrumDisplay)
+  # def _getSelection(self):
+  #   self.reject() #close the popup, not needed anymore
+  #   pid = self.getStripToPrint()
+  #   spectrumDisplay = self.project.getByPid(pid)
+  #   if spectrumDisplay:
+  #     if spectrumDisplay.is1D:
+  #       self._open1DExporter(spectrumDisplay)
+  #     else:
+  #       self.application.ui.mainWindow.printToFile(spectrumDisplay)
 
-  def getDisplayToPrint(self):
+  def getStripToPrint(self):
     pIndex = self.radioButtonBox.getIndex()
-    thisPid = self.spectrumDisplayPids[pIndex]
-    spectrumDisplay = self.project.getByPid(thisPid)
+    thisPid = self.stripPids[pIndex]
+    strip = self.project.getByPid(thisPid)
 
     self.reject() #close the popup, not needed anymore
-    if spectrumDisplay:
-      if spectrumDisplay.is1D:
-        self._open1DExporter(spectrumDisplay)
-      else:
-        self.application.ui.mainWindow.printToFile(spectrumDisplay)
+    if strip:
+      glWidget = strip._CcpnGLWidget
 
-  def _open1DExporter(self, spectrumDisplay):
-    viewBox = self._getViewBox(spectrumDisplay)
-    scene = viewBox.scene()
-    self.exportDialog = CustomExportDialog(scene, titleName=spectrumDisplay.pid, spectrumDimension='1D')
-    self.exportDialog.show(viewBox)
+      self.exportDialog = CustomGLExportDialog(glWidget, titleName=strip.id,)
+      self.exportDialog.show(strip.viewBox)
+
+
 
 
 
@@ -157,7 +156,7 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
 #
 #   def printSpectrum(self):
 #
-#     spectrumDisplay = self.project.getByPid(self.spectrumSelectionWidget.getDisplayToPrint())
+#     spectrumDisplay = self.project.getByPid(self.spectrumSelectionWidget.getStripToPrint())
 #     if self.filePathLineEdit.text():
 #       self.project._appBase.ui.mainWindow.printToFile(spectrumDisplayOrStrip=spectrumDisplay, path=self.filePathLineEdit.text())
 #       self.accept()
@@ -207,7 +206,7 @@ class SelectSpectrumDisplayPopup(CcpnDialog):
 #     self.radioButtons.append(radioButton)
 #     self.ii+=1
 #
-#   def getDisplayToPrint(self):
+#   def getStripToPrint(self):
 #     for radioButton in self.radioButtons:
 #       if radioButton.isChecked():
 #         index = self.radioButtons.index(radioButton)

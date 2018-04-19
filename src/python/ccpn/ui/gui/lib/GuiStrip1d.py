@@ -240,7 +240,7 @@ class GuiStrip1d(GuiStrip):
 
   def showExportDialog(self):
     from ccpn.ui.gui.widgets.CustomExportDialog import CustomGLExportDialog
-    self.exportDialog = CustomGLExportDialog(self._CcpnGLWidget, spectrumDimension='1D')
+    self.exportDialog = CustomGLExportDialog(self._CcpnGLWidget)
     self.exportDialog.show(self.viewBox)
 
   def _maximiseRegions(self):

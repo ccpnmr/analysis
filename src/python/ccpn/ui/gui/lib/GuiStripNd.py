@@ -361,7 +361,7 @@ class GuiStripNd(GuiStrip):
 
   def showExportDialog(self):
     from ccpn.ui.gui.widgets.CustomExportDialog import CustomGLExportDialog
-    self.exportDialog = CustomGLExportDialog(self._CcpnGLWidget, spectrumDimension='nD')
+    self.exportDialog = CustomGLExportDialog(self._CcpnGLWidget)
     self.exportDialog.show(self.viewBox)
 
   def copyStrip(self):

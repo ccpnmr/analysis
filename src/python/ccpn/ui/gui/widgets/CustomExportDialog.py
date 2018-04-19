@@ -6,17 +6,20 @@ import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.exporters1D.exportDialogPyQTGraph import UiForm
 
-from ccpn.ui.gui.exporters1D.ImageExporter import ImageExporter
+from ccpn.ui.gui.exporters1D.OpenGLImageExporter import OpenGLImageExporter
 from ccpn.ui.gui.exporters1D.SVGExporter import SVGExporter
 from ccpn.ui.gui.exporters1D.TextExporter import TextExporter
+from ccpn.ui.gui.exporters1D.ImageExporter import ImageExporter
 
-ExporterList = {'1D': [ImageExporter, SVGExporter, TextExporter],
-                'nD': [SVGExporter]
-                }
+GLType = 'GL'
+Default = 'Default'
+ExporterTypes = {GLType : [OpenGLImageExporter],  #[ImageExporter, SVGExporter, TextExporter],
+                 Default: [ImageExporter, SVGExporter, TextExporter] ,
+                 }
 
 
 class CustomExportDialog(QtWidgets.QDialog):
-  def __init__(self, scene, titleName=None, spectrumDimension=None ):
+  def __init__(self, scene, titleName=None, exportType=Default):
     QtWidgets.QDialog.__init__(self)
     self.setVisible(False)
     self.shown = False
@@ -37,7 +40,7 @@ class CustomExportDialog(QtWidgets.QDialog):
     if titleName is not None:
       self.setWindowTitle('Export '+titleName)
 
-    self.spectrumDimension = spectrumDimension
+    self.exporterType = exportType
 
 
     self.ui.closeBtn.clicked.connect(self.close)
@@ -66,8 +69,8 @@ class CustomExportDialog(QtWidgets.QDialog):
     self.exporterClasses = {}
 
     gotCurrent = False
-    if self.spectrumDimension is not None:
-      exporterList = ExporterList[self.spectrumDimension]
+    if self.exporterType is not None:
+      exporterList = ExporterTypes[self.exporterType]
     else:
       exporterList = []
 
@@ -174,7 +177,7 @@ class CustomExportDialog(QtWidgets.QDialog):
 
 
 class CustomGLExportDialog(QtWidgets.QDialog):
-  def __init__(self, GLWidget, titleName=None, spectrumDimension=None):
+  def __init__(self, GLWidget, titleName=None, exportType=GLType):
     QtWidgets.QDialog.__init__(self)
     self.setVisible(False)
     self.shown = False
@@ -196,7 +199,7 @@ class CustomGLExportDialog(QtWidgets.QDialog):
     if titleName is not None:
       self.setWindowTitle('Export ' + titleName)
 
-    self.spectrumDimension = spectrumDimension
+    self.exportType = exportType
 
     self.ui.closeBtn.clicked.connect(self.close)
     self.ui.exportBtn.clicked.connect(self.exportClicked)
@@ -222,8 +225,8 @@ class CustomGLExportDialog(QtWidgets.QDialog):
     self.exporterClasses = {}
 
     gotCurrent = False
-    if self.spectrumDimension is not None:
-      exporterList = ExporterList[self.spectrumDimension]
+    if self.exportType is not None:
+      exporterList = ExporterTypes[self.exportType]
     else:
       exporterList = []
 

@@ -1125,13 +1125,12 @@ class CcpnGLWidget(QOpenGLWidget):
     if self._parent:
       self.initialiseAxes(self._parent)
 
-  def setBackgroundColour(self, col):
+  def setBackgroundColour(self, col, silent=False):
     """
     set all background colours in the shaders
     :param col - vec4, 4 element list e.g.: [0.05, 0.05, 0.05, 1.0], very dark gray
     """
     self.makeCurrent()
-
     GL.glClearColor(*col)
     self.background = col
 
@@ -1139,10 +1138,14 @@ class CcpnGLWidget(QOpenGLWidget):
     self.globalGL._shaderProgram1.setBackground(self.background)
     self.globalGL._shaderProgramTex.makeCurrent()
     self.globalGL._shaderProgramTex.setBackground(self.background)
+    self.doneCurrent()
+    if not silent:
+      self.update()
+
 
     self.doneCurrent()
     self.update()
-    
+
   def mapMouseToAxis(self, pnt):
     if isinstance(pnt, QPoint):
       mx = pnt.x()

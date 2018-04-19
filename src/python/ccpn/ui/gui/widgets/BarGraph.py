@@ -485,7 +485,7 @@ class CustomViewBox(pg.ViewBox):
   def showExportDialog(self):
     if self.exportDialog is None:
       ### parent() is the graphicsScene
-      self.exportDialog = CustomExportDialog(self.scene(), titleName='Exporting', spectrumDimension='1D')
+      self.exportDialog = CustomExportDialog(self.scene(), titleName='Exporting')
     self.exportDialog.show(self)
 
 

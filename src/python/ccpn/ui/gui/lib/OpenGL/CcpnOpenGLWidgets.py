@@ -31,6 +31,7 @@ import numpy as np
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
                                                     GLRENDERMODE_DRAW
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
+from ccpn.core.Integral import Integral
 
 try:
   from OpenGL import GL, GLU, GLUT
@@ -193,26 +194,26 @@ class GLRegion(QtWidgets.QWidget):
     self.parent.update()
 
   def _rebuildIntegral(self):
-    intArea = self._integralArea = GLVertexArray(numLists=1,
-                                                renderMode=GLRENDERMODE_DRAW, blendMode=False,
-                                                drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
-                                                dimension=2, GLContext=self.parent)
+    if isinstance(self._object, Integral) and hasattr(self._object, '_1Dregions'):
+      intArea = self._integralArea = GLVertexArray(numLists=1,
+                                                  renderMode=GLRENDERMODE_DRAW, blendMode=False,
+                                                  drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
+                                                  dimension=2, GLContext=self.parent)
 
-    intArea.numVertices = len(self._object._1Dregions[1]) * 2
-    intArea.vertices = np.empty(intArea.numVertices * 2)
-    intArea.vertices[::4] = self._object._1Dregions[1]
-    intArea.vertices[2::4] = self._object._1Dregions[1]
-    intArea.vertices[1::4] = self._object._1Dregions[0]
-    intArea.vertices[3::4] = self._object._1Dregions[2]
+      intArea.numVertices = len(self._object._1Dregions[1]) * 2
+      intArea.vertices = np.empty(intArea.numVertices * 2)
+      intArea.vertices[::4] = self._object._1Dregions[1]
+      intArea.vertices[2::4] = self._object._1Dregions[1]
+      intArea.vertices[1::4] = self._object._1Dregions[0]
+      intArea.vertices[3::4] = self._object._1Dregions[2]
 
-    if self._object and self._object in self._glList.parent.current.integrals:
-      solidColour = list(self._glList.parent.highlightColour)
-    else:
-      solidColour = list(self._brush)
-    solidColour[3] = 1.0
+      if self._object and self._object in self._glList.parent.current.integrals:
+        solidColour = list(self._glList.parent.highlightColour)
+      else:
+        solidColour = list(self._brush)
+      solidColour[3] = 1.0
 
-    intArea.colors = np.array(solidColour * intArea.numVertices)
-
+      intArea.colors = np.array(solidColour * intArea.numVertices)
 
 
 class GLIntegralArray(GLVertexArray):
@@ -497,9 +498,10 @@ class GLIntegralArray(GLVertexArray):
       # else:
       if reg._object in self.parent.current.integrals:
         solidColour = list(self.parent.highlightColour)
+        solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
       else:
         solidColour = list(reg.brush)
-      solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
+
 
       index = self.numVertices
       self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,

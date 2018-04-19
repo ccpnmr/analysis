@@ -300,7 +300,7 @@ _coreImportOrder = (
   'Substance',  'Chain',  'Residue', 'Atom',  'Complex', 'NmrChain',  'NmrResidue',  'NmrAtom',
   'ChemicalShiftList',  'ChemicalShift',  'DataSet',  'RestraintList',  'Restraint',
   'RestraintContribution',  'CalculationStep',  'Data',  'StructureEnsemble',  'Model', 'Note',
-  'Multiplet'
+  'PeakCluster'
 )
 
 # This list includes ui classes (added below)

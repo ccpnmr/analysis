@@ -346,10 +346,10 @@ class GuiStrip(Frame):
     # GLSignals = GLNotifier(parent=self)
     # GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKNOTIFY], targets=data)
 
-    try:
-      self._CcpnGLWidget._processIntegralNotifier(data)
-    except Exception as es:
-      getLogger().debugGL('OpenGL widget not instantiated', strip=self)
+    # try:
+    self._CcpnGLWidget._processIntegralNotifier(data)
+    # except Exception as es:
+    #   getLogger().debugGL('OpenGL widget not instantiated', strip=self)
 
   def _highlightCurrentStrip(self, data):
     "Callback to highlight the axes of current strip"

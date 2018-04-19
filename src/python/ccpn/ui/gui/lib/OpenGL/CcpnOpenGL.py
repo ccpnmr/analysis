@@ -5231,9 +5231,11 @@ class CcpnGLWidget(QOpenGLWidget):
       self._deleteIntegral(integral)
 
     elif Notifier.CREATE in triggers:
+      print ('>>>create integral')
       self._createIntegral(integral)
 
     elif Notifier.CHANGE in triggers:
+      print ('>>>change integral')
       self._changeIntegral(integral)
 
     self._clearKeys()

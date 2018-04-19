@@ -524,7 +524,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     Replaces normal _createItem notifier for NmrResidues"""
 
     nmrResidue = data[Notifier.OBJECT]
-    oldPid = data[Notifier.OLDPID]
+    # oldPid = data[Notifier.OLDPID]
 
     sideBarState = self._saveExpandedState()
 

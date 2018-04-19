@@ -35,8 +35,10 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.SideBar import SideBar, _openItemObject
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.widgets.MainWindow import MainWindow
+from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 from ccpn.util.Colour import  hexToRgb
+from ccpn.ui.gui.lib.Shortcuts import addShortCut
 
 ModuleArea = DockArea
 Module = Dock
@@ -44,12 +46,15 @@ DropAreaLabel = 'Drop Area'
 Failed = 'Failed'
 
 
-class TempAreaWindow(MainWindow):
-    def __init__(self, area, **kwargs):
+class TempAreaWindow(GuiWindow, MainWindow):
+    def __init__(self, area, mainWindow=None, **kwargs):
       MainWindow.__init__(self, **kwargs)
+      GuiWindow.__init__(self, mainWindow.application)
       self.setCentralWidget(area)
       self.tempModuleArea = area
-      self.mainModuleArea =  self.tempModuleArea.home
+      self.mainModuleArea = self.tempModuleArea.home
+      self.mainWindow = mainWindow
+      self._setShortcuts()
 
     def closeEvent(self, *args, **kwargs):
       for module in self.tempModuleArea.ccpnModules:
@@ -349,7 +354,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       area.temporary = True
       area.home = self
       self.tempAreas.append(area)
-      win = TempAreaWindow(area)
+      win = TempAreaWindow(area, mainWindow=self.mainWindow)
       area.win = win
       win.show()
     else:

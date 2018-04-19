@@ -529,14 +529,14 @@ class CcpnModule(Dock, DropBase):
       try:
         found = False
         searchWidget = self.parent()
-        while searchWidget is not None and not found:
-          # print (searchWidget)
-          if isinstance(searchWidget, TempAreaWindow):
-            searchWidget.eventFilter = self._tempAreaWindowEventFilter
-            searchWidget.installEventFilter(searchWidget)
-            found = True
-          else:
-            searchWidget = searchWidget.parent()
+        # while searchWidget is not None and not found:
+        #   # print (searchWidget)
+        #   if isinstance(searchWidget, TempAreaWindow):
+        #     searchWidget.eventFilter = self._tempAreaWindowEventFilter
+        #     searchWidget.installEventFilter(searchWidget)
+        #     found = True
+        #   else:
+        #     searchWidget = searchWidget.parent()
 
       except Exception as es:
         getLogger().warning('Error setting maximiseFunc', str(es))
@@ -572,6 +572,8 @@ class CcpnModule(Dock, DropBase):
 
     :param maximiseFunc:
     """
+    return
+
     self._maximiseFunc = maximiseFunc
     self._closeFunc = closeFunc
 

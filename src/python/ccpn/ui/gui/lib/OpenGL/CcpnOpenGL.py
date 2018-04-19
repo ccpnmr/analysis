@@ -5228,6 +5228,7 @@ class CcpnGLWidget(QOpenGLWidget):
     integral = data[Notifier.OBJECT]
 
     if Notifier.DELETE in triggers:
+      print ('>>>delete integral')
       self._deleteIntegral(integral)
 
     elif Notifier.CREATE in triggers:
@@ -5246,7 +5247,7 @@ class CcpnGLWidget(QOpenGLWidget):
     for ils in self._GLIntegralLists.values():
 
       # confusing as peakList and integralList share the same list :)
-      if integral.integralList == ils.integralListView.peakList:
+      if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.peakList:
 
         for reg in ils._regions:
 
@@ -5259,13 +5260,13 @@ class CcpnGLWidget(QOpenGLWidget):
   def _createIntegral(self, integral):
     for ils in self._GLIntegralLists.values():
 
-      # confusing as peakList and integralList share the same list :)
-      if integral.integralList == ils.integralListView.peakList:
+      if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.peakList:
         listCol = getAutoColourRgbRatio(ils.integralListView.peakList.symbolColour, ils.integralListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
         ils.addIntegral(integral, ils.integralListView, colour=None, brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
-        self.update()
-        return
+
+    self.update()
+    return
 
   def _changeIntegral(self, integral):
 

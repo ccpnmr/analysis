@@ -191,7 +191,7 @@ class IntegralList(AbstractWrapperObject):
     noiseThreshold: value used to calculate the intersectingLine to get the peak limits
     '''
     # TODO: add excludeRegions option. Calculate Negative peak integral.
-    self._project.suspendNotification()
+    # self._project.suspendNotification()
     try:
       spectrum = self.spectrum
       x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
@@ -215,7 +215,8 @@ class IntegralList(AbstractWrapperObject):
           integrals.append(newIntegral)
 
     finally:
-      self._project.resumeNotification()
+      # self._project.resumeNotification()
+      pass
 
     return integrals
 

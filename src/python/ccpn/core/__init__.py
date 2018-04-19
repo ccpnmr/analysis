@@ -299,7 +299,8 @@ _coreImportOrder = (
   'IntegralList',  'Integral',  'PseudoDimension',  'SpectrumHit',  'Sample',  'SampleComponent',
   'Substance',  'Chain',  'Residue', 'Atom',  'Complex', 'NmrChain',  'NmrResidue',  'NmrAtom',
   'ChemicalShiftList',  'ChemicalShift',  'DataSet',  'RestraintList',  'Restraint',
-  'RestraintContribution',  'CalculationStep',  'Data',  'StructureEnsemble',  'Model', 'Note'
+  'RestraintContribution',  'CalculationStep',  'Data',  'StructureEnsemble',  'Model', 'Note',
+  'Multiplet'
 )
 
 # This list includes ui classes (added below)

@@ -715,77 +715,82 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     for spectrumDisplay in self.spectrumDisplays:
       pass  # GWV: poor solution spectrumDisplay._resetRemoveStripAction()
 
-  def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
-    #TODO:LUCA: Docstring needed
+  def printToFile(self):
+    self.application.showPrintSpectrumDisplayPopup()
 
-    try:
-      saveName = spectrumDisplayOrStrip.title+'.svg'
-    except:
-      saveName=''
 
-    current = self.application.current
-    if not spectrumDisplayOrStrip:
-      spectrumDisplayOrStrip = current.spectrumDisplay
-    if not spectrumDisplayOrStrip and current.strip:
-      spectrumDisplayOrStrip = current.strip.spectrumDisplay
-    if not spectrumDisplayOrStrip and self.spectrumDisplays:
-      spectrumDisplayOrStrip = self.spectrumDisplays[0]
-    if spectrumDisplayOrStrip:
-      if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-        strips = spectrumDisplayOrStrip.strips
-        if not strips:
-          return
-
-      if not path:
-        dialog = FileDialog(parent=self
-                            , directory=saveName, fileMode=FileDialog.AnyFile, text='Print to File',
-                            acceptMode=FileDialog.AcceptSave, preferences=self.application.preferences.general,
-                            filter='SVG (*.svg)')
-        path = dialog.selectedFile()
-        if not path:
-          return
-        if not path.endswith(".svg"):
-          path = path+".svg"
-
-      xCount = yCount = 1
-      if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-        if spectrumDisplayOrStrip.stripDirection == 'X':
-          yCount = len(strips)
-        else:
-          xCount = len(strips)
-
-      with Svg(path, xCount=xCount, yCount=yCount, width=width, height=height) as printer:
-
-        # box
-        printer.writeLine(0, 0, width, 0)
-        printer.writeLine(width, 0, width, height)
-        printer.writeLine(width, height, 0, height)
-        printer.writeLine(0, height, 0, 0)
-
-        xNumber = yNumber = 0
-        if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
-          for n, strip in enumerate(strips):
-            if spectrumDisplayOrStrip.stripDirection == 'X':
-              xOutputRegion = (0, width)
-              yOutputRegion = (n * height / yCount, (n + 1) * height / yCount)
-              yNumber = n
-              if n > 0:
-                # strip separator
-                printer.writeLine(0, yOutputRegion[0], width, yOutputRegion[0])
-            else:
-              xOutputRegion = (n * width / xCount, (n + 1) * width / xCount)
-              yOutputRegion = (0, height)
-              xNumber = n
-              if n > 0:
-                # strip separator
-                printer.writeLine(xOutputRegion[0], 0, xOutputRegion[0], height)
-            printer.startRegion(xOutputRegion, yOutputRegion, xNumber, yNumber)
-            strip._printToFile(printer)
-        else:
-          xOutputRegion = (0, width)
-          yOutputRegion = (0, height)
-          printer.startRegion(xOutputRegion, yOutputRegion)
-          spectrumDisplayOrStrip._printToFile(printer)
+  # Not in use, Broken after refactoring to a new GL
+  # def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
+  #   #TODO:LUCA: Docstring needed
+  #
+  #   try:
+  #     saveName = spectrumDisplayOrStrip.title+'.svg'
+  #   except:
+  #     saveName=''
+  #
+  #   current = self.application.current
+  #   if not spectrumDisplayOrStrip:
+  #     spectrumDisplayOrStrip = current.spectrumDisplay
+  #   if not spectrumDisplayOrStrip and current.strip:
+  #     spectrumDisplayOrStrip = current.strip.spectrumDisplay
+  #   if not spectrumDisplayOrStrip and self.spectrumDisplays:
+  #     spectrumDisplayOrStrip = self.spectrumDisplays[0]
+  #   if spectrumDisplayOrStrip:
+  #     if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
+  #       strips = spectrumDisplayOrStrip.strips
+  #       if not strips:
+  #         return
+  #
+  #     if not path:
+  #       dialog = FileDialog(parent=self
+  #                           , directory=saveName, fileMode=FileDialog.AnyFile, text='Print to File',
+  #                           acceptMode=FileDialog.AcceptSave, preferences=self.application.preferences.general,
+  #                           filter='SVG (*.svg)')
+  #       path = dialog.selectedFile()
+  #       if not path:
+  #         return
+  #       if not path.endswith(".svg"):
+  #         path = path+".svg"
+  #
+  #     xCount = yCount = 1
+  #     if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
+  #       if spectrumDisplayOrStrip.stripDirection == 'X':
+  #         yCount = len(strips)
+  #       else:
+  #         xCount = len(strips)
+  #
+  #     with Svg(path, xCount=xCount, yCount=yCount, width=width, height=height) as printer:
+  #
+  #       # box
+  #       printer.writeLine(0, 0, width, 0)
+  #       printer.writeLine(width, 0, width, height)
+  #       printer.writeLine(width, height, 0, height)
+  #       printer.writeLine(0, height, 0, 0)
+  #
+  #       xNumber = yNumber = 0
+  #       if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
+  #         for n, strip in enumerate(strips):
+  #           if spectrumDisplayOrStrip.stripDirection == 'X':
+  #             xOutputRegion = (0, width)
+  #             yOutputRegion = (n * height / yCount, (n + 1) * height / yCount)
+  #             yNumber = n
+  #             if n > 0:
+  #               # strip separator
+  #               printer.writeLine(0, yOutputRegion[0], width, yOutputRegion[0])
+  #           else:
+  #             xOutputRegion = (n * width / xCount, (n + 1) * width / xCount)
+  #             yOutputRegion = (0, height)
+  #             xNumber = n
+  #             if n > 0:
+  #               # strip separator
+  #               printer.writeLine(xOutputRegion[0], 0, xOutputRegion[0], height)
+  #           printer.startRegion(xOutputRegion, yOutputRegion, xNumber, yNumber)
+  #           strip._printToFile(printer)
+  #       else:
+  #         xOutputRegion = (0, width)
+  #         yOutputRegion = (0, height)
+  #         printer.startRegion(xOutputRegion, yOutputRegion)
+  #         spectrumDisplayOrStrip._printToFile(printer)
 
   _mouseMovedSignal = QtCore.pyqtSignal(dict)
 

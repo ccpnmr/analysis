@@ -35,11 +35,9 @@ from ccpn.core.Project import Project
 from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-# from ccpnmodel.ccpncore.lib import Util as modelUtil
+# from ccpn.core.Multiplet import Multiplet
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as apiMultipletList
-# from ccpn.core.MultipletListList import MultipletListList
-from typing import Optional, Tuple, Union, Sequence
+from typing import Optional, Tuple
 
 
 class MultipletList(AbstractWrapperObject):
@@ -98,11 +96,11 @@ class MultipletList(AbstractWrapperObject):
 
 
 # Connections to parents:
-def _newMultipletList(self: Project, peaks: ['Peak'] = None, serial: int = None) -> MultipletList:
-  """Create new MultipletList within multipletListList"""
+def _newMultipletList(self: Spectrum, multiplets:['Multiplet'] = None, serial: int = None) -> MultipletList:
+  """Create new MultipletList within Spectrum"""
 
   defaults = collections.OrderedDict(
-    (('peaks', None), ('serial', None),
+    (('multiplets', None), ('serial', None),
      )
   )
 
@@ -111,12 +109,11 @@ def _newMultipletList(self: Project, peaks: ['Peak'] = None, serial: int = None)
                               parName='newMultipletList')
 
   try:
-    apiParent = self._wrappedData  #
-    if peaks:
-      apiMultipletList = apiParent.newMultipletList(clusterType='multipletList',
-                                            peaks=[p._wrappedData for p in peaks])
+    apiParent = self._wrappedData
+    if multiplets:
+      apiMultipletList = apiParent.newMultipletList(multiplets=[mm._wrappedData for mm in multiplets])
     else:
-      apiMultipletList = apiParent.newMultipletList(clusterType='multipletList')
+      apiMultipletList = apiParent.newMultipletList()
 
     result = self._project._data2Obj.get(apiMultipletList)
 

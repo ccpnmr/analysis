@@ -34,7 +34,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.Peak import Peak
-from ccpn.core.Spectrum import Spectrum
+# from ccpn.core.Spectrum import Spectrum
+from ccpn.core.MultipletList import MultipletList
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
@@ -56,7 +57,7 @@ class Multiplet(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'Multiplet'
 
-  _parentClass = Spectrum
+  _parentClass = MultipletList
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'multiplets'
@@ -84,20 +85,19 @@ class Multiplet(AbstractWrapperObject):
     return self._wrappedData.serial
     
   @property
-  def _parent(self) -> Optional[Spectrum]:
+  def _parent(self) -> Optional[MultipletList]:
     """parent containing multiplet."""
-    #TODO:ED trap that the Multiplet is no longer attached due to deletion
-    return  self._project._data2Obj[self._wrappedData.dataSource]
+    return  self._project._data2Obj[self._wrappedData.multipletList]
 
-  multipletParent = _parent
+  multipletList = _parent
 
   @classmethod
-  def _getAllWrappedData(cls, parent: Spectrum)-> Tuple[apiMultiplet, ...]:
+  def _getAllWrappedData(cls, parent: MultipletList)-> Tuple[apiMultiplet, ...]:
     """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""
     return parent._wrappedData.sortedMultiplets()
 
 # Connections to parents:
-def _newMultiplet(self:Project, peaks:['Peak']=None, serial:int=None) -> Multiplet:
+def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> Multiplet:
   """Create new Multiplet within multipletList"""
 
   defaults = collections.OrderedDict(
@@ -110,7 +110,7 @@ def _newMultiplet(self:Project, peaks:['Peak']=None, serial:int=None) -> Multipl
                               parName='newMultiplet')
 
   try:
-    apiParent = self._wrappedData   #
+    apiParent = self._apiMultipletList
     if peaks:
       apiMultiplet = apiParent.newMultiplet(clusterType='multiplet',
                                               peaks=[p._wrappedData for p in peaks])

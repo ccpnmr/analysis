@@ -133,7 +133,6 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
 
    '''
 
-  print(spectrum.name, peakList.pid, noiseThreshold, minimalLineWidth)
   # TODO excludeRegions
   x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
   if noiseThreshold is None or 0.0:

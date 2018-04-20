@@ -52,7 +52,7 @@ class Multiplet(AbstractWrapperObject):
   list of all possible assignment combinations (assignedNmrAtoms)"""
   
   #: Short class name, for PID.
-  shortClassName = 'PC'
+  shortClassName = 'MT'
   # Attribute it necessary as subclasses must use superclass className
   className = 'Multiplet'
 

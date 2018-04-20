@@ -50,7 +50,8 @@ class MultipletTest_setUp(WrapperTesting):
     Create a valid spectrum and multipletList
     """
     with self.initialSetup():
-      self.spectrum = self.project.createDummySpectrum('H')
+      axisCodes = ('CO', 'Hn', 'Nh')
+      self.spectrum = self.project.createDummySpectrum(axisCodes)
       self.multipletList = self.spectrum.newMultipletList()
 
   def test_newMultiplet(self):
@@ -81,6 +82,27 @@ class MultipletTest_setUp(WrapperTesting):
     with self.assertRaisesRegex(TypeError, 'is not of type Peak'):
       mt = self.multipletList.newMultiplet(peaks=12)
 
+  def test_newMultiplet_position(self):
+    self.peakList = self.spectrum.newPeakList()
+    pks = self.peakList.newPeak()
+    pks.position = (0.1, 0.2, 0.5)
+    pks = self.peakList.newPeak()
+    pks.position = (0.3, 0.25, 1.0)
+    pks = self.peakList.newPeak()
+    pks.position = (0.05, 0.5, 0.1)
+
+    allPks = self.peakList.peaks
+
+    self.assertEqual(len(self.project.multiplets), 0)
+    mt = self.multipletList.newMultiplet(peaks=allPks)
+    self.assertEqual(len(self.project.multipletLists), 1)
+    self.assertEqual(len(self.project.multiplets), 1)
+    self.assertEqual(len(mt.peaks), 3)
+
+    pos = (0.45, 0.95, 1.6)
+    mtPos = mt.position
+    for ii in range(len(pos)):
+      self.assertAlmostEqual(pos[ii], mtPos[ii])
 
 #=========================================================================================
 # MultipletTest_No_setUp
@@ -96,6 +118,7 @@ class MultipletTest_No_setUp(WrapperTesting):
     """
     Test that creating a new Multiplet with no parameter creates a valid Multiplet.
     """
-    self.spectrum = self.project.createDummySpectrum('H')
+    axisCodes = ('CO', 'Hn', 'Nh')
+    self.spectrum = self.project.createDummySpectrum(axisCodes)
     self.multipletList = self.spectrum.newMultipletList()
 

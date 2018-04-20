@@ -169,12 +169,18 @@ class Multiplet(AbstractWrapperObject):
     return len(self._wrappedData.sortedPeaks())
 
   @property
-  def position(self) -> Tuple[float, ...]:
+  def position(self) -> Optional[Tuple[float, ...]]:
     """Peak position in ppm (or other relevant unit) in dimension order."""
-    pks = self.peaks
-    if pks:
-      self._position = self._wrappedData.sortedPeaks[0]
-    return tuple(x.value for x in self._wrappedData.sortedPeakDims())
+    result = None
+    try:
+      pks = self.peaks
+      pksPos = [pp.position for pp in pks]
+      if pks:
+        self._position = tuple(sum(item) for item in zip(*pksPos))
+        result = self._position
+
+    finally:
+      return result
 
   @property
   def positionError(self) -> Tuple[Optional[float], ...]:

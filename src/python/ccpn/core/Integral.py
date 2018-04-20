@@ -35,6 +35,7 @@ from typing import Optional, Tuple, Sequence, List
 import numpy as np
 from scipy.integrate import trapz
 
+LinkedPeaks = 'linkedPeaks'
 
 class Integral(AbstractWrapperObject):
   """n-dimensional Integral, with integration region and value.
@@ -256,25 +257,27 @@ class Integral(AbstractWrapperObject):
         return (baseline, x[dd], y[dd])
 # Connections to parents:
 
-  def linkIntegralToPeak(self, peak):
-    # links the value of an integral to a peak
-    if peak is not None and not peak.isDeleted:
-      values = {'value':'volume', 'valueError':'volumeError', 'figureOfMerit':'figOfMerit', 'bias':'offset'}
-      for integraAttr, peakAttr in values.items():
-        setattr(peak, peakAttr, getattr(self, integraAttr))
-      self._linkedPeaks.add(peak)
-    if not self._linkedPeakNotifier:
-      self._linkedPeakNotifier = self.project.registerNotifier(self.className, 'change', self._updateLinkedPeaks, onceOnly=True)
-
-  def _updateLinkedPeaks(self, *args):
-
-    if self._linkedPeaks:
-      self.linkIntegralToPeaks(self._linkedPeaks)
-
-  def linkIntegralToPeaks(self, peaks):
-    # add echo block
-    for peak in peaks:
-      self.linkIntegralToPeak(peak)
+  # def linkIntegralToPeak(self, peak):
+  #   # links the value of an integral to a peak
+  #   if peak is not None and not peak.isDeleted:
+  #     values = {'value':'volume', 'valueError':'volumeError', 'figureOfMerit':'figOfMerit', 'bias':'offset'}
+  #     for integraAttr, peakAttr in values.items():
+  #       setattr(peak, peakAttr, getattr(self, integraAttr))
+  #     if peak.pid not in self._ccpnInternalData[LinkedPeaks]:
+  #       self._ccpnInternalData[LinkedPeaks].append(peak.pid)
+  #   if not self._linkedPeakNotifier:
+  #     self._linkedPeakNotifier = self.project.registerNotifier(self.className, 'change', self._updateLinkedPeaks, onceOnly=True)
+  #
+  # def _updateLinkedPeaks(self, *args):
+  #
+  #   if self._ccpnInternalData[LinkedPeaks]:
+  #     peaks= [self.project.getByPid(p) for p in self._ccpnInternalData[LinkedPeaks]]
+  #     self.linkIntegralToPeaks(peaks)
+  #
+  # def linkIntegralToPeaks(self, peaks):
+  #   # add echo block
+  #   for peak in peaks:
+  #     self.linkIntegralToPeak(peak)
 
 def _newIntegral(self:IntegralList, value:List[float]=None,
                  valueError:List[float]=None, bias:float=0, slopes:List[float]=None,
@@ -309,8 +312,7 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
 
   # Do creation notifications
   result._finaliseAction('create')
-  # notifier = result.project.registerNotifier(result.className, 'change', result._updateLinkedPeaks, onceOnly=True)
-
+  # result._ccpnInternalData.update({LinkedPeaks:[]})
   return result
 
 IntegralList.newIntegral = _newIntegral

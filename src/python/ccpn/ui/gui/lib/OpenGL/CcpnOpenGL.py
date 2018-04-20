@@ -5284,7 +5284,8 @@ class CcpnGLWidget(QOpenGLWidget):
     #     self._regionList.renderMode = GLRENDERMODE_REBUILD
     #     self.update()
     #     return
-
+    # if not integral._linkedPeakNotifier: #adds a notifier when changes the integral value, so the linked peaks value are updated
+    #   integral._linkedPeakNotifier = integral.project.registerNotifier(integral.className, 'change', integral._updateLinkedPeaks, onceOnly=True)
     for ils in self._GLIntegralLists.values():
       for reg in ils._regions:
         if reg._object == integral:

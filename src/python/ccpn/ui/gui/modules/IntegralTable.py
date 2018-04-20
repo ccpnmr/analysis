@@ -309,7 +309,7 @@ class IntegralTable(QuickTable):
     """
     integrals = data[Notifier.OBJECT]
 
-    self._clearRegions()
+    # self._clearRegions()
     if integrals is None:
       self.current.clearIntegrals()
     else:
@@ -321,10 +321,10 @@ class IntegralTable(QuickTable):
     """
     integral = data[Notifier.OBJECT]
 
-    self._showRegions()
+    # self._showRegions()
     self._navigateToPosition()
 
-    logger.debug(str(NotImplemented))
+    # logger.debug(str(NotImplemented))
 
   def _selectionPulldownCallback(self, item):
     """

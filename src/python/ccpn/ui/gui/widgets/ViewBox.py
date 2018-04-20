@@ -204,10 +204,11 @@ class ViewBox(pg.ViewBox):
     self._successiveClicks = None  # GWV: Store successive click events for zooming; None means first click not set
     self.crossHair = CrossHair(self, show=False, rgb=(255,255,0), dash=[20.0,7.0]) # dashes in pixels, [on, off]
 
-    self.integralRegions = LinearRegionsPlot(values=[0, 0], orientation='v', bounds=None,
-                                             brush=None, colour='purple', movable=True)
-    for line in self.integralRegions.lines:
-      line.sigPositionChanged.connect(self._integralRegionsMoved)
+    # not needed anymore
+    # self.integralRegions = LinearRegionsPlot(values=[0, 0], orientation='v', bounds=None,
+    #                                          brush=None, colour='purple', movable=True)
+    # for line in self.integralRegions.lines:
+    #   line.sigPositionChanged.connect(self._integralRegionsMoved)
 
     # TODO:ED smaller cross for now, need to scale for ppm
     self.peakWidthPixels = 16  # for ND peaks

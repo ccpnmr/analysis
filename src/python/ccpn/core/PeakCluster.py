@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakCluster as apiPeakCluster
 # from ccpn.core.PeakClusterList import PeakClusterList
-from typing import Optional, Tuple, Union, Sequence
+from typing import Optional, Tuple, Any, Union, Sequence
 
 
 class PeakCluster(AbstractWrapperObject):
@@ -90,6 +90,19 @@ class PeakCluster(AbstractWrapperObject):
     return  self._project._data2Obj[self._wrappedData.nmrProject]
 
   peakClusterParent = _parent
+
+  @property
+  def peaks(self) -> Optional[Tuple[Any]]:
+    """List of peaks attached to the peakCluster"""
+    try:
+      return tuple([self._project._data2Obj[pk] for pk in self._wrappedData.sortedPeaks()])
+    except:
+      return None
+
+  @property
+  def numPeaks(self) -> int:
+    """return number of peaks in the peakCluster"""
+    return len(self._wrappedData.sortedPeaks())
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> Tuple[apiPeakCluster, ...]:

@@ -62,6 +62,7 @@ class Integral(AbstractWrapperObject):
   _registerClassNotifiers = False
 
   _baseline = None
+  _linkedPeakNotifier = None
   _linkedPeaks = set()
 
   # CCPN properties  
@@ -257,14 +258,16 @@ class Integral(AbstractWrapperObject):
 
   def linkIntegralToPeak(self, peak):
     # links the value of an integral to a peak
-    if peak:
+    if peak is not None and not peak.isDeleted:
       values = {'value':'volume', 'valueError':'volumeError', 'figureOfMerit':'figOfMerit', 'bias':'offset'}
       for integraAttr, peakAttr in values.items():
         setattr(peak, peakAttr, getattr(self, integraAttr))
       self._linkedPeaks.add(peak)
-
+    if not self._linkedPeakNotifier:
+      self._linkedPeakNotifier = self.project.registerNotifier(self.className, 'change', self._updateLinkedPeaks, onceOnly=True)
 
   def _updateLinkedPeaks(self, *args):
+
     if self._linkedPeaks:
       self.linkIntegralToPeaks(self._linkedPeaks)
 
@@ -306,7 +309,7 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
 
   # Do creation notifications
   result._finaliseAction('create')
-  notifier = result.project.registerNotifier(result.className, 'change', result._updateLinkedPeaks, onceOnly=True)
+  # notifier = result.project.registerNotifier(result.className, 'change', result._updateLinkedPeaks, onceOnly=True)
 
   return result
 

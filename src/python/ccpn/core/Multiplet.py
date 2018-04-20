@@ -91,6 +91,113 @@ class Multiplet(AbstractWrapperObject):
 
   multipletList = _parent
 
+  @property
+  def height(self) -> Optional[float]:
+    """height of Peak"""
+    return self._wrappedData.height
+
+  @height.setter
+  def height(self, value: float):
+    self._wrappedData.height = value
+
+  @property
+  def heightError(self) -> Optional[float]:
+    """height error of Peak"""
+    return self._wrappedData.heightError
+
+  @heightError.setter
+  def heightError(self, value: float):
+    self._wrappedData.heightError = value
+
+  @property
+  def volume(self) -> Optional[float]:
+    """volume of Peak"""
+    return self._wrappedData.volume
+
+  @volume.setter
+  def volume(self, value: float):
+    self._wrappedData.volume = value
+
+  @property
+  def volumeError(self) -> Optional[float]:
+    """volume error of Peak"""
+    return self._wrappedData.volumeError
+
+  @volumeError.setter
+  def volumeError(self, value: float):
+    self._wrappedData.volumeError = value
+
+  @property
+  def figureOfMerit(self) -> Optional[float]:
+    """figureOfMerit of Peak, between 0.0 and 1.0 inclusive."""
+    return self._wrappedData.figOfMerit
+
+  @figureOfMerit.setter
+  def figureOfMerit(self, value: float):
+    self._wrappedData.figOfMerit = value
+
+  @property
+  def annotation(self) -> Optional[str]:
+    """Peak text annotation"""
+    return self._wrappedData.annotation
+
+  @annotation.setter
+  def annotation(self, value: str):
+    self._wrappedData.annotation = value
+
+  @property
+  def comment(self) -> Optional[str]:
+    """Free-form text comment"""
+    return self._wrappedData.details
+
+  @comment.setter
+  def comment(self, value: str):
+    self._wrappedData.details = value
+
+  @property
+  def position(self) -> Tuple[float, ...]:
+    """Peak position in ppm (or other relevant unit) in dimension order."""
+    return tuple(x.value for x in self._wrappedData.sortedPeakDims())
+
+  @position.setter
+  def position(self,value:Sequence):
+    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+      peakDim.value = value[ii]
+      peakDim.realValue = None
+
+  @property
+  def positionError(self) -> Tuple[Optional[float], ...]:
+    """Peak position error in ppm (or other relevant unit)."""
+    return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
+
+  @positionError.setter
+  def positionError(self,value:Sequence):
+    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+      peakDim.valueError = value[ii]
+
+  @property
+  def boxWidths(self) -> Tuple[Optional[float], ...]:
+    """The full width of the peak footprint in points for each dimension,
+    i.e. the width of the area that should be considered for integration, fitting, etc. ."""
+    return tuple(x.boxWidth for x in self._wrappedData.sortedPeakDims())
+
+  @boxWidths.setter
+  def boxWidths(self,value:Sequence):
+    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+      peakDim.boxWidth = value[ii]
+
+  @property
+  def lineWidths(self) -> Tuple[Optional[float], ...]:
+    """Full-width-half-height of peak/multiplet for each dimension, in Hz. """
+    return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
+
+  @lineWidths.setter
+  def lineWidths(self,value:Sequence):
+    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+      peakDim.lineWidth = value[ii]
+
+
+  # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: MultipletList)-> Tuple[apiMultiplet, ...]:
     """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""

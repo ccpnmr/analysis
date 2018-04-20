@@ -84,11 +84,56 @@ class MultipletList(AbstractWrapperObject):
   @property
   def _parent(self) -> Optional[Spectrum]:
     """parent containing multipletList."""
-    # TODO:ED trap that the MultipletList is no longer attached due to deletion
     return self._project._data2Obj[self._wrappedData.dataSource]
 
   multipletListParent = _parent
 
+  @property
+  def title(self) -> str:
+    """title of multiplet (not used in PID)."""
+    return self._wrappedData.name
+
+  @title.setter
+  def title(self, value: str):
+    self._wrappedData.name = value
+
+  @property
+  def dataType(self) -> str:
+    """dataType of multipletList."""
+    return self._wrappedData.dataType
+
+  @dataType.setter
+  def title(self, value: str):
+    self._wrappedData.dataType = value
+
+  @property
+  def symbolColour(self) -> str:
+    """Symbol colour for multipletList annotation display"""
+    return self._wrappedData.symbolColour
+
+  @symbolColour.setter
+  def symbolColour(self, value: str):
+    self._wrappedData.symbolColour = value
+
+  @property
+  def textColour(self) -> str:
+    """Text colour for multipletList annotation display"""
+    return self._wrappedData.textColour
+
+  @textColour.setter
+  def textColour(self, value: str):
+    self._wrappedData.textColour = value
+
+  @property
+  def comment(self) -> str:
+    """Free-form text comment"""
+    return self._wrappedData.details
+
+  @comment.setter
+  def comment(self, value: str):
+    self._wrappedData.details = value
+
+  # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum) -> Tuple[apiMultipletList, ...]:
     """get wrappedData (MultipletLists) for all MultipletList children of parent MultipletListList"""

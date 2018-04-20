@@ -37,13 +37,13 @@ from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakCluster as apiPeakCluster
-# from ccpn.core.PeakClusterList import PeakClusterList
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
+# from ccpn.core.MultipletList import MultipletList
 from typing import Optional, Tuple, Union, Sequence
 
 
-class PeakCluster(AbstractWrapperObject):
-  """PeakCluster object, holding position, intensity, and assignment information
+class Multiplet(AbstractWrapperObject):
+  """Multiplet object, holding position, intensity, and assignment information
 
   Measurements that require more than one NmrAtom for an individual assignment
   (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
@@ -54,23 +54,23 @@ class PeakCluster(AbstractWrapperObject):
   #: Short class name, for PID.
   shortClassName = 'PC'
   # Attribute it necessary as subclasses must use superclass className
-  className = 'PeakCluster'
+  className = 'Multiplet'
 
-  _parentClass = Project
+  _parentClass = Spectrum
 
   #: Name of plural link to instances of class
-  _pluralLinkName = 'peakClusters'
+  _pluralLinkName = 'multiplets'
   
   #: List of child classes.
   _childClasses = []
 
   # Qualified name of matching API class
-  _apiClassQualifiedName = apiPeakCluster._metaclass.qualifiedName()
+  _apiClassQualifiedName = apiMultiplet._metaclass.qualifiedName()
 
   # CCPN properties  
   @property
-  def _apiPeakCluster(self) -> apiPeakCluster:
-    """ API peakClusters matching PeakCluster"""
+  def _apiMultiplet(self) -> apiMultiplet:
+    """ API multiplets matching Multiplet"""
     return self._wrappedData
     
   @property
@@ -80,25 +80,25 @@ class PeakCluster(AbstractWrapperObject):
 
   @property
   def serial(self) -> int:
-    """serial number of PeakCluster, used in Pid and to identify the PeakCluster. """
+    """serial number of Multiplet, used in Pid and to identify the Multiplet. """
     return self._wrappedData.serial
     
   @property
-  def _parent(self) -> Optional[Project]:
-    """parent containing peakCluster."""
-    #TODO:ED trap that the PeakCluster is no longer attached due to deletion
-    return  self._project._data2Obj[self._wrappedData.nmrProject]
+  def _parent(self) -> Optional[Spectrum]:
+    """parent containing multiplet."""
+    #TODO:ED trap that the Multiplet is no longer attached due to deletion
+    return  self._project._data2Obj[self._wrappedData.dataSource]
 
-  peakClusterParent = _parent
+  multipletParent = _parent
 
   @classmethod
-  def _getAllWrappedData(cls, parent: Project)-> Tuple[apiPeakCluster, ...]:
-    """get wrappedData (PeakClusters) for all PeakCluster children of parent PeakClusterList"""
-    return parent._wrappedData.sortedPeakClusters()
+  def _getAllWrappedData(cls, parent: Spectrum)-> Tuple[apiMultiplet, ...]:
+    """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""
+    return parent._wrappedData.sortedMultiplets()
 
 # Connections to parents:
-def _newPeakCluster(self:Project, peaks:['Peak']=None, serial:int=None) -> PeakCluster:
-  """Create new PeakCluster within peakClusterList"""
+def _newMultiplet(self:Project, peaks:['Peak']=None, serial:int=None) -> Multiplet:
+  """Create new Multiplet within multipletList"""
 
   defaults = collections.OrderedDict(
     (('peaks', None), ('serial', None),
@@ -106,23 +106,23 @@ def _newPeakCluster(self:Project, peaks:['Peak']=None, serial:int=None) -> PeakC
   )
 
   undo = self._project._undo
-  self._startCommandEchoBlock('newPeakCluster', values=locals(), defaults=defaults,
-                              parName='newPeakCluster')
+  self._startCommandEchoBlock('newMultiplet', values=locals(), defaults=defaults,
+                              parName='newMultiplet')
 
   try:
     apiParent = self._wrappedData   #
     if peaks:
-      apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet',
+      apiMultiplet = apiParent.newMultiplet(clusterType='multiplet',
                                               peaks=[p._wrappedData for p in peaks])
     else:
-      apiPeakCluster = apiParent.newPeakCluster(clusterType='multiplet')
+      apiMultiplet = apiParent.newMultiplet(clusterType='multiplet')
     
-    result = self._project._data2Obj.get(apiPeakCluster)
+    result = self._project._data2Obj.get(apiMultiplet)
 
   finally:
     self._endCommandEchoBlock()
 
   return result
 
-PeakCluster._parentClass.newPeakCluster = _newPeakCluster
-del _newPeakCluster
+Multiplet._parentClass.newMultiplet = _newMultiplet
+del _newMultiplet

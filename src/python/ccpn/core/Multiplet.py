@@ -41,6 +41,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 # from ccpn.core.MultipletList import MultipletList
 from typing import Optional, Tuple, Union, Sequence
+from ccpn.util.Common import makeIterableList
 
 
 class Multiplet(AbstractWrapperObject):
@@ -155,25 +156,27 @@ class Multiplet(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
+  def peaks(self) -> Optional[Tuple[Peak]]:
+    """List of peaks attached to the multiplet"""
+    return self._wrappedData.sortedPeaks()
+
+  @property
+  def numPeaks(self) -> int:
+    """return number of peaks in the multiplet"""
+    return len(self._wrappedData.sortedPeaks())
+
+  @property
   def position(self) -> Tuple[float, ...]:
     """Peak position in ppm (or other relevant unit) in dimension order."""
+    pks = self.peaks
+    if pks:
+      self._position = self._wrappedData.sortedPeaks[0]
     return tuple(x.value for x in self._wrappedData.sortedPeakDims())
-
-  @position.setter
-  def position(self,value:Sequence):
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      peakDim.value = value[ii]
-      peakDim.realValue = None
 
   @property
   def positionError(self) -> Tuple[Optional[float], ...]:
     """Peak position error in ppm (or other relevant unit)."""
     return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
-
-  @positionError.setter
-  def positionError(self,value:Sequence):
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      peakDim.valueError = value[ii]
 
   @property
   def boxWidths(self) -> Tuple[Optional[float], ...]:
@@ -181,21 +184,10 @@ class Multiplet(AbstractWrapperObject):
     i.e. the width of the area that should be considered for integration, fitting, etc. ."""
     return tuple(x.boxWidth for x in self._wrappedData.sortedPeakDims())
 
-  @boxWidths.setter
-  def boxWidths(self,value:Sequence):
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      peakDim.boxWidth = value[ii]
-
   @property
   def lineWidths(self) -> Tuple[Optional[float], ...]:
     """Full-width-half-height of peak/multiplet for each dimension, in Hz. """
     return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
-
-  @lineWidths.setter
-  def lineWidths(self,value:Sequence):
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      peakDim.lineWidth = value[ii]
-
 
   # Implementation functions
   @classmethod
@@ -212,15 +204,26 @@ def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> M
     )
   )
 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+  # throw more understandable errors for the python console
+  spectrum = self.multipletListParent
+  pks = makeIterableList(peaks)
+  for pp in pks:
+    if not isinstance(pp, Peak):
+      raise TypeError('%s is not of type Peak' % pp)
+    if pp not in spectrum.peaks:
+      raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+
   undo = self._project._undo
   self._startCommandEchoBlock('newMultiplet', values=locals(), defaults=defaults,
                               parName='newMultiplet')
 
   try:
     apiParent = self._apiMultipletList
-    if peaks:
+    if pks:
       apiMultiplet = apiParent.newMultiplet(multipletType='multiplet',
-                                              peaks=[p._wrappedData for p in peaks])
+                                              peaks=[p._wrappedData for p in pks])
     else:
       apiMultiplet = apiParent.newMultiplet(multipletType='multiplet')
     

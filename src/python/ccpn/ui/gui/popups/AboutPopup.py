@@ -63,12 +63,6 @@ class AboutPopup(CcpnDialog):
     self.label = Label(self, grid=(0, 0))
     self.label.setPixmap(QtGui.QPixmap(pathPNG))
 
-    # self.label.setScaledContents(True)
-    # # self.label2 = Label(self, text='myLabel', grid=(1, 0))
-    # self.label.setMinimumSize(1, 1)
-    # # get resize events for the label
-    # self.label.setAlignment(QtCore.Qt.AlignCenter)
-
     self.buttons = ButtonList(self, texts=['Close', 'Copy'],
                                       callbacks=[self.accept, self.copyToClipboard],
                                       tipTexts=['Close window', 'Copy text to clipboard'],

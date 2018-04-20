@@ -112,10 +112,10 @@ def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> M
   try:
     apiParent = self._apiMultipletList
     if peaks:
-      apiMultiplet = apiParent.newMultiplet(clusterType='multiplet',
+      apiMultiplet = apiParent.newMultiplet(multipletType='multiplet',
                                               peaks=[p._wrappedData for p in peaks])
     else:
-      apiMultiplet = apiParent.newMultiplet(clusterType='multiplet')
+      apiMultiplet = apiParent.newMultiplet(multipletType='multiplet')
     
     result = self._project._data2Obj.get(apiMultiplet)
 

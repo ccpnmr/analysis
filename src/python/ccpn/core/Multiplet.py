@@ -40,7 +40,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 # from ccpn.core.MultipletList import MultipletList
-from typing import Optional, Tuple, Union, Sequence
+from typing import Optional, Tuple, Any, Union, Sequence
 from ccpn.util.Common import makeIterableList
 
 
@@ -156,9 +156,12 @@ class Multiplet(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
-  def peaks(self) -> Optional[Tuple[Peak]]:
+  def peaks(self) -> Optional[Tuple[Any]]:
     """List of peaks attached to the multiplet"""
-    return self._wrappedData.sortedPeaks()
+    try:
+      return tuple([self._project._data2Obj[pk] for pk in self._wrappedData.sortedPeaks()])
+    except:
+      return None
 
   @property
   def numPeaks(self) -> int:

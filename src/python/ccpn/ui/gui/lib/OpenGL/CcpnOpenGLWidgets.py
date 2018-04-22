@@ -215,6 +215,7 @@ class GLRegion(QtWidgets.QWidget):
 
       intArea.colors = np.array(solidColour * intArea.numVertices)
 
+# TODO:ED add a class for 'normal' regions so that exclude/noise regions appear
 
 class GLIntegralArray(GLVertexArray):
   def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
@@ -344,6 +345,8 @@ class GLIntegralArray(GLVertexArray):
       newRegion.visible = True
       newRegion._PP = (self.numVertices-4) * 2
     else:
+
+      # Need to put the normal regions in here
       newRegion.visible = False
       newRegion._pp = None
 
@@ -502,6 +505,9 @@ class GLIntegralArray(GLVertexArray):
         reg.visible = False
         reg._pp = None
 
-      if checkBuild == False or reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
-        reg._integralArea.renderMode = GLRENDERMODE_DRAW
+      if checkBuild == False:
         reg._rebuildIntegral()
+      else:
+        if hasattr(reg, '_integralArea') and reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
+          reg._integralArea.renderMode = GLRENDERMODE_DRAW
+          reg._rebuildIntegral()

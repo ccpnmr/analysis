@@ -215,302 +215,6 @@ class GLRegion(QtWidgets.QWidget):
 
       intArea.colors = np.array(solidColour * intArea.numVertices)
 
-# TODO:ED add a class for 'normal' regions so that exclude/noise regions appear
-
-class GLIntegralRegion(GLVertexArray):
-  def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
-    super(GLIntegralRegion, self).__init__(renderMode=GLRENDERMODE_REBUILD, blendMode=True,
-                                          GLContext=GLContext, drawMode=GL.GL_QUADS,
-                                          dimension=2)
-    self.project = project
-    self._regions = []
-    self.spectrumView = spectrumView
-    self.integralListView = integralListView
-    self.GLContext=GLContext
-
-  def drawIndexArray(self):
-    # draw twice top cover the outline
-    self.fillMode = GL.GL_LINE
-    super(GLIntegralRegion, self).drawIndexArray()
-    self.fillMode = GL.GL_FILL
-    super(GLIntegralRegion, self).drawIndexArray()
-
-  def _clearRegions(self):
-    self._regions = []
-
-  def addIntegral(self, integral, integralListView, colour='blue', brush=None):
-    return self._addRegion(values=integral.limits[0], orientation='v', movable=True,
-                           obj=integral, objectView=integralListView, colour=colour, brush=brush)
-
-  def _removeRegion(self, region):
-    if region in self._regions:
-      self._regions.remove(region)
-
-  def _addRegion(self, values=None, axisCode=None, orientation=None,
-                brush=None, colour='blue',
-                movable=True, visible=True, bounds=None,
-                obj=None, objectView=None,
-                **kw):
-
-    if colour in REGION_COLOURS.keys() and not brush:
-      brush = REGION_COLOURS[colour]
-
-    if orientation == 'h':
-      axisCode = self.parent._axisCodes[1]
-    elif orientation == 'v':
-      axisCode = self.parent._axisCodes[0]
-    else:
-      if axisCode:
-        axisIndex = None
-        for ps, psCode in enumerate(self.parent._axisCodes[0:2]):
-          if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
-
-            if axisCode[0] == psCode[0]:
-              axisIndex = ps
-          elif self.parent._preferences.matchAxisCode == 1:  # match full code
-            if axisCode == psCode:
-              axisIndex = ps
-
-          if axisIndex == 0:
-            orientation = 'v'
-          elif axisIndex == 1:
-            orientation = 'h'
-
-        if not axisIndex:
-          getLogger().warning('Axis code %s not found in current strip' % axisCode)
-          return None
-      else:
-        axisCode = self.parent._axisCodes[0]
-        orientation = 'v'
-
-    self._regions.append(GLRegion(self.parent, self,
-                                  values=values,
-                                  axisCode=axisCode,
-                                  orientation=orientation,
-                                  brush=brush,
-                                  colour=colour,
-                                  movable=movable,
-                                  visible=visible,
-                                  bounds=bounds,
-                                  obj=obj,
-                                  objectView=objectView))
-
-    axisIndex = 0
-    for ps, psCode in enumerate(self.parent.axisOrder[0:2]):
-      if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
-
-        if axisCode[0] == psCode[0]:
-          axisIndex = ps
-      elif self.parent._preferences.matchAxisCode == 1:  # match full code
-        if axisCode == psCode:
-          axisIndex = ps
-
-    # TODO:ED check axis units - assume 'ppm' for the minute
-
-    if axisIndex == 0:
-      # vertical ruler
-      pos0 = x0 = values[0]
-      pos1 = x1 = values[1]
-      y0 = self.parent.axisT+self.parent.pixelY
-      y1 = self.parent.axisB-self.parent.pixelY
-    else:
-      # horizontal ruler
-      pos0 = y0 = values[0]
-      pos1 = y1 = values[1]
-      x0 = self.parent.axisL-self.parent.pixelX
-      x1 = self.parent.axisR+self.parent.pixelX
-
-    # get the new added region
-    newRegion = self._regions[-1]
-
-    if obj and obj in self.parent.current.integrals:
-
-      # draw integral bars if in the current list
-      colour = list(self.parent.highlightColour)
-      colour[3] = CCPNGLWIDGET_INTEGRALSHADE
-
-      index = self.numVertices
-      self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
-                                                      index, index + 1, index, index + 1,
-                                                      index + 1, index + 2, index + 1, index + 2,
-                                                      index + 2, index + 3, index + 2, index + 3,
-                                                      index, index + 3, index, index + 3])
-      self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
-      self.colors = np.append(self.colors, colour * 4)
-      self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
-
-      index += 4
-      self.numVertices += 4
-
-      newRegion.visible = True
-      newRegion._PP = (self.numVertices-4) * 2
-    else:
-
-      # Need to put the normal regions in here
-      newRegion.visible = False
-      newRegion._pp = None
-
-    newRegion._rebuildIntegral()
-
-    return newRegion
-
-  def _rebuildIntegralAreas(self):
-    self._rebuild(checkBuild=True)
-
-    return
-
-    for reg in self._regions:
-      if reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
-        reg._integralArea.renderMode = GLRENDERMODE_DRAW
-        reg._rebuildIntegral()
-
-  def _rescale(self):
-    vertices = self.numVertices
-    axisT = self.parent.axisT
-    axisB = self.parent.axisB
-    axisL = self.parent.axisL
-    axisR = self.parent.axisR
-    pixelX = self.parent.pixelX
-    pixelY = self.parent.pixelY
-
-    if vertices:
-      for pp in range(0, 2*vertices, 8):
-        axisIndex = int(self.attribs[pp])
-        axis0 = self.attribs[pp+1]
-        axis1 = self.attribs[pp+3]
-
-        # [x0, y0, x0, y1, x1, y1, x1, y0])
-
-        if axisIndex == 0:
-          offsets = [axis0, axisT+pixelY, axis0, axisB-pixelY,
-                     axis1, axisB-pixelY, axis1, axisT+pixelY]
-        else:
-          offsets = [axisL-pixelX, axis0, axisL-pixelX, axis1,
-                     axisR+pixelX, axis1, axisR+pixelX, axis0]
-
-        self.vertices[pp:pp+8] = offsets
-
-  def _resize(self):
-    axisT = self.parent.axisT
-    axisB = self.parent.axisB
-    axisL = self.parent.axisL
-    axisR = self.parent.axisR
-    pixelX = self.parent.pixelX
-    pixelY = self.parent.pixelY
-
-    # pp = 0
-    for reg in self._regions:
-      pp = reg._pp
-      if not pp:
-        continue
-
-      if not reg.isVisible:
-        continue
-
-      try:
-        axisIndex = int(self.attribs[pp])
-      except Exception as es:
-        axisIndex = 0
-
-      try:
-        values = reg._object.limits[0]
-      except Exception as es:
-        values = reg.values
-
-      axis0 = values[0]
-      axis1 = values[1]
-      reg._values = values
-
-      # axis0 = self.attribs[pp + 1]
-      # axis1 = self.attribs[pp + 3]
-
-      # [x0, y0, x0, y1, x1, y1, x1, y0])
-
-      if axisIndex == 0:
-        offsets = [axis0, axisT + pixelY, axis0, axisB - pixelY,
-                   axis1, axisB - pixelY, axis1, axisT + pixelY]
-      else:
-        offsets = [axisL - pixelX, axis0, axisL - pixelX, axis1,
-                   axisR + pixelX, axis1, axisR + pixelX, axis0]
-
-      self.vertices[pp:pp + 8] = offsets
-      self.attribs[pp + 1] = axis0
-      self.attribs[pp + 3] = axis1
-      self.attribs[pp + 5] = axis0
-      self.attribs[pp + 7] = axis1
-      # pp += 8
-
-  def _rebuild(self, checkBuild=False):
-    axisT = self.parent.axisT
-    axisB = self.parent.axisB
-    axisL = self.parent.axisL
-    axisR = self.parent.axisR
-    pixelX = self.parent.pixelX
-    pixelY = self.parent.pixelY
-
-    self.clearArrays()
-    for reg in self._regions:
-
-      axisIndex = 0
-      for ps, psCode in enumerate(self.parent.axisOrder[0:2]):
-        if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
-
-          if reg.axisCode[0] == psCode[0]:
-            axisIndex = ps
-        elif self.parent._preferences.matchAxisCode == 1:  # match full code
-          if reg.axisCode == psCode:
-            axisIndex = ps
-
-      # TODO:ED check axis units - assume 'ppm' for the minute
-
-      if axisIndex == 0:
-        # vertical ruler
-        pos0 = x0 = reg.values[0]
-        pos1 = x1 = reg.values[1]
-        y0 = axisT+pixelY
-        y1 = axisB-pixelY
-      else:
-        # horizontal ruler
-        pos0 = y0 = reg.values[0]
-        pos1 = y1 = reg.values[1]
-        x0 = axisL-pixelX
-        x1 = axisR+pixelX
-
-      # if self._object in self.current.integrals:
-      #   colour = (*self.parent.highlightColour[:3], CCPNGLWIDGET_INTEGRALSHADE)
-      # else:
-      if reg._object in self.parent.current.integrals:
-        solidColour = list(self.parent.highlightColour)
-        solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
-
-      # else:
-      #   solidColour = list(reg.brush)
-
-        index = self.numVertices
-        self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
-                                                        index, index + 1, index, index + 1,
-                                                        index + 1, index + 2, index + 1, index + 2,
-                                                        index + 2, index + 3, index + 2, index + 3,
-                                                        index, index + 3, index, index + 3])
-        self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
-        self.colors = np.append(self.colors, solidColour * 4)
-        self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
-
-        index += 4
-        self.numVertices += 4
-
-        reg.visible = True
-        reg._pp = (self.numVertices-4) * 2
-      else:
-        reg.visible = False
-        reg._pp = None
-
-      if checkBuild == False:
-        reg._rebuildIntegral()
-      else:
-        if hasattr(reg, '_integralArea') and reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
-          reg._integralArea.renderMode = GLRENDERMODE_DRAW
-          reg._rebuildIntegral()
 
 class GLExternalRegion(GLVertexArray):
   def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
@@ -601,7 +305,6 @@ class GLExternalRegion(GLVertexArray):
           axisIndex = ps
 
     # TODO:ED check axis units - assume 'ppm' for the minute
-
     if axisIndex == 0:
       # vertical ruler
       pos0 = x0 = values[0]
@@ -631,40 +334,6 @@ class GLExternalRegion(GLVertexArray):
 
     return self._regions[-1]
 
-    # # get the new added region
-    # newRegion = self._regions[-1]
-    #
-    # if obj and obj in self.parent.current.integrals:
-    #
-    #   # draw integral bars if in the current list
-    #   colour = list(self.parent.highlightColour)
-    #   colour[3] = CCPNGLWIDGET_INTEGRALSHADE
-    #
-    #   index = self.numVertices
-    #   self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
-    #                                                   index, index + 1, index, index + 1,
-    #                                                   index + 1, index + 2, index + 1, index + 2,
-    #                                                   index + 2, index + 3, index + 2, index + 3,
-    #                                                   index, index + 3, index, index + 3])
-    #   self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
-    #   self.colors = np.append(self.colors, colour * 4)
-    #   self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
-    #
-    #   index += 4
-    #   self.numVertices += 4
-    #
-    #   newRegion.visible = True
-    #   newRegion._PP = (self.numVertices-4) * 2
-    # else:
-    #
-    #   # Need to put the normal regions in here
-    #   newRegion.visible = False
-    #   newRegion._pp = None
-    #
-    # newRegion._rebuildIntegral()
-    #
-    # return newRegion
-
   def _rebuildIntegralAreas(self):
     self._rebuild(checkBuild=True)
 
@@ -690,8 +359,6 @@ class GLExternalRegion(GLVertexArray):
         axis0 = self.attribs[pp+1]
         axis1 = self.attribs[pp+3]
 
-        # [x0, y0, x0, y1, x1, y1, x1, y0])
-
         if axisIndex == 0:
           offsets = [axis0, axisT+pixelY, axis0, axisB-pixelY,
                      axis1, axisB-pixelY, axis1, axisT+pixelY]
@@ -711,13 +378,6 @@ class GLExternalRegion(GLVertexArray):
 
     pp = 0
     for reg in self._regions:
-      # pp = reg._pp
-      # if not pp:
-      #   continue
-      #
-      # if not reg.isVisible:
-      #   continue
-
       try:
         axisIndex = int(self.attribs[pp])
       except Exception as es:
@@ -731,11 +391,6 @@ class GLExternalRegion(GLVertexArray):
       axis0 = values[0]
       axis1 = values[1]
       reg._values = values
-
-      # axis0 = self.attribs[pp + 1]
-      # axis1 = self.attribs[pp + 3]
-
-      # [x0, y0, x0, y1, x1, y1, x1, y0])
 
       if axisIndex == 0:
         offsets = [axis0, axisT + pixelY, axis0, axisB - pixelY,
@@ -773,7 +428,6 @@ class GLExternalRegion(GLVertexArray):
             axisIndex = ps
 
       # TODO:ED check axis units - assume 'ppm' for the minute
-
       if axisIndex == 0:
         # vertical ruler
         pos0 = x0 = reg.values[0]
@@ -801,35 +455,275 @@ class GLExternalRegion(GLVertexArray):
       index += 4
       self.numVertices += 4
 
-      # if reg._object in self.parent.current.integrals:
-      #   solidColour = list(self.parent.highlightColour)
-      #   solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
-      #
-      # # else:
-      # #   solidColour = list(reg.brush)
-      #
-      #   index = self.numVertices
-      #   self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
-      #                                                   index, index + 1, index, index + 1,
-      #                                                   index + 1, index + 2, index + 1, index + 2,
-      #                                                   index + 2, index + 3, index + 2, index + 3,
-      #                                                   index, index + 3, index, index + 3])
-      #   self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
-      #   self.colors = np.append(self.colors, solidColour * 4)
-      #   self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
-      #
-      #   index += 4
-      #   self.numVertices += 4
-      #
-      #   reg.visible = True
-      #   reg._pp = (self.numVertices-4) * 2
-      # else:
-      #   reg.visible = False
-      #   reg._pp = None
-      #
-      # if checkBuild == False:
-      #   reg._rebuildIntegral()
-      # else:
-      #   if hasattr(reg, '_integralArea') and reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
-      #     reg._integralArea.renderMode = GLRENDERMODE_DRAW
-      #     reg._rebuildIntegral()
+
+class GLIntegralRegion(GLExternalRegion):
+  def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
+    super(GLIntegralRegion, self).__init__(project=project, GLContext=GLContext,
+                                           spectrumView=spectrumView, integralListView=integralListView)
+
+  # def drawIndexArray(self):
+  #   # draw twice top cover the outline
+  #   self.fillMode = GL.GL_LINE
+  #   super(GLIntegralRegion, self).drawIndexArray()
+  #   self.fillMode = GL.GL_FILL
+  #   super(GLIntegralRegion, self).drawIndexArray()
+  #
+  # def _clearRegions(self):
+  #   self._regions = []
+  #
+  # def addIntegral(self, integral, integralListView, colour='blue', brush=None):
+  #   return self._addRegion(values=integral.limits[0], orientation='v', movable=True,
+  #                          obj=integral, objectView=integralListView, colour=colour, brush=brush)
+  #
+  # def _removeRegion(self, region):
+  #   if region in self._regions:
+  #     self._regions.remove(region)
+  #
+  def _addRegion(self, values=None, axisCode=None, orientation=None,
+                brush=None, colour='blue',
+                movable=True, visible=True, bounds=None,
+                obj=None, objectView=None,
+                **kw):
+
+    if colour in REGION_COLOURS.keys() and not brush:
+      brush = REGION_COLOURS[colour]
+
+    if orientation == 'h':
+      axisCode = self.parent._axisCodes[1]
+    elif orientation == 'v':
+      axisCode = self.parent._axisCodes[0]
+    else:
+      if axisCode:
+        axisIndex = None
+        for ps, psCode in enumerate(self.parent._axisCodes[0:2]):
+          if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+
+            if axisCode[0] == psCode[0]:
+              axisIndex = ps
+          elif self.parent._preferences.matchAxisCode == 1:  # match full code
+            if axisCode == psCode:
+              axisIndex = ps
+
+          if axisIndex == 0:
+            orientation = 'v'
+          elif axisIndex == 1:
+            orientation = 'h'
+
+        if not axisIndex:
+          getLogger().warning('Axis code %s not found in current strip' % axisCode)
+          return None
+      else:
+        axisCode = self.parent._axisCodes[0]
+        orientation = 'v'
+
+    self._regions.append(GLRegion(self.parent, self,
+                                  values=values,
+                                  axisCode=axisCode,
+                                  orientation=orientation,
+                                  brush=brush,
+                                  colour=colour,
+                                  movable=movable,
+                                  visible=visible,
+                                  bounds=bounds,
+                                  obj=obj,
+                                  objectView=objectView))
+
+    axisIndex = 0
+    for ps, psCode in enumerate(self.parent.axisOrder[0:2]):
+      if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+
+        if axisCode[0] == psCode[0]:
+          axisIndex = ps
+      elif self.parent._preferences.matchAxisCode == 1:  # match full code
+        if axisCode == psCode:
+          axisIndex = ps
+
+    # TODO:ED check axis units - assume 'ppm' for the minute
+    if axisIndex == 0:
+      # vertical ruler
+      pos0 = x0 = values[0]
+      pos1 = x1 = values[1]
+      y0 = self.parent.axisT+self.parent.pixelY
+      y1 = self.parent.axisB-self.parent.pixelY
+    else:
+      # horizontal ruler
+      pos0 = y0 = values[0]
+      pos1 = y1 = values[1]
+      x0 = self.parent.axisL-self.parent.pixelX
+      x1 = self.parent.axisR+self.parent.pixelX
+
+    # get the new added region
+    newRegion = self._regions[-1]
+
+    if obj and obj in self.parent.current.integrals:
+
+      # draw integral bars if in the current list
+      colour = list(self.parent.highlightColour)
+      colour[3] = CCPNGLWIDGET_INTEGRALSHADE
+
+      index = self.numVertices
+      self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
+                                                      index, index + 1, index, index + 1,
+                                                      index + 1, index + 2, index + 1, index + 2,
+                                                      index + 2, index + 3, index + 2, index + 3,
+                                                      index, index + 3, index, index + 3])
+      self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+      self.colors = np.append(self.colors, colour * 4)
+      self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+
+      index += 4
+      self.numVertices += 4
+
+      newRegion.visible = True
+      newRegion._PP = (self.numVertices-4) * 2
+    else:
+
+      # Need to put the normal regions in here
+      newRegion.visible = False
+      newRegion._pp = None
+
+    newRegion._rebuildIntegral()
+
+    return newRegion
+
+  # def _rebuildIntegralAreas(self):
+  #   self._rebuild(checkBuild=True)
+  #
+  #   return
+  #
+  #   for reg in self._regions:
+  #     if reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
+  #       reg._integralArea.renderMode = GLRENDERMODE_DRAW
+  #       reg._rebuildIntegral()
+
+  # def _rescale(self):
+  #   vertices = self.numVertices
+  #   axisT = self.parent.axisT
+  #   axisB = self.parent.axisB
+  #   axisL = self.parent.axisL
+  #   axisR = self.parent.axisR
+  #   pixelX = self.parent.pixelX
+  #   pixelY = self.parent.pixelY
+  #
+  #   if vertices:
+  #     for pp in range(0, 2*vertices, 8):
+  #       axisIndex = int(self.attribs[pp])
+  #       axis0 = self.attribs[pp+1]
+  #       axis1 = self.attribs[pp+3]
+  #
+  #       if axisIndex == 0:
+  #         offsets = [axis0, axisT+pixelY, axis0, axisB-pixelY,
+  #                    axis1, axisB-pixelY, axis1, axisT+pixelY]
+  #       else:
+  #         offsets = [axisL-pixelX, axis0, axisL-pixelX, axis1,
+  #                    axisR+pixelX, axis1, axisR+pixelX, axis0]
+  #
+  #       self.vertices[pp:pp+8] = offsets
+
+  def _resize(self):
+    axisT = self.parent.axisT
+    axisB = self.parent.axisB
+    axisL = self.parent.axisL
+    axisR = self.parent.axisR
+    pixelX = self.parent.pixelX
+    pixelY = self.parent.pixelY
+
+    for reg in self._regions:
+      pp = reg._pp
+      if not pp:
+        continue
+
+      if not reg.isVisible:
+        continue
+
+      try:
+        axisIndex = int(self.attribs[pp])
+      except Exception as es:
+        axisIndex = 0
+
+      try:
+        values = reg._object.limits[0]
+      except Exception as es:
+        values = reg.values
+
+      axis0 = values[0]
+      axis1 = values[1]
+      reg._values = values
+
+      if axisIndex == 0:
+        offsets = [axis0, axisT + pixelY, axis0, axisB - pixelY,
+                   axis1, axisB - pixelY, axis1, axisT + pixelY]
+      else:
+        offsets = [axisL - pixelX, axis0, axisL - pixelX, axis1,
+                   axisR + pixelX, axis1, axisR + pixelX, axis0]
+
+      self.vertices[pp:pp + 8] = offsets
+      self.attribs[pp + 1] = axis0
+      self.attribs[pp + 3] = axis1
+      self.attribs[pp + 5] = axis0
+      self.attribs[pp + 7] = axis1
+
+  def _rebuild(self, checkBuild=False):
+    axisT = self.parent.axisT
+    axisB = self.parent.axisB
+    axisL = self.parent.axisL
+    axisR = self.parent.axisR
+    pixelX = self.parent.pixelX
+    pixelY = self.parent.pixelY
+
+    self.clearArrays()
+    for reg in self._regions:
+
+      axisIndex = 0
+      for ps, psCode in enumerate(self.parent.axisOrder[0:2]):
+        if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+
+          if reg.axisCode[0] == psCode[0]:
+            axisIndex = ps
+        elif self.parent._preferences.matchAxisCode == 1:  # match full code
+          if reg.axisCode == psCode:
+            axisIndex = ps
+
+      # TODO:ED check axis units - assume 'ppm' for the minute
+      if axisIndex == 0:
+        # vertical ruler
+        pos0 = x0 = reg.values[0]
+        pos1 = x1 = reg.values[1]
+        y0 = axisT+pixelY
+        y1 = axisB-pixelY
+      else:
+        # horizontal ruler
+        pos0 = y0 = reg.values[0]
+        pos1 = y1 = reg.values[1]
+        x0 = axisL-pixelX
+        x1 = axisR+pixelX
+
+      if reg._object in self.parent.current.integrals:
+        solidColour = list(self.parent.highlightColour)
+        solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
+
+        index = self.numVertices
+        self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
+                                                        index, index + 1, index, index + 1,
+                                                        index + 1, index + 2, index + 1, index + 2,
+                                                        index + 2, index + 3, index + 2, index + 3,
+                                                        index, index + 3, index, index + 3])
+        self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+        self.colors = np.append(self.colors, solidColour * 4)
+        self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+
+        index += 4
+        self.numVertices += 4
+
+        reg.visible = True
+        reg._pp = (self.numVertices-4) * 2
+      else:
+        reg.visible = False
+        reg._pp = None
+
+      if checkBuild == False:
+        reg._rebuildIntegral()
+      else:
+        if hasattr(reg, '_integralArea') and reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
+          reg._integralArea.renderMode = GLRENDERMODE_DRAW
+          reg._rebuildIntegral()

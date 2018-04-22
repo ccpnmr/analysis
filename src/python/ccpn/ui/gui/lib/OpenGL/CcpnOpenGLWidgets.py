@@ -319,25 +319,35 @@ class GLIntegralArray(GLVertexArray):
       x0 = self.parent.axisL-self.parent.pixelX
       x1 = self.parent.axisR+self.parent.pixelX
 
+    newRegion = self._regions[-1]
+
     if obj and obj in self.parent.current.integrals:
+
+      # draw integral bars of in the current list
       colour = list(self.parent.highlightColour)
       colour[3] = CCPNGLWIDGET_INTEGRALSHADE
+    # else:
+    #   colour = (brush)
+
+      index = self.numVertices
+      self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
+                                                      index, index + 1, index, index + 1,
+                                                      index + 1, index + 2, index + 1, index + 2,
+                                                      index + 2, index + 3, index + 2, index + 3,
+                                                      index, index + 3, index, index + 3])
+      self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+      self.colors = np.append(self.colors, colour * 4)
+      self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+
+      index += 4
+      self.numVertices += 4
+
+      newRegion.setVisible(True)
     else:
-      colour = (brush)
+      # colour = (brush)
+      newRegion.setVisible(False)
 
-    index = self.numVertices
-    self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
-                                                    index, index + 1, index, index + 1,
-                                                    index + 1, index + 2, index + 1, index + 2,
-                                                    index + 2, index + 3, index + 2, index + 3,
-                                                    index, index + 3, index, index + 3])
-    self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
-    self.colors = np.append(self.colors, colour * 4)
-    self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
-
-    index += 4
-    self.numVertices += 4
-    newRegion = self._regions[-1]
+    # newRegion = self._regions[-1]
 
     # add the quads to the region
     if obj and hasattr(obj, '_1Dregions'):
@@ -423,6 +433,11 @@ class GLIntegralArray(GLVertexArray):
 
     pp = 0
     for reg in self._regions:
+      if pp >= len(self.vertices):
+        break
+
+      if not reg.isVisible:
+        continue
 
       try:
         axisIndex = int(self.attribs[pp])
@@ -499,21 +514,26 @@ class GLIntegralArray(GLVertexArray):
       if reg._object in self.parent.current.integrals:
         solidColour = list(self.parent.highlightColour)
         solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
+
+      # else:
+      #   solidColour = list(reg.brush)
+
+        index = self.numVertices
+        self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
+                                                        index, index + 1, index, index + 1,
+                                                        index + 1, index + 2, index + 1, index + 2,
+                                                        index + 2, index + 3, index + 2, index + 3,
+                                                        index, index + 3, index, index + 3])
+        self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+        self.colors = np.append(self.colors, solidColour * 4)
+        self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+
+        index += 4
+        self.numVertices += 4
+
+        reg.setVisible(True)
       else:
         solidColour = list(reg.brush)
-
-
-      index = self.numVertices
-      self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
-                                                      index, index + 1, index, index + 1,
-                                                      index + 1, index + 2, index + 1, index + 2,
-                                                      index + 2, index + 3, index + 2, index + 3,
-                                                      index, index + 3, index, index + 3])
-      self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
-      self.colors = np.append(self.colors, solidColour * 4)
-      self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
-
-      index += 4
-      self.numVertices += 4
+        reg.setVisible(False)
 
       reg._rebuildIntegral()

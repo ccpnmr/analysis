@@ -1227,7 +1227,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def mousePressInIntegralLists(self):
     for reg in self._GLIntegralLists.values():
-      if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
+      if not reg.integralListView.isVisible() or \
+              not reg.spectrumView.isVisible():
         continue
 
       integralPressed = self.mousePressInRegion(reg._regions)
@@ -2837,7 +2838,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
-      drawList._resize()
       drawList._rebuildIntegralAreas()
 
   def buildIntegralLists(self):

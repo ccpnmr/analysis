@@ -319,15 +319,14 @@ class GLIntegralArray(GLVertexArray):
       x0 = self.parent.axisL-self.parent.pixelX
       x1 = self.parent.axisR+self.parent.pixelX
 
+    # get the new added region
     newRegion = self._regions[-1]
 
     if obj and obj in self.parent.current.integrals:
 
-      # draw integral bars of in the current list
+      # draw integral bars if in the current list
       colour = list(self.parent.highlightColour)
       colour[3] = CCPNGLWIDGET_INTEGRALSHADE
-    # else:
-    #   colour = (brush)
 
       index = self.numVertices
       self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
@@ -342,56 +341,21 @@ class GLIntegralArray(GLVertexArray):
       index += 4
       self.numVertices += 4
 
-      newRegion.setVisible(True)
+      newRegion.visible = True
+      newRegion._PP = (self.numVertices-4) * 2
     else:
-      # colour = (brush)
-      newRegion.setVisible(False)
+      newRegion.visible = False
+      newRegion._pp = None
 
-    # newRegion = self._regions[-1]
-
-    # add the quads to the region
-    if obj and hasattr(obj, '_1Dregions'):
-      intArea = newRegion._integralArea = GLVertexArray(numLists=1,
-                                              renderMode=GLRENDERMODE_REBUILD, blendMode=True,
-                                              drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
-                                              dimension=2, GLContext=self.GLContext)
-
-      intArea.numVertices = len(obj._1Dregions[1]) * 2
-      intArea.vertices = np.empty(intArea.numVertices * 2)
-      intArea.vertices[::4] = obj._1Dregions[1]
-      intArea.vertices[2::4] = obj._1Dregions[1]
-      intArea.vertices[1::4] = obj._1Dregions[0]
-      intArea.vertices[3::4] = obj._1Dregions[2]
-
-      if obj in self.parent.current.integrals:
-        solidColour = list(self.parent.highlightColour)
-      else:
-        solidColour = list(brush)
-      solidColour[3] = 1.0
-
-      # solidColour = list(colour)
-      # solidColour[3] = 1.0
-      intArea.colors = np.array(solidColour * intArea.numVertices)
+    newRegion._rebuildIntegral()
 
     return newRegion
 
-  # def _rebuildIntegral(self, reg):
-  #   intArea = reg._integralArea = GLVertexArray(numLists=1,
-  #                                               renderMode=GLRENDERMODE_DRAW, blendMode=False,
-  #                                               drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
-  #                                               dimension=2, GLContext=self.GLContext)
-  #
-  #   intArea.numVertices = len(reg._object._1Dregions[1]) * 2
-  #   intArea.vertices = np.empty(intArea.numVertices * 2)
-  #   intArea.vertices[::4] = reg._object._1Dregions[1]
-  #   intArea.vertices[2::4] = reg._object._1Dregions[1]
-  #   intArea.vertices[1::4] = reg._object._1Dregions[0]
-  #   intArea.vertices[3::4] = reg._object._1Dregions[2]
-  #   solidColour = list(reg._brush)
-  #   solidColour[3] = 1.0
-  #   intArea.colors = np.array(solidColour * intArea.numVertices)
-
   def _rebuildIntegralAreas(self):
+    self._rebuild(checkBuild=True)
+
+    return
+
     for reg in self._regions:
       if reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
         reg._integralArea.renderMode = GLRENDERMODE_DRAW
@@ -431,10 +395,11 @@ class GLIntegralArray(GLVertexArray):
     pixelX = self.parent.pixelX
     pixelY = self.parent.pixelY
 
-    pp = 0
+    # pp = 0
     for reg in self._regions:
-      if pp >= len(self.vertices):
-        break
+      pp = reg._pp
+      if not pp:
+        continue
 
       if not reg.isVisible:
         continue
@@ -470,9 +435,9 @@ class GLIntegralArray(GLVertexArray):
       self.attribs[pp + 3] = axis1
       self.attribs[pp + 5] = axis0
       self.attribs[pp + 7] = axis1
-      pp += 8
+      # pp += 8
 
-  def _rebuild(self):
+  def _rebuild(self, checkBuild=False):
     axisT = self.parent.axisT
     axisB = self.parent.axisB
     axisL = self.parent.axisL
@@ -531,9 +496,12 @@ class GLIntegralArray(GLVertexArray):
         index += 4
         self.numVertices += 4
 
-        reg.setVisible(True)
+        reg.visible = True
+        reg._pp = (self.numVertices-4) * 2
       else:
-        solidColour = list(reg.brush)
-        reg.setVisible(False)
+        reg.visible = False
+        reg._pp = None
 
-      reg._rebuildIntegral()
+      if checkBuild == False or reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
+        reg._integralArea.renderMode = GLRENDERMODE_DRAW
+        reg._rebuildIntegral()

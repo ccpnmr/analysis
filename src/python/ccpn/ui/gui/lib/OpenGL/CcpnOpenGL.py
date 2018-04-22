@@ -1434,6 +1434,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 values[reg[2]] -= dy * self.pixelY
   
             reg[0].values = values
+
+            # TODO:ED check moving of _baseline
             if hasattr(reg[0], '_integralArea'):
               # reg[0].renderMode = GLRENDERMODE_REBUILD
               reg[0]._rebuildIntegral()

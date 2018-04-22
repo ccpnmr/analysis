@@ -461,24 +461,6 @@ class GLIntegralRegion(GLExternalRegion):
     super(GLIntegralRegion, self).__init__(project=project, GLContext=GLContext,
                                            spectrumView=spectrumView, integralListView=integralListView)
 
-  # def drawIndexArray(self):
-  #   # draw twice top cover the outline
-  #   self.fillMode = GL.GL_LINE
-  #   super(GLIntegralRegion, self).drawIndexArray()
-  #   self.fillMode = GL.GL_FILL
-  #   super(GLIntegralRegion, self).drawIndexArray()
-  #
-  # def _clearRegions(self):
-  #   self._regions = []
-  #
-  # def addIntegral(self, integral, integralListView, colour='blue', brush=None):
-  #   return self._addRegion(values=integral.limits[0], orientation='v', movable=True,
-  #                          obj=integral, objectView=integralListView, colour=colour, brush=brush)
-  #
-  # def _removeRegion(self, region):
-  #   if region in self._regions:
-  #     self._regions.remove(region)
-  #
   def _addRegion(self, values=None, axisCode=None, orientation=None,
                 brush=None, colour='blue',
                 movable=True, visible=True, bounds=None,
@@ -585,40 +567,6 @@ class GLIntegralRegion(GLExternalRegion):
     newRegion._rebuildIntegral()
 
     return newRegion
-
-  # def _rebuildIntegralAreas(self):
-  #   self._rebuild(checkBuild=True)
-  #
-  #   return
-  #
-  #   for reg in self._regions:
-  #     if reg._integralArea.renderMode == GLRENDERMODE_REBUILD:
-  #       reg._integralArea.renderMode = GLRENDERMODE_DRAW
-  #       reg._rebuildIntegral()
-
-  # def _rescale(self):
-  #   vertices = self.numVertices
-  #   axisT = self.parent.axisT
-  #   axisB = self.parent.axisB
-  #   axisL = self.parent.axisL
-  #   axisR = self.parent.axisR
-  #   pixelX = self.parent.pixelX
-  #   pixelY = self.parent.pixelY
-  #
-  #   if vertices:
-  #     for pp in range(0, 2*vertices, 8):
-  #       axisIndex = int(self.attribs[pp])
-  #       axis0 = self.attribs[pp+1]
-  #       axis1 = self.attribs[pp+3]
-  #
-  #       if axisIndex == 0:
-  #         offsets = [axis0, axisT+pixelY, axis0, axisB-pixelY,
-  #                    axis1, axisB-pixelY, axis1, axisT+pixelY]
-  #       else:
-  #         offsets = [axisL-pixelX, axis0, axisL-pixelX, axis1,
-  #                    axisR+pixelX, axis1, axisR+pixelX, axis0]
-  #
-  #       self.vertices[pp:pp+8] = offsets
 
   def _resize(self):
     axisT = self.parent.axisT

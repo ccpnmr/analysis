@@ -220,6 +220,8 @@ class GLTargetButtonSpinBoxes(Widget, Base):
       # pass changes to the GL widget
       if self.GLlinearRegions:
         self.GLlinearRegions.values = [min(values), max(values)]
+      else:
+        self.values = [min(values), max(values)]
 
   def get(self):
     """
@@ -284,7 +286,7 @@ if __name__ == '__main__':
   curve.setPen('w')  ## white pen
 
 
-  w = TargetButtonSpinBoxes(parent=popup, plotWidget=pw3, values= [1, 30], colour = 'yellow', step=0.02, orientation='h', grid=(1,0) )
+  w = GLTargetButtonSpinBoxes(parent=popup, plotWidget=pw3, values= [1, 30], colour = 'yellow', step=0.02, orientation='h', grid=(1,0) )
 
   popup.show()
   popup.raise_()

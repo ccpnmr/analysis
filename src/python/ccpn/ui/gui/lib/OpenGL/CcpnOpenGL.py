@@ -56,7 +56,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDE
                                                     GLREFRESHMODE_REBUILD, GLVertexArray, \
                                                     GLPeakLabelsArray, GLPeakListArray
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralArray, GLRegion, REGION_COLOURS
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
+                                                      GLRegion, REGION_COLOURS
 try:
   from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -1034,7 +1035,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                          dimension=2,
                                          GLContext=self))
 
-    self._externalRegions = GLIntegralArray(project=self.project, GLContext=self, spectrumView=None, integralListView=None)
+    self._externalRegions = GLExternalRegion(project=self.project, GLContext=self, spectrumView=None, integralListView=None)
 
     self._selectionBox = GLVertexArray(numLists=1,
                                       renderMode=GLRENDERMODE_REBUILD,
@@ -2819,7 +2820,7 @@ class CcpnGLWidget(QOpenGLWidget):
   def _buildIntegralLists(self, spectrumView, integralListView):
 
     if integralListView not in self._GLIntegralLists:
-      self._GLIntegralLists[integralListView] = GLIntegralArray(project=self.project, GLContext=self,
+      self._GLIntegralLists[integralListView] = GLIntegralRegion(project=self.project, GLContext=self,
                                                                 spectrumView=spectrumView,
                                                                 integralListView=integralListView)
 
@@ -3263,9 +3264,9 @@ class CcpnGLWidget(QOpenGLWidget):
     self._externalRegions.renderMode = GLRENDERMODE_REBUILD
     # if self._dragRegions[0] == region:
     #   self._dragRegions = set()
-    for reg in self.dragRegions:
+    for reg in self._dragRegions:
       if reg[0] == region:
-        self.dragRegions.remove(reg)
+        self._dragRegions.remove(reg)
         break
 
     self.update()

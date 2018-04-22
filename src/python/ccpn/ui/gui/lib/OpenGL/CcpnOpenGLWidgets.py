@@ -217,9 +217,9 @@ class GLRegion(QtWidgets.QWidget):
 
 # TODO:ED add a class for 'normal' regions so that exclude/noise regions appear
 
-class GLIntegralArray(GLVertexArray):
+class GLIntegralRegion(GLVertexArray):
   def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
-    super(GLIntegralArray, self).__init__(renderMode=GLRENDERMODE_REBUILD, blendMode=True,
+    super(GLIntegralRegion, self).__init__(renderMode=GLRENDERMODE_REBUILD, blendMode=True,
                                           GLContext=GLContext, drawMode=GL.GL_QUADS,
                                           dimension=2)
     self.project = project
@@ -231,9 +231,9 @@ class GLIntegralArray(GLVertexArray):
   def drawIndexArray(self):
     # draw twice top cover the outline
     self.fillMode = GL.GL_LINE
-    super(GLIntegralArray, self).drawIndexArray()
+    super(GLIntegralRegion, self).drawIndexArray()
     self.fillMode = GL.GL_FILL
-    super(GLIntegralArray, self).drawIndexArray()
+    super(GLIntegralRegion, self).drawIndexArray()
 
   def _clearRegions(self):
     self._regions = []
@@ -512,9 +512,9 @@ class GLIntegralArray(GLVertexArray):
           reg._integralArea.renderMode = GLRENDERMODE_DRAW
           reg._rebuildIntegral()
 
-class GLExternalArray(GLVertexArray):
+class GLExternalRegion(GLVertexArray):
   def __init__(self, project=None, GLContext=None, spectrumView=None, integralListView=None):
-    super(GLExternalArray, self).__init__(renderMode=GLRENDERMODE_REBUILD, blendMode=True,
+    super(GLExternalRegion, self).__init__(renderMode=GLRENDERMODE_REBUILD, blendMode=True,
                                           GLContext=GLContext, drawMode=GL.GL_QUADS,
                                           dimension=2)
     self.project = project
@@ -526,9 +526,9 @@ class GLExternalArray(GLVertexArray):
   def drawIndexArray(self):
     # draw twice top cover the outline
     self.fillMode = GL.GL_LINE
-    super(GLExternalArray, self).drawIndexArray()
+    super(GLExternalRegion, self).drawIndexArray()
     self.fillMode = GL.GL_FILL
-    super(GLExternalArray, self).drawIndexArray()
+    super(GLExternalRegion, self).drawIndexArray()
 
   def _clearRegions(self):
     self._regions = []
@@ -709,14 +709,14 @@ class GLExternalArray(GLVertexArray):
     pixelX = self.parent.pixelX
     pixelY = self.parent.pixelY
 
-    # pp = 0
+    pp = 0
     for reg in self._regions:
-      pp = reg._pp
-      if not pp:
-        continue
-
-      if not reg.isVisible:
-        continue
+      # pp = reg._pp
+      # if not pp:
+      #   continue
+      #
+      # if not reg.isVisible:
+      #   continue
 
       try:
         axisIndex = int(self.attribs[pp])
@@ -749,7 +749,7 @@ class GLExternalArray(GLVertexArray):
       self.attribs[pp + 3] = axis1
       self.attribs[pp + 5] = axis0
       self.attribs[pp + 7] = axis1
-      # pp += 8
+      pp += 8
 
   def _rebuild(self, checkBuild=False):
     axisT = self.parent.axisT

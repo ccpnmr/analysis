@@ -311,7 +311,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.axisCodes = self._parent.axisCodes
     self.initialiseTraces()
 
-    self._dragRegion = (None, None, None)
+    self._dragRegions = set()
 
     # define zoom limits for the display
     self._minXRange, self._maxXRange = RANGELIMITS
@@ -1183,47 +1183,47 @@ class CcpnGLWidget(QOpenGLWidget):
           if not self._widthsChangedEnough((0.0, region.values[0]),
                                            (0.0, self.cursorCoordinate[1]),
                                            tol=abs(3*self.pixelY)):
-            self._dragRegion = (region, 'h', 0)     # line 0 of h-region
-            break
+            self._dragRegions.add((region, 'h', 0))     # line 0 of h-region
+            # break
 
           elif not self._widthsChangedEnough((0.0, region.values[1]),
                                             (0.0, self.cursorCoordinate[1]),
                                             tol=abs(3*self.pixelY)):
-            self._dragRegion = (region, 'h', 1)     # line 1 of h-region
-            break
+            self._dragRegions.add((region, 'h', 1))     # line 1 of h-region
+            # break
           else:
             mid = (region.values[0]+region.values[1])/2.0
             delta = abs(region.values[0]-region.values[1])/2.0
             if not self._widthsChangedEnough((0.0, mid),
                                              (0.0, self.cursorCoordinate[1]),
                                              tol=delta):
-              self._dragRegion = (region, 'h', 3)   # both lines of h-region
-              break
+              self._dragRegions.add((region, 'h', 3))   # both lines of h-region
+              # break
 
         elif region.orientation == 'v':
           if not self._widthsChangedEnough((region.values[0], 0.0),
                                            (self.cursorCoordinate[0], 0.0),
                                            tol=abs(3*self.pixelX)):
-            self._dragRegion = (region, 'v', 0)     # line 0 of v-region
-            break
+            self._dragRegions.add((region, 'v', 0))     # line 0 of v-region
+            # break
 
           elif not self._widthsChangedEnough((region.values[1], 0.0),
                                             (self.cursorCoordinate[0], 0.0),
                                             tol=abs(3*self.pixelX)):
-            self._dragRegion = (region, 'v', 1)     # line 1 of v-region
-            break
+            self._dragRegions.add((region, 'v', 1))     # line 1 of v-region
+            # break
           else:
             mid = (region.values[0]+region.values[1])/2.0
             delta = abs(region.values[0]-region.values[1])/2.0
             if not self._widthsChangedEnough((mid, 0.0),
                                              (self.cursorCoordinate[0], 0.0),
                                              tol=delta):
-              self._dragRegion = (region, 'v', 3)   # both lines of v-region
-              break
-    else:
-      self._dragRegion = (None, None, None)         # nothing selected
+              self._dragRegions.add((region, 'v', 3))   # both lines of v-region
+              # break
+    # else:
+    #   self._dragRegions = set()         # nothing selected
 
-    return self._dragRegion[0]
+    return self._dragRegions
 
   def mousePressInIntegralLists(self):
     for reg in self._GLIntegralLists.values():
@@ -1232,8 +1232,8 @@ class CcpnGLWidget(QOpenGLWidget):
         continue
 
       integralPressed = self.mousePressInRegion(reg._regions)
-      if integralPressed:
-        break
+      # if integralPressed:
+      #   break
 
   def mousePressEvent(self, ev):
     self.lastPos = ev.pos()
@@ -1315,7 +1315,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self._clearKeys()
     self._drawSelectionBox = False
     self._drawMouseMoveLine = False
-    self._dragRegion = (None, None, None)
+    self._dragRegions = set()
     self.update()
 
   def keyReleaseEvent(self, ev: QtGui.QKeyEvent):
@@ -1413,28 +1413,29 @@ class CcpnGLWidget(QOpenGLWidget):
 
       else:
 
-        if self._dragRegion[0]:
-          values = self._dragRegion[0].values
-          if self._dragRegion[1] == 'v':
-
-            if self._dragRegion[2] == 3:
-              values[0] += dx * self.pixelX
-              values[1] += dx * self.pixelX
-            else:
-              values[self._dragRegion[2]] += dx * self.pixelX
-
-          elif self._dragRegion[1] == 'h':
-
-            if self._dragRegion[2] == 3:
-              values[0] -= dy * self.pixelY
-              values[1] -= dy * self.pixelY
-            else:
-              values[self._dragRegion[2]] -= dy * self.pixelY
-
-          self._dragRegion[0].values = values
-          if hasattr(self._dragRegion[0], '_integralArea'):
-            # self._dragRegion[0].renderMode = GLRENDERMODE_REBUILD
-            self._dragRegion[0]._rebuildIntegral()
+        if self._dragRegions:
+          for reg in self._dragRegions:
+            values = reg[0].values
+            if reg[1] == 'v':
+  
+              if reg[2] == 3:
+                values[0] += dx * self.pixelX
+                values[1] += dx * self.pixelX
+              else:
+                values[reg[2]] += dx * self.pixelX
+  
+            elif reg[1] == 'h':
+  
+              if reg[2] == 3:
+                values[0] -= dy * self.pixelY
+                values[1] -= dy * self.pixelY
+              else:
+                values[reg[2]] -= dy * self.pixelY
+  
+            reg[0].values = values
+            if hasattr(reg[0], '_integralArea'):
+              # reg[0].renderMode = GLRENDERMODE_REBUILD
+              reg[0]._rebuildIntegral()
         else:
           self.axisL -= dx * self.pixelX
           self.axisR -= dx * self.pixelX
@@ -3260,8 +3261,13 @@ class CcpnGLWidget(QOpenGLWidget):
     pass
     self._externalRegions._removeRegion(region)
     self._externalRegions.renderMode = GLRENDERMODE_REBUILD
-    if self._dragRegion[0] == region:
-      self._dragRegion = (None, None, None)
+    # if self._dragRegions[0] == region:
+    #   self._dragRegions = set()
+    for reg in self.dragRegions:
+      if reg[0] == region:
+        self.dragRegions.remove(reg)
+        break
+
     self.update()
 
   def addExternalRegion(self, values=None, axisCode=None, orientation=None,
@@ -4919,7 +4925,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # getLogger().info('not implemented yet')
     self._regions = []
     self._regionList.renderMode = GLRENDERMODE_REBUILD
-    self._dragRegion = (None, None, None)
+    self._dragRegions = set()
     self.update()
 
   def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
@@ -4962,9 +4968,6 @@ class CcpnGLWidget(QOpenGLWidget):
         if integralPressed:
           self.current.integrals = [integralPressed._object]
           break
-
-      # if self._dragRegion[0]:   # and isinstance(self._dragRegion[0]._object, Integral):
-      #   self.current.integrals = [self._dragRegion[0]._object]
 
     elif shiftRightMouse(event):
       # Two successive shift-right-clicks: define zoombox

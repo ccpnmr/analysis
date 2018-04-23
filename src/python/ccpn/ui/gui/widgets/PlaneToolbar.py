@@ -109,6 +109,8 @@ class _StripLabel(Label):
     pixmap = self.grab()     # ejb - set the pixmap to the image of the label
     painter = QtGui.QPainter(pixmap)            #       replaces the block text
     painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+
+    # change background to selected?
     painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
     painter.end()
     drag.setPixmap(pixmap)

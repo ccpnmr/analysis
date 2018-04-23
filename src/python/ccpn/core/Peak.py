@@ -211,8 +211,12 @@ class Peak(AbstractWrapperObject):
 
   @lineWidths.setter
   def lineWidths(self,value:Sequence):
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      peakDim.lineWidth = value[ii]
+    self._startCommandEchoBlock('lineWidths', value, propertySetter=True)
+    try:
+      for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+        peakDim.lineWidth = value[ii]
+    finally:
+      self._endCommandEchoBlock()
 
   @property
   def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:

@@ -61,7 +61,8 @@ class MultipletTest_setUp(WrapperTesting):
       self._multipletNotifier = Notifier(self.project,
                                         [Notifier.CREATE, Notifier.CHANGE, Notifier.DELETE],
                                         'Multiplet',
-                                        self._multipletChange)
+                                        self._multipletChange,
+                                         onceOnly=True)
 
       # self._peakNotifier = Notifier(self.project,
       #                                   [Notifier.CREATE, Notifier.CHANGE, Notifier.DELETE],

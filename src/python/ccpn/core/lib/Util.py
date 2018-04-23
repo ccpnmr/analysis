@@ -78,7 +78,6 @@ def expandDollarFilePath(project:'Project', filePath:str) -> str:
   return filePath
 
 
-
 def commandParameterString(*params, values:dict=None, defaults:dict=None):
   """Make  parameter string to insert into function call string.
 
@@ -125,6 +124,54 @@ def commandParameterString(*params, values:dict=None, defaults:dict=None):
         ll.append('%s=%s' % (tag, repr(val)))
   #
   return ', '.join(ll)
+
+def commandParameterStringValues(*params, values:dict=None, defaults:dict=None):
+  """Make  parameter string to insert into function call string.
+
+  params are positional parameters in order, values are keyword parameters.
+  If the defaults dictionary is passed in,
+  only parameters in defaults are added to the string, and only if the value differs from the
+  default. This allows you to pass in values=locals(). The order of keyword parameters
+  follows defaults if given, else values, so you can get ordered parameters by passing in
+  ordered dictionaries.
+
+  Wrapper object values are replaced with their Pids
+
+  Example:
+
+  commandParameterString(11, values={a:1, b:<Note NO:notename>, c:2, d:3, e:4},
+                          defaults=OrderedDict(d=8, b=None, c=2))
+
+    will return
+
+    "11, d=3, b='NO:notename'"
+    """
+
+  from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+
+  ll = []
+  for val in params:
+    if isinstance(val, AbstractWrapperObject):
+      val = val.pid
+    ll.append(repr(val))
+
+  if values:
+    if defaults:
+      for tag, default in defaults.items():
+        val = values[tag]
+        if val != default:
+          if isinstance(val, AbstractWrapperObject):
+            val = val.pid
+          ll.append('%s=%s' % (tag, repr(val)))
+
+    else:
+      for tag, val in values.items():
+        if isinstance(val, AbstractWrapperObject):
+          val = val.pid
+        ll.append('%s=%s' % (tag, repr(val)))
+  #
+  return ', '.join(ll)
+
 
 def funcCaller() -> Optional[str]:
   """

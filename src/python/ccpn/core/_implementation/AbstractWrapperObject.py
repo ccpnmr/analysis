@@ -747,7 +747,7 @@ class AbstractWrapperObject():
     commonUtil.resetSerial(self._wrappedData, newSerial)
     self._resetIds()
 
-  def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, quiet=False):
+  def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False, quiet=False):
     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
 
     *params, values, and defaults are used by coreUtil.commandParameterString to set the function
@@ -766,9 +766,15 @@ class AbstractWrapperObject():
     parameterString = coreUtil.commandParameterString(*params, values=values, defaults=defaults)
 
     if self is project:
-      command = "project.%s(%s)" % (funcName, parameterString)
+      if propertySetter:
+        command = "project.%s = %s" % (funcName, parameterString)
+      else:
+        command = "project.%s(%s)" % (funcName, parameterString)
     else:
-      command = "project.getByPid('%s').%s(%s)" % (self.pid, funcName, parameterString)
+      if propertySetter:
+        command = "project.getByPid('%s').%s = %s" % (self.pid, funcName, parameterString)
+      else:
+        command = "project.getByPid('%s').%s(%s)" % (self.pid, funcName, parameterString)
 
     if parName:
       command = ''.join((parName, ' = ', command))

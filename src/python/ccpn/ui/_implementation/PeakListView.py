@@ -189,6 +189,17 @@ PeakList.peakListViews = property(getter, None, None,
                                   "PeakListViews showing Spectrum")
 del getter
 
+# MultipletList.peakListViews property
+from ccpn.core.MultipletList import MultipletList
+def getter(multipletList:MultipletList) -> typing.Tuple[PeakListView, ...]:
+  data2ObjDict = multipletList._project._data2Obj
+  return tuple(data2ObjDict[y]
+               for x in multipletList._wrappedData.sortedPeakListViews()
+               for y in x.sortedStripPeakListViews() if not x.isDeleted)
+MultipletList.peakListViews = property(getter, None, None,
+                                  "peakListViews showing Spectrum")
+del getter
+
 
 # Notifiers:
 # TODO change to calling _setupApiNotifier

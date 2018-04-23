@@ -568,14 +568,14 @@ def resetSerial(apiObject, newSerial):
     elif oldSerial == maxSerial:
       serialDict[downlink] = max(downdict)
 
-def makeIterableList(inList):
+def makeIterableList(inList=None):
   """
   Take a list of lists and concatenate into a single list.
   Remove any None's from the list
   :param inList:
   :return single list:
   """
-  if isinstance(inList, Iterable):
+  if isinstance(inList, Iterable) and not isinstance(inList, str):
     return [y for x in inList for y in makeIterableList(x) if inList]
   else:
     if inList:

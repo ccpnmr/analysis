@@ -30,7 +30,8 @@ from ccpn.framework import Framework
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 from ccpn.core.Peak import Peak
-
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.util.Common import makeIterableList
 
 #=========================================================================================
 # MultipletTest_SetUp
@@ -53,6 +54,15 @@ class MultipletTest_setUp(WrapperTesting):
       axisCodes = ('CO', 'Hn', 'Nh')
       self.spectrum = self.project.createDummySpectrum(axisCodes)
       self.multipletList = self.spectrum.newMultipletList()
+
+      self.spectrum2 = self.project.createDummySpectrum(axisCodes)
+      self.multipletList2 = self.spectrum.newMultipletList()
+
+      self._multipletNotifier = Notifier(self.project,
+                                        [Notifier.CREATE, Notifier.CHANGE, Notifier.DELETE],
+                                        'Multiplet',
+                                        self._multipletChange)
+
 
   def test_newMultiplet(self):
     self.assertEqual(len(self.project.multiplets), 0)
@@ -95,14 +105,39 @@ class MultipletTest_setUp(WrapperTesting):
 
     self.assertEqual(len(self.project.multiplets), 0)
     mt = self.multipletList.newMultiplet(peaks=allPks)
-    self.assertEqual(len(self.project.multipletLists), 1)
+
+    # check that there are 2 lists from the setup
+    self.assertEqual(len(self.project.multipletLists), 2)
     self.assertEqual(len(self.project.multiplets), 1)
     self.assertEqual(len(mt.peaks), 3)
+
+    pks2 = self.peakList.newPeak()
+    pks2.position = (0.1, 0.2, 0.5)
+    pks2 = self.peakList.newPeak()
+    pks2.position = (0.3, 0.25, 1.0)
+    pks2 = self.peakList.newPeak()
+    pks2.position = (0.05, 0.5, 0.1)
 
     pos = (0.45, 0.95, 1.6)
     mtPos = mt.position
     for ii in range(len(pos)):
       self.assertAlmostEqual(pos[ii], mtPos[ii])
+
+    with self.assertRaisesRegex(TypeError, 'is not of type Peak'):
+      mt.removePeaks('notPeak')
+    with self.assertRaisesRegex(ValueError, 'does not belong to multiplet'):
+      mt.removePeaks(pks2)
+
+    # create another spectrum with a new peak
+    self.peakList2 = self.spectrum2.newPeakList()
+    pks3 = self.peakList2.newPeak()
+
+    # check the new peak cannot be added to the first multiplet
+    with self.assertRaisesRegex(ValueError, 'does not belong to spectrum'):
+      mt.addPeaks(pks3)
+
+  def _multipletChange(self, data):
+    print ('>>>Changed', data[Notifier.OBJECT], data[Notifier.TRIGGER])
 
 #=========================================================================================
 # MultipletTest_No_setUp

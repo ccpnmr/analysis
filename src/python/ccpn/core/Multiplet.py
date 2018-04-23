@@ -204,14 +204,74 @@ class Multiplet(AbstractWrapperObject):
     """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""
     return parent._wrappedData.sortedMultiplets()
 
+  def addPeaks(self, peaks:['Peak']=None):
+    """
+    Add a peak or list of peaks to the Multiplet
+    The peaks must belong to the spectrum containing the multipletList.
+
+    :param peaks - single peak or list of peaks:
+    """
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # throw more understandable errors for the python console
+    spectrum = self._parent.multipletListParent
+    pks = makeIterableList(peaks)
+    for pp in pks:
+      if not isinstance(pp, Peak):
+        raise TypeError('%s is not of type Peak' % pp)
+      if pp not in spectrum.peaks:
+        raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+
+    defaults = collections.OrderedDict(
+      (('peaks', None),
+       )
+    )
+    undo = self._project._undo
+    self._startCommandEchoBlock('addPeaks', values=locals(), defaults=defaults,
+                                parName='addPeaks')
+    try:
+      for pk in pks:
+        self._wrappedData.addPeak(pk._wrappedData)
+    finally:
+      self._endCommandEchoBlock()
+
+  def removePeaks(self, peaks:['Peak']=None):
+    """
+    Remove a peak or list of peaks from the Multiplet
+    The peaks must belong to the multiplet.
+
+    :param peaks - single peak or list of peaks:
+    """
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # throw more understandable errors for the python console
+    spectrum = self._parent.multipletListParent
+    pks = makeIterableList(peaks)
+    for pp in pks:
+      if not isinstance(pp, Peak):
+        raise TypeError('%s is not of type Peak' % pp)
+      if pp not in self.peaks:
+        raise ValueError('%s does not belong to multiplet: %s' % (pp.pid, self.pid))
+      if pp not in spectrum.peaks:
+        raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+
+    defaults = collections.OrderedDict(
+      (('peaks', None),
+       )
+    )
+    undo = self._project._undo
+    self._startCommandEchoBlock('removePeaks', values=locals(), defaults=defaults,
+                                parName='removePeaks')
+    try:
+      for pk in pks:
+        self._wrappedData.removePeak(pk._wrappedData)
+    finally:
+      self._endCommandEchoBlock()
+
+
 # Connections to parents:
 def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> Multiplet:
   """Create new Multiplet within multipletList"""
-
-  defaults = collections.OrderedDict(
-    (('peaks', None), ('serial', None),
-    )
-  )
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
   # throw more understandable errors for the python console
@@ -223,11 +283,13 @@ def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> M
     if pp not in spectrum.peaks:
       raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-
+  defaults = collections.OrderedDict(
+    (('peaks', None), ('serial', None),
+    )
+  )
   undo = self._project._undo
   self._startCommandEchoBlock('newMultiplet', values=locals(), defaults=defaults,
                               parName='newMultiplet')
-
   try:
     apiParent = self._apiMultipletList
     if pks:
@@ -245,3 +307,5 @@ def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> M
 
 Multiplet._parentClass.newMultiplet = _newMultiplet
 del _newMultiplet
+
+# need notifiers that notify the multiplet that peaks have changed

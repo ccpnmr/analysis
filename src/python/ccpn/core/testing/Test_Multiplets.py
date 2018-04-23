@@ -154,6 +154,8 @@ class MultipletTest_setUp(WrapperTesting):
     print ('>>>prePositionChange')
     morePeaks[0].position = (0.0, 0.0, 0.0)
     print('>>>postPositionChange')
+    morePeaks[0].lineWidths = (0.0, 0.0, 0.0)
+    print('>>>postLineWidthChange')
 
   def _multipletChange(self, data):
     print ('>>>multipletNotifier', data[Notifier.OBJECT], data[Notifier.TRIGGER])

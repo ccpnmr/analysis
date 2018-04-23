@@ -43,6 +43,8 @@ from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 
+STRIPLABEL_ISPLUS = '_isPlus'
+
 
 class _StripLabel(Label):
   """
@@ -83,6 +85,10 @@ class _StripLabel(Label):
     mimeData = QtCore.QMimeData()
     # create the dataDict
     dataDict = {self._dragKey:self.text()}
+    isPlus = self._isPlus if hasattr(self, STRIPLABEL_ISPLUS) else True
+    dataDict[STRIPLABEL_ISPLUS] = isPlus
+    # print ('>>>isPlus', isPlus)
+
     # update the dataDict with all mouseEvents
     dataDict.update(getMouseEventDict(event))
     # convert into json

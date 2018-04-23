@@ -169,9 +169,13 @@ class Peak(AbstractWrapperObject):
 
   @position.setter
   def position(self,value:Sequence):
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      peakDim.value = value[ii]
-      peakDim.realValue = None
+    self._startCommandEchoBlock('position', value, propertySetter=True)
+    try:
+      for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+        peakDim.value = value[ii]
+        peakDim.realValue = None
+    finally:
+      self._endCommandEchoBlock()
 
   @property
   def positionError(self) -> Tuple[Optional[float], ...]:
@@ -180,8 +184,12 @@ class Peak(AbstractWrapperObject):
 
   @positionError.setter
   def positionError(self,value:Sequence):
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      peakDim.valueError = value[ii]
+    self._startCommandEchoBlock('positionError', value, propertySetter=True)
+    try:
+      for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+        peakDim.valueError = value[ii]
+    finally:
+      self._endCommandEchoBlock()
 
   @property
   def pointPosition(self) -> Tuple[float, ...]:
@@ -190,8 +198,12 @@ class Peak(AbstractWrapperObject):
 
   @pointPosition.setter
   def pointPosition(self,value:Sequence):
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      peakDim.position = value[ii]
+    self._startCommandEchoBlock('pointPosition', value, propertySetter=True)
+    try:
+      for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+        peakDim.position = value[ii]
+    finally:
+      self._endCommandEchoBlock()
 
   @property
   def boxWidths(self) -> Tuple[Optional[float], ...]:
@@ -201,8 +213,12 @@ class Peak(AbstractWrapperObject):
 
   @boxWidths.setter
   def boxWidths(self,value:Sequence):
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      peakDim.boxWidth = value[ii]
+    self._startCommandEchoBlock('boxWidths', value, propertySetter=True)
+    try:
+      for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+        peakDim.boxWidth = value[ii]
+    finally:
+      self._endCommandEchoBlock()
 
   @property
   def lineWidths(self) -> Tuple[Optional[float], ...]:
@@ -251,33 +267,37 @@ class Peak(AbstractWrapperObject):
   @dimensionNmrAtoms.setter
   def dimensionNmrAtoms(self, value:Sequence):
 
-    isotopeCodes = self.peakList.spectrum.isotopeCodes
+    self._startCommandEchoBlock('dimensionNmrAtoms', value, propertySetter=True)
+    try:
+      isotopeCodes = self.peakList.spectrum.isotopeCodes
 
-    apiPeak = self._wrappedData
-    dimResonances = []
-    for ii,atoms in enumerate(value):
-      if atoms is None:
-        dimResonances.append(None)
+      apiPeak = self._wrappedData
+      dimResonances = []
+      for ii,atoms in enumerate(value):
+        if atoms is None:
+          dimResonances.append(None)
 
-      else:
+        else:
 
-        isotopeCode = isotopeCodes[ii]
+          isotopeCode = isotopeCodes[ii]
 
-        if isinstance(atoms, str):
-          raise ValueError("dimensionNmrAtoms cannot be set to a sequence of strings")
-        if not isinstance(atoms, Sequence):
-          raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
+          if isinstance(atoms, str):
+            raise ValueError("dimensionNmrAtoms cannot be set to a sequence of strings")
+          if not isinstance(atoms, Sequence):
+            raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
 
-        atoms = tuple(self.getByPid(x) if isinstance(x, str) else x for x in atoms)
-        resonances = tuple(x._wrappedData for x in atoms if x is not None)
-        if isotopeCode and isotopeCode != '?':
-          # check for isotope match
-          if any(x.isotopeCode not in (isotopeCode, '?') for x in resonances):
-            raise ValueError("NmrAtom assigned to dimension %s must have isotope %s or '?'"
-                             % (ii+1, isotopeCode))
-        dimResonances.append(resonances)
+          atoms = tuple(self.getByPid(x) if isinstance(x, str) else x for x in atoms)
+          resonances = tuple(x._wrappedData for x in atoms if x is not None)
+          if isotopeCode and isotopeCode != '?':
+            # check for isotope match
+            if any(x.isotopeCode not in (isotopeCode, '?') for x in resonances):
+              raise ValueError("NmrAtom assigned to dimension %s must have isotope %s or '?'"
+                               % (ii+1, isotopeCode))
+          dimResonances.append(resonances)
 
-    apiPeak.assignByDimensions(dimResonances)
+      apiPeak.assignByDimensions(dimResonances)
+    finally:
+      self._endCommandEchoBlock()
 
   @property
   def assignedNmrAtoms(self) -> Tuple[Tuple[Optional['NmrAtom'], ...], ...]:
@@ -327,30 +347,33 @@ class Peak(AbstractWrapperObject):
 
   @assignedNmrAtoms.setter
   def assignedNmrAtoms(self, value:Sequence):
+    self._startCommandEchoBlock('assignedNmrAtoms', value, propertySetter=True)
+    try:
+      isotopeCodes = tuple(None if x == '?' else x for x in self.peakList.spectrum.isotopeCodes)
 
-    isotopeCodes = tuple(None if x == '?' else x for x in self.peakList.spectrum.isotopeCodes)
+      apiPeak = self._wrappedData
+      peakDims = apiPeak.sortedPeakDims()
+      dimensionCount = len(peakDims)
 
-    apiPeak = self._wrappedData
-    peakDims = apiPeak.sortedPeakDims()
-    dimensionCount = len(peakDims)
+      # get resonance, all tuples and per dimension
+      resonances = []
+      for tt in value:
+        ll = dimensionCount*[None]
+        resonances.append(ll)
+        for ii, atom in enumerate(tt):
+          atom = self.getByPid(atom) if isinstance(atom, str) else atom
+          if atom is not None:
+            resonance = atom._wrappedData
+            if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], '?'):
+              raise ValueError("NmrAtom %s, isotope %s, assigned to dimension %s must have isotope %s or '?'"
+                               % (atom, resonance.isotopeCode, ii+1, isotopeCodes[ii]))
 
-    # get resonance, all tuples and per dimension
-    resonances = []
-    for tt in value:
-      ll = dimensionCount*[None]
-      resonances.append(ll)
-      for ii, atom in enumerate(tt):
-        atom = self.getByPid(atom) if isinstance(atom, str) else atom
-        if atom is not None:
-          resonance = atom._wrappedData
-          if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], '?'):
-            raise ValueError("NmrAtom %s, isotope %s, assigned to dimension %s must have isotope %s or '?'"
-                             % (atom, resonance.isotopeCode, ii+1, isotopeCodes[ii]))
+            ll[ii] = resonance
 
-          ll[ii] = resonance
-
-    # set assignments
-    apiPeak.assignByContributions(resonances)
+      # set assignments
+      apiPeak.assignByContributions(resonances)
+    finally:
+      self._endCommandEchoBlock()
 
   def addAssignment(self, value:Sequence[Union[str, 'NmrAtom']]):
     """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""

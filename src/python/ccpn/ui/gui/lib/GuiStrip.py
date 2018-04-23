@@ -55,6 +55,8 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
 from ccpn.util.Logging import getLogger
 
+STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
+
 
 class GuiStrip(Frame):
 
@@ -156,6 +158,14 @@ class GuiStrip(Frame):
 
     self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
     self._stripLabel.setFont(textFontSmall)
+
+    self._stripResidueId = _StripLabel(parent=self._labelWidget,
+                                   text='', spacing=(0,0),
+                                   grid=(1,0), gridSpan=(1,3))
+
+    self._stripResidueId.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+    self._stripResidueId.setFont(textFontSmall)
+    self._stripResidueId.hide()
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem
@@ -318,6 +328,36 @@ class GuiStrip(Frame):
     #   self._CcpnGLWidget.setStripID(callbackDict['object'].pid)
     # except Exception as es:
     #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
+  def getStripResidueId(self):
+    """Return the stripResidueId widget"""
+    return self._stripResidueId
+
+  def setStripResidueIdText(self, text: str):
+    """set the text of the _stripResidueId"""
+    if text is not None:
+      self._stripResidueId.setText(text)
+
+  def setStripLabelisPlus(self, isPlus: bool):
+    """set the isPlus attribute of the _stripResidueId"""
+    self._stripLabel._isPlus = isPlus
+
+  def getStripResidueIdText(self) -> str:
+    """return the text of the _stripResidueId"""
+    return self._stripResidueId.text()
+
+  def showStripResidueId(self, doShow: bool=True):
+    """show / hide the _stripResidueId"""
+    self._stripResidueId.setVisible(doShow)
+    if doShow:
+      self._labelWidget.setFixedHeight(30)
+    else:
+      self._labelWidget.setFixedHeight(16)
+
+  def hideStripResidueId(self):
+    "Hide the _stripResidueId; convienience"
+    self._stripResidueId.setVisible(False)
+    self._labelWidget.setFixedHeight(16)
 
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()

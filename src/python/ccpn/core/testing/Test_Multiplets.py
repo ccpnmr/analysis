@@ -63,6 +63,11 @@ class MultipletTest_setUp(WrapperTesting):
                                         'Multiplet',
                                         self._multipletChange)
 
+      # self._peakNotifier = Notifier(self.project,
+      #                                   [Notifier.CREATE, Notifier.CHANGE, Notifier.DELETE],
+      #                                   'Peak',
+      #                                   self._peakChange)
+
 
   def test_newMultiplet(self):
     self.assertEqual(len(self.project.multiplets), 0)
@@ -128,6 +133,7 @@ class MultipletTest_setUp(WrapperTesting):
     with self.assertRaisesRegex(ValueError, 'does not belong to multiplet'):
       mt.removePeaks(pks2)
 
+    print ('>>>preAddPeaks')
     morePeaks = self.peakList.peaks[3:]
     mt.addPeaks(morePeaks)
     self.assertEqual(len(mt.peaks), 6)
@@ -144,8 +150,16 @@ class MultipletTest_setUp(WrapperTesting):
     with self.assertRaisesRegex(ValueError, 'does not belong to spectrum'):
       mt.addPeaks(pks3)
 
+    # check that changing the position of a peak notifies the multiplet
+    print ('>>>prePositionChange')
+    morePeaks[0].position = (0.0, 0.0, 0.0)
+    print('>>>postPositionChange')
+
   def _multipletChange(self, data):
-    print ('>>>Changed', data[Notifier.OBJECT], data[Notifier.TRIGGER])
+    print ('>>>multipletNotifier', data[Notifier.OBJECT], data[Notifier.TRIGGER])
+
+  def _peakChange(self, data):
+    print ('>>>peakNotifier', data[Notifier.OBJECT], data[Notifier.TRIGGER])
 
 #=========================================================================================
 # MultipletTest_No_setUp

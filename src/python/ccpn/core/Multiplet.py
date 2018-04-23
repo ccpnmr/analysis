@@ -308,4 +308,9 @@ def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> M
 Multiplet._parentClass.newMultiplet = _newMultiplet
 del _newMultiplet
 
-# need notifiers that notify the multiplet that peaks have changed
+# Notify Multiplets when the contents of peaks have changed
+# i.e PeakDim references
+Project._apiNotifiers.append(
+  ('_notifyRelatedApiObject', {'pathToObject':'peak.multiplets',  'action':'change'},
+   Nmr.PeakDim._metaclass.qualifiedName(), '')
+)

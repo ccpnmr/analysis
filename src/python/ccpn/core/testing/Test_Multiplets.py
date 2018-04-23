@@ -128,6 +128,14 @@ class MultipletTest_setUp(WrapperTesting):
     with self.assertRaisesRegex(ValueError, 'does not belong to multiplet'):
       mt.removePeaks(pks2)
 
+    morePeaks = self.peakList.peaks[3:]
+    mt.addPeaks(morePeaks)
+    self.assertEqual(len(mt.peaks), 6)
+    self.undo.undo()
+    self.assertEqual(len(mt.peaks), 3)
+    self.undo.redo()
+    self.assertEqual(len(mt.peaks), 6)
+
     # create another spectrum with a new peak
     self.peakList2 = self.spectrum2.newPeakList()
     pks3 = self.peakList2.newPeak()

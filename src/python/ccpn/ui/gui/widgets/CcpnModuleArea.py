@@ -53,7 +53,12 @@ class TempAreaWindow(GuiWindow, MainWindow):
       self.setCentralWidget(area)
       self.tempModuleArea = area
       self.mainModuleArea = self.tempModuleArea.home
+
       self.mainWindow = mainWindow
+      self.application = mainWindow.application
+      self.project = mainWindow.application.project
+      self.current = mainWindow.application.current
+
       self._setShortcuts()
       self.setMouseMode(SELECT)
 

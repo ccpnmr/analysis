@@ -154,18 +154,24 @@ class GuiStrip(Frame):
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
     self._stripLabel = _StripLabel(parent=self._labelWidget,
                                    text='', spacing=(0,0),
-                                   grid=(0,0), gridSpan=(1,3))    #, hAlign='left', vAlign='top', hPolicy='minimum')
+                                   grid=(0,1), hAlign='c')    #, hAlign='left', vAlign='top', hPolicy='minimum')
 
     self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
     self._stripLabel.setFont(textFontSmall)
 
     self._stripResidueId = _StripLabel(parent=self._labelWidget,
                                    text='', spacing=(0,0),
-                                   grid=(1,0), gridSpan=(1,3))
-
+                                   grid=(0,0), hAlign='l')
     self._stripResidueId.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
     self._stripResidueId.setFont(textFontSmall)
     self._stripResidueId.hide()
+
+    self._stripResidueDir = _StripLabel(parent=self._labelWidget,
+                                   text='', spacing=(0,0),
+                                   grid=(0,2), hAlign='r')
+    self._stripResidueDir.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+    self._stripResidueDir.setFont(textFontSmall)
+    self._stripResidueDir.hide()
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem
@@ -334,6 +340,10 @@ class GuiStrip(Frame):
     # except Exception as es:
     #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
+  def setStripLabelisPlus(self, isPlus: bool):
+    """set the isPlus attribute of the _stripResidueId"""
+    self._stripLabel._isPlus = isPlus
+
   def getStripResidueId(self):
     """Return the stripResidueId widget"""
     return self._stripResidueId
@@ -343,10 +353,6 @@ class GuiStrip(Frame):
     if text is not None:
       self._stripResidueId.setText(text)
 
-  def setStripLabelisPlus(self, isPlus: bool):
-    """set the isPlus attribute of the _stripResidueId"""
-    self._stripLabel._isPlus = isPlus
-
   def getStripResidueIdText(self) -> str:
     """return the text of the _stripResidueId"""
     return self._stripResidueId.text()
@@ -355,13 +361,39 @@ class GuiStrip(Frame):
     """show / hide the _stripResidueId"""
     self._stripResidueId.setVisible(doShow)
     if doShow:
-      self._labelWidget.setFixedHeight(30)
+      self._labelWidget.setFixedHeight(16)
     else:
       self._labelWidget.setFixedHeight(16)
 
   def hideStripResidueId(self):
     "Hide the _stripResidueId; convienience"
     self._stripResidueId.setVisible(False)
+    self._labelWidget.setFixedHeight(16)
+
+  def getStripResidueDir(self):
+    """Return the stripResidueDir widget"""
+    return self._stripResidueDir
+
+  def setStripResidueDirText(self, text: str):
+    """set the text of the _stripResidueDir"""
+    if text is not None:
+      self._stripResidueDir.setText(text)
+
+  def getStripResidueDirText(self) -> str:
+    """return the text of the _stripResidueDir"""
+    return self._stripResidueDir.text()
+
+  def showStripResidueDir(self, doShow: bool=True):
+    """show / hide the _stripResidueDir"""
+    self._stripResidueDir.setVisible(doShow)
+    if doShow:
+      self._labelWidget.setFixedHeight(16)
+    else:
+      self._labelWidget.setFixedHeight(16)
+
+  def hideStripResidueDir(self):
+    "Hide the _stripResidueDir; convienience"
+    self._stripResidueDir.setVisible(False)
     self._labelWidget.setFixedHeight(16)
 
   def _unregisterStrip(self):

@@ -36,7 +36,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
 
 from ccpn.util.Svg import Svg
-from ccpn.ui.gui.lib.mouseEvents import SELECT
+from ccpn.ui.gui.lib.mouseEvents import SELECT, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow
@@ -119,7 +119,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     # self.newBlankDisplay()
     self.pythonConsoleModule = None
     self.statusBar().showMessage('Ready')
-    self.mouseMode = SELECT
+    setCurrentMouseMode(SELECT)
     self.show()
 
   #   QtWidgets.QShortcut.installEventFilter(self)
@@ -543,7 +543,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     if e.key() == QtCore.Qt.Key_Escape:
       # Reset Mouse Mode
-      mode = self.mouseMode
+      mode = getCurrentMouseMode()
       if mode != SELECT:
         self.setMouseMode(SELECT)
 

@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,17 +19,11 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: Luca Mureddu $"
 __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-#====================================
-
-
-
-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.dockarea.DockArea import DockArea
@@ -58,6 +51,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.framework.lib.Pipeline import Pipeline
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
+from ccpn.util.Logging import getLogger
 
 commonWidgets =           {
                             CheckBox.__name__:              ('get',         'setChecked'),
@@ -222,7 +216,7 @@ class PipelineDropArea(DockArea):
   def guiPipesState(self):
     d = []
     for pipeName, guiPipe in self.findAll()[1].items():
-      print()
+      # print()
       d.append((guiPipe.__class__.__name__, pipeName, guiPipe.widgetsState, guiPipe.isActive ))
     return d
 
@@ -404,7 +398,7 @@ class GuiPipe(Dock, DockDrop):
         try:  # try because widgets can be dinamically deleted
           widgetsState[varName] = getattr(varObj, commonWidgets[varObj.__class__.__name__][0])()
         except Exception as e:
-          print('Error',e)
+          getLogger().debug('Error %s' % str(e))
     self._kwargs = widgetsState
     return widgetsState
 
@@ -418,7 +412,7 @@ class GuiPipe(Dock, DockDrop):
           setWidget = getattr(widget, commonWidgets[widget.__class__.__name__][1])
           setWidget(value)
       except Exception as e:
-        print('Impossible to restore %s value for %s.' % (variableName, self.pipeName), e)
+        getLogger().debug('Impossible to restore %s value for %s. (%s)' % (variableName, self.pipeName, str(e)))
 
   def _updateWidgets(self):
     '''
@@ -455,7 +449,7 @@ class GuiPipe(Dock, DockDrop):
     if len(spectrumGroups)>0:
       for widgetVariable in widgetVariables:
         selected = _getWidgetByAtt(self, widgetVariable).get()
-        print(selected)
+        getLogger().debug(selected)
         _getWidgetByAtt(self, widgetVariable).setData(texts=[sg.pid for sg in spectrumGroups], objects=spectrumGroups,
                         headerText = headerText, headerEnabled = headerEnabled, headerIcon=headerIcon)
         _getWidgetByAtt(self, widgetVariable).select(selected)

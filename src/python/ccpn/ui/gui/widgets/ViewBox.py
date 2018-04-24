@@ -85,6 +85,7 @@ from ccpn.ui.gui.lib.mouseEvents import \
   middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
   rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse, PICK, SELECT
 from ccpn.ui.gui.widgets.LinearRegionsPlot import LinearRegionsPlot
+from ccpn.ui.gui.lib.mouseEvents import MouseModes, getCurrentMouseMode
 
 
 class CrossHair:
@@ -250,7 +251,8 @@ class ViewBox(pg.ViewBox):
 
   def _setMouseCursor(self):
 
-    if self.application.ui.mainWindow.mouseMode == PICK:
+    # if self.application.ui.mainWindow.mouseMode == PICK:
+    if getCurrentMouseMode() == PICK:
       cursor = QtGui.QCursor(QtCore.Qt.CrossCursor)
       self.setCursor(cursor)
 
@@ -283,7 +285,8 @@ class ViewBox(pg.ViewBox):
     # This is the correct future style for cursorPosition handling
     self.current.cursorPosition = (xPosition, yPosition)
 
-    if self.application.ui.mainWindow.mouseMode == PICK:
+    # if self.application.ui.mainWindow.mouseMode == PICK:
+    if getCurrentMouseMode() == PICK:
       self._pickAtMousePosition(event)
 
     if controlShiftLeftMouse(event):

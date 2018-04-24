@@ -73,7 +73,7 @@ class MultipletTest_setUp(WrapperTesting):
   def test_newMultiplet(self):
     self.assertEqual(len(self.project.multiplets), 0)
     self.multipletList.newMultiplet()
-    self.assertEqual(len(self.project.multipletLists), 1)
+    self.assertEqual(len(self.project.multipletLists), 2)
     self.assertEqual(len(self.project.multiplets), 1)
 
   def test_newMultiplet_goodPeaks(self):
@@ -82,7 +82,7 @@ class MultipletTest_setUp(WrapperTesting):
 
     self.assertEqual(len(self.project.multiplets), 0)
     mt = self.multipletList.newMultiplet(peaks=pks)
-    self.assertEqual(len(self.project.multipletLists), 1)
+    self.assertEqual(len(self.project.multipletLists), 2)
     self.assertEqual(len(self.project.multiplets), 1)
     self.assertEqual(len(mt.peaks), 1)
 

@@ -293,6 +293,11 @@ class GuiStrip(Frame):
 
     return self.plotWidget.crossHair1.isVisible()
 
+  # @property
+  # def mouseMode(self):
+  #   """Get the mouseMode from the mainWindow"""
+  #   return self.application.ui.mainWindow.mouseMode
+
   @property
   def pythonConsole(self):
     return self.mainWindow.pythonConsole

@@ -37,6 +37,7 @@ from functools import partial
 from ccpn.ui.gui.lib.Shortcuts import addShortCut
 from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
 # For readability there should be a class
@@ -527,9 +528,9 @@ class GuiWindow():
     # self.application.project.unblankNotification()
 
   def setMouseMode(self, mode):
-    from ccpn.ui.gui.lib.mouseEvents import MouseModes
     if mode in MouseModes:
-      self.mouseMode = mode
+      # self.mouseMode = mode
+      setCurrentMouseMode(mode)
       mouseModeText = ' Mouse Mode: '
       self.statusBar().showMessage(mouseModeText + mode)
       project = self.application.project
@@ -537,9 +538,9 @@ class GuiWindow():
         strip.viewBox._setMouseCursor()
 
   def switchMouseMode(self):
-    from ccpn.ui.gui.lib.mouseEvents import MouseModes
-    mode = self.mouseMode
+    # mode = self.mouseMode
     modesCount = len(MouseModes)
+    mode = getCurrentMouseMode()
     if mode in MouseModes:
       i = MouseModes.index(mode)
       if i + 1 < modesCount:

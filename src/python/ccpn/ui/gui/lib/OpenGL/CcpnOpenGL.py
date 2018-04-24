@@ -1,5 +1,46 @@
 """
-Module Documentation here
+By Functionality:
+
+Zoom and pan:
+    Left-drag:                          pans the spectrum.
+
+    shift-left-drag:                    draws a zooming box and zooms the viewbox.
+    shift-middle-drag:                  draws a zooming box and zooms the viewbox.
+    shift-right-drag:                   draws a zooming box and zooms the viewbox.
+    Two successive shift-right-clicks:  define zoombox
+    control-right click:                reset the zoom
+
+Peaks:
+    Left-click:                         select peak near cursor in a spectrum display, deselecting others
+    Control(Cmd)-left-click:            (de)select peak near cursor in a spectrum display, adding/removing to selection.
+    Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
+    Middle-drag:                        Moves a selected peak.
+    Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
+    Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
+
+Others:
+    Right-click:                        raises the context menu.
+
+
+By Mouse button:
+
+    Left-click:                         select peak near cursor in a spectrum display, deselecting others
+    Control(Cmd)-left-click:            (de)select peak near cursor in a spectrum display, adding/removing to selection.
+    Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
+
+    Left-drag:                          pans the spectrum.
+    shift-left-drag:                    draws a zooming box and zooms the viewbox.
+    Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
+    Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
+
+
+    shift-middle-drag:                  draws a zooming box and zooms the viewbox.
+
+    Right-click:                        raises the context menu.
+    control-right click:                reset the zoom
+    Two successive shift-right-clicks:  define zoombox
+
+    shift-right-drag:                   draws a zooming box and zooms the viewbox.
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -36,6 +77,7 @@ from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
+from ccpn.ui.gui.lib.mouseEvents import MouseModes, getCurrentMouseMode
 
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
@@ -3515,7 +3557,7 @@ class CcpnGLWidget(QOpenGLWidget):
       GL.glBegin(GL.GL_LINES)
 
       # TODO:ED may want to put other icons for other modes
-      if self.mainWindow.mouseMode == PICK:
+      if getCurrentMouseMode() == PICK:
         GL.glColor4f(*self.mousePickColour)
         x = self.pixelX * 8
         y = self.pixelY * 8
@@ -4940,7 +4982,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # This is the correct future style for cursorPosition handling
     self.current.cursorPosition = (xPosition, yPosition)
 
-    if self.mainWindow.mouseMode == PICK:
+    if getCurrentMouseMode() == PICK:
       self._pickAtMousePosition(event)
 
     if controlShiftLeftMouse(event):
@@ -5242,15 +5284,12 @@ class CcpnGLWidget(QOpenGLWidget):
     integral = data[Notifier.OBJECT]
 
     if Notifier.DELETE in triggers:
-      print ('>>>delete integral')
       self._deleteIntegral(integral)
 
     elif Notifier.CREATE in triggers:
-      print ('>>>create integral')
       self._createIntegral(integral)
 
     elif Notifier.CHANGE in triggers:
-      print ('>>>change integral')
       self._changeIntegral(integral)
 
     self._clearKeys()

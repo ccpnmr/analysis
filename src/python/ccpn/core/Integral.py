@@ -175,10 +175,10 @@ class Integral(AbstractWrapperObject):
     for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
       dataDimRef = dataDimRefs[ii]
       if dataDimRef is None:
-        value = peakDim.position
+        value = (peakDim.position or 0)
         halfWidth = 0.5 * (peakDim.boxWidth or 0)
       else:
-        value = peakDim.value
+        value = (peakDim.value or 0)
         halfWidth = abs(0.5 * (peakDim.boxWidth or 0) * dataDimRef.valuePerPoint)
       result.append((value - halfWidth, value + halfWidth))
     #

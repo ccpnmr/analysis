@@ -38,7 +38,7 @@ from ccpn.ui.gui.widgets.MainWindow import MainWindow
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 from ccpn.util.Colour import  hexToRgb
-from ccpn.ui.gui.lib.Shortcuts import addShortCut
+from ccpn.ui.gui.lib.mouseEvents import SELECT
 
 ModuleArea = DockArea
 Module = Dock
@@ -55,6 +55,7 @@ class TempAreaWindow(GuiWindow, MainWindow):
       self.mainModuleArea = self.tempModuleArea.home
       self.mainWindow = mainWindow
       self._setShortcuts()
+      self.setMouseMode(SELECT)
 
     def closeEvent(self, *args, **kwargs):
       for module in self.tempModuleArea.ccpnModules:

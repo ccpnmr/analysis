@@ -4,14 +4,12 @@ various mouse event functions. See ViewBox.py for the full mouse commands descri
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -23,10 +21,10 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import sys
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -41,7 +39,15 @@ from ccpn.util.Logging import getLogger
 # mouse modes for single click:
 PICK = 'pick'
 SELECT = 'select'
+MOUSEMODEDICT_CURRENT = 'Mode'
 MouseModes = [PICK, SELECT]
+mouseModeDict = {MOUSEMODEDICT_CURRENT: SELECT}
+
+def setCurrentMouseMode(mode):
+  mouseModeDict[MOUSEMODEDICT_CURRENT] = mode
+
+def getCurrentMouseMode():
+  return mouseModeDict[MOUSEMODEDICT_CURRENT]
 
 def doDebug(msg):
   if False: #cannot get the regular debugger to work and likely do not want this on during production anyway
@@ -210,7 +216,7 @@ def getMouseEventDict(event:QtGui.QMouseEvent):
   """
   Return a dict with the status of each mouseEvent as boolean
   """
-  mouseDict = {}
+  mouseModeDict = {}
 
   for key, func in [
     ('leftMouse', leftMouse),
@@ -228,6 +234,6 @@ def getMouseEventDict(event:QtGui.QMouseEvent):
     ('controlRightMouse', controlRightMouse),
     ('controlShiftRightMouse', controlShiftRightMouse),
   ]:
-    mouseDict[key] = func(event)
-  return mouseDict
+    mouseModeDict[key] = func(event)
+  return mouseModeDict
 

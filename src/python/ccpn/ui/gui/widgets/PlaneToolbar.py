@@ -45,7 +45,8 @@ from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 
-STRIPLABEL_ISPLUS = '_isPlus'
+STRIPLABEL_CONNECTDIR = '_connectDir'
+STRIPLABEL_CONNECTNONE = 'none'
 
 
 class _StripLabel(Label):
@@ -87,9 +88,9 @@ class _StripLabel(Label):
     mimeData = QtCore.QMimeData()
     # create the dataDict
     dataDict = {self._dragKey:self.text()}
-    isPlus = self._isPlus if hasattr(self, STRIPLABEL_ISPLUS) else True
-    dataDict[STRIPLABEL_ISPLUS] = isPlus
-    # print ('>>>isPlus', isPlus)
+    connectDir = self._connectDir if hasattr(self, STRIPLABEL_CONNECTDIR) else STRIPLABEL_CONNECTNONE
+    dataDict[STRIPLABEL_CONNECTDIR] = connectDir
+    print ('>>>connectDir', connectDir)
 
     # update the dataDict with all mouseEvents
     dataDict.update(getMouseEventDict(event))
@@ -273,9 +274,10 @@ class PlaneToolbar(ToolBar):
 
     self.strip._rebuildStripContours()
 
-STRIPCONNECT_ISMINUS = 'isMinus'
-STRIPCONNECT_ISPLUS = 'isPlus'
-STRIPCONNECT_DIRS = (STRIPCONNECT_ISMINUS, None, STRIPCONNECT_ISPLUS)
+STRIPCONNECT_LEFT = 'isLeft'
+STRIPCONNECT_RIGHT = 'isRight'
+STRIPCONNECT_NONE = 'none'
+STRIPCONNECT_DIRS = (STRIPCONNECT_NONE, STRIPCONNECT_LEFT, STRIPCONNECT_RIGHT)
 STRIPPOSITION_LEFT = 'left'
 STRIPPOSITION_CENTRE = 'centre'
 STRIPPOSITION_RIGHT = 'right'
@@ -298,9 +300,26 @@ class StripHeader(Frame):
 
       self._labels[lab].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
       self._labels[lab].setFont(textFontSmall)
-      self._labels[lab].setEnabled(False)
+      self._labels[lab].obj = None
+      self._labels[lab]._connectDir = STRIPCONNECT_NONE
 
     self.setFixedHeight(16)
+
+  def reset(self):
+    for lab in STRIPPOSITIONS:
+      self._labels[lab].setText('')
+      self._labels[lab].obj = None
+      self._labels[lab]._connectDir = STRIPCONNECT_NONE
+
+  def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      self._labels[pos].obj = obj
+
+  def getLabelObject(self, position=STRIPPOSITION_CENTRE):
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      return self._labels[pos].obj
 
   def setLabelText(self, text=None, position=STRIPPOSITION_CENTRE):
     pos = position[0]
@@ -313,33 +332,37 @@ class StripHeader(Frame):
       return self._labels[pos].text()
 
   def getLabel(self, position=STRIPPOSITION_CENTRE):
-    """Return the stripLabel widget"""
+    """Return the header label widget"""
     pos = position[0]
     if pos in STRIPPOSITIONS:
-      return self._Labels[pos]
+      return self._labels[pos]
 
   def showLabel(self, position=STRIPPOSITION_CENTRE, doShow: bool=True):
-    """show / hide the _stripLabel"""
+    """show / hide the header label"""
     pos = position[0]
     if pos in STRIPPOSITIONS:
       self._labels[pos].setVisible(doShow)
 
   def hideLabel(self, position=STRIPPOSITION_CENTRE):
-    "Hide the _stripLabel; convienience"
+    "Hide the header label; convienience"
     pos = position[0]
     if pos in STRIPPOSITIONS:
       self._labels[pos].setVisible(False)
 
   def setLabelEnabled(self, position=STRIPPOSITION_CENTRE, enable: bool=True):
-    """show / hide the _stripLabel"""
+    """show / hide the header label"""
     pos = position[0]
     if pos in STRIPPOSITIONS:
       self._labels[pos].setEnabled(enable)
 
+  def setLabelConnectDir(self, position=STRIPPOSITION_CENTRE, connectDir: str=STRIPCONNECT_NONE):
+    """set the connectDir attribute of the header label"""
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      self._labels[pos]._connectDir = connectDir
 
-
-
-
-  def setStripLabelisPlus(self, isPlus: bool):
-    """set the isPlus attribute of the _stripResidueId"""
-    self._stripLabel._isPlus = isPlus
+  def getLabelConnectDir(self, position=STRIPPOSITION_CENTRE):
+    """set the connectDir attribute of the header label"""
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      return self._labels[pos]._connectDir

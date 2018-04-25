@@ -227,9 +227,16 @@ def navigateToNmrAtomsInStrip(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom], wid
   if markPositions:
     strip.spectrumDisplay.mainWindow.markPositions(list(shiftDict.keys()), list(shiftDict.values()))
 
+  strip.header.reset()
   if setNmrResidueLabel and nmrAtoms:
     strip.setStripLabelText(nmrAtoms[0].nmrResidue.pid)
     strip.showStripLabel()
+
+    strip.header.setLabelText(position='c', text=nmrAtoms[0].nmrResidue.pid)
+    obj = strip.project.getByPid(nmrAtoms[0].nmrResidue.pid)
+    strip.header.setLabelText(position='l', text='<<<')
+    strip.header.setLabelObject(position='c', obj=obj)
+    strip.header.setLabelText(position='r', text='>>>')
 
   # redraw the contours
   for specNum, thisSpecView in enumerate(strip.spectrumDisplay.spectrumViews):

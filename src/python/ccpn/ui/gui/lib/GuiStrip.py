@@ -138,7 +138,7 @@ class GuiStrip(Frame):
                                grid=(0, 0), spacing=(0,0))
     # self._labelWidget.layout().setHorizontalSpacing(0)
     # self._labelWidget.layout().setVerticalSpacing(0)
-    self._labelWidget.setFixedHeight(16)
+    self._labelWidget.setFixedHeight(32)
 
     # display and pid
     #TODO:GEERTEN correct once pid has been reviewed
@@ -174,8 +174,11 @@ class GuiStrip(Frame):
     self._stripResidueDir.hide()
 
 
-    # self.header = StripHeader(parent=self._labelWidget, mainWindow=self.mainWindow, grid=(1,0), setLayout=True)
-    # self.header.setLabelText(position='c', text='Hello')
+    self.header = StripHeader(parent=self._labelWidget, mainWindow=self.mainWindow,
+                              grid=(1,0), gridSpan=(1,3), setLayout=True)
+    self.header.setLabelText(position='l', text='LEFT'+self.id)
+    self.header.setLabelText(position='c', text='CENTRE'+self.id)
+    self.header.setLabelText(position='r', text='RIGHT'+self.id)
 
 
 
@@ -368,14 +371,14 @@ class GuiStrip(Frame):
     """show / hide the _stripResidueId"""
     self._stripResidueId.setVisible(doShow)
     if doShow:
-      self._labelWidget.setFixedHeight(16)
+      self._labelWidget.setFixedHeight(32)
     else:
-      self._labelWidget.setFixedHeight(16)
+      self._labelWidget.setFixedHeight(32)
 
   def hideStripResidueId(self):
     "Hide the _stripResidueId; convienience"
     self._stripResidueId.setVisible(False)
-    self._labelWidget.setFixedHeight(16)
+    self._labelWidget.setFixedHeight(32)
 
   def getStripResidueDir(self):
     """Return the stripResidueDir widget"""
@@ -394,14 +397,14 @@ class GuiStrip(Frame):
     """show / hide the _stripResidueDir"""
     self._stripResidueDir.setVisible(doShow)
     if doShow:
-      self._labelWidget.setFixedHeight(16)
+      self._labelWidget.setFixedHeight(32)
     else:
-      self._labelWidget.setFixedHeight(16)
+      self._labelWidget.setFixedHeight(32)
 
   def hideStripResidueDir(self):
     "Hide the _stripResidueDir; convienience"
     self._stripResidueDir.setVisible(False)
-    self._labelWidget.setFixedHeight(16)
+    self._labelWidget.setFixedHeight(32)
 
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()

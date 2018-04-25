@@ -1186,7 +1186,7 @@ QuickTable::item::selected {
         # selectionModel.setCurrentIndex(self.model().index(row, 0)
         #                                , selectionModel.SelectCurrent | selectionModel.Rows)
 
-      self.scrollToSelectedIndex()
+      # self.scrollToSelectedIndex()
 
       self.setUpdatesEnabled(True)
       # self.blockSignals(False)

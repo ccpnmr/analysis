@@ -36,6 +36,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.guiSettings import textFontSmall
 
 import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -270,3 +272,73 @@ class PlaneToolbar(ToolBar):
         self.nextPlaneCallback(n)
 
     self.strip._rebuildStripContours()
+
+STRIPCONNECT_ISMINUS = 'isMinus'
+STRIPCONNECT_ISPLUS = 'isPlus'
+STRIPCONNECT_DIRS = (STRIPCONNECT_ISMINUS, None, STRIPCONNECT_ISPLUS)
+STRIPPOSITION_LEFT = 'left'
+STRIPPOSITION_CENTRE = 'centre'
+STRIPPOSITION_RIGHT = 'right'
+STRIPPOSITIONS = (STRIPPOSITION_LEFT[0], STRIPPOSITION_CENTRE[0], STRIPPOSITION_RIGHT[0])
+
+
+class stripHeader(Frame):
+  def __init__(self, parent, mainWindow, **kw):
+    super(stripHeader, self).__init__(parent=parent, **kw)
+
+    self.parent = parent
+    self.mainWindow = mainWindow
+
+    self._labels = {}
+
+    for lab in STRIPPOSITIONS:
+      self._labels[lab] = _StripLabel(parent=self,
+                                     text='', spacing=(0,0),
+                                     grid=(0,STRIPPOSITIONS.index(lab)))
+
+      self._labels[lab].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+      self._labels[lab].setFont(textFontSmall)
+      self._labels[lab].dropEnabled = False
+
+    self.setFixedHeight(16)
+
+  def setLabelText(self, text=None, position=STRIPPOSITION_CENTRE):
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      self._labels[pos].setText(text)
+
+  def getLabelText(self, position=STRIPPOSITION_CENTRE):
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      return self._labels[pos].text()
+
+    return None
+
+  def geLabel(self, position=STRIPPOSITION_CENTRE):
+    """Return the stripLabel widget"""
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      return self._Labels[pos]
+
+    return None
+
+  def showLabel(self, position=STRIPPOSITION_CENTRE, doShow: bool=True):
+    """show / hide the _stripLabel"""
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      self._labels[pos].setVisible(doShow)
+
+  def hideLabel(self, position=STRIPPOSITION_CENTRE):
+    "Hide the _stripLabel; convienience"
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      self._labels[pos].setVisible(False)
+
+
+
+
+
+
+  def setStripLabelisPlus(self, isPlus: bool):
+    """set the isPlus attribute of the _stripResidueId"""
+    self._stripLabel._isPlus = isPlus

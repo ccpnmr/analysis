@@ -270,7 +270,10 @@ class GuiSpectrumView(QtWidgets.QGraphicsItem):
         widget.setFixedSize(75, 30)
       else:
         widget.setFixedSize(75, 30)
+      # WHY _wrappedData and not spectrumView?
       widget.spectrumView = self._wrappedData
+      action.spectrumView = self
+
       spectrumDisplay.spectrumActionDict[apiDataSource] = action
       # The following call sets the icon colours:
       self._spectrumViewHasChanged()

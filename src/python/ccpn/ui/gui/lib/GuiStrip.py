@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 
 import pyqtgraph as pg
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
@@ -78,26 +78,37 @@ class GuiStrip(Frame):
 
     getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
     Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
-                   acceptDrops=True, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+                   acceptDrops=True#, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                    )
 
     # it appears to be required to explicitly set these, otherwise
     # the Widget will not fill all available space
     ###self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
     # The strip is responsive on restore to the contentMargins set here
-    #self.setContentsMargins(5, 0, 5, 0)
-    self.setContentsMargins(0, 0, 0, 0)
+    # self.setContentsMargins(5, 0, 5, 0)
+    # self.setContentsMargins(10, 10, 10, 10)
     self.setMinimumWidth(50)
     self.setMinimumHeight(150)
+    # self.layout().setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
+
+    self.layout().setSpacing(0)
+
+    self.header = StripHeader(parent=self, mainWindow=self.mainWindow,
+                              grid=(0,0), gridSpan=(1,2), setLayout=True, spacing=(0,0),
+                              showBorder=True)
+    self.header.setLabelText(position='l', text='LEFT'+self.id)
+    self.header.setLabelText(position='c', text='CENTRE'+self.id)
+    self.header.setLabelText(position='r', text='RIGHT'+self.id)
+    self.header.layout().setAlignment(QtCore.Qt.AlignBottom)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
     #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
-    self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+    self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
     # GWV: plotWidget appears not to be responsive to contentsMargins
-    self.plotWidget.setContentsMargins(10, 30, 10, 30)
-    self.getLayout().addWidget(self.plotWidget, 1, 0)
-    self.layout().setHorizontalSpacing(0)
-    self.layout().setVerticalSpacing(0)
+    # self.plotWidget.setContentsMargins(10, 30, 10, 30)
+    # self.getLayout().addWidget(self.plotWidget, 1, 0)
+    # self.layout().setHorizontalSpacing(0)
+    # self.layout().setVerticalSpacing(0)
     # self.plotWidget.showGrid(x=True, y=True, alpha=None)
 
     self._useCcpnGL = True
@@ -133,12 +144,12 @@ class GuiStrip(Frame):
                                       grid=(2, 0), spacing=(5,5))
 
     # Widgets for _stripIdLabel and _stripLabel
-    self._labelWidget = Widget(parent=self, setLayout=True,
-                               # hPolicy='expanding', vAlign='center',
-                               grid=(0, 0), spacing=(0,0))
+    # self._labelWidget = Frame(parent=self, setLayout=True,
+    #                            hPolicy='expanding', vAlign='center',
+                               # grid=(0, 0), spacing=(0,0))
     # self._labelWidget.layout().setHorizontalSpacing(0)
     # self._labelWidget.layout().setVerticalSpacing(0)
-    self._labelWidget.setFixedHeight(32)
+    # self._labelWidget.setFixedHeight(32)
 
     # display and pid
     #TODO:GEERTEN correct once pid has been reviewed
@@ -152,34 +163,28 @@ class GuiStrip(Frame):
 
     # Displays a draggable label for the strip
     #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
-    self._stripLabel = _StripLabel(parent=self._labelWidget,
-                                   text='', spacing=(0,0),
-                                   grid=(0,1), hAlign='c')    #, hAlign='left', vAlign='top', hPolicy='minimum')
+    # self._stripLabel = _StripLabel(parent=self._labelWidget,
+    #                                text='', spacing=(0,0),
+    #                                grid=(0,1), hAlign='c')    #, hAlign='left', vAlign='top', hPolicy='minimum')
+    #
+    # self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+    # self._stripLabel.setFont(textFontSmall)
+    #
+    # self._stripResidueId = _StripLabel(parent=self._labelWidget,
+    #                                text='', spacing=(0,0),
+    #                                grid=(0,0), hAlign='l')
+    # self._stripResidueId.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+    # self._stripResidueId.setFont(textFontSmall)
+    # self._stripResidueId.hide()
+    #
+    # self._stripResidueDir = _StripLabel(parent=self._labelWidget,
+    #                                text='', spacing=(0,0),
+    #                                grid=(0,2), hAlign='r')
+    # self._stripResidueDir.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+    # self._stripResidueDir.setFont(textFontSmall)
+    # self._stripResidueDir.hide()
 
-    self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-    self._stripLabel.setFont(textFontSmall)
-
-    self._stripResidueId = _StripLabel(parent=self._labelWidget,
-                                   text='', spacing=(0,0),
-                                   grid=(0,0), hAlign='l')
-    self._stripResidueId.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-    self._stripResidueId.setFont(textFontSmall)
-    self._stripResidueId.hide()
-
-    self._stripResidueDir = _StripLabel(parent=self._labelWidget,
-                                   text='', spacing=(0,0),
-                                   grid=(0,2), hAlign='r')
-    self._stripResidueDir.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-    self._stripResidueDir.setFont(textFontSmall)
-    self._stripResidueDir.hide()
-
-
-    self.header = StripHeader(parent=self._labelWidget, mainWindow=self.mainWindow,
-                              grid=(1,0), gridSpan=(1,3), setLayout=True)
-    self.header.setLabelText(position='l', text='LEFT'+self.id)
-    self.header.setLabelText(position='c', text='CENTRE'+self.id)
-    self.header.setLabelText(position='r', text='RIGHT'+self.id)
-
+    # self._labelWidget.layout().setAlignment(QtCore.Qt.AlignTop)
 
 
 
@@ -318,93 +323,97 @@ class GuiStrip(Frame):
   def pythonConsole(self):
     return self.mainWindow.pythonConsole
 
-  def getStripLabel(self):
-    """Return the stripLabel widget"""
-    return self._stripLabel
-
-  def setStripLabelText(self, text: str):
-    """set the text of the _stripLabel"""
-    if text is not None:
-      self._stripLabel.setText(text)
-
-  def getStripLabelText(self) -> str:
-    """return the text of the _stripLabel"""
-    return self._stripLabel.text()
-
-  def showStripLabel(self, doShow: bool=True):
-    """show / hide the _stripLabel"""
-    self._stripLabel.setVisible(doShow)
-
-  def hideStripLabel(self):
-    "Hide the _stripLabel; convienience"
-    self._stripLabel.setVisible(False)
+  # def getStripLabel(self):
+  #   """Return the stripLabel widget"""
+  #   return self._stripLabel
+  #
+  # def setStripLabelText(self, text: str):
+  #   """set the text of the _stripLabel"""
+  #   if text is not None:
+  #     self._stripLabel.setText(text)
+  #
+  # def getStripLabelText(self) -> str:
+  #   """return the text of the _stripLabel"""
+  #   return self._stripLabel.text()
+  #
+  # def showStripLabel(self, doShow: bool=True):
+  #   """show / hide the _stripLabel"""
+  #   self._stripLabel.setVisible(doShow)
+  #
+  # def hideStripLabel(self):
+  #   "Hide the _stripLabel; convienience"
+  #   self._stripLabel.setVisible(False)
 
   def _updateStripLabel(self, callbackDict):
     "Update the striplabel if it represented a NmrResidue that has changed its id"
-    text = self.getStripLabelText()
+    # text = self.getStripLabelText()
+
+    text = self.header.getLabelText(position='c')
     if callbackDict['oldPid'] == text:
-      self.setStripLabelText(callbackDict['object'].pid)
+      self.header.setLabelText(position='c', text=callbackDict['object'].pid)
+
+      # self.setStripLabelText(callbackDict['object'].pid)
 
     # try:
     #   self._CcpnGLWidget.setStripID(callbackDict['object'].pid)
     # except Exception as es:
     #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
-  def setStripLabelisPlus(self, isPlus: bool):
-    """set the isPlus attribute of the _stripResidueId"""
-    self._stripLabel._isPlus = isPlus
-
-  def getStripResidueId(self):
-    """Return the stripResidueId widget"""
-    return self._stripResidueId
-
-  def setStripResidueIdText(self, text: str):
-    """set the text of the _stripResidueId"""
-    if text is not None:
-      self._stripResidueId.setText(text)
-
-  def getStripResidueIdText(self) -> str:
-    """return the text of the _stripResidueId"""
-    return self._stripResidueId.text()
-
-  def showStripResidueId(self, doShow: bool=True):
-    """show / hide the _stripResidueId"""
-    self._stripResidueId.setVisible(doShow)
-    if doShow:
-      self._labelWidget.setFixedHeight(32)
-    else:
-      self._labelWidget.setFixedHeight(32)
-
-  def hideStripResidueId(self):
-    "Hide the _stripResidueId; convienience"
-    self._stripResidueId.setVisible(False)
-    self._labelWidget.setFixedHeight(32)
-
-  def getStripResidueDir(self):
-    """Return the stripResidueDir widget"""
-    return self._stripResidueDir
-
-  def setStripResidueDirText(self, text: str):
-    """set the text of the _stripResidueDir"""
-    if text is not None:
-      self._stripResidueDir.setText(text)
-
-  def getStripResidueDirText(self) -> str:
-    """return the text of the _stripResidueDir"""
-    return self._stripResidueDir.text()
-
-  def showStripResidueDir(self, doShow: bool=True):
-    """show / hide the _stripResidueDir"""
-    self._stripResidueDir.setVisible(doShow)
-    if doShow:
-      self._labelWidget.setFixedHeight(32)
-    else:
-      self._labelWidget.setFixedHeight(32)
-
-  def hideStripResidueDir(self):
-    "Hide the _stripResidueDir; convienience"
-    self._stripResidueDir.setVisible(False)
-    self._labelWidget.setFixedHeight(32)
+  # def setStripLabelisPlus(self, isPlus: bool):
+  #   """set the isPlus attribute of the _stripResidueId"""
+  #   self._stripLabel._isPlus = isPlus
+  #
+  # def getStripResidueId(self):
+  #   """Return the stripResidueId widget"""
+  #   return self._stripResidueId
+  #
+  # def setStripResidueIdText(self, text: str):
+  #   """set the text of the _stripResidueId"""
+  #   if text is not None:
+  #     self._stripResidueId.setText(text)
+  #
+  # def getStripResidueIdText(self) -> str:
+  #   """return the text of the _stripResidueId"""
+  #   return self._stripResidueId.text()
+  #
+  # def showStripResidueId(self, doShow: bool=True):
+  #   """show / hide the _stripResidueId"""
+  #   self._stripResidueId.setVisible(doShow)
+  #   if doShow:
+  #     self._labelWidget.setFixedHeight(32)
+  #   else:
+  #     self._labelWidget.setFixedHeight(32)
+  #
+  # def hideStripResidueId(self):
+  #   "Hide the _stripResidueId; convienience"
+  #   self._stripResidueId.setVisible(False)
+  #   self._labelWidget.setFixedHeight(32)
+  #
+  # def getStripResidueDir(self):
+  #   """Return the stripResidueDir widget"""
+  #   return self._stripResidueDir
+  #
+  # def setStripResidueDirText(self, text: str):
+  #   """set the text of the _stripResidueDir"""
+  #   if text is not None:
+  #     self._stripResidueDir.setText(text)
+  #
+  # def getStripResidueDirText(self) -> str:
+  #   """return the text of the _stripResidueDir"""
+  #   return self._stripResidueDir.text()
+  #
+  # def showStripResidueDir(self, doShow: bool=True):
+  #   """show / hide the _stripResidueDir"""
+  #   self._stripResidueDir.setVisible(doShow)
+  #   if doShow:
+  #     self._labelWidget.setFixedHeight(32)
+  #   else:
+  #     self._labelWidget.setFixedHeight(32)
+  #
+  # def hideStripResidueDir(self):
+  #   "Hide the _stripResidueDir; convienience"
+  #   self._stripResidueDir.setVisible(False)
+  #   self._labelWidget.setFixedHeight(32)
 
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()

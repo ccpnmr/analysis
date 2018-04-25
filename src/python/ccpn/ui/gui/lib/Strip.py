@@ -229,8 +229,8 @@ def navigateToNmrAtomsInStrip(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom], wid
 
   strip.header.reset()
   if setNmrResidueLabel and nmrAtoms:
-    strip.setStripLabelText(nmrAtoms[0].nmrResidue.pid)
-    strip.showStripLabel()
+    # strip.setStripLabelText(nmrAtoms[0].nmrResidue.pid)
+    # strip.showStripLabel()
 
     strip.header.setLabelText(position='c', text=nmrAtoms[0].nmrResidue.pid)
     obj = strip.project.getByPid(nmrAtoms[0].nmrResidue.pid)

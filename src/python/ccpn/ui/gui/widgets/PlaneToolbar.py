@@ -37,7 +37,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.guiSettings import textFontSmall
+from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, STRIPHEADER_FOREGROUND
 
 import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -297,15 +297,30 @@ class StripHeader(Frame):
                                      text='', spacing=(0,0),
                                      grid=(0,STRIPPOSITIONS.index(lab)))
 
-      self._labels[lab].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-      self._labels[lab].setFont(textFontSmall)
+      # ED: the only way I could find to cure the mis-aligned header
+      self._labels[lab].setStyleSheet('QLabel {'
+                                      'padding: 0; '
+                                      'margin: 0px 0px 0px 0px;'
+                                      'color:  %s;'
+                                      'background-color: %s;'
+                                      'border: 0 px;'
+                                      'font-family: %s;'
+                                      'font-size: %dpx;'
+                                      'qproperty-alignment: AlignCenter;'
+                                      '}' % (getColours()[STRIPHEADER_FOREGROUND],
+                                             getColours()[STRIPHEADER_BACKGROUND],
+                                             textFont.fontName,
+                                             textFont.pointSize()))
+
       self._labels[lab].obj = None
       self._labels[lab]._connectDir = STRIPCONNECT_NONE
+      self._labels[lab].setFixedHeight(16)
+      self._labels[lab].setAlignment(QtCore.Qt.AlignAbsolute)
 
     self._labels[STRIPPOSITION_LEFT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-    self._labels[STRIPPOSITION_CENTRE].setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-    self._labels[STRIPPOSITION_CENTRE].setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
+    self._labels[STRIPPOSITION_CENTRE].setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
     self._labels[STRIPPOSITION_RIGHT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
     self.setFixedHeight(16)
 
   def reset(self):

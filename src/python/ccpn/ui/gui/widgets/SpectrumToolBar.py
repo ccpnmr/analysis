@@ -52,6 +52,56 @@ class SpectrumToolBar(ToolBar):
     # self.installEventFilter(self)   # ejb
     # self.setDropEventCallback(None)
 
+
+  def _paintButtonToMove(self, button):
+    pixmap = button.grab()  # makes a "ghost" of the button as we drag
+    # below makes the pixmap half transparent
+    painter = QtGui.QPainter(pixmap)
+    painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+    painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
+    painter.end()
+    return pixmap
+
+  def mouseMoveEvent(self, e):
+    # if e.buttons() != QtCore.Qt.RightButton:
+    #   return
+
+    # QMimeData needs to be always set for a drag.
+    mimeData = QtCore.QMimeData()
+    mimeData.setText('%d,%d' % (e.x(), e.y()))
+
+    button = self.childAt(e.pos())
+    if button:
+      pixmap = self._paintButtonToMove(button)
+
+      # make a QDrag
+      drag = QtGui.QDrag(self)
+      drag.setMimeData(mimeData)
+      drag.setPixmap(pixmap)
+
+      # start the drag operation
+      # exec_ will return the accepted action from dropEvent
+      if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
+
+        w = self.childAt(e.pos())
+        movingAction = button.actions()[0]
+        # self.removeAction(movingAction)
+        toAction = w.actions()[0]
+        self.insertAction(movingAction,toAction )
+        newSpectrumViewsOrder = []
+        for action in self.actions():
+            newSpectrumViewsOrder.append(action.spectrumView)
+        for strip in self.widget.strips:
+          strip._storeOrderedSpectrumViews(newSpectrumViewsOrder)
+
+        self._updateSpectrumViews()
+
+
+  def _updateSpectrumViews(self):
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=None)
+    GLSignals.emitPaintEvent()
+
   def mousePressEvent(self, event:QtGui.QMouseEvent):
     """
     Re-implementation of the Toolbar mouse event so a right mouse context menu can be raised.
@@ -62,6 +112,7 @@ class SpectrumToolBar(ToolBar):
       if menu:
         menu.move(event.globalPos().x(), event.globalPos().y() + 10)
         menu.exec()
+    # SpectrumToolBar.mousePressEvent(self, event)
 
   def _createContextMenu(self, button:QtWidgets.QToolButton):
     """
@@ -100,6 +151,17 @@ class SpectrumToolBar(ToolBar):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
+
+  def _getSpectrumViewFromButton(self, button):
+    spvs = []
+    key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+
+    for spectrumView in self.widget.spectrumViews:
+      if spectrumView._apiDataSource == key:
+        spvs.append(spectrumView)
+    if len(spvs) == 1:
+      return spvs[0]
+
 
   def _allPeakLists(self, contextMenu, button):
     key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]

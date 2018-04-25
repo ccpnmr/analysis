@@ -47,10 +47,8 @@ class SpectrumToolBar(ToolBar):
     self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
 
     # this is in the wrong place
-    # self.eventFilter = self._eventFilter        # ejb - only need this one now
-    # self.setAcceptDrops(True)
-    # self.installEventFilter(self)   # ejb
-    # self.setDropEventCallback(None)
+    self.eventFilter = self._eventFilter
+    self.installEventFilter(self)
 
 
   def _paintButtonToMove(self, button):
@@ -62,57 +60,13 @@ class SpectrumToolBar(ToolBar):
     painter.end()
     return pixmap
 
-  def mouseMoveEvent(self, e):
-    # if e.buttons() != QtCore.Qt.RightButton:
-    #   return
-
-    # QMimeData needs to be always set for a drag.
-    mimeData = QtCore.QMimeData()
-    mimeData.setText('%d,%d' % (e.x(), e.y()))
-
-    button = self.childAt(e.pos())
-    if button:
-      pixmap = self._paintButtonToMove(button)
-
-      # make a QDrag
-      drag = QtGui.QDrag(self)
-      drag.setMimeData(mimeData)
-      drag.setPixmap(pixmap)
-
-      # start the drag operation
-      # exec_ will return the accepted action from dropEvent
-      if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
-
-        w = self.childAt(e.pos())
-        movingAction = button.actions()[0]
-        # self.removeAction(movingAction)
-        toAction = w.actions()[0]
-        self.insertAction(movingAction,toAction )
-        newSpectrumViewsOrder = []
-        for action in self.actions():
-            newSpectrumViewsOrder.append(action.spectrumView)
-        for strip in self.widget.strips:
-          strip._storeOrderedSpectrumViews(newSpectrumViewsOrder)
-
-        self._updateSpectrumViews()
-
 
   def _updateSpectrumViews(self):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitPaintEvent()
 
-  def mousePressEvent(self, event:QtGui.QMouseEvent):
-    """
-    Re-implementation of the Toolbar mouse event so a right mouse context menu can be raised.
-    """
-    if event.button() == QtCore.Qt.RightButton:
-      button = self.childAt(event.pos())
-      menu = self._createContextMenu(button)
-      if menu:
-        menu.move(event.globalPos().x(), event.globalPos().y() + 10)
-        menu.exec()
-    # SpectrumToolBar.mousePressEvent(self, event)
+
 
   def _createContextMenu(self, button:QtWidgets.QToolButton):
     """
@@ -222,87 +176,55 @@ class SpectrumToolBar(ToolBar):
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitPaintEvent()
 
-  def _mousePressEvent(self, event:QtGui.QMouseEvent):
-    """
-    Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object
-    containing its id and a modifier key to encode the direction to drop the strip.
-    """
-    event.accept()
+
+  def _dragButton(self, toolButton, event):
     mimeData = QtCore.QMimeData()
-    # create the dataDict
-    dataDict = {self._dragKey:self.text()}
-    # update the dataDict with all mouseEvents
-    dataDict.update(getMouseEventDict(event))
-    # convert into json
-    itemData = json.dumps(dataDict)
-    mimeData.setData(DropBase.JSONDATA, self.text())
-    mimeData.setText(itemData)
-    drag = QtGui.QDrag(self)
-    drag.setMimeData(mimeData)
+    mimeData.setText('%d,%d' % (event.x(), event.y()))
 
-    pixmap = QtGui.QPixmap.grabWidget(self)     # ejb - set the pixmap to the image of the label
-    painter = QtGui.QPainter(pixmap)            #       replaces the block text
-    painter.setCompositionMode(painter.CompositionMode_DestinationIn)
-    painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
-    painter.end()
-    drag.setPixmap(pixmap)
-    drag.setHotSpot(event.pos())
+    if toolButton:
+      pixmap = self._paintButtonToMove(toolButton)
 
-    drag.start(QtCore.Qt.MoveAction)
-    # if drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction, QtCore.Qt.CopyAction) == QtCore.Qt.MoveAction:
-    #     pass
-    # else:
-    #   self.show()
+      # make a QDrag
+      drag = QtGui.QDrag(self)
+      drag.setMimeData(mimeData)
+      drag.setPixmap(pixmap)
+
+      # start the drag operation
+      # exec_ will return the accepted action from dropEvent
+      if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
+
+        w = self.childAt(event.pos())
+        movingAction = toolButton.actions()[0]
+        # self.removeAction(movingAction)
+        toAction = w.actions()[0]
+        self.insertAction(movingAction, toAction)
+        newSpectrumViewsOrder = []
+        for action in self.actions():
+          newSpectrumViewsOrder.append(action.spectrumView)
+        for strip in self.widget.strips:
+          strip._storeOrderedSpectrumViews(newSpectrumViewsOrder)
+
+        self._updateSpectrumViews()
 
   def _eventFilter(self, obj, event):
     """
     Replace all the events with a single filter process
-    Not sure if this is the best solution, but doesn't interfere with _processDroppedItems
-    and allows changing of the cursor - ejb
+
     """
+
     if event.type() == QtCore.QEvent.MouseButtonPress:
-      self._mousePressEvent(event)                      # call the standard mouse event
+      # if event.button() == QtCore.Qt.LeftButton: Can't make it working!!!
+      toolButton = self.childAt(event.pos())
+
+      if event.button() == QtCore.Qt.RightButton:
+
+        menu = self._createContextMenu(toolButton)
+        if menu:
+          menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+          menu.exec()
+
+      if event.button() == QtCore.Qt.MidButton:
+        self._dragButton(toolButton, event)
       return True
-
-    if event.type() == QtCore.QEvent.DragEnter:
-      self._source = event.source()
-      try:
-
-        # need to change this to the button
-
-        if isinstance(obj,SpectrumToolBar) and self._source != self:
-          mime = event.mimeData().text()
-          dataItem = json.loads(mime)
-          if 'text' in dataItem and dataItem['text'].startswith('NR'):
-          # only test NmrResidues
-          # print('>>>DragEnterFilter %s' % dataItem['text'])
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.DragCopyCursor)
-      finally:
-        event.accept()
-        return True
-
-    if event.type() == QtCore.QEvent.DragLeave:
-      QtWidgets.QApplication.restoreOverrideCursor()
-      # print('>>>DragLeaveFilter')
-      event.accept()
-      return True
-
-    if event.type() == QtCore.QEvent.Leave:
-      QtWidgets.QApplication.restoreOverrideCursor()
-      # print('>>>DragLeaveFilter')
-      event.accept()
-      return True
-
-    if event.type() == QtCore.QEvent.MouseMove:
-      if not isinstance(obj,SpectrumToolBar):
-        QtWidgets.QApplication.restoreOverrideCursor()
-        event.accept()
-        return True
-
-    if event.type() == QtCore.QEvent.Drop:
-      QtWidgets.QApplication.restoreOverrideCursor()
-      # print(">>>DropFilter")
-      event.ignore()
-      # no return True needed, so BackboneAssignment._processDroppedItem still fires
 
     return super(SpectrumToolBar, self).eventFilter(obj,event)    # do the rest

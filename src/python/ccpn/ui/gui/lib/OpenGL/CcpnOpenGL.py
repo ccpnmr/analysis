@@ -2982,7 +2982,7 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glLineWidth(1.0)
     GL.glDisable(GL.GL_BLEND)
 
-    for spectrumView in self._parent.spectrumViews:      #.orderedSpectrumViews():
+    for spectrumView in self._parent.orderedSpectrumViews():      #.orderedSpectrumViews():
     # specList = self._parent.orderedSpectrumViews()
     # for spectrumView in self._parent._orderedSpectra:
       if spectrumView.isDeleted:

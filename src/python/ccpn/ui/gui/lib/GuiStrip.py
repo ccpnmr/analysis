@@ -42,7 +42,7 @@ from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel, StripHeader
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -172,6 +172,13 @@ class GuiStrip(Frame):
     self._stripResidueDir.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
     self._stripResidueDir.setFont(textFontSmall)
     self._stripResidueDir.hide()
+
+
+    # self.header = StripHeader(parent=self._labelWidget, mainWindow=self.mainWindow, grid=(1,0), setLayout=True)
+    # self.header.setLabelText(position='c', text='Hello')
+
+
+
 
     # Strip needs access to plotWidget's items and info #TODO: get rid of this
     self.plotItem = self.plotWidget.plotItem

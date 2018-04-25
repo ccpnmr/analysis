@@ -282,9 +282,9 @@ STRIPPOSITION_RIGHT = 'right'
 STRIPPOSITIONS = (STRIPPOSITION_LEFT[0], STRIPPOSITION_CENTRE[0], STRIPPOSITION_RIGHT[0])
 
 
-class stripHeader(Frame):
+class StripHeader(Frame):
   def __init__(self, parent, mainWindow, **kw):
-    super(stripHeader, self).__init__(parent=parent, **kw)
+    super(StripHeader, self).__init__(parent=parent, **kw)
 
     self.parent = parent
     self.mainWindow = mainWindow

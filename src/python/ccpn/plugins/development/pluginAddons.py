@@ -1,6 +1,6 @@
 import os,copy,json,pprint,math
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog

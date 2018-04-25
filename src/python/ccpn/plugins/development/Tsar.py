@@ -38,7 +38,7 @@ __date__ = "$Date: 2017-11-28 10:28:42 +0000 (Tue, Nov 28, 2017) $"
 
 import os,copy,json,pprint,math,shutil
 from collections import OrderedDict as OD
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
@@ -181,8 +181,8 @@ class TsarGuiPlugin(PluginModule):
         self.settings = OD([('General',OD()), ('Chains',OD()), ('Basis spectrum', OD()), ('Backbone spectra', OD())])
 
         # Set the basis type synonyms as valid inputs
-        self.basisSpectra    = [self.project.spectra[i].id for i in range(len(self.project.spectra))
-                                if self.project.spectra[i].synonym in tsarBasisExperiments]
+        self.basisSpectra = [self.project.spectra[i].id for i in range(len(self.project.spectra))
+                             if self.project.spectra[i].synonym in tsarBasisExperiments]
 
         # Spectrum ids are unique. For easier lookup later, duplicate ExperimentTypes info with spectrum id as keys
         # Easier for later extraction and export to NEF
@@ -268,7 +268,9 @@ class TsarGuiPlugin(PluginModule):
         self.guiDict['Basis spectrum']['Peak list'] = widget
         self.settings['Basis spectrum']['Peak list'] = self._getValue(widget)
         # Invoke the callback function to catch the selection in case only one spectrum is available as basisExperiment
-        self._selectBasisPeaklist(self.basisSpectra[0])
+
+        if self.basisSpectra:
+            self._selectBasisPeaklist(self.basisSpectra[0])
 
         # Add the backbone spectra
         grid = _addVerticalSpacer(self.scrollAreaLayout,grid)
@@ -383,6 +385,9 @@ class TsarGuiPlugin(PluginModule):
 
     def _inputDataCheck(self):
         # Checks available input data at plugin start
+
+        return True
+
         inputWarning = ''
         if len(self.project.chains) == 0:
             inputWarning += 'No molecular chains found in the project\n'
@@ -431,7 +436,8 @@ class TsarGuiPlugin(PluginModule):
         return setupComplete
 
     def _spectrumId2Spectrum(self,spectrumId):
-        return self.project.getByPid('SP:'+spectrumId)
+        if spectrumId:
+            return self.project.getByPid('SP:'+spectrumId)
 
     def _selectBasisPeaklist(self,spectrumId):
         spectrum = self._spectrumId2Spectrum(spectrumId)

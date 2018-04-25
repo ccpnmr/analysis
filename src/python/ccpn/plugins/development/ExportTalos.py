@@ -38,7 +38,7 @@ __date__ = "$Date: 2017-11-28 10:28:42 +0000 (Tue, Nov 28, 2017) $"
 
 import os,copy,json,pprint,math,shutil,pandas,operator
 from collections import OrderedDict as OD
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.framework.lib.Plugin import Plugin
 from ccpn.ui.gui.modules.PluginModule import PluginModule
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
@@ -264,6 +264,9 @@ class TalosGuiPlugin(PluginModule):
 
     def _inputDataCheck(self):
         # Checks available input data at plugin start
+
+        return True
+
         inputWarning = ''
         if len(self.project.chains) == 0:
             inputWarning += 'No molecular chains found in the project\n'

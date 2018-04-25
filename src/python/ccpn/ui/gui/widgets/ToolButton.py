@@ -27,10 +27,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class ToolButton(QtWidgets.QToolButton):
+from ccpn.ui.gui.widgets.Base import Base
 
-  def __init__(self, parent=None, spectrumView=None):
-    
+class ToolButton(QtWidgets.QToolButton, Base):
+
+  def __init__(self, parent=None, spectrumView=None, **kw):
+    Base.__init__(self, **kw)
     QtWidgets.QToolButton.__init__(self, parent.spectrumToolBar)
     self.spectrumView = spectrumView
     pix=QtGui.QPixmap(120, 10)

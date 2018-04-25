@@ -30,10 +30,10 @@ from ccpn.ui.gui.widgets.Base import Base
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 
-class ToolBar(QtGui.QToolBar, Base):
+class ToolBar(QtWidgets.QToolBar, Base):
 
   def __init__(self, parent, iconSizes=(None,None), **kw):
-    QtGui.QToolBar.__init__(self, parent)
+    QtWidgets.QToolBar.__init__(self, parent)
     Base.__init__(self, **kw)
 
     # optionally set width and height, making it square if one is missing

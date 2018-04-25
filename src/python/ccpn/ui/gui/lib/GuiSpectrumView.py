@@ -220,7 +220,8 @@ class GuiSpectrumView(QtWidgets.QGraphicsItem):
     self.strip.update()
 
   def _createdSpectrumView(self, index=None):
-    """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers"""
+    """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers.
+    This function adds the spectra buttons to the spectrumToolBar."""
 
     # NBNB TBD FIXME get rid of API objects
 

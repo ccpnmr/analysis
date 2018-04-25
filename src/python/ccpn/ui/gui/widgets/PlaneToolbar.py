@@ -90,7 +90,6 @@ class _StripLabel(Label):
     dataDict = {self._dragKey:self.text()}
     connectDir = self._connectDir if hasattr(self, STRIPLABEL_CONNECTDIR) else STRIPLABEL_CONNECTNONE
     dataDict[STRIPLABEL_CONNECTDIR] = connectDir
-    print ('>>>connectDir', connectDir)
 
     # update the dataDict with all mouseEvents
     dataDict.update(getMouseEventDict(event))
@@ -278,10 +277,10 @@ STRIPCONNECT_LEFT = 'isLeft'
 STRIPCONNECT_RIGHT = 'isRight'
 STRIPCONNECT_NONE = 'none'
 STRIPCONNECT_DIRS = (STRIPCONNECT_NONE, STRIPCONNECT_LEFT, STRIPCONNECT_RIGHT)
-STRIPPOSITION_LEFT = 'left'
-STRIPPOSITION_CENTRE = 'centre'
-STRIPPOSITION_RIGHT = 'right'
-STRIPPOSITIONS = (STRIPPOSITION_LEFT[0], STRIPPOSITION_CENTRE[0], STRIPPOSITION_RIGHT[0])
+STRIPPOSITION_LEFT = 'l'
+STRIPPOSITION_CENTRE = 'c'
+STRIPPOSITION_RIGHT = 'r'
+STRIPPOSITIONS = (STRIPPOSITION_LEFT, STRIPPOSITION_CENTRE, STRIPPOSITION_RIGHT)
 
 
 class StripHeader(Frame):
@@ -303,6 +302,10 @@ class StripHeader(Frame):
       self._labels[lab].obj = None
       self._labels[lab]._connectDir = STRIPCONNECT_NONE
 
+    self._labels[STRIPPOSITION_LEFT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+    self._labels[STRIPPOSITION_CENTRE].setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+    self._labels[STRIPPOSITION_CENTRE].setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
+    self._labels[STRIPPOSITION_RIGHT].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
     self.setFixedHeight(16)
 
   def reset(self):
@@ -312,57 +315,48 @@ class StripHeader(Frame):
       self._labels[lab]._connectDir = STRIPCONNECT_NONE
 
   def setLabelObject(self, obj=None, position=STRIPPOSITION_CENTRE):
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      self._labels[pos].obj = obj
+    if position in STRIPPOSITIONS:
+      self._labels[position].obj = obj
 
   def getLabelObject(self, position=STRIPPOSITION_CENTRE):
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      return self._labels[pos].obj
+    if position in STRIPPOSITIONS:
+      return self._labels[position].obj
 
   def setLabelText(self, text=None, position=STRIPPOSITION_CENTRE):
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      self._labels[pos].setText(text)
+    if position in STRIPPOSITIONS:
+      self._labels[position].setText(text)
 
   def getLabelText(self, position=STRIPPOSITION_CENTRE):
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      return self._labels[pos].text()
+    if position in STRIPPOSITIONS:
+      return self._labels[position].text()
 
   def getLabel(self, position=STRIPPOSITION_CENTRE):
     """Return the header label widget"""
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      return self._labels[pos]
+    if position in STRIPPOSITIONS:
+      return self._labels[position]
 
   def showLabel(self, position=STRIPPOSITION_CENTRE, doShow: bool=True):
     """show / hide the header label"""
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      self._labels[pos].setVisible(doShow)
+    position = position[0]
+    if position in STRIPPOSITIONS:
+      self._labels[position].setVisible(doShow)
 
   def hideLabel(self, position=STRIPPOSITION_CENTRE):
     "Hide the header label; convienience"
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      self._labels[pos].setVisible(False)
+    if position in STRIPPOSITIONS:
+      self._labels[position].setVisible(False)
 
   def setLabelEnabled(self, position=STRIPPOSITION_CENTRE, enable: bool=True):
     """show / hide the header label"""
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      self._labels[pos].setEnabled(enable)
+    if position in STRIPPOSITIONS:
+      self._labels[position].setEnabled(enable)
 
   def setLabelConnectDir(self, position=STRIPPOSITION_CENTRE, connectDir: str=STRIPCONNECT_NONE):
     """set the connectDir attribute of the header label"""
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      self._labels[pos]._connectDir = connectDir
+    if position in STRIPPOSITIONS:
+      self._labels[position]._connectDir = connectDir
 
   def getLabelConnectDir(self, position=STRIPPOSITION_CENTRE):
     """set the connectDir attribute of the header label"""
-    pos = position[0]
-    if pos in STRIPPOSITIONS:
-      return self._labels[pos]._connectDir
+    if position in STRIPPOSITIONS:
+      return self._labels[position]._connectDir

@@ -298,7 +298,7 @@ class stripHeader(Frame):
 
       self._labels[lab].setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
       self._labels[lab].setFont(textFontSmall)
-      self._labels[lab].dropEnabled = False
+      self._labels[lab].setEnabled(False)
 
     self.setFixedHeight(16)
 
@@ -312,15 +312,11 @@ class stripHeader(Frame):
     if pos in STRIPPOSITIONS:
       return self._labels[pos].text()
 
-    return None
-
-  def geLabel(self, position=STRIPPOSITION_CENTRE):
+  def getLabel(self, position=STRIPPOSITION_CENTRE):
     """Return the stripLabel widget"""
     pos = position[0]
     if pos in STRIPPOSITIONS:
       return self._Labels[pos]
-
-    return None
 
   def showLabel(self, position=STRIPPOSITION_CENTRE, doShow: bool=True):
     """show / hide the _stripLabel"""
@@ -334,6 +330,11 @@ class stripHeader(Frame):
     if pos in STRIPPOSITIONS:
       self._labels[pos].setVisible(False)
 
+  def setLabelEnabled(self, position=STRIPPOSITION_CENTRE, enable: bool=True):
+    """show / hide the _stripLabel"""
+    pos = position[0]
+    if pos in STRIPPOSITIONS:
+      self._labels[pos].setEnabled(enable)
 
 
 

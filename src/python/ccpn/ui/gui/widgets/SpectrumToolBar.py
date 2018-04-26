@@ -258,7 +258,7 @@ class SpectrumToolBar(ToolBar):
       try:
         # try and find the spectrumView in the orderedlist - for undo function
         oldList = spectrumDisplay.orderedSpectrumViews()
-        oldIndex = oldList.index(self)
+        oldIndex = oldList.index(spectrumView)
 
         if actionList and oldIndex < len(actionList):
           nextAction = actionList[oldIndex]

@@ -536,6 +536,84 @@ class NmrStretchTest(WrapperTesting):
     self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
                      ['X.2.TRP', 'X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR',])
 
+  def test_assigning_unConnectedToAssigned(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    residues = self.chain.residues
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'GLY', 'CYS', 'GLN'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+
+    nmrChain.assignConnectedResidues(residues[3])
+    assignedNmrChain = self.project.getByPid('NC:X')
+
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO',])
+
+    self.undo.undo()      # undo - assignConnectedResidues
+    self.undo.redo()
+
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO',])
+
+    # a new short chain
+    nmrChain = self.project.fetchNmrChain(shortName='@-')
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    self.assertEqual([x.id for x in nmrChain.nmrResidues],
+                     ['@-.@6.ALA', '@-.@7.VAL'])
+
+    nmrResidues[0].connectPrevious(nmrResidues[1])
+    self.undo.undo()
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
+                     ['#4.@7.VAL','#4.@6.ALA'])
+
+    singleNmrResidue = nmrChain.fetchNmrResidue(residueType='THR')
+
+
+    # attach single to the end
+    singleNmrResidue.nmrChain.assignSingleResidue(singleNmrResidue, residues[8])
+
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO', 'X.9.ALA'])
+
+    self.undo.undo()
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO'])
+
+    # attach single to the start
+    singleNmrResidue.nmrChain.assignSingleResidue(singleNmrResidue, residues[2])
+
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO'])
+
+    self.undo.undo()
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO'])
+
+    # attach nmrChain to the end
+    nmrChain4 = self.project.getByPid('NC:#4')
+    self.assertRaises(ValueError, singleNmrResidue.nmrChain.assignConnectedResidues, residues[8])
+
+    nmrChain4.assignConnectedResidues(residues[8])
+
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO', 'X.9.ALA', 'X.10.SER'])
+
+    self.undo.undo()
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO'])
+
+    nmrChain4.assignConnectedResidues(residues[1])
+
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.2.TRP', 'X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO'])
+
+    self.undo.undo()
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO'])
+
 
 class NmrResidueTest(WrapperTesting):
 

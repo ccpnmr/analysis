@@ -204,14 +204,24 @@ class SequenceModule(CcpnModule):
         try:
           selectedNmrResidue = selectedNmrResidue.mainNmrResidue
 
+          # get the first residue of the chain
           for resLeft in range(toAssign.index(selectedNmrResidue)):
             chainRes = chainRes.previousResidue
+
+          endRes = chainRes
+          for resRight in range(len(toAssign)-1):
+            endRes = endRes.nextResidue
+
         except:
-          showWarning(str(self.windowTitle()), 'Cannot connect at the beginning of the chain')
+          showWarning(str(self.windowTitle()), 'Too close to the start of the chain')
           return
 
         if not chainRes:
-          showWarning(str(self.windowTitle()), 'Cannot connect at the beginning of the chain')
+          showWarning(str(self.windowTitle()), 'Too close to the start of the chain')
+          return
+
+        if not endRes:
+          showWarning(str(self.windowTitle()), 'Too close to the end of the chain')
           return
 
         residues = [chainRes]
@@ -229,6 +239,8 @@ class SequenceModule(CcpnModule):
             # assume that it is the only one
             nmrChain.assignSingleResidue(selectedNmrResidue, residues[0])
           else:
+
+            # toAssign is the list of mainNmrResidues of the chain
             for ii in range(len(toAssign)-1):
               resid = residues[ii]
               next = resid.nextResidue    #TODO:ED may not have a .nextResidue

@@ -345,7 +345,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
       navigateToNmrAtomsInStrip(strips[ii], nr.nmrAtoms,
                                 widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
 
-      obj = strips[ii].project.getByPid(nr.pid)
+      # add connection tags to start/end sequential strips - may later allow insertion of nmrResidues
       if allNmrResidues.index(nr) == 0:
         # enable the left arrow
         strips[ii].header.setLabelText(position='l', text='<<<')
@@ -364,6 +364,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
                               widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
     strips.append(display.strips[stripIndex])
 
+    # add connection tags to non-sequential strips
     strips[0].header.setLabelText(position='l', text='<<<')
     strips[0].header.setLabelText(position='r', text='>>>')
     strips[0].header.setLabelObject(position='c', obj=nmrResidue)

@@ -233,10 +233,11 @@ def navigateToNmrAtomsInStrip(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom], wid
     # strip.showStripLabel()
 
     strip.header.setLabelText(position='c', text=nmrAtoms[0].nmrResidue.pid)
-    obj = strip.project.getByPid(nmrAtoms[0].nmrResidue.pid)
-    strip.header.setLabelText(position='l', text='<<<')
-    strip.header.setLabelObject(position='c', obj=obj)
-    strip.header.setLabelText(position='r', text='>>>')
+
+    # obj = strip.project.getByPid(nmrAtoms[0].nmrResidue.pid)
+    # strip.header.setLabelText(position='l', text='<<<')
+    # strip.header.setLabelObject(position='c', obj=obj)
+    # strip.header.setLabelText(position='r', text='>>>')
 
   # redraw the contours
   for specNum, thisSpecView in enumerate(strip.spectrumDisplay.spectrumViews):
@@ -313,7 +314,7 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
 
 
     # show the three connected nmrResidues in the strip
-    # but alqways show the end three if connected and the strip long enough
+    # but always show the end three if connected and the strip long enough
 
     allNmrResidues = nmrResidue._getAllConnectedList()
     if len(allNmrResidues) < 3:
@@ -343,6 +344,16 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
     for ii,nr in enumerate(nmrResidues):
       navigateToNmrAtomsInStrip(strips[ii], nr.nmrAtoms,
                                 widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
+
+      obj = strips[ii].project.getByPid(nr.pid)
+      if allNmrResidues.index(nr) == 0:
+        # enable the left arrow
+        strips[ii].header.setLabelText(position='l', text='<<<')
+        strips[ii].header.setLabelObject(position='c', obj=nr)
+
+      if allNmrResidues.index(nr) == len(allNmrResidues)-1:
+        strips[ii].header.setLabelText(position='r', text='>>>')
+        strips[ii].header.setLabelObject(position='c', obj=nr)
 
   else:
     # not showing sequential strips

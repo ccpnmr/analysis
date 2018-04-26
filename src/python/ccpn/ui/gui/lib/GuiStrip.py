@@ -96,10 +96,6 @@ class GuiStrip(Frame):
     self.header = StripHeader(parent=self, mainWindow=self.mainWindow,
                               grid=(0,0), gridSpan=(1,2), setLayout=True, spacing=(0,0),
                               showBorder=True)
-    self.header.setLabelText(position='l', text='LEFT'+self.id)
-    self.header.setLabelText(position='c', text='CENTRE'+self.id)
-    self.header.setLabelText(position='r', text='RIGHT'+self.id)
-    self.header.layout().setAlignment(QtCore.Qt.AlignBottom)
 
     self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
     #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)

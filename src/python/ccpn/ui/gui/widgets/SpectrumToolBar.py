@@ -26,16 +26,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSlot
 
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
-
 from functools import partial
-
-import json
-from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 
 
 class SpectrumToolBar(ToolBar):
@@ -46,12 +40,12 @@ class SpectrumToolBar(ToolBar):
     self.widget = widget
     self.parent = parent
     self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-
-    # this is in the wrong place
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
     self.setMouseTracking(True)
-
+    self.dragged = False
+    self._dragStarted = False
+    self._dropped = False
 
   def _paintButtonToMove(self, button):
     pixmap = button.grab()  # makes a "ghost" of the button as we drag
@@ -64,6 +58,11 @@ class SpectrumToolBar(ToolBar):
 
 
   def _updateSpectrumViews(self):
+    newSpectrumViewsOrder = []
+    for action in self.actions():
+      newSpectrumViewsOrder.append(action.spectrumView)
+    for strip in self.widget.strips:
+      strip._storeOrderedSpectrumViews(newSpectrumViewsOrder)
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitPaintEvent()
@@ -179,32 +178,9 @@ class SpectrumToolBar(ToolBar):
     GLSignals.emitPaintEvent()
 
 
-  def _dragButton(self, toolButton, event):
-    mimeData = QtCore.QMimeData()
-    mimeData.setText('%d,%d' % (event.x(), event.y()))
+  def _dragButton(self, event):
 
-    if toolButton:
-      pixmap = self._paintButtonToMove(toolButton)
-
-      # make a QDrag
-      drag = QtGui.QDrag(self)
-      drag.setMimeData(mimeData)
-      drag.setPixmap(pixmap)
-
-      # start the drag operation
-      if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
-        w = self.childAt(event.pos(), )
-        movingAction = toolButton.actions()[0]
-        # self.removeAction(movingAction)
-        toAction = w.actions()[0]
-        self.insertAction(movingAction, toAction)
-        newSpectrumViewsOrder = []
-        for action in self.actions():
-          newSpectrumViewsOrder.append(action.spectrumView)
-        for strip in self.widget.strips:
-          strip._storeOrderedSpectrumViews(newSpectrumViewsOrder)
-        print(event.pos(), 'END Pos')
-        self._updateSpectrumViews()
+    pass
 
   def _eventFilter(self, obj, event):
     """
@@ -222,12 +198,34 @@ class SpectrumToolBar(ToolBar):
         if menu:
           menu.move(event.globalPos().x(), event.globalPos().y() + 10)
           menu.exec()
+      if event.button() == QtCore.Qt.MiddleButton:
+        toolButton = self.childAt(event.pos())
+        self._buttonBeingDragged = toolButton
 
+        if toolButton:
+          pixmap = self._paintButtonToMove(toolButton)
+          self._dragStarted = True
+          mimeData = QtCore.QMimeData()
+          mimeData.setText('%d,%d' % (event.x(), event.y()))
+          drag = QtGui.QDrag(self)
+          drag.setMimeData(mimeData)
+          drag.setPixmap(pixmap)
+          # start the drag operation
+          if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
+            self._dropped = True
+            point = QtGui.QCursor.pos()
+            droppedPoint = self.mapFromGlobal(point)
+            nextButton = self.childAt(droppedPoint)
+            if not nextButton:
+              x, y = droppedPoint.x(),droppedPoint.y(),
+              nextButton = self.childAt(QtCore.QPoint(30 + x, y))
+            if nextButton:
+              if nextButton != toolButton:
+                self.insertAction(nextButton.actions()[0],toolButton.actions()[0])
+            else:
+              self.insertAction(toolButton.actions()[0], toolButton.actions()[0])
+          self._updateSpectrumViews()
 
-    if event.type() == QtCore.QEvent.MouseMove:
-      toolButton = self.childAt(event.pos())
-
-      self._dragButton(toolButton, event)
 
     return super(SpectrumToolBar, self).eventFilter(obj,event)    # do the rest
 

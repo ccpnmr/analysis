@@ -63,7 +63,7 @@ class SpectrumToolBar(ToolBar):
       spectrumView = self.widget.project.getByPid(action.spectrumViewPid)
       newSpectrumViewsOrder.append(spectrumView)
     for strip in self.widget.strips:
-      strip._storeOrderedSpectrumViews(newSpectrumViewsOrder)
+      strip.setOrderedSpectrumViews(newSpectrumViewsOrder)
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitPaintEvent()

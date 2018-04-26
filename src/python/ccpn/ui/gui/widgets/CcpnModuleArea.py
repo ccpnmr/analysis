@@ -39,6 +39,7 @@ from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 from ccpn.util.Colour import  hexToRgb
 from ccpn.ui.gui.lib.mouseEvents import SELECT
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
 
 ModuleArea = DockArea
 Module = Dock
@@ -135,8 +136,11 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       DockArea.dragEnterEvent(self, *args)
       event.accept()
     else:
-      DockDrop.dragEnterEvent(self, *args)
-      event.accept()
+      if isinstance(data['source'], ToolBar):
+        event.ignore()
+      else:
+        DockDrop.dragEnterEvent(self, *args)
+        event.accept()
 
   def dragLeaveEvent(self, *args):
     event = args[0]

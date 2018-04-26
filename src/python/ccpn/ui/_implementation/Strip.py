@@ -35,6 +35,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.util.Logging import getLogger
+from collections import OrderedDict
 
 # SV_TITLE = '_Strip'
 ORDEREDSPECTRA = '_orderedSpectra'
@@ -1031,8 +1032,11 @@ class Strip(AbstractWrapperObject):
     setattr(self, ORDEREDSPECTRA, tuple(spectrumViews))
 
   def setOrderedSpectrumViews(self, spectrumViews:Tuple):
-    self._startCommandEchoBlock('setOrderedSpectrumViews')
+    defaults = OrderedDict((('spectrumViews', 'None'),))
 
+    pidStr = ','.join(["project.getByPid('%s')" % sp.pid for sp in spectrumViews])
+    self.project._appBase._startCommandBlock("project.getByPid('%s').setOrderedSpectrumViews(spectrumViews=(%s))" % \
+                                             (self.pid, pidStr))
     _undo = self.project._undo
     if _undo is not None:
       _undo.increaseBlocking()
@@ -1042,7 +1046,7 @@ class Strip(AbstractWrapperObject):
       self._setOrderedSpectrumViews(tuple(spectrumViews))
 
     finally:
-      self._endCommandEchoBlock()
+      self.project._appBase._endCommandBlock()
 
     if _undo is not None:
       _undo.decreaseBlocking()

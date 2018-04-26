@@ -197,17 +197,17 @@ class IntegralTable(QuickTable):
     if integralList is not None:
       self._selectIntegralList(integralList)
 
-    self.setTableNotifiers(tableClass=IntegralList
-                           , rowClass=Integral
-                           , cellClassNames=None
-                           , tableName='integralList', rowName='integral'
-                           , changeFunc=self.displayTableForIntegralList
-                           , className=self.attributeName
-                           , updateFunc=self._update
-                           , tableSelection='integralList'
-                           , pullDownWidget=self.ITcolumns
-                           , callBackClass=Integral
-                           , selectCurrentCallBack=self._selectOnTableCurrentIntegralsNotifierCallback)
+    self.setTableNotifiers(tableClass=IntegralList,
+                           rowClass=Integral,
+                           cellClassNames=None,
+                           tableName='integralList', rowName='integral',
+                           changeFunc=self.displayTableForIntegralList,
+                           className=self.attributeName,
+                           updateFunc=self._update,
+                           tableSelection='integralList',
+                           pullDownWidget=self.ITcolumns,
+                           callBackClass=Integral,
+                           selectCurrentCallBack=self._selectOnTableCurrentIntegralsNotifierCallback)
 
     self.droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.PIDS],

@@ -356,17 +356,17 @@ class NmrResidueTable(QuickTable):
     if nmrChain is not None:
       self._selectNmrChain(nmrChain)
 
-    self.setTableNotifiers(tableClass=NmrChain
-                           , className=self.attributeName
-                           , tableSelection='_nmrChain'      # _nmrChain.nmrResidues
-                           , rowClass=NmrResidue
-                           , cellClassNames=[(NmrAtom, 'nmrResidue')] # doesn't change anything
-                           , tableName='nmrChain', rowName='nmrResidue'
-                           , changeFunc=self.displayTableForNmrChain
-                           , updateFunc=self._update
-                           , pullDownWidget=self.ncWidget
-                           , callBackClass=NmrResidue
-                           , selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback)
+    self.setTableNotifiers(tableClass=NmrChain,
+                           className=self.attributeName,
+                           tableSelection='_nmrChain',      # _nmrChain.nmrResidues
+                           rowClass=NmrResidue,
+                           cellClassNames=[(NmrAtom, 'nmrResidue')], # doesn't change anything
+                           tableName='nmrChain', rowName='nmrResidue',
+                           changeFunc=self.displayTableForNmrChain,
+                           updateFunc=self._update,
+                           pullDownWidget=self.ncWidget,
+                           callBackClass=NmrResidue,
+                           selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback)
 
     self.droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.PIDS],

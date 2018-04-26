@@ -324,26 +324,26 @@ class Undo(deque):
     # print('@~@~ undoTo', self.nextIndex-1, undoTo)
     # block addition of items while operating
     self._blocked = True
-    # try:
-    undoCall = redoCall = None
-    for n in range(self.nextIndex-1,undoTo,-1):
-      undoCall, redoCall = self[n]
-      # if self._debug:
-      #   print ("undoing", undoCall)
+    try:
+      undoCall = redoCall = None
+      for n in range(self.nextIndex-1,undoTo,-1):
+        undoCall, redoCall = self[n]
+        # if self._debug:
+        #   print ("undoing", undoCall)
 
-      undoCall()
-    self.nextIndex = undoTo + 1
+        undoCall()
+      self.nextIndex = undoTo + 1
 
-    # except Exception as e:
-    #   from ccpn.util.Logging import getLogger
-    #   getLogger().warning ("Error while undoing (%s). Undo stack is cleared." % e)
-    #   if self._debug:
-    #     print ("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
-    #     raise
-    #   self.clear()
-    # finally:
-    #   # Added by Rasmus March 2015. Surely we need to reset self._blocked?
-    self._blocked = False
+    except Exception as e:
+      from ccpn.util.Logging import getLogger
+      getLogger().warning ("Error while undoing (%s). Undo stack is cleared." % e)
+      if self._debug:
+        print ("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
+        raise
+      self.clear()
+    finally:
+      # Added by Rasmus March 2015. Surely we need to reset self._blocked?
+      self._blocked = False
 
   def redo(self):
     """Redo one waypoint - or one operation if waypoints are not set.

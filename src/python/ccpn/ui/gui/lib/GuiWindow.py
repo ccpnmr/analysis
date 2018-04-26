@@ -345,8 +345,13 @@ class GuiWindow():
     """
     Clears all marks in all windows for the current task.
     """
-    for mark in self.project.marks[:]:
-      mark.delete()
+    self._startCommandEchoBlock('clearMarks')
+    try:
+      for mark in self.project.marks:
+        mark.delete()
+
+    finally:
+      self._endCommandEchoBlock()
 
   def markPositions(self, axisCodes, chemicalShifts):
     """

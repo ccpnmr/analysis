@@ -179,17 +179,17 @@ class PeakListTableWidget(QuickTable):
     if peakList is not None:
       self._selectPeakList(peakList)
 
-    self.setTableNotifiers(tableClass=PeakList
-                           , rowClass=Peak
-                           , cellClassNames=(NmrAtom, 'assignedPeaks')
-                           , tableName='peakList', rowName='peak'
-                           , changeFunc=self._updateAllModule
-                           , className=self.attributeName
-                           , updateFunc=self._updateAllModule
-                           , tableSelection='_selectedPeakList'
-                           , pullDownWidget=self.pLwidget
-                           , callBackClass=Peak
-                           , selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback)
+    self.setTableNotifiers(tableClass=PeakList,
+                           rowClass=Peak,
+                           cellClassNames=(NmrAtom, 'assignedPeaks'),
+                           tableName='peakList', rowName='peak',
+                           changeFunc=self._updateAllModule,
+                           className=self.attributeName,
+                           updateFunc=self._updateAllModule,
+                           tableSelection='_selectedPeakList',
+                           pullDownWidget=self.pLwidget,
+                           callBackClass=Peak,
+                           selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback)
 
     self.droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.PIDS],

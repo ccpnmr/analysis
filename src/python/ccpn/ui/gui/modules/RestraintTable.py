@@ -262,17 +262,17 @@ class RestraintTable(QuickTable):
     if restraintList is not None:
       self._selectRestraintList(restraintList)
 
-    self.setTableNotifiers(tableClass=RestraintList
-                           , rowClass=Restraint
-                           , cellClassNames=None
-                           , tableName='restraintList', rowName='restraint'
-                           , changeFunc=self.displayTableForRestraint
-                           , className=self.attributeName
-                           , updateFunc=self._update
-                           , tableSelection='restraintList'
-                           , pullDownWidget=self.RLcolumns
-                           , callBackClass=Restraint
-                           , selectCurrentCallBack=None)
+    self.setTableNotifiers(tableClass=RestraintList,
+                           rowClass=Restraint,
+                           cellClassNames=None,
+                           tableName='restraintList', rowName='restraint',
+                           changeFunc=self.displayTableForRestraint,
+                           className=self.attributeName,
+                           updateFunc=self._update,
+                           tableSelection='restraintList',
+                           pullDownWidget=self.RLcolumns,
+                           callBackClass=Restraint,
+                           selectCurrentCallBack=None)
     self.droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                        self._processDroppedItems)

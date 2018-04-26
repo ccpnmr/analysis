@@ -1344,6 +1344,20 @@ QuickTable::item::selected {
       # modify the line in the table
       try:
         _update = self._dataFrameObject.changeObject(row)
+
+        # TODO:ED it may not already be in the list - check indexing
+        if not _update:
+          if self._tableData['tableSelection']:
+            tSelect = getattr(self, self._tableData['tableSelection'])
+            if tSelect:
+
+              # check that the object created is in the list viewed in this table
+              # e.g. row.peakList == tSelect then add
+              if tSelect == getattr(row, self._tableData['tableName']):
+                # add the row to the dataFrame and table
+                self._dataFrameObject.appendObject(row)
+                _update = True
+
       except:
         getLogger().debug2('Error updating row in table')
 

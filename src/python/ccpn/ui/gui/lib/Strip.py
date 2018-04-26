@@ -364,5 +364,9 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
                               widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
     strips.append(display.strips[stripIndex])
 
+    strips[0].header.setLabelText(position='l', text='<<<')
+    strips[0].header.setLabelText(position='r', text='>>>')
+    strips[0].header.setLabelObject(position='c', obj=nmrResidue)
+
   return strips
 

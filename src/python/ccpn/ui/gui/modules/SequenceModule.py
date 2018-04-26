@@ -324,24 +324,26 @@ class SequenceModule(CcpnModule):
       return
     number = residue.chain.residues.index(residue)
     self.chainLabel._addResidue(number, residue)
+    self.populateFromSequenceGraphs()
 
   def _registerNotifiers(self):
     # self.project.registerNotifier('Chain', 'create', self._addChainLabel)
     # self.project.registerNotifier('Residue', 'create', self._addChainResidue)
     # self.project.registerNotifier('Chain', 'delete', self._refreshChainLabels)
 
-    self._chainNotifier = Notifier(self.project
-                                  , [Notifier.CREATE]
-                                  , 'Chain'
-                                  , self._addChainLabel)
-    self._residueNotifier = Notifier(self.project
-                                  , [Notifier.CREATE]
-                                  , 'Residue'
-                                  , self._addChainResidue)
-    self._chainDeleteNotifier = Notifier(self.project
-                                  , [Notifier.DELETE]
-                                  , 'Chain'
-                                  , self._refreshChainLabels)
+    self._chainNotifier = Notifier(self.project,
+                                  [Notifier.CREATE],
+                                  'Chain',
+                                  self._addChainLabel)
+    self._residueNotifier = Notifier(self.project,
+                                  [Notifier.CREATE, Notifier.CHANGE],
+                                  'Residue',
+                                  self._addChainResidue,
+                                  onceOnly=True)
+    self._chainDeleteNotifier = Notifier(self.project,
+                                  [Notifier.DELETE],
+                                  'Chain',
+                                  self._refreshChainLabels)
 
   def _unRegisterNotifiers(self):
     if self._chainNotifier:

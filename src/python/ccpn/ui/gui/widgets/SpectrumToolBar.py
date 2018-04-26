@@ -60,7 +60,8 @@ class SpectrumToolBar(ToolBar):
   def _updateSpectrumViews(self):
     newSpectrumViewsOrder = []
     for action in self.actions():
-      newSpectrumViewsOrder.append(action.spectrumView)
+      spectrumView = self.widget.project.getByPid(action.spectrumViewPid)
+      newSpectrumViewsOrder.append(spectrumView)
     for strip in self.widget.strips:
       strip._storeOrderedSpectrumViews(newSpectrumViewsOrder)
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -215,6 +216,8 @@ class SpectrumToolBar(ToolBar):
       else:
         event.ignore()
       self._updateSpectrumViews()
+      for action in self.actions():
+        self._setSizes(action)
 
   def _eventFilter(self, obj, event):
     """
@@ -275,13 +278,10 @@ class SpectrumToolBar(ToolBar):
       action.setToolTip(spectrum.name)
       widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
       widget.setIconSize(QtCore.QSize(120, 10))
-      if spectrumDisplay.is1D:
-        widget.setFixedSize(75, 30)
-      else:
-        widget.setFixedSize(75, 30)
+      self._setSizes(action)
       # WHY _wrappedData and not spectrumView?
       widget.spectrumView = spectrumView._wrappedData
-      action.spectrumView = spectrumView
+      action.spectrumViewPid = spectrumView.pid
 
       spectrumDisplay.spectrumActionDict[apiDataSource] = action
       # The following call sets the icon colours:
@@ -290,3 +290,10 @@ class SpectrumToolBar(ToolBar):
     if spectrumDisplay.is1D:
       action.toggled.connect(spectrumView.plot.setVisible)
     action.toggled.connect(spectrumView.setVisible)
+
+
+  def _setSizes(self, action):
+
+    widget = self.widgetForAction(action)
+    widget.setIconSize(QtCore.QSize(120, 10))
+    widget.setFixedSize(75, 30)

@@ -234,54 +234,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsItem):
       if not strip.haveSetupZWidgets:
         strip._setZWidgets()
 
-    # Handle action buttons
-    apiDataSource = spectrum._wrappedData
-    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-    if not action:
-      # add toolbar action (button)
-      spectrumName = spectrum.name
-      if len(spectrumName) > 12:
-        spectrumName = spectrumName[:12]+'.....'
-
-      actionList = spectrumDisplay.spectrumToolBar.actions()
-      try:
-        # try and find the spectrumView in the orderedlist - for undo function
-        oldList = spectrumDisplay.orderedSpectrumViews()
-        oldIndex = oldList.index(self)
-
-        if actionList and oldIndex < len(actionList):
-          nextAction = actionList[oldIndex]
-
-          # create a new action and move it to the correct place in the list
-          action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
-          spectrumDisplay.spectrumToolBar.insertAction(nextAction, action)
-        else:
-          action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
-
-      except Exception as es:
-        action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
-
-
-      action.setCheckable(True)
-      action.setChecked(True)
-      action.setToolTip(spectrum.name)
-      widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
-      widget.setIconSize(QtCore.QSize(120, 10))
-      if spectrumDisplay.is1D:
-        widget.setFixedSize(75, 30)
-      else:
-        widget.setFixedSize(75, 30)
-      # WHY _wrappedData and not spectrumView?
-      widget.spectrumView = self._wrappedData
-      action.spectrumView = self
-
-      spectrumDisplay.spectrumActionDict[apiDataSource] = action
-      # The following call sets the icon colours:
-      self._spectrumViewHasChanged()
-
-    if spectrumDisplay.is1D:
-      action.toggled.connect(self.plot.setVisible)
-    action.toggled.connect(self.setVisible)
+    spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)
 
     # TODO:ED check here - used to catch undelete of spectrumView
     if self.strip.plotWidget:

@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import pyqtSlot
 
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
@@ -49,7 +50,9 @@ class SpectrumToolBar(ToolBar):
     # this is in the wrong place
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
+    self.setMouseTracking(True)
 
+    self._mousePos = QtCore.QPoint()
 
   def _paintButtonToMove(self, button):
     pixmap = button.grab()  # makes a "ghost" of the button as we drag
@@ -176,10 +179,14 @@ class SpectrumToolBar(ToolBar):
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitPaintEvent()
 
+  def mouseMoveEvent(self, event: QtGui.QMouseEvent):
+    self._mousePos = event.pos()
+
 
   def _dragButton(self, toolButton, event):
     mimeData = QtCore.QMimeData()
     mimeData.setText('%d,%d' % (event.x(), event.y()))
+    print(event.pos(), 'Start Pos')
 
     if toolButton:
       pixmap = self._paintButtonToMove(toolButton)
@@ -190,10 +197,9 @@ class SpectrumToolBar(ToolBar):
       drag.setPixmap(pixmap)
 
       # start the drag operation
-      # exec_ will return the accepted action from dropEvent
       if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
-
-        w = self.childAt(event.pos())
+        self.mouseMoveEvent(event)
+        w = self.childAt(event.pos(), )
         movingAction = toolButton.actions()[0]
         # self.removeAction(movingAction)
         toAction = w.actions()[0]
@@ -228,3 +234,57 @@ class SpectrumToolBar(ToolBar):
       return True
 
     return super(SpectrumToolBar, self).eventFilter(obj,event)    # do the rest
+
+
+  def _addSpectrumViewToolButtons(self, spectrumView):
+    print('guiSpectrumView', type(spectrumView))
+
+    spectrumDisplay = spectrumView.strip.spectrumDisplay
+    spectrum = spectrumView.spectrum
+    apiDataSource = spectrum._wrappedData
+    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    if not action:
+      # add toolbar action (button)
+      spectrumName = spectrum.name
+      if len(spectrumName) > 12:
+        spectrumName = spectrumName[:12]+'.....'
+
+      actionList = spectrumDisplay.spectrumToolBar.actions()
+      try:
+        # try and find the spectrumView in the orderedlist - for undo function
+        oldList = spectrumDisplay.orderedSpectrumViews()
+        oldIndex = oldList.index(self)
+
+        if actionList and oldIndex < len(actionList):
+          nextAction = actionList[oldIndex]
+
+          # create a new action and move it to the correct place in the list
+          action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+          spectrumDisplay.spectrumToolBar.insertAction(nextAction, action)
+        else:
+          action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+
+      except Exception as es:
+        action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+
+
+      action.setCheckable(True)
+      action.setChecked(True)
+      action.setToolTip(spectrum.name)
+      widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
+      widget.setIconSize(QtCore.QSize(120, 10))
+      if spectrumDisplay.is1D:
+        widget.setFixedSize(75, 30)
+      else:
+        widget.setFixedSize(75, 30)
+      # WHY _wrappedData and not spectrumView?
+      widget.spectrumView = spectrumView._wrappedData
+      action.spectrumView = spectrumView
+
+      spectrumDisplay.spectrumActionDict[apiDataSource] = action
+      # The following call sets the icon colours:
+      spectrumView._spectrumViewHasChanged()
+
+    if spectrumDisplay.is1D:
+      action.toggled.connect(spectrumView.plot.setVisible)
+    action.toggled.connect(spectrumView.setVisible)

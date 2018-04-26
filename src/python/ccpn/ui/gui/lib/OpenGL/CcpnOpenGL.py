@@ -835,6 +835,23 @@ class CcpnGLWidget(QOpenGLWidget):
 
     event.accept()
 
+  def _scaleToYAxis(self):
+    if self._axisLocked:
+      mbx = 0.5 * (self.axisR + self.axisL)
+
+      ax0 = self._getValidAspectRatio(self._axisCodes[0])
+      ax1 = self._getValidAspectRatio(self._axisCodes[1])
+
+      ratio = (self.w / self.h) * 0.5 * abs(self.axisT - self.axisB) * ax0 / ax1
+      self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
+      self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
+
+      # self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+      #                                    axisB=self.axisB, axisT=self.axisT,
+      #                                    axisL=self.axisL, axisR=self.axisR)
+
+    self._rescaleAllAxes()
+
   def _rescaleXAxis(self, update=True):
     self._testAxisLimits()
     self.rescale()

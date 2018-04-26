@@ -223,7 +223,7 @@ QuickTable::item::selected {
     # set Interactive and last column to expanding
     self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
     self.horizontalHeader().setStretchLastSection(stretchLastSection)
-    self.horizontalHeader().setResizeContentsPrecision(0)
+    self.horizontalHeader().setResizeContentsPrecision(-1)
     self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
 
     # enable the right click menu

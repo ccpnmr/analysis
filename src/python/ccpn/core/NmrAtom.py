@@ -81,7 +81,8 @@ class NmrAtom(AbstractWrapperObject):
   @property
   def _parent(self) -> NmrResidue:
     """Parent (containing) object."""
-    return self._project._data2Obj[self._wrappedData.resonanceGroup]
+    if self._wrappedData.resonanceGroup in self._project._data2Obj:
+      return self._project._data2Obj[self._wrappedData.resonanceGroup]
   
   nmrResidue = _parent
     

@@ -605,6 +605,8 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
           else:
             self.project._startCommandEchoBlock('deleteObjects', str(obj.pid))
+            obj.delete()
+            self.project._endCommandEchoBlock()
 
             # # try:
             # ll = self._getChildren(obj)
@@ -628,14 +630,16 @@ class SideBar(QtWidgets.QTreeWidget, Base):
             #       if children[-1] is not None and not children[-1].isDeleted:
             #         children[-1].delete()
             # if not obj.isDeleted:
-            try:
-              obj.delete()
 
-            except Exception as es:
-              getLogger().warning('Object %s: %s' % (obj.pid, str(es)))
-            finally:
 
-              self.project._endCommandEchoBlock()
+            # try:
+            #   obj.delete()
+            #
+            # except Exception as es:
+            #   getLogger().warning('Object %s: %s' % (obj.pid, str(es)))
+            # finally:
+            #
+            #   self.project._endCommandEchoBlock()
 
     #  Force redrawing
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

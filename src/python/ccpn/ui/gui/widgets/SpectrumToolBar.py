@@ -180,7 +180,41 @@ class SpectrumToolBar(ToolBar):
 
   def _dragButton(self, event):
 
-    pass
+    toolButton = self.childAt(event.pos())
+    self._buttonBeingDragged = toolButton
+
+    if toolButton:
+      pixmap = self._paintButtonToMove(toolButton)
+      self._dragStarted = True
+      mimeData = QtCore.QMimeData()
+      mimeData.setText('%d,%d' % (event.x(), event.y()))
+      drag = QtGui.QDrag(self)
+      drag.setMimeData(mimeData)
+      drag.setPixmap(pixmap)
+      # start the drag operation
+      if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
+
+        point = QtGui.QCursor.pos()
+        droppedPoint = self.mapFromGlobal(point)
+        nextButton = self.childAt(droppedPoint)
+        x, y = droppedPoint.x(), droppedPoint.y(),
+        if not nextButton:
+          nextButton = self.childAt(QtCore.QPoint(30 + x, y))
+        if nextButton:
+          if nextButton == toolButton:
+            return
+          allActionsTexts =  [action.text() for action in self.actions()]
+          if allActionsTexts.index(toolButton.text()) > allActionsTexts.index(nextButton.text()):
+            self.insertAction(nextButton.actions()[0], toolButton.actions()[0])
+          else:
+            self.insertAction(toolButton.actions()[0],nextButton.actions()[0])
+
+        else:
+          # Dropping outside
+          self.insertAction(toolButton.actions()[0], toolButton.actions()[0])
+      else:
+        event.ignore()
+      self._updateSpectrumViews()
 
   def _eventFilter(self, obj, event):
     """
@@ -199,32 +233,7 @@ class SpectrumToolBar(ToolBar):
           menu.move(event.globalPos().x(), event.globalPos().y() + 10)
           menu.exec()
       if event.button() == QtCore.Qt.MiddleButton:
-        toolButton = self.childAt(event.pos())
-        self._buttonBeingDragged = toolButton
-
-        if toolButton:
-          pixmap = self._paintButtonToMove(toolButton)
-          self._dragStarted = True
-          mimeData = QtCore.QMimeData()
-          mimeData.setText('%d,%d' % (event.x(), event.y()))
-          drag = QtGui.QDrag(self)
-          drag.setMimeData(mimeData)
-          drag.setPixmap(pixmap)
-          # start the drag operation
-          if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
-            self._dropped = True
-            point = QtGui.QCursor.pos()
-            droppedPoint = self.mapFromGlobal(point)
-            nextButton = self.childAt(droppedPoint)
-            if not nextButton:
-              x, y = droppedPoint.x(),droppedPoint.y(),
-              nextButton = self.childAt(QtCore.QPoint(30 + x, y))
-            if nextButton:
-              if nextButton != toolButton:
-                self.insertAction(nextButton.actions()[0],toolButton.actions()[0])
-            else:
-              self.insertAction(toolButton.actions()[0], toolButton.actions()[0])
-          self._updateSpectrumViews()
+        self._dragButton(event)
 
 
     return super(SpectrumToolBar, self).eventFilter(obj,event)    # do the rest

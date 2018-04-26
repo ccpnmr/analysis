@@ -961,11 +961,17 @@ class Strip(AbstractWrapperObject):
     else:
       return None
 
-  def _storeOrderedSpectrumViews(self, spectra):
+  def _storeOrderedSpectrumViews(self, spectrumViews):
     if isinstance(self._ccpnInternalData, dict):
-      self._ccpnInternalData[ORDEREDSPECTRA] = spectra
+      from ccpn.core.lib.Pid import Pid
+      if not all([type(x) == Pid for x in spectrumViews]):
+        pids = [x.pid for x in spectrumViews]
+      else:
+        pids = spectrumViews
 
-    setattr(self, ORDEREDSPECTRA, spectra)
+      self._ccpnInternalData[ORDEREDSPECTRA] = pids
+
+    setattr(self, ORDEREDSPECTRA, spectrumViews)
 
   def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
     """The spectra attached to the strip (ordered)"""

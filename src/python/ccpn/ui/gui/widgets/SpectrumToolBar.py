@@ -52,7 +52,6 @@ class SpectrumToolBar(ToolBar):
     self.installEventFilter(self)
     self.setMouseTracking(True)
 
-    self._mousePos = QtCore.QPoint()
 
   def _paintButtonToMove(self, button):
     pixmap = button.grab()  # makes a "ghost" of the button as we drag
@@ -179,14 +178,10 @@ class SpectrumToolBar(ToolBar):
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitPaintEvent()
 
-  def mouseMoveEvent(self, event: QtGui.QMouseEvent):
-    self._mousePos = event.pos()
-
 
   def _dragButton(self, toolButton, event):
     mimeData = QtCore.QMimeData()
     mimeData.setText('%d,%d' % (event.x(), event.y()))
-    print(event.pos(), 'Start Pos')
 
     if toolButton:
       pixmap = self._paintButtonToMove(toolButton)
@@ -198,7 +193,6 @@ class SpectrumToolBar(ToolBar):
 
       # start the drag operation
       if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
-        self.mouseMoveEvent(event)
         w = self.childAt(event.pos(), )
         movingAction = toolButton.actions()[0]
         # self.removeAction(movingAction)
@@ -209,7 +203,7 @@ class SpectrumToolBar(ToolBar):
           newSpectrumViewsOrder.append(action.spectrumView)
         for strip in self.widget.strips:
           strip._storeOrderedSpectrumViews(newSpectrumViewsOrder)
-
+        print(event.pos(), 'END Pos')
         self._updateSpectrumViews()
 
   def _eventFilter(self, obj, event):
@@ -220,24 +214,25 @@ class SpectrumToolBar(ToolBar):
 
     if event.type() == QtCore.QEvent.MouseButtonPress:
       # if event.button() == QtCore.Qt.LeftButton: Can't make it working!!!
-      toolButton = self.childAt(event.pos())
 
       if event.button() == QtCore.Qt.RightButton:
+        toolButton = self.childAt(event.pos())
 
         menu = self._createContextMenu(toolButton)
         if menu:
           menu.move(event.globalPos().x(), event.globalPos().y() + 10)
           menu.exec()
 
-      if event.button() == QtCore.Qt.MidButton:
-        self._dragButton(toolButton, event)
-      return True
+
+    if event.type() == QtCore.QEvent.MouseMove:
+      toolButton = self.childAt(event.pos())
+
+      self._dragButton(toolButton, event)
 
     return super(SpectrumToolBar, self).eventFilter(obj,event)    # do the rest
 
 
   def _addSpectrumViewToolButtons(self, spectrumView):
-    print('guiSpectrumView', type(spectrumView))
 
     spectrumDisplay = spectrumView.strip.spectrumDisplay
     spectrum = spectrumView.spectrum

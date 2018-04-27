@@ -100,7 +100,8 @@ class Translation:
 
   def translate(self, text):
     """ Translate a specific text into the previously specified language. """
-
+    if not text:
+      return
     if len(text) == 0:
       return text
 

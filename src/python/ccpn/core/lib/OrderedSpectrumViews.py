@@ -53,7 +53,10 @@ class OrderedSpectrumViews(object):
 
   def _storeOrderedSpectrumViewPids(self, spectrumViewPids):
     if isinstance(self.parent._ccpnInternalData, dict):
-      self.parent._ccpnInternalData[ORDEREDSPECTRUMVIEWS] = spectrumViewPids
+      # _wrappedData._ccpnInternalData won't flag for saving unless the dict changes
+      tempCcpn = self.parent._ccpnInternalData.copy()
+      tempCcpn[ORDEREDSPECTRUMVIEWS] = spectrumViewPids
+      self.parent._ccpnInternalData = tempCcpn
 
   def orderedSpectra(self) -> Optional[Tuple]:
     """

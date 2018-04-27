@@ -62,6 +62,8 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructurePopup import StructurePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
+from ccpn.ui.gui.popups.EditMultipletPopup import EditMultipletPopup
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager
@@ -1231,7 +1233,6 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def _createNewObject(self, item):
     """Create new object starting from the <New> item
     """
-    print(item.text(0), 'trdfscdfsc')
     if item.text(0) in ["<New IntegralList>", "<New PeakList>", "<New MultipletList>",]:
 
       if item.text(0) == "<New PeakList>":
@@ -1239,7 +1240,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       if item.text(0) == "<New IntegralList>":
         self.project.getByPid(item.parent().text(0)).newIntegralList()
       if item.text(0) == "<New MultipletList>":
-        self.project.getByPid(item.parent().text(0)).newMultipletList()
+        # self.project.getByPid(item.parent().text(0)).newMultipletList()
+
+        popup = EditMultipletPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+        popup.exec_()
+        popup.raise_()
 
       # item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)
 

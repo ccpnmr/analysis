@@ -35,35 +35,23 @@ from typing import Tuple,Optional
 
 ORDEREDSPECTRUMVIEWS = '_orderedSpectrumViews'
 
+
 class OrderedSpectrumViews(object):
 
   def __init__(self, parent=None):
     self.parent = parent
     self.project = parent.project
     self.spectrumViews = parent.spectrumViews
-    self._ccpnInternalData = parent._ccpnInternalData
 
   def _retrieveOrderedSpectrumViewPids(self):
-    if isinstance(self._ccpnInternalData, dict) and ORDEREDSPECTRUMVIEWS in self._ccpnInternalData:
-      return self._ccpnInternalData[ORDEREDSPECTRUMVIEWS]
+    if isinstance(self.parent._ccpnInternalData, dict) and ORDEREDSPECTRUMVIEWS in self.parent._ccpnInternalData:
+      return self.parent._ccpnInternalData[ORDEREDSPECTRUMVIEWS]
     else:
       return None
 
   def _storeOrderedSpectrumViewPids(self, spectrumViewPids):
-    if isinstance(self._ccpnInternalData, dict):
-      self._ccpnInternalData[ORDEREDSPECTRUMVIEWS] = spectrumViewPids
-
-      # from ccpn.core.lib.Pid import Pid
-      # print('     >>spectrumViews in :', spectrumViews)
-      # if not all([type(x.pid) == Pid for x in spectrumViews]):
-      #   pids = [x.pid for x in spectrumViews]
-      #   print('    >>>_storeOrderedSpectrumViews', pids)
-      # else:
-      #   pids = None
-      #
-      # self._ccpnInternalData[ORDEREDSPECTRUMVIEWS] = pids
-
-    # setattr(self, ORDEREDSPECTRUMVIEWS, spectrumViews)
+    if isinstance(self.parent._ccpnInternalData, dict):
+      self.parent._ccpnInternalData[ORDEREDSPECTRUMVIEWS] = spectrumViewPids
 
   def orderedSpectra(self) -> Optional[Tuple]:
     """The spectra attached to the strip (ordered)"""

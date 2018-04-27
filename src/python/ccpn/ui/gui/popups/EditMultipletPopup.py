@@ -89,24 +89,21 @@ class EditMultipletPopup(CcpnDialog):
 
 
     # self.selectButtons.buttons[-1].setDisabled(True)
-    self._populateMultipletListPulldown()
     self._populateMultipletPulldown()
     self._populateSourceMultipletListsWidget()
     self._setPullDownData()
-
+    if self.multiplet:
+      self._selectMultiplet()
 
   def _setPullDownData(self):
     if self.project:
       for multipletList in self.project.multipletLists:
         self.mtPullDown.addItem(text=multipletList.pid, object=multipletList)
 
-  def _populateMultipletListPulldown(self, *args):
-    if self.project:
-      for multipletList in self.project.multipletLists:
-        self.mtPullDown.addItem(text=multipletList.pid, object=multipletList)
-
-      if self.multipletList:
-        self.mtPullDown.select(self.multipletList.pid)
+  def _selectMultiplet(self):
+    if self.multiplet:
+      self.mtPullDown.select(self.multiplet.multipletList.pid)
+      self.mlPullDown.select(self.multiplet.pid)
 
   def _populateMultipletPulldown(self, *args):
     obj = self.mtPullDown.getObject()
@@ -135,7 +132,8 @@ class EditMultipletPopup(CcpnDialog):
       self.peaksSourceListWidget.setObjects(obj.peaks, name='pid')
     else:
       if self.project:
-        self.peaksSourceListWidget.setObjects(self.project.peaks, name='pid')
+        if self.sourcePullDown.getText() == 'All in spectrum':
+          self.peaksSourceListWidget.setObjects(self.project.peaks, name='pid')
 
 
   def _refreshInputMultipletsWidget(self, *args):

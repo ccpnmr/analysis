@@ -31,6 +31,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from functools import partial
 from ccpn.core.lib.Notifiers import Notifier
+from collections import OrderedDict
 
 
 class SpectrumToolBar(ToolBar):
@@ -44,9 +45,6 @@ class SpectrumToolBar(ToolBar):
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)
     self.setMouseTracking(True)
-    self.dragged = False
-    self._dragStarted = False
-    self._dropped = False
 
   def _paintButtonToMove(self, button):
     pixmap = button.grab()  # makes a "ghost" of the button as we drag
@@ -58,16 +56,29 @@ class SpectrumToolBar(ToolBar):
     return pixmap
 
 
-  def _updateSpectrumViews(self):
+  def _updateSpectrumViews(self, newIndex):
     newSpectrumViewsOrder = []
+
     for action in self.actions():
       spectrumView = self.widget.project.getByPid(action.spectrumViewPid)
       newSpectrumViewsOrder.append(spectrumView)
 
-    for strip in self.widget.strips:
-      self.widget.project.blankNotification()
-      strip.setOrderedSpectrumViews(newSpectrumViewsOrder)
-      self.widget.project.unblankNotification()
+    self.widget.project.blankNotification()
+    self.widget.indexOrderedSpectrumViews(newIndex)
+    self.widget.project.unblankNotification()
+
+    # defaults = OrderedDict((('newIndex', None),))
+    #
+    # self.widget._startCommandEchoBlock('indexOrderedSpectrumViews', values=locals(), defaults=defaults)
+    # self.widget.project.blankNotification()
+    # try:
+    #   for strip in self.widget.strips:
+    #     # strip.setOrderedSpectrumViews(newSpectrumViewsOrder)
+    #     strip._indexOrderedSpectrumViews(newIndex)
+    #
+    # finally:
+    #   self.widget.project.unblankNotification()
+    #   self.widget._endCommandEchoBlock()
 
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=None)
@@ -187,16 +198,19 @@ class SpectrumToolBar(ToolBar):
 
     toolButton = self.childAt(event.pos())
     self._buttonBeingDragged = toolButton
+    allActionsTexts = []
 
     if toolButton:
       pixmap = self._paintButtonToMove(toolButton)
-      self._dragStarted = True
+
       mimeData = QtCore.QMimeData()
       mimeData.setText('%d,%d' % (event.x(), event.y()))
       drag = QtGui.QDrag(self)
       drag.setMimeData(mimeData)
       drag.setPixmap(pixmap)
       # start the drag operation
+
+      allActionsTexts = [action.text() for action in self.actions()]
       if drag.exec_(QtCore.Qt.MoveAction) == QtCore.Qt.MoveAction:
 
         point = QtGui.QCursor.pos()
@@ -208,7 +222,7 @@ class SpectrumToolBar(ToolBar):
         if nextButton:
           if nextButton == toolButton:
             return
-          allActionsTexts =  [action.text() for action in self.actions()]
+          # allActionsTexts = [action.text() for action in self.actions()]
           if allActionsTexts.index(toolButton.text()) > allActionsTexts.index(nextButton.text()):
             self.insertAction(nextButton.actions()[0], toolButton.actions()[0])
           else:
@@ -219,7 +233,9 @@ class SpectrumToolBar(ToolBar):
           self.insertAction(toolButton.actions()[0], toolButton.actions()[0])
       else:
         event.ignore()
-      self._updateSpectrumViews()
+
+      actionIndex = [allActionsTexts.index(act.text()) for act in self.actions() if act.text() in allActionsTexts]
+      self._updateSpectrumViews(actionIndex)
       for action in self.actions():
         self._setSizes(action)
 

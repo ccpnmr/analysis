@@ -240,48 +240,72 @@ class SpectrumDisplay(AbstractWrapperObject):
     """Find axis """
     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # ejb - orderedSpectrumViews, orderedSpectra
-  # store the current orderedSpectrumViews in the internal data store
-  # so it is hidden from external users
-  def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
+  # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # # ejb - orderedSpectrumViews, orderedSpectra
+  # # store the current orderedSpectrumViews in the internal data store
+  # # so it is hidden from external users
+  # def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
+  #   """
+  #   The spectra attached to the strip (ordered)
+  #   :return tuple of spectra:
+  #   """
+  #   if not self._orderedSpectrumViews:
+  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+  #   return self._orderedSpectrumViews.orderedSpectra()
+  #
+  # def orderedSpectrumViews(self, strip=0, includeDeleted=False) -> Optional[Tuple]:
+  #   """
+  #   The spectrumViews attached to the strip (ordered)
+  #   :return tuple of SpectrumViews:
+  #   """
+  #   if not self._orderedSpectrumViews:
+  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+  #   return self._orderedSpectrumViews.orderedSpectrumViews()
+  #
+  # def setOrderedSpectrumViews(self, spectrumViews: Tuple):
+  #   """
+  #   Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
+  #   :param spectrumViews - tuple of SpectrumView objects:
+  #   """
+  #   if not self._orderedSpectrumViews:
+  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+  #   self._orderedSpectrumViews.setOrderedSpectrumViews(spectrumViews)
+  #
+  def indexOrderedSpectrumViews(self, newIndex: Tuple[int]):
     """
-    The spectra attached to the strip (ordered)
-    :return tuple of spectra:
+    Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
+    :param newIndex - tuple of int:
     """
-    if not self._orderedSpectrumViews:
-      self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-    return self._orderedSpectrumViews.orderedSpectra()
 
-  def orderedSpectrumViews(self, strip=0, includeDeleted=False) -> Optional[Tuple]:
-    """
-    The spectrumViews attached to the strip (ordered)
-    :return tuple of SpectrumViews:
-    """
-    if not self._orderedSpectrumViews:
-      self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-    return self._orderedSpectrumViews.orderedSpectrumViews()
+    defaults = collections.OrderedDict((('newIndex', None),))
 
-  def setOrderedSpectrumViews(self, spectrumViews: Tuple):
-    """
-    Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
-    :param spectrumViews - tuple of SpectrumView objects:
-    """
-    self._orderedSpectrumViews.setOrderedSpectrumViews(spectrumViews)
+    self._startCommandEchoBlock('indexOrderedSpectrumViews', values=locals(), defaults=defaults)
+    try:
+      for strip in self.strips:
+        strip._indexOrderedSpectrumViews(newIndex=newIndex)
 
-  def appendSpectrumView(self, spectrumView):
-    """
-    Append a SpectrumView to the end of the ordered spectrumviews
-    :param spectrumView - new SpectrumView:
-    """
-    self._orderedSpectrumViews.appendSpectrumView(spectrumView)
+    finally:
+      self._endCommandEchoBlock()
 
-  def removeSpectrumView(self, spectrumView):
-    """
-    Remove a SpectrumView from the ordered spectrumviews
-    :param spectrumView - SpectrumView to be removed:
-    """
-    self._orderedSpectrumViews.removeSpectrumView(spectrumView)
+
+
+  # def appendSpectrumView(self, spectrumView):
+  #   """
+  #   Append a SpectrumView to the end of the ordered spectrumviews
+  #   :param spectrumView - new SpectrumView:
+  #   """
+  #   if not self._orderedSpectrumViews:
+  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+  #   self._orderedSpectrumViews.appendSpectrumView(spectrumView)
+  #
+  # def removeSpectrumView(self, spectrumView):
+  #   """
+  #   Remove a SpectrumView from the ordered spectrumviews
+  #   :param spectrumView - SpectrumView to be removed:
+  #   """
+  #   if not self._orderedSpectrumViews:
+  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+  #   self._orderedSpectrumViews.removeSpectrumView(spectrumView)
 
 
 # newSpectrumDisplay functions

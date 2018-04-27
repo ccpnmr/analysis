@@ -176,6 +176,8 @@ class CcpnGLWidget(QOpenGLWidget):
       return
 
     self._parent = parent
+    self.spectrumDisplay = parent.spectrumDisplay
+
     self.mainWindow = mainWindow
     if mainWindow:
       self.application = mainWindow.application
@@ -3045,9 +3047,8 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glLineWidth(1.0)
     GL.glDisable(GL.GL_BLEND)
 
-    for spectrumView in self._parent.orderedSpectrumViews():      #.orderedSpectrumViews():
-    # specList = self._parent.orderedSpectrumViews()
-    # for spectrumView in self._parent._orderedSpectra:
+    for spectrumView in self._parent.orderedSpectrumViews():
+
       if spectrumView.isDeleted:
         continue
 
@@ -3071,6 +3072,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                          , self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX])
 
             self._contourList[spectrumView].drawVertexColor()
+          else:
+            pass
 
         # if self._testSpectrum.renderMode == GLRENDERMODE_REBUILD:
         #   self._testSpectrum.renderMode = GLRENDERMODE_DRAW

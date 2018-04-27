@@ -231,7 +231,12 @@ class GuiSpectrumDisplay(CcpnModule):
   def _toolbarChange(self, data):
     trigger = data[Notifier.TRIGGER]
     if trigger == Notifier.CHANGE:
-      self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews())
+      self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())
+
+      # spawn a redraw of the GL windows
+      from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+      GLSignals = GLNotifier(parent=None)
+      GLSignals.emitPaintEvent()
 
   def _hoverEvent(self, event):
     event.accept()
@@ -857,7 +862,7 @@ class GuiSpectrumDisplay(CcpnModule):
     stripIndex = -1   # ejb - just here for the minute
     newStrip = self.strips[stripIndex].clone()
 
-    # newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
+    newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
 
     self.showAxes()
 

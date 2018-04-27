@@ -67,7 +67,7 @@ class OrderedSpectrumViews(object):
       # store by pids
 
       pids = self._retrieveOrderedSpectrumViewPids()
-      if not pids:
+      if pids is None:
         self._storeOrderedSpectrumViewPids(tuple(x.pid for x in self.spectrumViews))
         views = tuple(x for x in self.spectrumViews)
       else:
@@ -92,7 +92,7 @@ class OrderedSpectrumViews(object):
       # store by pid
 
       pids = self._retrieveOrderedSpectrumViewPids()
-      if not pids:
+      if pids is None:
         self._storeOrderedSpectrumViewPids(tuple(x.pid for x in self.spectrumViews))
         views = tuple(x for x in self.spectrumViews)
       else:
@@ -115,7 +115,7 @@ class OrderedSpectrumViews(object):
   def setOrderedSpectrumViews(self, spectrumViews:Tuple):
     """
     Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
-    :param spectrumViews - tuple of SpectrumView objects:
+    :param spectrumViews - tuple of spectrumView:
     """
     pidStr = ','.join(["project.getByPid('%s')" % sp.pid for sp in spectrumViews])
     self.project._appBase._startCommandBlock("project.getByPid('%s').setOrderedSpectrumViews(spectrumViews=(%s))" % \
@@ -138,12 +138,12 @@ class OrderedSpectrumViews(object):
                     , undoArgs=(_oldSpectrumViews,), redoArgs=(spectrumViews,))
 
     # notify that the order has been changed
-    self.parent._finaliseAction(action='change')
+    self.parent.spectrumDisplay._finaliseAction(action='change')
 
   def appendSpectrumView(self, spectrumView):
     """
     Append a SpectrumView to the end of the ordered spectrumviews
-    :param spectrumView - new SpectrumView:
+    :param spectrumView - new spectrumView:
     """
     if self._orderedSpectrumViews:
       spectra = (self._orderedSpectrumViews, (spectrumView,))
@@ -158,8 +158,8 @@ class OrderedSpectrumViews(object):
 
   def removeSpectrumView(self, spectrumView):
     """
-    Remove a SpectrumView from the ordered spectrumviews
-    :param spectrumView - SpectrumView to be removed:
+    Remove a SpectrumView from the ordered spectrumViews
+    :param spectrumView - spectrumView:
     """
     if self._orderedSpectrumViews:
       spectra = self._orderedSpectrumViews
@@ -171,22 +171,20 @@ class OrderedSpectrumViews(object):
     values = tuple(x for x in spectra)
     self._orderedSpectrumViews = values
 
-  # def copyOrderedSpectrumViews(self, fromStrip):
-  #   if hasattr(fromStrip, ORDEREDSPECTRUMVIEWS):
-  #     fromSpectraV = getattr(fromStrip, ORDEREDSPECTRUMVIEWS)
-  #
-  #     # loop through the source list of spectra and append the new matching spectra in this spectrumView
-  #     newSpectra = []
-  #     for fromSP in fromSpectraV:
-  #       for selfSPV in self.spectrumViews:
-  #
-  #         # fromSP could be a 'deleted' structure, so no 'spectrum' attribute
-  #         if hasattr(fromSP, 'spectrum'):
-  #           if fromSP.spectrum == selfSPV.spectrum:
-  #             newSpectra.append(selfSPV)
-  #
-  #     self._storeOrderedSpectrumViewPids(tuple(x.pid for x in newSpectra))
-  #
-  #     values = tuple(x for x in newSpectra)
-  #     self._orderedSpectrumViews = values
+  def copyOrderedSpectrumViews(self, fromStrip):
+    if fromStrip._orderedSpectrumViews:
+      fromSpectraV = fromStrip.orderedSpectrumViews()
 
+      newSpectra = []
+      for fromSP in fromSpectraV:
+        for selfSPV in self.spectrumViews:
+
+          # fromSP could be a 'deleted' structure, so no 'spectrum' attribute
+          if hasattr(fromSP, 'spectrum'):
+            if fromSP.spectrum == selfSPV.spectrum:
+              newSpectra.append(selfSPV)
+
+      self._storeOrderedSpectrumViewPids(tuple(x.pid for x in newSpectra))
+
+      values = tuple(x for x in newSpectra)
+      self._orderedSpectrumViews = values

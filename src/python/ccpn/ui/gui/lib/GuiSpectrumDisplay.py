@@ -52,6 +52,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 #from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.core.lib.Notifiers import Notifier
 
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
@@ -221,6 +222,16 @@ class GuiSpectrumDisplay(CcpnModule):
     self.hoverEvent = self._hoverEvent
     self.lastAxisOnly = True
     self._phasingTraceScale = 1.0e-7
+
+    self._toolbarNotifier = Notifier(self.project,
+                                    [Notifier.CHANGE],
+                                    'SpectrumDisplay',
+                                    self._toolbarChange)
+
+  def _toolbarChange(self, data):
+    trigger = data[Notifier.TRIGGER]
+    if trigger == Notifier.CHANGE:
+      print ('>>>redraw toolbar')
 
   def _hoverEvent(self, event):
     event.accept()

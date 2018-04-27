@@ -39,12 +39,12 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.OrderedSpectrumViews import ORDEREDSPECTRUMVIEWS, OrderedSpectrumViews
 
 logger = getLogger()
 
 # _ccpnInternalData references
 # SV_TITLE = className  # may not be needed
-ORDEREDSPECTRA = '_orderedSpectra'
 
 
 class SpectrumDisplay(AbstractWrapperObject):
@@ -243,106 +243,32 @@ class SpectrumDisplay(AbstractWrapperObject):
   # so it is hidden from external users
   def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
     """The ordered spectra attached to the strip"""
-    try:
-      return self.strips[0].orderedSpectra()
-    except:
-      return None
+    # try:
+    #   return self.strips[0].orderedSpectra()
+    # except:
+    #   return None
+    if not hasattr(self, ORDEREDSPECTRUMVIEWS):
+      setattr(self, ORDEREDSPECTRUMVIEWS, OrderedSpectrumViews(parent=self))
+    return getattr(self, ORDEREDSPECTRUMVIEWS).orderedSpectra()
 
   def orderedSpectrumViews(self, strip=0, includeDeleted=False) -> Optional[Tuple]:
     """The ordered spectrumViews attached to the strip attached to the strip"""
-    try:
-      return self.strips[strip].orderedSpectrumViews(includeDeleted=includeDeleted)
-    except:
-      return None
+    # try:
+    #   return self.strips[strip].orderedSpectrumViews(includeDeleted=includeDeleted)
+    # except:
+    #   return None
+    if not hasattr(self, ORDEREDSPECTRUMVIEWS):
+      setattr(self, ORDEREDSPECTRUMVIEWS, OrderedSpectrumViews(parent=self))
+    return getattr(self, ORDEREDSPECTRUMVIEWS).orderedSpectrumViews()
 
-  # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # # MOVED TO STRIP
-  # # ejb - orderedSpectrumViews, orderedSpectra
-  # # store the current orderedSpectrumViews in the internal data store
-  # # so it is hidden from external users
-  # def _retrieveOrderedSpectrumViews(self):
-  #   if isinstance(self._ccpnInternalData, dict) and ORDEREDSPECTRA in self._ccpnInternalData:
-  #     return self._ccpnInternalData[ORDEREDSPECTRA]
-  #   else:
-  #     return None
-  #
-  # def _storeOrderedSpectrumViews(self, spectra):
-  #   if isinstance(self._ccpnInternalData, dict):
-  #     self._ccpnInternalData[ORDEREDSPECTRA] = spectra
-  #
-  #   setattr(self, ORDEREDSPECTRA, spectra)
-  #
-  # def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
-  #   """The spectra attached to the strip (ordered)"""
-  #
-  #   if hasattr(self, ORDEREDSPECTRA):
-  #     return tuple(x.spectrum for x in getattr(self, ORDEREDSPECTRA) if 'Deleted' not in x.pid)
-  #   else:
-  #     # create a dataset with the spectrumViews attached (will be alphabetical) if doesn't exist
-  #     # store by pids
-  #
-  #     values = self._retrieveOrderedSpectrumViews()
-  #     if values is None:
-  #       self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
-  #       values = tuple(x for x in self.spectrumViews)
-  #     else:
-  #       values = tuple(self._project.getByPid(x) for x in values if self._project.getByPid(x))
-  #
-  #       # this should be the first read from loading the project, so write back without bad pids
-  #       self._storeOrderedSpectrumViews(tuple(x.pid for x in values))
-  #
-  #     setattr(self, ORDEREDSPECTRA, values)
-  #     return tuple(x.spectrum for x in values)
-  #
-  # def orderedSpectrumViews(self, includeDeleted=False) -> Optional[Tuple]:
-  #   """The spectra attached to the strip (ordered)"""
-  #
-  #   if hasattr(self, ORDEREDSPECTRA):
-  #     return getattr(self, ORDEREDSPECTRA)
-  #   else:
-  #     # create a dataset with the spectrumViews attached (will be alphabetical) if doesn't exist
-  #     # store by pid
-  #     values = self._retrieveOrderedSpectrumViews()
-  #     if values is None:
-  #       self._storeOrderedSpectrumViews(tuple(x.pid for x in self.spectrumViews))
-  #       values = tuple(x for x in self.spectrumViews)
-  #     else:
-  #       values = tuple(self._project.getByPid(x) for x in values if self._project.getByPid(x))
-  #
-  #       # this should be the first read from loading the project, so write back without bad pids
-  #       self._storeOrderedSpectrumViews(tuple(x.pid for x in values))
-  #
-  #     setattr(self, ORDEREDSPECTRA, values)
-  #     return values
-  #
-  # def appendSpectrumView(self, spectrumView):
-  #   # retrieve the list from the dataset
-  #   # append to the end
-  #   # write back to the dataset
-  #   if hasattr(self, ORDEREDSPECTRA):
-  #     spectra = (getattr(self, ORDEREDSPECTRA), (spectrumView,))
-  #     spectra = tuple(j for i in spectra for j in i)
-  #   else:
-  #     spectra = tuple(spectrumView,)
-  #
-  #   self._storeOrderedSpectrumViews(tuple(x.pid for x in spectra))
-  #
-  #   values = tuple(x for x in spectra)
-  #   setattr(self, ORDEREDSPECTRA, values)
-  #
-  # def removeSpectrumView(self, spectrumView):
-  #   # TODO:ED handle deletion
-  #   # do I need to update the deleted object in _ccpnInternalData
-  #   if hasattr(self, ORDEREDSPECTRA):
-  #     spectra = getattr(self, ORDEREDSPECTRA)
-  #   else:
-  #     spectra = tuple(spectrumView,)
-  #
-  #   self._storeOrderedSpectrumViews(tuple(x.pid for x in spectra))
-  #
-  #   values = tuple(x for x in spectra)
-  #   setattr(self, ORDEREDSPECTRA, values)
-  # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  def setOrderedSpectrumViews(self, spectrumViews: Tuple):
+    getattr(self, ORDEREDSPECTRUMVIEWS).setOrderedSpectrumViews(spectrumViews)
+
+  def appendSpectrumView(self, spectrumView):
+    getattr(self, ORDEREDSPECTRUMVIEWS).appendSpectrumView(spectrumView)
+
+  def removeSpectrumView(self, spectrumView):
+    getattr(self, ORDEREDSPECTRUMVIEWS).removeSpectrumView(spectrumView)
 
 
 # newSpectrumDisplay functions

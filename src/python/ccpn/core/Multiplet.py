@@ -163,6 +163,15 @@ class Multiplet(AbstractWrapperObject):
     except:
       return None
 
+  @peaks.setter
+  def peaks(self, ll: list):
+
+    if ll:
+      toRemove = [pk for pk in self.peaks if pk not in ll]
+      toAdd = [pk for pk in ll if pk not in self.peaks]
+      self.removePeaks(toRemove)
+      self.addPeaks(toAdd)
+
   @property
   def numPeaks(self) -> int:
     """return number of peaks in the multiplet"""

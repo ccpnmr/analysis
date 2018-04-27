@@ -951,12 +951,14 @@ class Strip(AbstractWrapperObject):
   def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
     """
     The spectra attached to the strip (ordered)
+    :return tuple of spectra:
     """
     return self.spectrumDisplay.orderedSpectra()
 
   def orderedSpectrumViews(self, includeDeleted=False) -> Optional[Tuple]:
     """
     The spectrumViews attached to the strip (ordered)
+    :return tuple of SpectrumViews:
     """
     return self.spectrumDisplay.orderedSpectrumViews()
 

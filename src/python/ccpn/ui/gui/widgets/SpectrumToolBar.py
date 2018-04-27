@@ -30,6 +30,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from functools import partial
+from ccpn.core.lib.Notifiers import Notifier
 
 
 class SpectrumToolBar(ToolBar):
@@ -62,12 +63,15 @@ class SpectrumToolBar(ToolBar):
     for action in self.actions():
       spectrumView = self.widget.project.getByPid(action.spectrumViewPid)
       newSpectrumViewsOrder.append(spectrumView)
+
     for strip in self.widget.strips:
+      self.widget.project.blankNotification()
       strip.setOrderedSpectrumViews(newSpectrumViewsOrder)
+      self.widget.project.unblankNotification()
+
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitPaintEvent()
-
 
 
   def _createContextMenu(self, button:QtWidgets.QToolButton):
@@ -254,7 +258,7 @@ class SpectrumToolBar(ToolBar):
       if len(spectrumName) > 12:
         spectrumName = spectrumName[:12]+'.....'
 
-      actionList = spectrumDisplay.spectrumToolBar.actions()
+      actionList = self.actions()
       try:
         # try and find the spectrumView in the orderedlist - for undo function
         oldList = spectrumDisplay.orderedSpectrumViews()
@@ -264,19 +268,19 @@ class SpectrumToolBar(ToolBar):
           nextAction = actionList[oldIndex]
 
           # create a new action and move it to the correct place in the list
-          action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
-          spectrumDisplay.spectrumToolBar.insertAction(nextAction, action)
+          action = self.addAction(spectrumName)
+          self.insertAction(nextAction, action)
         else:
-          action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+          action = self.addAction(spectrumName)
 
       except Exception as es:
-        action = spectrumDisplay.spectrumToolBar.addAction(spectrumName)
+        action = self.addAction(spectrumName)
 
 
       action.setCheckable(True)
       action.setChecked(True)
       action.setToolTip(spectrum.name)
-      widget = spectrumDisplay.spectrumToolBar.widgetForAction(action)
+      widget = self.widgetForAction(action)
       widget.setIconSize(QtCore.QSize(120, 10))
       self._setSizes(action)
       # WHY _wrappedData and not spectrumView?
@@ -297,3 +301,21 @@ class SpectrumToolBar(ToolBar):
     widget = self.widgetForAction(action)
     widget.setIconSize(QtCore.QSize(120, 10))
     widget.setFixedSize(75, 30)
+
+  def _toolbarChange(self, spectrumViews):
+    actionList = self.actions()
+    self.clear()
+    for specView in spectrumViews:
+
+      spectrum = specView.spectrum
+      spectrumName = spectrum.name
+      if len(spectrumName) > 12:
+        spectrumName = spectrumName[:12] + '.....'
+
+      for act in actionList:
+        if act.text() == spectrumName:
+          self.addAction(act)
+
+          widget = self.widgetForAction(act)
+          widget.setIconSize(QtCore.QSize(120, 10))
+          self._setSizes(act)

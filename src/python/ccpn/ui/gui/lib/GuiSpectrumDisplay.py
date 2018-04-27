@@ -224,14 +224,14 @@ class GuiSpectrumDisplay(CcpnModule):
     self._phasingTraceScale = 1.0e-7
 
     self._toolbarNotifier = Notifier(self.project,
-                                    [Notifier.CHANGE],
-                                    'SpectrumDisplay',
-                                    self._toolbarChange)
+                                     [Notifier.CHANGE],
+                                     'SpectrumDisplay',
+                                     self._toolbarChange)
 
   def _toolbarChange(self, data):
     trigger = data[Notifier.TRIGGER]
     if trigger == Notifier.CHANGE:
-      print ('>>>redraw toolbar')
+      self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews())
 
   def _hoverEvent(self, event):
     event.accept()
@@ -857,7 +857,7 @@ class GuiSpectrumDisplay(CcpnModule):
     stripIndex = -1   # ejb - just here for the minute
     newStrip = self.strips[stripIndex].clone()
 
-    newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
+    # newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
 
     self.showAxes()
 

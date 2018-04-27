@@ -54,6 +54,7 @@ from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
+from ccpn.ui.gui.popups.MultipletListPropertiesPopup import MultipletListPropertiesPopup
 from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
 from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
@@ -76,7 +77,7 @@ from ccpn.core.lib.Notifiers import Notifier
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
 # Also parents must appear before their children
 
-_classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList',
+_classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList','MultipletList',
                         'Sample', 'SampleComponent', 'Substance', 'Complex', 'Chain',
                         'Residue', 'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
                         'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
@@ -738,6 +739,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
           newPeakListObjectItem = QtWidgets.QTreeWidgetItem(newItem)
           newPeakListObjectItem.setFlags(newPeakListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
           newPeakListObjectItem.setText(0, "<New PeakList>")
+
+          newMultipletListObjectItem = QtWidgets.QTreeWidgetItem(newItem)
+          newMultipletListObjectItem.setFlags(newMultipletListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+          newMultipletListObjectItem.setText(0, "<New MultipletList>")
+
           newIntegralListObjectItem = QtWidgets.QTreeWidgetItem(newItem)
           newIntegralListObjectItem.setFlags(newIntegralListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
           newIntegralListObjectItem.setText(0, "<New IntegralList>")
@@ -1097,6 +1103,10 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       popup = IntegralListPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, integralList=obj)
       popup.exec_()
       popup.raise_()
+    elif obj.shortClassName == 'ML':
+      popup = MultipletListPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, multipletList=obj)
+      popup.exec_()
+      popup.raise_()
     elif obj.shortClassName == 'SG':
       popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumGroup=obj)
       popup.exec_()
@@ -1221,13 +1231,15 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def _createNewObject(self, item):
     """Create new object starting from the <New> item
     """
-
-    if item.text(0) == "<New IntegralList>" or item.text(0) == "<New PeakList>":
+    print(item.text(0), 'trdfscdfsc')
+    if item.text(0) in ["<New IntegralList>", "<New PeakList>", "<New MultipletList>",]:
 
       if item.text(0) == "<New PeakList>":
         self.project.getByPid(item.parent().text(0)).newPeakList()
       if item.text(0) == "<New IntegralList>":
         self.project.getByPid(item.parent().text(0)).newIntegralList()
+      if item.text(0) == "<New MultipletList>":
+        self.project.getByPid(item.parent().text(0)).newMultipletList()
 
       # item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)
 

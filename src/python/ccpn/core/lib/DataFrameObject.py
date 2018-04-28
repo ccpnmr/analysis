@@ -33,6 +33,8 @@ from ccpn.util.Logging import getLogger
 DATAFRAME_OBJECT = '_object'
 DATAFRAME_PID = 'Pid'
 DATAFRAME_HASH = '#'
+DATAFRAME_INDEX = 'Index'
+
 
 class DataFrameObject(object):
   # class to handle pandas dataframe and matching object pid list
@@ -169,7 +171,7 @@ class DataFrameObject(object):
       finally:
         self._table.silenceCallBack = False
 
-  def appendObject(self, obj):
+  def appendObject(self, obj, multipleAttr=None):
     row = self.find(self._table, str(obj.pid), column='Pid')
 
     # check that the object doesn't already exists in the table
@@ -190,13 +192,13 @@ class DataFrameObject(object):
           self._objects = [obj]
           self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
 
-          with self._table._quickTableUpdate(self):
+          with self._table._quickTableUpdate(self):           # keep the column widths
             self._table.setData(self._dataFrame.values)
 
         else:
           # append a new line to the end
 
-          # set Index to next available
+          # set Index to next available - will change later
           if not self._dataFrame.empty and 'Index' in self._dataFrame:
             newIndex = self._dataFrame['Index'].max()+1
             if 'Index' in listDict.keys():
@@ -207,8 +209,33 @@ class DataFrameObject(object):
           appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
           self._dataFrame = self._dataFrame.append(appendDataFrame)
 
-          with self._table._quickTableUpdate(self):
+          with self._table._quickTableUpdate(self):           # keep the column widths
             self._table.appendRow(list(listDict.values()))
+
+          # get indexing from pulldown selection and set in dataFrame/table
+          # change to a finishing routine called updateTableIndexing when
+          if multipleAttr:
+            newIndex = [multipleAttr.index(rr) for rr in self._objects]
+
+            objCol = indCol = None
+            for cc in range(self._table.columnCount()):
+              colName = self._table.horizontalHeaderItem(cc).text()
+              if colName == DATAFRAME_INDEX:
+                indCol = cc
+                print (DATAFRAME_INDEX, cc)
+              elif colName == DATAFRAME_OBJECT:
+                objCol = cc
+                print (DATAFRAME_OBJECT, cc)
+            if objCol and indCol:
+              print ('INDEXING')
+              for rr in range(self._table.rowCount()):
+
+                thisObj = self._table.item(rr, objCol).value
+
+                if thisObj in multipleAttr:
+                  print('>>>', rr, thisObj, multipleAttr.index(thisObj))
+                  self._table.item(rr, indCol).setValue(multipleAttr.index(thisObj))
+                  print ('>>>--', rr, thisObj, multipleAttr.index(thisObj))
 
       except Exception as es:
         getLogger().warning(str(es))

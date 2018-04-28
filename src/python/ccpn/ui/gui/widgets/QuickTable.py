@@ -470,14 +470,14 @@ QuickTable::item::selected {
       obj = self.project.getByPid(objIndex)
 
       if obj:
-        data = CallBack(theObject = self._dataFrameObject
-                        , object = obj
-                        , index = objIndex
-                        , targetName = obj.className
-                        , trigger = CallBack.DOUBLECLICK
-                        , row = row
-                        , col = col
-                        , rowItem = data)
+        data = CallBack(theObject = self._dataFrameObject,
+                        object = obj,
+                        index = objIndex,
+                        targetName = obj.className,
+                        trigger = CallBack.DOUBLECLICK,
+                        row = row,
+                        col = col,
+                        rowItem = data)
 
         if self._actionCallback and self._dataFrameObject and not self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback
           self._actionCallback(data)
@@ -566,14 +566,14 @@ QuickTable::item::selected {
       #       objList.append(obj)
 
       if objList:
-        data = CallBack(theObject = self._dataFrameObject
-                        , object = objList
-                        , index = 0
-                        , targetName = objList[0].className
-                        , trigger = CallBack.DOUBLECLICK
-                        , row = 0
-                        , col = 0
-                        , rowItem = None)
+        data = CallBack(theObject = self._dataFrameObject,
+                        object = objList,
+                        index = 0,
+                        targetName = objList[0].className,
+                        trigger = CallBack.DOUBLECLICK,
+                        row = 0,
+                        col = 0,
+                        rowItem = None)
 
         self._selectionCallback(data)
 
@@ -590,29 +590,29 @@ QuickTable::item::selected {
         objList = self.getSelectedObjects()
 
         if objList:
-          data = CallBack(theObject = self._dataFrameObject
-                          , object = objList
-                          , index = 0
-                          , targetName = objList[0].className
-                          , trigger = CallBack.DOUBLECLICK
-                          , row = itemSelection.row()
-                          , col = itemSelection.column()
-                          , rowItem = itemSelection
-                          , checked = state)
+          data = CallBack(theObject = self._dataFrameObject,
+                          object = objList,
+                          index = 0,
+                          targetName = objList[0].className,
+                          trigger = CallBack.DOUBLECLICK,
+                          row = itemSelection.row(),
+                          col = itemSelection.column(),
+                          rowItem = itemSelection,
+                          checked = state)
           textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
           if textHeader:
             self._dataFrameObject.setObjAttr(textHeader, objList[0], state)
             # setattr(objList[0], textHeader, state)
         else:
-          data = CallBack(theObject=self._dataFrameObject
-                          , object=None
-                          , index=0
-                          , targetName=None
-                          , trigger=CallBack.DOUBLECLICK
-                          , row=itemSelection.row()
-                          , col=itemSelection.column()
-                          , rowItem=itemSelection
-                          , checked = state)
+          data = CallBack(theObject=self._dataFrameObject,
+                          object=None,
+                          index=0,
+                          targetName=None,
+                          trigger=CallBack.DOUBLECLICK,
+                          row=itemSelection.row(),
+                          col=itemSelection.column(),
+                          rowItem=itemSelection,
+                          checked = state)
         self._checkBoxCallback(data)
 
   def showColumns(self, dataFrameObject):
@@ -885,10 +885,10 @@ QuickTable::item::selected {
     # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
     self.resizeColumnsToContents()
 
-  def getDataFrameFromList(self, table=None
-                           , buildList=None
-                           , colDefs=None
-                           , hiddenColumns=None):
+  def getDataFrameFromList(self, table=None,
+                           buildList=None,
+                           colDefs=None,
+                           hiddenColumns=None):
     """
     Return a Pandas dataFrame from an internal list of objects
     The columns are based on the 'func' functions in the columnDefinitions
@@ -921,17 +921,17 @@ QuickTable::item::selected {
       # indexList[str(col)] = obj
       # objectList[obj.pid] = col
 
-    return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)
-                           , objectList=objects or []
-                           # , indexList=indexList
-                           , columnDefs=colDefs or []
-                           , hiddenColumns=hiddenColumns or []
-                           , table=table)
+    return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings),
+                           objectList=objects or [],
+                           # indexList=indexList,
+                           columnDefs=colDefs or [],
+                           hiddenColumns=hiddenColumns or [],
+                           table=table)
 
-  def getDataFrameFromRows(self, table=None
-                           , dataFrame=None
-                           , colDefs=None
-                           , hiddenColumns=None):
+  def getDataFrameFromRows(self, table=None,
+                           dataFrame=None,
+                           colDefs=None,
+                           hiddenColumns=None):
     """
     Return a Pandas dataFrame from the internal rows of an internal Pandas dataFrame
     The columns are based on the 'func' functions in the columnDefinitions
@@ -961,12 +961,12 @@ QuickTable::item::selected {
     #     indexList[str(ind)] = obj
     #     objectList[obj.pid] = ind
 
-    return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings)
-                           , objectList=objects
-                           # , indexList=indexList
-                           , columnDefs=colDefs
-                           , hiddenColumns=hiddenColumns
-                           , table=table)
+    return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings),
+                           objectList=objects,
+                           # indexList=indexList,
+                           columnDefs=colDefs,
+                           hiddenColumns=hiddenColumns,
+                           table=table)
 
   def exportDialog(self):
     self.saveDialog = FileDialog(directory='ccpn_Table.xlsx', #default saving name
@@ -1283,9 +1283,12 @@ QuickTable::item::selected {
     #   self.clearTable()
 
     self._silenceCallback = False
-    getLogger().debug2('<updateTableCallback>', data['notifier']
-                      , tableSelect
-                      , data['trigger'], data['object'])
+    getLogger().debug2('<updateTableCallback>', data['notifier'],
+                      tableSelect,
+                      data['trigger'], data['object'])
+    getLogger().info('<updateTableCallback>', data['notifier'],
+                      tableSelect,
+                      data['trigger'], data['object'])
 
   def _updateRowCallback(self, data):
     """
@@ -1355,7 +1358,12 @@ QuickTable::item::selected {
               # e.g. row.peakList == tSelect then add
               if tSelect == getattr(row, self._tableData['tableName']):
                 # add the row to the dataFrame and table
-                self._dataFrameObject.appendObject(row)
+
+                # get the aray containin the objects displayed in the table
+                multiple = self._tableData['classCallBack']
+                multipleAttr = getattr(tSelect, multiple)
+
+                self._dataFrameObject.appendObject(row, multipleAttr=multipleAttr)
                 _update = True
 
       except:
@@ -1399,9 +1407,12 @@ QuickTable::item::selected {
       # #   getLogger().warning(str(es)+str(data))
       #
       # self._silenceCallback = False
-      getLogger().debug2('<updateRowCallback>', data['notifier']
-                        , self._tableData['tableSelection']
-                        , data['trigger'], data['object'])
+      getLogger().debug2('<updateRowCallback>', data['notifier'],
+                        self._tableData['tableSelection'],
+                        data['trigger'], data['object'])
+      getLogger().info('<updateRowCallback>', data['notifier'],
+                       self._tableData['tableSelection'],
+                       data['trigger'], data['object'])
     return _update
 
   def _updateCellCallback(self, attr, data):
@@ -1451,9 +1462,9 @@ QuickTable::item::selected {
           self._updateCellCallback(rowCallback, newData)
 
     self._silenceCallback = False
-    getLogger().debug2('<updateCellCallback>', data['notifier']
-                      , self._tableData['tableSelection']
-                      , data['trigger'], data['object'])
+    getLogger().debug2('<updateCellCallback>', data['notifier'],
+                      self._tableData['tableSelection'],
+                      data['trigger'], data['object'])
 
   def _searchCallBack(self, data):
     """

@@ -10,7 +10,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -20,14 +19,11 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: Wayne Boucher $"
 __date__ = "$Date: 2017-03-17 12:22:34 +0000 (Fri, March 17, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""Logger and message handler"""
-
 
 import datetime
 import functools
@@ -39,6 +35,7 @@ from inspect import stack
 DEBUG1 = logging.DEBUG  # = 10
 DEBUG2 = 9
 DEBUG3 = 8
+INFO = logging.INFO
 
 defaultLogLevel = logging.INFO
 # defaultLogLevel = logging.DEBUG
@@ -97,6 +94,13 @@ def _debug3(logger, msg, *args, **kwargs):
   if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
   logger.log(DEBUG3, '; '.join(fmsg))
 
+def _info(logger, msg, *args, **kwargs):
+  fmsg = [msg]
+  if args: fmsg.append(', '.join([str(arg) for arg in args]))
+  if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
+  logger.log(INFO, '; '.join(fmsg))
+
+
 def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):
   """Return a (unique) logger for this memopsRoot and with given programName, if any.
@@ -152,6 +156,7 @@ def createLogger(loggerName, memopsRoot, stream=None, level=None, mode='a',
     _setupHandler(handler, level)
 
   # logger.debug1 = logger.debug
+  logger.info = functools.partial(_info, logger)
   logger.debug1 = functools.partial(_debug1, logger)
   logger.debug = logger.debug1
   logger.debug2 = functools.partial(_debug2, logger)

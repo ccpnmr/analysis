@@ -212,30 +212,28 @@ class DataFrameObject(object):
           with self._table._quickTableUpdate(self):           # keep the column widths
             self._table.appendRow(list(listDict.values()))
 
-          # get indexing from pulldown selection and set in dataFrame/table
-          # change to a finishing routine called updateTableIndexing when
-          if multipleAttr:
-            newIndex = [multipleAttr.index(rr) for rr in self._objects]
-
-            objCol = indCol = None
-            for cc in range(self._table.columnCount()):
-              colName = self._table.horizontalHeaderItem(cc).text()
-              if colName == DATAFRAME_INDEX:
-                indCol = cc
-                print (DATAFRAME_INDEX, cc)
-              elif colName == DATAFRAME_OBJECT:
-                objCol = cc
-                print (DATAFRAME_OBJECT, cc)
-            if objCol and indCol:
-              print ('INDEXING')
-              for rr in range(self._table.rowCount()):
-
-                thisObj = self._table.item(rr, objCol).value
-
-                if thisObj in multipleAttr:
-                  print('>>>', rr, thisObj, multipleAttr.index(thisObj))
-                  self._table.item(rr, indCol).setValue(multipleAttr.index(thisObj))
-                  print ('>>>--', rr, thisObj, multipleAttr.index(thisObj))
+          # # get indexing from pulldown selection and set in dataFrame/table
+          # # change to a finishing routine called updateTableIndexing when
+          # if multipleAttr:
+          #   newIndex = [multipleAttr.index(rr) for rr in self._objects]
+          #
+          #   objCol = indCol = None
+          #   for cc in range(self._table.columnCount()):
+          #     colName = self._table.horizontalHeaderItem(cc).text()
+          #     if colName == DATAFRAME_INDEX:
+          #       indCol = cc
+          #       print (DATAFRAME_INDEX, cc)
+          #     elif colName == DATAFRAME_OBJECT:
+          #       objCol = cc
+          #       print (DATAFRAME_OBJECT, cc)
+          #   if objCol and indCol:
+          #     print ('INDEXING')
+          #     print (multipleAttr)
+          #     for rr in range(self._table.rowCount()):
+          #
+          #       thisObj = self._table.item(rr, objCol).value
+          #       if thisObj in multipleAttr:
+          #         self._table.item(rr, indCol).setValue(multipleAttr.index(thisObj))
 
       except Exception as es:
         getLogger().warning(str(es))

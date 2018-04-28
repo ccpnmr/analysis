@@ -530,7 +530,7 @@ class NmrResidue(AbstractWrapperObject):
           # data2Obj = self._project._data2Obj
           nextNmrResidue = data2Obj[stretch[1]]
           nmrChain = data2Obj[apiNmrChain]
-          nmrChain.reverse()                # ejb - why?
+          nmrChain.reverse()              # ejb - why? .. because the api can only remove from one end
           nextNmrResidue._disconnectNext()
           nmrChain.reverse()
 
@@ -586,7 +586,7 @@ class NmrResidue(AbstractWrapperObject):
     """Connect free end of self to free end of previous residue in sequence,
     and return resulting connected NmrChain
 
-    Raises error if self is assigned, of if either self or value is offset.
+    Raises error if self is assigned, or if either self or value is offset.
 
     NB Undoing a connection between two connected stretches
     will get back a 'value' stretch with a new shortName"""
@@ -659,9 +659,9 @@ class NmrResidue(AbstractWrapperObject):
                 ll.insert(0, ll.pop())
 
                 if undo is not None:
-                  undo.increaseBlocking()
-                if undo is not None:
-                  undo.decreaseBlocking()
+                #   undo.increaseBlocking()
+                # if undo is not None:
+                #   undo.decreaseBlocking()
                   undo.newItem(self._bubbleTail, self._bubbleHead,
                                undoArgs=(ll, ), redoArgs=(ll, ))
 

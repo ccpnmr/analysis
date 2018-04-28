@@ -37,7 +37,8 @@ from pyqtgraph import TableWidget
 from pyqtgraph.widgets.TableWidget import _defersort, TableWidgetItem
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, DATAFRAME_PID
+from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
+                                          DATAFRAME_INDEX, DATAFRAME_HASH, DATAFRAME_PID
 
 from ccpn.ui.gui.guiSettings import getColours
 
@@ -831,6 +832,7 @@ QuickTable::item::selected {
 
       # required to make the header visible
       self.setColumnCount(dataFrameObject.numColumns)
+      self.reindexTableObjects()
 
       # re-sort the table
       if sortColumn < self.columnCount():
@@ -1228,6 +1230,36 @@ QuickTable::item::selected {
     self.setRowCount(0)
     self.items = []
 
+  def reindexTableObjects(self):
+    if self._tableData['tableSelection']:
+      tSelect = getattr(self, self._tableData['tableSelection'])
+      if tSelect:
+
+        multiple = self._tableData['classCallBack']
+        print(tSelect, multiple)
+        multipleAttr = getattr(tSelect, multiple)
+
+        if multipleAttr:
+          # newIndex = [multipleAttr.index(rr) for rr in self._objects]
+
+          objCol = indCol = None
+          for cc in range(self.columnCount()):
+            colName = self.horizontalHeaderItem(cc).text()
+            if colName == DATAFRAME_INDEX:
+              indCol = cc
+              print (DATAFRAME_INDEX, cc)
+            elif colName == DATAFRAME_OBJECT:
+              objCol = cc
+              print (DATAFRAME_OBJECT, cc)
+          if objCol and indCol:
+            print ('INDEXING')
+            print (multipleAttr)
+            for rr in range(self.rowCount()):
+
+              thisObj = self.item(rr, objCol).value
+              if thisObj in multipleAttr:
+                self.item(rr, indCol).setValue(multipleAttr.index(thisObj))
+
   def _updateTableCallback(self, data):
     """
     Notifier callback for updating the table
@@ -1361,6 +1393,7 @@ QuickTable::item::selected {
 
                 # get the aray containin the objects displayed in the table
                 multiple = self._tableData['classCallBack']
+                print(tSelect, multiple)
                 multipleAttr = getattr(tSelect, multiple)
 
                 self._dataFrameObject.appendObject(row, multipleAttr=multipleAttr)

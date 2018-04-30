@@ -1385,6 +1385,7 @@ QuickTable::item::selected {
       try:
         _update = self._dataFrameObject.changeObject(row)
 
+        # getLogger().info('>>>change', row, _update)
         # TODO:ED it may not already be in the list - check indexing
         if not _update:
           if self._tableData['tableSelection']:
@@ -1396,13 +1397,14 @@ QuickTable::item::selected {
               if tSelect == getattr(row, self._tableData['tableName']):
                 # add the row to the dataFrame and table
 
-                # get the aray containin the objects displayed in the table
+                # get the array containing the objects displayed in the table
                 multiple = self._tableData['classCallBack']
                 print(tSelect, multiple)
                 multipleAttr = getattr(tSelect, multiple)
 
                 self._dataFrameObject.appendObject(row, multipleAttr=multipleAttr)
                 _update = True
+                # getLogger().info('>>>changeEND', row)
 
       except:
         getLogger().debug2('Error updating row in table')
@@ -1424,11 +1426,11 @@ QuickTable::item::selected {
 
             if objList and row not in objList:
               # TODO:ED Check current deletion
-              # print ('>>> deleting spare object %s' % row)
+              getLogger().info('>>> deleting spare object %s' % row, oldPid)
               self._dataFrameObject.removeObject(row)
 
             else:
-              # print('>>> creating spare object %s' % row)
+              getLogger().info('>>> creating spare object %s' % row, oldPid)
               self._dataFrameObject.appendObject(row)
           else:
             self.clearTable()

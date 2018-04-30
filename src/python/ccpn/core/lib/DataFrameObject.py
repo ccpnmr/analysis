@@ -285,7 +285,8 @@ class DataFrameObject(object):
         header.setEditValue(obj, value)
 
   def changeObject(self, obj):
-    row = self.find(self._table, str(obj.pid), column='Pid')
+    # row = self.find(self._table, str(obj.pid), column='Pid')
+    row = self.find(self._table, obj, column='_object')
     _update = False
     if row is not None:
       self._table.silenceCallBack = True

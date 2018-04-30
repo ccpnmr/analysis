@@ -541,12 +541,14 @@ class NmrResidue(AbstractWrapperObject):
       else:
         # make new connected NmrChain with rightmost ResonanceGroups
         newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+
         for rg in reversed(stretch):
           if rg is apiResonanceGroup:
             break
           else:
-            rg.directNmrChain = newNmrChain
-        newNmrChain.__dict__['mainResonanceGroups'].reverse()
+            rg.moveDirectNmrChain(newNmrChain, 'head')
+        #     rg.directNmrChain = newNmrChain
+        # newNmrChain.__dict__['mainResonanceGroups'].reverse()
 
         return newNmrChain    # need this when using disconnectPrevious
 

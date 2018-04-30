@@ -331,8 +331,9 @@ class NmrResidue(AbstractWrapperObject):
             for rg in apiValueNmrChain.mainResonanceGroups:
               rg.directNmrChain = apiNmrChain
             apiValueNmrChain.delete()
-          except:
-            print ('>>> error here')
+
+          except Exception as es:
+            getLogger().debug('Error %s' % str(es))
           finally:
             if undo is not None:
               undo.decreaseBlocking()
@@ -480,28 +481,10 @@ class NmrResidue(AbstractWrapperObject):
     Does nothing if nextNmrResidue is empty;
     Raises ValueError for assigned NmrResidues"""
 
-    # nmrList = self._getNextConnectedList()
-    #
-    # if nmrList:
-    #   if len(nmrList) > 1:
-    #     for nmr in reversed(nmrList):
-    #       nmr.moveToNmrChain()
-    #     for i in range(len(nmrList)-1):
-    #       nmrList[i].connectNext(nmrList[i+1])
-    #   else:
-    #     nmrList[0].moveToNmrChain()
-    #
-    # if not self.mainNmrResidue.previousNmrResidue:
-    #   # a single residue so return to the default
-    #   self.moveToNmrChain()
-    # return None
-
     apiResonanceGroup = self._wrappedData
     apiNmrChain = apiResonanceGroup.directNmrChain
     defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
-    # self._startCommandEchoBlock('disconnectNext')
-    # try:
     if apiNmrChain is None:
       # offset residue: no-op
       return
@@ -522,38 +505,23 @@ class NmrResidue(AbstractWrapperObject):
         # chop off end ResonanceGroup
         if len(stretch) <= 2:
           # Chain gets removed
-          print('>>>moveDirectNmrChain - dn, res,res')
+
           for resonanceGroup in reversed(stretch):
             resonanceGroup.directNmrChain = defaultChain
           # delete empty chain
           apiNmrChain.delete()
         else:
-          # data2Obj = self._project._data2Obj
-          # nextNmrResidue = data2Obj[stretch[1]]
-          # nmrChain = data2Obj[apiNmrChain]
-          # nmrChain.reverse()              # ejb - why? .. because the api can only remove from one end
-          # nextNmrResidue._disconnectNext()
-          # nmrChain.reverse()
-          print('>>>moveDirectNmrChain - dn, res,chain')
 
-          # keep all and ust remove the end - not consistent
-          # apiResonanceGroup.moveDirectNmrChain(defaultChain, 'head')
+          apiResonanceGroup.moveDirectNmrChain(defaultChain, 'head')
 
-          newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-          for rg in reversed(stretch):
-            if rg is apiResonanceGroup:
-              break
-            else:
-              rg.moveDirectNmrChain(newNmrChain, 'head')
-          apiResonanceGroup.directNmrChain = defaultChain
-          apiNmrChain.delete()
-
-          #     rg.directNmrChain = newNmrChain
-          # newNmrChain.__dict__['mainResonanceGroups'].reverse()
-
-          # return newNmrChain    # need this when using disconnectPrevious
-
-        print('>>>moveDirectNmrChain - done')
+          # newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+          # for rg in reversed(stretch):
+          #   if rg is apiResonanceGroup:
+          #     break
+          #   else:
+          #     rg.moveDirectNmrChain(newNmrChain, 'head')
+          # apiResonanceGroup.directNmrChain = defaultChain
+          # apiNmrChain.delete()
 
       elif apiResonanceGroup is stretch[-2]:
         # chop off end ResonanceGroup
@@ -563,21 +531,13 @@ class NmrResidue(AbstractWrapperObject):
         # make new connected NmrChain with rightmost ResonanceGroups
         newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
 
-        print ('>>>moveDirectNmrChain - dn, chain, chain')
         for rg in reversed(stretch):
           if rg is apiResonanceGroup:
             break
           else:
             rg.moveDirectNmrChain(newNmrChain, 'head')
-        #     rg.directNmrChain = newNmrChain
-        # newNmrChain.__dict__['mainResonanceGroups'].reverse()
 
         return newNmrChain    # need this when using disconnectPrevious
-
-    # except Exception as es:
-    #   getLogger().warning(str(es))
-    # finally:
-    #   self._endCommandEchoBlock()
 
   @property
   def previousNmrResidue(self) -> typing.Optional['NmrResidue']:
@@ -815,29 +775,10 @@ class NmrResidue(AbstractWrapperObject):
     Does nothing if previousNmrResidue is empty;
     Raises ValueError for assigned NmrResidues"""
 
-    # nmrList = self._getPreviousConnectedList()
-    #
-    # if nmrList:
-    #   if len(nmrList) > 1:
-    #     for nmr in nmrList:
-    #       nmr.moveToNmrChain()
-    #     for i in range(len(nmrList)-1):
-    #       nmrList[i].connectNext(nmrList[i+1])
-    #   else:
-    #     nmrList[0].moveToNmrChain()
-    #
-    # if not self.mainNmrResidue.nextNmrResidue:
-    #   # a single residue so return to the default
-    #   self.moveToNmrChain()
-    # return None
-
-
     apiResonanceGroup = self._wrappedData
     apiNmrChain = apiResonanceGroup.directNmrChain
     defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
-    # self._startCommandEchoBlock('disconnectPrevious')
-    # try:
     if apiNmrChain is None:
       # offset residue: no-op
       return
@@ -853,53 +794,27 @@ class NmrResidue(AbstractWrapperObject):
       if apiResonanceGroup is stretch[0]:     # first in the chain
         return
 
-      # elif apiResonanceGroup is stretch[-1]:
-      #   # chop off end ResonanceGroup
-      #   apiResonanceGroup.directNmrChain = defaultChain
-      #   if len(stretch) == 2:
-      #     stretch[0].directNmrChain = defaultChain
-      #     # delete one-element remaining chain
-      #     apiNmrChain.delete()
-      #
-      # else:
-      #   # Done with reverses because disconnectNext is easily undoable
-      #   nmrChain = self.nmrChain
-      #   nmrChain.reverse()
-      #   newNmrChain = self.disconnectNext()
-      #   nmrChain.reverse()
-      #
-      #   if newNmrChain:             # why is this crashing now?
-      #     newNmrChain.__dict__['mainResonanceGroups'].reverse()
-
       if apiResonanceGroup is stretch[-1]:     # last in the chain
         # chop off end ResonanceGroup
         if len(stretch) <= 2:
           # Chain gets removed
-          print('>>>moveDirectNmrChain - np, res,res')
+
           for resonanceGroup in reversed(stretch):
             resonanceGroup.directNmrChain = defaultChain
           # delete empty chain
           apiNmrChain.delete()
         else:
-          # data2Obj = self._project._data2Obj
-          # nextNmrResidue = data2Obj[stretch[1]]
-          # nmrChain = data2Obj[apiNmrChain]
-          # nmrChain.reverse()              # ejb - why? .. because the api can only remove from one end
-          # nextNmrResidue._disconnectNext()
-          # nmrChain.reverse()
-          print('>>>moveDirectNmrChain - np, res,chain')
-          # apiResonanceGroup.moveDirectNmrChain(defaultChain, 'tail')
 
-          newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-          for rg in stretch:
-            if rg is apiResonanceGroup:
-              break
-            else:
-              rg.moveDirectNmrChain(newNmrChain, 'tail')
-          apiResonanceGroup.directNmrChain = defaultChain
-          apiNmrChain.delete()
+          apiResonanceGroup.moveDirectNmrChain(defaultChain, 'tail')
 
-        print('>>>moveDirectNmrChain - done')
+          # newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+          # for rg in stretch:
+          #   if rg is apiResonanceGroup:
+          #     break
+          #   else:
+          #     rg.moveDirectNmrChain(newNmrChain, 'tail')
+          # apiResonanceGroup.directNmrChain = defaultChain
+          # apiNmrChain.delete()
 
       elif apiResonanceGroup is stretch[1]:
         # chop off end ResonanceGroup
@@ -909,21 +824,13 @@ class NmrResidue(AbstractWrapperObject):
         # make new connected NmrChain with rightmost ResonanceGroups
         newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
 
-        print ('>>>moveDirectNmrChain - np, chain, chain')
         for rg in stretch:
           if rg is apiResonanceGroup:
             break
           else:
             rg.moveDirectNmrChain(newNmrChain, 'tail')
-        #     rg.directNmrChain = newNmrChain
-        # newNmrChain.__dict__['mainResonanceGroups'].reverse()
 
-        return newNmrChain    # need this when using disconnectPrevious
-
-    # except Exception as es:
-    #   getLogger().warning(str(es))
-    # finally:
-    #   self._endCommandEchoBlock()
+        return newNmrChain
 
   def disconnect(self):
     self._startCommandEchoBlock('disconnect')
@@ -1011,7 +918,7 @@ class NmrResidue(AbstractWrapperObject):
       # Connected stretch - break stretch, keeping first half in the NmrChain
       stretch = apiNmrChain.mainResonanceGroups
 
-      if len(stretch) < 3 or len(stretch) == 3 and apiResonanceGroup is stretch[1]:
+      if len(stretch) < 3 or (len(stretch) == 3 and apiResonanceGroup is stretch[1]):
         for rg in reversed(stretch):
           # reversed to add residues back in proper order (they are added to end)
           rg.directNmrChain = defaultChain
@@ -1019,6 +926,7 @@ class NmrResidue(AbstractWrapperObject):
 
       else:
         index = stretch.index(apiResonanceGroup)
+        print('>>DISCONNECT', index)
         data2Obj = self._project._data2Obj
 
         # NB operations are carefully selected to make sure they undo correctly
@@ -1036,12 +944,16 @@ class NmrResidue(AbstractWrapperObject):
           nmrChain = self.nmrChain
           nr1 = data2Obj[stretch[1]]
           nr2 = data2Obj[stretch[2]]
-          nmrChain.reverse()
-          nr1._disconnectNext()
-          nr2._disconnectNext()
-          nmrChain.reverse()
+          # nmrChain.reverse()
+          # nr1._disconnectNext()
+          # nr2._disconnectNext()
+          # nmrChain.reverse()
+
+          nr1._disconnectPrevious()
+          nr2._disconnectPrevious()
+
         else:
-          self.disconnectNext()
+          self._disconnectNext()
           apiResonanceGroup.directNmrChain = defaultChain
 
     # except Exception as es:
@@ -1305,19 +1217,19 @@ class NmrResidue(AbstractWrapperObject):
 
     return result
 
-  def _rebuildAssignedChains(self):
-    self._startCommandEchoBlock('_rebuildAssignedChains')
-    try:
-      assignedChain = self._project.fetchNmrChain('A')
-      while assignedChain.nmrResidues:
-        startNmrResidue = assignedChain.nmrResidues[0].mainNmrResidue
-        startNmrResidue._deassignNmrChain()
-        startNmrResidue.nmrChain.reverse()
-
-    except Exception as es:
-      getLogger().warning(str(es))
-    finally:
-      self._endCommandEchoBlock()
+  # def _rebuildAssignedChains(self):
+  #   self._startCommandEchoBlock('_rebuildAssignedChains')
+  #   try:
+  #     assignedChain = self._project.fetchNmrChain('A')
+  #     while assignedChain.nmrResidues:
+  #       startNmrResidue = assignedChain.nmrResidues[0].mainNmrResidue
+  #       startNmrResidue._deassignNmrChain()
+  #       startNmrResidue.nmrChain.reverse()
+  #
+  #   except Exception as es:
+  #     getLogger().warning(str(es))
+  #   finally:
+  #     self._endCommandEchoBlock()
 
 
   # Implementation functions

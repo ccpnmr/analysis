@@ -323,6 +323,168 @@ class NmrStretchTest(WrapperTesting):
     self.assertEqual([x.id for x in nmrResidues],
                      ['@-.@1.ALA', '@-.@2.VAL'])
 
+  def test_connect_chain_chain(self):
+    nmrChain = self.project.newNmrChain(isConnected=True)
+    nmrResidues = []
+    for residueType in ('ALA', 'VAL', 'SER', None, 'ILE', 'ALA'):
+      nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
+    nmrChain.mainNmrResidues = nmrResidues
+
+    nmrChain2 = self.project.newNmrChain(isConnected=True)
+    nmrResidues2 = []
+    for residueType in ('VAL', 'SER', None, 'ILE'):
+      nmrResidues2.append(nmrChain2.fetchNmrResidue(residueType=residueType))
+    nmrChain2.mainNmrResidues = nmrResidues2
+
+    nmrChain3 = self.project.newNmrChain(isConnected=False)
+    nmrResidues3 = []
+    for residueType in ('ILE',):
+      nmrResidues3.append(nmrChain3.fetchNmrResidue(residueType=residueType))
+    nmrChain3.mainNmrResidues = nmrResidues3
+
+    nmrChain4 = self.project.newNmrChain(isConnected=False)
+    nmrResidues4 = []
+    for residueType in ('MET',):
+      nmrResidues4.append(nmrChain4.fetchNmrResidue(residueType=residueType))
+    nmrChain4.mainNmrResidues = nmrResidues4
+
+
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA' ])
+
+    self.assertEqual([x.id for x in nmrChain2.mainNmrResidues],
+                     ['#3.@7.VAL', '#3.@8.SER', '#3.@9.', '#3.@10.ILE' ])
+
+    self.assertEqual([x.id for x in nmrChain3.mainNmrResidues],
+                     ['@4.@11.ILE', ])
+
+    self.assertEqual([x.id for x in nmrChain4.mainNmrResidues],
+                     ['@5.@12.MET', ])
+
+    # add a connected stretch to the right
+    nmrChain.nmrResidues[-1].connectNext(nmrChain2.nmrResidues[0])
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA', '#2.@7.VAL', '#2.@8.SER', '#2.@9.', '#2.@10.ILE'])
+
+    self.assertEqual(nmrChain2.isDeleted, True)
+    self.assertEqual(self.project.getNmrChain('#3'), None)
+    self.undo.undo()
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA' ])
+    self.assertEqual(nmrChain2.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('#3').nmrResidues, nmrResidues2)
+
+    # add an unconnected stretch to the right
+    nmrChain.nmrResidues[-1].connectNext(nmrChain3.nmrResidues[0])
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA', '#2.@11.ILE'])
+
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, [])
+    self.undo.undo()
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA' ])
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, nmrResidues3)
+
+    # add an unconnected-connected stretch to the right
+    nmrChain3.nmrResidues[-1].connectNext(nmrChain.nmrResidues[0])
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@11.ILE', '#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA'])
+
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, [])
+    self.undo.undo()
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA' ])
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, nmrResidues3)
+
+    # add an unconnected-unconnected stretch to the right
+    nmrChain3.nmrResidues[-1].connectNext(nmrChain4.nmrResidues[0])
+
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, [])
+    self.assertEqual(nmrChain4.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@5').nmrResidues, [])
+    self.assertEqual(self.project.getNmrChain('#6').nmrResidues, nmrResidues3+nmrResidues4)
+
+    self.undo.undo()
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, nmrResidues3)
+    self.assertEqual(nmrChain4.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@5').nmrResidues, nmrResidues4)
+
+
+
+
+    # add a connected stretch to the left
+    nmrChain.nmrResidues[0].connectPrevious(nmrChain2.nmrResidues[-1])
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@7.VAL', '#2.@8.SER', '#2.@9.', '#2.@10.ILE', '#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA'])
+
+    self.assertEqual(nmrChain2.isDeleted, True)
+    self.assertEqual(self.project.getNmrChain('#3'), None)
+    self.undo.undo()
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA' ])
+    self.assertEqual(nmrChain2.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('#3').nmrResidues, nmrResidues2)
+
+    # add an unconnected stretch to the left
+    nmrChain.nmrResidues[0].connectPrevious(nmrChain3.nmrResidues[-1])
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@11.ILE', '#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA'])
+
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, [])
+    self.undo.undo()
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA' ])
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, nmrResidues3)
+
+    # add an connected-unconnected stretch to the left
+    nmrChain3.nmrResidues[0].connectPrevious(nmrChain.nmrResidues[-1])
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA', '#2.@11.ILE'])
+
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, [])
+    self.undo.undo()
+    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE', '#2.@6.ALA' ])
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, nmrResidues3)
+
+    # add an unconnected-unconnected stretch to the left
+    nmrChain4.nmrResidues[0].connectPrevious(nmrChain3.nmrResidues[-1])
+
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, [])
+    self.assertEqual(nmrChain4.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@5').nmrResidues, [])
+    self.assertEqual(self.project.getNmrChain('#7').nmrResidues, nmrResidues3+nmrResidues4)
+
+    self.undo.undo()
+    self.assertEqual(nmrChain3.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@4').nmrResidues, nmrResidues3)
+    self.assertEqual(nmrChain4.isDeleted, False)
+    self.assertEqual(self.project.getNmrChain('@5').nmrResidues, nmrResidues4)
+
+
+
+
+    return
+
+    nmrResidues[1].disconnect()
+    self.undo.undo()
+    self.assertEqual([x.id for x in nmrResidues[0].nmrChain.mainNmrResidues],
+                     ['#2.@1.ALA', '#2.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
+    self.undo.redo()
+    self.assertEqual([x.id for x in nmrResidues],
+                     ['@-.@1.ALA', '@-.@2.VAL', '#2.@3.SER', '#2.@4.', '#2.@5.ILE' ])
+
   def test_disconnect_midchain_1(self):
     nmrChain = self.project.newNmrChain(isConnected=True)
     nmrResidues = []
@@ -613,7 +775,6 @@ class NmrStretchTest(WrapperTesting):
     self.undo.undo()
     self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
                      ['X.4.ARG', 'X.5.THR', 'X.6.TYR', 'X.7.ILE', 'X.8.PRO'])
-
 
 class NmrResidueTest(WrapperTesting):
 

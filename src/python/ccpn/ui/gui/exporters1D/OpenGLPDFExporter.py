@@ -31,13 +31,13 @@ from ccpn.ui.gui.exporters1D.Exporter import Exporter
 from PyQt5 import QtGui, QtWidgets, QtCore
 from collections import OrderedDict
 
-__all__ = ['OpenGLImageExporter']
+__all__ = ['OpenGLPDFExporter']
 
 
 Quality = OrderedDict([('low',1), ('medium',50), ('high',100)])
 
-class OpenGLImageExporter(Exporter):
-  Name = "Image File (PNG, TIF, JPG, ...)"
+class OpenGLPDFExporter(Exporter):
+  Name = "PDF Format"
   allowCopy = True
 
   def __init__(self, item):
@@ -45,14 +45,14 @@ class OpenGLImageExporter(Exporter):
     self.glWidget = item
     bg = self.glWidget.background
     qtColour = QtGui.QColor(*[i*255 for i in bg])
-    self.params = Parameter(name='params', type='group', children=[
-                          # {'name': 'width', 'type': 'int', 'value': 0, 'limits': (0, None)},
-                          # {'name': 'height', 'type': 'int', 'value': 0, 'limits': (0, None)},
-                          {'name': 'quality', 'type': 'list', 'values': Quality.keys()},
-                          {'name': 'background', 'type': 'color', 'value': qtColour},
-                                                                  ])
-    # self.params.param('width').sigValueChanged.connect(self.widthChanged)
-    # self.params.param('height').sigValueChanged.connect(self.heightChanged)
+    self.params = Parameter(name='params', type='group', children=[])
+    #                       # {'name': 'width', 'type': 'int', 'value': 0, 'limits': (0, None)},
+    #                       # {'name': 'height', 'type': 'int', 'value': 0, 'limits': (0, None)},
+    #                       {'name': 'quality', 'type': 'list', 'values': Quality.keys()},
+    #                       {'name': 'background', 'type': 'color', 'value': qtColour},
+    #                                                               ])
+    # # self.params.param('width').sigValueChanged.connect(self.widthChanged)
+    # # self.params.param('height').sigValueChanged.connect(self.heightChanged)
 
 
   def parameters(self):
@@ -61,8 +61,8 @@ class OpenGLImageExporter(Exporter):
   def export(self, filename=None, toBytes=False, copy=False):
     if filename is None and not toBytes and not copy:
 
-      filter = ["*." + bytes(f).decode('utf-8') for f in QtGui.QImageWriter.supportedImageFormats()]
-      preferred = ['*.png', '*.tif', '*.jpg']
+      filter = ['*.pdf',]
+      preferred = ['*.pdf',]
       for p in preferred[::-1]:
         if p in filter:
           filter.remove(p)
@@ -70,19 +70,11 @@ class OpenGLImageExporter(Exporter):
       self.fileSaveDialog(filter=filter)
       return
 
-    quality = Quality.get(self.params['quality'])
-    bgColorObj = self.params['background']
-    bgRgb = bgColorObj.getRgb()
-    originalBackground = self.glWidget.background
-    self.glWidget.setBackgroundColour([i/255 for i in bgRgb], silent=True)
-    self.image = self.glWidget.grabFramebuffer()
+    # TODO:ED finish writing code to export PDF using reportlab
 
-    if copy:
-      QtWidgets.QApplication.clipboard().setImage(self.image)
-    elif toBytes:
-      return self.image
-    else:
-      self.image.save(filename, quality=quality)
-    self.glWidget.setBackgroundColour(originalBackground, silent=True)
+    pdfExport = self.glWidget.exportToPdf(filename, self.params)
+    if pdfExport:
+      with open(filename, 'wb') as fd:
+        fd.write(pdfExport)
 
-OpenGLImageExporter.register()
+OpenGLPDFExporter.register()

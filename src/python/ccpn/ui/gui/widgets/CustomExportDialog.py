@@ -7,14 +7,17 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.exporters1D.exportDialogPyQTGraph import UiForm
 
 from ccpn.ui.gui.exporters1D.OpenGLImageExporter import OpenGLImageExporter
+from ccpn.ui.gui.exporters1D.OpenGLPDFExporter import OpenGLPDFExporter
 from ccpn.ui.gui.exporters1D.SVGExporter import SVGExporter
 from ccpn.ui.gui.exporters1D.TextExporter import TextExporter
 from ccpn.ui.gui.exporters1D.ImageExporter import ImageExporter
+from ccpn.util.Common import makeIterableList
 
 GLType = 'GL'
 Default = 'Default'
-ExporterTypes = {GLType : [OpenGLImageExporter],  #[ImageExporter, SVGExporter, TextExporter],
-                 Default: [ImageExporter, SVGExporter, TextExporter] ,
+
+ExporterTypes = {GLType    : [OpenGLImageExporter, OpenGLPDFExporter],  #[ImageExporter, SVGExporter, TextExporter],
+                 Default   : [ImageExporter, SVGExporter, TextExporter] ,
                  }
 
 

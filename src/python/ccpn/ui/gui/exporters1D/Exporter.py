@@ -32,16 +32,16 @@ class Exporter(object):
         """Return the parameters used to configure this exporter."""
         raise Exception("Abstract method must be overridden in subclass.")
         
-    def export(self, fileName=None, toBytes=False, copy=False):
+    def export(self, filename=None, toBytes=False, copy=False):
         """
-        If *fileName* is None, pop-up a file dialog.
+        If *filename* is None, pop-up a file dialog.
         If *toBytes* is True, return a bytes object rather than writing to file.
         If *copy* is True, export to the copy buffer rather than writing to file.
         """
         raise Exception("Abstract method must be overridden in subclass.")
 
     def fileSaveDialog(self, filter=None, opts=None):
-        ## Show a file dialog, call self.export(fileName) when finished.
+        ## Show a file dialog, call self.export(filename) when finished.
         if opts is None:
             opts = {}
         self.fileDialog = FileDialog()
@@ -61,20 +61,20 @@ class Exporter(object):
         self.fileDialog.fileSelected.connect(self.fileSaveFinished)
         return
         
-    def fileSaveFinished(self, fileName):
-        fileName = pg.python2_3.asUnicode(fileName)
+    def fileSaveFinished(self, filename):
+        filename = pg.python2_3.asUnicode(filename)
         global LastExportDirectory
-        LastExportDirectory = os.path.split(fileName)[0]
+        LastExportDirectory = os.path.split(filename)[0]
         
         ## If file name does not match selected extension, append it now
-        ext = os.path.splitext(fileName)[1].lower().lstrip('.')
+        ext = os.path.splitext(filename)[1].lower().lstrip('.')
         selectedExt = re.search(r'\*\.(\w+)\b', pg.python2_3.asUnicode(self.fileDialog.selectedNameFilter()))
         if selectedExt is not None:
             selectedExt = selectedExt.groups()[0].lower()
             if ext != selectedExt:
-                fileName = fileName + '.' + selectedExt.lstrip('.')
+                filename = filename + '.' + selectedExt.lstrip('.')
         
-        self.export(fileName=fileName, **self.fileDialog.opts)
+        self.export(filename=filename, **self.fileDialog.opts)
         
     def getScene(self):
         if isinstance(self.item, pg.GraphicsScene):

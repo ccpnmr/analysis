@@ -103,6 +103,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDE
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
                                                       GLRegion, REGION_COLOURS
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import CcpnOpenGLExporter
+
 try:
   from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -5466,6 +5468,23 @@ class CcpnGLWidget(QOpenGLWidget):
         if reg._object == integral:
           ils._resize()
           return
+
+  def exportToPdf(self, filename, params):
+    pdfExporter = CcpnOpenGLExporter(self, self._parent, filename, params)
+    return pdfExporter.exporter
+
+  def lineVisible(self, lineList, maxX, maxY):
+    if self.between(lineList[0], self.axisL, self.axisR) and \
+      self.between(lineList[2], self.axisL, self.axisR) and \
+      self.between(lineList[1], self.axisT, self.axisB) and \
+      self.between(lineList[3], self.axisT, self.axisB):
+
+      lineList[0] = maxX * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
+      lineList[2] = maxX * (lineList[2] - self.axisL) / (self.axisR - self.axisL)
+      lineList[1] = maxY * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
+      lineList[3] = maxY * (lineList[3] - self.axisB) / (self.axisT - self.axisB)
+
+      return True
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

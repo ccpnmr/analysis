@@ -1416,7 +1416,7 @@ QuickTable::item::selected {
       if row in self._dataFrameObject._objects:
 
         # modify the oldPid in the objectList, change to newPid
-        self._dataFrameObject.renameObject(row, oldPid)
+        _update = self._dataFrameObject.renameObject(row, oldPid)
 
         # TODO:ED check whether the new object is still in the active list - remove otherwise
         if self._tableData['tableSelection']:

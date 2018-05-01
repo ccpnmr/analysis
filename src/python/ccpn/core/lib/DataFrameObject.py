@@ -140,6 +140,14 @@ class DataFrameObject(object):
       matches = model.match(
         start, QtCore.Qt.DisplayRole,
         text, 1, QtCore.Qt.MatchExactly)
+
+      # start = model.index(0, columnNum)
+      # matches2 = model.match(
+      #   start, QtCore.Qt.UserRole,
+      #   text, 1, QtCore.Qt.MatchExactly)
+      #
+      # print ([table.item(rr, columnNum).value for rr in range(table.rowCount())])
+
       if matches:
         return matches[0].row()
         # # index.row(), index.column()
@@ -147,6 +155,23 @@ class DataFrameObject(object):
         #   index, QtGui.QItemSelectionModel.Select)
 
     return None
+
+  def findObject(self, table, obj, column='_object'):
+    # model = table.model()
+
+    # change column to correct index
+    columns = list(range(table.columnCount()))
+    columnNum = None
+    for c in columns:
+      if column == table.horizontalHeaderItem(c).text():
+        columnNum = c
+        break
+    else:
+      return None
+
+    foundObjs = [table.item(rr, columnNum).value for rr in range(table.rowCount())]
+    if obj in foundObjs:
+      return foundObjs.index(obj)
 
   def removeObject(self, obj):
     # remove an object from the class
@@ -239,9 +264,11 @@ class DataFrameObject(object):
         getLogger().warning(str(es))
       finally:
         self._table.silenceCallBack = False
+        return True
 
   def renameObject(self, obj, oldPid):
     row = self.find(self._table, str(oldPid), column='Pid')
+    # row = self.find(self._table, obj, column='_object')
     if row is not None:
       self._table.silenceCallBack = True
 
@@ -273,6 +300,7 @@ class DataFrameObject(object):
         getLogger().warning(str(es))
       finally:
         self._table.silenceCallBack = False
+        return True
 
   def objAttr(self, headerText, obj):
     for header in self._columnDefinitions.columns:
@@ -286,7 +314,7 @@ class DataFrameObject(object):
 
   def changeObject(self, obj):
     # row = self.find(self._table, str(obj.pid), column='Pid')
-    row = self.find(self._table, obj, column='_object')
+    row = self.findObject(self._table, obj, column='_object')
     _update = False
     if row is not None:
       self._table.silenceCallBack = True
@@ -316,14 +344,12 @@ class DataFrameObject(object):
       #   listDict['Pid'] = obj
       appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
       self._dataFrame = self._dataFrame.append(appendDataFrame)
-      _update = True
 
       # except Exception as es:
       #   getLogger().warning(str(es))
       # finally:
       self._table.silenceCallBack = False
-
-    return _update
+      return True
 
   def objectExists(self, obj):
     return self.find(self._table, str(obj.pid), column='Pid') is not None

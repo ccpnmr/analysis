@@ -53,8 +53,8 @@ class CcpnOpenGLExporter():
     self.params = params
     self.canv = None
 
-    self.buf = io.BytesIO()         # for canvas
-    return
+    # self.buf = io.BytesIO()         # for canvas
+    # return
 
 
     # self._buildCanvas()
@@ -89,9 +89,11 @@ class CcpnOpenGLExporter():
     Return the buffer for the created pdf document
     :return buffer:
     """
-    self._buildCanvas()
-    self.buf.write(self.canv.getpdfdata())       # for canvas
-    self.buf.seek(0)
+    # self._buildCanvas()
+    # return True
+    #
+    # self.buf.write(self.canv.getpdfdata())       # for canvas
+    # self.buf.seek(0)
 
     return self.buf.getvalue()
 
@@ -102,7 +104,7 @@ class CcpnOpenGLExporter():
     from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Group
     from reportlab.lib.units import mm
 
-    self.canv = canvas.Canvas(None)
+    self.canv = canvas.Canvas(filename=self.filename)
     self.canv.setPageSize(A4)
 
     # define a clipping path
@@ -232,7 +234,7 @@ class CcpnOpenGLExporter():
     # add a drawing and build it up
 
     from reportlab.lib import colors
-    from reportlab.graphics import renderSVG
+    from reportlab.graphics import renderSVG, renderPS
     from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Group
     from reportlab.lib.units import mm
 
@@ -362,7 +364,8 @@ class CcpnOpenGLExporter():
 
     # test putting it in twice :)
     self.story.append(d)
-    renderSVG.drawToFile(d, '/Users/ejb66/Desktop/testCCPNsvg.svg', 'testCCPNoutput')
+    renderSVG.drawToFile(d, '/Users/ejb66/Desktop/testCCPNsvg.svg', showBoundary=False, useClip=True)
+    renderPS.drawToFile(d, '/Users/ejb66/Desktop/testCCPNps.ps', showBoundary=False)
 
 if __name__ == '__main__':
   buf = io.BytesIO()

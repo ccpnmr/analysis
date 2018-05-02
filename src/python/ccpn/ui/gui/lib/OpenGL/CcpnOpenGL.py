@@ -3071,9 +3071,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if spectrumView.spectrum.dimensionCount > 1:
           if spectrumView in self._spectrumSettings.keys():
-            self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
-                                                       , 1, GL.GL_FALSE
-                                                       , self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
+            self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
+                                                       1, GL.GL_FALSE,
+                                                       self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
             # draw the spectrum - call the existing glCallList
             spectrumView._paintContoursNoClip()
@@ -3082,9 +3082,9 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._stackingValue:
 
               # use the stacking matrix to offset the 1D spectra
-              self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix'
-                                                         , 1, GL.GL_FALSE
-                                                         , self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX])
+              self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
+                                                         1, GL.GL_FALSE,
+                                                         self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX])
 
             self._contourList[spectrumView].drawVertexColor()
           else:
@@ -5473,16 +5473,16 @@ class CcpnGLWidget(QOpenGLWidget):
     pdfExporter = CcpnOpenGLExporter(self, self._parent, filename, params)
     return pdfExporter.exporter
 
-  def lineVisible(self, lineList, maxX, maxY):
-    if self.between(lineList[0], self.axisL, self.axisR) and \
-      self.between(lineList[2], self.axisL, self.axisR) and \
-      self.between(lineList[1], self.axisT, self.axisB) and \
-      self.between(lineList[3], self.axisT, self.axisB):
+  def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
+    if (self.between(lineList[0], self.axisL, self.axisR) and
+        self.between(lineList[1], self.axisT, self.axisB)) or \
+              (self.between(lineList[2], self.axisL, self.axisR) and
+                self.between(lineList[3], self.axisT, self.axisB)):
 
-      lineList[0] = maxX * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
-      lineList[2] = maxX * (lineList[2] - self.axisL) / (self.axisR - self.axisL)
-      lineList[1] = maxY * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
-      lineList[3] = maxY * (lineList[3] - self.axisB) / (self.axisT - self.axisB)
+      lineList[0] = x + width * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
+      lineList[2] = x + width * (lineList[2] - self.axisL) / (self.axisR - self.axisL)
+      lineList[1] = y + height * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
+      lineList[3] = y + height * (lineList[3] - self.axisB) / (self.axisT - self.axisB)
 
       return True
 

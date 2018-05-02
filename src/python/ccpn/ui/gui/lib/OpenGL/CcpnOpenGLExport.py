@@ -135,6 +135,9 @@ class CcpnOpenGLExporter():
     self.canv.setLineWidth(0.5)
     p = self.canv.beginPath()
 
+    colour = colors.Color(*grid.colors[0:3], alpha=grid.colors[0])
+    self.canv.setStrokeColor(colour)
+
     self.canv._code = self.canv._code + ['n']
     for ii in range(0, len(grid.indices), 2):
       ii0 = grid.indices[ii]
@@ -152,9 +155,13 @@ class CcpnOpenGLExporter():
         # p.lineTo(newLine[2], newLine[3])
 
       if self.parent.lineVisible(newLine, x=pageLeft, y=pageBottom, width=pageWidth, height=pixHeight):
-        colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=grid.colors[ii0 * 4+4])
+        colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=ii/len(grid.indices))    #grid.colors[ii0 * 4+4])
         self.canv.setStrokeColor(colour)
-        self.canv.line(*newLine)
+        self.canv.setStrokeAlpha(ii/len(grid.indices))
+        # self.canv.line(*newLine)
+
+        # self.canv._code = self.canv._code + ['%s %s %s RG' % tuple(grid.colors[ii0*4:ii0 * 4+3])]
+        self.canv._code = self.canv._code + ['%s %s m %s %s l' % tuple(newLine)]
 
     self.canv._code = self.canv._code + ['S']
 
@@ -196,7 +203,7 @@ class CcpnOpenGLExporter():
 
             # drawVertexColor
             p = self.canv.beginPath()
-            self.canv._code = self.canv._code + ['q']
+            self.canv._code = self.canv._code + ['n']
             for vv in range(0, len(thisSpec.vertices)-2, 2):
 
               # vectStart = mat.dot([thisSpec.vertices[vv],
@@ -213,7 +220,7 @@ class CcpnOpenGLExporter():
                 p.lineTo(newLine[2], newLine[3])
 
             self.canv.drawPath(p, fill=False, stroke=True)
-            self.canv._code = self.canv._code + ['Q']       # cheat to make a subgroup
+            self.canv._code = self.canv._code + ['S']       # cheat to make a subgroup
 
           else:
             pass

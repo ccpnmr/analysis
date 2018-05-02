@@ -156,11 +156,12 @@ class CcpnOpenGLExporter():
 
       if self.parent.lineVisible(newLine, x=pageLeft, y=pageBottom, width=pageWidth, height=pixHeight):
         colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=ii/len(grid.indices))    #grid.colors[ii0 * 4+4])
-        self.canv.setStrokeColor(colour)
-        self.canv.setStrokeAlpha(ii/len(grid.indices))
+        # self.canv.setStrokeColor(colour)
+        # self.canv.setStrokeAlpha(ii/len(grid.indices))
         # self.canv.line(*newLine)
 
         # self.canv._code = self.canv._code + ['%s %s %s RG' % tuple(grid.colors[ii0*4:ii0 * 4+3])]
+        self.canv._code = self.canv._code + ['%s %s %s RG' % (ii/len(grid.indices), 1.0-(ii/len(grid.indices)), ii/len(grid.indices))]
         self.canv._code = self.canv._code + ['%s %s m %s %s l' % tuple(newLine)]
 
     self.canv._code = self.canv._code + ['S']

@@ -53,8 +53,11 @@ class CcpnOpenGLExporter():
     self.params = params
     self.canv = None
 
-    # self.buf = io.BytesIO()         # for canvas
-    # return
+    self.useCanvas = True
+
+    if self.useCanvas:
+      self.buf = io.BytesIO()         # for canvas
+      return
 
 
     # self._buildCanvas()
@@ -89,9 +92,12 @@ class CcpnOpenGLExporter():
     Return the buffer for the created pdf document
     :return buffer:
     """
-    # self._buildCanvas()
-    # return True
-    #
+    if self.useCanvas:
+      self._buildCanvas()
+      self.canv.showPage()
+      self.canv.save()
+      return None
+
     # self.buf.write(self.canv.getpdfdata())       # for canvas
     # self.buf.seek(0)
 
@@ -104,10 +110,9 @@ class CcpnOpenGLExporter():
     from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Group
     from reportlab.lib.units import mm
 
-    self.canv = canvas.Canvas(filename=self.filename)
-    self.canv.setPageSize(A4)
+    self.canv = canvas.Canvas(filename=self.filename, pagesize=A4)
 
-    # define a clipping path
+    # define the page dimensions - not including border
     pageWidth = A4[0]
     pageHeight = A4[1]
 
@@ -117,14 +122,14 @@ class CcpnOpenGLExporter():
     pageBottom = pageHeight - pixHeight
     pageLeft = 0.0
 
-    # # define a clipping region
-    # p = self.canv.beginPath()
-    # p.moveTo(pageLeft, pageBottom)
-    # p.lineTo(pageLeft, pageHeight)
-    # p.lineTo(pageWidth, pageHeight)
-    # p.lineTo(pageWidth, pageBottom)
-    # p.close()
-    # self.canv.clipPath(p, fill=0, stroke=0)
+    # define a clipping region
+    p = self.canv.beginPath()
+    p.moveTo(pageLeft, pageBottom)
+    p.lineTo(pageLeft, pageHeight)
+    p.lineTo(pageWidth, pageHeight)
+    p.lineTo(pageWidth, pageBottom)
+    p.close()
+    self.canv.clipPath(p, fill=0, stroke=0)
 
     # write stuff into the region
     colour = colors.Color(*self.parent.background[0:3], alpha=float(self.parent.background[3]))
@@ -140,7 +145,7 @@ class CcpnOpenGLExporter():
     colour = colors.Color(*grid.colors[0:3], alpha=grid.colors[0])
     self.canv.setStrokeColor(colour)
 
-    self.canv._code = self.canv._code + ['n']
+    # self.canv._code = self.canv._code + ['/S1 BMC']
     for ii in range(0, len(grid.indices), 2):
       ii0 = grid.indices[ii]
       ii1 = grid.indices[ii+1]
@@ -152,23 +157,23 @@ class CcpnOpenGLExporter():
 
       # colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=1.0)     #grid.colors[ii0 * 4+4])
       # self.canv.setStrokeColor(colour)
-      # if self.parent.lineVisible(newLine, x=pageLeft, y=pageBottom, width=pageWidth, height=pixHeight):
-        # p.moveTo(newLine[0], newLine[1])
-        # p.lineTo(newLine[2], newLine[3])
-
       if self.parent.lineVisible(newLine, x=pageLeft, y=pageBottom, width=pageWidth, height=pixHeight):
-        colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=ii/len(grid.indices))    #grid.colors[ii0 * 4+4])
-        # self.canv.setStrokeColor(colour)
-        # self.canv.setStrokeAlpha(ii/len(grid.indices))
-        # self.canv.line(*newLine)
+        p.moveTo(newLine[0], newLine[1])
+        p.lineTo(newLine[2], newLine[3])
+
+      # if self.parent.lineVisible(newLine, x=pageLeft, y=pageBottom, width=pageWidth, height=pixHeight):
+      #   colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=grid.colors[ii0 * 4+4])
+      #   self.canv.setStrokeColor(colour)
+      #   self.canv.setStrokeAlpha(ii/len(grid.indices))
+      #   self.canv.line(*newLine)
 
         # self.canv._code = self.canv._code + ['%s %s %s RG' % tuple(grid.colors[ii0*4:ii0 * 4+3])]
-        self.canv._code = self.canv._code + ['%s %s %s RG' % (ii/len(grid.indices), 1.0-(ii/len(grid.indices)), ii/len(grid.indices))]
-        self.canv._code = self.canv._code + ['%s %s m %s %s l' % tuple(newLine)]
+        # self.canv._code = self.canv._code + ['%s %s %s RG' % (ii/len(grid.indices), 1.0-(ii/len(grid.indices)), ii/len(grid.indices))]
+        # self.canv._code = self.canv._code + ['%s %s m %s %s l' % tuple(newLine)]
 
-    self.canv._code = self.canv._code + ['S']
+    # self.canv._code = self.canv._code + ['EMC']
 
-    # self.canv.drawPath(p, fill=False, stroke=True)
+    self.canv.drawPath(p, fill=False, stroke=True)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -206,7 +211,7 @@ class CcpnOpenGLExporter():
 
             # drawVertexColor
             p = self.canv.beginPath()
-            self.canv._code = self.canv._code + ['n']
+            # self.canv._code = self.canv._code + ['n']
             for vv in range(0, len(thisSpec.vertices)-2, 2):
 
               # vectStart = mat.dot([thisSpec.vertices[vv],
@@ -223,12 +228,12 @@ class CcpnOpenGLExporter():
                 p.lineTo(newLine[2], newLine[3])
 
             self.canv.drawPath(p, fill=False, stroke=True)
-            self.canv._code = self.canv._code + ['S']       # cheat to make a subgroup
+            # self.canv._code = self.canv._code + ['S']       # cheat to make a subgroup
 
           else:
             pass
 
-    print ('>>>drawCanvas')
+    # print ('>>>drawCanvas')
 
   def _buildAll(self):
     # add a drawing and build it up

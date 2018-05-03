@@ -31,9 +31,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
-
-# simple test
-
+from contextlib import contextmanager
 import io
 
 
@@ -488,3 +486,49 @@ if __name__ == '__main__':
   c.drawPath(p, fill=1, stroke=1)
 
   c.save()
+
+
+
+class svgFileOutput():
+  def __init__(self, filename):
+    self._code = []
+    self._filename = filename
+    self._useGroups = []
+
+  @property
+  def svgCode(self):
+    return self._code
+
+  @contextmanager
+  def newSvgFile(self):
+    try:
+      # initialise the file
+      self._code = []
+
+      self._code.append('<?xml version="1.0" encoding="utf-8"?>')
+      self._code.append("<!DOCTYPE svg")
+      self._code.append("  PUBLIC '-//W3C//DTD SVG 1.0//EN'")
+      self._code.append("  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>")
+      self._code.append('<svg fill-rule="evenodd" height="200.23536165327212" preserveAspectRatio="xMinYMin meet" version="1.0" viewBox="0 0 453 200" width="453" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
+
+      yield
+
+    finally:
+      # write footer to array
+      self._code.append('</svg>')
+
+  @contextmanager
+  def newSvgGroup(self):
+    pass
+
+  @contextmanager
+  def newSvgSymbol(self):
+    pass
+
+  def svgWriteString(self, value):
+    self._code.append(value)
+
+  def writeFile(self):
+    with open(self._filename, 'w') as f:
+      for ll in self._code:
+        f.write(self._code[ll])

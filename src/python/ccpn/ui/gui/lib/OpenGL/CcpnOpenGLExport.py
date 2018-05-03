@@ -518,17 +518,39 @@ class svgFileOutput():
       self._code.append('</svg>')
 
   @contextmanager
+  def newSvgBlock(self):
+    try:
+      self._code.append('<svg>')    # some more info
+    finally:
+      self._code.append('</svg>')
+
+  @contextmanager
   def newSvgGroup(self):
-    pass
+    try:
+      self._code.append('<g>')    # some more info
+    finally:
+      self._code.append('</g>')
 
   @contextmanager
   def newSvgSymbol(self):
-    pass
+    try:
+      self._code.append('<symbol>')    # some more info
+    finally:
+      self._code.append('</symbol>')
 
   def svgWriteString(self, value):
     self._code.append(value)
+
+  def svgTitle(self, title):
+    self._code.append('<title>%s</title>' % title)
+
+  def svgDesc(self, desc):
+    self._code.append('<desc>%s</desc>' % desc)
 
   def writeFile(self):
     with open(self._filename, 'w') as f:
       for ll in self._code:
         f.write(self._code[ll])
+
+    # if args: fmsg.append(', '.join([str(arg) for arg in args]))
+    # if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))

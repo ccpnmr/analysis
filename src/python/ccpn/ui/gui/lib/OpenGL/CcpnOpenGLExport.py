@@ -499,17 +499,25 @@ class svgFileOutput():
   def svgCode(self):
     return self._code
 
+  def _AKWtoStr(self, *args, **kwargs):
+    fmsg = []
+    if args: fmsg.append(', '.join([str(arg) for arg in args]))
+    if kwargs: fmsg.append(' '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
+    return fmsg
+
   @contextmanager
-  def newSvgFile(self):
+  def newSvgFile(self, *args, **kwargs):
     try:
       # initialise the file
       self._code = []
 
+      fmsg = self._AKWtoStr(args, kwargs)
+      # viewBox="0 0 453 200" width="453" height="200"
       self._code.append('<?xml version="1.0" encoding="utf-8"?>')
       self._code.append("<!DOCTYPE svg")
       self._code.append("  PUBLIC '-//W3C//DTD SVG 1.0//EN'")
       self._code.append("  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>")
-      self._code.append('<svg fill-rule="evenodd" height="200.23536165327212" preserveAspectRatio="xMinYMin meet" version="1.0" viewBox="0 0 453 200" width="453" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
+      self._code.append('<svg fill-rule="evenodd" height="200.23536165327212" preserveAspectRatio="xMinYMin meet" version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
 
       yield
 
@@ -551,6 +559,3 @@ class svgFileOutput():
     with open(self._filename, 'w') as f:
       for ll in self._code:
         f.write(self._code[ll])
-
-    # if args: fmsg.append(', '.join([str(arg) for arg in args]))
-    # if kwargs: fmsg.append(', '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))

@@ -5472,17 +5472,29 @@ class CcpnGLWidget(QOpenGLWidget):
     return pdfExporter.exportToSVG
 
   def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
-    if (self.between(lineList[0], self.axisL, self.axisR) and
-        self.between(lineList[1], self.axisT, self.axisB)) or \
-              (self.between(lineList[2], self.axisL, self.axisR) and
-                self.between(lineList[3], self.axisT, self.axisB)):
+    for pp in range(0, len(lineList), 2):
+      if (self.between(lineList[pp], self.axisL, self.axisR) and
+          self.between(lineList[pp+1], self.axisT, self.axisB)):
+        break
+    else:
+      return False
 
-      lineList[0] = x + width * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
-      lineList[2] = x + width * (lineList[2] - self.axisL) / (self.axisR - self.axisL)
-      lineList[1] = y + height * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
-      lineList[3] = y + height * (lineList[3] - self.axisB) / (self.axisT - self.axisB)
+    for pp in range(0, len(lineList), 2):
+      lineList[pp] = x + width * (lineList[pp] - self.axisL) / (self.axisR - self.axisL)
+      lineList[pp+1] = y + height * (lineList[pp+1] - self.axisB) / (self.axisT - self.axisB)
+    return True
 
-      return True
+    # if (self.between(lineList[0], self.axisL, self.axisR) and
+    #     self.between(lineList[1], self.axisT, self.axisB)) or \
+    #           (self.between(lineList[2], self.axisL, self.axisR) and
+    #             self.between(lineList[3], self.axisT, self.axisB)):
+    #
+    #   lineList[0] = x + width * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
+    #   lineList[2] = x + width * (lineList[2] - self.axisL) / (self.axisR - self.axisL)
+    #   lineList[1] = y + height * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
+    #   lineList[3] = y + height * (lineList[3] - self.axisB) / (self.axisT - self.axisB)
+    #
+    #   return True
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

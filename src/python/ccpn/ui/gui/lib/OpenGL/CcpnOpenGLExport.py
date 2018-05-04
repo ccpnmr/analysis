@@ -36,6 +36,13 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTR
 from collections import OrderedDict
 import io
 import numpy as np
+try:
+  from OpenGL import GL, GLU, GLUT
+except ImportError:
+  app = QtWidgets.QApplication(sys.argv)
+  QtWidgets.QMessageBox.critical(None, "OpenGL hellogl",
+          "PyOpenGL must be installed to run this example.")
+  sys.exit(1)
 
 class CcpnOpenGLExporter():
   """
@@ -307,6 +314,8 @@ class CcpnOpenGLExporter():
     #                           \xc2\xa2\xc2\xa9\xc2\xae\xc2\xa3\xce\xb1\xce\xb2',
     #            fillColor=colors.red))
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # grid lines
 
     grid  = self.parent.gridList[0]  # main grid
 
@@ -348,6 +357,7 @@ class CcpnOpenGLExporter():
     # d.add(gr, name='mainGrid')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # spectrumView contours
 
     # specGroup = Group()
     # colourGroups = OrderedDict()
@@ -383,7 +393,7 @@ class CcpnOpenGLExporter():
               newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
 
               colour = colors.Color(*thisSpec.colors[ii0*4:ii0 * 4+3], alpha=thisSpec.colors[ii0 * 4+3])
-              colourPath = 'spectrumView%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+              colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
               if colourPath not in colourGroups:
                 cc = colourGroups[colourPath] = {}
                 cc['lines'] = []
@@ -446,14 +456,98 @@ class CcpnOpenGLExporter():
             pass
     # d.add(specGroup, name='spectrumGroups')
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # spectrumView peaklists and labels
+
+    for spectrumView in self.strip.orderedSpectrumViews():
+
+      for peakListView in spectrumView.peakListViews:
+        if spectrumView.isVisible() and peakListView.isVisible():
+
+          if peakListView in self.parent._GLPeakLists.keys():
+
+            thisSpec = self.parent._GLPeakLists[peakListView]
+            # colour = colors.Color(*thisSpec.colors[0:3], alpha=float(thisSpec.colors[3]))
+
+            mode = thisSpec.fillMode
+            if not mode:
+              for ii in range(0, len(thisSpec.indices), 2):
+                ii0 = thisSpec.indices[ii]
+                ii1 = thisSpec.indices[ii + 1]
+
+                # vectStart = [thisSpec.vertices[ii0*2], thisSpec.vertices[ii0*2 + 1], 0.0, 1.0]
+                # vectStart = mat.dot(vectStart)
+                # vectEnd = [thisSpec.vertices[ii1*2], thisSpec.vertices[ii1*2 + 1], 0.0, 1.0]
+                # vectEnd = mat.dot(vectEnd)
+                # newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
+                newLine = [thisSpec.vertices[ii0*2], thisSpec.vertices[ii0*2 + 1],
+                           thisSpec.vertices[ii1 * 2], thisSpec.vertices[ii1 * 2 + 1]]
+
+                colour = colors.Color(*thisSpec.colors[ii0*4:ii0 * 4+3], alpha=thisSpec.colors[ii0 * 4+3])
+                colourPath = 'spectrumViewPeakLists%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+                if colourPath not in colourGroups:
+                  cc = colourGroups[colourPath] = {}
+                  cc['lines'] = []
+                  cc['strokeWidth'] = 0.5
+                  cc['strokeColor'] = colour
+                  cc['strokeLineCap'] = 1
+
+                if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
+
+                  colourGroups[colourPath]['lines'].append(newLine)
+            else:
+              if thisSpec.drawMode == GL.GL_TRIANGLES:
+                indexLen = 3
+              elif thisSpec.drawMode == GL.GL_QUADS:
+                indexLen = 4
+
+              for ii in range(0, len(thisSpec.indices), indexLen):
+                ii0 = thisSpec.indices[ii:ii+indexLen]
+
+                # vectStart = [thisSpec.vertices[ii0*2], thisSpec.vertices[ii0*2 + 1], 0.0, 1.0]
+                # vectStart = mat.dot(vectStart)
+                # vectEnd = [thisSpec.vertices[ii1*2], thisSpec.vertices[ii1*2 + 1], 0.0, 1.0]
+                # vectEnd = mat.dot(vectEnd)
+                # newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
+                # newLine =
+                newLine = []
+                for vv in ii0:
+                  newLine.extend([thisSpec.vertices[vv * 2], thisSpec.vertices[vv * 2 + 1]])
+                # newLine = [thisSpec.vertices[ii0 * 2], thisSpec.vertices[ii0 * 2 + 1],
+                #            thisSpec.vertices[ii1 * 2], thisSpec.vertices[ii1 * 2 + 1]]
+
+                colour = colors.Color(*thisSpec.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=thisSpec.colors[ii0[0] * 4 + 3])
+                colourPath = 'spectrumViewPeakLists%s%s%s%s%s' % (
+                spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+                if colourPath not in colourGroups:
+                  cc = colourGroups[colourPath] = {}
+                  cc['lines'] = []
+                  cc['strokeWidth'] = 0.5
+                  cc['fillColor'] = colour
+                  cc['strokeColor'] = colour
+                  cc['strokeLineCap'] = 1
+
+                if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
+                  colourGroups[colourPath]['lines'].append(newLine)
+
     # add the grid to the main drawing
     gr = Group()
     for colourItem in colourGroups.values():
       # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
-      pl = Path(strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])
+
+      wanted_keys = ['strokeWidth', 'strokeColor', 'strokeLineCap', 'fillColor']  # The keys you want
+      newColour = dict((k, colourItem[k]) for k in wanted_keys if k in colourItem)
+
+      pl = Path(**newColour)    #  strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])
       for ll in colourItem['lines']:
-        pl.moveTo(ll[0], ll[1])
-        pl.lineTo(ll[2], ll[3])
+        if len(ll) == 4:
+          pl.moveTo(ll[0], ll[1])
+          pl.lineTo(ll[2], ll[3])
+        else:
+          pl.moveTo(ll[0], ll[1])
+          for vv in range(2, len(ll), 2):
+            pl.lineTo(ll[vv], ll[vv+1])
+          pl.closePath()
       gr.add(pl)
     d.add(gr, name='mainGrid')
 

@@ -104,6 +104,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
                                                       GLRegion, REGION_COLOURS
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import CcpnOpenGLExporter
+import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 
 try:
   from OpenGL import GL, GLU, GLUT
@@ -113,30 +114,29 @@ except ImportError:
           "PyOpenGL must be installed to run this example.")
   sys.exit(1)
 
-
-SPECTRUM_STACKEDMATRIX = 'stackedMatrix'
-SPECTRUM_MATRIX = 'spectrumMatrix'
-SPECTRUM_MAXXALIAS = 'maxXAlias'
-SPECTRUM_MINXALIAS = 'minXAlias'
-SPECTRUM_MAXYALIAS = 'maxYAlias'
-SPECTRUM_MINYALIAS = 'minYAlias'
-SPECTRUM_DXAF = 'dxAF'
-SPECTRUM_DYAF = 'dyAF'
-SPECTRUM_XSCALE = 'xScale'
-SPECTRUM_YSCALE = 'yScale'
-
-MAINVIEW = 'mainView'
-MAINVIEWFULLWIDTH = 'mainViewFullWidth'
-MAINVIEWFULLHEIGHT = 'mainViewFullHeight'
-RIGHTAXIS = 'rightAxis'
-RIGHTAXISBAR = 'rightAxisBar'
-FULLRIGHTAXIS = 'fullRightAxis'
-FULLRIGHTAXISBAR = 'fullRightAxisBar'
-BOTTOMAXIS = 'bottomAxis'
-BOTTOMAXISBAR = 'bottomAxisBar'
-FULLBOTTOMAXIS = 'fullBottomAxis'
-FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
-FULLVIEW = 'fullView'
+# SPECTRUM_STACKEDMATRIX = 'stackedMatrix'
+# SPECTRUM_MATRIX = 'spectrumMatrix'
+# SPECTRUM_MAXXALIAS = 'maxXAlias'
+# SPECTRUM_MINXALIAS = 'minXAlias'
+# SPECTRUM_MAXYALIAS = 'maxYAlias'
+# SPECTRUM_MINYALIAS = 'minYAlias'
+# SPECTRUM_DXAF = 'dxAF'
+# SPECTRUM_DYAF = 'dyAF'
+# SPECTRUM_XSCALE = 'xScale'
+# SPECTRUM_YSCALE = 'yScale'
+#
+# MAINVIEW = 'mainView'
+# MAINVIEWFULLWIDTH = 'mainViewFullWidth'
+# MAINVIEWFULLHEIGHT = 'mainViewFullHeight'
+# RIGHTAXIS = 'rightAxis'
+# RIGHTAXISBAR = 'rightAxisBar'
+# FULLRIGHTAXIS = 'fullRightAxis'
+# FULLRIGHTAXISBAR = 'fullRightAxisBar'
+# BOTTOMAXIS = 'bottomAxis'
+# BOTTOMAXISBAR = 'bottomAxisBar'
+# FULLBOTTOMAXIS = 'fullBottomAxis'
+# FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
+# FULLVIEW = 'fullView'
 
 AXISLIMITS = [-1.0e12, 1.0e12]
 INVERTED_AXISLIMITS = [1.0e12, -1.0e12]
@@ -291,11 +291,11 @@ class CcpnGLWidget(QOpenGLWidget):
     self._drawBottomAxis = True
 
     # here for completeness, although they should be updated in rescale
-    self._currentView = MAINVIEW
-    self._currentRightAxisView = RIGHTAXIS
-    self._currentRightAxisBarView = RIGHTAXISBAR
-    self._currentBottomAxisView = BOTTOMAXIS
-    self._currentBottomAxisBarView = BOTTOMAXISBAR
+    self._currentView = GLDefs.MAINVIEW
+    self._currentRightAxisView = GLDefs.RIGHTAXIS
+    self._currentRightAxisBarView = GLDefs.RIGHTAXISBAR
+    self._currentBottomAxisView = GLDefs.BOTTOMAXIS
+    self._currentBottomAxisBarView = GLDefs.BOTTOMAXISBAR
 
     self._oldStripIDLabel = None
     self.stripIDString = None
@@ -412,36 +412,36 @@ class CcpnGLWidget(QOpenGLWidget):
     # needs to be offset from (0,0) for mouse scaling
     if self._drawRightAxis and self._drawBottomAxis:
 
-      self._currentView = MAINVIEW
-      self._currentRightAxisView = RIGHTAXIS
-      self._currentRightAxisBarView = RIGHTAXISBAR
-      self._currentBottomAxisView = BOTTOMAXIS
-      self._currentBottomAxisBarView = BOTTOMAXISBAR
+      self._currentView = GLDefs.MAINVIEW
+      self._currentRightAxisView = GLDefs.RIGHTAXIS
+      self._currentRightAxisBarView = GLDefs.RIGHTAXISBAR
+      self._currentBottomAxisView = GLDefs.BOTTOMAXIS
+      self._currentBottomAxisBarView = GLDefs.BOTTOMAXISBAR
 
       currentShader.setViewportMatrix(self._uVMatrix, 0, w-self.AXIS_MARGINRIGHT, 0, h-self.AXIS_MARGINBOTTOM, -1.0, 1.0)
       self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
       self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
     elif self._drawRightAxis and not self._drawBottomAxis:
 
-      self._currentView = MAINVIEWFULLHEIGHT
-      self._currentRightAxisView = FULLRIGHTAXIS
-      self._currentRightAxisBarView = FULLRIGHTAXISBAR
+      self._currentView = GLDefs.MAINVIEWFULLHEIGHT
+      self._currentRightAxisView = GLDefs.FULLRIGHTAXIS
+      self._currentRightAxisBarView = GLDefs.FULLRIGHTAXISBAR
 
       currentShader.setViewportMatrix(self._uVMatrix, 0, w-self.AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
       self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
       self.pixelY = (self.axisT - self.axisB) / h
     elif not self._drawRightAxis and self._drawBottomAxis:
 
-      self._currentView = MAINVIEWFULLWIDTH
-      self._currentBottomAxisView = FULLBOTTOMAXIS
-      self._currentBottomAxisBarView = FULLBOTTOMAXISBAR
+      self._currentView = GLDefs.MAINVIEWFULLWIDTH
+      self._currentBottomAxisView = GLDefs.FULLBOTTOMAXIS
+      self._currentBottomAxisBarView = GLDefs.FULLBOTTOMAXISBAR
 
       currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
       self.pixelX = (self.axisR - self.axisL) / w
       self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
     else:
 
-      self._currentView = FULLVIEW
+      self._currentView = GLDefs.FULLVIEW
 
       currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
       self.pixelX = (self.axisR - self.axisL) / w
@@ -589,29 +589,29 @@ class CcpnGLWidget(QOpenGLWidget):
         if self._stackingValue:
           st = stackCount * self._stackingValue
           stackCount += 1
-          self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
+          self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
 
-          self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
+          self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
                                                                                0.0, 1.0, 0.0, 0.0,
                                                                                0.0, 0.0, 1.0, 0.0,
                                                                                0.0, st, 0.0, 1.0]
 
       # create modelview matrix for the spectrum to be drawn
-      self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
 
-      self._spectrumSettings[spectrumView][SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
                                                                      0.0, yScale, 0.0, 0.0,
                                                                      0.0, 0.0, 1.0, 0.0,
                                                                      fx0, fy0, 0.0, 1.0]
       # setup information for the horizontal/vertical traces
-      self._spectrumSettings[spectrumView][SPECTRUM_MAXXALIAS] = fx0
-      self._spectrumSettings[spectrumView][SPECTRUM_MINXALIAS] = fx1
-      self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS] = fy0
-      self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS] = fy1
-      self._spectrumSettings[spectrumView][SPECTRUM_DXAF] = dxAF
-      self._spectrumSettings[spectrumView][SPECTRUM_DYAF] = dyAF
-      self._spectrumSettings[spectrumView][SPECTRUM_XSCALE] = xScale
-      self._spectrumSettings[spectrumView][SPECTRUM_YSCALE] = yScale
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXXALIAS] = fx0
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINXALIAS] = fx1
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXYALIAS] = fy0
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINYALIAS] = fy1
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DXAF] = dxAF
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DYAF] = dyAF
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
       self._maxX = max(self._maxX, fx0)
       self._minX = min(self._minX, fx1)
@@ -1068,15 +1068,15 @@ class CcpnGLWidget(QOpenGLWidget):
 
     for spectrumView in self._parent.spectrumViews:
       if not axisLimits:
-        axisLimits = [self._spectrumSettings[spectrumView][SPECTRUM_MAXXALIAS],
-                      self._spectrumSettings[spectrumView][SPECTRUM_MINXALIAS],
-                      self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS],
-                      self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS]]
+        axisLimits = [self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXXALIAS],
+                      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINXALIAS],
+                      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXYALIAS],
+                      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINYALIAS]]
       else:
-        axisLimits[0] = max(axisLimits[0], self._spectrumSettings[spectrumView][SPECTRUM_MAXXALIAS])
-        axisLimits[1] = min(axisLimits[1], self._spectrumSettings[spectrumView][SPECTRUM_MINXALIAS])
-        axisLimits[2] = max(axisLimits[2], self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS])
-        axisLimits[3] = min(axisLimits[3], self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS])
+        axisLimits[0] = max(axisLimits[0], self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXXALIAS])
+        axisLimits[1] = min(axisLimits[1], self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINXALIAS])
+        axisLimits[2] = max(axisLimits[2], self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXYALIAS])
+        axisLimits[3] = min(axisLimits[3], self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINYALIAS])
 
     if xAxis:
       if self.INVERTXAXIS:
@@ -1150,45 +1150,45 @@ class CcpnGLWidget(QOpenGLWidget):
     # TODO:ED error here when calculating the top offset, FOUND
 
     # define the main viewports
-    self.viewports.addViewport(MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
+    self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
                                                 , (-self.AXIS_MARGINRIGHT, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport(MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
+    self.viewports.addViewport(GLDefs.MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
                                                         , (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport(MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a')
+    self.viewports.addViewport(GLDefs.MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a')
                                                 , (-self.AXIS_MARGINRIGHT, 'w'), (0, 'h'))
 
     # define the viewports for the right axis bar
-    self.viewports.addViewport(RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w')
+    self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w')
                                                   , (self.AXIS_MARGINBOTTOM, 'a')
                                                   , (self.AXIS_LINE, 'a'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport(RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a')
+    self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a')
                                                     , (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-    self.viewports.addViewport(FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w')
+    self.viewports.addViewport(GLDefs.FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT+self.AXIS_LINE), 'w')
                                                   , (0, 'a')
                                                   , (self.AXIS_LINE, 'a'), (0, 'h'))
 
-    self.viewports.addViewport(FULLRIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a')
+    self.viewports.addViewport(GLDefs.FULLRIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a')
                                                     , (0, 'w'), (0, 'h'))
 
     # define the viewports for the bottom axis bar
-    self.viewports.addViewport(BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
+    self.viewports.addViewport(GLDefs.BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
                                                   , (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_LINE, 'a'))
 
-    self.viewports.addViewport(BOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
+    self.viewports.addViewport(GLDefs.BOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
                                                     , (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
-    self.viewports.addViewport(FULLBOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
+    self.viewports.addViewport(GLDefs.FULLBOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
                                                   , (0, 'w'), (self.AXIS_LINE, 'a'))
 
-    self.viewports.addViewport(FULLBOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
+    self.viewports.addViewport(GLDefs.FULLBOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
                                                     , (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
     # define the full viewport
-    self.viewports.addViewport(FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
+    self.viewports.addViewport(GLDefs.FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
 
     self._lockStringFalse = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0, color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
     self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0, color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
@@ -2873,7 +2873,6 @@ class CcpnGLWidget(QOpenGLWidget):
         spectrumView.buildContoursOnly = False
 
         # rebuild the contours
-
         if spectrumView not in self._contourList.keys():
           self._contourList[spectrumView] = GLVertexArray(numLists=1,
                                                               renderMode=GLRENDERMODE_DRAW,
@@ -2884,16 +2883,6 @@ class CcpnGLWidget(QOpenGLWidget):
         spectrumView._buildGLContours(self._contourList[spectrumView])
 
         self._buildSpectrumSetting(spectrumView=spectrumView)
-
-
-
-        # # TODO:ED check how to efficiently trigger a rebuild of the peaklists
-        # if spectrumView.spectrum.pid in self._GLPeakLists.keys():
-        #   self._GLPeakLists[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
-        # if spectrumView.spectrum.pid in self._GLPeakListLabels.keys():
-        #   self._GLPeakListLabels[spectrumView.spectrum.pid].renderMode = GLRENDERMODE_REBUILD
-
-    # self.rescaleSpectra()
 
   def _buildIntegralLists(self, spectrumView, integralListView):
 
@@ -3073,7 +3062,7 @@ class CcpnGLWidget(QOpenGLWidget):
           if spectrumView in self._spectrumSettings.keys():
             self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                                                        1, GL.GL_FALSE,
-                                                       self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
+                                                       self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX])
 
             # draw the spectrum - call the existing glCallList
             # spectrumView._paintContoursNoClip()
@@ -3085,7 +3074,7 @@ class CcpnGLWidget(QOpenGLWidget):
               # use the stacking matrix to offset the 1D spectra
               self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                                                          1, GL.GL_FALSE,
-                                                         self._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX])
+                                                         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX])
 
             self._contourList[spectrumView].drawVertexColor()
           else:
@@ -4390,21 +4379,21 @@ class CcpnGLWidget(QOpenGLWidget):
         yScale = dy * dyAF / 1.0
 
       # create modelview matrix for the spectrum to be drawn
-      self._spectrumSettings[spectrumView][SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
 
-      self._spectrumSettings[spectrumView][SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX][0:16] = [xScale, 0.0, 0.0, 0.0,
                                                                      0.0, yScale, 0.0, 0.0,
                                                                      0.0, 0.0, 1.0, 0.0,
                                                                      fx0, fy0, 0.0, 1.0]
       # setup information for the horizontal/vertical traces
-      self._spectrumSettings[spectrumView][SPECTRUM_MAXXALIAS] = fx0
-      self._spectrumSettings[spectrumView][SPECTRUM_MINXALIAS] = fx1
-      self._spectrumSettings[spectrumView][SPECTRUM_MAXYALIAS] = fy0
-      self._spectrumSettings[spectrumView][SPECTRUM_MINYALIAS] = fy1
-      self._spectrumSettings[spectrumView][SPECTRUM_DXAF] = dxAF
-      self._spectrumSettings[spectrumView][SPECTRUM_DYAF] = dyAF
-      self._spectrumSettings[spectrumView][SPECTRUM_XSCALE] = xScale
-      self._spectrumSettings[spectrumView][SPECTRUM_YSCALE] = yScale
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXXALIAS] = fx0
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINXALIAS] = fx1
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXYALIAS] = fy0
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINYALIAS] = fy1
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DXAF] = dxAF
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_DYAF] = dyAF
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
+      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
   def _makeSpectrumArray(self, spectrumView, drawList):
     drawList.renderMode = GLRENDERMODE_DRAW
@@ -5470,9 +5459,13 @@ class CcpnGLWidget(QOpenGLWidget):
           ils._resize()
           return
 
-  def exportToPdf(self, filename, params):
+  def exportToPDF(self, filename, params):
     pdfExporter = CcpnOpenGLExporter(self, self._parent, filename, params)
-    return pdfExporter.exporter
+    return pdfExporter.exportToPDF
+
+  def exportToSVG(self, filename, params):
+    pdfExporter = CcpnOpenGLExporter(self, self._parent, filename, params)
+    return pdfExporter.exportToSVG
 
   def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
     if (self.between(lineList[0], self.axisL, self.axisR) and

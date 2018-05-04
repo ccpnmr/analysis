@@ -689,3 +689,33 @@ class Gui1dWidget(CcpnGLWidget):
     except Exception as es:
       print ('>>>', str(es))
       tracesDict = []
+
+  def buildSpectra(self):
+    if self._parent.isDeleted:
+      return
+
+    # self._spectrumSettings = {}
+    for spectrumView in self._parent.spectrumViews:
+
+      if spectrumView.buildContours or spectrumView.buildContoursOnly:
+
+        # flag the peaks for rebuilding
+        if not spectrumView.buildContoursOnly:
+          for peakListView in spectrumView.peakListViews:
+            peakListView.buildPeakLists = True
+            peakListView.buildPeakListLabels = True
+
+        spectrumView.buildContours = False
+        spectrumView.buildContoursOnly = False
+
+        # rebuild the contours
+        if spectrumView not in self._contourList.keys():
+          self._contourList[spectrumView] = GLVertexArray(numLists=1,
+                                                              renderMode=GLRENDERMODE_DRAW,
+                                                              blendMode=False,
+                                                              drawMode=GL.GL_LINE_STRIP,
+                                                              dimension=2,
+                                                              GLContext=self)
+        spectrumView._buildGLContours(self._contourList[spectrumView])
+
+        self._buildSpectrumSetting(spectrumView=spectrumView)

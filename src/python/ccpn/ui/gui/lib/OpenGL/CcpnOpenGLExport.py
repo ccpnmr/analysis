@@ -32,8 +32,10 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from contextlib import contextmanager
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX
+from collections import OrderedDict
 import io
-
+import numpy as np
 
 class CcpnOpenGLExporter():
   """
@@ -51,28 +53,26 @@ class CcpnOpenGLExporter():
     self.params = params
     self.canv = None
 
-    self.useCanvas = True
-
+    # use a drawing object as this can be inserted into a report if we have a report generator
+    self.useCanvas = False
     if self.useCanvas:
       self.buf = io.BytesIO()         # for canvas
       return
-
 
     # self._buildCanvas()
     # self.buf = StringIO()         # for canvas
     # return
 
     self.buf = io.BytesIO()       # for renderPDF
+    self.margin = 2.0*cm
     self.doc = SimpleDocTemplate(
       self.buf,
-      rightMargin=2 * cm,
-      leftMargin=2 * cm,
-      topMargin=2 * cm,
-      bottomMargin=2 * cm,
+      rightMargin=self.margin,
+      leftMargin=self.margin,
+      topMargin=self.margin,
+      bottomMargin=self.margin,
       pagesize=A4,
     )
-    self.doc.compression = None
-    self.doc.pageCompression = None
 
     # Styling paragraphs
     styles = getSampleStyleSheet()
@@ -85,7 +85,24 @@ class CcpnOpenGLExporter():
     self.doc.build(self.story)
 
   @property
-  def exporter(self):
+  def exportToPDF(self):
+    """
+    Return the buffer for the created pdf document
+    :return buffer:
+    """
+    if self.useCanvas:
+      self._buildCanvas()
+      self.canv.showPage()
+      self.canv.save()
+      return None
+
+    # self.buf.write(self.canv.getpdfdata())       # for canvas
+    # self.buf.seek(0)
+
+    return self.buf.getvalue()
+
+  @property
+  def exportToSVG(self):
     """
     Return the buffer for the created pdf document
     :return buffer:
@@ -113,19 +130,21 @@ class CcpnOpenGLExporter():
     # define the page dimensions - not including border
     pageWidth = A4[0]
     pageHeight = A4[1]
-
+    
     # keep aspect ratio of the original screen
+    self.margin = 2.0*cm
     ratio = self.parent.h/self.parent.w
-    pixHeight = pageWidth * ratio
-    pageBottom = pageHeight - pixHeight
-    pageLeft = 0.0
+    pixWidth = (pageWidth - 2 * self.margin)
+    pixHeight = pixWidth * ratio
+    pixBottom = pageHeight - pixHeight - self.margin
+    pixLeft = self.margin
 
     # define a clipping region
     p = self.canv.beginPath()
-    p.moveTo(pageLeft, pageBottom)
-    p.lineTo(pageLeft, pageHeight)
-    p.lineTo(pageWidth, pageHeight)
-    p.lineTo(pageWidth, pageBottom)
+    p.moveTo(pixLeft, pixBottom)
+    p.lineTo(pixLeft, pixBottom+pixHeight)
+    p.lineTo(pixLeft+pixWidth, pixBottom+pixHeight)
+    p.lineTo(pixLeft+pixWidth, pixBottom)
     p.close()
     self.canv.clipPath(p, fill=0, stroke=0)
 
@@ -155,7 +174,7 @@ class CcpnOpenGLExporter():
 
       # colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=1.0)     #grid.colors[ii0 * 4+4])
       # self.canv.setStrokeColor(colour)
-      if self.parent.lineVisible(newLine, x=pageLeft, y=pageBottom, width=pageWidth, height=pixHeight):
+      if self.parent.lineVisible(newLine, x=pixLeft, y=pixBottom, width=pixWidth, height=pixHeight):
         p.moveTo(newLine[0], newLine[1])
         p.lineTo(newLine[2], newLine[3])
 
@@ -221,7 +240,7 @@ class CcpnOpenGLExporter():
               newLine = list(thisSpec.vertices[vv:vv+4])
 
               # colour = colors.Color(*thisSpec.colors[vv*2:vv*2 + 3], alpha=float(thisSpec.colors[vv*2 + 4]))
-              if self.parent.lineVisible(newLine, x=pageLeft, y=pageBottom, width=pageWidth, height=pixHeight):
+              if self.parent.lineVisible(newLine, x=pixLeft, y=pixBottom, width=pixWidth, height=pixHeight):
                 p.moveTo(newLine[0], newLine[1])
                 p.lineTo(newLine[2], newLine[3])
 
@@ -238,34 +257,41 @@ class CcpnOpenGLExporter():
 
     from reportlab.lib import colors
     from reportlab.graphics import renderSVG, renderPS
-    from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Group
+    from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Group, Path
     from reportlab.lib.units import mm
 
     dpi = 72                        # drawing object is hard-coded to this
-    mmwidth = 160
-    pixwidth = int(mmwidth * mm)    # 566 points
-    # mmheight = 160
-    # pixHeight = int(mmheight * mm)
+    pageWidth = A4[0]
+    pageHeight = A4[1]
 
     # keep aspect ratio of the original screen
-    ratio = self.parent.h/self.parent.w
-    pixHeight = pixwidth * ratio
+    self.margin = 2.0 * cm
+    ratio = self.parent.h / self.parent.w
 
-    d = Drawing(pixwidth, pixHeight)
+    pixWidth = self.doc.width
+    pixHeight = pixWidth * ratio
+    if pixHeight > self.doc.height:
+      pixHeight = self.doc.height - cm
+      pixWidth = pixHeight / ratio
+    pixBottom = pageHeight - pixHeight - self.margin
+    pixLeft = self.margin
+
+    # create an object that can be added to a report
+    d = Drawing(pixWidth, pixHeight)
 
     # colour = colors.Color(*self.parent.background[0:3], alpha=float(self.parent.background[3]))
-    # d.add(Rect(0, 0, pixwidth, pixHeight, fillColor=colour, stroke=0), name='background')
-    # d.add(Rect(0, 0, pixwidth, pixHeight, fill=None, stroke=None), name='border')
+    # d.add(Rect(0, 0, pixWidth, pixHeight, fillColor=colour, stroke=0), name='background')
+    # d.add(Rect(0, 0, pixWidth, pixHeight, fill=None, stroke=None), name='border')
 
     # colour = colors.Color(*self.parent.background[0:3], alpha=float(self.parent.background[3]))
     # gr = Group()
-    # gr.add(Rect(0, 0, pixwidth/2, pixHeight/2, fillColor=colour))
-    # gr.add(Rect(pixwidth/2, 0, pixwidth, pixHeight/2, fillColor=colour))
+    # gr.add(Rect(0, 0, pixWidth/2, pixHeight/2, fillColor=colour))
+    # gr.add(Rect(pixWidth/2, 0, pixWidth, pixHeight/2, fillColor=colour))
     # d.add(gr, name='background')
 
     # gr = Group()
-    # gr.add(Rect(0, pixHeight/2, pixwidth/2, pixHeight/2, fillColor=colour))
-    # # gr.add(Rect(pixwidth/2, pixHeight/2, pixwidth, pixHeight/2, fillColor=colour))
+    # gr.add(Rect(0, pixHeight/2, pixWidth/2, pixHeight/2, fillColor=colour))
+    # # gr.add(Rect(pixWidth/2, pixHeight/2, pixWidth, pixHeight/2, fillColor=colour))
     #
     # d.add(gr, name='moreBackground')
     # self.story.append(d)
@@ -284,7 +310,8 @@ class CcpnOpenGLExporter():
 
     grid  = self.parent.gridList[0]  # main grid
 
-    gr = Group()
+    # gr = Group()
+    colourGroups = OrderedDict()
     for ii in range(0, len(grid.indices), 2):
       ii0 = grid.indices[ii]
       ii1 = grid.indices[ii+1]
@@ -294,13 +321,26 @@ class CcpnOpenGLExporter():
                  grid.vertices[ii1 * 2],
                  grid.vertices[ii1 * 2+1]]
 
-      colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=grid.colors[ii0 * 4+4])
-      if self.parent.lineVisible(newLine, x=0, y=0, width=pixwidth, height=pixHeight):
+      colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=grid.colors[ii0 * 4+3])
+      if colour not in colourGroups:
+        cc = colourGroups[colour] = {}
+        cc['lines'] = []
+        cc['strokeWidth'] = 0.5
+        cc['strokeColor'] = colour
+        cc['strokeLineCap'] = 1
 
-        pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour, strokeLineCap=1)
-        gr.add(pl)
+      if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
+
+        colourGroups[colour]['lines'].extend(newLine)
+        # pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour, strokeLineCap=1)
+        # gr.add(pl)
 
     # add the grid to the main drawing
+    gr = Group()
+    for ll in colourGroups.values():
+      # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
+      pl = Path(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
+      gr.add(pl)
     d.add(gr, name='mainGrid')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -314,44 +354,67 @@ class CcpnOpenGLExporter():
       if spectrumView.isVisible():
 
         if spectrumView.spectrum.dimensionCount > 1:
-          # if spectrumView in self._spectrumSettings.keys():
-          #   self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-          #                                              1, GL.GL_FALSE,
-          #                                              self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
-          #
-          #   # draw the spectrum - call the existing glCallList
-          #   spectrumView._paintContoursNoClip()
-          pass
+          if spectrumView in self.parent._spectrumSettings.keys():
+            # self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
+            #                                            1, GL.GL_FALSE,
+            #                                            self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
+
+            mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
+            # mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
+
+            thisSpec = self.parent._contourList[spectrumView]
+            # colour = colors.Color(*thisSpec.colors[0:3], alpha=float(thisSpec.colors[3]))
+
+            # drawVertexColor
+            gr = Group()
+            for ii in range(0, len(thisSpec.indices), 2):
+              ii0 = thisSpec.indices[ii]
+              ii1 = thisSpec.indices[ii + 1]
+
+              vectStart = [thisSpec.vertices[ii0*2], thisSpec.vertices[ii0*2 + 1], 0.0, 1.0]
+              vectStart = mat.dot(vectStart)
+              vectEnd = [thisSpec.vertices[ii1*2], thisSpec.vertices[ii1*2 + 1], 0.0, 1.0]
+              vectEnd = mat.dot(vectEnd)
+              newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
+
+              try:
+                colour = colors.Color(*thisSpec.colors[ii0*4:ii0 * 4+3], alpha=thisSpec.colors[ii0 * 4+3])
+              except Exception as es:
+                pass
+
+              if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
+                pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour)
+                gr.add(pl)
+            specGroup.add(gr, name=spectrumView.pid)
 
         else:
+
+          # assume that the vertexArray is a GL_LINE_STRIP
           if spectrumView in self.parent._contourList.keys():
-            # if self.parent._stackingValue:
-            #
-            #   # use the stacking matrix to offset the 1D spectra
-            #   # self.parent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-            #   #                                       1, self.parent.GL.GL_FALSE,
-            #   #                                       self.parent._spectrumSettings[spectrumView][self.parent.SPECTRUM_STACKEDMATRIX])
-            #   #
-            #   # self.parent._contourList[spectrumView].drawVertexColor()
-            #   mat = self.parent._spectrumSettings[spectrumView][self.parent.SPECTRUM_STACKEDMATRIX]
-            #
+            if self.parent._stackingValue:
+              mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
+            else:
+              mat = None
+
             thisSpec = self.parent._contourList[spectrumView]
-            colour = colors.Color(*thisSpec.colors[0:3], alpha=float(thisSpec.colors[3]))
+            # colour = colors.Color(*thisSpec.colors[0:3], alpha=float(thisSpec.colors[3]))
 
             # drawVertexColor
             gr = Group()
             for vv in range(0, len(thisSpec.vertices)-2, 2):
 
-              # vectStart = mat.dot([thisSpec.vertices[vv],
-              #                      thisSpec.vertices[vv+1], 0.0, 1.0])
-              # vectEnd = mat.dot([thisSpec.vertices[vv+2],
-              #                      thisSpec.vertices[vv+3], 0.0, 1.0])
-              # newLine = [*vectStart, *vectEnd]
+              if mat is not None:
 
-              newLine = list(thisSpec.vertices[vv:vv+4])
+                vectStart = [thisSpec.vertices[vv], thisSpec.vertices[vv + 1], 0.0, 1.0]
+                vectStart = mat.dot(vectStart)
+                vectEnd = [thisSpec.vertices[vv + 2], thisSpec.vertices[vv + 3], 0.0, 1.0]
+                vectEnd = mat.dot(vectEnd)
+                newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
+              else:
+                newLine = list(thisSpec.vertices[vv:vv+4])
 
-              # colour = colors.Color(*thisSpec.colors[vv*2:vv*2 + 3], alpha=float(thisSpec.colors[vv*2 + 4]))
-              if self.parent.lineVisible(newLine, x=0, y=0, width=pixwidth, height=pixHeight):
+              colour = colors.Color(*thisSpec.colors[vv*2:vv*2 + 3], alpha=float(thisSpec.colors[vv*2 + 3]))
+              if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
                 pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour)
                 gr.add(pl)
             specGroup.add(gr, name=spectrumView.pid)
@@ -400,14 +463,14 @@ if __name__ == '__main__':
   dpi = 72
   mmwidth = 150
   mmheight = 150
-  pixwidth = int(mmwidth * mm)
+  pixWidth = int(mmwidth * mm)
   pixHeight = int(mmheight * mm)
 
   # the width doesn't mean anything, but the height defines how much space is added to the story
   # co-ordinates are origin bottom-left
-  d = Drawing(pixwidth, pixHeight)
+  d = Drawing(pixWidth, pixHeight)
 
-  d.add(Rect(0.0, 0.0, pixwidth, pixHeight, fillColor=colors.yellow, stroke=0, fill=0))
+  d.add(Rect(0.0, 0.0, pixWidth, pixHeight, fillColor=colors.yellow, stroke=0, fill=0))
   d.add(String(150.0, 100.0, 'Hello World', fontSize=18, fillColor=colors.red))
   d.add(String(180.0, 86.0, 'Special characters \
                             \xc2\xa2\xc2\xa9\xc2\xae\xc2\xa3\xce\xb1\xce\xb2',

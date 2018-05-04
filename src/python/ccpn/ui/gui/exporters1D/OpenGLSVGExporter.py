@@ -31,13 +31,13 @@ from ccpn.ui.gui.exporters1D.Exporter import Exporter
 from PyQt5 import QtGui, QtWidgets, QtCore
 from collections import OrderedDict
 
-__all__ = ['OpenGLPDFExporter']
+__all__ = ['OpenGLSVGExporter']
 
 
 Quality = OrderedDict([('low',1), ('medium',50), ('high',100)])
 
-class OpenGLPDFExporter(Exporter):
-  Name = "PDF Format"
+class OpenGLSVGExporter(Exporter):
+  Name = "SVG Format"
   allowCopy = True
 
   def __init__(self, item):
@@ -61,8 +61,8 @@ class OpenGLPDFExporter(Exporter):
   def export(self, filename=None, toBytes=False, copy=False):
     if filename is None and not toBytes and not copy:
 
-      filter = ['*.pdf',]
-      preferred = ['*.pdf',]
+      filter = ['*.svg',]
+      preferred = ['*.svg',]
       for p in preferred[::-1]:
         if p in filter:
           filter.remove(p)
@@ -70,12 +70,12 @@ class OpenGLPDFExporter(Exporter):
       self.fileSaveDialog(filter=filter)
       return
 
-    # TODO:ED finish writing code to export PDF using reportlab
+    # TODO:ED finish writing code to export SVG using reportlab
 
-    pdfExport = self.glWidget.exportToPDF(filename, self.params)
-    if pdfExport:
+    svgExport = self.glWidget.exportToSvg(filename, self.params)
+    if svgExport:
       with open(filename, 'wb') as fd:
-        fd.write(pdfExport)
+        fd.write(svgExport)
 
 
-OpenGLPDFExporter.register()
+OpenGLSVGExporter.register()

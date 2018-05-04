@@ -345,22 +345,31 @@ class CcpnOpenGLExporter():
         # pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour, strokeLineCap=1)
         # gr.add(pl)
 
-    # add the grid to the main drawing
-    # gr = Group()
-    # for colourItem in colourGroups.values():
-    #   # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
-    #   pl = Path(strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])
-    #   for ll in colourItem['lines']:
-    #     pl.moveTo(ll[0], ll[1])
-    #     pl.lineTo(ll[2], ll[3])
-    #   gr.add(pl)
-    # d.add(gr, name='mainGrid')
+    gr = Group()
+    for colourItem in colourGroups.values():
+      # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
+
+      wanted_keys = ['strokeWidth', 'strokeColor', 'strokeLineCap', 'fillColor', 'fill', 'stroke']
+      newColour = dict((k, colourItem[k]) for k in wanted_keys if k in colourItem)
+
+      pl = Path(**newColour)    #  strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])
+      for ll in colourItem['lines']:
+        if len(ll) == 4:
+          pl.moveTo(ll[0], ll[1])
+          pl.lineTo(ll[2], ll[3])
+        else:
+          pl.moveTo(ll[0], ll[1])
+          for vv in range(2, len(ll), 2):
+            pl.lineTo(ll[vv], ll[vv+1])
+          pl.closePath()
+      gr.add(pl)
+    d.add(gr, name='grid')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # spectrumView contours
 
     # specGroup = Group()
-    # colourGroups = OrderedDict()
+    colourGroups = OrderedDict()
     for spectrumView in self.strip.orderedSpectrumViews():
 
       if spectrumView.isDeleted:
@@ -548,7 +557,7 @@ class CcpnOpenGLExporter():
             pl.lineTo(ll[vv], ll[vv+1])
           pl.closePath()
       gr.add(pl)
-    d.add(gr, name='mainGrid')
+    d.add(gr, name='spectra')
 
     # ejb - the next two lines a are a quick one page renderer
     # from reportlab.graphics import renderPDF

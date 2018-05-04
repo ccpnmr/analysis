@@ -4505,6 +4505,7 @@ class CcpnGLWidget(QOpenGLWidget):
       ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
       br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])
 
+      dim = [abs(self.axisL-self.axisR), abs(self.axisT-self.axisB)]
       gridGLList.renderMode = GLRENDERMODE_DRAW
       labelsChanged = True
 
@@ -4520,7 +4521,7 @@ class CcpnGLWidget(QOpenGLWidget):
       #   ul[1] = br[1]
       #   br[1] = y
 
-      for i in scaleGrid:       #  [2,1,0]:   ## Draw three different scales of grid
+      for scaleOrder, i in enumerate(scaleGrid):       #  [2,1,0]:   ## Draw three different scales of grid
         dist = br-ul
         nlTarget = 10.**i
         d = 10. ** np.floor(np.log10(abs(dist/nlTarget))+0.5)
@@ -4530,8 +4531,11 @@ class CcpnGLWidget(QOpenGLWidget):
         nl = (dist / d) + 0.5
 
         for ax in axisList:           #   range(0,2):  ## Draw grid for both axes
-          ppl = np.array( dim[ax] / nl[ax] )                      # ejb
-          c = np.clip(3.*(ppl-3), 0., 30.)
+          # ppl = np.array( dim[ax] / nl[ax] )                      # ejb
+          # c = np.clip(3.*(ppl-3), 0., 30.)
+          # print ('>>>clip %d %s %0.3f %0.3f %s %0.3f' % (scaleOrder, c, dim[ax], nl[ax], ppl, d))
+
+          c = 32.0+(scaleOrder*30)
 
           bx = (ax+1) % 2
           for x in range(0, int(nl[ax])):

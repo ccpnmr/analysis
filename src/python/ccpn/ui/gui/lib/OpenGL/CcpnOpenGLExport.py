@@ -322,8 +322,9 @@ class CcpnOpenGLExporter():
                  grid.vertices[ii1 * 2+1]]
 
       colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=grid.colors[ii0 * 4+3])
-      if colour not in colourGroups:
-        cc = colourGroups[colour] = {}
+      colourPath = 'grid%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+      if colourPath not in colourGroups:
+        cc = colourGroups[colourPath] = {}
         cc['lines'] = []
         cc['strokeWidth'] = 0.5
         cc['strokeColor'] = colour
@@ -331,21 +332,25 @@ class CcpnOpenGLExporter():
 
       if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
 
-        colourGroups[colour]['lines'].extend(newLine)
+        colourGroups[colourPath]['lines'].append(newLine)
         # pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour, strokeLineCap=1)
         # gr.add(pl)
 
     # add the grid to the main drawing
-    gr = Group()
-    for ll in colourGroups.values():
-      # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
-      pl = Path(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
-      gr.add(pl)
-    d.add(gr, name='mainGrid')
+    # gr = Group()
+    # for colourItem in colourGroups.values():
+    #   # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
+    #   pl = Path(strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])
+    #   for ll in colourItem['lines']:
+    #     pl.moveTo(ll[0], ll[1])
+    #     pl.lineTo(ll[2], ll[3])
+    #   gr.add(pl)
+    # d.add(gr, name='mainGrid')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    specGroup = Group()
+    # specGroup = Group()
+    # colourGroups = OrderedDict()
     for spectrumView in self.strip.orderedSpectrumViews():
 
       if spectrumView.isDeleted:
@@ -377,15 +382,22 @@ class CcpnOpenGLExporter():
               vectEnd = mat.dot(vectEnd)
               newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
 
-              try:
-                colour = colors.Color(*thisSpec.colors[ii0*4:ii0 * 4+3], alpha=thisSpec.colors[ii0 * 4+3])
-              except Exception as es:
-                pass
+              colour = colors.Color(*thisSpec.colors[ii0*4:ii0 * 4+3], alpha=thisSpec.colors[ii0 * 4+3])
+              colourPath = 'spectrumView%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+              if colourPath not in colourGroups:
+                cc = colourGroups[colourPath] = {}
+                cc['lines'] = []
+                cc['strokeWidth'] = 0.5
+                cc['strokeColor'] = colour
+                cc['strokeLineCap'] = 1
 
               if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
-                pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour)
-                gr.add(pl)
-            specGroup.add(gr, name=spectrumView.pid)
+
+                colourGroups[colourPath]['lines'].append(newLine)
+                # pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour)
+                # gr.add(pl)
+
+            # specGroup.add(gr, name=spectrumView.pid)
 
         else:
 
@@ -414,14 +426,36 @@ class CcpnOpenGLExporter():
                 newLine = list(thisSpec.vertices[vv:vv+4])
 
               colour = colors.Color(*thisSpec.colors[vv*2:vv*2 + 3], alpha=float(thisSpec.colors[vv*2 + 3]))
+              colourPath = 'spectrumView%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+              if colourPath not in colourGroups:
+                cc = colourGroups[colourPath] = {}
+                cc['lines'] = []
+                cc['strokeWidth'] = 0.5
+                cc['strokeColor'] = colour
+                cc['strokeLineCap'] = 1
+
               if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
-                pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour)
-                gr.add(pl)
-            specGroup.add(gr, name=spectrumView.pid)
+
+                colourGroups[colourPath]['lines'].append(newLine)
+                # pl = Line(*newLine, strokeWidth=0.5, strokeColor=colour)
+                # gr.add(pl)
+
+            # specGroup.add(gr, name=spectrumView.pid)
 
           else:
             pass
-    d.add(specGroup, name='spectrumGroups')
+    # d.add(specGroup, name='spectrumGroups')
+
+    # add the grid to the main drawing
+    gr = Group()
+    for colourItem in colourGroups.values():
+      # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
+      pl = Path(strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])
+      for ll in colourItem['lines']:
+        pl.moveTo(ll[0], ll[1])
+        pl.lineTo(ll[2], ll[3])
+      gr.add(pl)
+    d.add(gr, name='mainGrid')
 
 
     # ejb - the next two lines a are a quick one page renderer

@@ -522,10 +522,9 @@ class CcpnOpenGLExporter():
                 if colourPath not in colourGroups:
                   cc = colourGroups[colourPath] = {}
                   cc['lines'] = []
-                  cc['strokeWidth'] = 0.5
                   cc['fillColor'] = colour
-                  cc['strokeColor'] = colour
-                  cc['strokeLineCap'] = 1
+                  cc['stroke'] = None
+                  cc['strokeColor'] = None
 
                 if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
                   colourGroups[colourPath]['lines'].append(newLine)
@@ -535,7 +534,7 @@ class CcpnOpenGLExporter():
     for colourItem in colourGroups.values():
       # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
 
-      wanted_keys = ['strokeWidth', 'strokeColor', 'strokeLineCap', 'fillColor']  # The keys you want
+      wanted_keys = ['strokeWidth', 'strokeColor', 'strokeLineCap', 'fillColor', 'fill', 'stroke']  # The keys you want
       newColour = dict((k, colourItem[k]) for k in wanted_keys if k in colourItem)
 
       pl = Path(**newColour)    #  strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])
@@ -550,7 +549,6 @@ class CcpnOpenGLExporter():
           pl.closePath()
       gr.add(pl)
     d.add(gr, name='mainGrid')
-
 
     # ejb - the next two lines a are a quick one page renderer
     # from reportlab.graphics import renderPDF

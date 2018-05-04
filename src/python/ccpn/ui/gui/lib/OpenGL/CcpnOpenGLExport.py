@@ -534,7 +534,7 @@ class CcpnOpenGLExporter():
     for colourItem in colourGroups.values():
       # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
 
-      wanted_keys = ['strokeWidth', 'strokeColor', 'strokeLineCap', 'fillColor', 'fill', 'stroke']  # The keys you want
+      wanted_keys = ['strokeWidth', 'strokeColor', 'strokeLineCap', 'fillColor', 'fill', 'stroke']
       newColour = dict((k, colourItem[k]) for k in wanted_keys if k in colourItem)
 
       pl = Path(**newColour)    #  strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])

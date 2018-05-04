@@ -56,8 +56,9 @@ class GLVertexArray():
                dimension=3,
                GLContext=None):
 
-    self.initialise(numLists=numLists, renderMode=renderMode, refreshMode = refreshMode
-                    , blendMode=blendMode, drawMode=drawMode, fillMode=fillMode, dimension=dimension, GLContext=GLContext)
+    self.initialise(numLists=numLists, renderMode=renderMode, refreshMode=refreshMode,
+                    blendMode=blendMode, drawMode=drawMode, fillMode=fillMode,
+                    dimension=dimension, GLContext=GLContext)
 
   def initialise(self, numLists=1, renderMode=GLRENDERMODE_IGNORE,
                 refreshMode=GLREFRESHMODE_NEVER,
@@ -76,6 +77,9 @@ class GLVertexArray():
     self.offsets = np.empty(0, dtype=np.float32)
     self.pids = np.empty(0, dtype=np.object_)
     self.lineWidths = [0.0, 0.0]
+    self.color = None
+    self.posColour = None
+    self.negColour = None
 
     self.numVertices = 0
 
@@ -123,6 +127,22 @@ class GLVertexArray():
     if self.blendMode:
       GL.glDisable(GL.GL_BLEND)
 
+  def drawIndexArrayNoColor(self):
+    if self.blendMode:
+      GL.glEnable(GL.GL_BLEND)
+    if self.fillMode is not None:
+      GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
+
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+
+    GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+    GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
+
+    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+
+    if self.blendMode:
+      GL.glDisable(GL.GL_BLEND)
+
   def drawVertexColor(self):
     if self.blendMode:
       GL.glEnable(GL.GL_BLEND)
@@ -138,6 +158,22 @@ class GLVertexArray():
 
     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+
+    if self.blendMode:
+      GL.glDisable(GL.GL_BLEND)
+
+  def drawVertexNoColor(self):
+    if self.blendMode:
+      GL.glEnable(GL.GL_BLEND)
+    if self.fillMode is not None:
+      GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
+
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+
+    GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+    GL.glDrawArrays(self.drawMode, 0, self.numVertices)
+
+    GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
 
     if self.blendMode:
       GL.glDisable(GL.GL_BLEND)

@@ -2878,7 +2878,7 @@ class CcpnGLWidget(QOpenGLWidget):
           self._contourList[spectrumView] = GLVertexArray(numLists=1,
                                                               renderMode=GLRENDERMODE_DRAW,
                                                               blendMode=False,
-                                                              drawMode=GL.GL_LINE_STRIP,
+                                                              drawMode=GL.GL_LINES,
                                                               dimension=2,
                                                               GLContext=self)
         spectrumView._buildGLContours(self._contourList[spectrumView])
@@ -3076,7 +3076,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                        self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
             # draw the spectrum - call the existing glCallList
-            spectrumView._paintContoursNoClip()
+            # spectrumView._paintContoursNoClip()
+            self._contourList[spectrumView].drawIndexArray()
         else:
           if spectrumView in self._contourList.keys():
             if self._stackingValue:
@@ -3203,25 +3204,25 @@ class CcpnGLWidget(QOpenGLWidget):
         axisX = axLabel[2]
         axisXText = str(int(axisX)) if axLabel[3] >= 1 else str(axisX)
 
-        self._axisXLabelling.append(GLString(text=axisXText
-                                  , font=self.globalGL.glSmallFont
-                                  # , angle=np.pi/2.0
-                                  # , x=axisX-(10.0*self.pixelX) #*len(str(axisX)))
-                                  # , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE
+        self._axisXLabelling.append(GLString(text=axisXText,
+                                  font=self.globalGL.glSmallFont,
+                                  # , angle=np.pi/2.0,
+                                  # , x=axisX-(10.0*self.pixelX) #*len(str(axisX))),
+                                  # , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE,
 
-                                  , x=axisX-(0.4*self.globalGL.glSmallFont.width*self.pixelX*len(axisXText)) #*len(str(axisX)))
-                                  , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE-self.globalGL.glSmallFont.height
+                                  x=axisX-(0.4*self.globalGL.glSmallFont.width*self.pixelX*len(axisXText)), #*len(str(axisX))),
+                                  y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE-self.globalGL.glSmallFont.height,
 
-                                  , color=labelColour, GLContext=self
-                                  , obj=None))
+                                  color=labelColour, GLContext=self,
+                                  obj=None))
 
       # append the axisCode to the end
-      self._axisXLabelling.append(GLString(text=self.axisCodes[0]
-                                , font=self.globalGL.glSmallFont
-                                , x=self.axisL+(5*self.pixelX)
-                                , y=self.AXIS_LINE
-                                , color=labelColour, GLContext=self
-                                , obj=None))
+      self._axisXLabelling.append(GLString(text=self.axisCodes[0],
+                                font=self.globalGL.glSmallFont,
+                                x=self.axisL+(5*self.pixelX),
+                                y=self.AXIS_LINE,
+                                color=labelColour, GLContext=self,
+                                obj=None))
 
       self._axisYLabelling = []
 
@@ -3233,20 +3234,20 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
           axisYText = str(int(axisY)) if ayLabel[3] >= 1 else str(axisY)
 
-        self._axisYLabelling.append(GLString(text=axisYText
-                                  , font=self.globalGL.glSmallFont
-                                  , x=self.AXIS_LINE
-                                  , y=axisY-(10.0*self.pixelY)
-                                  , color=labelColour, GLContext=self
-                                  , obj=None))
+        self._axisYLabelling.append(GLString(text=axisYText,
+                                  font=self.globalGL.glSmallFont,
+                                  x=self.AXIS_LINE,
+                                  y=axisY-(10.0*self.pixelY),
+                                  color=labelColour, GLContext=self,
+                                  obj=None))
 
       # append the axisCode to the end
-      self._axisYLabelling.append(GLString(text=self.axisCodes[1]
-                                , font=self.globalGL.glSmallFont
-                                , x=self.AXIS_LINE
-                                , y=self.axisT-(1.5*self.globalGL.glSmallFont.height*self.pixelY)
-                                , color=labelColour, GLContext=self
-                                , obj=None))
+      self._axisYLabelling.append(GLString(text=self.axisCodes[1],
+                                font=self.globalGL.glSmallFont,
+                                x=self.AXIS_LINE,
+                                y=self.axisT-(1.5*self.globalGL.glSmallFont.height*self.pixelY),
+                                color=labelColour, GLContext=self,
+                                obj=None))
 
   def drawAxisLabels(self):
     # draw axes labelling

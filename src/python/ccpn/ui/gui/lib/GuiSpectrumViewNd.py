@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import math
 import numpy
 import os
+import numpy as np
 
 from OpenGL import GL
 from OpenGL.error import GLError
@@ -657,7 +658,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   #
   #   self._buildSignal._emitSignal(self.buildContours)
 
-  def _buildGLContours(self, GLList):
+  def _buildGLContours(self, glList):
 
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
@@ -683,15 +684,17 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if not self.posLevels and not self.negLevels:
       return
 
+    self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
+    self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
+    glList.posColour = self.posColour
+    glList.negColour = self.negColour
+
     # contourDict = self.constructContours(guiStrip, posLevels, negLevels)
     try:
-      self._constructContours(self.posLevels, self.negLevels)
+      self._constructContours(self.posLevels, self.negLevels, glList=glList)
     except FileNotFoundError:
       self._project._logger.warning("No data file found for %s" % self)
       return
-
-    self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
-    self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
 
   #def drawContours(self, painter, guiStrip):
   def _buildContours(self, painter):
@@ -815,7 +818,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         GL.glCallList(displayLists[n])
     # GL.glPopMatrix()
 
-  def _constructContours(self, posLevels, negLevels, doRefresh=False):
+  def _constructContours(self, posLevels, negLevels, doRefresh=False, glList=None):
     """ Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level needs to call this function.
     """
@@ -893,14 +896,17 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             else:
               negContoursAll[n].extend(contourData)
             # print(contourData)
-        
+
+    glList.clearArrays()
     if posContoursAll:
       for n, contourData in enumerate(posContoursAll):
         self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
+        self._addContoursToGLList(contourData, glList=glList, colour=self.posColour)
 
     if negContoursAll:
       for n, contourData in enumerate(negContoursAll):
         self._addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
+        self._addContoursToGLList(contourData, glList=glList, colour=self.negColour)
       
     ###GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
 
@@ -1086,7 +1092,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           
   def _addContoursToDisplayList(self, displayList, contourData, level):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
-    
+
     GL.glNewList(displayList, GL.GL_COMPILE)
     xData = []
     yData = []
@@ -1105,7 +1111,20 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     GL.glEndList()
 
-    
+  def _addContoursToGLList(self, contourData, glList=None, colour=None):
+    """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
+
+    for contour in contourData:
+      index = glList.numVertices
+      thisNumVertices = len(contour)//2
+      glList.vertices = np.append(glList.vertices, contour)
+
+      newIndices = list([(((ll+1) // 2) % thisNumVertices)+index for ll in range(2*thisNumVertices)])
+      glList.indices = np.append(glList.indices, newIndices)
+      glList.colors = np.append(glList.colors, colour * thisNumVertices)
+
+      glList.numVertices = len(glList.vertices)//2
+
   # def getTranslateScale(self, dim, ind:int):
   def _getTranslateScale(self, ind:int, pixelViewBox0:float=None, pixelViewBox1:float=None):
     """Get translation data for X (ind==0) or Y (ind==1) dimension"""

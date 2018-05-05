@@ -66,7 +66,6 @@ class CcpnOpenGLExporter():
     self.project = self.strip.project
     self.filename = filename
     self.params = params
-    self.canv = None
     self.report = Report(self, self.project, filename)
 
     # # use a drawing object as this can be inserted into a report if we have a report generator
@@ -96,6 +95,7 @@ class CcpnOpenGLExporter():
 
     # build all the sections of the pdf
     self._buildAll()
+    self.addDrawingToStory()
 
     # this generates the buffer to write to the file
     self.report.buildDocument()

@@ -74,8 +74,7 @@ class OpenGLPDFExporter(Exporter):
 
     pdfExport = self.glWidget.exportToPDF(filename, self.params)
     if pdfExport:
-      with open(filename, 'wb') as fd:
-        fd.write(pdfExport)
+      pdfExport.writePDFFile()
 
 
 OpenGLPDFExporter.register()

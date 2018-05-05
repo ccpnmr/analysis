@@ -74,8 +74,9 @@ class OpenGLSVGExporter(Exporter):
 
     svgExport = self.glWidget.exportToSvg(filename, self.params)
     if svgExport:
-      with open(filename, 'wb') as fd:
-        fd.write(svgExport)
+      svgExport.writeSVGFile()
+      # with open(filename, 'wb') as fd:
+      #   fd.write(svgExport)
 
 
 OpenGLSVGExporter.register()

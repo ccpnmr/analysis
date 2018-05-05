@@ -5464,12 +5464,10 @@ class CcpnGLWidget(QOpenGLWidget):
           return
 
   def exportToPDF(self, filename, params):
-    pdfExporter = CcpnOpenGLExporter(self, self._parent, filename, params)
-    return pdfExporter.exportToPDF
+    return CcpnOpenGLExporter(self, self._parent, filename, params)
 
   def exportToSVG(self, filename, params):
-    pdfExporter = CcpnOpenGLExporter(self, self._parent, filename, params)
-    return pdfExporter.exportToSVG
+    return CcpnOpenGLExporter(self, self._parent, filename, params)
 
   def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
     for pp in range(0, len(lineList), 2):

@@ -160,43 +160,24 @@ class CcpnOpenGLExporter():
     pixLeft = self.margin
 
     # create an object that can be added to a report
-    self._mainPlot = Drawing(self.displayScale*self.mainW, self.displayScale*self.mainH)
-    self._rAxisPlot = Drawing(self.displayScale*self.rAxisW, self.displayScale*self.rAxisH) \
-                        if self.rAxis else None
-    self._bAxisPlot = Drawing(self.displayScale*self.bAxisW, self.displayScale*self.bAxisH) \
-                        if self.bAxis else None
+    self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
+    # self._rAxisPlot = Drawing(self.displayScale*self.rAxisW, self.displayScale*self.rAxisH) \
+    #                     if self.rAxis else None
+    # self._bAxisPlot = Drawing(self.displayScale*self.bAxisW, self.displayScale*self.bAxisH) \
+    #                     if self.bAxis else None
+
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # grid lines
 
-    grid  = self.parent.gridList[0]  # main grid
-
     colourGroups = OrderedDict()
-    for ii in range(0, len(grid.indices), 2):
-      ii0 = int(grid.indices[ii])
-      ii1 = int(grid.indices[ii+1])
-
-      newLine = [grid.vertices[ii0*2],
-                 grid.vertices[ii0 * 2+1],
-                 grid.vertices[ii1 * 2],
-                 grid.vertices[ii1 * 2+1]]
-
-      colour = colors.Color(*grid.colors[ii0*4:ii0 * 4+3], alpha=grid.colors[ii0 * 4+3])
-      colourPath = 'grid%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
-      if colourPath not in colourGroups:
-        cc = colourGroups[colourPath] = {}
-        cc['lines'] = []
-        cc['strokeWidth'] = 0.5
-        cc['strokeColor'] = colour
-        cc['strokeLineCap'] = 1
-
-      # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
-      if self.parent.lineVisible(newLine,
-                                 x=0, y=0,
-                                 width=self.displayScale*self.mainW,
-                                 height=self.displayScale*self.mainH):
-        colourGroups[colourPath]['lines'].append(newLine)
-
+    self.appendIndexLineGroup(indArray=self.parent.gridList[0],
+                              colourGroups=colourGroups,
+                              plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                       PLOTBOTTOM: self.displayScale * self.mainB,
+                                       PLOTWIDTH: self.displayScale * self.mainW,
+                                       PLOTHEIGHT: self.displayScale * self.mainH},
+                              name='grid')
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -245,7 +226,8 @@ class CcpnOpenGLExporter():
 
               # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
               if self.parent.lineVisible(newLine,
-                                         x=0, y=0,
+                                         x=self.displayScale * self.mainL,
+                                         y=self.displayScale * self.mainB,
                                          width=self.displayScale * self.mainW,
                                          height=self.displayScale * self.mainH):
                 colourGroups[colourPath]['lines'].append(newLine)
@@ -287,7 +269,8 @@ class CcpnOpenGLExporter():
 
               # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
               if self.parent.lineVisible(newLine,
-                                         x=0, y=0,
+                                         x=self.displayScale * self.mainL,
+                                         y=self.displayScale * self.mainB,
                                          width=self.displayScale * self.mainW,
                                          height=self.displayScale * self.mainH):
                 colourGroups[colourPath]['lines'].append(newLine)
@@ -333,7 +316,8 @@ class CcpnOpenGLExporter():
 
                 # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
                 if self.parent.lineVisible(newLine,
-                                           x=0, y=0,
+                                           x=self.displayScale * self.mainL,
+                                           y=self.displayScale * self.mainB,
                                            width=self.displayScale * self.mainW,
                                            height=self.displayScale * self.mainH):
                   colourGroups[colourPath]['lines'].append(newLine)
@@ -373,12 +357,53 @@ class CcpnOpenGLExporter():
 
                 # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
                 if self.parent.lineVisible(newLine,
-                                           x=0, y=0,
+                                           x=self.displayScale * self.mainL,
+                                           y=self.displayScale * self.mainB,
                                            width=self.displayScale * self.mainW,
                                            height=self.displayScale * self.mainH):
                   colourGroups[colourPath]['lines'].append(newLine)
 
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='spectra')
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # marks
+
+    colourGroups = OrderedDict()
+    self.appendIndexLineGroup(indArray=self.parent._marksList,
+                              colourGroups=colourGroups,
+                              plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                       PLOTBOTTOM: self.displayScale * self.mainB,
+                                       PLOTWIDTH: self.displayScale * self.mainW,
+                                       PLOTHEIGHT: self.displayScale * self.mainH},
+                              name='marks')
+    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='marks')
+
+
+
+    # add an axis mask
+    backCol = colors.Color(self.parent.background[0] * 255,
+                           self.parent.background[1] * 255,
+                           self.parent.background[2] * 255,
+                           alpha = self.parent.background[3])
+    gr = Group()
+    if self.rAxis:
+      gr.add(Rect(self.displayScale * self.rAxisL,
+                  0.0,
+                  self.displayScale * self.rAxisW,
+                  self.pixHeight,
+                  fillColor=backCol,
+                  strokeColor=backCol,
+                  fill=True))
+    if self.bAxis:
+      gr.add(Rect(0.0,
+                  0.0,
+                  self.pixWidth,
+                  self.displayScale * self.bAxisH,
+                  fillColor=backCol,
+                  strokeColor=backCol,
+                  fill=True))
+    if self.rAxis or self.bAxis:
+      self._mainPlot.add(gr)
 
   def report(self):
     """
@@ -390,10 +415,11 @@ class CcpnOpenGLExporter():
     scale = self.displayScale
     return Clipped_Flowable(width=self.pixWidth, height=self.pixHeight,
                             mainPlot=self._mainPlot,
-                            mainDim={ PLOTLEFT: scale*self.mainL, 
-                                      PLOTBOTTOM: scale*self.mainB, 
-                                      PLOTWIDTH: scale*self.mainW, 
-                                      PLOTHEIGHT: scale*self.mainH } 
+                            mainDim={ PLOTLEFT: 0,                  #scale*self.mainL,
+                                      PLOTBOTTOM: 0,                #scale*self.mainB,
+                                      PLOTWIDTH: self.pixWidth,     #scale*self.mainW,
+                                      PLOTHEIGHT: self.pixHeight    #scale*self.mainH
+                                      }
                             )
 
   def addDrawingToStory(self):
@@ -406,32 +432,32 @@ class CcpnOpenGLExporter():
     """
     Output an SVG file for the GL widget
     """
-    d = renderScaledDrawing(self._mainPlot)
-    c = SVGCanvas((self.pixWidth, self.pixHeight))
-    mainDim = {PLOTLEFT: self.displayScale * self.mainL,
-               PLOTBOTTOM: self.displayScale * self.mainB,
-               PLOTWIDTH: self.displayScale * self.mainW,
-               PLOTHEIGHT: self.displayScale * self.mainH}
+    # d = renderScaledDrawing(self._mainPlot)
+    # c = SVGCanvas((self.pixWidth, self.pixHeight))
+    # mainDim = {PLOTLEFT: self.displayScale * self.mainL,
+    #            PLOTBOTTOM: self.displayScale * self.mainB,
+    #            PLOTWIDTH: self.displayScale * self.mainW,
+    #            PLOTHEIGHT: self.displayScale * self.mainH}
+    #
+    # c.saveState()
+    #
+    # # make a clippath for the mainPlot
+    # pl = c.beginPath()
+    # pl.moveTo(mainDim[PLOTLEFT], mainDim[PLOTBOTTOM])
+    # pl.lineTo(mainDim[PLOTLEFT], mainDim[PLOTHEIGHT] + mainDim[PLOTBOTTOM])
+    # pl.lineTo(mainDim[PLOTLEFT] + mainDim[PLOTWIDTH], mainDim[PLOTHEIGHT] + mainDim[PLOTBOTTOM])
+    # pl.lineTo(mainDim[PLOTLEFT] + mainDim[PLOTWIDTH], mainDim[PLOTBOTTOM])
+    # pl.close()
+    # c.clipPath(pl, fill=0, stroke=0)
+    #
+    # # draw the drawing into the canvas
+    # d.drawOn(c, mainDim[PLOTLEFT], mainDim[PLOTBOTTOM])
+    #
+    # # draw(d, c, self.displayScale*self.mainL, self.displayScale*self.mainB, showBoundary=False)
+    #
+    # c.save(self.filename)
 
-    c.saveState()
-
-    # make a clippath for the mainPlot
-    pl = c.beginPath()
-    pl.moveTo(mainDim[PLOTLEFT], mainDim[PLOTBOTTOM])
-    pl.lineTo(mainDim[PLOTLEFT], mainDim[PLOTHEIGHT] + mainDim[PLOTBOTTOM])
-    pl.lineTo(mainDim[PLOTLEFT] + mainDim[PLOTWIDTH], mainDim[PLOTHEIGHT] + mainDim[PLOTBOTTOM])
-    pl.lineTo(mainDim[PLOTLEFT] + mainDim[PLOTWIDTH], mainDim[PLOTBOTTOM])
-    pl.close()
-    c.clipPath(pl, fill=0, stroke=0)
-
-    # draw the drawing into the canvas
-    d.drawOn(c, mainDim[PLOTLEFT], mainDim[PLOTBOTTOM])
-
-    # draw(d, c, self.displayScale*self.mainL, self.displayScale*self.mainB, showBoundary=False)
-
-    c.save(self.filename)
-
-    # renderSVG.drawToFile(self._mainPlot, self.filename, showBoundary=False)
+    renderSVG.drawToFile(self._mainPlot, self.filename, showBoundary=False)
 
   def writePDFFile(self):
     """
@@ -439,6 +465,33 @@ class CcpnOpenGLExporter():
     """
     # self._report.story.append(self._mainPlot)
     self._report.writeDocument()
+
+  def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name):
+    for ii in range(0, len(indArray.indices), 2):
+      ii0 = int(indArray.indices[ii])
+      ii1 = int(indArray.indices[ii+1])
+
+      newLine = [indArray.vertices[ii0*2],
+                 indArray.vertices[ii0 * 2+1],
+                 indArray.vertices[ii1 * 2],
+                 indArray.vertices[ii1 * 2+1]]
+
+      colour = colors.Color(*indArray.colors[ii0*4:ii0 * 4+3], alpha=indArray.colors[ii0 * 4+3])
+      colourPath = '%s:%s%s%s%s' % (name, colour.red, colour.green, colour.blue, colour.alpha)
+      if colourPath not in colourGroups:
+        cc = colourGroups[colourPath] = {}
+        cc['lines'] = []
+        cc['strokeWidth'] = 0.5
+        cc['strokeColor'] = colour
+        cc['strokeLineCap'] = 1
+
+      # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+      if self.parent.lineVisible(newLine,
+                                 x=plotDim[PLOTLEFT],
+                                 y=plotDim[PLOTBOTTOM],
+                                 width=plotDim[PLOTWIDTH],
+                                 height=plotDim[PLOTHEIGHT]):
+        colourGroups[colourPath]['lines'].append(newLine)
 
   def appendGroup(self, drawing:Drawing=None, colourGroups:dict=None, name:str=None):
     """

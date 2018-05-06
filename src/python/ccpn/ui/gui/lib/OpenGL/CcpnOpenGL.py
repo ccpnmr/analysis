@@ -78,8 +78,7 @@ import numpy as np
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
-from ccpn.core.Integral import Integral
-from ccpn.ui.gui.lib.mouseEvents import MouseModes, getCurrentMouseMode
+from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu,MultipletMenu, PhasingMenu
 
 from ccpn.util.Colour import getAutoColourRgbRatio
@@ -114,29 +113,6 @@ except ImportError:
           "PyOpenGL must be installed to run this example.")
   sys.exit(1)
 
-# SPECTRUM_STACKEDMATRIX = 'stackedMatrix'
-# SPECTRUM_MATRIX = 'spectrumMatrix'
-# SPECTRUM_MAXXALIAS = 'maxXAlias'
-# SPECTRUM_MINXALIAS = 'minXAlias'
-# SPECTRUM_MAXYALIAS = 'maxYAlias'
-# SPECTRUM_MINYALIAS = 'minYAlias'
-# SPECTRUM_DXAF = 'dxAF'
-# SPECTRUM_DYAF = 'dyAF'
-# SPECTRUM_XSCALE = 'xScale'
-# SPECTRUM_YSCALE = 'yScale'
-#
-# MAINVIEW = 'mainView'
-# MAINVIEWFULLWIDTH = 'mainViewFullWidth'
-# MAINVIEWFULLHEIGHT = 'mainViewFullHeight'
-# RIGHTAXIS = 'rightAxis'
-# RIGHTAXISBAR = 'rightAxisBar'
-# FULLRIGHTAXIS = 'fullRightAxis'
-# FULLRIGHTAXISBAR = 'fullRightAxisBar'
-# BOTTOMAXIS = 'bottomAxis'
-# BOTTOMAXISBAR = 'bottomAxisBar'
-# FULLBOTTOMAXIS = 'fullBottomAxis'
-# FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
-# FULLVIEW = 'fullView'
 
 AXISLIMITS = [-1.0e12, 1.0e12]
 INVERTED_AXISLIMITS = [1.0e12, -1.0e12]

@@ -48,8 +48,14 @@ from reportlab.lib import colors
 from reportlab.graphics import renderSVG, renderPS
 from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Group, Path
 from reportlab.graphics.shapes import definePath
+from reportlab.graphics.renderSVG import draw, renderScaledDrawing, SVGCanvas
 from reportlab.lib.units import mm
 from ccpn.util.Report import Report
+
+PLOTLEFT = 'plotLeft'
+PLOTBOTTOM = 'plotBottom'
+PLOTWIDTH = 'plotWidth'
+PLOTHEIGHT = 'plotHeight'
 
 
 class CcpnOpenGLExporter():
@@ -85,41 +91,80 @@ class CcpnOpenGLExporter():
 
     # keep aspect ratio of the original screen
     self.margin = 2.0 * cm
+
+    self.main = True
+    self.rAxis = self.parent._drawRightAxis
+    self.bAxis = self.parent._drawBottomAxis
+
+    if not self.rAxis and not self.bAxis:
+      # no axes visible
+      self.mainH = self.parent.h
+      self.mainW = self.parent.w
+      self.mainL = 0
+      self.mainB = 0
+
+    elif self.rAxis and not self.bAxis:
+      # right axis visible
+      self.rAxisW = self.parent.AXIS_MARGINRIGHT
+      self.rAxisH = self.parent.h
+      self.rAxisL = self.parent.w - self.parent.AXIS_MARGINRIGHT
+      self.rAxisB = 0
+      self.mainW = self.parent.w - self.parent.AXIS_MARGINRIGHT
+      self.mainH = self.parent.h
+      self.mainL = 0
+      self.mainB = 0
+
+    elif not self.rAxis and self.bAxis:
+      # bottom axis visible
+      self.bAxisW = self.parent.w
+      self.bAxisH = self.parent.AXIS_MARGINBOTTOM
+      self.bAxisL = 0
+      self.bAxisB = 0
+      self.mainW = self.parent.w
+      self.mainH = self.parent.h - self.parent.AXIS_MARGINBOTTOM
+      self.mainL = 0
+      self.mainB = self.parent.AXIS_MARGINBOTTOM
+
+    else:
+      # both axes visible
+      self.rAxisW = self.parent.AXIS_MARGINRIGHT
+      self.rAxisH = self.parent.h - self.parent.AXIS_MARGINBOTTOM
+      self.rAxisL = self.parent.w - self.parent.AXIS_MARGINRIGHT
+      self.rAxisB = self.parent.AXIS_MARGINBOTTOM
+      self.bAxisW = self.parent.w - self.parent.AXIS_MARGINRIGHT
+      self.bAxisH = self.parent.AXIS_MARGINBOTTOM
+      self.bAxisL = 0
+      self.bAxisB = 0
+      self.mainW = self.parent.w - self.parent.AXIS_MARGINRIGHT
+      self.mainH = self.parent.h - self.parent.AXIS_MARGINBOTTOM
+      self.mainL = 0
+      self.mainB = self.parent.AXIS_MARGINBOTTOM
+
+    # strip axis ratio
     ratio = self.parent.h / self.parent.w
 
-    pixWidth = self._report.doc.width
-    pixHeight = pixWidth * ratio
-    if pixHeight > self._report.doc.height:
-      pixHeight = self._report.doc.height - cm
-      pixWidth = pixHeight / ratio
-    pixBottom = pageHeight - pixHeight - self.margin
+    # translate to size of drawing Flowable
+    self.pixWidth = self._report.doc.width
+    self.pixHeight = self.pixWidth * ratio
+    if self.pixHeight > (self._report.doc.height - 2*cm):
+
+      # TODO:ED check what else is stealing the height
+      self.pixHeight = self._report.doc.height - (2*cm)
+      self.pixWidth = self.pixHeight / ratio
+
+    # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
+    self.displayScale = self.pixHeight / self.parent.h
+
+    # don't think these are needed
+    pixBottom = pageHeight - self.pixHeight - self.margin
     pixLeft = self.margin
 
     # create an object that can be added to a report
-    self._drawing = Drawing(pixWidth, pixHeight)
-
-    # TODO:ED use extra drawing objects for the right axis and bottom axis
-    #         these can have their own clipping areas defined in the
-    #         Clipped_Flowable below
-
-
-
-    # self._report.setClipRegion(pixLeft, pixWidth, pixBottom, pixHeight)
-    # d.add(String(150, 100, 'Hello World', fontSize=18, fillColor=colors.red))
-
-    # gr = Group()
-    # add a clipping path
-    # pl = PolyLine(points=[0.0, 0.0, 0.0, pixHeight, pixWidth, pixHeight],
-    #               isClipPath=True, autoClose=True)
-    # pl = Path(isClipPath=1)
-    # pl.moveTo(0.0, 0.0)
-    # pl.lineTo(0.0, pixHeight)
-    # pl.lineTo(pixWidth, pixHeight)
-    # pl.lineTo(pixWidth, 0.0)
-    # pl.closePath()
-    # pl.isClipPath = True
-    # gr.add(pl)
-    # self._drawing.add(pl)
+    self._mainPlot = Drawing(self.displayScale*self.mainW, self.displayScale*self.mainH)
+    self._rAxisPlot = Drawing(self.displayScale*self.rAxisW, self.displayScale*self.rAxisH) \
+                        if self.rAxis else None
+    self._bAxisPlot = Drawing(self.displayScale*self.bAxisW, self.displayScale*self.bAxisH) \
+                        if self.bAxis else None
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # grid lines
@@ -145,10 +190,14 @@ class CcpnOpenGLExporter():
         cc['strokeColor'] = colour
         cc['strokeLineCap'] = 1
 
-      if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
+      # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+      if self.parent.lineVisible(newLine,
+                                 x=0, y=0,
+                                 width=self.displayScale*self.mainW,
+                                 height=self.displayScale*self.mainH):
         colourGroups[colourPath]['lines'].append(newLine)
 
-    self.appendGroup(colourGroups=colourGroups, name='grid')
+    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # spectrumView contours
@@ -194,7 +243,11 @@ class CcpnOpenGLExporter():
                 cc['strokeColor'] = colour
                 cc['strokeLineCap'] = 1
 
-              if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
+              # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+              if self.parent.lineVisible(newLine,
+                                         x=0, y=0,
+                                         width=self.displayScale * self.mainW,
+                                         height=self.displayScale * self.mainH):
                 colourGroups[colourPath]['lines'].append(newLine)
 
         else:
@@ -232,7 +285,11 @@ class CcpnOpenGLExporter():
                 cc['strokeColor'] = colour
                 cc['strokeLineCap'] = 1
 
-              if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
+              # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+              if self.parent.lineVisible(newLine,
+                                         x=0, y=0,
+                                         width=self.displayScale * self.mainW,
+                                         height=self.displayScale * self.mainH):
                 colourGroups[colourPath]['lines'].append(newLine)
 
           else:
@@ -274,9 +331,13 @@ class CcpnOpenGLExporter():
                   cc['strokeColor'] = colour
                   cc['strokeLineCap'] = 1
 
-                if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
-
+                # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+                if self.parent.lineVisible(newLine,
+                                           x=0, y=0,
+                                           width=self.displayScale * self.mainW,
+                                           height=self.displayScale * self.mainH):
                   colourGroups[colourPath]['lines'].append(newLine)
+
             else:
               if thisSpec.drawMode == GL.GL_TRIANGLES:
                 indexLen = 3
@@ -310,10 +371,14 @@ class CcpnOpenGLExporter():
                   cc['stroke'] = None
                   cc['strokeColor'] = None
 
-                if self.parent.lineVisible(newLine, x=0, y=0, width=pixWidth, height=pixHeight):
+                # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+                if self.parent.lineVisible(newLine,
+                                           x=0, y=0,
+                                           width=self.displayScale * self.mainW,
+                                           height=self.displayScale * self.mainH):
                   colourGroups[colourPath]['lines'].append(newLine)
 
-    self.appendGroup(colourGroups=colourGroups, name='spectra')
+    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='spectra')
 
   def report(self):
     """
@@ -322,7 +387,14 @@ class CcpnOpenGLExporter():
     and can be added to a report.
     :return reportlab.platypus.Flowable:
     """
-    return Clipped_Flowable(self._drawing)
+    scale = self.displayScale
+    return Clipped_Flowable(width=self.pixWidth, height=self.pixHeight,
+                            mainPlot=self._mainPlot,
+                            mainDim={ PLOTLEFT: scale*self.mainL, 
+                                      PLOTBOTTOM: scale*self.mainB, 
+                                      PLOTWIDTH: scale*self.mainW, 
+                                      PLOTHEIGHT: scale*self.mainH } 
+                            )
 
   def addDrawingToStory(self):
     """
@@ -334,18 +406,44 @@ class CcpnOpenGLExporter():
     """
     Output an SVG file for the GL widget
     """
-    renderSVG.drawToFile(self._drawing, self.filename, showBoundary=False)
+    d = renderScaledDrawing(self._mainPlot)
+    c = SVGCanvas((self.pixWidth, self.pixHeight))
+    mainDim = {PLOTLEFT: self.displayScale * self.mainL,
+               PLOTBOTTOM: self.displayScale * self.mainB,
+               PLOTWIDTH: self.displayScale * self.mainW,
+               PLOTHEIGHT: self.displayScale * self.mainH}
+
+    c.saveState()
+
+    # make a clippath for the mainPlot
+    pl = c.beginPath()
+    pl.moveTo(mainDim[PLOTLEFT], mainDim[PLOTBOTTOM])
+    pl.lineTo(mainDim[PLOTLEFT], mainDim[PLOTHEIGHT] + mainDim[PLOTBOTTOM])
+    pl.lineTo(mainDim[PLOTLEFT] + mainDim[PLOTWIDTH], mainDim[PLOTHEIGHT] + mainDim[PLOTBOTTOM])
+    pl.lineTo(mainDim[PLOTLEFT] + mainDim[PLOTWIDTH], mainDim[PLOTBOTTOM])
+    pl.close()
+    c.clipPath(pl, fill=0, stroke=0)
+
+    # draw the drawing into the canvas
+    d.drawOn(c, mainDim[PLOTLEFT], mainDim[PLOTBOTTOM])
+
+    # draw(d, c, self.displayScale*self.mainL, self.displayScale*self.mainB, showBoundary=False)
+
+    c.save(self.filename)
+
+    # renderSVG.drawToFile(self._mainPlot, self.filename, showBoundary=False)
 
   def writePDFFile(self):
     """
     Output a PDF file for the GL widget
     """
-    # self._report.story.append(self._drawing)
+    # self._report.story.append(self._mainPlot)
     self._report.writeDocument()
 
-  def appendGroup(self, colourGroups:dict, name:str):
+  def appendGroup(self, drawing:Drawing=None, colourGroups:dict=None, name:str=None):
     """
     Append a group of polylines to the current drawing object
+    :param drawing - drawing to append groups to:
     :param colourGroups - OrderedDict of polylines:
     :param name - name for the group:
     """
@@ -373,27 +471,37 @@ class CcpnOpenGLExporter():
             pl.lineTo(ll[vv], ll[vv+1])
           pl.closePath()
       gr.add(pl)
-    self._drawing.add(gr, name=name)
+    drawing.add(gr, name=name)
 
 class Clipped_Flowable(Flowable):
-  def __init__(self, drawing):
+  def __init__(self, width=0.0, height=0.0, 
+               mainPlot=None, mainDim=None):
     Flowable.__init__(self)
-    self._drawing = drawing
-    self.width = drawing.width
-    self.height = drawing.height
-
+    self.mainPlot = mainPlot
+    self.mainDim = mainDim
+    self.width = width
+    self.height = height
+    
   def draw(self):
-    # make a clippath
-    pl = self.canv.beginPath()
-    pl.moveTo(0, 0)
-    pl.lineTo(0, self.height)
-    pl.lineTo(self.width, self.height)
-    pl.lineTo(self.width, 0)
-    pl.close()
-    self.canv.clipPath(pl, fill=0, stroke=0)
+    if self.mainPlot:
+      self.canv.saveState()
+  
+      # make a clippath for the mainPlot
+      pl = self.canv.beginPath()
+      pl.moveTo(self.mainDim[PLOTLEFT], self.mainDim[PLOTBOTTOM])
+      pl.lineTo(self.mainDim[PLOTLEFT], self.mainDim[PLOTHEIGHT]+self.mainDim[PLOTBOTTOM])
+      pl.lineTo(self.mainDim[PLOTLEFT]+self.mainDim[PLOTWIDTH], self.mainDim[PLOTHEIGHT]+self.mainDim[PLOTBOTTOM])
+      pl.lineTo(self.mainDim[PLOTLEFT]+self.mainDim[PLOTWIDTH], self.mainDim[PLOTBOTTOM])
+      pl.close()
+      self.canv.clipPath(pl, fill=0, stroke=0)
+  
+      # draw the drawing into the canvas
+      self.mainPlot.drawOn(self.canv, self.mainDim[PLOTLEFT], self.mainDim[PLOTBOTTOM])
+    
+    # restore preclipping state
+    self.canv.restoreState()
+    # draw the axes
 
-    # draw the drawing into the canvas
-    self._drawing.drawOn(self.canv, 0, 0)
 
 if __name__ == '__main__':
   buf = io.BytesIO()

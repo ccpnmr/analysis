@@ -369,15 +369,6 @@ class CcpnOpenGLExporter():
     # integrals
 
     # colourGroups = OrderedDict()
-    # self.appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
-    #                           colourGroups=colourGroups,
-    #                           plotDim={PLOTLEFT: self.displayScale * self.mainL,
-    #                                    PLOTBOTTOM: self.displayScale * self.mainB,
-    #                                    PLOTWIDTH: self.displayScale * self.mainW,
-    #                                    PLOTHEIGHT: self.displayScale * self.mainH},
-    #                           name='IntegralListsLine',
-    #                           fillMode=None,
-    #                           checkIntegral=True, splitGroups=True)
     self.appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
                               colourGroups=colourGroups,
                               plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -390,7 +381,7 @@ class CcpnOpenGLExporter():
     # self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # spectrumView contours
+    # integralLists filled areas
 
     colourGroups = OrderedDict()
     for spectrumView in self.strip.orderedSpectrumViews():
@@ -462,10 +453,35 @@ class CcpnOpenGLExporter():
                                              height=self.displayScale * self.mainH):
                     colourGroups[colourPath]['lines'].append(newLine)
 
-    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsFill')
+    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsAreaFill')
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # grid marks
+
+    if self.rAxis and self.bAxis:
+      colourGroups = OrderedDict()
+      if self.rAxis:
+        self.appendIndexLineGroup(indArray=self.parent.gridList[1],
+                                  colourGroups=colourGroups,
+                                  plotDim={PLOTLEFT: self.displayScale * (self.mainW-self.parent.AXIS_LINE),
+                                           PLOTBOTTOM: self.displayScale * self.mainB,
+                                           PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
+                                           PLOTHEIGHT: self.displayScale * self.mainH},
+                                  name='gridVertical')
+      if self.bAxis:
+        self.appendIndexLineGroup(indArray=self.parent.gridList[2],
+                                  colourGroups=colourGroups,
+                                  plotDim={PLOTLEFT: 0.0,
+                                           PLOTBOTTOM: self.displayScale * self.mainB,
+                                           PLOTWIDTH: self.displayScale * self.mainW,
+                                           PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
+                                  name='gridHorizontal')
+      self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # add an axis mask
+
     backCol = colors.Color(self.parent.background[0] * 255,
                            self.parent.background[1] * 255,
                            self.parent.background[2] * 255,

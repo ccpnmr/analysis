@@ -138,7 +138,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
   AXIS_MARGINRIGHT = 40
   AXIS_MARGINBOTTOM = 25
-  AXIS_LINE = 5
+  AXIS_LINE = 10
   YAXISUSEEFORMAT = False
   INVERTXAXIS = True
   INVERTYAXIS = True
@@ -4518,7 +4518,7 @@ class CcpnGLWidget(QOpenGLWidget):
           # c = np.clip(3.*(ppl-3), 0., 30.)
           # print ('>>>clip %d %s %0.3f %0.3f %s %0.3f' % (scaleOrder, c, dim[ax], nl[ax], ppl, d))
 
-          c = 32.0+(scaleOrder*30)
+          c = 30.0+(scaleOrder*20)
 
           bx = (ax+1) % 2
           for x in range(0, int(nl[ax])):
@@ -4547,7 +4547,8 @@ class CcpnGLWidget(QOpenGLWidget):
             # append the new points to the end of nparray
             gridGLList.indices = np.append(gridGLList.indices, [index, index+1])
             gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
-            gridGLList.colors = np.append(gridGLList.colors, [r, g, b, c/transparency, r, g, b, c/transparency])
+            alpha = min([1.0, c/transparency])
+            gridGLList.colors = np.append(gridGLList.colors, [r, g, b, alpha, r, g, b, alpha])
             gridGLList.numVertices += 2
             index += 2
 

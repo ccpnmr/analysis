@@ -416,6 +416,36 @@ class CcpnOpenGLExporter():
     """
     self._report.writeDocument()
 
+  def appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None):
+    for vv in range(0, len(indArray.vertices) - 2, 2):
+
+      if mat is not None:
+
+        vectStart = [indArray.vertices[vv], indArray.vertices[vv + 1], 0.0, 1.0]
+        vectStart = mat.dot(vectStart)
+        vectEnd = [indArray.vertices[vv + 2], indArray.vertices[vv + 3], 0.0, 1.0]
+        vectEnd = mat.dot(vectEnd)
+        newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
+      else:
+        newLine = list(indArray.vertices[vv:vv + 4])
+
+      colour = colors.Color(*indArray.colors[vv * 2:vv * 2 + 3], alpha=float(indArray.colors[vv * 2 + 3]))
+      colourPath = 'spectrumView%s%s%s%s%s' % (name, colour.red, colour.green, colour.blue, colour.alpha)
+      if colourPath not in colourGroups:
+        cc = colourGroups[colourPath] = {}
+        cc['lines'] = []
+        cc['strokeWidth'] = 0.5
+        cc['strokeColor'] = colour
+        cc['strokeLineCap'] = 1
+
+      # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+      if self.parent.lineVisible(newLine,
+                                 x=plotDim[PLOTLEFT],
+                                 y=plotDim[PLOTBOTTOM],
+                                 width=plotDim[PLOTWIDTH],
+                                 height=plotDim[PLOTHEIGHT]):
+        colourGroups[colourPath]['lines'].append(newLine)
+
   def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name):
     for ii in range(0, len(indArray.indices), 2):
       ii0 = int(indArray.indices[ii])

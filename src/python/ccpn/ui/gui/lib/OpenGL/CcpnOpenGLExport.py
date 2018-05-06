@@ -289,38 +289,16 @@ class CcpnOpenGLExporter():
           if peakListView in self.parent._GLPeakLists.keys():
 
             thisSpec = self.parent._GLPeakLists[peakListView]
-            # colour = colors.Color(*thisSpec.colors[0:3], alpha=float(thisSpec.colors[3]))
 
             mode = thisSpec.fillMode
             if not mode:
-              for ii in range(0, len(thisSpec.indices), 2):
-                ii0 = int(thisSpec.indices[ii])
-                ii1 = int(thisSpec.indices[ii + 1])
-
-                # vectStart = [thisSpec.vertices[ii0*2], thisSpec.vertices[ii0*2 + 1], 0.0, 1.0]
-                # vectStart = mat.dot(vectStart)
-                # vectEnd = [thisSpec.vertices[ii1*2], thisSpec.vertices[ii1*2 + 1], 0.0, 1.0]
-                # vectEnd = mat.dot(vectEnd)
-                # newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
-                newLine = [thisSpec.vertices[ii0*2], thisSpec.vertices[ii0*2 + 1],
-                           thisSpec.vertices[ii1 * 2], thisSpec.vertices[ii1 * 2 + 1]]
-
-                colour = colors.Color(*thisSpec.colors[ii0*4:ii0 * 4+3], alpha=thisSpec.colors[ii0 * 4+3])
-                colourPath = 'spectrumViewPeakLists%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
-                if colourPath not in colourGroups:
-                  cc = colourGroups[colourPath] = {}
-                  cc['lines'] = []
-                  cc['strokeWidth'] = 0.5
-                  cc['strokeColor'] = colour
-                  cc['strokeLineCap'] = 1
-
-                # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
-                if self.parent.lineVisible(newLine,
-                                           x=self.displayScale * self.mainL,
-                                           y=self.displayScale * self.mainB,
-                                           width=self.displayScale * self.mainW,
-                                           height=self.displayScale * self.mainH):
-                  colourGroups[colourPath]['lines'].append(newLine)
+              self.appendIndexLineGroup(indArray=thisSpec,
+                                        colourGroups=colourGroups,
+                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                                 PLOTBOTTOM: self.displayScale * self.mainB,
+                                                 PLOTWIDTH: self.displayScale * self.mainW,
+                                                 PLOTHEIGHT: self.displayScale * self.mainH},
+                                        name='spectrumViewPeakList')
 
             else:
               if thisSpec.drawMode == GL.GL_TRIANGLES:
@@ -378,8 +356,6 @@ class CcpnOpenGLExporter():
                               name='marks')
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='marks')
 
-
-
     # add an axis mask
     backCol = colors.Color(self.parent.background[0] * 255,
                            self.parent.background[1] * 255,
@@ -432,38 +408,12 @@ class CcpnOpenGLExporter():
     """
     Output an SVG file for the GL widget
     """
-    # d = renderScaledDrawing(self._mainPlot)
-    # c = SVGCanvas((self.pixWidth, self.pixHeight))
-    # mainDim = {PLOTLEFT: self.displayScale * self.mainL,
-    #            PLOTBOTTOM: self.displayScale * self.mainB,
-    #            PLOTWIDTH: self.displayScale * self.mainW,
-    #            PLOTHEIGHT: self.displayScale * self.mainH}
-    #
-    # c.saveState()
-    #
-    # # make a clippath for the mainPlot
-    # pl = c.beginPath()
-    # pl.moveTo(mainDim[PLOTLEFT], mainDim[PLOTBOTTOM])
-    # pl.lineTo(mainDim[PLOTLEFT], mainDim[PLOTHEIGHT] + mainDim[PLOTBOTTOM])
-    # pl.lineTo(mainDim[PLOTLEFT] + mainDim[PLOTWIDTH], mainDim[PLOTHEIGHT] + mainDim[PLOTBOTTOM])
-    # pl.lineTo(mainDim[PLOTLEFT] + mainDim[PLOTWIDTH], mainDim[PLOTBOTTOM])
-    # pl.close()
-    # c.clipPath(pl, fill=0, stroke=0)
-    #
-    # # draw the drawing into the canvas
-    # d.drawOn(c, mainDim[PLOTLEFT], mainDim[PLOTBOTTOM])
-    #
-    # # draw(d, c, self.displayScale*self.mainL, self.displayScale*self.mainB, showBoundary=False)
-    #
-    # c.save(self.filename)
-
     renderSVG.drawToFile(self._mainPlot, self.filename, showBoundary=False)
 
   def writePDFFile(self):
     """
     Output a PDF file for the GL widget
     """
-    # self._report.story.append(self._mainPlot)
     self._report.writeDocument()
 
   def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name):

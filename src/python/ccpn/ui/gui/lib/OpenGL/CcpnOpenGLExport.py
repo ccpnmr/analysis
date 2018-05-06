@@ -398,10 +398,9 @@ class CcpnOpenGLExporter():
       for peakListView in spectrumView.peakListViews:
         if spectrumView.isVisible() and peakListView.isVisible():
 
-          if peakListView in self.parent._GLPeakLists.keys():
+          if peakListView in self.parent._GLIntegralLists.keys():
 
-            thisSpec = self.parent._GLPeakLists[peakListView]
-
+            mat = None
             if spectrumView.spectrum.dimensionCount > 1:
               if spectrumView in self.parent._spectrumSettings.keys():
 
@@ -417,12 +416,51 @@ class CcpnOpenGLExporter():
                 else:
                   mat = None
 
-                thisSpec = self.parent._contourList[spectrumView]
+            # draw the integralAreas if they exist
+            for integralArea in self.parent._GLIntegralLists[peakListView]._regions:
+              if hasattr(integralArea, '_integralArea'):
 
-                # draw the integralAreas if they exist
-                for integralArea in self.parent._GLIntegralLists[peakListView]._regions:
-                  if hasattr(integralArea, '_integralArea'):
-                    integralArea._integralArea.drawVertexColor()
+                thisSpec = integralArea._integralArea
+                for vv in range(0, len(thisSpec.vertices) - 4, 2):
+
+                  if mat is not None:
+
+                    vectStart = [thisSpec.vertices[vv], thisSpec.vertices[vv + 1], 0.0, 1.0]
+                    vectStart = mat.dot(vectStart)
+                    vectMid = [thisSpec.vertices[vv + 2], thisSpec.vertices[vv + 3], 0.0, 1.0]
+                    vectMid = mat.dot(vectMid)
+                    vectEnd = [thisSpec.vertices[vv + 4], thisSpec.vertices[vv + 5], 0.0, 1.0]
+                    vectEnd = mat.dot(vectEnd)
+                    newLine = [vectStart[0], vectStart[1],
+                               vectMid[0], vectMid[1],
+                               vectEnd[0], vectEnd[1]]
+                  else:
+                    newLine = list(thisSpec.vertices[vv:vv + 6])
+
+                  colour = colors.Color(*thisSpec.colors[vv * 2:vv * 2 + 3], alpha=float(thisSpec.colors[vv * 2 + 3]))
+                  colourPath = 'spectrumViewIntegralFill%s%s%s%s%s' % (
+                                      spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+                  if colourPath not in colourGroups:
+                    cc = colourGroups[colourPath] = {}
+                    # if (thisSpec.fillMode or GL.GL_LINE) == GL.GL_LINE:
+                    #   cc['lines'] = []
+                    #   cc['strokeWidth'] = 0.5
+                    #   cc['strokeColor'] = colour
+                    #   cc['strokeLineCap'] = 1
+                    # else:
+                      # assume that it is GL.GL_FILL
+                    cc['lines'] = []
+                    cc['fillColor'] = colour
+                    cc['stroke'] = None
+                    cc['strokeColor'] = None
+
+                  # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+                  if self.parent.lineVisible(newLine,
+                                             x=self.displayScale * self.mainL,
+                                             y=self.displayScale * self.mainB,
+                                             width=self.displayScale * self.mainW,
+                                             height=self.displayScale * self.mainH):
+                    colourGroups[colourPath]['lines'].append(newLine)
 
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsFill')
 

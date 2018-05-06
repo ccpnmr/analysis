@@ -2976,8 +2976,15 @@ class CcpnGLWidget(QOpenGLWidget):
             # draw the integralAreas if they exist
             for integralArea in self._GLIntegralLists[peakListView]._regions:
               if hasattr(integralArea, '_integralArea'):
+                if self._stackingValue:
+                  # use the stacking matrix to offset the 1D spectra
+                  self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
+                                                                      1, GL.GL_FALSE,
+                                                                      self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX])
+
                 integralArea._integralArea.drawVertexColor()
 
+    self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
     # for il in self._GLIntegralLists.values():
     #   if il.spectrumView.isVisible() and il.integralListView.isVisible():

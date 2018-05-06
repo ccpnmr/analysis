@@ -5445,10 +5445,10 @@ class CcpnGLWidget(QOpenGLWidget):
   def exportToSVG(self, filename='default.svg', params=None):
     return CcpnOpenGLExporter(self, self._parent, filename, params)
 
-  def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
+  def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
     for pp in range(0, len(lineList), 2):
       if (self.between(lineList[pp], self.axisL, self.axisR) and
-          self.between(lineList[pp+1], self.axisT, self.axisB)):
+              (self.between(lineList[pp+1], self.axisT, self.axisB) or checkIntegral)):
         break
     else:
       return False

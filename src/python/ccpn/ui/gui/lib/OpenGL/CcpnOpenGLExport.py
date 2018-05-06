@@ -290,7 +290,6 @@ class CcpnOpenGLExporter():
                                   name='PeakLists',
                                   fillMode=None)
 
-
     # for spectrumView in self.strip.orderedSpectrumViews():
     #
     #   for peakListView in spectrumView.peakListViews:
@@ -369,15 +368,16 @@ class CcpnOpenGLExporter():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # integrals
 
-    colourGroups = OrderedDict()
-    self.appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
-                              colourGroups=colourGroups,
-                              plotDim={PLOTLEFT: self.displayScale * self.mainL,
-                                       PLOTBOTTOM: self.displayScale * self.mainB,
-                                       PLOTWIDTH: self.displayScale * self.mainW,
-                                       PLOTHEIGHT: self.displayScale * self.mainH},
-                              name='IntegralListsLine',
-                              fillMode=None)
+    # colourGroups = OrderedDict()
+    # self.appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
+    #                           colourGroups=colourGroups,
+    #                           plotDim={PLOTLEFT: self.displayScale * self.mainL,
+    #                                    PLOTBOTTOM: self.displayScale * self.mainB,
+    #                                    PLOTWIDTH: self.displayScale * self.mainW,
+    #                                    PLOTHEIGHT: self.displayScale * self.mainH},
+    #                           name='IntegralListsLine',
+    #                           fillMode=None,
+    #                           checkIntegral=True, splitGroups=True)
     self.appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
                               colourGroups=colourGroups,
                               plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -385,8 +385,47 @@ class CcpnOpenGLExporter():
                                        PLOTWIDTH: self.displayScale * self.mainW,
                                        PLOTHEIGHT: self.displayScale * self.mainH},
                               name='IntegralListsFill',
-                              fillMode=GL.GL_FILL)
-    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
+                              fillMode=GL.GL_FILL,
+                              checkIntegral=True, splitGroups=True)
+    # self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # spectrumView contours
+
+    colourGroups = OrderedDict()
+    for spectrumView in self.strip.orderedSpectrumViews():
+
+      for peakListView in spectrumView.peakListViews:
+        if spectrumView.isVisible() and peakListView.isVisible():
+
+          if peakListView in self.parent._GLPeakLists.keys():
+
+            thisSpec = self.parent._GLPeakLists[peakListView]
+
+            if spectrumView.spectrum.dimensionCount > 1:
+              if spectrumView in self.parent._spectrumSettings.keys():
+
+                # draw
+                pass
+
+            else:
+
+              # assume that the vertexArray is a GL_LINE_STRIP
+              if spectrumView in self.parent._contourList.keys():
+                if self.parent._stackingValue:
+                  mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
+                else:
+                  mat = None
+
+                thisSpec = self.parent._contourList[spectrumView]
+
+                # draw the integralAreas if they exist
+                for integralArea in self.parent._GLIntegralLists[peakListView]._regions:
+                  if hasattr(integralArea, '_integralArea'):
+                    integralArea._integralArea.drawVertexColor()
+
+    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsFill')
+
 
     # add an axis mask
     backCol = colors.Color(self.parent.background[0] * 255,
@@ -465,10 +504,17 @@ class CcpnOpenGLExporter():
       colourPath = 'spectrumView%s%s%s%s%s' % (name, colour.red, colour.green, colour.blue, colour.alpha)
       if colourPath not in colourGroups:
         cc = colourGroups[colourPath] = {}
-        cc['lines'] = []
-        cc['strokeWidth'] = 0.5
-        cc['strokeColor'] = colour
-        cc['strokeLineCap'] = 1
+        if (indArray.fillMode or GL.GL_LINE) == GL.GL_LINE:
+          cc['lines'] = []
+          cc['strokeWidth'] = 0.5
+          cc['strokeColor'] = colour
+          cc['strokeLineCap'] = 1
+        else:
+          # assume that it is GL.GL_FILL
+          cc['lines'] = []
+          cc['fillColor'] = colour
+          cc['stroke'] = None
+          cc['strokeColor'] = None
 
       # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
       if self.parent.lineVisible(newLine,
@@ -478,7 +524,8 @@ class CcpnOpenGLExporter():
                                  height=plotDim[PLOTHEIGHT]):
         colourGroups[colourPath]['lines'].append(newLine)
 
-  def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name, fillMode=None):
+  def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name,
+                           fillMode=None, checkIntegral=False, splitGroups=False):
     if indArray.drawMode == GL.GL_TRIANGLES:
       indexLen = 3
     elif indArray.drawMode == GL.GL_QUADS:
@@ -496,6 +543,11 @@ class CcpnOpenGLExporter():
       colour = colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=indArray.colors[ii0[0] * 4 + 3])
       colourPath = 'spectrumView%s%s%s%s%s' % (name,
                                                colour.red, colour.green, colour.blue, colour.alpha)
+
+      # override so that each element is a new group
+      if splitGroups:
+        colourGroups = OrderedDict()
+
       if colourPath not in colourGroups:
         cc = colourGroups[colourPath] = {}
         if (fillMode or indArray.fillMode or GL.GL_LINE) == GL.GL_LINE:
@@ -514,8 +566,13 @@ class CcpnOpenGLExporter():
                                  x=plotDim[PLOTLEFT],
                                  y=plotDim[PLOTBOTTOM],
                                  width=plotDim[PLOTWIDTH],
-                                 height=plotDim[PLOTHEIGHT]):
+                                 height=plotDim[PLOTHEIGHT],
+                                 checkIntegral=checkIntegral):
         colourGroups[colourPath]['lines'].append(newLine)
+
+      # override so that each element is a new group
+      if splitGroups:
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
 
     # for ii in range(0, len(indArray.indices), 2):
     #   ii0 = int(indArray.indices[ii])
@@ -543,7 +600,9 @@ class CcpnOpenGLExporter():
     #                              height=plotDim[PLOTHEIGHT]):
     #     colourGroups[colourPath]['lines'].append(newLine)
 
-  def appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name, fillMode=None):
+  def appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name,
+                               fillMode=None,
+                               checkIntegral=False, splitGroups=False):
     for spectrumView in self.strip.orderedSpectrumViews():
 
       for peakListView in spectrumView.peakListViews:
@@ -560,7 +619,9 @@ class CcpnOpenGLExporter():
                                       colourGroups=colourGroups,
                                       plotDim=plotDim,
                                       name='spectrumView%s%s' % (name, spectrumView.pid),
-                                      fillMode=fillMode)
+                                      fillMode=fillMode,
+                                      checkIntegral=checkIntegral,
+                                      splitGroups=splitGroups)
 
             # else:
             #   if thisSpec.drawMode == GL.GL_TRIANGLES:

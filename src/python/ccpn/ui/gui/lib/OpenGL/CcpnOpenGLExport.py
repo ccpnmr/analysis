@@ -171,6 +171,18 @@ class CcpnOpenGLExporter():
     # self._bAxisPlot = Drawing(self.displayScale*self.bAxisW, self.displayScale*self.bAxisH) \
     #                     if self.bAxis else None
 
+    ll = [0.0, 0.0,
+          0.0, self.pixHeight,
+          self.pixWidth, self.pixHeight,
+          self.pixWidth, 0.0]
+
+    if ll:
+      pl = Path(fillColor=colors.lightgreen, stroke=None, strokeColor=None)
+      pl.moveTo(ll[0], ll[1])
+      for vv in range(2, len(ll), 2):
+        pl.lineTo(ll[vv], ll[vv+1])
+      pl.closePath()
+      self._mainPlot.add(pl)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # grid lines
@@ -461,21 +473,21 @@ class CcpnOpenGLExporter():
       ll = [0.0, 0.0,
             0.0, self.displayScale * self.mainB,
             self.displayScale * self.mainW, self.displayScale * self.mainB,
-            self.displayScale * self.mainW, self.displayScale * (self.mainB + self.mainH),
-            self.displayScale * (self.mainW + self.rAxisW), self.displayScale * (self.mainB + self.mainH),
-            self.displayScale * (self.mainW + self.rAxisW), 0.0]
+            self.displayScale * self.mainW, self.pixHeight,
+            self.pixWidth, self.pixHeight,
+            self.pixWidth, 0.0]
 
     elif self.rAxis:
       ll = [self.displayScale * self.mainW, 0.0,
-            self.displayScale * self.mainW, self.displayScale * (self.mainB + self.mainH),
-            self.displayScale * (self.mainW + self.rAxisW), self.displayScale * (self.mainB + self.mainH),
-            self.displayScale * (self.mainW + self.rAxisW), 0.0]
+            self.displayScale * self.mainW, self.pixHeight,
+            self.pixWidth, self.pixHeight,
+            self.pixWidth, 0.0]
 
     elif self.bAxis:
       ll = [0.0, 0.0,
             0.0, self.displayScale * self.mainB,
-            self.displayScale * (self.mainW + self.rAxisW), self.displayScale * self.mainB,
-            self.displayScale * (self.mainW + self.rAxisW), 0.0]
+            self.pixWidth, self.displayScale * self.mainB,
+            self.pixWidth, 0.0]
 
     if ll:
       pl = Path(fillColor=colors.mediumseagreen, stroke=None, strokeColor=None)
@@ -488,7 +500,7 @@ class CcpnOpenGLExporter():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # grid marks
 
-    if self.rAxis and self.bAxis:
+    if self.rAxis or self.bAxis:
       colourGroups = OrderedDict()
       if self.rAxis:
         self.appendIndexLineGroup(indArray=self.parent.gridList[1],
@@ -498,6 +510,9 @@ class CcpnOpenGLExporter():
                                            PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
                                            PLOTHEIGHT: self.displayScale * self.mainH},
                                   name='gridAxes')
+        list(colourGroups.values())[0]['lines'].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
+                                         self.displayScale * self.mainW, self.pixHeight])
+
       if self.bAxis:
         self.appendIndexLineGroup(indArray=self.parent.gridList[2],
                                   colourGroups=colourGroups,
@@ -506,6 +521,8 @@ class CcpnOpenGLExporter():
                                            PLOTWIDTH: self.displayScale * self.mainW,
                                            PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
                                   name='gridAxes')
+        list(colourGroups.values())[0]['lines'].append([0.0, self.displayScale * self.bAxisH,
+                                         self.displayScale * self.mainW, self.displayScale * self.bAxisH])
       self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
 

@@ -104,12 +104,3 @@ class Report():
     """
     with open(self.filename, 'wb') as fn:
       fn.write(self.buf.getvalue())
-
-  def setClipRegion(self, canvas, left, width, bottom, height):
-    pl = canvas.beginPath()
-    pl.moveTo(left, bottom)
-    pl.lineTo(left, bottom+height)
-    pl.lineTo(left+width, bottom+height)
-    pl.lineTo(left, bottom)
-    pl.close()
-    canvas.clipPath(pl, fill=0, stroke=0)

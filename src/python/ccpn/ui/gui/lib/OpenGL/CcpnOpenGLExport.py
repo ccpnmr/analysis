@@ -77,15 +77,6 @@ class CcpnOpenGLExporter():
     # this generates the buffer to write to the file
     self._report.buildDocument()
 
-  def report(self):
-    """
-    Return the current report for this Gl object
-    This is the vector image for the current strip containing the GL widget,
-    and can be added to a report.
-    :return reportlab.Drawing:
-    """
-    return self._drawing
-
   def _buildAll(self):
     # add a drawing and build it up
     dpi = 72                        # drawing object is hard-coded to this
@@ -107,6 +98,12 @@ class CcpnOpenGLExporter():
     # create an object that can be added to a report
     self._drawing = Drawing(pixWidth, pixHeight)
 
+    # TODO:ED use extra drawing objects for the right axis and bottom axis
+    #         these can have their own clipping areas defined in the
+    #         Clipped_Flowable below
+
+
+
     # self._report.setClipRegion(pixLeft, pixWidth, pixBottom, pixHeight)
     # d.add(String(150, 100, 'Hello World', fontSize=18, fillColor=colors.red))
 
@@ -123,8 +120,6 @@ class CcpnOpenGLExporter():
     # pl.isClipPath = True
     # gr.add(pl)
     # self._drawing.add(pl)
-
-
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # grid lines
@@ -259,8 +254,8 @@ class CcpnOpenGLExporter():
             mode = thisSpec.fillMode
             if not mode:
               for ii in range(0, len(thisSpec.indices), 2):
-                ii0 = thisSpec.indices[ii]
-                ii1 = thisSpec.indices[ii + 1]
+                ii0 = int(thisSpec.indices[ii])
+                ii1 = int(thisSpec.indices[ii + 1])
 
                 # vectStart = [thisSpec.vertices[ii0*2], thisSpec.vertices[ii0*2 + 1], 0.0, 1.0]
                 # vectStart = mat.dot(vectStart)
@@ -320,12 +315,20 @@ class CcpnOpenGLExporter():
 
     self.appendGroup(colourGroups=colourGroups, name='spectra')
 
+  def report(self):
+    """
+    Return the current report for this Gl object
+    This is the vector image for the current strip containing the GL widget,
+    and can be added to a report.
+    :return reportlab.platypus.Flowable:
+    """
+    return self._drawing
+
   def addDrawingToStory(self):
     """
     add the current drawing the story of a document
     """
     glPlot = Clipped_Flowable(self._drawing)
-    self._report.story.append(glPlot)
     self._report.story.append(glPlot)
 
   def writeSVGFile(self):
@@ -338,7 +341,7 @@ class CcpnOpenGLExporter():
     """
     Output a PDF file for the GL widget
     """
-    self._report.story.append(self._drawing)
+    # self._report.story.append(self._drawing)
     self._report.writeDocument()
 
   def appendGroup(self, colourGroups:dict, name:str):

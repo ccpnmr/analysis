@@ -322,14 +322,13 @@ class CcpnOpenGLExporter():
     and can be added to a report.
     :return reportlab.platypus.Flowable:
     """
-    return self._drawing
+    return Clipped_Flowable(self._drawing)
 
   def addDrawingToStory(self):
     """
     add the current drawing the story of a document
     """
-    glPlot = Clipped_Flowable(self._drawing)
-    self._report.story.append(glPlot)
+    self._report.story.append(self.report())
 
   def writeSVGFile(self):
     """

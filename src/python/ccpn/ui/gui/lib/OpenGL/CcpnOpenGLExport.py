@@ -281,65 +281,75 @@ class CcpnOpenGLExporter():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # spectrumView peaklists
 
-    for spectrumView in self.strip.orderedSpectrumViews():
+    self.appendIndexLineGroupFill(indArray=self.parent._GLPeakLists,
+                                  colourGroups=colourGroups,
+                                  plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                           PLOTBOTTOM: self.displayScale * self.mainB,
+                                           PLOTWIDTH: self.displayScale * self.mainW,
+                                           PLOTHEIGHT: self.displayScale * self.mainH},
+                                  name='PeakLists',
+                                  fillMode=None)
 
-      for peakListView in spectrumView.peakListViews:
-        if spectrumView.isVisible() and peakListView.isVisible():
 
-          if peakListView in self.parent._GLPeakLists.keys():
-
-            thisSpec = self.parent._GLPeakLists[peakListView]
-
-            mode = thisSpec.fillMode
-            if not mode:
-              self.appendIndexLineGroup(indArray=thisSpec,
-                                        colourGroups=colourGroups,
-                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
-                                                 PLOTBOTTOM: self.displayScale * self.mainB,
-                                                 PLOTWIDTH: self.displayScale * self.mainW,
-                                                 PLOTHEIGHT: self.displayScale * self.mainH},
-                                        name='spectrumViewPeakList')
-
-            else:
-              if thisSpec.drawMode == GL.GL_TRIANGLES:
-                indexLen = 3
-              elif thisSpec.drawMode == GL.GL_QUADS:
-                indexLen = 4
-              else:
-                indexLen = 2
-
-              for ii in range(0, len(thisSpec.indices), indexLen):
-                ii0 = [int(ind) for ind in thisSpec.indices[ii:ii+indexLen]]
-
-                # vectStart = [thisSpec.vertices[ii0*2], thisSpec.vertices[ii0*2 + 1], 0.0, 1.0]
-                # vectStart = mat.dot(vectStart)
-                # vectEnd = [thisSpec.vertices[ii1*2], thisSpec.vertices[ii1*2 + 1], 0.0, 1.0]
-                # vectEnd = mat.dot(vectEnd)
-                # newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
-                # newLine =
-                newLine = []
-                for vv in ii0:
-                  newLine.extend([thisSpec.vertices[vv * 2], thisSpec.vertices[vv * 2 + 1]])
-                # newLine = [thisSpec.vertices[ii0 * 2], thisSpec.vertices[ii0 * 2 + 1],
-                #            thisSpec.vertices[ii1 * 2], thisSpec.vertices[ii1 * 2 + 1]]
-
-                colour = colors.Color(*thisSpec.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=thisSpec.colors[ii0[0] * 4 + 3])
-                colourPath = 'spectrumViewPeakLists%s%s%s%s%s' % (
-                spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
-                if colourPath not in colourGroups:
-                  cc = colourGroups[colourPath] = {}
-                  cc['lines'] = []
-                  cc['fillColor'] = colour
-                  cc['stroke'] = None
-                  cc['strokeColor'] = None
-
-                # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
-                if self.parent.lineVisible(newLine,
-                                           x=self.displayScale * self.mainL,
-                                           y=self.displayScale * self.mainB,
-                                           width=self.displayScale * self.mainW,
-                                           height=self.displayScale * self.mainH):
-                  colourGroups[colourPath]['lines'].append(newLine)
+    # for spectrumView in self.strip.orderedSpectrumViews():
+    #
+    #   for peakListView in spectrumView.peakListViews:
+    #     if spectrumView.isVisible() and peakListView.isVisible():
+    #
+    #       if peakListView in self.parent._GLPeakLists.keys():
+    #
+    #         thisSpec = self.parent._GLPeakLists[peakListView]
+    #
+    #         mode = thisSpec.fillMode
+    #         if not mode:
+    #           self.appendIndexLineGroup(indArray=thisSpec,
+    #                                     colourGroups=colourGroups,
+    #                                     plotDim={PLOTLEFT: self.displayScale * self.mainL,
+    #                                              PLOTBOTTOM: self.displayScale * self.mainB,
+    #                                              PLOTWIDTH: self.displayScale * self.mainW,
+    #                                              PLOTHEIGHT: self.displayScale * self.mainH},
+    #                                     name='spectrumViewPeakList%s' % spectrumView.pid)
+    #
+    #         else:
+    #           if thisSpec.drawMode == GL.GL_TRIANGLES:
+    #             indexLen = 3
+    #           elif thisSpec.drawMode == GL.GL_QUADS:
+    #             indexLen = 4
+    #           else:
+    #             indexLen = 2
+    #
+    #           for ii in range(0, len(thisSpec.indices), indexLen):
+    #             ii0 = [int(ind) for ind in thisSpec.indices[ii:ii+indexLen]]
+    #
+    #             # vectStart = [thisSpec.vertices[ii0*2], thisSpec.vertices[ii0*2 + 1], 0.0, 1.0]
+    #             # vectStart = mat.dot(vectStart)
+    #             # vectEnd = [thisSpec.vertices[ii1*2], thisSpec.vertices[ii1*2 + 1], 0.0, 1.0]
+    #             # vectEnd = mat.dot(vectEnd)
+    #             # newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
+    #             # newLine =
+    #             newLine = []
+    #             for vv in ii0:
+    #               newLine.extend([thisSpec.vertices[vv * 2], thisSpec.vertices[vv * 2 + 1]])
+    #             # newLine = [thisSpec.vertices[ii0 * 2], thisSpec.vertices[ii0 * 2 + 1],
+    #             #            thisSpec.vertices[ii1 * 2], thisSpec.vertices[ii1 * 2 + 1]]
+    #
+    #             colour = colors.Color(*thisSpec.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=thisSpec.colors[ii0[0] * 4 + 3])
+    #             colourPath = 'spectrumViewPeakLists%s%s%s%s%s' % (
+    #             spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+    #             if colourPath not in colourGroups:
+    #               cc = colourGroups[colourPath] = {}
+    #               cc['lines'] = []
+    #               cc['fillColor'] = colour
+    #               cc['stroke'] = None
+    #               cc['strokeColor'] = None
+    #
+    #             # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+    #             if self.parent.lineVisible(newLine,
+    #                                        x=self.displayScale * self.mainL,
+    #                                        y=self.displayScale * self.mainB,
+    #                                        width=self.displayScale * self.mainW,
+    #                                        height=self.displayScale * self.mainH):
+    #               colourGroups[colourPath]['lines'].append(newLine)
 
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='spectra')
 
@@ -355,6 +365,28 @@ class CcpnOpenGLExporter():
                                        PLOTHEIGHT: self.displayScale * self.mainH},
                               name='marks')
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='marks')
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # integrals
+
+    colourGroups = OrderedDict()
+    self.appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
+                              colourGroups=colourGroups,
+                              plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                       PLOTBOTTOM: self.displayScale * self.mainB,
+                                       PLOTWIDTH: self.displayScale * self.mainW,
+                                       PLOTHEIGHT: self.displayScale * self.mainH},
+                              name='IntegralListsLine',
+                              fillMode=None)
+    self.appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
+                              colourGroups=colourGroups,
+                              plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                       PLOTBOTTOM: self.displayScale * self.mainB,
+                                       PLOTWIDTH: self.displayScale * self.mainW,
+                                       PLOTHEIGHT: self.displayScale * self.mainH},
+                              name='IntegralListsFill',
+                              fillMode=GL.GL_FILL)
+    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
 
     # add an axis mask
     backCol = colors.Color(self.parent.background[0] * 255,
@@ -446,32 +478,128 @@ class CcpnOpenGLExporter():
                                  height=plotDim[PLOTHEIGHT]):
         colourGroups[colourPath]['lines'].append(newLine)
 
-  def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name):
-    for ii in range(0, len(indArray.indices), 2):
-      ii0 = int(indArray.indices[ii])
-      ii1 = int(indArray.indices[ii+1])
+  def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name, fillMode=None):
+    if indArray.drawMode == GL.GL_TRIANGLES:
+      indexLen = 3
+    elif indArray.drawMode == GL.GL_QUADS:
+      indexLen = 4
+    else:
+      indexLen = 2
 
-      newLine = [indArray.vertices[ii0*2],
-                 indArray.vertices[ii0 * 2+1],
-                 indArray.vertices[ii1 * 2],
-                 indArray.vertices[ii1 * 2+1]]
+    for ii in range(0, len(indArray.indices), indexLen):
+      ii0 = [int(ind) for ind in indArray.indices[ii:ii + indexLen]]
 
-      colour = colors.Color(*indArray.colors[ii0*4:ii0 * 4+3], alpha=indArray.colors[ii0 * 4+3])
-      colourPath = '%s:%s%s%s%s' % (name, colour.red, colour.green, colour.blue, colour.alpha)
+      newLine = []
+      for vv in ii0:
+        newLine.extend([indArray.vertices[vv * 2], indArray.vertices[vv * 2 + 1]])
+
+      colour = colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=indArray.colors[ii0[0] * 4 + 3])
+      colourPath = 'spectrumView%s%s%s%s%s' % (name,
+                                               colour.red, colour.green, colour.blue, colour.alpha)
       if colourPath not in colourGroups:
         cc = colourGroups[colourPath] = {}
-        cc['lines'] = []
-        cc['strokeWidth'] = 0.5
-        cc['strokeColor'] = colour
-        cc['strokeLineCap'] = 1
+        if (fillMode or indArray.fillMode or GL.GL_LINE) == GL.GL_LINE:
+          cc['lines'] = []
+          cc['strokeWidth'] = 0.5
+          cc['strokeColor'] = colour
+          cc['strokeLineCap'] = 1
+        else:
+          # assume that it is GL.GL_FILL
+          cc['lines'] = []
+          cc['fillColor'] = colour
+          cc['stroke'] = None
+          cc['strokeColor'] = None
 
-      # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
       if self.parent.lineVisible(newLine,
                                  x=plotDim[PLOTLEFT],
                                  y=plotDim[PLOTBOTTOM],
                                  width=plotDim[PLOTWIDTH],
                                  height=plotDim[PLOTHEIGHT]):
         colourGroups[colourPath]['lines'].append(newLine)
+
+    # for ii in range(0, len(indArray.indices), 2):
+    #   ii0 = int(indArray.indices[ii])
+    #   ii1 = int(indArray.indices[ii+1])
+    #
+    #   newLine = [indArray.vertices[ii0*2],
+    #              indArray.vertices[ii0 * 2+1],
+    #              indArray.vertices[ii1 * 2],
+    #              indArray.vertices[ii1 * 2+1]]
+    #
+    #   colour = colors.Color(*indArray.colors[ii0*4:ii0 * 4+3], alpha=indArray.colors[ii0 * 4+3])
+    #   colourPath = '%s:%s%s%s%s' % (name, colour.red, colour.green, colour.blue, colour.alpha)
+    #   if colourPath not in colourGroups:
+    #     cc = colourGroups[colourPath] = {}
+    #     cc['lines'] = []
+    #     cc['strokeWidth'] = 0.5
+    #     cc['strokeColor'] = colour
+    #     cc['strokeLineCap'] = 1
+    #
+    #   # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+    #   if self.parent.lineVisible(newLine,
+    #                              x=plotDim[PLOTLEFT],
+    #                              y=plotDim[PLOTBOTTOM],
+    #                              width=plotDim[PLOTWIDTH],
+    #                              height=plotDim[PLOTHEIGHT]):
+    #     colourGroups[colourPath]['lines'].append(newLine)
+
+  def appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name, fillMode=None):
+    for spectrumView in self.strip.orderedSpectrumViews():
+
+      for peakListView in spectrumView.peakListViews:
+        if spectrumView.isVisible() and peakListView.isVisible():
+
+          if peakListView in indArray.keys():
+
+            thisSpec = indArray[peakListView]
+
+            # mode = fillMode or thisSpec.fillMode
+            # if not mode:
+
+            self.appendIndexLineGroup(indArray=thisSpec,
+                                      colourGroups=colourGroups,
+                                      plotDim=plotDim,
+                                      name='spectrumView%s%s' % (name, spectrumView.pid),
+                                      fillMode=fillMode)
+
+            # else:
+            #   if thisSpec.drawMode == GL.GL_TRIANGLES:
+            #     indexLen = 3
+            #   elif thisSpec.drawMode == GL.GL_QUADS:
+            #     indexLen = 4
+            #   else:
+            #     indexLen = 2
+            #
+            #   for ii in range(0, len(thisSpec.indices), indexLen):
+            #     ii0 = [int(ind) for ind in thisSpec.indices[ii:ii+indexLen]]
+            #
+            #     newLine = []
+            #     for vv in ii0:
+            #       newLine.extend([thisSpec.vertices[vv * 2], thisSpec.vertices[vv * 2 + 1]])
+            #
+            #     colour = colors.Color(*thisSpec.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=thisSpec.colors[ii0[0] * 4 + 3])
+            #     colourPath = 'spectrumView%s%s%s%s%s%s' % (name,
+            #                   spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+            #     if colourPath not in colourGroups:
+            #       cc = colourGroups[colourPath] = {}
+            #       if mode == GL.GL_LINE:
+            #         cc['lines'] = []
+            #         cc['strokeWidth'] = 0.5
+            #         cc['strokeColor'] = colour
+            #         cc['strokeLineCap'] = 1
+            #       else:
+            #         cc['lines'] = []
+            #         cc['fillColor'] = colour
+            #         cc['stroke'] = None
+            #         cc['strokeColor'] = None
+            #
+            #     if self.parent.lineVisible(newLine,
+            #                                x=plotDim[PLOTLEFT],
+            #                                y=plotDim[PLOTBOTTOM],
+            #                                width=plotDim[PLOTWIDTH],
+            #                                height=plotDim[PLOTHEIGHT]):
+            #       colourGroups[colourPath]['lines'].append(newLine)
+
 
   def appendGroup(self, drawing:Drawing=None, colourGroups:dict=None, name:str=None):
     """

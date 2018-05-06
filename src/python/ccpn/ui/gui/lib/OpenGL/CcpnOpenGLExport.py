@@ -75,6 +75,11 @@ class CcpnOpenGLExporter():
     self.params = params
     self._report = Report(self, self.project, filename)
 
+    self.backgroundColour = colors.Color(self.parent.background[0] * 255,
+                                         self.parent.background[1] * 255,
+                                         self.parent.background[2] * 255,
+                                         alpha = self.parent.background[3])
+
     # build all the sections of the pdf
 
     self._buildAll()
@@ -433,13 +438,6 @@ class CcpnOpenGLExporter():
                                       spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
                   if colourPath not in colourGroups:
                     cc = colourGroups[colourPath] = {}
-                    # if (thisSpec.fillMode or GL.GL_LINE) == GL.GL_LINE:
-                    #   cc['lines'] = []
-                    #   cc['strokeWidth'] = 0.5
-                    #   cc['strokeColor'] = colour
-                    #   cc['strokeLineCap'] = 1
-                    # else:
-                      # assume that it is GL.GL_FILL
                     cc['lines'] = []
                     cc['fillColor'] = colour
                     cc['stroke'] = None
@@ -456,6 +454,38 @@ class CcpnOpenGLExporter():
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsAreaFill')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # add an axis mask
+
+    ll = None
+    if self.rAxis and self.bAxis:
+      ll = [0.0, 0.0,
+            0.0, self.displayScale * self.mainB,
+            self.displayScale * self.mainW, self.displayScale * self.mainB,
+            self.displayScale * self.mainW, self.displayScale * (self.mainB + self.mainH),
+            self.displayScale * (self.mainW + self.rAxisW), self.displayScale * (self.mainB + self.mainH),
+            self.displayScale * (self.mainW + self.rAxisW), 0.0]
+
+    elif self.rAxis:
+      ll = [self.displayScale * self.mainW, 0.0,
+            self.displayScale * self.mainW, self.displayScale * (self.mainB + self.mainH),
+            self.displayScale * (self.mainW + self.rAxisW), self.displayScale * (self.mainB + self.mainH),
+            self.displayScale * (self.mainW + self.rAxisW), 0.0]
+
+    elif self.bAxis:
+      ll = [0.0, 0.0,
+            0.0, self.displayScale * self.mainB,
+            self.displayScale * (self.mainW + self.rAxisW), self.displayScale * self.mainB,
+            self.displayScale * (self.mainW + self.rAxisW), 0.0]
+
+    if ll:
+      pl = Path(fillColor=colors.mediumseagreen, stroke=None, strokeColor=None)
+      pl.moveTo(ll[0], ll[1])
+      for vv in range(2, len(ll), 2):
+        pl.lineTo(ll[vv], ll[vv+1])
+      pl.closePath()
+      self._mainPlot.add(pl)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # grid marks
 
     if self.rAxis and self.bAxis:
@@ -467,7 +497,7 @@ class CcpnOpenGLExporter():
                                            PLOTBOTTOM: self.displayScale * self.mainB,
                                            PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
                                            PLOTHEIGHT: self.displayScale * self.mainH},
-                                  name='gridVertical')
+                                  name='gridAxes')
       if self.bAxis:
         self.appendIndexLineGroup(indArray=self.parent.gridList[2],
                                   colourGroups=colourGroups,
@@ -475,36 +505,9 @@ class CcpnOpenGLExporter():
                                            PLOTBOTTOM: self.displayScale * self.mainB,
                                            PLOTWIDTH: self.displayScale * self.mainW,
                                            PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
-                                  name='gridHorizontal')
+                                  name='gridAxes')
       self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # add an axis mask
-
-    backCol = colors.Color(self.parent.background[0] * 255,
-                           self.parent.background[1] * 255,
-                           self.parent.background[2] * 255,
-                           alpha = self.parent.background[3])
-    gr = Group()
-    if self.rAxis:
-      gr.add(Rect(self.displayScale * self.rAxisL,
-                  0.0,
-                  self.displayScale * self.rAxisW,
-                  self.pixHeight,
-                  fillColor=backCol,
-                  strokeColor=backCol,
-                  fill=True))
-    if self.bAxis:
-      gr.add(Rect(0.0,
-                  0.0,
-                  self.pixWidth,
-                  self.displayScale * self.bAxisH,
-                  fillColor=backCol,
-                  strokeColor=backCol,
-                  fill=True))
-    if self.rAxis or self.bAxis:
-      self._mainPlot.add(gr)
 
   def report(self):
     """

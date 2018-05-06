@@ -5463,10 +5463,10 @@ class CcpnGLWidget(QOpenGLWidget):
           ils._resize()
           return
 
-  def exportToPDF(self, filename, params):
+  def exportToPDF(self, filename='default.pdf', params=None):
     return CcpnOpenGLExporter(self, self._parent, filename, params)
 
-  def exportToSVG(self, filename, params):
+  def exportToSVG(self, filename='default.svg', params=None):
     return CcpnOpenGLExporter(self, self._parent, filename, params)
 
   def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):

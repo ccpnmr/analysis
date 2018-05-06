@@ -25,6 +25,7 @@ __date__ = "$Date$"
 
 import sys
 from PyQt5 import QtWidgets
+from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate, BaseDocTemplate, NextPageTemplate, PageTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, cm
@@ -69,7 +70,6 @@ class Report():
     # buffer for exporting
     self.buf = io.BytesIO()
 
-    # initialise a new document
     self.doc = SimpleDocTemplate(
       self.buf,
       rightMargin=rightMargin,
@@ -104,3 +104,12 @@ class Report():
     """
     with open(self.filename, 'wb') as fn:
       fn.write(self.buf.getvalue())
+
+  def setClipRegion(self, canvas, left, width, bottom, height):
+    pl = canvas.beginPath()
+    pl.moveTo(left, bottom)
+    pl.lineTo(left, bottom+height)
+    pl.lineTo(left+width, bottom+height)
+    pl.lineTo(left, bottom)
+    pl.close()
+    canvas.clipPath(pl, fill=0, stroke=0)

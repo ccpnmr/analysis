@@ -72,11 +72,9 @@ class OpenGLSVGExporter(Exporter):
 
     # TODO:ED finish writing code to export SVG using reportlab
 
-    svgExport = self.glWidget.exportToSvg(filename, self.params)
+    svgExport = self.glWidget.exportToSVG(filename, self.params)
     if svgExport:
       svgExport.writeSVGFile()
-      # with open(filename, 'wb') as fd:
-      #   fd.write(svgExport)
 
 
 OpenGLSVGExporter.register()

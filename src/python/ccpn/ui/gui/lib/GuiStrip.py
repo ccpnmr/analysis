@@ -1384,7 +1384,17 @@ class GuiStrip(Frame):
       else:
         self._showAllSpectrumViews(True)
 
+  def report(self):
+    """
+    Generate a drawing object that can be added to reports
+    :return reportlab drawing object:
+    """
+    if self._CcpnGLWidget:
+      from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import CcpnOpenGLExporter
 
+      glReport = self._CcpnGLWidget.exportToSVG()
+      if glReport:
+        return glReport.report()
 
 # Notifiers:
 def _updateDisplayedMarks(data):

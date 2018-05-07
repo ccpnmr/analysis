@@ -33,7 +33,7 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from contextlib import contextmanager
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX
-from collections import OrderedDict
+from collections import OrderedDict, Iterable
 import io
 import numpy as np
 
@@ -177,7 +177,7 @@ class CcpnOpenGLExporter():
           self.pixWidth, 0.0]
 
     if ll:
-      pl = Path(fillColor=colors.lightgreen, stroke=None, strokeColor=None)
+      pl = Path(fillColor=self.backgroundColour, stroke=None, strokeColor=None)
       pl.moveTo(ll[0], ll[1])
       for vv in range(2, len(ll), 2):
         pl.lineTo(ll[vv], ll[vv+1])
@@ -187,15 +187,16 @@ class CcpnOpenGLExporter():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # grid lines
 
-    colourGroups = OrderedDict()
-    self.appendIndexLineGroup(indArray=self.parent.gridList[0],
-                              colourGroups=colourGroups,
-                              plotDim={PLOTLEFT: self.displayScale * self.mainL,
-                                       PLOTBOTTOM: self.displayScale * self.mainB,
-                                       PLOTWIDTH: self.displayScale * self.mainW,
-                                       PLOTHEIGHT: self.displayScale * self.mainH},
-                              name='grid')
-    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
+    if self.strip.gridVisible:
+      colourGroups = OrderedDict()
+      self.appendIndexLineGroup(indArray=self.parent.gridList[0],
+                                colourGroups=colourGroups,
+                                plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                         PLOTBOTTOM: self.displayScale * self.mainB,
+                                         PLOTWIDTH: self.displayScale * self.mainW,
+                                         PLOTHEIGHT: self.displayScale * self.mainH},
+                                name='grid')
+      self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # spectrumView contours
@@ -466,6 +467,84 @@ class CcpnOpenGLExporter():
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsAreaFill')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # regions
+
+    colourGroups = OrderedDict()
+    self.appendIndexLineGroup(indArray=self.parent._externalRegions,
+                              colourGroups=colourGroups,
+                              plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                       PLOTBOTTOM: self.displayScale * self.mainB,
+                                       PLOTWIDTH: self.displayScale * self.mainW,
+                                       PLOTHEIGHT: self.displayScale * self.mainH},
+                              name='regions')
+    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='regions')
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # peak labels
+
+    gr = Group()
+    for spectrumView in self.strip.orderedSpectrumViews():
+
+      for peakListView in spectrumView.peakListViews:
+        if spectrumView.isVisible() and peakListView.isVisible():
+
+          if peakListView in self.parent._GLPeakListLabels.keys():
+
+            for drawString in self.parent._GLPeakListLabels[peakListView].stringList:
+              # drawString.drawTextArray()
+
+              # TODO:ED check why this isn't always a list
+              col = drawString.colors[0]
+              if not isinstance(col, Iterable):
+                col = drawString.colors[0:4]
+              colour = colors.Color(*col[0:3], alpha=float(col[3]))
+              colourPath = 'spectrumViewPeakLabels%s%s%s%s%s' % (
+                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+              if colourPath not in colourGroups:
+                cc = colourGroups[colourPath] = Group()
+
+              newLine = [drawString.attribs[0], drawString.attribs[1]]
+              if self.parent.lineVisible(newLine,
+                                         x=self.displayScale * self.mainL,
+                                         y=self.displayScale * self.mainB,
+                                         width=self.displayScale * self.mainW,
+                                         height=self.displayScale * self.mainH):
+                colourGroups[colourPath].add(String(newLine[0], newLine[1],
+                                              drawString.text, fontSize=11,
+                                              fillColor=colour))
+
+    for colourGroup in colourGroups.values():
+      self._mainPlot.add(colourGroup)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # mark labels
+
+    gr = Group()
+    for drawString in self.parent._marksAxisCodes:
+      # drawString.drawTextArray()
+
+      col = drawString.colors[0]
+      if not isinstance(col, Iterable):
+        col = drawString.colors[0:4]
+      colour = colors.Color(*col[0:3], alpha=float(col[3]))
+      colourPath = 'projectMarks%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+      if colourPath not in colourGroups:
+        cc = colourGroups[colourPath] = Group()
+
+      newLine = [drawString.attribs[0], drawString.attribs[1]]
+      if self.parent.lineVisible(newLine,
+                                 x=self.displayScale * self.mainL,
+                                 y=self.displayScale * self.mainB,
+                                 width=self.displayScale * self.mainW,
+                                 height=self.displayScale * self.mainH):
+        colourGroups[colourPath].add(String(newLine[0], newLine[1],
+                                            drawString.text, fontSize=11,
+                                            fillColor=colour))
+
+    for colourGroup in colourGroups.values():
+      self._mainPlot.add(colourGroup)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # add an axis mask
 
     ll = None
@@ -490,7 +569,7 @@ class CcpnOpenGLExporter():
             self.pixWidth, 0.0]
 
     if ll:
-      pl = Path(fillColor=colors.mediumseagreen, stroke=None, strokeColor=None)
+      pl = Path(fillColor=self.backgroundColour, stroke=None, strokeColor=None)
       pl.moveTo(ll[0], ll[1])
       for vv in range(2, len(ll), 2):
         pl.lineTo(ll[vv], ll[vv+1])
@@ -525,6 +604,80 @@ class CcpnOpenGLExporter():
                                          self.displayScale * self.mainW, self.displayScale * self.bAxisH])
       self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
+      # if self._drawBottomAxis:
+      #   # put the axis labels into the bottom bar
+      #   self.viewports.setViewport(self._currentBottomAxisBarView)
+      #   self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
+      #   self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+      #   self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
+      #                                            self.AXIS_MARGINBOTTOM, -1.0, 1.0)
+      #   self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      #
+      #   for lb in self._axisXLabelling:
+      #     lb.drawTextArray()
+      #
+      # if self._drawRightAxis:
+      #   # put the axis labels into the right bar
+      #   self.viewports.setViewport(self._currentRightAxisBarView)
+      #   self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
+      #   self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+      #   self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT
+      #                                            , self.axisB, self.axisT, -1.0, 1.0)
+      #   self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+      #
+      #   for lb in self._axisYLabelling:
+      #     lb.drawTextArray()
+
+    if self.rAxis or self.bAxis:
+      colourGroups = OrderedDict()
+      if self.rAxis:
+        for drawString in self.parent._axisYLabelling:
+          # drawString.drawTextArray()
+
+          col = drawString.colors[0]
+          if not isinstance(col, Iterable):
+            col = drawString.colors[0:4]
+          colour = colors.Color(*col[0:3], alpha=float(col[3]))
+          colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+          if colourPath not in colourGroups:
+            cc = colourGroups[colourPath] = Group()
+
+          mid = self.parent.axisL   # +10/self.AXIS_MARGINRIGHT
+          newLine = [mid, drawString.attribs[1]]
+          if self.parent.lineVisible(newLine,
+                                     x=self.displayScale * self.rAxisL,
+                                     y=self.displayScale * self.rAxisB,
+                                     width=self.displayScale * self.rAxisW,
+                                     height=self.displayScale * self.rAxisH):
+            colourGroups[colourPath].add(String(newLine[0], newLine[1],
+                                                drawString.text, fontSize=11,
+                                                fillColor=colour))
+
+      if self.bAxis:
+        for drawString in self.parent._axisXLabelling:
+          # drawString.drawTextArray()
+
+          col = drawString.colors[0]
+          if not isinstance(col, Iterable):
+            col = drawString.colors[0:4]
+          colour = colors.Color(*col[0:3], alpha=float(col[3]))
+          colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+          if colourPath not in colourGroups:
+            cc = colourGroups[colourPath] = Group()
+
+          mid = self.parent.axisB   # +10/self.AXIS_MARGINRIGHT
+          newLine = [drawString.attribs[0], mid]
+          if self.parent.lineVisible(newLine,
+                                     x=self.displayScale * self.bAxisL,
+                                     y=self.displayScale * self.bAxisB,
+                                     width=self.displayScale * self.bAxisW,
+                                     height=self.displayScale * self.bAxisH):
+            colourGroups[colourPath].add(String(newLine[0], newLine[1],
+                                                drawString.text, fontSize=11,
+                                                fillColor=colour))
+
+    for colourGroup in colourGroups.values():
+      self._mainPlot.add(colourGroup)
 
   def report(self):
     """

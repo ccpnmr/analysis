@@ -441,34 +441,36 @@ class CcpnOpenGLExporter():
     # peak labels
 
     for spectrumView in self.strip.orderedSpectrumViews():
+      if spectrumView.isDeleted:
+        continue
 
-      for peakListView in spectrumView.peakListViews:
-        if spectrumView.isVisible() and peakListView.isVisible():
+      validPeakListViews = [pp for pp in spectrumView.peakListViews
+                            if pp.isVisible()
+                            and spectrumView.isVisible()
+                            and pp in self.parent._GLPeakListLabels.keys()]
 
-          if peakListView in self.parent._GLPeakListLabels.keys():
+      for peakListView in validPeakListViews:  # spectrumView.peakListViews:
+        for drawString in self.parent._GLPeakListLabels[peakListView].stringList:
 
-            for drawString in self.parent._GLPeakListLabels[peakListView].stringList:
-              # drawString.drawTextArray()
+          # TODO:ED check why this isn't always a list
+          col = drawString.colors[0]
+          if not isinstance(col, Iterable):
+            col = drawString.colors[0:4]
+          colour = colors.Color(*col[0:3], alpha=float(col[3]))
+          colourPath = 'spectrumViewPeakLabels%s%s%s%s%s' % (
+                     spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+          if colourPath not in colourGroups:
+            cc = colourGroups[colourPath] = Group()
 
-              # TODO:ED check why this isn't always a list
-              col = drawString.colors[0]
-              if not isinstance(col, Iterable):
-                col = drawString.colors[0:4]
-              colour = colors.Color(*col[0:3], alpha=float(col[3]))
-              colourPath = 'spectrumViewPeakLabels%s%s%s%s%s' % (
-                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
-              if colourPath not in colourGroups:
-                cc = colourGroups[colourPath] = Group()
-
-              newLine = [drawString.attribs[0], drawString.attribs[1]]
-              if self.parent.lineVisible(newLine,
-                                         x=self.displayScale * self.mainL,
-                                         y=self.displayScale * self.mainB,
-                                         width=self.displayScale * self.mainW,
-                                         height=self.displayScale * self.mainH):
-                colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                              drawString.text, fontSize=13, fontName='Tahoma',
-                                              fillColor=colour))
+          newLine = [drawString.attribs[0], drawString.attribs[1]]
+          if self.parent.lineVisible(newLine,
+                                     x=self.displayScale * self.mainL,
+                                     y=self.displayScale * self.mainB,
+                                     width=self.displayScale * self.mainW,
+                                     height=self.displayScale * self.mainH):
+            colourGroups[colourPath].add(String(newLine[0], newLine[1],
+                                          drawString.text, fontSize=13, fontName='Tahoma',
+                                          fillColor=colour))
 
     for colourGroup in colourGroups.values():
       self._mainPlot.add(colourGroup)
@@ -858,63 +860,24 @@ class CcpnOpenGLExporter():
                                fillMode=None,
                                checkIntegral=False, splitGroups=False):
     for spectrumView in self.strip.orderedSpectrumViews():
+      if spectrumView.isDeleted:
+        continue
 
-      for peakListView in spectrumView.peakListViews:
-        if spectrumView.isVisible() and peakListView.isVisible():
+      validPeakListViews = [pp for pp in spectrumView.peakListViews
+                            if pp.isVisible()
+                            and spectrumView.isVisible()]
 
-          if peakListView in indArray.keys():
+      for peakListView in validPeakListViews:       #spectrumView.peakListViews:
+        if peakListView in indArray.keys():
 
-            thisSpec = indArray[peakListView]
-
-            # mode = fillMode or thisSpec.fillMode
-            # if not mode:
-
-            self.appendIndexLineGroup(indArray=thisSpec,
-                                      colourGroups=colourGroups,
-                                      plotDim=plotDim,
-                                      name='spectrumView%s%s' % (name, spectrumView.pid),
-                                      fillMode=fillMode,
-                                      checkIntegral=checkIntegral,
-                                      splitGroups=splitGroups)
-
-            # else:
-            #   if thisSpec.drawMode == GL.GL_TRIANGLES:
-            #     indexLen = 3
-            #   elif thisSpec.drawMode == GL.GL_QUADS:
-            #     indexLen = 4
-            #   else:
-            #     indexLen = 2
-            #
-            #   for ii in range(0, len(thisSpec.indices), indexLen):
-            #     ii0 = [int(ind) for ind in thisSpec.indices[ii:ii+indexLen]]
-            #
-            #     newLine = []
-            #     for vv in ii0:
-            #       newLine.extend([thisSpec.vertices[vv * 2], thisSpec.vertices[vv * 2 + 1]])
-            #
-            #     colour = colors.Color(*thisSpec.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=thisSpec.colors[ii0[0] * 4 + 3])
-            #     colourPath = 'spectrumView%s%s%s%s%s%s' % (name,
-            #                   spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
-            #     if colourPath not in colourGroups:
-            #       cc = colourGroups[colourPath] = {}
-            #       if mode == GL.GL_LINE:
-            #         cc['lines'] = []
-            #         cc['strokeWidth'] = 0.5
-            #         cc['strokeColor'] = colour
-            #         cc['strokeLineCap'] = 1
-            #       else:
-            #         cc['lines'] = []
-            #         cc['fillColor'] = colour
-            #         cc['stroke'] = None
-            #         cc['strokeColor'] = None
-            #
-            #     if self.parent.lineVisible(newLine,
-            #                                x=plotDim[PLOTLEFT],
-            #                                y=plotDim[PLOTBOTTOM],
-            #                                width=plotDim[PLOTWIDTH],
-            #                                height=plotDim[PLOTHEIGHT]):
-            #       colourGroups[colourPath]['lines'].append(newLine)
-
+          thisSpec = indArray[peakListView]
+          self.appendIndexLineGroup(indArray=thisSpec,
+                                    colourGroups=colourGroups,
+                                    plotDim=plotDim,
+                                    name='spectrumView%s%s' % (name, spectrumView.pid),
+                                    fillMode=fillMode,
+                                    checkIntegral=checkIntegral,
+                                    splitGroups=splitGroups)
 
   def appendGroup(self, drawing:Drawing=None, colourGroups:dict=None, name:str=None):
     """

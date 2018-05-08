@@ -104,6 +104,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExterna
                                                       GLRegion, REGION_COLOURS
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import CcpnOpenGLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
+from ccpn.util.Common import makeIterableList
 
 try:
   from OpenGL import GL, GLU, GLUT
@@ -5573,26 +5574,45 @@ class CcpnGLWidget(QOpenGLWidget):
     #   lineList[pp+1] = y + height * (lineList[pp+1] - self.axisB) / (self.axisT - self.axisB)
     # return True
 
-    newList = []
-    for pp in range(0, len(lineList)-2, 2):
-      clippedList = self.cohenSutherlandClip(*lineList[pp:pp+4])
-      if clippedList:
-        if not newList:
-          newList = clippedList
-        else:
-          if clippedList[0] == newList[-2] and clippedList[1] == newList[-1]:
-            newList.extend(clippedList[2:])
-          else:
-            newList.extend(clippedList)
+    # newList = []
+    # for pp in range(0, len(lineList)-2, 2):
+    #   clippedList = self.cohenSutherlandClip(*lineList[pp:pp+4])
+    #   if clippedList:
+    #     if not newList:
+    #       newList = clippedList
+    #     else:
+    #       if clippedList[0] == newList[-2] and clippedList[1] == newList[-1]:
+    #         newList.extend(clippedList[2:])
+    #       else:
+    #         newList.extend(clippedList)
 
-    for pp in range(0, len(newList), 2):
-      newList[pp] = x + width * (newList[pp] - self.axisL) / (self.axisR - self.axisL)
-      newList[pp+1] = y + height * (newList[pp+1] - self.axisB) / (self.axisT - self.axisB)
+
+    newLine = [[lineList[ll], lineList[ll+1]] for ll in range(0, len(lineList), 2)]
+    newList = self.clip(newLine)
+
+    try:
+      for pp in range(0, len(newList), 2):
+        newList[pp] = x + width * (newList[pp] - self.axisL) / (self.axisR - self.axisL)
+        newList[pp+1] = y + height * (newList[pp+1] - self.axisB) / (self.axisT - self.axisB)
+    except Exception as es:
+      pass
 
     return newList
 
-  def clip(self, subjectPolygon, clipPolygon):
+  def clip(self, subjectPolygon):
     """Apply Sutherland-Hodgman algorithm for clipping polygons"""
+
+    if self.INVERTXAXIS != self.INVERTYAXIS:
+      clipPolygon = [[self.axisL, self.axisB],
+                      [self.axisL, self.axisT],
+                      [self.axisR, self.axisT],
+                      [self.axisR, self.axisB]]
+    else:
+      clipPolygon = [[self.axisL, self.axisB],
+                     [self.axisR, self.axisB],
+                     [self.axisR, self.axisT],
+                     [self.axisL, self.axisT]]
+
     def inside(p):
       return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
 
@@ -5611,6 +5631,9 @@ class CcpnGLWidget(QOpenGLWidget):
       cp2 = clipVertex
       inputList = outputList
       outputList = []
+      if not inputList:
+        break
+
       s = inputList[-1]
 
       for subjectVertex in inputList:
@@ -5623,7 +5646,7 @@ class CcpnGLWidget(QOpenGLWidget):
           outputList.append(computeIntersection())
         s = e
       cp1 = cp2
-    return (outputList)
+    return [pp for ol in outputList for pp in ol]
 
   def lineFit(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
     for pp in range(0, len(lineList), 2):

@@ -10,7 +10,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -119,7 +119,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.addItem(item)
 
   def getObjects(self):
-     return list(self.objects)
+    return list(self.objects)
 
   def _getDroppedObjects(self, project):
     '''This will return obj if the items text is a ccpn pid '''
@@ -178,7 +178,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
   def removeItem(self):
     for selectedItem in self.selectedItems():
       self.takeItem(self.row(selectedItem))
-        # self.takeItem(self.currentRow())
+      # self.takeItem(self.currentRow())
 
   def mousePressEvent(self, event):
     self._mouse_button = event.button()
@@ -381,10 +381,10 @@ class ListWidgetPair(Frame):
         moveText = ['move left', 'move right']
 
       self.buttons = ButtonList(self, texts=moveText
-                               , icons=[self.leftIcon, self.rightIcon]
-                               , callbacks=[self._moveLeft, self._moveRight]
-                               , direction='v'
-                               , grid=(3,3), hAlign='c')
+                                , icons=[self.leftIcon, self.rightIcon]
+                                , callbacks=[self._moveLeft, self._moveRight]
+                                , direction='v'
+                                , grid=(3,3), hAlign='c')
       self.buttons.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
       transparentStyle = "background-color: transparent; border: 0px solid transparent"
       self.buttons.setStyleSheet(transparentStyle)
@@ -396,17 +396,17 @@ class ListWidgetPair(Frame):
     # self.button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
     self.spacer1 = Spacer(self, 5, 5
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(0,2), gridSpan=(1,1))
+                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                          , grid=(0,2), gridSpan=(1,1))
     self.spacer2 = Spacer(self, 5, 5
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(2,2), gridSpan=(1,1))
+                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                          , grid=(2,2), gridSpan=(1,1))
     self.spacer3 = Spacer(self, 5, 5
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(4,4), gridSpan=(1,1))
+                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                          , grid=(4,4), gridSpan=(1,1))
     self.spacer4 = Spacer(self, 5, 5
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(6,4), gridSpan=(1,1))
+                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                          , grid=(6,4), gridSpan=(1,1))
 
     for i, cs in enumerate([2,8,1,1,1,8,2]):
       self.getLayout().setColumnStretch(i, cs)
@@ -487,7 +487,7 @@ class ListWidgetPair(Frame):
 
   def getRightList(self):
     return self.rightList.getTexts()
-    
+
 
     # RESIDUE                     ABBREVIATION                SYNONYM
     # -----------------------------------------------------------------------------
@@ -522,29 +522,29 @@ class ListWidgetSelector(Frame):
   to the other and vise-versa
   """
   residueTypes = [('Alanine', 'ALA', 'A')
-                  , ('Arginine','ARG', 'R')
-                  , ('Asparagine', 'ASN', 'N')
-                  , ('Aspartic acid', 'ASP', 'D')
-                  , ('ASP/ASN ambiguous', 'ASX', 'B')
-                  , ('Cysteine', 'CYS', 'C')
-                  , ('Glutamine', 'GLN', 'Q')
-                  , ('Glutamic acid', 'GLU', 'E')
-                  , ('GLU/GLN ambiguous', 'GLX', 'Z')
-                  , ('Glycine', 'GLY', 'G')
-                  , ('Histidine', 'HIS', 'H')
-                  , ('Isoleucine', 'ILE', 'I')
-                  , ('Leucine', 'LEU', 'L')
-                  , ('Lysine', 'LYS', 'K')
-                  , ('Methionine', 'MET', 'M')
-                  , ('Phenylalanine', 'PHE', 'F')
-                  , ('Proline', 'PRO', 'P')
-                  , ('Serine', 'SER', 'S')
-                  , ('Threonine', 'THR', 'T')
-                  , ('Tryptophan', 'TRP', 'W')
-                  , ('Tyrosine', 'TYR', 'Y')
-                  , ('Unknown', 'UNK', '')
-                  , ('Valine', 'VAL', 'V')]
-  
+    , ('Arginine','ARG', 'R')
+    , ('Asparagine', 'ASN', 'N')
+    , ('Aspartic acid', 'ASP', 'D')
+    , ('ASP/ASN ambiguous', 'ASX', 'B')
+    , ('Cysteine', 'CYS', 'C')
+    , ('Glutamine', 'GLN', 'Q')
+    , ('Glutamic acid', 'GLU', 'E')
+    , ('GLU/GLN ambiguous', 'GLX', 'Z')
+    , ('Glycine', 'GLY', 'G')
+    , ('Histidine', 'HIS', 'H')
+    , ('Isoleucine', 'ILE', 'I')
+    , ('Leucine', 'LEU', 'L')
+    , ('Lysine', 'LYS', 'K')
+    , ('Methionine', 'MET', 'M')
+    , ('Phenylalanine', 'PHE', 'F')
+    , ('Proline', 'PRO', 'P')
+    , ('Serine', 'SER', 'S')
+    , ('Threonine', 'THR', 'T')
+    , ('Tryptophan', 'TRP', 'W')
+    , ('Tyrosine', 'TYR', 'Y')
+    , ('Unknown', 'UNK', '')
+    , ('Valine', 'VAL', 'V')]
+
   def __init__(self, parent=None, objects=None, callback=None
                , rightMouseCallback=None
                , contextMenu=True
@@ -599,17 +599,17 @@ class ListWidgetSelector(Frame):
     # self.button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
     self.spacer1 = Spacer(self, 5, 5
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(0,2), gridSpan=(1,1))
+                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                          , grid=(0,2), gridSpan=(1,1))
     self.spacer2 = Spacer(self, 10, 10
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(2,2), gridSpan=(1,1))
+                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                          , grid=(2,2), gridSpan=(1,1))
     self.spacer3 = Spacer(self, 10, 10
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(4,4), gridSpan=(1,1))
+                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                          , grid=(4,4), gridSpan=(1,1))
     self.spacer4 = Spacer(self, 5, 5
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(6,4), gridSpan=(1,1))
+                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+                          , grid=(6,4), gridSpan=(1,1))
 
     for i, cs in enumerate([2,6,1,1,1,6,2]):
       self.getLayout().setColumnStretch(i, cs)

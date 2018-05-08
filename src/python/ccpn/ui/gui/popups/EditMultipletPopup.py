@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -38,217 +38,223 @@ NEW = "Add New"
 
 class EditMultipletPopup(CcpnDialog):
 
-  def __init__(self, parent=None,  mainWindow=None, multiplet = None, title='Edit Multiplet', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kw)
+    def __init__(self, parent=None,  mainWindow=None, multiplet = None, title='Edit Multiplet', **kw):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kw)
 
-    self.project = None
+        self.project = None
 
-    if mainWindow:
-      self.mainWindow = mainWindow
-      self.application = mainWindow.application
-      self.current = self.application.current
-      self.project = mainWindow.project
-      self.multiplet = multiplet
-      self.multipletList = None
-      self.spectrum = None
-      if self.multiplet:
-        self.multipletList = self.multiplet.multipletList
-        self.spectrum = self.multipletList.spectrum
-      # self._registerNotifiers() #not really needed in a popup
+        if mainWindow:
+            self.mainWindow = mainWindow
+            self.application = mainWindow.application
+            self.current = self.application.current
+            self.project = mainWindow.project
+            self.multiplet = multiplet
+            self.multipletList = None
+            self.spectrum = None
+            if self.multiplet:
+                self.multipletList = self.multiplet.multipletList
+                self.spectrum = self.multipletList.spectrum
+            # self._registerNotifiers() #not really needed in a popup
 
-    self._createWidgets()
-    # self._enableButtons()
+        self._createWidgets()
+        # self._enableButtons()
 
-  def _createWidgets(self):
+    def _createWidgets(self):
 
-    tipText = ''
+        tipText = ''
 
-    self.getLayout().setContentsMargins(10,10,10,10)
-    row =  0
-    self.mtLabel = Label(self, 'Select Multiplet List', grid=(row, 0), hAlign='l')
-    self.label2 = Label(self, 'Select Peaks Source', grid=(row, 1), hAlign='l')
-    row += 1
-    self.mtPullDown = PulldownList(self, texts=[NEW], headerText='Select', callback=self._populateMultipletPulldown, grid=(row, 0))
-    self.sourcePullDown = PulldownList(self, texts=['All in spectrum', ], headerText='Select', callback=self._populateSourceMultipletListsWidget, grid=(row, 1))
-    row += 1
-    self.mlLabel = Label(self, 'Select Multiplet', grid=(row, 0), hAlign='l')
-    row += 1
-    self.mlPullDown = PulldownList(self, texts=[NEW], headerText='Select', callback=self._populatePeaksListsWidget, grid=(row, 0))
-    row += 1
+        self.getLayout().setContentsMargins(10,10,10,10)
+        row =  0
+        self.mtLabel = Label(self, 'Select Multiplet List', grid=(row, 0), hAlign='l')
+        self.label2 = Label(self, 'Select Peaks Source', grid=(row, 1), hAlign='l')
+        row += 1
+        self.mtPullDown = PulldownList(self, texts=[NEW], headerText='Select', callback=self._populateMultipletPulldown, grid=(row, 0))
+        self.sourcePullDown = PulldownList(self, texts=['All in spectrum', ], headerText='Select', callback=self._populateSourceMultipletListsWidget, grid=(row, 1))
+        row += 1
+        self.mlLabel = Label(self, 'Select Multiplet', grid=(row, 0), hAlign='l')
+        row += 1
+        self.mlPullDown = PulldownList(self, texts=[NEW], headerText='Select', callback=self._populatePeaksListsWidget, grid=(row, 0))
+        row += 1
 
-    self.mlPeaksLabel = Label(self, 'Peaks', grid=(row, 0), hAlign='l')
-    self.outputMultipletListsWidgetLabel = Label(self, 'Available Peaks',  grid=(row, 1),  hAlign='l')
-    row += 1
-    self.multipletPeaksListWidget = ListWidget(self, multiSelect= True, callback=self._activateOkButton,acceptDrops=True, copyDrop=False, tipText=tipText, grid=(row, 0))
-    self.peaksSourceListWidget = ListWidget(self, multiSelect= True, callback=self._activateOkButton, acceptDrops=True,copyDrop=False, tipText=tipText, grid=(row, 1))
-    row += 1
-    self.selectButtons = ButtonList(self, texts=['Select from Current Peaks','Close', 'Ok'],
-                                    callbacks=[self._selectCurrentPeaks, self._closePopup, self._okCallback],
-                                    tipTexts=['Select on the list all the current peaks',
-                                              '',''], grid=(row, 0), gridSpan=(row,2))
-
-
-    self.multipletPeaksListWidget.setAcceptDrops(True)
-    self.peaksSourceListWidget.setAcceptDrops(True)
-
-    # self.selectButtons.buttons[-1].setDisabled(True)
-    self._populateMultipletPulldown()
-    self._populateSourceMultipletListsWidget()
-    self._setPullDownData()
-    if self.project:
-      if self.multiplet:
-        self._selectMultiplet()
-
-  def _setPullDownData(self):
-    if self.project:
-      for multipletList in self.project.multipletLists:
-        self.mtPullDown.addItem(text=multipletList.pid, object=multipletList)
-
-  def _selectMultiplet(self):
-    if self.multiplet:
-      self.mtPullDown.select(self.multiplet.multipletList.pid)
-      self.mlPullDown.select(self.multiplet.pid)
-
-  def _populateMultipletPulldown(self, *args):
-    obj = self.mtPullDown.getObject()
-
-    if isinstance(obj, MultipletList):
-      self.spectrum = obj.spectrum
-      for multiplet in obj.multiplets:
-        self.mlPullDown.addItem(text=multiplet.pid, object=multiplet)
-
-  def _populatePeaksListsWidget(self, *args):
-
-    obj = self.mlPullDown.getObject()
-    if isinstance(obj, Multiplet):
-      self.multipletPeaksListWidget.setObjects(obj.peaks, name='pid')
-    else:
-      if self.project:
-        if self.mlPullDown.getText() != NEW:
-          self.multipletPeaksListWidget.setObjects(self.project.peaks, name='pid')
-
-    self._activateOkButton()
+        self.mlPeaksLabel = Label(self, 'Peaks', grid=(row, 0), hAlign='l')
+        self.outputMultipletListsWidgetLabel = Label(self, 'Available Peaks',  grid=(row, 1),  hAlign='l')
+        row += 1
+        self.multipletPeaksListWidget = ListWidget(self, multiSelect= True, callback=self._activateOkButton,acceptDrops=True, copyDrop=False, tipText=tipText, grid=(row, 0))
+        self.peaksSourceListWidget = ListWidget(self, multiSelect= True, callback=self._activateOkButton, acceptDrops=True,copyDrop=False, tipText=tipText, grid=(row, 1))
+        row += 1
+        self.selectButtons = ButtonList(self, texts=['Select from Current Peaks','Close', 'Ok'],
+                                        callbacks=[self._selectCurrentPeaks, self._closePopup, self._okCallback],
+                                        tipTexts=['Select on the list all the current peaks',
+                                                  '',''], grid=(row, 0), gridSpan=(row,2))
 
 
-  def _populateSourceMultipletListsWidget(self, *args):
+        self.multipletPeaksListWidget.setAcceptDrops(True)
+        self.peaksSourceListWidget.setAcceptDrops(True)
 
-    obj = self.sourcePullDown.getObject()
-    if isinstance(obj, Multiplet):
-      self.peaksSourceListWidget.setObjects(obj.peaks, name='pid')
-    else:
-      if self.project:
-        if self.sourcePullDown.getText() == 'All in spectrum':
-          print(self.spectrum, 'ff')
-          if self.spectrum:
-            availablePeaks = [pp for peakList in self.spectrum.peakLists for pp in peakList.peaks if pp not in self.multipletPeaksListWidget._getDroppedObjects(self.project)]
-            self.peaksSourceListWidget.setObjects(availablePeaks, name='pid')
+        # self.selectButtons.buttons[-1].setDisabled(True)
+        self._populateMultipletPulldown()
+        self._populateSourceMultipletListsWidget()
+        self._setPullDownData()
+        if self.project:
+            if self.multiplet:
+                self._selectMultiplet()
 
+    def _setPullDownData(self):
+        if self.project:
+            for multipletList in self.project.multipletLists:
+                self.mtPullDown.addItem(text=multipletList.pid, object=multipletList)
 
-  def _refreshInputMultipletsWidget(self, *args):
-    self._populateMultipletPulldown()
+    def _selectMultiplet(self):
+        if self.multiplet:
+            self.mtPullDown.select(self.multiplet.multipletList.pid)
+            self.mlPullDown.select(self.multiplet.pid)
 
-  def _refreshInputMultipletsListWidget(self, *args):
-    self._populateSourceMultipletListsWidget()
+    def _populateMultipletPulldown(self, *args):
+        obj = self.mtPullDown.getObject()
 
-  def _selectSpectrum(self, spectrum):
-    self.mtPullDown.select(spectrum)
+        if isinstance(obj, MultipletList):
+            self.spectrum = obj.spectrum
+            for multiplet in obj.multiplets:
+                self.mlPullDown.addItem(text=multiplet.pid, object=multiplet)
 
-  def _activateOkButton(self):
+    def _populatePeaksListsWidget(self, *args):
 
-    if self.project:
-      if len(self.peaksSourceListWidget.getSelectedObjects())>0 and len(self.multipletPeaksListWidget.getSelectedObjects())>0:
-        self.selectButtons.buttons[-1].setDisabled(False)
-      elif self.mtPullDown.getText == NEW:
-        self.selectButtons.buttons[-1].setDisabled(False)
-      elif self.mlPullDown.getText == NEW:
-        self.selectButtons.buttons[-1].setDisabled(False)
-
-  def _okCallback(self):
-
-    if self.project:
-      multipletListText = self.mtPullDown.getText()
-      if multipletListText == NEW:
-        self.multipletList = self.spectrum.newMultipletList()
-      else:
-        self.multipletList = self.mtPullDown.getObject()
-
-      multipletText = self.mlPullDown.getText()
-      if multipletText == NEW:
-        if self.multipletList:
-          self.multiplet = self.multipletList.newMultiplet()
-      else:
-        pdObj = self.mlPullDown.getObject()
-        if isinstance(pdObj, Multiplet):
-          self.multiplet = pdObj
+        obj = self.mlPullDown.getObject()
+        if isinstance(obj, Multiplet):
+            self.multipletPeaksListWidget.setObjects(obj.peaks, name='pid')
         else:
-          # raise a warning
-          showWarning("No Multiplet Selected", "Select a multiplet option")
+            if self.project:
+                if self.mlPullDown.getText() != NEW:
+                    self.multipletPeaksListWidget.setObjects(self.project.peaks, name='pid')
+
+        self._refreshAvailableSpectra()
+        self._activateOkButton()
 
 
-      sourceMultipletText = self.sourcePullDown.getText()
-      sourceMultiplet = self.project.getByPid(sourceMultipletText)
-      sourcePeaks = self.peaksSourceListWidget._getDroppedObjects(self.project)
-      print(sourcePeaks,'sourcePeaks')
-      if sourceMultiplet:
-        if list(set(sourcePeaks)) != list(set(sourceMultiplet.peaks)):
-          sourceMultiplet.peaks = sourcePeaks
+    def _populateSourceMultipletListsWidget(self, *args):
 
-      multipletPeaks = self.multipletPeaksListWidget._getDroppedObjects(self.project)
+        obj = self.sourcePullDown.getObject()
+        if isinstance(obj, Multiplet):
+            self.peaksSourceListWidget.setObjects(obj.peaks, name='pid')
+        else:
+            self._refreshAvailableSpectra()
 
-      if self.multiplet:
-        print(self.multiplet)
-        if list(set(multipletPeaks)) != list(set(self.multiplet.peaks)):
-          self.multiplet.peaks = multipletPeaks
-      print(multipletPeaks, 'multipletPeaks')
-
-      # try:
-      #   # todo 'Implement getLogger  info '
-      #   # getLogger().info('')
-      # except Exception as es:
-      #   showWarning(str(self.windowTitle()), str(es))
-      self._closePopup()
+    def _refreshAvailableSpectra(self):
+        if self.project:
+            if self.sourcePullDown.getText() == 'All in spectrum':
+                if self.spectrum:
+                    if self.mlPullDown.getText() != NEW:
+                        availablePeaks = [pp for peakList in self.spectrum.peakLists for pp in peakList.peaks if pp not in self.multipletPeaksListWidget._getDroppedObjects(self.project)]
+                    else:
+                        availablePeaks = [pp for peakList in self.spectrum.peakLists for pp in peakList.peaks]
+                    self.peaksSourceListWidget.setObjects(availablePeaks, name='pid')
 
 
-  def _selectPeaks(self, peaks):
-    self.multipletPeaksListWidget.selectObjects(peaks)
+    def _refreshInputMultipletsWidget(self, *args):
+        self._populateMultipletPulldown()
 
-  def clearSelections(self):
-    self.multipletPeaksListWidget.clearSelection()
-    self.peaksSourceListWidget.clearSelection()
-    self.copyButtons.buttons[1].setDisabled(True)
+    def _refreshInputMultipletsListWidget(self, *args):
+        self._populateSourceMultipletListsWidget()
 
-  def _selectCurrentPeaks(self):
-    if self.project:
-      self.multipletPeaksListWidget.clearSelection()
-      peaks = self.current.peaks
-      self._selectPeaks(peaks)
+    def _selectSpectrum(self, spectrum):
+        self.mtPullDown.select(spectrum)
 
-  def _enableButtons(self):
-    if len(self.current.peaks)>0:
-      self.selectButtons.buttons[0].setDisabled(False)
-    else:
-      self.selectButtons.buttons[0].setDisabled(True)
+    def _activateOkButton(self):
 
-  def _closePopup(self):
-    """
+        if self.project:
+            if len(self.peaksSourceListWidget.getSelectedObjects())>0 and len(self.multipletPeaksListWidget.getSelectedObjects())>0:
+                self.selectButtons.buttons[-1].setDisabled(False)
+            elif self.mtPullDown.getText == NEW:
+                self.selectButtons.buttons[-1].setDisabled(False)
+            elif self.mlPullDown.getText == NEW:
+                self.selectButtons.buttons[-1].setDisabled(False)
 
-    """
-    # self._deregisterNotifiers()
-    self.reject()
+    def _okCallback(self):
 
-  #
-  # def _registerNotifiers(self):
-  #   if self.project:
-  #     self._multipletNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'Multiplet', self._refreshInputMultipletsWidget)
-  #     self._multipletListNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'MultipletList', self._refreshInputMultipletsListWidget)
-  #
-  #
-  # def _deregisterNotifiers(self):
-  #   if self.project:
-  #     if self._multipletNotifier:
-  #       self._multipletNotifier.unRegister()
-  #     if self._multipletListNotifier:
-  #       self._multipletListNotifier.unRegister()
+        if self.project:
+            multipletListText = self.mtPullDown.getText()
+            if multipletListText == NEW:
+                self.multipletList = self.spectrum.newMultipletList()
+            else:
+                self.multipletList = self.mtPullDown.getObject()
+
+            multipletText = self.mlPullDown.getText()
+            if multipletText == NEW:
+                if self.multipletList:
+                    self.multiplet = self.multipletList.newMultiplet()
+            else:
+                pdObj = self.mlPullDown.getObject()
+                if isinstance(pdObj, Multiplet):
+                    self.multiplet = pdObj
+                else:
+                    # raise a warning
+                    showWarning("No Multiplet Selected", "Select a multiplet option")
+
+
+            sourceMultipletText = self.sourcePullDown.getText()
+            sourceMultiplet = self.project.getByPid(sourceMultipletText)
+            sourcePeaks = self.peaksSourceListWidget._getDroppedObjects(self.project)
+            print(sourcePeaks,'sourcePeaks')
+            if sourceMultiplet:
+                if list(set(sourcePeaks)) != list(set(sourceMultiplet.peaks)):
+                    sourceMultiplet.peaks = sourcePeaks
+
+            multipletPeaks = self.multipletPeaksListWidget._getDroppedObjects(self.project)
+
+            if self.multiplet:
+                print(self.multiplet)
+                if list(set(multipletPeaks)) != list(set(self.multiplet.peaks)):
+                    self.multiplet.peaks = multipletPeaks
+            print(multipletPeaks, 'multipletPeaks')
+
+            # try:
+            #   # todo 'Implement getLogger  info '
+            #   # getLogger().info('')
+            # except Exception as es:
+            #   showWarning(str(self.windowTitle()), str(es))
+            self._closePopup()
+
+
+    def _selectPeaks(self, peaks):
+        self.multipletPeaksListWidget.selectObjects(peaks)
+
+    def clearSelections(self):
+        self.multipletPeaksListWidget.clearSelection()
+        self.peaksSourceListWidget.clearSelection()
+        self.copyButtons.buttons[1].setDisabled(True)
+
+    def _selectCurrentPeaks(self):
+        if self.project:
+            self.multipletPeaksListWidget.clearSelection()
+            peaks = self.current.peaks
+            self._selectPeaks(peaks)
+
+    def _enableButtons(self):
+        if len(self.current.peaks)>0:
+            self.selectButtons.buttons[0].setDisabled(False)
+        else:
+            self.selectButtons.buttons[0].setDisabled(True)
+
+    def _closePopup(self):
+        """
+
+        """
+        # self._deregisterNotifiers()
+        self.reject()
+
+    #
+    # def _registerNotifiers(self):
+    #   if self.project:
+    #     self._multipletNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'Multiplet', self._refreshInputMultipletsWidget)
+    #     self._multipletListNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'MultipletList', self._refreshInputMultipletsListWidget)
+    #
+    #
+    # def _deregisterNotifiers(self):
+    #   if self.project:
+    #     if self._multipletNotifier:
+    #       self._multipletNotifier.unRegister()
+    #     if self._multipletListNotifier:
+    #       self._multipletListNotifier.unRegister()
 
 
 if __name__ == '__main__':

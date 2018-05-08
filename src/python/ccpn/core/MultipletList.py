@@ -86,7 +86,7 @@ class MultipletList(AbstractWrapperObject):
     """parent containing multipletList."""
     return self._project._data2Obj[self._wrappedData.dataSource]
 
-  multipletListParent = _parent
+  spectrum = _parent
 
   @property
   def title(self) -> str:

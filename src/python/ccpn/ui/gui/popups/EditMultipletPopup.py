@@ -33,6 +33,7 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
+
 NEW = "Add New"
 
 class EditMultipletPopup(CcpnDialog):
@@ -53,7 +54,7 @@ class EditMultipletPopup(CcpnDialog):
       if self.multiplet:
         self.multipletList = self.multiplet.multipletList
         self.spectrum = self.multipletList.spectrum
-      self._registerNotifiers()
+      # self._registerNotifiers() #not really needed in a popup
 
     self._createWidgets()
     # self._enableButtons()
@@ -87,13 +88,16 @@ class EditMultipletPopup(CcpnDialog):
                                               '',''], grid=(row, 0), gridSpan=(row,2))
 
 
+    self.multipletPeaksListWidget.setAcceptDrops(True)
+    self.peaksSourceListWidget.setAcceptDrops(True)
 
     # self.selectButtons.buttons[-1].setDisabled(True)
     self._populateMultipletPulldown()
     self._populateSourceMultipletListsWidget()
     self._setPullDownData()
-    if self.multiplet:
-      self._selectMultiplet()
+    if self.project:
+      if self.multiplet:
+        self._selectMultiplet()
 
   def _setPullDownData(self):
     if self.project:
@@ -109,6 +113,7 @@ class EditMultipletPopup(CcpnDialog):
     obj = self.mtPullDown.getObject()
 
     if isinstance(obj, MultipletList):
+      self.spectrum = obj.spectrum
       for multiplet in obj.multiplets:
         self.mlPullDown.addItem(text=multiplet.pid, object=multiplet)
 
@@ -133,7 +138,10 @@ class EditMultipletPopup(CcpnDialog):
     else:
       if self.project:
         if self.sourcePullDown.getText() == 'All in spectrum':
-          self.peaksSourceListWidget.setObjects(self.project.peaks, name='pid')
+          print(self.spectrum, 'ff')
+          if self.spectrum:
+            availablePeaks = [pp for peakList in self.spectrum.peakLists for pp in peakList.peaks if pp not in self.multipletPeaksListWidget._getDroppedObjects(self.project)]
+            self.peaksSourceListWidget.setObjects(availablePeaks, name='pid')
 
 
   def _refreshInputMultipletsWidget(self, *args):
@@ -146,6 +154,7 @@ class EditMultipletPopup(CcpnDialog):
     self.mtPullDown.select(spectrum)
 
   def _activateOkButton(self):
+
     if self.project:
       if len(self.peaksSourceListWidget.getSelectedObjects())>0 and len(self.multipletPeaksListWidget.getSelectedObjects())>0:
         self.selectButtons.buttons[-1].setDisabled(False)
@@ -156,40 +165,48 @@ class EditMultipletPopup(CcpnDialog):
 
   def _okCallback(self):
 
+    if self.project:
+      multipletListText = self.mtPullDown.getText()
+      if multipletListText == NEW:
+        self.multipletList = self.spectrum.newMultipletList()
+      else:
+        self.multipletList = self.mtPullDown.getObject()
 
-    multipletListText = self.mtPullDown.getText()
-    if multipletListText == NEW:
-      self.multipletList = self.spectrum.newMultipletList()
-    else:
-      self.multipletList = self.mtPullDown.getObject()
-
-    multipletText = self.mlPullDown.getText()
-    if multipletText == NEW:
-      if self.multipletList:
-        self.multiplet = self.multipletList.newMultiplet()
-    else:
-      self.multiplet = self.mlPullDown.getObject()
-
-    sourceMultipletText = self.sourcePullDown.getText()
-    sourceMultiplet = self.project.getByPid(sourceMultipletText)
-    sourcePeaks = self.peaksSourceListWidget.getObjects()
-    if sourceMultiplet:
-      if list(set(sourcePeaks)) != list(set(sourceMultiplet.peaks)):
-        sourceMultiplet.peaks = sourcePeaks
-
-    multipletPeaks = self.multipletPeaksListWidget.getObjects()
-
-    if self.multiplet:
-      if list(set(multipletPeaks)) != list(set(self.multiplet.peaks)):
-        self.multiplet.peaks = multipletPeaks
+      multipletText = self.mlPullDown.getText()
+      if multipletText == NEW:
+        if self.multipletList:
+          self.multiplet = self.multipletList.newMultiplet()
+      else:
+        pdObj = self.mlPullDown.getObject()
+        if isinstance(pdObj, Multiplet):
+          self.multiplet = pdObj
+        else:
+          # raise a warning
+          showWarning("No Multiplet Selected", "Select a multiplet option")
 
 
-    # try:
-    #   # todo 'Implement getLogger  info '
-    #   # getLogger().info('')
-    # except Exception as es:
-    #   showWarning(str(self.windowTitle()), str(es))
-    self._closePopup()
+      sourceMultipletText = self.sourcePullDown.getText()
+      sourceMultiplet = self.project.getByPid(sourceMultipletText)
+      sourcePeaks = self.peaksSourceListWidget._getDroppedObjects(self.project)
+      print(sourcePeaks,'sourcePeaks')
+      if sourceMultiplet:
+        if list(set(sourcePeaks)) != list(set(sourceMultiplet.peaks)):
+          sourceMultiplet.peaks = sourcePeaks
+
+      multipletPeaks = self.multipletPeaksListWidget._getDroppedObjects(self.project)
+
+      if self.multiplet:
+        print(self.multiplet)
+        if list(set(multipletPeaks)) != list(set(self.multiplet.peaks)):
+          self.multiplet.peaks = multipletPeaks
+      print(multipletPeaks, 'multipletPeaks')
+
+      # try:
+      #   # todo 'Implement getLogger  info '
+      #   # getLogger().info('')
+      # except Exception as es:
+      #   showWarning(str(self.windowTitle()), str(es))
+      self._closePopup()
 
 
   def _selectPeaks(self, peaks):
@@ -201,9 +218,10 @@ class EditMultipletPopup(CcpnDialog):
     self.copyButtons.buttons[1].setDisabled(True)
 
   def _selectCurrentPeaks(self):
-    self.multipletPeaksListWidget.clearSelection()
-    peaks = self.current.peaks
-    self._selectPeaks(peaks)
+    if self.project:
+      self.multipletPeaksListWidget.clearSelection()
+      peaks = self.current.peaks
+      self._selectPeaks(peaks)
 
   def _enableButtons(self):
     if len(self.current.peaks)>0:
@@ -213,24 +231,24 @@ class EditMultipletPopup(CcpnDialog):
 
   def _closePopup(self):
     """
-    Re-implementation of closeModule function from CcpnModule to unregister notification
+
     """
-    self._deregisterNotifiers()
+    # self._deregisterNotifiers()
     self.reject()
 
-
-  def _registerNotifiers(self):
-    if self.project:
-      self._multipletNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'Multiplet', self._refreshInputMultipletsWidget)
-      self._multipletListNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'MultipletList', self._refreshInputMultipletsListWidget)
-
-
-  def _deregisterNotifiers(self):
-    if self.project:
-      if self._multipletNotifier:
-        self._multipletNotifier.unRegister()
-      if self._multipletListNotifier:
-        self._multipletListNotifier.unRegister()
+  #
+  # def _registerNotifiers(self):
+  #   if self.project:
+  #     self._multipletNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'Multiplet', self._refreshInputMultipletsWidget)
+  #     self._multipletListNotifier = Notifier(self.project, [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME], 'MultipletList', self._refreshInputMultipletsListWidget)
+  #
+  #
+  # def _deregisterNotifiers(self):
+  #   if self.project:
+  #     if self._multipletNotifier:
+  #       self._multipletNotifier.unRegister()
+  #     if self._multipletListNotifier:
+  #       self._multipletListNotifier.unRegister()
 
 
 if __name__ == '__main__':

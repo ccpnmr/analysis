@@ -121,6 +121,20 @@ class ListWidget(QtWidgets.QListWidget, Base):
   def getObjects(self):
      return list(self.objects)
 
+  def _getDroppedObjects(self, project):
+    '''This will return obj if the items text is a ccpn pid '''
+    items = []
+    objs = []
+
+    for index in range(self.count()):
+      items.append(self.item(index))
+    for item in items:
+      obj = project.getByPid(item.text())
+      objs.append(obj)
+    return objs
+
+
+
   def getSelectedObjects(self):
     indexes =  self.selectedIndexes()
     objects = []

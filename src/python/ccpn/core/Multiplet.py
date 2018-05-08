@@ -222,7 +222,7 @@ class Multiplet(AbstractWrapperObject):
     """
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # throw more understandable errors for the python console
-    spectrum = self._parent.multipletListParent
+    spectrum = self._parent.spectrum
     pks = makeIterableList(peaks)
     for pp in pks:
       if not isinstance(pp, Peak):
@@ -253,7 +253,7 @@ class Multiplet(AbstractWrapperObject):
     """
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # throw more understandable errors for the python console
-    spectrum = self._parent.multipletListParent
+    spectrum = self._parent.spectrum
     pks = makeIterableList(peaks)
     for pp in pks:
       if not isinstance(pp, Peak):
@@ -284,7 +284,7 @@ def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> M
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
   # throw more understandable errors for the python console
-  spectrum = self.multipletListParent
+  spectrum = self.spectrum
   pks = makeIterableList(peaks)
   for pp in pks:
     if not isinstance(pp, Peak):

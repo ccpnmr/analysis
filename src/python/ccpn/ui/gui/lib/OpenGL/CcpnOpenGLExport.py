@@ -361,66 +361,69 @@ class CcpnOpenGLExporter():
 
     colourGroups = OrderedDict()
     for spectrumView in self.strip.orderedSpectrumViews():
+      if spectrumView.isDeleted:
+        continue
 
-      for peakListView in spectrumView.peakListViews:
-        if spectrumView.isVisible() and peakListView.isVisible():
+      validPeakListViews = [pp for pp in spectrumView.peakListViews
+                            if pp.isVisible()
+                            and spectrumView.isVisible()
+                            and pp in self.parent._GLIntegralLists.keys()]
 
-          if peakListView in self.parent._GLIntegralLists.keys():
+      for peakListView in validPeakListViews:  # spectrumView.peakListViews:
+        mat = None
+        if spectrumView.spectrum.dimensionCount > 1:
+          if spectrumView in self.parent._spectrumSettings.keys():
 
-            mat = None
-            if spectrumView.spectrum.dimensionCount > 1:
-              if spectrumView in self.parent._spectrumSettings.keys():
+            # draw
+            pass
 
-                # draw
-                pass
+        else:
 
+          # assume that the vertexArray is a GL_LINE_STRIP
+          if spectrumView in self.parent._contourList.keys():
+            if self.parent._stackingValue:
+              mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
             else:
+              mat = None
 
-              # assume that the vertexArray is a GL_LINE_STRIP
-              if spectrumView in self.parent._contourList.keys():
-                if self.parent._stackingValue:
-                  mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
-                else:
-                  mat = None
+        # draw the integralAreas if they exist
+        for integralArea in self.parent._GLIntegralLists[peakListView]._regions:
+          if hasattr(integralArea, '_integralArea'):
 
-            # draw the integralAreas if they exist
-            for integralArea in self.parent._GLIntegralLists[peakListView]._regions:
-              if hasattr(integralArea, '_integralArea'):
+            thisSpec = integralArea._integralArea
+            for vv in range(0, len(thisSpec.vertices) - 4, 2):
 
-                thisSpec = integralArea._integralArea
-                for vv in range(0, len(thisSpec.vertices) - 4, 2):
+              if mat is not None:
 
-                  if mat is not None:
+                vectStart = [thisSpec.vertices[vv], thisSpec.vertices[vv + 1], 0.0, 1.0]
+                vectStart = mat.dot(vectStart)
+                vectMid = [thisSpec.vertices[vv + 2], thisSpec.vertices[vv + 3], 0.0, 1.0]
+                vectMid = mat.dot(vectMid)
+                vectEnd = [thisSpec.vertices[vv + 4], thisSpec.vertices[vv + 5], 0.0, 1.0]
+                vectEnd = mat.dot(vectEnd)
+                newLine = [vectStart[0], vectStart[1],
+                           vectMid[0], vectMid[1],
+                           vectEnd[0], vectEnd[1]]
+              else:
+                newLine = list(thisSpec.vertices[vv:vv + 6])
 
-                    vectStart = [thisSpec.vertices[vv], thisSpec.vertices[vv + 1], 0.0, 1.0]
-                    vectStart = mat.dot(vectStart)
-                    vectMid = [thisSpec.vertices[vv + 2], thisSpec.vertices[vv + 3], 0.0, 1.0]
-                    vectMid = mat.dot(vectMid)
-                    vectEnd = [thisSpec.vertices[vv + 4], thisSpec.vertices[vv + 5], 0.0, 1.0]
-                    vectEnd = mat.dot(vectEnd)
-                    newLine = [vectStart[0], vectStart[1],
-                               vectMid[0], vectMid[1],
-                               vectEnd[0], vectEnd[1]]
-                  else:
-                    newLine = list(thisSpec.vertices[vv:vv + 6])
+              colour = colors.Color(*thisSpec.colors[vv * 2:vv * 2 + 3], alpha=float(thisSpec.colors[vv * 2 + 3]))
+              colourPath = 'spectrumViewIntegralFill%s%s%s%s%s' % (
+                                  spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+              if colourPath not in colourGroups:
+                cc = colourGroups[colourPath] = {}
+                cc['lines'] = []
+                cc['fillColor'] = colour
+                cc['stroke'] = None
+                cc['strokeColor'] = None
 
-                  colour = colors.Color(*thisSpec.colors[vv * 2:vv * 2 + 3], alpha=float(thisSpec.colors[vv * 2 + 3]))
-                  colourPath = 'spectrumViewIntegralFill%s%s%s%s%s' % (
-                                      spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
-                  if colourPath not in colourGroups:
-                    cc = colourGroups[colourPath] = {}
-                    cc['lines'] = []
-                    cc['fillColor'] = colour
-                    cc['stroke'] = None
-                    cc['strokeColor'] = None
-
-                  # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
-                  if self.parent.lineVisible(newLine,
-                                             x=self.displayScale * self.mainL,
-                                             y=self.displayScale * self.mainB,
-                                             width=self.displayScale * self.mainW,
-                                             height=self.displayScale * self.mainH):
-                    colourGroups[colourPath]['lines'].append(newLine)
+              # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+              if self.parent.lineVisible(newLine,
+                                         x=self.displayScale * self.mainL,
+                                         y=self.displayScale * self.mainB,
+                                         width=self.displayScale * self.mainW,
+                                         height=self.displayScale * self.mainH):
+                colourGroups[colourPath]['lines'].append(newLine)
 
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsAreaFill')
 
@@ -622,30 +625,6 @@ class CcpnOpenGLExporter():
         list(colourGroups.values())[0]['lines'].append([0.0, self.displayScale * self.bAxisH,
                                          self.displayScale * self.mainW, self.displayScale * self.bAxisH])
       self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
-
-      # if self._drawBottomAxis:
-      #   # put the axis labels into the bottom bar
-      #   self.viewports.setViewport(self._currentBottomAxisBarView)
-      #   self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
-      #   self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-      #   self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
-      #                                            self.AXIS_MARGINBOTTOM, -1.0, 1.0)
-      #   self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-      #
-      #   for lb in self._axisXLabelling:
-      #     lb.drawTextArray()
-      #
-      # if self._drawRightAxis:
-      #   # put the axis labels into the right bar
-      #   self.viewports.setViewport(self._currentRightAxisBarView)
-      #   self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
-      #   self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-      #   self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT
-      #                                            , self.axisB, self.axisT, -1.0, 1.0)
-      #   self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
-      #
-      #   for lb in self._axisYLabelling:
-      #     lb.drawTextArray()
 
     if self.rAxis or self.bAxis:
       colourGroups = OrderedDict()

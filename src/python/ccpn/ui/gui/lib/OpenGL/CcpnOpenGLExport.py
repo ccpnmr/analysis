@@ -85,6 +85,9 @@ class CcpnOpenGLExporter():
                 pdfmetrics.registerFont(TTFont('Tahoma', ff))
                 break
 
+        self.fontSize = 11
+        self.fontName = 'Tahoma'
+
         self.backgroundColour = colors.Color(*self.parent.background[0:3],
                                              alpha = self.parent.background[3])
         self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
@@ -162,11 +165,13 @@ class CcpnOpenGLExporter():
         # translate to size of drawing Flowable
         self.pixWidth = self._report.doc.width
         self.pixHeight = self.pixWidth * ratio
+        self.fontSize = int(13.0 * 1.1 * self.pixWidth / self.parent.w)
         if self.pixHeight > (self._report.doc.height - 2*cm):
 
             # TODO:ED check what else is stealing the height
             self.pixHeight = self._report.doc.height - (2*cm)
             self.pixWidth = self.pixHeight / ratio
+            self.fontSize = int(13.0 * 1.05 * self.pixHeight / self.parent.h)
 
         # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
         self.displayScale = self.pixHeight / self.parent.h
@@ -299,19 +304,74 @@ class CcpnOpenGLExporter():
                                                             PLOTHEIGHT: self.displayScale * self.mainH},
                                                    name='spectrumContours%s' % spectrumView.pid,
                                                    mat=mat)
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # spectrumView boundaries
+
+        colourGroups = OrderedDict()
+        for spectrumView in self.strip.orderedSpectrumViews():
+            if spectrumView.isDeleted:
+                continue
+
+            if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
+                self._spectrumValues = spectrumView._getValues()
+
+                # get the bounding box of the spectra
+                fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+                if spectrumView.spectrum.dimensionCount > 1:
+                    fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+                    colour = colors.Color(*spectrumView.posColour[0:3], alpha=0.5)
+                else:
+                    fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
+
+                    colour = spectrumView.sliceColour
+                    colR = int(colour.strip('# ')[0:2], 16) / 255.0
+                    colG = int(colour.strip('# ')[2:4], 16) / 255.0
+                    colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+                    colour = colors.Color(colR, colG, colB, alpha=0.5)
+
+                colourPath = 'spectrumViewBoundaries%s%s%s%s%s' % (
+                spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+
+                if colourPath not in colourGroups:
+                    cc = colourGroups[colourPath] = {}
+                    cc['lines'] = []
+                    cc['strokeWidth'] = 0.5
+                    cc['strokeColor'] = colour
+                    cc['strokeLineCap'] = 1
+
+                lineLoop = [fx0, fy0,
+                           fx0, fy1,
+                           fx1, fy1,
+                           fx1, fy0,
+                            fx0, fy0]
+                for pp in range(0, len(lineLoop)-2, 2):
+                    newLine = lineLoop[pp:pp+4]
+                    newLine = self.parent.lineVisible(newLine,
+                                                      x=self.displayScale * self.mainL,
+                                                      y=self.displayScale * self.mainB,
+                                                      width=self.displayScale * self.mainW,
+                                                      height=self.displayScale * self.mainH)
+                    if newLine:
+                        colourGroups[colourPath]['lines'].append(newLine)
+
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # spectrumView peaklists
 
+        colourGroups = OrderedDict()
         self.appendIndexLineGroupFill(indArray=self.parent._GLPeakLists,
                                       colourGroups=colourGroups,
                                       plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                PLOTBOTTOM: self.displayScale * self.mainB,
                                                PLOTWIDTH: self.displayScale * self.mainW,
                                                PLOTHEIGHT: self.displayScale * self.mainH},
-                                      name='PeakLists',
+                                      name='peakLists',
                                       fillMode=None)
-        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='spectra')
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='peakLists')
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # marks
@@ -459,7 +519,8 @@ class CcpnOpenGLExporter():
                                                 width=self.displayScale * self.mainW,
                                                 height=self.displayScale * self.mainH):
                         colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                            drawString.text, fontSize=11, fontName='Tahoma',
+                                                            drawString.text, fontSize=self.fontSize,
+                                                            fontName=self.fontName,
                                                             fillColor=colour))
 
         for colourGroup in colourGroups.values():
@@ -487,7 +548,8 @@ class CcpnOpenGLExporter():
                                         width=self.displayScale * self.mainW,
                                         height=self.displayScale * self.mainH):
                 colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                    drawString.text, fontSize=11, fontName='Tahoma',
+                                                    drawString.text, fontSize=self.fontSize,
+                                                    fontName=self.fontName,
                                                     fillColor=colour))
 
         for colourGroup in colourGroups.values():
@@ -636,7 +698,8 @@ class CcpnOpenGLExporter():
                                                width=self.displayScale * self.rAxisW,
                                                height=self.displayScale * self.rAxisH):
                         colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                            drawString.text, fontSize=11, fontName='Tahoma',
+                                                            drawString.text, fontSize=self.fontSize,
+                                                            fontName=self.fontName,
                                                             fillColor=colour))
 
             if self.bAxis:
@@ -657,7 +720,8 @@ class CcpnOpenGLExporter():
                                                width=self.displayScale * self.bAxisW,
                                                height=self.displayScale * self.bAxisH):
                         colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                            drawString.text, fontSize=11, fontName='Tahoma',
+                                                            drawString.text, fontSize=self.fontSize,
+                                                            fontName=self.fontName,
                                                             fillColor=colour))
 
         for colourGroup in colourGroups.values():

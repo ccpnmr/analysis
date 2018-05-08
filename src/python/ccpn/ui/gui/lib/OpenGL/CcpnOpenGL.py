@@ -5458,9 +5458,9 @@ class CcpnGLWidget(QOpenGLWidget):
     INSIDE, LEFT, RIGHT, BOTTOM, TOP = 0, 1, 2, 4, 8
 
     xMin = min([self.axisL, self.axisR])
-    xMax = min([self.axisL, self.axisR])
+    xMax = max([self.axisL, self.axisR])
     yMin = min([self.axisB, self.axisT])
-    yMax = min([self.axisB, self.axisT])
+    yMax = max([self.axisB, self.axisT])
 
     def computeCode(x, y):
       """
@@ -5550,20 +5550,80 @@ class CcpnGLWidget(QOpenGLWidget):
           y1 = y
           code2 = computeCode(x1, y1)
 
-    return (x0, y0, x1, y1)
+    return [x0, y0, x1, y1]
+
+  def pointVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
+      if (self.between(lineList[0], self.axisL, self.axisR) and
+              (self.between(lineList[1], self.axisT, self.axisB))):
+
+        lineList[0] = x + width * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
+        lineList[1] = y + height * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
+        return True
 
   def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
-    for pp in range(0, len(lineList), 2):
-      if (self.between(lineList[pp], self.axisL, self.axisR) and
-              (self.between(lineList[pp+1], self.axisT, self.axisB) or checkIntegral)):
-        break
-    else:
-      return False
+    # for pp in range(0, len(lineList), 2):
+    #   if (self.between(lineList[pp], self.axisL, self.axisR) and
+    #           (self.between(lineList[pp+1], self.axisT, self.axisB) or checkIntegral)):
+    #     break
+    # else:
+    #   return False
+    #
+    # for pp in range(0, len(lineList), 2):
+    #   lineList[pp] = x + width * (lineList[pp] - self.axisL) / (self.axisR - self.axisL)
+    #   lineList[pp+1] = y + height * (lineList[pp+1] - self.axisB) / (self.axisT - self.axisB)
+    # return True
 
-    for pp in range(0, len(lineList), 2):
-      lineList[pp] = x + width * (lineList[pp] - self.axisL) / (self.axisR - self.axisL)
-      lineList[pp+1] = y + height * (lineList[pp+1] - self.axisB) / (self.axisT - self.axisB)
-    return True
+    newList = []
+    for pp in range(0, len(lineList)-2, 2):
+      clippedList = self.cohenSutherlandClip(*lineList[pp:pp+4])
+      if clippedList:
+        if not newList:
+          newList = clippedList
+        else:
+          if clippedList[0] == newList[-2] and clippedList[1] == newList[-1]:
+            newList.extend(clippedList[2:])
+          else:
+            newList.extend(clippedList)
+
+    for pp in range(0, len(newList), 2):
+      newList[pp] = x + width * (newList[pp] - self.axisL) / (self.axisR - self.axisL)
+      newList[pp+1] = y + height * (newList[pp+1] - self.axisB) / (self.axisT - self.axisB)
+
+    return newList
+
+  def clip(self, subjectPolygon, clipPolygon):
+    """Apply Sutherland-Hodgman algorithm for clipping polygons"""
+    def inside(p):
+      return (cp2[0] - cp1[0]) * (p[1] - cp1[1]) > (cp2[1] - cp1[1]) * (p[0] - cp1[0])
+
+    def computeIntersection():
+      dc = [cp1[0] - cp2[0], cp1[1] - cp2[1]]
+      dp = [s[0] - e[0], s[1] - e[1]]
+      n1 = cp1[0] * cp2[1] - cp1[1] * cp2[0]
+      n2 = s[0] * e[1] - s[1] * e[0]
+      n3 = 1.0 / (dc[0] * dp[1] - dc[1] * dp[0])
+      return [(n1 * dp[0] - n2 * dc[0]) * n3, (n1 * dp[1] - n2 * dc[1]) * n3]
+
+    outputList = subjectPolygon
+    cp1 = clipPolygon[-1]
+
+    for clipVertex in clipPolygon:
+      cp2 = clipVertex
+      inputList = outputList
+      outputList = []
+      s = inputList[-1]
+
+      for subjectVertex in inputList:
+        e = subjectVertex
+        if inside(e):
+          if not inside(s):
+            outputList.append(computeIntersection())
+          outputList.append(e)
+        elif inside(s):
+          outputList.append(computeIntersection())
+        s = e
+      cp1 = cp2
+    return (outputList)
 
   def lineFit(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
     for pp in range(0, len(lineList), 2):

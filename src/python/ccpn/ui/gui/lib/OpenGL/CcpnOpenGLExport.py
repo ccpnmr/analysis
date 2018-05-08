@@ -760,6 +760,10 @@ class CcpnOpenGLExporter():
         else:
             indexLen = 2
 
+        # override so that each element is a new group
+        if splitGroups:
+            colourGroups = OrderedDict()
+
         for ii in range(0, len(indArray.indices), indexLen):
             ii0 = [int(ind) for ind in indArray.indices[ii:ii + indexLen]]
 
@@ -771,9 +775,9 @@ class CcpnOpenGLExporter():
             colourPath = 'spectrumView%s%s%s%s%s' % (name,
                                                      colour.red, colour.green, colour.blue, colour.alpha)
 
-            # override so that each element is a new group
-            if splitGroups:
-                colourGroups = OrderedDict()
+            # # override so that each element is a new group
+            # if splitGroups:
+            #     colourGroups = OrderedDict()
 
             if colourPath not in colourGroups:
                 cc = colourGroups[colourPath] = {}
@@ -798,9 +802,9 @@ class CcpnOpenGLExporter():
             if newLine:
                 colourGroups[colourPath]['lines'].append(newLine)
 
-            # override so that each element is a new group
-            if splitGroups:
-                self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
+        # override so that each element is a new group
+        if splitGroups:
+            self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
 
     def appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name,
                                  fillMode=None,

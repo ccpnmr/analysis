@@ -809,32 +809,6 @@ class CcpnOpenGLExporter():
       if splitGroups:
         self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
 
-    # for ii in range(0, len(indArray.indices), 2):
-    #   ii0 = int(indArray.indices[ii])
-    #   ii1 = int(indArray.indices[ii+1])
-    #
-    #   newLine = [indArray.vertices[ii0*2],
-    #              indArray.vertices[ii0 * 2+1],
-    #              indArray.vertices[ii1 * 2],
-    #              indArray.vertices[ii1 * 2+1]]
-    #
-    #   colour = colors.Color(*indArray.colors[ii0*4:ii0 * 4+3], alpha=indArray.colors[ii0 * 4+3])
-    #   colourPath = '%s:%s%s%s%s' % (name, colour.red, colour.green, colour.blue, colour.alpha)
-    #   if colourPath not in colourGroups:
-    #     cc = colourGroups[colourPath] = {}
-    #     cc['lines'] = []
-    #     cc['strokeWidth'] = 0.5
-    #     cc['strokeColor'] = colour
-    #     cc['strokeLineCap'] = 1
-    #
-    #   # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
-    #   if self.parent.lineVisible(newLine,
-    #                              x=plotDim[PLOTLEFT],
-    #                              y=plotDim[PLOTBOTTOM],
-    #                              width=plotDim[PLOTWIDTH],
-    #                              height=plotDim[PLOTHEIGHT]):
-    #     colourGroups[colourPath]['lines'].append(newLine)
-
   def appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name,
                                fillMode=None,
                                checkIntegral=False, splitGroups=False):

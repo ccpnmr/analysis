@@ -126,19 +126,8 @@ LENTEXCOORDS = 2
 LENATTRIBS = 4
 LENOFFSETS = 4
 
-# GLLINE_STYLES = {
-#   'solid': 0xFFFF,
-#   'dashed': 0xF0F0,
-#   'dotted': 0xAAAA
-# }
-#
-# GLLINE_STYLES_ARRAY = {
-#   'solid': None,
-#   'dashed': [3, 3],
-#   'dotted': [1, 1]
-# }
-
 FADE_FACTOR = 0.25
+
 
 class CcpnGLWidget(QOpenGLWidget):
 
@@ -5458,6 +5447,110 @@ class CcpnGLWidget(QOpenGLWidget):
 
   def exportToSVG(self, filename='default.svg', params=None):
     return CcpnOpenGLExporter(self, self._parent, filename, params)
+
+  def cohenSutherlandClip(self, x0, y0, x1, y1):
+    """
+    Implement Cohen-Sutherland clipping
+    :param x0, y0 - co-ordinates of first point:
+    :param x1, y1 - co-ordinates of second point:
+    :return None if not clipped else (xs, ys, xe, ye) - start, end of clipped line
+    """
+    INSIDE, LEFT, RIGHT, BOTTOM, TOP = 0, 1, 2, 4, 8
+
+    xMin = min([self.axisL, self.axisR])
+    xMax = min([self.axisL, self.axisR])
+    yMin = min([self.axisB, self.axisT])
+    yMax = min([self.axisB, self.axisT])
+
+    def computeCode(x, y):
+      """
+      calculate region that point lies in
+      :param x, y - point: 
+      :return code: 
+      """
+      code = INSIDE
+      if x < xMin:          # to the left of rectangle
+        code |= LEFT
+      elif x > xMax:        # to the right of rectangle
+        code |= RIGHT
+      if y < yMin:          # below the rectangle
+        code |= BOTTOM
+      elif y > yMax:        # above the rectangle
+        code |= TOP
+      return code
+
+    code1 = computeCode(x0, y0)
+    code2 = computeCode(x1, y1)
+    accept = False
+
+    while not accept:
+
+      # If both endpoints lie within rectangle
+      if code1 == 0 and code2 == 0:
+        accept = True
+
+      # If both endpoints are outside rectangle
+      elif (code1 & code2) != 0:
+        return None
+
+      # Some segment lies within the rectangle
+      else:
+
+        # Line Needs clipping
+        # At least one of the points is outside, 
+        # select it
+        x = 1.0
+        y = 1.0
+        if code1 != 0:
+          code_out = code1
+        else:
+          code_out = code2
+
+        # Find intersection point
+        # using formulas y = y0 + slope * (x - x0), 
+        # x = x0 + (1 / slope) * (y - y0)
+        if code_out & TOP:
+
+          # point is above the clip rectangle
+          x = x0 + (x1 - x0) * \
+              (yMax - y0) / (y1 - y0)
+          y = yMax
+
+        elif code_out & BOTTOM:
+
+          # point is below the clip rectangle
+          x = x0 + (x1 - x0) * \
+              (yMin - y0) / (y1 - y0)
+          y = yMin
+
+        elif code_out & RIGHT:
+
+          # point is to the right of the clip rectangle
+          y = y0 + (y1 - y0) * \
+              (xMax - x0) / (x1 - x0)
+          x = xMax
+
+        elif code_out & LEFT:
+
+          # point is to the left of the clip rectangle
+          y = y0 + (y1 - y0) * \
+              (xMin - x0) / (x1 - x0)
+          x = xMin
+
+        # Now intersection point x,y is found
+        # We replace point outside clipping rectangle
+        # by intersection point
+        if code_out == code1:
+          x0 = x
+          y0 = y
+          code1 = computeCode(x0, y0)
+
+        else:
+          x1 = x
+          y1 = y
+          code2 = computeCode(x1, y1)
+
+    return (x0, y0, x1, y1)
 
   def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
     for pp in range(0, len(lineList), 2):

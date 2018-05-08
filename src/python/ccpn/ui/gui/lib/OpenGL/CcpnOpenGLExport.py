@@ -617,6 +617,31 @@ class CcpnOpenGLExporter():
         self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='infiniteLines')
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # overlay text
+
+        colourGroups = OrderedDict()
+        drawString = self.parent.stripIDString
+
+        colour = self.foregroundColour
+        colourPath = 'overlayText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+        if colourPath not in colourGroups:
+            cc = colourGroups[colourPath] = Group()
+
+        newLine = [drawString.attribs[0], drawString.attribs[1]]
+        if self.parent.pointVisible(newLine,
+                                    x=self.displayScale * self.mainL,
+                                    y=self.displayScale * self.mainB,
+                                    width=self.displayScale * self.mainW,
+                                    height=self.displayScale * self.mainH):
+            colourGroups[colourPath].add(String(newLine[0], newLine[1],
+                                                drawString.text, fontSize=self.fontSize,
+                                                fontName=self.fontName,
+                                                fillColor=colour))
+
+        for colourGroup in colourGroups.values():
+            self._mainPlot.add(colourGroup)
+
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # add an axis mask
 
         ll = None

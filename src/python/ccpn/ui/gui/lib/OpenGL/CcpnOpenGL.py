@@ -126,11 +126,17 @@ LENTEXCOORDS = 2
 LENATTRIBS = 4
 LENOFFSETS = 4
 
-GLLINE_STYLES = {
-  'solid': 0xFFFF,
-  'dashed': 0xF0F0,
-  'dotted': 0xAAAA
-}
+# GLLINE_STYLES = {
+#   'solid': 0xFFFF,
+#   'dashed': 0xF0F0,
+#   'dotted': 0xAAAA
+# }
+#
+# GLLINE_STYLES_ARRAY = {
+#   'solid': None,
+#   'dashed': [3, 3],
+#   'dotted': [1, 1]
+# }
 
 FADE_FACTOR = 0.25
 
@@ -3624,7 +3630,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
       if infLine.visible:
         GL.glColor4f(*infLine.brush)
-        GL.glLineStipple(1, GLLINE_STYLES[infLine.lineStyle])
+        GL.glLineStipple(1, GLDefs.GLLINE_STYLES[infLine.lineStyle])
 
         GL.glBegin(GL.GL_LINES)
         if infLine.orientation == 'h':

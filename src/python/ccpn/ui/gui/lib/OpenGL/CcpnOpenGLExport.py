@@ -32,7 +32,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from contextlib import contextmanager
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
+                                                  GLLINE_STYLES_ARRAY
 from collections import OrderedDict, Iterable
 import io
 import numpy as np
@@ -514,7 +515,7 @@ class CcpnOpenGLExporter():
                                             PLOTWIDTH: self.displayScale * self.mainW,
                                             PLOTHEIGHT: self.displayScale * self.mainH},
                                    name='hTrace%s' % hTrace.spectrumView.pid,
-                                   includeLastVertex=True)
+                                   includeLastVertex=not self.parent.is1D)
 
     for vTrace in self.parent._staticVTraces:
       if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
@@ -526,9 +527,39 @@ class CcpnOpenGLExporter():
                                             PLOTWIDTH: self.displayScale * self.mainW,
                                             PLOTHEIGHT: self.displayScale * self.mainH},
                                    name='vTrace%s' % vTrace.spectrumView.pid,
-                                   includeLastVertex=True)
+                                   includeLastVertex=not self.parent.is1D)
 
     self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='traces')
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # infinite lines
+
+    colourGroups = OrderedDict()
+    for infLine in self.parent._infiniteLines:
+      if infLine.visible:
+        colour = colors.Color(*infLine.brush[0:3], alpha=float(infLine.brush[3]))
+        colourPath = 'infiniteLines%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+        if colourPath not in colourGroups:
+          cc = colourGroups[colourPath] = {}
+          cc['lines'] = []
+          cc['strokeWidth'] = 0.5
+          cc['strokeColor'] = colour
+          cc['strokeLineCap'] = 1
+          cc['strokeDashArray'] = GLLINE_STYLES_ARRAY[infLine.lineStyle]
+
+        if infLine.orientation == 'h':
+          newLine = [self.parent.axisL, infLine.values[0], self.parent.axisR, infLine.values[0]]
+        else:
+          newLine = [infLine.values[0], self.parent.axisT, infLine.values[0], self.parent.axisB]
+
+        if self.parent.lineFit(newLine,
+                                   x=self.displayScale * self.mainL,
+                                   y=self.displayScale * self.mainB,
+                                   width=self.displayScale * self.mainW,
+                                   height=self.displayScale * self.mainH):
+          colourGroups[colourPath]['lines'].append(newLine)
+
+    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='infiniteLines')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # add an axis mask
@@ -902,7 +933,9 @@ class CcpnOpenGLExporter():
                      'fillColor',
                      'fill',
                      'fillMode',
-                     'stroke']
+                     'stroke',
+                     'strokeDashArray']
+
       newColour = dict((k, colourItem[k]) for k in wanted_keys if k in colourItem)
 
       pl = Path(**newColour)    #  strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])

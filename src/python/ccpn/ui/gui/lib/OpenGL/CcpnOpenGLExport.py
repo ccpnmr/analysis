@@ -50,6 +50,8 @@ from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Gro
 from reportlab.graphics.shapes import definePath
 from reportlab.graphics.renderSVG import draw, renderScaledDrawing, SVGCanvas
 from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from ccpn.util.Report import Report
 
 PLOTLEFT = 'plotLeft'
@@ -74,6 +76,13 @@ class CcpnOpenGLExporter():
     self.filename = filename
     self.params = params
     self._report = Report(self, self.project, filename)
+
+    import matplotlib.font_manager
+    foundFonts = matplotlib.font_manager.findSystemFonts()
+    for ff in foundFonts:
+      if 'Tahoma.ttf' in ff:
+        pdfmetrics.registerFont(TTFont('Tahoma', ff))
+        break
 
     self.backgroundColour = colors.Color(self.parent.background[0] * 255,
                                          self.parent.background[1] * 255,
@@ -166,6 +175,7 @@ class CcpnOpenGLExporter():
 
     # create an object that can be added to a report
     self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
+
     # self._rAxisPlot = Drawing(self.displayScale*self.rAxisW, self.displayScale*self.rAxisH) \
     #                     if self.rAxis else None
     # self._bAxisPlot = Drawing(self.displayScale*self.bAxisW, self.displayScale*self.bAxisH) \
@@ -429,7 +439,6 @@ class CcpnOpenGLExporter():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # peak labels
 
-    gr = Group()
     for spectrumView in self.strip.orderedSpectrumViews():
 
       for peakListView in spectrumView.peakListViews:
@@ -457,7 +466,7 @@ class CcpnOpenGLExporter():
                                          width=self.displayScale * self.mainW,
                                          height=self.displayScale * self.mainH):
                 colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                              drawString.text, fontSize=11,
+                                              drawString.text, fontSize=13, fontName='Tahoma',
                                               fillColor=colour))
 
     for colourGroup in colourGroups.values():
@@ -485,7 +494,7 @@ class CcpnOpenGLExporter():
                                  width=self.displayScale * self.mainW,
                                  height=self.displayScale * self.mainH):
         colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                            drawString.text, fontSize=11,
+                                            drawString.text, fontSize=13, fontName='Tahoma',
                                             fillColor=colour))
 
     for colourGroup in colourGroups.values():
@@ -504,7 +513,8 @@ class CcpnOpenGLExporter():
                                             PLOTBOTTOM: self.displayScale * self.mainB,
                                             PLOTWIDTH: self.displayScale * self.mainW,
                                             PLOTHEIGHT: self.displayScale * self.mainH},
-                                   name='hTrace%s' % hTrace.spectrumView.pid)
+                                   name='hTrace%s' % hTrace.spectrumView.pid,
+                                   includeLastVertex=True)
 
     for vTrace in self.parent._staticVTraces:
       if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
@@ -515,10 +525,10 @@ class CcpnOpenGLExporter():
                                             PLOTBOTTOM: self.displayScale * self.mainB,
                                             PLOTWIDTH: self.displayScale * self.mainW,
                                             PLOTHEIGHT: self.displayScale * self.mainH},
-                                   name='vTrace%s' % vTrace.spectrumView.pid)
+                                   name='vTrace%s' % vTrace.spectrumView.pid,
+                                   includeLastVertex=True)
 
-    for colourGroup in colourGroups.values():
-      self._mainPlot.add(colourGroup)
+    self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='traces')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # add an axis mask
@@ -618,15 +628,16 @@ class CcpnOpenGLExporter():
           if colourPath not in colourGroups:
             cc = colourGroups[colourPath] = Group()
 
-          mid = self.parent.axisL   # +10/self.AXIS_MARGINRIGHT
-          newLine = [mid, drawString.attribs[1]]
-          if self.parent.lineVisible(newLine,
-                                     x=self.displayScale * self.rAxisL,
-                                     y=self.displayScale * self.rAxisB,
-                                     width=self.displayScale * self.rAxisW,
-                                     height=self.displayScale * self.rAxisH):
+          # add (0, 3) to mid
+          mid = self.parent.axisL + (0+drawString.attribs[0]) * (self.parent.axisR-self.parent.axisL) / self.parent.AXIS_MARGINRIGHT
+          newLine = [mid, drawString.attribs[1]+(3*self.parent.pixelY)]
+          if self.parent.lineFit(newLine,
+                                   x=self.displayScale * self.rAxisL,
+                                   y=self.displayScale * self.rAxisB,
+                                   width=self.displayScale * self.rAxisW,
+                                   height=self.displayScale * self.rAxisH):
             colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                drawString.text, fontSize=11,
+                                                drawString.text, fontSize=13, fontName='Tahoma',
                                                 fillColor=colour))
 
       if self.bAxis:
@@ -641,15 +652,16 @@ class CcpnOpenGLExporter():
           if colourPath not in colourGroups:
             cc = colourGroups[colourPath] = Group()
 
-          mid = self.parent.axisB   # +10/self.AXIS_MARGINRIGHT
-          newLine = [drawString.attribs[0], mid]
-          if self.parent.lineVisible(newLine,
-                                     x=self.displayScale * self.bAxisL,
-                                     y=self.displayScale * self.bAxisB,
-                                     width=self.displayScale * self.bAxisW,
-                                     height=self.displayScale * self.bAxisH):
+          # add (0, 3) to mid
+          mid = self.parent.axisB + (3+drawString.attribs[1]) * (self.parent.axisT-self.parent.axisB) / self.parent.AXIS_MARGINBOTTOM
+          newLine = [drawString.attribs[0]+(0*self.parent.pixelX), mid]
+          if self.parent.lineFit(newLine,
+                                 x=self.displayScale * self.bAxisL,
+                                 y=self.displayScale * self.bAxisB,
+                                 width=self.displayScale * self.bAxisW,
+                                 height=self.displayScale * self.bAxisH):
             colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                drawString.text, fontSize=11,
+                                                drawString.text, fontSize=13, fontName='Tahoma',
                                                 fillColor=colour))
 
     for colourGroup in colourGroups.values():
@@ -690,7 +702,7 @@ class CcpnOpenGLExporter():
     """
     self._report.writeDocument()
 
-  def appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None):
+  def appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None, includeLastVertex=False):
     for vv in range(0, len(indArray.vertices) - 2, 2):
 
       if mat is not None:
@@ -720,12 +732,20 @@ class CcpnOpenGLExporter():
           cc['strokeColor'] = None
 
       # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
-      if self.parent.lineVisible(newLine,
+      if (includeLastVertex and vv==len(indArray.vertices)-4):
+        self.parent.lineFit(newLine,
+                            x=plotDim[PLOTLEFT],
+                            y=plotDim[PLOTBOTTOM],
+                            width=plotDim[PLOTWIDTH],
+                            height=plotDim[PLOTHEIGHT])
+        colourGroups[colourPath]['lines'].append(newLine)
+      elif self.parent.lineVisible(newLine,
                                  x=plotDim[PLOTLEFT],
                                  y=plotDim[PLOTBOTTOM],
                                  width=plotDim[PLOTWIDTH],
                                  height=plotDim[PLOTHEIGHT]):
         colourGroups[colourPath]['lines'].append(newLine)
+
 
   def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name,
                            fillMode=None, checkIntegral=False, splitGroups=False):

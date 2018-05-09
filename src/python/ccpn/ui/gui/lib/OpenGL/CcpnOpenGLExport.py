@@ -343,23 +343,18 @@ class CcpnOpenGLExporter():
                 colourPath = 'spectrumViewBoundaries%s%s%s%s%s' % (
                 spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
-                lineLoop = [fx0, fy0,
-                           fx0, fy1,
-                           fx1, fy1,
-                           fx1, fy0,
-                            fx0, fy0]
-                for pp in range(0, len(lineLoop)-2, 2):
-                    newLine = lineLoop[pp:pp+4]
-                    newLine = self.parent.lineVisible(newLine,
-                                                      x=self.displayScale * self.mainL,
-                                                      y=self.displayScale * self.mainB,
-                                                      width=self.displayScale * self.mainW,
-                                                      height=self.displayScale * self.mainH)
-                    if newLine:
-                        if colourPath not in colourGroups:
-                            colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
-                                                             PDFSTROKELINECAP: 1}
-                        colourGroups[colourPath][PDFLINES].append(newLine)
+                # generate the bounding box
+                newLine = [fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0, fx0, fy0]
+                newLine = self.parent.lineVisible(newLine,
+                                                  x=self.displayScale * self.mainL,
+                                                  y=self.displayScale * self.mainB,
+                                                  width=self.displayScale * self.mainW,
+                                                  height=self.displayScale * self.mainH)
+                if newLine:
+                    if colourPath not in colourGroups:
+                        colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
+                                                         PDFSTROKELINECAP: 1, PDFCLOSEPATH: False}
+                    colourGroups[colourPath][PDFLINES].append(newLine)
 
         self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
@@ -671,7 +666,6 @@ class CcpnOpenGLExporter():
             ll2 = [0.0, 0.0, self.pixWidth, 0.0]
 
         if ll1:
-            # pl = Path(fillColor=self.backgroundColour, strokeColor=self.backgroundColour, strokeWidth=1.0)
             pl = Path(fillColor=self.backgroundColour, stroke=None, strokeColor=None)
             pl.moveTo(ll1[0], ll1[1])
             for vv in range(2, len(ll1), 2):
@@ -719,14 +713,12 @@ class CcpnOpenGLExporter():
             colourGroups = OrderedDict()
             if self.rAxis:
                 for drawString in self.parent._axisYLabelling:
-                    # drawString.drawTextArray()
 
+                    # drawTextArray
                     colour = self.foregroundColour
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
-                    # if colourPath not in colourGroups:
-                    #     cc = colourGroups[colourPath] = Group()
 
-                    # add (0, 3) to mid
+                    # add (0, 3) to mid-point
                     mid = self.parent.axisL + (0+drawString.attribs[0]) * (self.parent.axisR-self.parent.axisL) / self.parent.AXIS_MARGINRIGHT
                     newLine = [mid, drawString.attribs[1]+(3*self.parent.pixelY)]
                     if self.parent.pointVisible(newLine,
@@ -744,12 +736,10 @@ class CcpnOpenGLExporter():
 
             if self.bAxis:
                 for drawString in self.parent._axisXLabelling:
-                    # drawString.drawTextArray()
 
+                    # drawTextArray
                     colour = self.foregroundColour
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
-                    # if colourPath not in colourGroups:
-                    #     cc = colourGroups[colourPath] = Group()
 
                     # add (0, 3) to mid
                     mid = self.parent.axisB + (3+drawString.attribs[1]) * (self.parent.axisT-self.parent.axisB) / self.parent.AXIS_MARGINBOTTOM
@@ -833,21 +823,6 @@ class CcpnOpenGLExporter():
                     cc[PDFFILLCOLOR] = colour
                     cc[PDFSTROKE] = None
                     cc[PDFSTROKECOLOR] = None
-
-            # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
-            # if (includeLastVertex and vv==len(indArray.vertices)-4):
-            #   self.parent.lineFit(newLine,
-            #                       x=plotDim[PLOTLEFT],
-            #                       y=plotDim[PLOTBOTTOM],
-            #                       width=plotDim[PLOTWIDTH],
-            #                       height=plotDim[PLOTHEIGHT])
-            #   colourGroups[colourPath][PDFLINES].append(newLine)
-            # elif self.parent.lineVisible(newLine,
-            #                            x=plotDim[PLOTLEFT],
-            #                            y=plotDim[PLOTBOTTOM],
-            #                            width=plotDim[PLOTWIDTH],
-            #                            height=plotDim[PLOTHEIGHT]):
-            #   colourGroups[colourPath][PDFLINES].append(newLine)
 
             newLine = self.parent.lineVisible(newLine,
                                               x=plotDim[PLOTLEFT],
@@ -967,7 +942,8 @@ class CcpnOpenGLExporter():
                     pl.moveTo(ll[0], ll[1])
                     for vv in range(2, len(ll), 2):
                         pl.lineTo(ll[vv], ll[vv+1])
-                    pl.closePath()
+                    if PDFCLOSEPATH not in colourItem or (PDFCLOSEPATH in colourItem and colourItem[PDFCLOSEPATH] == True):
+                        pl.closePath()
             gr.add(pl)
         drawing.add(gr, name=name)
 

@@ -1,29 +1,29 @@
 """GUI SpectrumDisplay class
 
 """
-#=========================================================================================
+# =========================================================================================
 # Licence, Reference and Credits
-#=========================================================================================
+# =========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-#=========================================================================================
+# =========================================================================================
 # Last code modification
-#=========================================================================================
+# =========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b3 $"
-#=========================================================================================
+# =========================================================================================
 # Created
-#=========================================================================================
+# =========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-#=========================================================================================
+# =========================================================================================
 # Start of code
-#=========================================================================================
+# =========================================================================================
 
 from typing import Sequence, Tuple, Optional
 import collections
@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.OrderedSpectrumViews import SPECTRUMVIEWINDEX, OrderedSpectrumViews
+from ccpn.core.lib.OrderedSpectrumViews import ORDEREDSPECTRUMVIEWS, OrderedSpectrumViews
 
 logger = getLogger()
 
@@ -245,66 +245,43 @@ class SpectrumDisplay(AbstractWrapperObject):
     # # ejb - orderedSpectrumViews, orderedSpectra
     # # store the current orderedSpectrumViews in the internal data store
     # # so it is hidden from external users
+    def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
+        """
+        The spectra attached to the strip (ordered)
+        :return tuple of spectra:
+        """
+        return self.strips[0].orderedSpectra()
 
-    def orderedSpectrumViews(self, spectrumList, includeDeleted=False) -> Optional[Tuple]:
+    def orderedSpectrumViews(self, strip=0, includeDeleted=False) -> Optional[Tuple]:
         """
         The spectrumViews attached to the strip (ordered)
         :return tuple of SpectrumViews:
         """
-        if not self._orderedSpectrumViews:
-            self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-        return self._orderedSpectrumViews.orderedSpectrumViews((spectrumList or self.spectrumViews), includeDeleted=includeDeleted)
+        return self.strips[0].orderedSpectrumViews()
 
-    def getOrderedSpectrumViewsIndex(self) -> Optional[Tuple]:
+    def setOrderedSpectrumViews(self, spectrumViews: Tuple):
         """
-        The indexing of the current spectrumViews
-        :return tuple of ints:
+        Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
+        :param spectrumViews - tuple of SpectrumView objects:
         """
-        if not self._orderedSpectrumViews:
-            self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-        return self._orderedSpectrumViews.getOrderedSpectrumViewsIndex()
+        for strip in self.strips:
+            strip.setOrderedSpectrumViews(spectrumViews)
 
-    def setOrderedSpectrumViewsIndex(self, spectrumIndex: Tuple[int]):
+    def indexOrderedSpectrumViews(self, newIndex: Tuple[int]):
         """
         Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
         :param newIndex - tuple of int:
         """
-        defaults = collections.OrderedDict((('spectrumIndex', None),))
 
-        self._startCommandEchoBlock('setOrderedSpectrumViewsIndex', values=locals(), defaults=defaults)
+        defaults = collections.OrderedDict((('newIndex', None),))
+
+        self._startCommandEchoBlock('indexOrderedSpectrumViews', values=locals(), defaults=defaults)
         try:
-            if not self._orderedSpectrumViews:
-                self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-            self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=spectrumIndex)
+            for strip in self.strips:
+                strip._indexOrderedSpectrumViews(newIndex=newIndex)
 
         finally:
             self._endCommandEchoBlock()
-
-    def _removeOrderedSpectrumViewIndex(self, index):
-        print ('>>>_removeSpectrumDisplay')
-        self.removeOrderedSpectrumView(index)
-
-    def removeOrderedSpectrumView(self, ind):
-        defaults = collections.OrderedDict((('ind', None),))
-
-        index = ind #.spectrumViews.index(spectrumView)
-        self._startCommandEchoBlock('removeOrderedSpectrumView', values=locals(), defaults=defaults)
-        try:
-            if not self._orderedSpectrumViews:
-                self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-            oldIndex = list(self.getOrderedSpectrumViewsIndex())
-
-            # index = oldIndex.index(ind)
-            oldIndex.remove(index)
-            for ii in range(len(oldIndex)):
-                if oldIndex[ii] > index:
-                    oldIndex[ii] -= 1
-            self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=oldIndex)
-
-        finally:
-            self._endCommandEchoBlock()
-
-
 
     # def appendSpectrumView(self, spectrumView):
     #   """

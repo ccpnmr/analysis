@@ -1,5 +1,5 @@
 """
-Code for exporting OpenGL stripDisplay to pdf and svg files.
+Code for exporting OpenGL stripDisplay to a pdf file.
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -92,16 +92,13 @@ class CcpnOpenGLExporter():
         import matplotlib.font_manager
         foundFonts = matplotlib.font_manager.findSystemFonts()
 
-        # load all fonts that are in the openGL font list
-        for glFonts in self.parent.globalGL.fonts.values():
-            for ff in foundFonts:
-                if glFonts.fontName+'.ttf' in ff:
-                    pdfmetrics.registerFont(TTFont(glFonts.fontName, ff))
-                    break
-            else:
-                raise RuntimeError('Font %s not found.' % (glFonts.fontName+'.ttf'))
+        # need to load all fonts that are in the project
+        for ff in foundFonts:
+            if self.parent.globalGL.glSmallFont.fontName+'.ttf' in ff:
+                pdfmetrics.registerFont(TTFont(self.parent.globalGL.glSmallFont.fontName, ff))
+                break
 
-        # set a default fontName
+        self.exportFontSize = self.parent.globalGL.glSmallFont.fontSize
         self.fontName = self.parent.globalGL.glSmallFont.fontName
 
         self.backgroundColour = colors.Color(*self.parent.background[0:3],
@@ -111,7 +108,7 @@ class CcpnOpenGLExporter():
 
         # build all the sections of the pdf
         self._buildAll()
-        self._addDrawingToStory()
+        self.addDrawingToStory()
 
         # this generates the buffer to write to the file
         self._report.buildDocument()
@@ -183,12 +180,14 @@ class CcpnOpenGLExporter():
         self.pixHeight = self.pixWidth * ratio
 
         # scale fonts to appear the correct size
+        self.fontSize = int(self.exportFontSize * 1.1 * self.pixWidth / self.parent.w)
         self.fontScale = 1.1 * self.pixWidth / self.parent.w
         if self.pixHeight > (self._report.doc.height - 2*cm):
 
             # TODO:ED check what else is stealing the height
             self.pixHeight = self._report.doc.height - (2*cm)
             self.pixWidth = self.pixHeight / ratio
+            self.fontSize = int(self.exportFontSize * 1.025 * self.pixHeight / self.parent.h)
             self.fontScale = 1.025 * self.pixHeight / self.parent.h
 
         # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
@@ -231,42 +230,24 @@ class CcpnOpenGLExporter():
         # add to the drawing object
         self._mainPlot.add(gr, name='mainPlotBox')
 
-        self._addGridLines()
-        self._addSpectrumContours()
-        self._addSpectrumBoundaries()
-        self._addPeakSymbols()
-        self._addMarkLines()
-        self._addIntegralLines()
-        self._addIntegralAreas()
-        self._addRegions()
-        self._addPeakLabels()
-        self._addMarkLabels()
-        self._addTraces()
-        self._addInfiniteLines()
-        self._addOverlayText()
-        self._addAxisMask()
-        self._addGridTickMarks()
-        self._addGridLabels()
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # add the objects from the openGL widget to the drawing object
+        # grid lines
 
-    def _addGridLines(self):
-        """
-        Add grid lines to the main drawing area.
-        """
         if self.strip.gridVisible:
             colourGroups = OrderedDict()
-            self._appendIndexLineGroup(indArray=self.parent.gridList[0],
-                                       colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT: self.displayScale * self.mainL,
-                                                PLOTBOTTOM: self.displayScale * self.mainB,
-                                                PLOTWIDTH: self.displayScale * self.mainW,
-                                                PLOTHEIGHT: self.displayScale * self.mainH},
-                                       name='grid')
-            self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
+            self.appendIndexLineGroup(indArray=self.parent.gridList[0],
+                                      colourGroups=colourGroups,
+                                      plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                               PLOTBOTTOM: self.displayScale * self.mainB,
+                                               PLOTWIDTH: self.displayScale * self.mainW,
+                                               PLOTHEIGHT: self.displayScale * self.mainH},
+                                      name='grid')
+            self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
 
-    def _addSpectrumContours(self):
-        """
-        Add the spectrum contours to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # spectrumView contours
+
         colourGroups = OrderedDict()
         for spectrumView in self.strip.orderedSpectrumViews():
 
@@ -323,20 +304,19 @@ class CcpnOpenGLExporter():
                         thisSpec = self.parent._contourList[spectrumView]
 
                         # drawVertexColor
-                        self._appendVertexLineGroup(indArray=thisSpec,
-                                                    colourGroups=colourGroups,
-                                                    plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                        self.appendVertexLineGroup(indArray=thisSpec,
+                                                   colourGroups=colourGroups,
+                                                   plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                             PLOTBOTTOM: self.displayScale * self.mainB,
                                                             PLOTWIDTH: self.displayScale * self.mainW,
                                                             PLOTHEIGHT: self.displayScale * self.mainH},
-                                                    name='spectrumContours%s' % spectrumView.pid,
-                                                    mat=mat)
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
+                                                   name='spectrumContours%s' % spectrumView.pid,
+                                                   mat=mat)
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
-    def _addSpectrumBoundaries(self):
-        """
-        Add the spectrum boundaries to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # spectrumView boundaries
+
         colourGroups = OrderedDict()
         for spectrumView in self.strip.orderedSpectrumViews():
             if spectrumView.isDeleted:
@@ -363,70 +343,71 @@ class CcpnOpenGLExporter():
                 colourPath = 'spectrumViewBoundaries%s%s%s%s%s' % (
                 spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
-                # generate the bounding box
-                newLine = [fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0, fx0, fy0]
-                newLine = self.parent.lineVisible(newLine,
-                                                  x=self.displayScale * self.mainL,
-                                                  y=self.displayScale * self.mainB,
-                                                  width=self.displayScale * self.mainW,
-                                                  height=self.displayScale * self.mainH)
-                if newLine:
-                    if colourPath not in colourGroups:
-                        colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
-                                                         PDFSTROKELINECAP: 1, PDFCLOSEPATH: False}
-                    colourGroups[colourPath][PDFLINES].append(newLine)
+                lineLoop = [fx0, fy0,
+                           fx0, fy1,
+                           fx1, fy1,
+                           fx1, fy0,
+                            fx0, fy0]
+                for pp in range(0, len(lineLoop)-2, 2):
+                    newLine = lineLoop[pp:pp+4]
+                    newLine = self.parent.lineVisible(newLine,
+                                                      x=self.displayScale * self.mainL,
+                                                      y=self.displayScale * self.mainB,
+                                                      width=self.displayScale * self.mainW,
+                                                      height=self.displayScale * self.mainH)
+                    if newLine:
+                        if colourPath not in colourGroups:
+                            colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
+                                                             PDFSTROKELINECAP: 1}
+                        colourGroups[colourPath][PDFLINES].append(newLine)
 
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
-    def _addPeakSymbols(self):
-        """
-        Add the peak symbols to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # spectrumView peaklists
+
         colourGroups = OrderedDict()
-        self._appendIndexLineGroupFill(indArray=self.parent._GLPeakLists,
-                                       colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT: self.displayScale * self.mainL,
+        self.appendIndexLineGroupFill(indArray=self.parent._GLPeakLists,
+                                      colourGroups=colourGroups,
+                                      plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                PLOTBOTTOM: self.displayScale * self.mainB,
                                                PLOTWIDTH: self.displayScale * self.mainW,
                                                PLOTHEIGHT: self.displayScale * self.mainH},
-                                       name='peakSymbols',
-                                       fillMode=None)
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='peakSymbols')
+                                      name='peakLists',
+                                      fillMode=None)
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='peakLists')
 
-    def _addMarkLines(self):
-        """
-        Add the mark lines to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # marks
+
         colourGroups = OrderedDict()
-        self._appendIndexLineGroup(indArray=self.parent._marksList,
-                                   colourGroups=colourGroups,
-                                   plotDim={PLOTLEFT: self.displayScale * self.mainL,
+        self.appendIndexLineGroup(indArray=self.parent._marksList,
+                                  colourGroups=colourGroups,
+                                  plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                            PLOTBOTTOM: self.displayScale * self.mainB,
                                            PLOTWIDTH: self.displayScale * self.mainW,
                                            PLOTHEIGHT: self.displayScale * self.mainH},
-                                   name='marks')
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='marks')
+                                  name='marks')
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='marks')
 
-    def _addIntegralLines(self):
-        """
-        Add the integral lines to the main drawing area.
-        """
-        colourGroups = OrderedDict()
-        self._appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
-                                       colourGroups=colourGroups,
-                                       plotDim={PLOTLEFT: self.displayScale * self.mainL,
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # integrals
+
+        # colourGroups = OrderedDict()
+        self.appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
+                                      colourGroups=colourGroups,
+                                      plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                PLOTBOTTOM: self.displayScale * self.mainB,
                                                PLOTWIDTH: self.displayScale * self.mainW,
                                                PLOTHEIGHT: self.displayScale * self.mainH},
-                                       name='IntegralListsFill',
-                                       fillMode=GL.GL_FILL,
-                                       splitGroups=True)
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
+                                      name='IntegralListsFill',
+                                      fillMode=GL.GL_FILL,
+                                      checkIntegral=True, splitGroups=True)
+        # self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
 
-    def _addIntegralAreas(self):
-        """
-        Add the integral filled areas to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # integralLists filled areas
+
         colourGroups = OrderedDict()
         for spectrumView in self.strip.orderedSpectrumViews():
             if spectrumView.isDeleted:
@@ -489,26 +470,24 @@ class CcpnOpenGLExporter():
                                     colourGroups[colourPath] = {PDFLINES:[], PDFFILLCOLOR:colour, PDFSTROKE:None, PDFSTROKECOLOR:None}
                                 colourGroups[colourPath][PDFLINES].append(newLine)
 
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsAreaFill')
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsAreaFill')
 
-    def _addRegions(self):
-        """
-        Add the regions to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # regions
+
         colourGroups = OrderedDict()
-        self._appendIndexLineGroup(indArray=self.parent._externalRegions,
-                                   colourGroups=colourGroups,
-                                   plotDim={PLOTLEFT: self.displayScale * self.mainL,
+        self.appendIndexLineGroup(indArray=self.parent._externalRegions,
+                                  colourGroups=colourGroups,
+                                  plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                            PLOTBOTTOM: self.displayScale * self.mainB,
                                            PLOTWIDTH: self.displayScale * self.mainW,
                                            PLOTHEIGHT: self.displayScale * self.mainH},
-                                   name='regions')
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='regions')
+                                  name='regions')
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='regions')
 
-    def _addPeakLabels(self):
-        """
-        Add the peak labels to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # peak labels
+
         colourGroups = OrderedDict()
         for spectrumView in self.strip.orderedSpectrumViews():
             if spectrumView.isDeleted:
@@ -547,10 +526,9 @@ class CcpnOpenGLExporter():
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)
 
-    def _addMarkLabels(self):
-        """
-        Add the mark labels to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # mark labels
+
         colourGroups = OrderedDict()
         for drawString in self.parent._marksAxisCodes:
             # drawString.drawTextArray()
@@ -578,48 +556,46 @@ class CcpnOpenGLExporter():
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)
 
-    def _addTraces(self):
-        """
-        Add the traces to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # traces
+
         colourGroups = OrderedDict()
         for hTrace in self.parent._staticHTraces:
             if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
 
                 # drawVertexColor
-                self._appendVertexLineGroup(indArray=hTrace,
-                                            colourGroups=colourGroups,
-                                            plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                self.appendVertexLineGroup(indArray=hTrace,
+                                           colourGroups=colourGroups,
+                                           plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                     PLOTBOTTOM: self.displayScale * self.mainB,
                                                     PLOTWIDTH: self.displayScale * self.mainW,
                                                     PLOTHEIGHT: self.displayScale * self.mainH},
-                                            name='hTrace%s' % hTrace.spectrumView.pid,
-                                            includeLastVertex=not self.parent.is1D)
+                                           name='hTrace%s' % hTrace.spectrumView.pid,
+                                           includeLastVertex=not self.parent.is1D)
 
         for vTrace in self.parent._staticVTraces:
             if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
 
                 # drawVertexColor
-                self._appendVertexLineGroup(indArray=vTrace,
-                                            colourGroups=colourGroups,
-                                            plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                self.appendVertexLineGroup(indArray=vTrace,
+                                           colourGroups=colourGroups,
+                                           plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                     PLOTBOTTOM: self.displayScale * self.mainB,
                                                     PLOTWIDTH: self.displayScale * self.mainW,
                                                     PLOTHEIGHT: self.displayScale * self.mainH},
-                                            name='vTrace%s' % vTrace.spectrumView.pid,
-                                            includeLastVertex=not self.parent.is1D)
+                                           name='vTrace%s' % vTrace.spectrumView.pid,
+                                           includeLastVertex=not self.parent.is1D)
 
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='traces')
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='traces')
 
-    def _addInfiniteLines(self):
-        """
-        Add the infinite lines to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # infinite lines
+
         colourGroups = OrderedDict()
         for infLine in self.parent._infiniteLines:
             if infLine.visible:
                 colour = colors.Color(*infLine.brush[0:3], alpha=float(infLine.brush[3]))
-                colourPath = 'infiniteLines%s%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha, infLine.lineStyle)
+                colourPath = 'infiniteLines%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
                 if infLine.orientation == 'h':
                     newLine = [self.parent.axisL, infLine.values[0], self.parent.axisR, infLine.values[0]]
@@ -634,16 +610,15 @@ class CcpnOpenGLExporter():
                 if newLine:
                     if colourPath not in colourGroups:
                         colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
-                                                         PDFSTROKELINECAP: 1, PDFCLOSEPATH: False,
+                                                         PDFSTROKELINECAP: 1,
                                                          PDFSTROKEDASHARRAY: GLLINE_STYLES_ARRAY[infLine.lineStyle] }
                     colourGroups[colourPath][PDFLINES].append(newLine)
 
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='infiniteLines')
+        self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='infiniteLines')
 
-    def _addOverlayText(self):
-        """
-        Add the overlay text to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # overlay text
+
         colourGroups = OrderedDict()
         drawString = self.parent.stripIDString
 
@@ -667,10 +642,9 @@ class CcpnOpenGLExporter():
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)
 
-    def _addAxisMask(self):
-        """
-        Add a mask to clean the right/bottom axis areas.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # add an axis mask
+
         ll1 = None
         ll2 = None
         if self.rAxis and self.bAxis:
@@ -697,6 +671,7 @@ class CcpnOpenGLExporter():
             ll2 = [0.0, 0.0, self.pixWidth, 0.0]
 
         if ll1:
+            # pl = Path(fillColor=self.backgroundColour, strokeColor=self.backgroundColour, strokeWidth=1.0)
             pl = Path(fillColor=self.backgroundColour, stroke=None, strokeColor=None)
             pl.moveTo(ll1[0], ll1[1])
             for vv in range(2, len(ll1), 2):
@@ -710,51 +685,48 @@ class CcpnOpenGLExporter():
                 pl.lineTo(ll2[vv], ll2[vv+1])
             self._mainPlot.add(pl)
 
-    def _addGridTickMarks(self):
-        """
-        Add tick marks to the main drawing area.
-        """
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # grid marks
+
         if self.rAxis or self.bAxis:
             colourGroups = OrderedDict()
             if self.rAxis:
-                self._appendIndexLineGroup(indArray=self.parent.gridList[1],
-                                           colourGroups=colourGroups,
-                                           plotDim={PLOTLEFT: self.displayScale * (self.mainW-self.parent.AXIS_LINE),
+                self.appendIndexLineGroup(indArray=self.parent.gridList[1],
+                                          colourGroups=colourGroups,
+                                          plotDim={PLOTLEFT: self.displayScale * (self.mainW-self.parent.AXIS_LINE),
                                                    PLOTBOTTOM: self.displayScale * self.mainB,
                                                    PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
                                                    PLOTHEIGHT: self.displayScale * self.mainH},
-                                           name='gridAxes',
-                                           setColour=self.foregroundColour)
+                                          name='gridAxes',
+                                          setColour=self.foregroundColour)
                 list(colourGroups.values())[0][PDFLINES].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
                                                                 self.displayScale * self.mainW, self.pixHeight])
 
             if self.bAxis:
-                self._appendIndexLineGroup(indArray=self.parent.gridList[2],
-                                           colourGroups=colourGroups,
-                                           plotDim={PLOTLEFT: 0.0,
+                self.appendIndexLineGroup(indArray=self.parent.gridList[2],
+                                          colourGroups=colourGroups,
+                                          plotDim={PLOTLEFT: 0.0,
                                                    PLOTBOTTOM: self.displayScale * self.mainB,
                                                    PLOTWIDTH: self.displayScale * self.mainW,
                                                    PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
-                                           name='gridAxes',
-                                           setColour=self.foregroundColour)
+                                          name='gridAxes',
+                                          setColour=self.foregroundColour)
                 list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
                                                                 self.displayScale * self.mainW, self.displayScale * self.bAxisH])
-            self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
+            self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
-    def _addGridLabels(self):
-        """
-        Add marks to the right/bottom axis areas.
-        """
         if self.rAxis or self.bAxis:
             colourGroups = OrderedDict()
             if self.rAxis:
                 for drawString in self.parent._axisYLabelling:
+                    # drawString.drawTextArray()
 
-                    # drawTextArray
                     colour = self.foregroundColour
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+                    # if colourPath not in colourGroups:
+                    #     cc = colourGroups[colourPath] = Group()
 
-                    # add (0, 3) to mid-point
+                    # add (0, 3) to mid
                     mid = self.parent.axisL + (0+drawString.attribs[0]) * (self.parent.axisR-self.parent.axisL) / self.parent.AXIS_MARGINRIGHT
                     newLine = [mid, drawString.attribs[1]+(3*self.parent.pixelY)]
                     if self.parent.pointVisible(newLine,
@@ -772,10 +744,12 @@ class CcpnOpenGLExporter():
 
             if self.bAxis:
                 for drawString in self.parent._axisXLabelling:
+                    # drawString.drawTextArray()
 
-                    # drawTextArray
                     colour = self.foregroundColour
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+                    # if colourPath not in colourGroups:
+                    #     cc = colourGroups[colourPath] = Group()
 
                     # add (0, 3) to mid
                     mid = self.parent.axisB + (3+drawString.attribs[1]) * (self.parent.axisT-self.parent.axisB) / self.parent.AXIS_MARGINBOTTOM
@@ -793,14 +767,14 @@ class CcpnOpenGLExporter():
                                                             fontName=drawString.font.fontName,
                                                             fillColor=colour))
 
-            for colourGroup in colourGroups.values():
-                self._mainPlot.add(colourGroup)
+        for colourGroup in colourGroups.values():
+            self._mainPlot.add(colourGroup)
 
     def report(self):
         """
-        Return the current report for the GL widget.
+        Return the current report for this Gl object
         This is the vector image for the current strip containing the GL widget,
-        it is a reportlab Flowable type object that can be added to reportlab documents.
+        and can be added to a report.
         :return reportlab.platypus.Flowable:
         """
         scale = self.displayScale
@@ -813,25 +787,25 @@ class CcpnOpenGLExporter():
                                           }
                                 )
 
-    def _addDrawingToStory(self):
+    def addDrawingToStory(self):
         """
-        Add the current drawing the story of a document
+        add the current drawing the story of a document
         """
         self._report.story.append(self.report())
 
     def writeSVGFile(self):
         """
-        Output an SVG file for the GL widget.
+        Output an SVG file for the GL widget
         """
         renderSVG.drawToFile(self._mainPlot, self.filename, showBoundary=False)
 
     def writePDFFile(self):
         """
-        Output a PDF file for the GL widget.
+        Output a PDF file for the GL widget
         """
         self._report.writeDocument()
 
-    def _appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None, includeLastVertex=False):
+    def appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None, includeLastVertex=False):
         for vv in range(0, len(indArray.vertices) - 2, 2):
 
             if mat is not None:
@@ -860,6 +834,21 @@ class CcpnOpenGLExporter():
                     cc[PDFSTROKE] = None
                     cc[PDFSTROKECOLOR] = None
 
+            # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
+            # if (includeLastVertex and vv==len(indArray.vertices)-4):
+            #   self.parent.lineFit(newLine,
+            #                       x=plotDim[PLOTLEFT],
+            #                       y=plotDim[PLOTBOTTOM],
+            #                       width=plotDim[PLOTWIDTH],
+            #                       height=plotDim[PLOTHEIGHT])
+            #   colourGroups[colourPath][PDFLINES].append(newLine)
+            # elif self.parent.lineVisible(newLine,
+            #                            x=plotDim[PLOTLEFT],
+            #                            y=plotDim[PLOTBOTTOM],
+            #                            width=plotDim[PLOTWIDTH],
+            #                            height=plotDim[PLOTHEIGHT]):
+            #   colourGroups[colourPath][PDFLINES].append(newLine)
+
             newLine = self.parent.lineVisible(newLine,
                                               x=plotDim[PLOTLEFT],
                                               y=plotDim[PLOTBOTTOM],
@@ -868,9 +857,9 @@ class CcpnOpenGLExporter():
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 
-    def _appendIndexLineGroup(self, indArray, colourGroups, plotDim, name,
-                              fillMode=None, splitGroups=False,
-                              setColour=None):
+    def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name,
+                             fillMode=None, checkIntegral=False, splitGroups=False,
+                             setColour=None):
         if indArray.drawMode == GL.GL_TRIANGLES:
             indexLen = 3
         elif indArray.drawMode == GL.GL_QUADS:
@@ -915,16 +904,18 @@ class CcpnOpenGLExporter():
                                               x=plotDim[PLOTLEFT],
                                               y=plotDim[PLOTBOTTOM],
                                               width=plotDim[PLOTWIDTH],
-                                              height=plotDim[PLOTHEIGHT])
+                                              height=plotDim[PLOTHEIGHT],
+                                              checkIntegral=checkIntegral)
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 
         # override so that each element is a new group
         if splitGroups:
-            self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
+            self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
 
-    def _appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name,
-                                  fillMode=None, splitGroups=False):
+    def appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name,
+                                 fillMode=None,
+                                 checkIntegral=False, splitGroups=False):
         for spectrumView in self.strip.orderedSpectrumViews():
             if spectrumView.isDeleted:
                 continue
@@ -937,14 +928,15 @@ class CcpnOpenGLExporter():
                 if peakListView in indArray.keys():
 
                     thisSpec = indArray[peakListView]
-                    self._appendIndexLineGroup(indArray=thisSpec,
-                                               colourGroups=colourGroups,
-                                               plotDim=plotDim,
-                                               name='spectrumView%s%s' % (name, spectrumView.pid),
-                                               fillMode=fillMode,
-                                               splitGroups=splitGroups)
+                    self.appendIndexLineGroup(indArray=thisSpec,
+                                              colourGroups=colourGroups,
+                                              plotDim=plotDim,
+                                              name='spectrumView%s%s' % (name, spectrumView.pid),
+                                              fillMode=fillMode,
+                                              checkIntegral=checkIntegral,
+                                              splitGroups=splitGroups)
 
-    def _appendGroup(self, drawing:Drawing=None, colourGroups:dict=None, name:str=None):
+    def appendGroup(self, drawing:Drawing=None, colourGroups:dict=None, name:str=None):
         """
         Append a group of polylines to the current drawing object
         :param drawing - drawing to append groups to:
@@ -975,8 +967,7 @@ class CcpnOpenGLExporter():
                     pl.moveTo(ll[0], ll[1])
                     for vv in range(2, len(ll), 2):
                         pl.lineTo(ll[vv], ll[vv+1])
-                    if PDFCLOSEPATH not in colourItem or (PDFCLOSEPATH in colourItem and colourItem[PDFCLOSEPATH] == True):
-                        pl.closePath()
+                    pl.closePath()
             gr.add(pl)
         drawing.add(gr, name=name)
 

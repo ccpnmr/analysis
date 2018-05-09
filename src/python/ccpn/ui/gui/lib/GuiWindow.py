@@ -81,6 +81,7 @@ class GuiWindow():
     addShortCut("t, a", self, partial(self.toggleLastAxisOnly, self), context=context)
     addShortCut("p, v", self, self.setPhasingPivot, context=context)
     addShortCut("t, r", self, self.removePhasingTraces, context=context)
+    addShortCut("a, m", self, self.addMultiplet, context=context)
     addShortCut("p, t", self, self.newPhasingTrace, context=context)
     addShortCut("i, 1", self, self.addIntegral1D, context=context)
     addShortCut("w, 1", self, self.getCurrentPositionAndStrip, context=context)
@@ -236,6 +237,23 @@ class GuiWindow():
                    self.application.current.strip.spectrumDisplay.spectrumViews if spectrumView.isVisible()]
         peakLists = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
         self.application.current.peaks = [peak for peakList in peakLists for peak in peakList]
+
+  def addMultiplet(self):
+    '''add current peak to a multiplet'''
+    if self.application.current.strip:
+      if self.application.current.strip.spectrumDisplay:
+        spectra = [spectrumView.spectrum for spectrumView in
+                   self.application.current.strip.spectrumDisplay.spectrumViews if spectrumView.isVisible()]
+        for spectrum in spectra:
+          if len(spectrum.multipletLists)<1:
+            multipletList = spectrum.newMultipletList()
+          else:
+            multipletList = spectrum.multipletLists[-1]
+          peaks = [peak for peakList in spectrum.peakLists for peak in peakList.peaks if peak in self.current.peaks]
+          multiplet = multipletList.newMultiplet(peaks=peaks)
+          self.application.current.multiplets += (multiplet,)
+
+
 
   def traceScaleScale(self, window:'GuiWindow', scale:float):
     """

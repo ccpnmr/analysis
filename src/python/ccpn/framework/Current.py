@@ -46,6 +46,7 @@ from ccpn.core.Integral import Integral
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core.Peak import Peak
+from ccpn.core.Multiplet import Multiplet
 # from ccpn.core.Integral import Integral
 from ccpn.ui._implementation.Strip import Strip
 # from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
@@ -67,8 +68,8 @@ _currentClasses = {
   ChemicalShift:{},
   Sample:{},
   SpectrumHit:{SingularOnly:True},
-  Substance:{}
-
+  Substance:{},
+  Multiplet:{}
 
 }
 

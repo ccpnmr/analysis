@@ -698,7 +698,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   #def drawContours(self, painter, guiStrip):
   def _buildContours(self, painter):
-    
+
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
 
@@ -900,12 +900,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     glList.clearArrays()
     if posContoursAll:
       for n, contourData in enumerate(posContoursAll):
-        self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
+        # self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
         self._addContoursToGLList(contourData, glList=glList, colour=self.posColour)
 
     if negContoursAll:
       for n, contourData in enumerate(negContoursAll):
-        self._addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
+        # self._addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
         self._addContoursToGLList(contourData, glList=glList, colour=self.negColour)
       
     ###GL.glDisableClientState(GL.GL_VERTEX_ARRAY)

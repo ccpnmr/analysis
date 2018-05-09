@@ -1,29 +1,29 @@
 """GUI SpectrumDisplay class
 
 """
-#=========================================================================================
+# =========================================================================================
 # Licence, Reference and Credits
-#=========================================================================================
+# =========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-#=========================================================================================
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+# =========================================================================================
 # Last code modification
-#=========================================================================================
+# =========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b3 $"
-#=========================================================================================
+# =========================================================================================
 # Created
-#=========================================================================================
+# =========================================================================================
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
-#=========================================================================================
+# =========================================================================================
 # Start of code
-#=========================================================================================
+# =========================================================================================
 
 from typing import Sequence, Tuple, Optional
 import collections
@@ -43,500 +43,499 @@ from ccpn.core.lib.OrderedSpectrumViews import ORDEREDSPECTRUMVIEWS, OrderedSpec
 
 logger = getLogger()
 
+
 # _ccpnInternalData references
 # SV_TITLE = className  # may not be needed
 
 
 class SpectrumDisplay(AbstractWrapperObject):
-  """Spectrum display for 1D or nD spectrum"""
-  
-  #: Short class name, for PID.
-  shortClassName = 'GD'
-  # Attribute it necessary as subclasses must use superclass className
-  className = 'SpectrumDisplay'
+    """Spectrum display for 1D or nD spectrum"""
 
-  _parentClass = Project
+    #: Short class name, for PID.
+    shortClassName = 'GD'
+    # Attribute it necessary as subclasses must use superclass className
+    className = 'SpectrumDisplay'
 
-  #: Name of plural link to instances of class
-  _pluralLinkName = 'spectrumDisplays'
-  #: List of child classes.
-  _childClasses = []
+    _parentClass = Project
 
-  # Qualified name of matching API class
-  _apiClassQualifiedName = ApiBoundDisplay._metaclass.qualifiedName()
+    #: Name of plural link to instances of class
+    _pluralLinkName = 'spectrumDisplays'
+    #: List of child classes.
+    _childClasses = []
 
-  # store the list of ordered spectrumViews
-  _orderedSpectrumViews = None
+    # Qualified name of matching API class
+    _apiClassQualifiedName = ApiBoundDisplay._metaclass.qualifiedName()
 
-  # CCPN properties  
-  @property
-  def _apiSpectrumDisplay(self) -> ApiBoundDisplay:
-    """ CCPN SpectrumDisplay matching SpectrumDisplay"""
-    return self._wrappedData
-  
-  @property
-  def _key(self) -> str:
-    """short form of name, corrected to use for id"""
-    return self._wrappedData.name.translate(Pid.remapSeparators)
+    # store the list of ordered spectrumViews
+    _orderedSpectrumViews = None
 
-  @property
-  def title(self) -> str:
-    """SpectrumDisplay title
+    # CCPN properties
+    @property
+    def _apiSpectrumDisplay(self) -> ApiBoundDisplay:
+        """ CCPN SpectrumDisplay matching SpectrumDisplay"""
+        return self._wrappedData
 
-    (corresponds to its name, but the name 'name' is taken by PyQt"""
-    return self._wrappedData.name
+    @property
+    def _key(self) -> str:
+        """short form of name, corrected to use for id"""
+        return self._wrappedData.name.translate(Pid.remapSeparators)
 
-  @property
-  def _parent(self) -> Project:
-    """Project containing spectrumDisplay."""
-    return self._project
+    @property
+    def title(self) -> str:
+        """SpectrumDisplay title
 
-  project = _parent
+        (corresponds to its name, but the name 'name' is taken by PyQt"""
+        return self._wrappedData.name
 
-  @property
-  def stripDirection(self) -> str:
-    """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
-    return self._wrappedData.stripDirection
+    @property
+    def _parent(self) -> Project:
+        """Project containing spectrumDisplay."""
+        return self._project
 
-  @property
-  def stripCount(self) -> str:
-    """Number of strips"""
-    return self._wrappedData.stripCount
+    project = _parent
 
-  @property
-  def comment(self) -> str:
-    """Free-form text comment"""
-    return self._wrappedData.details
+    @property
+    def stripDirection(self) -> str:
+        """Strip axis direction ('X', 'Y', None) - None only for non-strip plots"""
+        return self._wrappedData.stripDirection
 
-  @comment.setter
-  def comment(self, value:str):
-    self._wrappedData.details = value
+    @property
+    def stripCount(self) -> str:
+        """Number of strips"""
+        return self._wrappedData.stripCount
 
-  @property
-  def axisCodes(self) -> Tuple[str, ...]:
-    """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
-    # TODO axisCodes shold be unique, but I am not sure this is enforced
-    return self._wrappedData.axisCodes
+    @property
+    def comment(self) -> str:
+        """Free-form text comment"""
+        return self._wrappedData.details
 
-  @property
-  def axisOrder(self) ->  Tuple[str, ...]:
-    """String Axis codes in display order (X, Y, Z1, Z2, ...), determine axis display order"""
-    return self._wrappedData.axisOrder
+    @comment.setter
+    def comment(self, value: str):
+        self._wrappedData.details = value
 
-  @axisOrder.setter
-  def axisOrder(self, value:Sequence):
-    self._wrappedData.axisOrder = value
+    @property
+    def axisCodes(self) -> Tuple[str, ...]:
+        """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
+        # TODO axisCodes shold be unique, but I am not sure this is enforced
+        return self._wrappedData.axisCodes
 
-  @property
-  def is1D(self) -> bool:
-    """True if this is a 1D display."""
-    tt = self.axisCodes
-    return bool(tt and tt[1] == 'intensity')
+    @property
+    def axisOrder(self) -> Tuple[str, ...]:
+        """String Axis codes in display order (X, Y, Z1, Z2, ...), determine axis display order"""
+        return self._wrappedData.axisOrder
 
-  @property
-  def window(self) -> Window:
-    """Gui window showing SpectrumDisplay"""
-    # TODO: RASMUS window clashes with a Qt attribute.
-    # This should be renamed, but that also requires refactoring
-    # possibly with a model change that modifies the Task/Window/Module relationship
-    return self._project._data2Obj.get(self._wrappedData.window)
+    @axisOrder.setter
+    def axisOrder(self, value: Sequence):
+        self._wrappedData.axisOrder = value
 
-  @window.setter
-  def window(self, value:Window):
-    value = self.getByPid(value) if isinstance(value, str) else value
-    self._wrappedData.window = value and value._wrappedData
+    @property
+    def is1D(self) -> bool:
+        """True if this is a 1D display."""
+        tt = self.axisCodes
+        return bool(tt and tt[1] == 'intensity')
 
-  @property
-  def nmrResidue(self) -> NmrResidue:
-    """NmrResidue attached to SpectrumDisplay"""
-    return  self._project._data2Obj.get(self._wrappedData.resonanceGroup)
+    @property
+    def window(self) -> Window:
+        """Gui window showing SpectrumDisplay"""
+        # TODO: RASMUS window clashes with a Qt attribute.
+        # This should be renamed, but that also requires refactoring
+        # possibly with a model change that modifies the Task/Window/Module relationship
+        return self._project._data2Obj.get(self._wrappedData.window)
 
-  @nmrResidue.setter
-  def nmrResidue(self, value:NmrResidue):
-    value = self.getByPid(value) if isinstance(value, str) else value
-    self._wrappedData.resonanceGroup = value and value._wrappedData
+    @window.setter
+    def window(self, value: Window):
+        value = self.getByPid(value) if isinstance(value, str) else value
+        self._wrappedData.window = value and value._wrappedData
 
-  @property
-  def positions(self) ->  Tuple[float, ...]:
-    """Axis centre positions, in display order"""
-    return self._wrappedData.positions
+    @property
+    def nmrResidue(self) -> NmrResidue:
+        """NmrResidue attached to SpectrumDisplay"""
+        return self._project._data2Obj.get(self._wrappedData.resonanceGroup)
 
-  @positions.setter
-  def positions(self, value):
-    self._wrappedData.positions = value
+    @nmrResidue.setter
+    def nmrResidue(self, value: NmrResidue):
+        value = self.getByPid(value) if isinstance(value, str) else value
+        self._wrappedData.resonanceGroup = value and value._wrappedData
 
-  @property
-  def widths(self) ->  Tuple[float, ...]:
-    """Axis display widths, in display order"""
-    return self._wrappedData.widths
+    @property
+    def positions(self) -> Tuple[float, ...]:
+        """Axis centre positions, in display order"""
+        return self._wrappedData.positions
 
-  @widths.setter
-  def widths(self, value):
-    self._wrappedData.widths = value
+    @positions.setter
+    def positions(self, value):
+        self._wrappedData.positions = value
 
-  @property
-  def units(self) ->  Tuple[str, ...]:
-    """Axis units, in display order"""
-    return self._wrappedData.units
+    @property
+    def widths(self) -> Tuple[float, ...]:
+        """Axis display widths, in display order"""
+        return self._wrappedData.widths
 
-  @property
-  def parameters(self) -> dict:
-    """Keyword-value dictionary of parameters.
-    NB the value is a copy - modifying it will not modify the actual data.
+    @widths.setter
+    def widths(self, value):
+        self._wrappedData.widths = value
 
-    Values can be anything that can be exported to JSON,
-    including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
-    or pandas DataFrame, Series, or Panel"""
-    return dict((x.name, x.value) for x in self._wrappedData.parameters)
+    @property
+    def units(self) -> Tuple[str, ...]:
+        """Axis units, in display order"""
+        return self._wrappedData.units
 
-  def setParameter(self, name:str, value):
-    """Add name:value to parameters, overwriting existing entries"""
-    apiData = self._wrappedData
-    parameter = apiData.findFirstParameter(name=name)
-    if parameter is None:
-      apiData.newParameter(name=name, value=value)
-    else:
-      parameter.value = value
+    @property
+    def parameters(self) -> dict:
+        """Keyword-value dictionary of parameters.
+        NB the value is a copy - modifying it will not modify the actual data.
 
-  def deleteParameter(self, name:str):
-    """Delete parameter named 'name'"""
-    apiData = self._wrappedData
-    parameter = apiData.findFirstParameter(name=name)
-    if parameter is None:
-      raise KeyError("No parameter named %s" % name)
-    else:
-      parameter.delete()
+        Values can be anything that can be exported to JSON,
+        including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
+        or pandas DataFrame, Series, or Panel"""
+        return dict((x.name, x.value) for x in self._wrappedData.parameters)
 
-  def clearParameters(self):
-    """Delete all parameters"""
-    for parameter in self._wrappedData.parameters:
-      parameter.delete()
+    def setParameter(self, name: str, value):
+        """Add name:value to parameters, overwriting existing entries"""
+        apiData = self._wrappedData
+        parameter = apiData.findFirstParameter(name=name)
+        if parameter is None:
+            apiData.newParameter(name=name, value=value)
+        else:
+            parameter.value = value
 
-  def updateParameters(self, value:dict):
-    """update parameters"""
-    for key,val in value.items():
-      self.setParameter(key, val)
+    def deleteParameter(self, name: str):
+        """Delete parameter named 'name'"""
+        apiData = self._wrappedData
+        parameter = apiData.findFirstParameter(name=name)
+        if parameter is None:
+            raise KeyError("No parameter named %s" % name)
+        else:
+            parameter.delete()
 
-  # Implementation functions
-  @classmethod
-  def _getAllWrappedData(cls, parent:Project)-> list:
-    """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of Project"""
+    def clearParameters(self):
+        """Delete all parameters"""
+        for parameter in self._wrappedData.parameters:
+            parameter.delete()
 
-    apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
-                  parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
-    return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
+    def updateParameters(self, value: dict):
+        """update parameters"""
+        for key, val in value.items():
+            self.setParameter(key, val)
 
-  # CCPN functions
-  def resetAxisOrder(self):
-    """Reset display to original axis order"""
+    # Implementation functions
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of Project"""
 
-    self._startCommandEchoBlock('resetAxisOrder')
-    try:
-      self._wrappedData.resetAxisOrder()
-    finally:
-      self._endCommandEchoBlock()
+        apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+                      parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+        return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
 
-  def findAxis(self, axisCode):
-    """Find axis """
-    return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
+    # CCPN functions
+    def resetAxisOrder(self):
+        """Reset display to original axis order"""
 
-  # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # # ejb - orderedSpectrumViews, orderedSpectra
-  # # store the current orderedSpectrumViews in the internal data store
-  # # so it is hidden from external users
-  # def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
-  #   """
-  #   The spectra attached to the strip (ordered)
-  #   :return tuple of spectra:
-  #   """
-  #   if not self._orderedSpectrumViews:
-  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-  #   return self._orderedSpectrumViews.orderedSpectra()
-  #
-  # def orderedSpectrumViews(self, strip=0, includeDeleted=False) -> Optional[Tuple]:
-  #   """
-  #   The spectrumViews attached to the strip (ordered)
-  #   :return tuple of SpectrumViews:
-  #   """
-  #   if not self._orderedSpectrumViews:
-  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-  #   return self._orderedSpectrumViews.orderedSpectrumViews()
-  #
-  # def setOrderedSpectrumViews(self, spectrumViews: Tuple):
-  #   """
-  #   Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
-  #   :param spectrumViews - tuple of SpectrumView objects:
-  #   """
-  #   if not self._orderedSpectrumViews:
-  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-  #   self._orderedSpectrumViews.setOrderedSpectrumViews(spectrumViews)
-  #
-  def indexOrderedSpectrumViews(self, newIndex: Tuple[int]):
-    """
-    Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
-    :param newIndex - tuple of int:
-    """
+        self._startCommandEchoBlock('resetAxisOrder')
+        try:
+            self._wrappedData.resetAxisOrder()
+        finally:
+            self._endCommandEchoBlock()
 
-    defaults = collections.OrderedDict((('newIndex', None),))
+    def findAxis(self, axisCode):
+        """Find axis """
+        return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-    self._startCommandEchoBlock('indexOrderedSpectrumViews', values=locals(), defaults=defaults)
-    try:
-      for strip in self.strips:
-        strip._indexOrderedSpectrumViews(newIndex=newIndex)
+    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # # ejb - orderedSpectrumViews, orderedSpectra
+    # # store the current orderedSpectrumViews in the internal data store
+    # # so it is hidden from external users
+    def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
+        """
+        The spectra attached to the strip (ordered)
+        :return tuple of spectra:
+        """
+        return self.strips[0].orderedSpectra()
 
-    finally:
-      self._endCommandEchoBlock()
+    def orderedSpectrumViews(self, strip=0, includeDeleted=False) -> Optional[Tuple]:
+        """
+        The spectrumViews attached to the strip (ordered)
+        :return tuple of SpectrumViews:
+        """
+        return self.strips[0].orderedSpectrumViews()
 
+    def setOrderedSpectrumViews(self, spectrumViews: Tuple):
+        """
+        Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
+        :param spectrumViews - tuple of SpectrumView objects:
+        """
+        for strip in self.strips:
+            strip.setOrderedSpectrumViews(spectrumViews)
 
+    def indexOrderedSpectrumViews(self, newIndex: Tuple[int]):
+        """
+        Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
+        :param newIndex - tuple of int:
+        """
 
-  # def appendSpectrumView(self, spectrumView):
-  #   """
-  #   Append a SpectrumView to the end of the ordered spectrumviews
-  #   :param spectrumView - new SpectrumView:
-  #   """
-  #   if not self._orderedSpectrumViews:
-  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-  #   self._orderedSpectrumViews.appendSpectrumView(spectrumView)
-  #
-  # def removeSpectrumView(self, spectrumView):
-  #   """
-  #   Remove a SpectrumView from the ordered spectrumviews
-  #   :param spectrumView - SpectrumView to be removed:
-  #   """
-  #   if not self._orderedSpectrumViews:
-  #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-  #   self._orderedSpectrumViews.removeSpectrumView(spectrumView)
+        defaults = collections.OrderedDict((('newIndex', None),))
+
+        self._startCommandEchoBlock('indexOrderedSpectrumViews', values=locals(), defaults=defaults)
+        try:
+            for strip in self.strips:
+                strip._indexOrderedSpectrumViews(newIndex=newIndex)
+
+        finally:
+            self._endCommandEchoBlock()
+
+    # def appendSpectrumView(self, spectrumView):
+    #   """
+    #   Append a SpectrumView to the end of the ordered spectrumviews
+    #   :param spectrumView - new SpectrumView:
+    #   """
+    #   if not self._orderedSpectrumViews:
+    #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+    #   self._orderedSpectrumViews.appendSpectrumView(spectrumView)
+    #
+    # def removeSpectrumView(self, spectrumView):
+    #   """
+    #   Remove a SpectrumView from the ordered spectrumviews
+    #   :param spectrumView - SpectrumView to be removed:
+    #   """
+    #   if not self._orderedSpectrumViews:
+    #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+    #   self._orderedSpectrumViews.removeSpectrumView(spectrumView)
 
 
 # newSpectrumDisplay functions
-def _newSpectrumDisplay(self:Project, axisCodes:(str,), stripDirection:str='Y',
-                        title:str=None, window:Window=None, comment:str=None,
-                       independentStrips=False, nmrResidue=None):
+def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 'Y',
+                        title: str = None, window: Window = None, comment: str = None,
+                        independentStrips=False, nmrResidue=None):
+    defaults = collections.OrderedDict((('stripDirection', 'Y'), ('title', None),
+                                        ('window', None), ('comment', None),
+                                        ('independentStrips', False), ('nmrResidue', None)))
 
-  defaults = collections.OrderedDict((('stripDirection', 'Y'), ('title', None),
-                                     ('window', None), ('comment', None),
-                                     ('independentStrips', False), ('nmrResidue', None)))
+    window = self.getByPid(window) if isinstance(window, str) else window
+    nmrResidue = self.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
 
-  window = self.getByPid(window) if isinstance(window, str) else window
-  nmrResidue = self.getByPid(nmrResidue) if isinstance(nmrResidue, str) else nmrResidue
+    apiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+               self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
 
-  apiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
-             self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    if len(axisCodes) < 2:
+        raise ValueError("New SpectrumDisplay must have at least two axisCodes")
 
-  if len(axisCodes) <2:
-    raise ValueError("New SpectrumDisplay must have at least two axisCodes")
+    # set parameters for display
+    window = window or apiTask.sortedWindows()[0]
+    displayPars = dict(
+            stripDirection=stripDirection, window=window,
+            details=comment, resonanceGroup=nmrResidue and nmrResidue._wrappedData
+    )
+    # Add name, setting and insuring uniqueness if necessary
+    if title is None:
+        if 'intensity' in axisCodes:
+            title = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
+        else:
+            title = ''.join([str(x) for x in axisCodes])
+    elif Pid.altCharacter in title:
+        raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
+    while apiTask.findFirstModule(name=title):
+        title = commonUtil.incrementName(title)
+    displayPars['name'] = title
 
-  # set parameters for display
-  window = window or apiTask.sortedWindows()[0]
-  displayPars = dict(
-    stripDirection=stripDirection, window=window,
-    details=comment, resonanceGroup=nmrResidue and nmrResidue._wrappedData
-  )
-  # Add name, setting and insuring uniqueness if necessary
-  if title is None:
-    if 'intensity' in axisCodes:
-      title = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
-    else:
-      title = ''.join([str(x) for x in axisCodes])
-  elif Pid.altCharacter in title:
-    raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
-  while apiTask.findFirstModule(name=title):
-    title = commonUtil.incrementName(title)
-  displayPars['name'] = title
+    self._startCommandEchoBlock('newSpectrumDisplay', axisCodes, values=locals(), defaults=defaults,
+                                parName='newSpectrumDisplay')
+    try:
+        # Create SpectrumDisplay
+        if independentStrips:
+            # Create FreeStripDisplay
+            apiSpectrumDisplay = apiTask.newFreeDisplay(**displayPars)
+        else:
+            # Create Boundstrip/Nostrip display and first strip
+            displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
+            apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
 
-  self._startCommandEchoBlock('newSpectrumDisplay', axisCodes, values=locals(), defaults=defaults,
-                              parName='newSpectrumDisplay')
-  try:
-    # Create SpectrumDisplay
-    if independentStrips:
-      # Create FreeStripDisplay
-      apiSpectrumDisplay = apiTask.newFreeDisplay(**displayPars)
-    else:
-      # Create Boundstrip/Nostrip display and first strip
-      displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
-      apiSpectrumDisplay = apiTask.newBoundDisplay(**displayPars)
+        # Create axes
+        for ii, code in enumerate(axisCodes):
+            # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
+            #    not stripDirection):
+            # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
+            if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
+                stripSerial = 0
+            else:
+                stripSerial = 1
 
-    # Create axes
-    for ii, code in enumerate(axisCodes):
-      # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
-      #    not stripDirection):
-      # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
-      if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
-        stripSerial = 0
-      else:
-        stripSerial = 1
+            if code[0].isupper():
+                apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
+            elif code == 'intensity':
+                apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
+            elif code.startswith('fid'):
+                apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
+            else:
+                apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
 
-      if code[0].isupper():
-        apiSpectrumDisplay.newFrequencyAxis(code=code, stripSerial=stripSerial)
-      elif code == 'intensity':
-        apiSpectrumDisplay.newIntensityAxis(code=code, stripSerial=stripSerial)
-      elif code.startswith('fid'):
-        apiSpectrumDisplay.newFidAxis(code=code, stripSerial=stripSerial)
-      else:
-        apiSpectrumDisplay.newSampledAxis(code=code, stripSerial=stripSerial)
+        # Create first strip
+        if independentStrips:
+            apiStrip = apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
+        else:
+            apiStrip = apiSpectrumDisplay.newBoundStrip()
+        #
+        result = self._project._data2Obj.get(apiSpectrumDisplay)
+    finally:
+        self._endCommandEchoBlock()
 
-    # Create first strip
-    if independentStrips:
-      apiStrip = apiSpectrumDisplay.newFreeStrip(axisCodes=axisCodes, axisOrder=axisCodes)
-    else:
-      apiStrip = apiSpectrumDisplay.newBoundStrip()
-    #
-    result = self._project._data2Obj.get(apiSpectrumDisplay)
-  finally:
-    self._endCommandEchoBlock()
+    return result
 
-  return result
+
 Project.newSpectrumDisplay = _newSpectrumDisplay
 del _newSpectrumDisplay
 
 
-def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Sequence[str]=(),
-                          axisOrder:Sequence[str]=(), title:str=None, positions:Sequence[float]=(),
-                          widths:Sequence[float]=(), units:Sequence[str]=(),
-                          stripDirection:str='Y', is1D:bool=False,
-                          independentStrips:bool=False):
+def _createSpectrumDisplay(window: Window, spectrum: Spectrum, displayAxisCodes: Sequence[str] = (),
+                           axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
+                           widths: Sequence[float] = (), units: Sequence[str] = (),
+                           stripDirection: str = 'Y', is1D: bool = False,
+                           independentStrips: bool = False):
+    """
+    :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
+    :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
+    :param \*float positions: axis positions in order - default to heuristic
+    :param \*float widths: axis widths in order - default to heuristic
+    :param \*str units: axis units in display order - default to heuristic
+    :param str stripDirection: if 'X' or 'Y' set strip axis
+    :param bool is1D: If True, or spectrum passed in is 1D, do 1D display
+    :param bool independentStrips: if True do freeStrip display.
+    """
 
-  """
-  :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
-  :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
-  :param \*float positions: axis positions in order - default to heuristic
-  :param \*float widths: axis widths in order - default to heuristic
-  :param \*str units: axis units in display order - default to heuristic
-  :param str stripDirection: if 'X' or 'Y' set strip axis
-  :param bool is1D: If True, or spectrum passed in is 1D, do 1D display
-  :param bool independentStrips: if True do freeStrip display.
-  """
+    inputValues = locals()
 
-  inputValues = locals()
+    defaults = collections.OrderedDict((('displayAxisCodes', ()), ('axisOrder', ()), ('title', None),
+                                        ('positions', ()), ('widths', ()), ('units', ()),
+                                        ('stripDirection', 'Y'), ('is1D', False),
+                                        ('independentStrips', False)))
 
-  defaults = collections.OrderedDict((('displayAxisCodes', ()), ('axisOrder', ()), ('title', None),
-                                     ('positions', ()), ('widths', ()), ('units', ()),
-                                      ('stripDirection', 'Y'), ('is1D', False),
-                                     ('independentStrips', False)))
+    if title and Pid.altCharacter in title:
+        raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
 
-  if title and Pid.altCharacter in title:
-    raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
+    spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 
-  spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
+    dataSource = spectrum._wrappedData
 
-  dataSource = spectrum._wrappedData
+    project = window._project
 
-  project = window._project
+    spectrumAxisCodes = spectrum.axisCodes
 
-  spectrumAxisCodes = spectrum.axisCodes
-
-  mapIndices = ()
-  if axisOrder:
-    mapIndices = commonUtil._axisCodeMapIndices(spectrumAxisCodes, axisOrder)
-    if displayAxisCodes:
-      if not commonUtil.doAxisCodesMatch(axisOrder, displayAxisCodes):
-        raise ValueError("AxisOrder %s do not match display axisCodes %s"
-                         % (axisOrder, displayAxisCodes))
-    else:
-      displayAxisCodes = axisOrder
-  elif displayAxisCodes:
-    mapIndices = commonUtil._axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
-  else:
-    displayAxisCodes = list(spectrumAxisCodes)
-    mapIndices = list(range(dataSource.numDim))
-    if is1D:
-      displayAxisCodes.insert(1, 'intensity')
-      mapIndices.insert(1,None)
-
-  # Make DataDim ordering
-  sortedDataDims = dataSource.sortedDataDims()
-  orderedDataDims = []
-  for index in mapIndices:
-    if index is None:
-      orderedDataDims.append(None)
-    else:
-      orderedDataDims.append(sortedDataDims[index])
-
-  # Make dimensionOrdering
-  dimensionOrdering = [(0 if x is None else x.dim) for x in orderedDataDims]
-
-  # Add intensity dimension for 1D if necessary
-  if dataSource.numDim == 1 and len(displayAxisCodes) ==1:
-    displayAxisCodes.append('intensity')
-    dimensionOrdering.append(0)
-
-  if dataSource.findFirstDataDim(className='SampledDataDim') is not None:
-    # logger.warning( "Display of sampled dimension spectra is not implemented yet")
-    # showWarning("createSpectrumDisplay", "Display of sampled dimension spectra is not implemented yet")
-    # return
-    raise NotImplementedError(
-      "Display of sampled dimension spectra is not implemented yet")
-    # # NBNB TBD FIXME
-
-  window._startCommandEchoBlock('createSpectrumDisplay', spectrum, values=inputValues,
-                                defaults=defaults, parName='newSpectrumDisplay')
-  try:
-    display = project.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripDirection,
-                                      independentStrips=independentStrips,
-                                      title=title)
-
-    # Set unit, position and width
-    orderedApiAxes = display._wrappedData.orderedAxes
-    for ii, dataDim in enumerate(orderedDataDims):
-
-      if dataDim is not None:
-        # Set values only if we have a spectrum axis
-
-        # Get unit, position and width
-        dataDimRef = dataDim.primaryDataDimRef
-        if dataDimRef:
-          # This is a FreqDataDim
-          unit = dataDimRef.expDimRef.unit
-          position = dataDimRef.pointToValue(1) - dataDimRef.spectralWidth/2
-          if ii < 2:
-            width = dataDimRef.spectralWidth
-          else:
-            width = dataDimRef.valuePerPoint
-
-        elif dataDim.className == 'SampledDataDim':
-
-          unit = dataDim.unit
-          width = len(dataDim.pointValues)
-          position = 1 + width // 2
-          if ii >= 2:
-            width = 1
-          # NBNB TBD this may not work, once we implement sampled axes
-
+    mapIndices = ()
+    if axisOrder:
+        mapIndices = commonUtil._axisCodeMapIndices(spectrumAxisCodes, axisOrder)
+        if displayAxisCodes:
+            if not commonUtil.doAxisCodesMatch(axisOrder, displayAxisCodes):
+                raise ValueError("AxisOrder %s do not match display axisCodes %s"
+                                 % (axisOrder, displayAxisCodes))
         else:
-          # This is a FidDataDim
-          unit = dataDim.unit
-          width = dataDim.maxValue - dataDim.firstValue
-          position = width / 2
-          if ii >= 2:
-            width = dataDim.valuePerPoint
+            displayAxisCodes = axisOrder
+    elif displayAxisCodes:
+        mapIndices = commonUtil._axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
+    else:
+        displayAxisCodes = list(spectrumAxisCodes)
+        mapIndices = list(range(dataSource.numDim))
+        if is1D:
+            displayAxisCodes.insert(1, 'intensity')
+            mapIndices.insert(1, None)
 
-        # Set values
-        apiAxis = orderedApiAxes[ii]
-        apiAxis.unit = unit
-        apiAxis.position = position
-        apiAxis.width = width
-  finally:
-    window._endCommandEchoBlock()
+    # Make DataDim ordering
+    sortedDataDims = dataSource.sortedDataDims()
+    orderedDataDims = []
+    for index in mapIndices:
+        if index is None:
+            orderedDataDims.append(None)
+        else:
+            orderedDataDims.append(sortedDataDims[index])
 
-  # Make spectrumView. NB We need notifiers on for these
-  stripSerial = 1 if independentStrips else 0
-  display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
-                                       stripSerial=stripSerial,dataSource=dataSource,
-                                       dimensionOrdering=dimensionOrdering)
+    # Make dimensionOrdering
+    dimensionOrdering = [(0 if x is None else x.dim) for x in orderedDataDims]
 
-  try:
-    display.strips[0]._CcpnGLWidget.initialiseAxes(strip=display.strips[0])
-  except:
-    getLogger().debugGL('OpenGL widget not instantiated')
+    # Add intensity dimension for 1D if necessary
+    if dataSource.numDim == 1 and len(displayAxisCodes) == 1:
+        displayAxisCodes.append('intensity')
+        dimensionOrdering.append(0)
 
-  return display
+    if dataSource.findFirstDataDim(className='SampledDataDim') is not None:
+        # logger.warning( "Display of sampled dimension spectra is not implemented yet")
+        # showWarning("createSpectrumDisplay", "Display of sampled dimension spectra is not implemented yet")
+        # return
+        raise NotImplementedError(
+                "Display of sampled dimension spectra is not implemented yet")
+        # # NBNB TBD FIXME
+
+    window._startCommandEchoBlock('createSpectrumDisplay', spectrum, values=inputValues,
+                                  defaults=defaults, parName='newSpectrumDisplay')
+    try:
+        display = project.newSpectrumDisplay(axisCodes=displayAxisCodes, stripDirection=stripDirection,
+                                             independentStrips=independentStrips,
+                                             title=title)
+
+        # Set unit, position and width
+        orderedApiAxes = display._wrappedData.orderedAxes
+        for ii, dataDim in enumerate(orderedDataDims):
+
+            if dataDim is not None:
+                # Set values only if we have a spectrum axis
+
+                # Get unit, position and width
+                dataDimRef = dataDim.primaryDataDimRef
+                if dataDimRef:
+                    # This is a FreqDataDim
+                    unit = dataDimRef.expDimRef.unit
+                    position = dataDimRef.pointToValue(1) - dataDimRef.spectralWidth / 2
+                    if ii < 2:
+                        width = dataDimRef.spectralWidth
+                    else:
+                        width = dataDimRef.valuePerPoint
+
+                elif dataDim.className == 'SampledDataDim':
+
+                    unit = dataDim.unit
+                    width = len(dataDim.pointValues)
+                    position = 1 + width // 2
+                    if ii >= 2:
+                        width = 1
+                    # NBNB TBD this may not work, once we implement sampled axes
+
+                else:
+                    # This is a FidDataDim
+                    unit = dataDim.unit
+                    width = dataDim.maxValue - dataDim.firstValue
+                    position = width / 2
+                    if ii >= 2:
+                        width = dataDim.valuePerPoint
+
+                # Set values
+                apiAxis = orderedApiAxes[ii]
+                apiAxis.unit = unit
+                apiAxis.position = position
+                apiAxis.width = width
+    finally:
+        window._endCommandEchoBlock()
+
+    # Make spectrumView. NB We need notifiers on for these
+    stripSerial = 1 if independentStrips else 0
+    display._wrappedData.newSpectrumView(spectrumName=dataSource.name,
+                                         stripSerial=stripSerial, dataSource=dataSource,
+                                         dimensionOrdering=dimensionOrdering)
+
+    try:
+        display.strips[0]._CcpnGLWidget.initialiseAxes(strip=display.strips[0])
+    except:
+        getLogger().debugGL('OpenGL widget not instantiated')
+
+    return display
+
+
 Window.createSpectrumDisplay = _createSpectrumDisplay
 del _createSpectrumDisplay
 
+
 # Window.spectrumDisplays property
-def getter(window:Window):
-  ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
-  return tuple(window._project._data2Obj[x] for x in ll)
+def getter(window: Window):
+    ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
+    return tuple(window._project._data2Obj[x] for x in ll)
+
+
 Window.spectrumDisplays = property(getter, None, None,
                                    "SpectrumDisplays shown in Window")
 del getter
@@ -546,19 +545,19 @@ del getter
 # crosslinks window, nmrResidue
 # TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
-  ('_modifiedLink', {'classNames':('Window','SpectrumDisplay')},
-  ApiBoundDisplay._metaclass.qualifiedName(), 'setWindow'),
+        ('_modifiedLink', {'classNames': ('Window', 'SpectrumDisplay')},
+         ApiBoundDisplay._metaclass.qualifiedName(), 'setWindow'),
 )
 Project._apiNotifiers.append(
-  ('_modifiedLink', {'classNames':('NmrResidue','SpectrumDisplay')},
-  ApiBoundDisplay._metaclass.qualifiedName(), 'setResonanceGroup'),
+        ('_modifiedLink', {'classNames': ('NmrResidue', 'SpectrumDisplay')},
+         ApiBoundDisplay._metaclass.qualifiedName(), 'setResonanceGroup'),
 )
 className = ApiWindow._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_modifiedLink', {'classNames':('SpectrumDisplay','Window')}, className, 'addModule'),
-    ('_modifiedLink', {'classNames':('SpectrumDisplay','Window')}, className, 'removeModule'),
-    ('_modifiedLink', {'classNames':('SpectrumDisplay','Window')}, className, 'setModules'),
-  )
+        (('_modifiedLink', {'classNames': ('SpectrumDisplay', 'Window')}, className, 'addModule'),
+         ('_modifiedLink', {'classNames': ('SpectrumDisplay', 'Window')}, className, 'removeModule'),
+         ('_modifiedLink', {'classNames': ('SpectrumDisplay', 'Window')}, className, 'setModules'),
+         )
 )
 
 # WARNING link notifiers for both Window <-> Module and Window<->SpectrumDisplay
@@ -566,13 +565,13 @@ Project._apiNotifiers.extend(
 # Programmer take care that your notified function will work for both inputs !!!
 className = ApiResonanceGroup._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-  ( ('_modifiedLink', {'classNames':('SpectrumDisplay','NmrResidue')}, className,
-     'addSpectrumDisplay'),
-    ('_modifiedLink', {'classNames':('SpectrumDisplay','NmrResidue')}, className,
-     'removeSpectrumDisplay'),
-    ('_modifiedLink', {'classNames':('SpectrumDisplay','NmrResidue')}, className,
-     'setSpectrumDisplays'),
-  )
+        (('_modifiedLink', {'classNames': ('SpectrumDisplay', 'NmrResidue')}, className,
+          'addSpectrumDisplay'),
+         ('_modifiedLink', {'classNames': ('SpectrumDisplay', 'NmrResidue')}, className,
+          'removeSpectrumDisplay'),
+         ('_modifiedLink', {'classNames': ('SpectrumDisplay', 'NmrResidue')}, className,
+          'setSpectrumDisplays'),
+         )
 )
 
 # Drag-n-drop functions:

@@ -135,6 +135,7 @@ class CcpnGLWidget(QOpenGLWidget):
   AXIS_MARGINRIGHT = 40
   AXIS_MARGINBOTTOM = 25
   AXIS_LINE = 10
+  AXIS_OFFSET = 5
   YAXISUSEEFORMAT = False
   INVERTXAXIS = True
   INVERTYAXIS = True
@@ -3204,7 +3205,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._axisYLabelling.append(GLString(text=axisYText,
                                   font=self.globalGL.glSmallFont,
-                                  x=self.AXIS_LINE,
+                                  x=self.AXIS_OFFSET,
                                   y=axisY-(10.0*self.pixelY),
                                   color=labelColour, GLContext=self,
                                   obj=None))
@@ -3212,7 +3213,7 @@ class CcpnGLWidget(QOpenGLWidget):
       # append the axisCode to the end
       self._axisYLabelling.append(GLString(text=self.axisCodes[1],
                                 font=self.globalGL.glSmallFont,
-                                x=self.AXIS_LINE,
+                                x=self.AXIS_OFFSET,
                                 y=self.axisT-(1.5*self.globalGL.glSmallFont.height*self.pixelY),
                                 color=labelColour, GLContext=self,
                                 obj=None))

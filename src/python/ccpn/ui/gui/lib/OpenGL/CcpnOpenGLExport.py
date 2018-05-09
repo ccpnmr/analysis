@@ -60,6 +60,17 @@ PLOTBOTTOM = 'plotBottom'
 PLOTWIDTH = 'plotWidth'
 PLOTHEIGHT = 'plotHeight'
 
+PDFSTROKEWIDTH = 'strokeWidth'
+PDFSTROKECOLOR = 'strokeColor'
+PDFSTROKELINECAP = 'strokeLineCap'
+PDFFILLCOLOR = 'fillColor'
+PDFFILL = 'fill'
+PDFFILLMODE = 'fillMode'
+PDFSTROKE = 'stroke'
+PDFSTROKEDASHARRAY = 'strokeDashArray'
+PDFCLOSEPATH = 'closePath'
+PDFLINES = 'lines'
+
 
 class CcpnOpenGLExporter():
     """
@@ -80,13 +91,15 @@ class CcpnOpenGLExporter():
 
         import matplotlib.font_manager
         foundFonts = matplotlib.font_manager.findSystemFonts()
+
+        # need to load all fonts that are in the project
         for ff in foundFonts:
-            if 'Tahoma.ttf' in ff:
-                pdfmetrics.registerFont(TTFont('Tahoma', ff))
+            if self.parent.globalGL.glSmallFont.fontName+'.ttf' in ff:
+                pdfmetrics.registerFont(TTFont(self.parent.globalGL.glSmallFont.fontName, ff))
                 break
 
-        self.fontSize = 11
-        self.fontName = 'Tahoma'
+        self.exportFontSize = self.parent.globalGL.glSmallFont.fontSize
+        self.fontName = self.parent.globalGL.glSmallFont.fontName
 
         self.backgroundColour = colors.Color(*self.parent.background[0:3],
                                              alpha = self.parent.background[3])
@@ -165,13 +178,17 @@ class CcpnOpenGLExporter():
         # translate to size of drawing Flowable
         self.pixWidth = self._report.doc.width
         self.pixHeight = self.pixWidth * ratio
-        self.fontSize = int(13.0 * 1.1 * self.pixWidth / self.parent.w)
+
+        # scale fonts to appear the correct size
+        self.fontSize = int(self.exportFontSize * 1.1 * self.pixWidth / self.parent.w)
+        self.fontScale = 1.1 * self.pixWidth / self.parent.w
         if self.pixHeight > (self._report.doc.height - 2*cm):
 
             # TODO:ED check what else is stealing the height
             self.pixHeight = self._report.doc.height - (2*cm)
             self.pixWidth = self.pixHeight / ratio
-            self.fontSize = int(13.0 * 1.05 * self.pixHeight / self.parent.h)
+            self.fontSize = int(self.exportFontSize * 1.025 * self.pixHeight / self.parent.h)
+            self.fontScale = 1.025 * self.pixHeight / self.parent.h
 
         # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
         self.displayScale = self.pixHeight / self.parent.h
@@ -182,11 +199,6 @@ class CcpnOpenGLExporter():
 
         # create an object that can be added to a report
         self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
-
-        # self._rAxisPlot = Drawing(self.displayScale*self.rAxisW, self.displayScale*self.rAxisH) \
-        #                     if self.rAxis else None
-        # self._bAxisPlot = Drawing(self.displayScale*self.bAxisW, self.displayScale*self.bAxisH) \
-        #                     if self.bAxis else None
 
         gr = Group()
         # paint a background box
@@ -214,9 +226,12 @@ class CcpnOpenGLExporter():
             for vv in range(2, len(ll), 2):
                 pl.lineTo(ll[vv], ll[vv+1])
             gr.add(pl)
+
+        # add to the drawing object
         self._mainPlot.add(gr, name='mainPlotBox')
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # add the objects from the openGL widget to the drawing object
         # grid lines
 
         if self.strip.gridVisible:
@@ -251,7 +266,6 @@ class CcpnOpenGLExporter():
                         # mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
 
                         thisSpec = self.parent._contourList[spectrumView]
-                        # colour = colors.Color(*thisSpec.colors[0:3], alpha=float(thisSpec.colors[3]))
 
                         # drawVertexColor
                         # gr = Group()
@@ -267,21 +281,16 @@ class CcpnOpenGLExporter():
 
                             colour = colors.Color(*thisSpec.colors[ii0*4:ii0 * 4+3], alpha=thisSpec.colors[ii0 * 4+3])
                             colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
-                            if colourPath not in colourGroups:
-                                cc = colourGroups[colourPath] = {}
-                                cc['lines'] = []
-                                cc['strokeWidth'] = 0.5
-                                cc['strokeColor'] = colour
-                                cc['strokeLineCap'] = 1
 
-                            # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
                             newLine = self.parent.lineVisible(newLine,
                                                               x=self.displayScale * self.mainL,
                                                               y=self.displayScale * self.mainB,
                                                               width=self.displayScale * self.mainW,
                                                               height=self.displayScale * self.mainH)
                             if newLine:
-                                colourGroups[colourPath]['lines'].append(newLine)
+                                if colourPath not in colourGroups:
+                                    colourGroups[colourPath] = {PDFLINES:[], PDFSTROKEWIDTH:0.5, PDFSTROKECOLOR:colour, PDFSTROKELINECAP:1}
+                                colourGroups[colourPath][PDFLINES].append(newLine)
 
                 else:
 
@@ -293,7 +302,6 @@ class CcpnOpenGLExporter():
                             mat = None
 
                         thisSpec = self.parent._contourList[spectrumView]
-                        # colour = colors.Color(*thisSpec.colors[0:3], alpha=float(thisSpec.colors[3]))
 
                         # drawVertexColor
                         self.appendVertexLineGroup(indArray=thisSpec,
@@ -335,13 +343,6 @@ class CcpnOpenGLExporter():
                 colourPath = 'spectrumViewBoundaries%s%s%s%s%s' % (
                 spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
-                if colourPath not in colourGroups:
-                    cc = colourGroups[colourPath] = {}
-                    cc['lines'] = []
-                    cc['strokeWidth'] = 0.5
-                    cc['strokeColor'] = colour
-                    cc['strokeLineCap'] = 1
-
                 lineLoop = [fx0, fy0,
                            fx0, fy1,
                            fx1, fy1,
@@ -355,7 +356,10 @@ class CcpnOpenGLExporter():
                                                       width=self.displayScale * self.mainW,
                                                       height=self.displayScale * self.mainH)
                     if newLine:
-                        colourGroups[colourPath]['lines'].append(newLine)
+                        if colourPath not in colourGroups:
+                            colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
+                                                             PDFSTROKELINECAP: 1}
+                        colourGroups[colourPath][PDFLINES].append(newLine)
 
         self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
@@ -455,21 +459,16 @@ class CcpnOpenGLExporter():
                             colour = colors.Color(*thisSpec.colors[vv * 2:vv * 2 + 3], alpha=float(thisSpec.colors[vv * 2 + 3]))
                             colourPath = 'spectrumViewIntegralFill%s%s%s%s%s' % (
                                 spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
-                            if colourPath not in colourGroups:
-                                cc = colourGroups[colourPath] = {}
-                                cc['lines'] = []
-                                cc['fillColor'] = colour
-                                cc['stroke'] = None
-                                cc['strokeColor'] = None
 
-                            # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
                             newLine = self.parent.lineVisible(newLine,
                                                               x=self.displayScale * self.mainL,
                                                               y=self.displayScale * self.mainB,
                                                               width=self.displayScale * self.mainW,
                                                               height=self.displayScale * self.mainH)
                             if newLine:
-                                colourGroups[colourPath]['lines'].append(newLine)
+                                if colourPath not in colourGroups:
+                                    colourGroups[colourPath] = {PDFLINES:[], PDFFILLCOLOR:colour, PDFSTROKE:None, PDFSTROKECOLOR:None}
+                                colourGroups[colourPath][PDFLINES].append(newLine)
 
         self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralListsAreaFill')
 
@@ -489,7 +488,7 @@ class CcpnOpenGLExporter():
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # peak labels
 
-        # colourGroups = OrderedDict()
+        colourGroups = OrderedDict()
         for spectrumView in self.strip.orderedSpectrumViews():
             if spectrumView.isDeleted:
                 continue
@@ -509,8 +508,6 @@ class CcpnOpenGLExporter():
                     colour = colors.Color(*col[0:3], alpha=float(col[3]))
                     colourPath = 'spectrumViewPeakLabels%s%s%s%s%s' % (
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
-                    if colourPath not in colourGroups:
-                        cc = colourGroups[colourPath] = Group()
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
                     if self.parent.pointVisible(newLine,
@@ -518,10 +515,13 @@ class CcpnOpenGLExporter():
                                                 y=self.displayScale * self.mainB,
                                                 width=self.displayScale * self.mainW,
                                                 height=self.displayScale * self.mainH):
+                        if colourPath not in colourGroups:
+                            colourGroups[colourPath] = Group()
                         colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                            drawString.text, fontSize=self.fontSize,
-                                                            fontName=self.fontName,
-                                                            fillColor=colour))
+                                    drawString.text,
+                                    fontSize=drawString.font.fontSize * self.fontScale,
+                                    fontName=drawString.font.fontName,
+                                    fillColor=colour))
 
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)
@@ -538,8 +538,6 @@ class CcpnOpenGLExporter():
                 col = drawString.colors[0:4]
             colour = colors.Color(*col[0:3], alpha=float(col[3]))
             colourPath = 'projectMarks%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
-            if colourPath not in colourGroups:
-                cc = colourGroups[colourPath] = Group()
 
             newLine = [drawString.attribs[0], drawString.attribs[1]]
             if self.parent.pointVisible(newLine,
@@ -547,9 +545,12 @@ class CcpnOpenGLExporter():
                                         y=self.displayScale * self.mainB,
                                         width=self.displayScale * self.mainW,
                                         height=self.displayScale * self.mainH):
+                if colourPath not in colourGroups:
+                    colourGroups[colourPath] = Group()
                 colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                    drawString.text, fontSize=self.fontSize,
-                                                    fontName=self.fontName,
+                                                    drawString.text,
+                                                    fontSize=drawString.font.fontSize * self.fontScale,
+                                                    fontName=drawString.font.fontName,
                                                     fillColor=colour))
 
         for colourGroup in colourGroups.values():
@@ -561,7 +562,8 @@ class CcpnOpenGLExporter():
         colourGroups = OrderedDict()
         for hTrace in self.parent._staticHTraces:
             if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
-                # hTrace.drawVertexColor()
+
+                # drawVertexColor
                 self.appendVertexLineGroup(indArray=hTrace,
                                            colourGroups=colourGroups,
                                            plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -573,7 +575,8 @@ class CcpnOpenGLExporter():
 
         for vTrace in self.parent._staticVTraces:
             if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
-                # vTrace.drawVertexColor()
+
+                # drawVertexColor
                 self.appendVertexLineGroup(indArray=vTrace,
                                            colourGroups=colourGroups,
                                            plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -593,13 +596,6 @@ class CcpnOpenGLExporter():
             if infLine.visible:
                 colour = colors.Color(*infLine.brush[0:3], alpha=float(infLine.brush[3]))
                 colourPath = 'infiniteLines%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
-                if colourPath not in colourGroups:
-                    cc = colourGroups[colourPath] = {}
-                    cc['lines'] = []
-                    cc['strokeWidth'] = 0.5
-                    cc['strokeColor'] = colour
-                    cc['strokeLineCap'] = 1
-                    cc['strokeDashArray'] = GLLINE_STYLES_ARRAY[infLine.lineStyle]
 
                 if infLine.orientation == 'h':
                     newLine = [self.parent.axisL, infLine.values[0], self.parent.axisR, infLine.values[0]]
@@ -612,7 +608,11 @@ class CcpnOpenGLExporter():
                                        width=self.displayScale * self.mainW,
                                        height=self.displayScale * self.mainH)
                 if newLine:
-                    colourGroups[colourPath]['lines'].append(newLine)
+                    if colourPath not in colourGroups:
+                        colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
+                                                         PDFSTROKELINECAP: 1,
+                                                         PDFSTROKEDASHARRAY: GLLINE_STYLES_ARRAY[infLine.lineStyle] }
+                    colourGroups[colourPath][PDFLINES].append(newLine)
 
         self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='infiniteLines')
 
@@ -624,8 +624,6 @@ class CcpnOpenGLExporter():
 
         colour = self.foregroundColour
         colourPath = 'overlayText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
-        if colourPath not in colourGroups:
-            cc = colourGroups[colourPath] = Group()
 
         newLine = [drawString.attribs[0], drawString.attribs[1]]
         if self.parent.pointVisible(newLine,
@@ -633,9 +631,12 @@ class CcpnOpenGLExporter():
                                     y=self.displayScale * self.mainB,
                                     width=self.displayScale * self.mainW,
                                     height=self.displayScale * self.mainH):
+            if colourPath not in colourGroups:
+                colourGroups[colourPath] = Group()
             colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                drawString.text, fontSize=self.fontSize,
-                                                fontName=self.fontName,
+                                                drawString.text,
+                                                fontSize=drawString.font.fontSize * self.fontScale,
+                                                fontName=drawString.font.fontName,
                                                 fillColor=colour))
 
         for colourGroup in colourGroups.values():
@@ -644,33 +645,44 @@ class CcpnOpenGLExporter():
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # add an axis mask
 
-        ll = None
+        ll1 = None
+        ll2 = None
         if self.rAxis and self.bAxis:
-            ll = [0.0, 0.0,
+            ll1 = [0.0, 0.0,
                   0.0, self.displayScale * self.mainB,
                   self.displayScale * self.mainW, self.displayScale * self.mainB,
                   self.displayScale * self.mainW, self.pixHeight,
                   self.pixWidth, self.pixHeight,
                   self.pixWidth, 0.0]
+            ll2 = [0.0, 0.0, self.pixWidth, 0.0, self.pixWidth, self.pixHeight]
 
         elif self.rAxis:
-            ll = [self.displayScale * self.mainW, 0.0,
+            ll1 = [self.displayScale * self.mainW, 0.0,
                   self.displayScale * self.mainW, self.pixHeight,
                   self.pixWidth, self.pixHeight,
                   self.pixWidth, 0.0]
+            ll2 = [self.pixWidth, 0.0, self.pixWidth, self.pixHeight]
 
         elif self.bAxis:
-            ll = [0.0, 0.0,
+            ll1 = [0.0, 0.0,
                   0.0, self.displayScale * self.mainB,
                   self.pixWidth, self.displayScale * self.mainB,
                   self.pixWidth, 0.0]
+            ll2 = [0.0, 0.0, self.pixWidth, 0.0]
 
-        if ll:
+        if ll1:
+            # pl = Path(fillColor=self.backgroundColour, strokeColor=self.backgroundColour, strokeWidth=1.0)
             pl = Path(fillColor=self.backgroundColour, stroke=None, strokeColor=None)
-            pl.moveTo(ll[0], ll[1])
-            for vv in range(2, len(ll), 2):
-                pl.lineTo(ll[vv], ll[vv+1])
+            pl.moveTo(ll1[0], ll1[1])
+            for vv in range(2, len(ll1), 2):
+                pl.lineTo(ll1[vv], ll1[vv+1])
             pl.closePath()
+            self._mainPlot.add(pl)
+
+            pl = Path(fillColor=None, strokeColor=self.backgroundColour, strokeWidth=1.0)
+            pl.moveTo(ll2[0], ll2[1])
+            for vv in range(2, len(ll2), 2):
+                pl.lineTo(ll2[vv], ll2[vv+1])
             self._mainPlot.add(pl)
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -687,7 +699,7 @@ class CcpnOpenGLExporter():
                                                    PLOTHEIGHT: self.displayScale * self.mainH},
                                           name='gridAxes',
                                           setColour=self.foregroundColour)
-                list(colourGroups.values())[0]['lines'].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
+                list(colourGroups.values())[0][PDFLINES].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
                                                                 self.displayScale * self.mainW, self.pixHeight])
 
             if self.bAxis:
@@ -699,7 +711,7 @@ class CcpnOpenGLExporter():
                                                    PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
                                           name='gridAxes',
                                           setColour=self.foregroundColour)
-                list(colourGroups.values())[0]['lines'].append([0.0, self.displayScale * self.bAxisH,
+                list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
                                                                 self.displayScale * self.mainW, self.displayScale * self.bAxisH])
             self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
@@ -711,8 +723,8 @@ class CcpnOpenGLExporter():
 
                     colour = self.foregroundColour
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
-                    if colourPath not in colourGroups:
-                        cc = colourGroups[colourPath] = Group()
+                    # if colourPath not in colourGroups:
+                    #     cc = colourGroups[colourPath] = Group()
 
                     # add (0, 3) to mid
                     mid = self.parent.axisL + (0+drawString.attribs[0]) * (self.parent.axisR-self.parent.axisL) / self.parent.AXIS_MARGINRIGHT
@@ -722,9 +734,12 @@ class CcpnOpenGLExporter():
                                                y=self.displayScale * self.rAxisB,
                                                width=self.displayScale * self.rAxisW,
                                                height=self.displayScale * self.rAxisH):
+                        if colourPath not in colourGroups:
+                            colourGroups[colourPath] = Group()
                         colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                            drawString.text, fontSize=self.fontSize,
-                                                            fontName=self.fontName,
+                                                            drawString.text,
+                                                            fontSize=drawString.font.fontSize * self.fontScale,
+                                                            fontName=drawString.font.fontName,
                                                             fillColor=colour))
 
             if self.bAxis:
@@ -733,8 +748,8 @@ class CcpnOpenGLExporter():
 
                     colour = self.foregroundColour
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
-                    if colourPath not in colourGroups:
-                        cc = colourGroups[colourPath] = Group()
+                    # if colourPath not in colourGroups:
+                    #     cc = colourGroups[colourPath] = Group()
 
                     # add (0, 3) to mid
                     mid = self.parent.axisB + (3+drawString.attribs[1]) * (self.parent.axisT-self.parent.axisB) / self.parent.AXIS_MARGINBOTTOM
@@ -744,9 +759,12 @@ class CcpnOpenGLExporter():
                                                y=self.displayScale * self.bAxisB,
                                                width=self.displayScale * self.bAxisW,
                                                height=self.displayScale * self.bAxisH):
+                        if colourPath not in colourGroups:
+                            colourGroups[colourPath] = Group()
                         colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                            drawString.text, fontSize=self.fontSize,
-                                                            fontName=self.fontName,
+                                                            drawString.text,
+                                                            fontSize=drawString.font.fontSize * self.fontScale,
+                                                            fontName=drawString.font.fontName,
                                                             fillColor=colour))
 
         for colourGroup in colourGroups.values():
@@ -805,16 +823,16 @@ class CcpnOpenGLExporter():
             if colourPath not in colourGroups:
                 cc = colourGroups[colourPath] = {}
                 if (indArray.fillMode or GL.GL_LINE) == GL.GL_LINE:
-                    cc['lines'] = []
-                    cc['strokeWidth'] = 0.5
-                    cc['strokeColor'] = colour
-                    cc['strokeLineCap'] = 1
+                    cc[PDFLINES] = []
+                    cc[PDFSTROKEWIDTH] = 0.5
+                    cc[PDFSTROKECOLOR] = colour
+                    cc[PDFSTROKELINECAP] = 1
                 else:
                     # assume that it is GL.GL_FILL
-                    cc['lines'] = []
-                    cc['fillColor'] = colour
-                    cc['stroke'] = None
-                    cc['strokeColor'] = None
+                    cc[PDFLINES] = []
+                    cc[PDFFILLCOLOR] = colour
+                    cc[PDFSTROKE] = None
+                    cc[PDFSTROKECOLOR] = None
 
             # if self.parent.lineVisible(newLine, x=0, y=0, width=self.pixWidth, height=self.pixHeight):
             # if (includeLastVertex and vv==len(indArray.vertices)-4):
@@ -823,13 +841,13 @@ class CcpnOpenGLExporter():
             #                       y=plotDim[PLOTBOTTOM],
             #                       width=plotDim[PLOTWIDTH],
             #                       height=plotDim[PLOTHEIGHT])
-            #   colourGroups[colourPath]['lines'].append(newLine)
+            #   colourGroups[colourPath][PDFLINES].append(newLine)
             # elif self.parent.lineVisible(newLine,
             #                            x=plotDim[PLOTLEFT],
             #                            y=plotDim[PLOTBOTTOM],
             #                            width=plotDim[PLOTWIDTH],
             #                            height=plotDim[PLOTHEIGHT]):
-            #   colourGroups[colourPath]['lines'].append(newLine)
+            #   colourGroups[colourPath][PDFLINES].append(newLine)
 
             newLine = self.parent.lineVisible(newLine,
                                               x=plotDim[PLOTLEFT],
@@ -837,7 +855,7 @@ class CcpnOpenGLExporter():
                                               width=plotDim[PLOTWIDTH],
                                               height=plotDim[PLOTHEIGHT])
             if newLine:
-                colourGroups[colourPath]['lines'].append(newLine)
+                colourGroups[colourPath][PDFLINES].append(newLine)
 
     def appendIndexLineGroup(self, indArray, colourGroups, plotDim, name,
                              fillMode=None, checkIntegral=False, splitGroups=False,
@@ -871,16 +889,16 @@ class CcpnOpenGLExporter():
             if colourPath not in colourGroups:
                 cc = colourGroups[colourPath] = {}
                 if (fillMode or indArray.fillMode or GL.GL_LINE) == GL.GL_LINE:
-                    cc['lines'] = []
-                    cc['strokeWidth'] = 0.5
-                    cc['strokeColor'] = colour
-                    cc['strokeLineCap'] = 1
+                    cc[PDFLINES] = []
+                    cc[PDFSTROKEWIDTH] = 0.5
+                    cc[PDFSTROKECOLOR] = colour
+                    cc[PDFSTROKELINECAP] = 1
                 else:
                     # assume that it is GL.GL_FILL
-                    cc['lines'] = []
-                    cc['fillColor'] = colour
-                    cc['stroke'] = None
-                    cc['strokeColor'] = None
+                    cc[PDFLINES] = []
+                    cc[PDFFILLCOLOR] = colour
+                    cc[PDFSTROKE] = None
+                    cc[PDFSTROKECOLOR] = None
 
             newLine = self.parent.lineVisible(newLine,
                                               x=plotDim[PLOTLEFT],
@@ -889,7 +907,7 @@ class CcpnOpenGLExporter():
                                               height=plotDim[PLOTHEIGHT],
                                               checkIntegral=checkIntegral)
             if newLine:
-                colourGroups[colourPath]['lines'].append(newLine)
+                colourGroups[colourPath][PDFLINES].append(newLine)
 
         # override so that each element is a new group
         if splitGroups:
@@ -927,21 +945,21 @@ class CcpnOpenGLExporter():
         """
         gr = Group()
         for colourItem in colourGroups.values():
-            # pl = PolyLine(ll['lines'], strokeWidth=ll['strokeWidth'], strokeColor=ll['strokeColor'], strokeLineCap=ll['strokeLineCap'])
+            # pl = PolyLine(ll[PDFLINES], strokeWidth=ll[PDFSTROKEWIDTH], strokeColor=ll[PDFSTROKECOLOR], strokeLineCap=ll[PDFSTROKELINECAP])
 
-            wanted_keys = ['strokeWidth',
-                           'strokeColor',
-                           'strokeLineCap',
-                           'fillColor',
-                           'fill',
-                           'fillMode',
-                           'stroke',
-                           'strokeDashArray']
+            wanted_keys = [PDFSTROKEWIDTH,
+                           PDFSTROKECOLOR,
+                           PDFSTROKELINECAP,
+                           PDFFILLCOLOR,
+                           PDFFILL,
+                           PDFFILLMODE,
+                           PDFSTROKE,
+                           PDFSTROKEDASHARRAY]
 
             newColour = dict((k, colourItem[k]) for k in wanted_keys if k in colourItem)
 
-            pl = Path(**newColour)    #  strokeWidth=colourItem['strokeWidth'], strokeColor=colourItem['strokeColor'], strokeLineCap=colourItem['strokeLineCap'])
-            for ll in colourItem['lines']:
+            pl = Path(**newColour)    #  strokeWidth=colourItem[PDFSTROKEWIDTH], strokeColor=colourItem[PDFSTROKECOLOR], strokeLineCap=colourItem[PDFSTROKELINECAP])
+            for ll in colourItem[PDFLINES]:
                 if len(ll) == 4:
                     pl.moveTo(ll[0], ll[1])
                     pl.lineTo(ll[2], ll[3])

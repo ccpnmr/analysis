@@ -993,7 +993,8 @@ class Strip(AbstractWrapperObject):
     specViews = self._orderedSpectrumViews.orderedSpectrumViews()
     if len(set(newIndex)) != len(newIndex):
       raise ValueError('List contains duplicates')
-    if len(newIndex) != len(specViews):
+    notDeletedViews = [spec for spec in specViews if not spec.isDeleted]
+    if len(newIndex) != len(notDeletedViews):
       raise ValueError('List is not the correct length')
 
     newSpecViews = [specViews[ii] for ii in newIndex]

@@ -1,29 +1,29 @@
 """
 Module Documentation here
 """
-#=========================================================================================
+# =========================================================================================
 # Licence, Reference and Credits
-#=========================================================================================
+# =========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-#=========================================================================================
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+# =========================================================================================
 # Last code modification:
-#=========================================================================================
+# =========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified$"
 __version__ = "$Revision: 3.0.b3 $"
-#=========================================================================================
+# =========================================================================================
 # Created:
-#=========================================================================================
+# =========================================================================================
 __author__ = "$Author: Ed Brooksbank $"
 __date__ = "$Date$"
-#=========================================================================================
+# =========================================================================================
 # Start of code
-#=========================================================================================
+# =========================================================================================
 
 import os
 from PyQt5 import QtWidgets
@@ -33,22 +33,49 @@ from ccpn.framework.PathsAndUrls import fontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 
+FONTLIST = (('glTahoma13.fnt','Tahoma', 13),
+            ('glTahoma14.fnt','Tahoma', 14),
+            ('glTahoma15.fnt','Tahoma', 15),
+            ('glTahoma16.fnt','Tahoma', 16),
+            ('glTahoma18.fnt','Tahoma', 18),
+            ('glTahoma20.fnt','Tahoma', 20),
+            ('glTahoma22.fnt','Tahoma', 22),
+            ('glTahoma25.fnt','Tahoma', 25),
+            ('glTahoma28.fnt','Tahoma', 28),
+            ('glTahoma32.fnt','Tahoma', 32))
+FONTTRANSPARENT = 'Transparent'
+FONTPATH = 'Fonts'
+
 
 @singleton
 class GLGlobalData(QtWidgets.QWidget):
-  def __init__(self, parent=None, strip=None):
-    super(GLGlobalData, self).__init__()
-    self.parent = parent
-    self.strip = strip
+    def __init__(self, parent=None, strip=None):
+        super(GLGlobalData, self).__init__()
+        self.parent = parent
+        self.strip = strip
 
-    self.glSmallFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallFont.fnt'), activeTexture=0)
-    self.glSmallTransparentFont = CcpnGLFont(os.path.join(fontsPath, 'Fonts', 'glSmallTransparentFont.fnt'),
-                                             fontTransparency=0.5, activeTexture=1)
-    self.initialiseShaders()
+        self.fonts = {}
+        self.loadFonts()
 
-  def initialiseShaders(self):
-    # simple shader for standard plotting of contours
-    self._vertexShader1 = """
+        self.initialiseShaders()
+
+    def loadFonts(self):
+        for fontFile in FONTLIST:
+            normalName = fontFile[1]+str(fontFile[2])
+            transparentName = fontFile[1]+FONTTRANSPARENT+str(fontFile[2])
+
+            self.fonts[normalName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
+                                                activeTexture=0)
+            self.fonts[transparentName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
+                                                    fontTransparency=0.5, activeTexture=1)
+
+        self.glSmallFont = self.fonts['Tahoma13']
+        self.glSmallTransparentFont = self.fonts['Tahoma'+FONTTRANSPARENT+'13']
+
+
+    def initialiseShaders(self):
+        # simple shader for standard plotting of contours
+        self._vertexShader1 = """
     #version 120
 
     uniform mat4 mvMatrix;
@@ -64,7 +91,7 @@ class GLGlobalData(QtWidgets.QWidget):
     }
     """
 
-    self._fragmentShader1 = """
+        self._fragmentShader1 = """
     #version 120
 
     varying vec4  FC;
@@ -84,8 +111,8 @@ class GLGlobalData(QtWidgets.QWidget):
     }
     """
 
-    # shader for plotting antialiased text to the screen
-    self._vertexShaderTex = """
+        # shader for plotting antialiased text to the screen
+        self._vertexShaderTex = """
     #version 120
 
     uniform mat4 mvMatrix;
@@ -113,7 +140,7 @@ class GLGlobalData(QtWidgets.QWidget):
     }
     """
 
-    self._fragmentShaderTex = """
+        self._fragmentShaderTex = """
     #version 120
 
     uniform sampler2D texture;
@@ -135,49 +162,49 @@ class GLGlobalData(QtWidgets.QWidget):
     }
     """
 
-    #     # shader for plotting antialiased text to the screen
-    #     self._vertexShaderTex = """
-    #     #version 120
-    #
-    #     uniform mat4 mvMatrix;
-    #     uniform mat4 pMatrix;
-    #     varying vec4 FC;
-    #     uniform vec4 axisScale;
-    #     attribute vec2 offset;
-    #
-    #     void main()
-    #     {
-    #       gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
-    #       gl_TexCoord[0] = gl_MultiTexCoord0;
-    #       FC = gl_Color;
-    #     }
-    #     """
-    #
-    #     self._fragmentShaderTex = """
-    # #version 120
-    #
-    # #ifdef GL_ES
-    # precision mediump float;
-    # #endif
-    #
-    # uniform sampler2D texture;
-    # varying vec4 FC;
-    # vec4    filter;
-    #
-    # varying vec4 v_color;
-    # varying vec2 v_texCoord;
-    #
-    # const float smoothing = 1.0/16.0;
-    #
-    # void main() {
-    #     float distance = texture2D(texture, v_texCoord).a;
-    #     float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
-    #     gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
-    # }
-    # """
+        #     # shader for plotting antialiased text to the screen
+        #     self._vertexShaderTex = """
+        #     #version 120
+        #
+        #     uniform mat4 mvMatrix;
+        #     uniform mat4 pMatrix;
+        #     varying vec4 FC;
+        #     uniform vec4 axisScale;
+        #     attribute vec2 offset;
+        #
+        #     void main()
+        #     {
+        #       gl_Position = pMatrix * mvMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+        #       gl_TexCoord[0] = gl_MultiTexCoord0;
+        #       FC = gl_Color;
+        #     }
+        #     """
+        #
+        #     self._fragmentShaderTex = """
+        # #version 120
+        #
+        # #ifdef GL_ES
+        # precision mediump float;
+        # #endif
+        #
+        # uniform sampler2D texture;
+        # varying vec4 FC;
+        # vec4    filter;
+        #
+        # varying vec4 v_color;
+        # varying vec2 v_texCoord;
+        #
+        # const float smoothing = 1.0/16.0;
+        #
+        # void main() {
+        #     float distance = texture2D(texture, v_texCoord).a;
+        #     float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+        #     gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
+        # }
+        # """
 
-    # advanced shader for plotting contours
-    self._vertexShader2 = """
+        # advanced shader for plotting contours
+        self._vertexShader2 = """
     #version 120
 
     varying vec4  P;
@@ -201,7 +228,7 @@ class GLGlobalData(QtWidgets.QWidget):
     }
     """
 
-    self._fragmentShader2 = """
+        self._fragmentShader2 = """
     #version 120
 
     //  uniform float gsize = 50.0;       // size of the grid
@@ -236,7 +263,7 @@ class GLGlobalData(QtWidgets.QWidget):
     }
     """
 
-    self._vertexShader3 = """
+        self._vertexShader3 = """
         #version 120
 
         uniform mat4 u_projTrans;
@@ -255,7 +282,7 @@ class GLGlobalData(QtWidgets.QWidget):
         }
         """
 
-    self._fragmentShader3 = """
+        self._fragmentShader3 = """
         #version 120
 
         #ifdef GL_ES
@@ -276,28 +303,27 @@ class GLGlobalData(QtWidgets.QWidget):
         }
         """
 
-    self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
-                                         fragment=self._fragmentShader1,
-                                         attributes={'pMatrix': (16, np.float32),
-                                                     'mvMatrix': (16, np.float32),
-                                                     'parameterList': (4, np.int32),
-                                                     'background': (4, np.float32)})
-    self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2,
-                                         fragment=self._fragmentShader2,
-                                         attributes={'pMatrix': (16, np.float32),
-                                                     'mvMatrix': (16, np.float32),
-                                                     'positiveContours': (4, np.float32),
-                                                     'negativeContours': (4, np.float32)})
-    self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3,
-                                         fragment=self._fragmentShader3,
-                                         attributes={'pMatrix': (16, np.float32),
-                                                     'mvMatrix': (16, np.float32)})
-    self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex,
-                                           fragment=self._fragmentShaderTex,
-                                           attributes={'pMatrix': (16, np.float32),
-                                                       'mvMatrix': (16, np.float32),
-                                                       'axisScale': (4, np.float32),
-                                                       'background': (4, np.float32),
-                                                       'viewport': (4, np.float32),
-                                                       'texture': (1, np.uint)})
-
+        self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
+                                             fragment=self._fragmentShader1,
+                                             attributes={'pMatrix': (16, np.float32),
+                                                         'mvMatrix': (16, np.float32),
+                                                         'parameterList': (4, np.int32),
+                                                         'background': (4, np.float32)})
+        self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2,
+                                             fragment=self._fragmentShader2,
+                                             attributes={'pMatrix': (16, np.float32),
+                                                         'mvMatrix': (16, np.float32),
+                                                         'positiveContours': (4, np.float32),
+                                                         'negativeContours': (4, np.float32)})
+        self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3,
+                                             fragment=self._fragmentShader3,
+                                             attributes={'pMatrix': (16, np.float32),
+                                                         'mvMatrix': (16, np.float32)})
+        self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex,
+                                               fragment=self._fragmentShaderTex,
+                                               attributes={'pMatrix': (16, np.float32),
+                                                           'mvMatrix': (16, np.float32),
+                                                           'axisScale': (4, np.float32),
+                                                           'background': (4, np.float32),
+                                                           'viewport': (4, np.float32),
+                                                           'texture': (1, np.uint)})

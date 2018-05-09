@@ -43,6 +43,8 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 from typing import Optional, Tuple, Any, Union, Sequence
 from ccpn.util.Common import makeIterableList
 
+MULTIPLET_TYPES = ['singlet','doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
+                   'doublet of doublets', 'doublet of triplets', 'triplet of doublets', 'doublet of doublet of doublets']
 
 class Multiplet(AbstractWrapperObject):
   """Multiplet object, holding position, intensity, and assignment information

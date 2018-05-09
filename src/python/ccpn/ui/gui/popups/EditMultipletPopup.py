@@ -23,7 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.util.Logging import getLogger
-from ccpn.core.Multiplet import Multiplet
+from ccpn.core.Multiplet import Multiplet, MULTIPLET_TYPES
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
@@ -32,6 +32,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 
 
 NEW = "Add New"
@@ -80,8 +81,16 @@ class EditMultipletPopup(CcpnDialog):
         self.outputMultipletListsWidgetLabel = Label(self, 'Available Peaks',  grid=(row, 1),  hAlign='l')
         row += 1
         self.multipletPeaksListWidget = ListWidget(self, multiSelect= True, callback=self._activateOkButton,acceptDrops=True, copyDrop=False, tipText=tipText, grid=(row, 0))
-        self.peaksSourceListWidget = ListWidget(self, multiSelect= True, callback=self._activateOkButton, acceptDrops=True,copyDrop=False, tipText=tipText, grid=(row, 1))
+        self.peaksSourceListWidget = ListWidget(self, multiSelect= True, callback=self._activateOkButton, contextMenu=False, acceptDrops=True,copyDrop=False, tipText=tipText, grid=(row, 1))
+
         row += 1
+        self.typeLabel = Label(self, 'Type', grid=(row, 0), hAlign='l')
+        self.typePullDown = FilteringPulldownList(self, texts=MULTIPLET_TYPES, headerText=' ', headerEnabled=True, callback=None,
+                                       grid=(row, 1))
+
+        row += 1
+
+
         self.selectButtons = ButtonList(self, texts=['Select from Current Peaks','Close', 'Ok'],
                                         callbacks=[self._selectCurrentPeaks, self._closePopup, self._okCallback],
                                         tipTexts=['Select on the list all the current peaks',
@@ -116,6 +125,7 @@ class EditMultipletPopup(CcpnDialog):
             self.spectrum = obj.spectrum
             for multiplet in obj.multiplets:
                 self.mlPullDown.addItem(text=multiplet.pid, object=multiplet)
+        self._refreshAvailableSpectra()
 
     def _populatePeaksListsWidget(self, *args):
 
@@ -162,9 +172,7 @@ class EditMultipletPopup(CcpnDialog):
     def _activateOkButton(self):
 
         if self.project:
-            if len(self.peaksSourceListWidget.getSelectedObjects())>0 and len(self.multipletPeaksListWidget.getSelectedObjects())>0:
-                self.selectButtons.buttons[-1].setDisabled(False)
-            elif self.mtPullDown.getText == NEW:
+            if self.mtPullDown.getText == NEW:
                 self.selectButtons.buttons[-1].setDisabled(False)
             elif self.mlPullDown.getText == NEW:
                 self.selectButtons.buttons[-1].setDisabled(False)
@@ -176,7 +184,13 @@ class EditMultipletPopup(CcpnDialog):
             if multipletListText == NEW:
                 self.multipletList = self.spectrum.newMultipletList()
             else:
-                self.multipletList = self.mtPullDown.getObject()
+                multipletList = self.mtPullDown.getObject()
+                if isinstance(multipletList, MultipletList):
+                    self.multipletList = multipletList
+                else:
+                    # raise a warning
+                    showWarning("No MultipletList Selected", "Select a multipletList option")
+                    return
 
             multipletText = self.mlPullDown.getText()
             if multipletText == NEW:
@@ -189,6 +203,7 @@ class EditMultipletPopup(CcpnDialog):
                 else:
                     # raise a warning
                     showWarning("No Multiplet Selected", "Select a multiplet option")
+                    return
 
 
             sourceMultipletText = self.sourcePullDown.getText()

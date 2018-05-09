@@ -122,7 +122,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
     return list(self.objects)
 
   def _getDroppedObjects(self, project):
-    '''This will return obj if the items text is a ccpn pid '''
+    '''This will return obj if the items text is a ccpn pid. This is used when the objects inside a listWidget are being dragged and dropped across widgets'''
     items = []
     objs = []
 

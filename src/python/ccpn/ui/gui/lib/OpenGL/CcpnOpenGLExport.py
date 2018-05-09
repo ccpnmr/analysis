@@ -1,5 +1,5 @@
 """
-Code for exporting OpenGL stripDisplay to a pdf file.
+Code for exporting OpenGL stripDisplay to pdf and svg files.
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -92,13 +92,16 @@ class CcpnOpenGLExporter():
         import matplotlib.font_manager
         foundFonts = matplotlib.font_manager.findSystemFonts()
 
-        # need to load all fonts that are in the project
-        for ff in foundFonts:
-            if self.parent.globalGL.glSmallFont.fontName+'.ttf' in ff:
-                pdfmetrics.registerFont(TTFont(self.parent.globalGL.glSmallFont.fontName, ff))
-                break
+        # load all fonts that are in the openGL font list
+        for glFonts in self.parent.globalGL.fonts.values():
+            for ff in foundFonts:
+                if glFonts.fontName+'.ttf' in ff:
+                    pdfmetrics.registerFont(TTFont(glFonts.fontName, ff))
+                    break
+            else:
+                raise RuntimeError('Font %s not found.' % (glFonts.fontName+'.ttf'))
 
-        self.exportFontSize = self.parent.globalGL.glSmallFont.fontSize
+        # set a default fontName
         self.fontName = self.parent.globalGL.glSmallFont.fontName
 
         self.backgroundColour = colors.Color(*self.parent.background[0:3],
@@ -180,14 +183,12 @@ class CcpnOpenGLExporter():
         self.pixHeight = self.pixWidth * ratio
 
         # scale fonts to appear the correct size
-        self.fontSize = int(self.exportFontSize * 1.1 * self.pixWidth / self.parent.w)
         self.fontScale = 1.1 * self.pixWidth / self.parent.w
         if self.pixHeight > (self._report.doc.height - 2*cm):
 
             # TODO:ED check what else is stealing the height
             self.pixHeight = self._report.doc.height - (2*cm)
             self.pixWidth = self.pixHeight / ratio
-            self.fontSize = int(self.exportFontSize * 1.025 * self.pixHeight / self.parent.h)
             self.fontScale = 1.025 * self.pixHeight / self.parent.h
 
         # pixWidth/self.pixHeight are now the dimensions in points for the Flowable

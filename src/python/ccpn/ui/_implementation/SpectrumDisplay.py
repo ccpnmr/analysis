@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.OrderedSpectrumViews import ORDEREDSPECTRUMVIEWS, OrderedSpectrumViews
+from ccpn.core.lib.OrderedSpectrumViews import SPECTRUMVIEWINDEX, OrderedSpectrumViews
 
 logger = getLogger()
 
@@ -245,43 +245,60 @@ class SpectrumDisplay(AbstractWrapperObject):
     # # ejb - orderedSpectrumViews, orderedSpectra
     # # store the current orderedSpectrumViews in the internal data store
     # # so it is hidden from external users
-    def orderedSpectra(self) -> Optional[Tuple[Spectrum, ...]]:
-        """
-        The spectra attached to the strip (ordered)
-        :return tuple of spectra:
-        """
-        return self.strips[0].orderedSpectra()
 
-    def orderedSpectrumViews(self, strip=0, includeDeleted=False) -> Optional[Tuple]:
+    def orderedSpectrumViews(self, spectrumList, includeDeleted=False) -> Optional[Tuple]:
         """
         The spectrumViews attached to the strip (ordered)
         :return tuple of SpectrumViews:
         """
-        return self.strips[0].orderedSpectrumViews()
+        if not self._orderedSpectrumViews:
+            self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+        return self._orderedSpectrumViews.orderedSpectrumViews((spectrumList or self.spectrumViews), includeDeleted=includeDeleted)
 
-    def setOrderedSpectrumViews(self, spectrumViews: Tuple):
+    def getOrderedSpectrumViewsIndex(self) -> Optional[Tuple]:
         """
-        Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
-        :param spectrumViews - tuple of SpectrumView objects:
+        The indexing of the current spectrumViews
+        :return tuple of ints:
         """
-        for strip in self.strips:
-            strip.setOrderedSpectrumViews(spectrumViews)
+        if not self._orderedSpectrumViews:
+            self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+        return self._orderedSpectrumViews.getOrderedSpectrumViewsIndex()
 
-    def indexOrderedSpectrumViews(self, newIndex: Tuple[int]):
+    def setOrderedSpectrumViewsIndex(self, spectrumIndex: Tuple[int]):
         """
         Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
         :param newIndex - tuple of int:
         """
+        defaults = collections.OrderedDict((('spectrumIndex', None),))
 
-        defaults = collections.OrderedDict((('newIndex', None),))
-
-        self._startCommandEchoBlock('indexOrderedSpectrumViews', values=locals(), defaults=defaults)
+        self._startCommandEchoBlock('setOrderedSpectrumViewsIndex', values=locals(), defaults=defaults)
         try:
-            for strip in self.strips:
-                strip._indexOrderedSpectrumViews(newIndex=newIndex)
+            if not self._orderedSpectrumViews:
+                self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+            self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=spectrumIndex)
 
         finally:
             self._endCommandEchoBlock()
+
+    def removeOrderedSpectrumView(self, spectrumView):
+        defaults = collections.OrderedDict((('spectrumView', None),))
+
+        index = self.spectrumViews.index(spectrumView)
+        self._startCommandEchoBlock('removeOrderedSpectrumView', values=locals(), defaults=defaults)
+        try:
+            if not self._orderedSpectrumViews:
+                self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
+            oldIndex = list(self.getOrderedSpectrumViewsIndex())
+            oldIndex.remove(index)
+            for ii in range(len(oldIndex)):
+                if oldIndex[ii] > index:
+                    oldIndex[ii] -= 1
+            self._orderedSpectrumViews.setOrderedSpectrumViewsIndex(spectrumIndex=oldIndex)
+
+        finally:
+            self._endCommandEchoBlock()
+
+
 
     # def appendSpectrumView(self, spectrumView):
     #   """

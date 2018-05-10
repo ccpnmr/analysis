@@ -243,6 +243,10 @@ class CcpnOpenGLExporter():
         self._addMarkLabels()
         self._addTraces()
         self._addInfiniteLines()
+        self._addOverlayText()
+        self._addAxisMask()
+        self._addGridTickMarks()
+        self._addGridLabels()
 
     def _addGridLines(self):
         """
@@ -407,7 +411,7 @@ class CcpnOpenGLExporter():
         """
         Add the integral lines to the main drawing area.
         """
-        # colourGroups = OrderedDict()
+        colourGroups = OrderedDict()
         self._appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -417,7 +421,7 @@ class CcpnOpenGLExporter():
                                        name='IntegralListsFill',
                                        fillMode=GL.GL_FILL,
                                        checkIntegral=True, splitGroups=True)
-        # self.appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
+        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
 
     def _addIntegralAreas(self):
         """
@@ -615,7 +619,7 @@ class CcpnOpenGLExporter():
         for infLine in self.parent._infiniteLines:
             if infLine.visible:
                 colour = colors.Color(*infLine.brush[0:3], alpha=float(infLine.brush[3]))
-                colourPath = 'infiniteLines%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+                colourPath = 'infiniteLines%s%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha, infLine.lineStyle)
 
                 if infLine.orientation == 'h':
                     newLine = [self.parent.axisL, infLine.values[0], self.parent.axisR, infLine.values[0]]
@@ -630,7 +634,7 @@ class CcpnOpenGLExporter():
                 if newLine:
                     if colourPath not in colourGroups:
                         colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
-                                                         PDFSTROKELINECAP: 1,
+                                                         PDFSTROKELINECAP: 1, PDFCLOSEPATH: False,
                                                          PDFSTROKEDASHARRAY: GLLINE_STYLES_ARRAY[infLine.lineStyle] }
                     colourGroups[colourPath][PDFLINES].append(newLine)
 

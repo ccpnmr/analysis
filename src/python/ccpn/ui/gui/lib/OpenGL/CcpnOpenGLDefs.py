@@ -48,13 +48,13 @@ FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
 FULLVIEW = 'fullView'
 
 GLLINE_STYLES = {
-  'solid': 0xFFFF,
-  'dashed': 0xF0F0,
-  'dotted': 0xAAAA
+    'solid': 0xFFFF,
+    'dashed': 0xF0F0,
+    'dotted': 0xAAAA
 }
 
 GLLINE_STYLES_ARRAY = {
-  'solid': None,
-  'dashed': [3, 3],
-  'dotted': [1, 1]
+    'solid': None,
+    'dashed': [5, 5],
+    'dotted': [1, 1]
 }

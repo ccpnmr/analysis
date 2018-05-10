@@ -49,6 +49,9 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
     ###self.inactivePeakItems = set() # contains unused peakItems
     self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
 
+    # store the list of ordered spectrumViews
+    self._orderedSpectrumViews = None
+
   def showPeaks(self, peakListView, peaks):
     """
     Displays specified peaks in all strips of the display using peakListView

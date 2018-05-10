@@ -1332,7 +1332,8 @@ class GuiStrip(Frame):
     pass  # GWV: poor soultion self.spectrumDisplay._resetRemoveStripAction()
 
   def _moveToNextSpectrumView(self):
-    spectrumViews = self.orderedSpectrumViews()
+    # spectrumViews = self.orderedSpectrumViews()
+    spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
     countSpvs = len(spectrumViews)
     if countSpvs > 0:
       visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
@@ -1352,7 +1353,8 @@ class GuiStrip(Frame):
       getLogger().warning('No spectra displayed')
 
   def _moveToPreviousSpectrumView(self):
-    spectrumViews = self.orderedSpectrumViews()
+    # spectrumViews = self.orderedSpectrumViews()
+    spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
     countSpvs = len(spectrumViews)
     if countSpvs > 0:
       visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
@@ -1369,12 +1371,14 @@ class GuiStrip(Frame):
       getLogger().warning('No spectra displayed')
 
   def _showAllSpectrumViews(self, value:bool=True):
-    spectrumViews = self.orderedSpectrumViews()
+    # spectrumViews = self.orderedSpectrumViews()
+    spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
     for sp in spectrumViews:
       sp.setVisible(value)
 
   def _invertSelectedSpectra(self):
-    spectrumViews = self.orderedSpectrumViews()
+    # spectrumViews = self.orderedSpectrumViews()
+    spectrumViews = self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews)
     countSpvs = len(spectrumViews)
     if countSpvs > 0:
 

@@ -420,7 +420,7 @@ class CcpnOpenGLExporter():
                                                PLOTHEIGHT: self.displayScale * self.mainH},
                                        name='IntegralListsFill',
                                        fillMode=GL.GL_FILL,
-                                       checkIntegral=True, splitGroups=True)
+                                       splitGroups=True)
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='integralLists')
 
     def _addIntegralAreas(self):
@@ -869,7 +869,7 @@ class CcpnOpenGLExporter():
                 colourGroups[colourPath][PDFLINES].append(newLine)
 
     def _appendIndexLineGroup(self, indArray, colourGroups, plotDim, name,
-                              fillMode=None, checkIntegral=False, splitGroups=False,
+                              fillMode=None, splitGroups=False,
                               setColour=None):
         if indArray.drawMode == GL.GL_TRIANGLES:
             indexLen = 3
@@ -915,8 +915,7 @@ class CcpnOpenGLExporter():
                                               x=plotDim[PLOTLEFT],
                                               y=plotDim[PLOTBOTTOM],
                                               width=plotDim[PLOTWIDTH],
-                                              height=plotDim[PLOTHEIGHT],
-                                              checkIntegral=checkIntegral)
+                                              height=plotDim[PLOTHEIGHT])
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 
@@ -925,8 +924,7 @@ class CcpnOpenGLExporter():
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
 
     def _appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name,
-                                  fillMode=None,
-                                  checkIntegral=False, splitGroups=False):
+                                  fillMode=None, splitGroups=False):
         for spectrumView in self.strip.orderedSpectrumViews():
             if spectrumView.isDeleted:
                 continue
@@ -944,7 +942,6 @@ class CcpnOpenGLExporter():
                                                plotDim=plotDim,
                                                name='spectrumView%s%s' % (name, spectrumView.pid),
                                                fillMode=fillMode,
-                                               checkIntegral=checkIntegral,
                                                splitGroups=splitGroups)
 
     def _appendGroup(self, drawing:Drawing=None, colourGroups:dict=None, name:str=None):

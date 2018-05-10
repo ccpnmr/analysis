@@ -64,7 +64,9 @@ class SpectrumToolBar(ToolBar):
       newSpectrumViewsOrder.append(spectrumView)
 
     self.widget.project.blankNotification()
-    self.widget.indexOrderedSpectrumViews(newIndex)
+    # newIndex = [newIndex.index(ii) for ii in self.widget.getOrderedSpectrumViewsIndex()]
+    newIndex = [self.widget.getOrderedSpectrumViewsIndex()[ii] for ii in newIndex]
+    self.widget.setOrderedSpectrumViewsIndex(newIndex)
     self.widget.project.unblankNotification()
 
     # defaults = OrderedDict((('newIndex', None),))
@@ -169,11 +171,12 @@ class SpectrumToolBar(ToolBar):
     stripUpdateList = []
     for spectrumView in self.widget.spectrumViews:
       if spectrumView._apiDataSource == key:
-        stripUpdateList.append(spectrumView.strip)
+        stripUpdateList.append(spectrumView)
+        # self.widget.removeOrderedSpectrumView(spectrumView)
 
         # this spawns the creation of all orderedSpectra
         # should be done on loading though
-        spectrumView.strip.orderedSpectra()
+        # spectrumView.strip.orderedSpectra()
 
     for spectrumView in self.widget.spectrumViews:
       if spectrumView._apiDataSource == key:
@@ -181,12 +184,19 @@ class SpectrumToolBar(ToolBar):
         # delete the spectrumView
         try:
           # spectrumView._wrappedData.spectrumView.delete()
+          # if not spectrumView.isDeleted:
+          # self.widget.project.blankNotifications()
+          # self.widget.removeOrderedSpectrumView(spectrumView)
+          # self.widget.project.unblankNotifications()
+
           spectrumView.delete()
         except Exception as es:
           pass
 
-    for st in stripUpdateList:
-      st.removeSpectrumView(None)
+    # for st in stripUpdateList:
+    # #   st.removeSpectrumView(None)
+    #   if not st.isDeleted:
+    #     self.widget.removeOrderedSpectrumView(st)
 
     # spawn a redraw of the GL windows
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

@@ -231,7 +231,10 @@ class GuiSpectrumDisplay(CcpnModule):
   def _toolbarChange(self, data):
     trigger = data[Notifier.TRIGGER]
     if trigger == Notifier.CHANGE:
-      self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())
+      # self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())
+
+      specViews = data[Notifier.OBJECT].spectrumViews
+      self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
 
       # spawn a redraw of the GL windows
       from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -862,7 +865,7 @@ class GuiSpectrumDisplay(CcpnModule):
     stripIndex = -1   # ejb - just here for the minute
     newStrip = self.strips[stripIndex].clone()
 
-    newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
+    # newStrip.copyOrderedSpectrumViews(self.strips[stripIndex-1])
 
     self.showAxes()
 
@@ -1155,7 +1158,7 @@ class GuiSpectrumDisplay(CcpnModule):
   def _removeSpectrum(self, spectrum):
     try:
       # self._orderedSpectra.remove(spectrum)
-      self.removeSpectrumView(spectrum)
+      self._orderedSpectrumViews.removeSpectrumView(spectrum)
     except:
       getLogger().warning('Error, %s does not exist' % spectrum)
 

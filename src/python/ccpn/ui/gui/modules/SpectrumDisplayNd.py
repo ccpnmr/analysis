@@ -67,6 +67,9 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
     #TODO: have SpectrumToolbar own and maintain this
     self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
 
+    # store the list of ordered spectrumViews
+    self._orderedSpectrumViews = None
+
     self._fillToolBar()
     #self.setAcceptDrops(True)
 

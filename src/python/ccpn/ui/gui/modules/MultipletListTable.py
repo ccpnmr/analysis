@@ -250,6 +250,10 @@ class MultipletListTableWidget(QuickTable):
         volumeTipText = 'Integral of spectrum intensity around multiplet location, according to chosen volume method'
         columnDefs.append(('Volume', lambda ml: ml.volume, volumeTipText, None))
 
+        # numPeaks column
+        numPeaksTipText = 'Peaks count'
+        columnDefs.append(('Peaks count', lambda ml: ml.numPeaks, numPeaksTipText, None))
+
         # figureOfMerit column
         figureOfMeritTipText = 'Figure of merit'
         columnDefs.append(('Merit', lambda ml: ml.figureOfMerit, figureOfMeritTipText, None))
@@ -362,25 +366,30 @@ class MultipletListTableWidget(QuickTable):
 
     def _actionCallback(self, data, *args):
         ''' If current strip contains the double clicked multiplet will navigateToPositionInStrip '''
-        from ccpn.ui.gui.widgets.MessageDialog import showInfo
+        from ccpn.core.PeakList import PeakList
+        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
-        info = showInfo('Not implemented yet!',
-                        'Double click action has not been implemented in the current version')
-        # from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
-        #
-        # multiplet = data[Notifier.OBJECT]
-        #
-        # if self.current.strip is not None:
-        #     validMultipletListViews = [pp.multipletList for pp in self.current.strip.multipletListViews if isinstance(pp.multipletList, MultipletList)]
-        #
-        #     if multiplet.multipletList in validMultipletListViews:
-        #         widths = None
-        #
-        #         if multiplet.multipletList.spectrum.dimensionCount <= 2:
-        #             widths = _getCurrentZoomRatio(self.current.strip.viewRange())
-        #         navigateToPositionInStrip(strip = self.current.strip, positions=multiplet.position, widths=widths)
-        # else:
-        #     logger.warning('Impossible to navigate to multiplet position. Set a current strip first')
+
+        # TODO hack until we have multiplet views
+        multiplet = self.current.multiplet
+        if multiplet:
+            if len(multiplet.peaks)>0:
+                peak = multiplet.peaks[-1]
+
+                if self.current.strip is not None:
+                    validPeakListViews = [pp.peakList for pp in self.current.strip.peakListViews if
+                                          isinstance(pp.peakList, PeakList)]
+
+                    if peak.peakList in validPeakListViews:
+                        widths = None
+
+                        if peak.peakList.spectrum.dimensionCount <= 2:
+                            widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+                        navigateToPositionInStrip(strip=self.current.strip, positions=multiplet.position, widths=widths)
+            else:
+                logger.warning('Impossible to navigate to peak position. No peaks in multiplet')
+        else:
+            logger.warning('Impossible to navigate to peak position. Set a current strip first')
 
     def _selectionCallback(self, data, *args):
         """

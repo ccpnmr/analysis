@@ -411,38 +411,16 @@ class MultipletListTableWidget(QuickTable):
 
     def _editMultiplets(self):
         from ui.gui.popups.EditMultipletPopup import EditMultipletPopup
-        popup = EditMultipletPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
-        self._selectedMultipletList = self.project.getByPid(self.mLwidget.getText())
-
-        popup.exec()
-        popup.raise_()
+        multiplets = self.current.multiplets
+        if len(multiplets)>0:
+            multiplet = multiplets[-1]
+            popup = EditMultipletPopup(parent=self.mainWindow, mainWindow=self.mainWindow, multiplet=multiplet)
+            popup.exec()
+            popup.raise_()
 
 
     ##################   Notifiers callbacks  ##################
 
-    # def _multipletListNotifierCallback(self, data):
-    #   '''Refreshs the table only if the multipletList involved in the notification is the one displayed '''
-    #   if self._selectedMultipletList is not None:
-    #     self.pLwidget.select(self._selectedMultipletList.pid) #otherwise automatically reset from the compoundWidget pulldown notifiers
-    #
-    #   multipletList = data['object']
-    #   if self._selectedMultipletList != multipletList:
-    #     return
-    #   else:
-    #     self._updateAllModule()
-
-    # def _multipletNotifierNotifierCallback(self, data):
-    #   '''Callback for multiplet notifier. Refresh the table only if the multiplet belongs to the multipletList displayed
-    #   NB. Currently impossible to register and trigger the notifier dynamically for only the multiplets in the multipletList displayed.
-    #   This because when deleting a multipletList or spectrum from the project, the process starts by deleting one by one the multiplet and triggering the multiplet notifier automatically and therefore refreshing the table,
-    #   TODO: better notifier that if a parent object is deleted it suspends all the children notifiers.
-    #  '''
-    #   multiplet = data['object']
-    #   if multiplet is not None:
-    #     if self._selectedMultipletList != multiplet.multipletList:
-    #       return
-    #     else:
-    #       self._updateAllModule()
 
     def _selectOnTableCurrentMultipletsNotifierCallback(self, data):
         """

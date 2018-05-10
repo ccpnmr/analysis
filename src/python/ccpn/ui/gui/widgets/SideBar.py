@@ -1240,17 +1240,14 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     """Create new object starting from the <New> item
     """
     if item.text(0) in ["<New IntegralList>", "<New PeakList>", "<New MultipletList>",]:
-
+      spectrum = self.project.getByPid(item.parent().text(0))
       if item.text(0) == "<New PeakList>":
-        self.project.getByPid(item.parent().text(0)).newPeakList()
+        spectrum.newPeakList()
       if item.text(0) == "<New IntegralList>":
-        self.project.getByPid(item.parent().text(0)).newIntegralList()
+        spectrum.newIntegralList()
       if item.text(0) == "<New MultipletList>":
-        # self.project.getByPid(item.parent().text(0)).newMultipletList()
+        spectrum.newMultipletList()
 
-        popup = EditMultipletPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
-        popup.exec_()
-        popup.raise_()
 
       # item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)
 

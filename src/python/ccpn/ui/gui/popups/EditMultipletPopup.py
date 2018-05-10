@@ -39,7 +39,7 @@ NEW = "Add New"
 
 class EditMultipletPopup(CcpnDialog):
 
-    def __init__(self, parent=None,  mainWindow=None, multiplet = None, title='Edit Multiplet', **kw):
+    def __init__(self, parent=None,  mainWindow=None, multiplet = None, spectrum = None, isNewMultipletList=False, title='Edit Multiplet', **kw):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kw)
 
         self.project = None
@@ -51,7 +51,8 @@ class EditMultipletPopup(CcpnDialog):
             self.project = mainWindow.project
             self.multiplet = multiplet
             self.multipletList = None
-            self.spectrum = None
+            self.spectrum = spectrum
+            self._isNewMultipletList = isNewMultipletList
             if self.multiplet:
                 self.multipletList = self.multiplet.multipletList
                 self.spectrum = self.multipletList.spectrum
@@ -107,6 +108,10 @@ class EditMultipletPopup(CcpnDialog):
         if self.project:
             if self.multiplet:
                 self._selectMultiplet()
+            else:
+                if self._isNewMultipletList:
+                    self.mtPullDown.select(NEW)
+                    # self.mlPullDown.select(NEW)
 
     def _setPullDownData(self):
         if self.project:

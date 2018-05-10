@@ -31,6 +31,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 
@@ -88,7 +89,10 @@ class EditMultipletPopup(CcpnDialog):
         self.typeLabel = Label(self, 'Type', grid=(row, 0), hAlign='l')
         self.typePullDown = FilteringPulldownList(self, texts=MULTIPLET_TYPES, headerText=' ', headerEnabled=True, callback=None,
                                        grid=(row, 1))
-
+        row += 1
+        self.commentLabel = Label(self, 'Comment', grid=(row, 0), hAlign='l')
+        self.commentText = TextEditor(self, grid=(row, 1))
+        self.commentText.setFixedHeight(40)
         row += 1
 
 
@@ -108,6 +112,8 @@ class EditMultipletPopup(CcpnDialog):
         if self.project:
             if self.multiplet:
                 self._selectMultiplet()
+                print('comment',self.multiplet.comment)
+                self.commentText.setText(self.multiplet.comment)
             else:
                 if self._isNewMultipletList:
                     self.mtPullDown.select(NEW)
@@ -214,7 +220,6 @@ class EditMultipletPopup(CcpnDialog):
             sourceMultipletText = self.sourcePullDown.getText()
             sourceMultiplet = self.project.getByPid(sourceMultipletText)
             sourcePeaks = self.peaksSourceListWidget._getDroppedObjects(self.project)
-            print(sourcePeaks,'sourcePeaks')
             if sourceMultiplet:
                 if list(set(sourcePeaks)) != list(set(sourceMultiplet.peaks)):
                     sourceMultiplet.peaks = sourcePeaks
@@ -222,11 +227,10 @@ class EditMultipletPopup(CcpnDialog):
             multipletPeaks = self.multipletPeaksListWidget._getDroppedObjects(self.project)
 
             if self.multiplet:
-                print(self.multiplet)
                 if list(set(multipletPeaks)) != list(set(self.multiplet.peaks)):
                     self.multiplet.peaks = multipletPeaks
-            print(multipletPeaks, 'multipletPeaks')
-
+                comment = self.commentText.get()
+                self.multiplet.comment = comment
             # try:
             #   # todo 'Implement getLogger  info '
             #   # getLogger().info('')

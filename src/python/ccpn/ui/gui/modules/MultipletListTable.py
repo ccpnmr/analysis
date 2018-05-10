@@ -237,10 +237,10 @@ class MultipletListTableWidget(QuickTable):
                                positionTipText, None))
 
         # linewidth column TODO remove hardcoded Hz unit
-        # for i in range(multipletList.spectrum.dimensionCount):
-        #     linewidthTipTexts = 'Multiplet line width %s' % str(i + 1)
-        #     columnDefs.append(
-        #             ('LW F%s (Hz)' % str(i + 1), lambda ml, dim=i: getPeakLinewidth(ml, dim), linewidthTipTexts, None))
+        for i in range(multipletList.spectrum.dimensionCount):
+            linewidthTipTexts = 'Multiplet line width %s' % str(i + 1)
+            columnDefs.append(
+                    ('LW F%s (Hz)' % str(i + 1), lambda ml, dim=i: getPeakLinewidth(ml, dim), linewidthTipTexts, None))
 
         # height column
         heightTipText = 'Magnitude of spectrum intensity at multiplet center (interpolated), unless user edited'
@@ -362,21 +362,25 @@ class MultipletListTableWidget(QuickTable):
 
     def _actionCallback(self, data, *args):
         ''' If current strip contains the double clicked multiplet will navigateToPositionInStrip '''
-        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
+        from ccpn.ui.gui.widgets.MessageDialog import showInfo
 
-        multiplet = data[Notifier.OBJECT]
-
-        if self.current.strip is not None:
-            validMultipletListViews = [pp.multipletList for pp in self.current.strip.multipletListViews if isinstance(pp.multipletList, MultipletList)]
-
-            if multiplet.multipletList in validMultipletListViews:
-                widths = None
-
-                if multiplet.multipletList.spectrum.dimensionCount <= 2:
-                    widths = _getCurrentZoomRatio(self.current.strip.viewRange())
-                navigateToPositionInStrip(strip = self.current.strip, positions=multiplet.position, widths=widths)
-        else:
-            logger.warning('Impossible to navigate to multiplet position. Set a current strip first')
+        info = showInfo('Not implemented yet!',
+                        'Double click action has not been implemented in the current version')
+        # from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
+        #
+        # multiplet = data[Notifier.OBJECT]
+        #
+        # if self.current.strip is not None:
+        #     validMultipletListViews = [pp.multipletList for pp in self.current.strip.multipletListViews if isinstance(pp.multipletList, MultipletList)]
+        #
+        #     if multiplet.multipletList in validMultipletListViews:
+        #         widths = None
+        #
+        #         if multiplet.multipletList.spectrum.dimensionCount <= 2:
+        #             widths = _getCurrentZoomRatio(self.current.strip.viewRange())
+        #         navigateToPositionInStrip(strip = self.current.strip, positions=multiplet.position, widths=widths)
+        # else:
+        #     logger.warning('Impossible to navigate to multiplet position. Set a current strip first')
 
     def _selectionCallback(self, data, *args):
         """
@@ -398,26 +402,20 @@ class MultipletListTableWidget(QuickTable):
     def _pulldownPLcallback(self, data):
         self._updateAllModule()
 
-    def _copyMultiplets(self):
-        from ui.gui.popups.CopyMultipletsPopup import CopyMultiplets
-        popup = CopyMultiplets(parent=self.mainWindow, mainWindow=self.mainWindow)
-        self._selectedMultipletList = self.project.getByPid(self.mLwidget.getText())
-        if self._selectedMultipletList is not None:
-            spectrum = self._selectedMultipletList.spectrum
-            popup._selectSpectrum(spectrum)
-            popup._selectMultiplets(self.current.multiplets)
-        popup.exec()
-        popup.raise_()
+    # def _copyMultiplets(self):
+    #     pass
 
     def _editMultiplets(self):
         from ui.gui.popups.EditMultipletPopup import EditMultipletPopup
-        multiplets = self.current.multiplets
-        if len(multiplets)>0:
-            multiplet = multiplets[-1]
-            popup = EditMultipletPopup(parent=self.mainWindow, mainWindow=self.mainWindow, multiplet=multiplet)
-            popup.exec()
-            popup.raise_()
 
+        multiplets = self.current.multiplets
+        multiplet = multiplets[-1]
+        if len(multiplets) > 0:
+            popup = EditMultipletPopup(parent=self.mainWindow, mainWindow=self.mainWindow, multiplet=multiplet)
+        else:
+            popup = EditMultipletPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+        popup.exec()
+        popup.raise_()
 
     ##################   Notifiers callbacks  ##################
 

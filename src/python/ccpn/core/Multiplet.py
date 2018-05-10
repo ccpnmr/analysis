@@ -214,7 +214,7 @@ class Multiplet(AbstractWrapperObject):
     result = None
     try:
       pks = self.peaks
-      pksPos = [pp.position for pp in pks]
+      # pksPos = [pp.position for pp in pks]
       if pks:
         # self._position = tuple(sum(item) for item in zip(*pksPos))
         self._position = _calculateCenterOfMass(self)
@@ -226,18 +226,24 @@ class Multiplet(AbstractWrapperObject):
   @property
   def positionError(self) -> Tuple[Optional[float], ...]:
     """Peak position error in ppm (or other relevant unit)."""
-    return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
+    return tuple(x.valueError for x in self._wrappedData.sortedPeaks())
 
   @property
   def boxWidths(self) -> Tuple[Optional[float], ...]:
     """The full width of the peak footprint in points for each dimension,
     i.e. the width of the area that should be considered for integration, fitting, etc. ."""
-    return tuple(x.boxWidth for x in self._wrappedData.sortedPeakDims())
+    return tuple(x.boxWidth for x in self._wrappedData.sortedPeaks())
 
   @property
   def lineWidths(self) -> Tuple[Optional[float], ...]:
     """Full-width-half-height of peak/multiplet for each dimension, in Hz. """
-    return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
+    result = tuple()
+    pks = self.peaks
+    pksWidths = [pp.lineWidths for pp in pks]
+    try:
+      result = tuple(sum(item) for item in zip(*pksWidths))
+    finally:
+      return result
 
   # Implementation functions
   @classmethod

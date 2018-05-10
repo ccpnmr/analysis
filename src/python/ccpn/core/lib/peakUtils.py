@@ -39,7 +39,6 @@ C = 'C'
 DefaultAtomWeights = OrderedDict(((H, 7.00), (N, 1.00), (C, 4.00), (OTHER, 1.00)))
 
 def getMultipletPosition(multiplet, dim, unit='ppm'):
-    print('ytred',multiplet.position)
     try:
       if multiplet.position[dim] is None:
         value = None              #"*NOT SET*"
@@ -62,8 +61,14 @@ def getMultipletPosition(multiplet, dim, unit='ppm'):
       if isinstance(value, (int, float, np.float32, np.float64)):
         return '{0:.2f}'.format(value)
     except:
-      print('FAILED')
+      print('Testing FAILED')
     return None
+
+def getMultipletLinewidth(peak, dim):
+  if dim < len(peak.lineWidths):
+    lw = peak.lineWidths[dim]
+    if lw:
+      return float(lw)
 
 def getPeakPosition(peak, dim, unit='ppm'):
 

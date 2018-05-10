@@ -120,6 +120,9 @@ class _Pulldown(PulldownListCompoundWidget):
       return self.textList
 
 
+class MultipletListPulldown(_Pulldown):
+    className = 'MultipletList'
+    attributeName = 'multipletLists'
 
 class NmrChainPulldown(_Pulldown):
     className = 'NmrChain'

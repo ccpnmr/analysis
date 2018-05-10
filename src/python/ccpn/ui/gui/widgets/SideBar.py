@@ -35,6 +35,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
+from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PeakList import PeakList
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -184,6 +185,10 @@ def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):
   application = mainWindow.application
   application.showPeakTable(peakList=peakList, position=position, relativeTo=relativeTo)
 
+def _openMultipletList(mainWindow, multipletList, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showMultipletTable(multipletList=multipletList, position=position, relativeTo=relativeTo)
+
 def _openChemicalShiftList(mainWindow, chemicalShiftList, position=None, relativeTo=None):
   application = mainWindow.application
   application.showChemicalShiftTable(chemicalShiftList=chemicalShiftList, position=position, relativeTo=relativeTo)
@@ -211,6 +216,7 @@ def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
 OpenObjAction = {
                   Spectrum: _openSpectrumDisplay,
                   PeakList: _openPeakList,
+                  MultipletList:_openMultipletList,
                   NmrChain: _openNmrResidueTable,
                   SpectrumGroup:_openSpectrumGroup,
                   ChemicalShiftList:_openChemicalShiftList,

@@ -46,6 +46,34 @@ from ccpn.util.Common import makeIterableList
 MULTIPLET_TYPES = ['singlet','doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
                    'doublet of doublets', 'doublet of triplets', 'triplet of doublets', 'doublet of doublet of doublets']
 
+def _calculateCenterOfMass(multiplet):
+  '''
+
+  :param multiplet: multiplet obj containing peaks.
+  :return: the center of mass of the multiplet that can be used as peak position
+           if you consider the multiplet as a single peak
+  '''
+
+  if len(multiplet.peaks) > 0:
+    position = ()
+    dim = multiplet.multipletList.spectrum.dimensionCount
+    for d in range(dim):
+      peakPositions = [peak.position[d] for peak in multiplet.peaks]
+      peakIntensities = [peak.height or 1 for peak in multiplet.peaks]
+      numerator = []
+      for p, i in zip(peakPositions, peakIntensities):
+        numerator.append(p * i)
+      centerOfMass = sum(numerator) / sum(peakIntensities)
+      position += (centerOfMass,)
+    return position
+
+
+def _getMultipletHeight(multiplet):
+  'return the heighest peak intensity across the multiplet peaks'
+  if len(multiplet.peaks) > 0:
+    return max([peak.height or 1 for peak in multiplet.peaks])
+
+
 class Multiplet(AbstractWrapperObject):
   """Multiplet object, holding position, intensity, and assignment information
 
@@ -97,7 +125,8 @@ class Multiplet(AbstractWrapperObject):
   @property
   def height(self) -> Optional[float]:
     """height of Peak"""
-    return self._wrappedData.height
+    height = _getMultipletHeight(self)
+    return height
 
   @height.setter
   def height(self, value: float):
@@ -181,13 +210,14 @@ class Multiplet(AbstractWrapperObject):
 
   @property
   def position(self) -> Optional[Tuple[float, ...]]:
-    """Peak position in ppm (or other relevant unit) in dimension order."""
+    """Peak position in ppm (or other relevant unit) in dimension order calculated as Center Of Mass."""
     result = None
     try:
       pks = self.peaks
       pksPos = [pp.position for pp in pks]
       if pks:
-        self._position = tuple(sum(item) for item in zip(*pksPos))
+        # self._position = tuple(sum(item) for item in zip(*pksPos))
+        self._position = _calculateCenterOfMass(self)
         result = self._position
 
     finally:

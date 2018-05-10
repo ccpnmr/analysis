@@ -35,6 +35,7 @@ from distutils.dir_util import copy_tree
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
+from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo, CcpnSparkyIo
@@ -2025,6 +2026,22 @@ class Framework:
     mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     getLogger().info("application.showPeakTable()")
     return  self.peakTableModule
+
+  def showMultipletTable(self, position:str='left', relativeTo:CcpnModule=None, multipletList:MultipletList=None):
+    """
+    Displays multipletList table on left of main window with specified list selected.
+    """
+    from ccpn.ui.gui.modules.MultipletListTable import MultipletTableModule
+
+    mainWindow = self.ui.mainWindow
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea      # ejb
+    self.multipletTableModule = MultipletTableModule(mainWindow, multipletList=multipletList)
+    mainWindow.moduleArea.addModule(self.multipletTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showMultipletTable()")
+    getLogger().info("application.showMultipletTable()")
+    return  self.multipletTableModule
 
   def showIntegralTable(self, position:str='left', relativeTo:CcpnModule=None, integralList:IntegralList=None):
     """

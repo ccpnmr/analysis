@@ -177,8 +177,9 @@ class MultipletListTableWidget(QuickTable):
         # self._setNotifiers()
 
         # self.tableMenu.addAction('Copy Multiplets...', self._copyMultiplets)
-        self.tableMenu.addAction('Edit Multiplet...', self._editMultiplets)
-
+        self.tableMenu.insertSeparator(self.tableMenu.actions()[0])
+        a = self.tableMenu.addAction('Edit Multiplet...', self._editMultiplets)
+        self.tableMenu.insertAction(self.tableMenu.actions()[0],a)
         ## populate the table if there are multipletlists in the project
         if multipletList is not None:
             self._selectMultipletList(multipletList)
@@ -418,8 +419,8 @@ class MultipletListTableWidget(QuickTable):
         from ui.gui.popups.EditMultipletPopup import EditMultipletPopup
 
         multiplets = self.current.multiplets
-        multiplet = multiplets[-1]
         if len(multiplets) > 0:
+            multiplet = multiplets[-1]
             popup = EditMultipletPopup(parent=self.mainWindow, mainWindow=self.mainWindow, multiplet=multiplet)
         else:
             popup = EditMultipletPopup(parent=self.mainWindow, mainWindow=self.mainWindow)

@@ -37,10 +37,10 @@ from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 
 
 NEW = "Add New"
+PopupTitle = 'Multiplet Editor '
 
 class EditMultipletPopup(CcpnDialog):
-
-    def __init__(self, parent=None,  mainWindow=None, multiplet = None, spectrum = None, isNewMultipletList=False, title='Edit Multiplet', **kw):
+    def __init__(self, parent=None,  mainWindow=None, multiplet = None, spectrum = None, isNewMultipletList=False, title=PopupTitle, **kw):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kw)
 
         self.project = None
@@ -57,6 +57,7 @@ class EditMultipletPopup(CcpnDialog):
             if self.multiplet:
                 self.multipletList = self.multiplet.multipletList
                 self.spectrum = self.multipletList.spectrum
+                self.setWindowTitle(str(PopupTitle + self.multiplet.pid))
             # self._registerNotifiers() #not really needed in a popup
 
         self._createWidgets()

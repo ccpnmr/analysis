@@ -126,20 +126,22 @@ class OrderedSpectrumViews(object):
         return self._spectrumViewIndex
 
     def _setOrderedSpectrumViews(self, spectrumIndex: Tuple):
-        self._storeOrderedSpectrumViewIndex(spectrumIndex)
         self._spectrumViewIndex = tuple(spectrumIndex)
+        self._storeOrderedSpectrumViewIndex(spectrumIndex)
 
     def _undoOrderedSpectrumViews(self, spectrumIndex: Tuple):
-        self._storeOrderedSpectrumViewIndex(spectrumIndex)
         self._spectrumViewIndex = tuple(spectrumIndex)
+        self._storeOrderedSpectrumViewIndex(spectrumIndex)
 
     def setOrderedSpectrumViewsIndex(self, spectrumIndex: Tuple[int]):
         """
         Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
         :param spectrumIndex - tuple of ints:
         """
-        self.project._appBase._startCommandBlock("project.getByPid('%s').setOrderedSpectrumViewIndex(spectrumIndex=%s)" % \
-                                                 (self.parent.pid, spectrumIndex))
+        # self.parent._startCommandEchoBlock("project.getByPid('%s').setOrderedSpectrumViewIndex(spectrumIndex=%s)" % \
+        #                                          (self.parent.pid, spectrumIndex))
+        self.parent._startCommandEchoBlock('setOrderedSpectrumViewIndex', spectrumIndex)
+
         _undo = self.project._undo
         if _undo is not None:
             _undo.increaseBlocking()
@@ -148,7 +150,7 @@ class OrderedSpectrumViews(object):
             self._setOrderedSpectrumViews(spectrumIndex=spectrumIndex)
 
         finally:
-            self.project._appBase._endCommandBlock()
+            self.parent._endCommandEchoBlock()
         if _undo is not None:
             _undo.decreaseBlocking()
 

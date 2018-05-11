@@ -278,10 +278,12 @@ class Integral(AbstractWrapperObject):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
     undo = self._project._undo
-    peakStr = 'project.getByPid(%s)' % peak.pid if peak else None
-    self._startCommandEchoBlock('peak', peakStr, propertySetter=True)
+    peakStr = "project.getByPid('%s')" % peak.pid if peak else 'None'
+    self._startCommandEchoBlock('peak = '+peakStr, propertySetter=True)
     try:
       self._wrappedData.peak = peak._wrappedData if peak else None
+    except Exception as es:
+      raise TypeError('Error setting peak')
     finally:
       self._endCommandEchoBlock()
 
@@ -313,8 +315,6 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
     if slopes:
       result.slopes = slopes
 
-  except Exception as es:
-    print ('>>>', str(es))
   finally:
     self._project.unblankNotification()
     self._endCommandEchoBlock()

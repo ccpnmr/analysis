@@ -531,12 +531,12 @@ class Peak(AbstractWrapperObject):
     :param integral: single integral
     """
     undo = self._project._undo
-    integralStr = 'project.getByPid(%s)' % integral.pid if integral else None
-    self._startCommandEchoBlock('integral', integralStr, propertySetter=True)
+    integralStr = "project.getByPid('%s')" % integral.pid if integral else 'None'
+    self._startCommandEchoBlock('integral = '+integralStr, propertySetter=True)
     try:
       self._wrappedData.integral = integral._wrappedData if integral else None
     except Exception as es:
-      raise TypeError('Error setting integral link')
+      raise TypeError('Error setting integral')
     finally:
       self._endCommandEchoBlock()
 

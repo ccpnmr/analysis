@@ -767,12 +767,18 @@ class AbstractWrapperObject():
 
     if self is project:
       if propertySetter:
-        command = "project.%s = %s" % (funcName, parameterString)
+        if parameterString:
+          command = "project.%s = %s" % (funcName, parameterString)
+        else:
+          command = "project.%s" % funcName
       else:
         command = "project.%s(%s)" % (funcName, parameterString)
     else:
       if propertySetter:
-        command = "project.getByPid('%s').%s = %s" % (self.pid, funcName, parameterString)
+        if parameterString:
+          command = "project.getByPid('%s').%s = %s" % (self.pid, funcName, parameterString)
+        else:
+          command = "project.getByPid('%s').%s" % (self.pid, funcName)
       else:
         command = "project.getByPid('%s').%s(%s)" % (self.pid, funcName, parameterString)
 

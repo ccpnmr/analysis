@@ -85,7 +85,14 @@ class SpectrumView(AbstractWrapperObject):
 
   def delete(self):
     """Delete SpectrumView for all strips"""
-    self._wrappedData.spectrumView.delete()
+    self._startCommandEchoBlock('delete')
+    try:
+      index = self._parent.spectrumViews.index(self)
+      parent = self._parent
+      self._wrappedData.spectrumView.delete()
+      parent._removeOrderedSpectrumViewIndex(index)
+    finally:
+      self._endCommandEchoBlock()
 
   @property
   def experimentType(self) -> str:

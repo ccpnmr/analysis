@@ -105,8 +105,8 @@ class OrderedSpectrumViews(object):
             self._storeOrderedSpectrumViewIndex(index)
 
         # return the reordered spectrumList
-        return tuple(spectrumList[index] for index in self._spectrumViewIndex
-                     if not spectrumList[index].isDeleted or includeDeleted)
+        return tuple(spectrumList[index] for index in self._spectrumViewIndex if index < len(spectrumList))
+                     # if not spectrumList[index].isDeleted or includeDeleted)
 
     def getOrderedSpectrumViewsIndex(self) -> Optional[Tuple]:
         """

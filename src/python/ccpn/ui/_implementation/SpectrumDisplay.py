@@ -280,6 +280,10 @@ class SpectrumDisplay(AbstractWrapperObject):
         finally:
             self._endCommandEchoBlock()
 
+    def _removeOrderedSpectrumViewIndex(self, index):
+        print ('>>>_removeSpectrumDisplay')
+        self.removeOrderedSpectrumView(index)
+
     def removeOrderedSpectrumView(self, ind):
         defaults = collections.OrderedDict((('ind', None),))
 

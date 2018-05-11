@@ -32,6 +32,7 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from functools import partial
 from ccpn.core.lib.Notifiers import Notifier
 from collections import OrderedDict
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 class SpectrumToolBar(ToolBar):
@@ -171,33 +172,16 @@ class SpectrumToolBar(ToolBar):
     stripUpdateList = []
     for spectrumView in self.widget.spectrumViews:
       if spectrumView._apiDataSource == key:
-        ind = self.widget.spectrumViews.index(spectrumView)
-        stripUpdateList.append(ind)
-        # self.widget.removeOrderedSpectrumView(spectrumView)
+        index = self.widget.spectrumViews.index(spectrumView)
+        break
+    else:
+      showWarning('Spectrum not found in toolbar')
+      return
 
-        # this spawns the creation of all orderedSpectra
-        # should be done on loading though
-        # spectrumView.strip.orderedSpectra()
+    # found value is spectrumView, index
 
-    for spectrumView in self.widget.spectrumViews:
-      if spectrumView._apiDataSource == key:
-
-        # delete the spectrumView
-        try:
-          # spectrumView._wrappedData.spectrumView.delete()
-          # if not spectrumView.isDeleted:
-          # self.widget.project.blankNotification()
-          # self.widget.removeOrderedSpectrumView(spectrumView)
-          # self.widget.project.unblankNotification()
-
-          spectrumView.delete()
-        except Exception as es:
-          pass
-
-    for ind in stripUpdateList:
-    # #   st.removeSpectrumView(None)
-    #   if not st.isDeleted:
-        self.widget.removeOrderedSpectrumView(ind)
+    spectrumView.delete()
+    # self.widget.removeOrderedSpectrumView(index)
 
     # spawn a redraw of the GL windows
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

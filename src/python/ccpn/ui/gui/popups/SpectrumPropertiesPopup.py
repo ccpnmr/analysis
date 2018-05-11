@@ -1114,7 +1114,7 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
   MINIMUM_WIDTH_PER_TAB = 120
   MINIMUM_WIDTH = 400
 
-  def __init__(self, parent=None, mainWindow=None, orderedSpectra=None
+  def __init__(self, parent=None, mainWindow=None, orderedSpectrumViews=None
                , title='Spectrum Display Properties', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
@@ -1122,16 +1122,15 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
-    # FIXME Bug: check orderedSpectra is not None
-    self.orderedSpectra = orderedSpectra
-
+    self.orderedSpectrumViews = orderedSpectrumViews
+    self.orderedSpectra = [spec.spectrum for spec in self.orderedSpectrumViews]
 
     self.tabWidget = QtWidgets.QTabWidget()
     self.tabWidget.setMinimumWidth(
                    max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB*len(self.orderedSpectra)))
 
     self._contoursTab = []
-    for specNum, thisSpec in enumerate(orderedSpectra):
+    for specNum, thisSpec in enumerate(self.orderedSpectra):
       self._contoursTab.append(ContoursTab(self, thisSpec))
       self.tabWidget.addTab(self._contoursTab[specNum], thisSpec.name)
 

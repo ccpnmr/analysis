@@ -425,6 +425,10 @@ class Strip(AbstractWrapperObject):
     else:
       raise ValueError("The last strip in a display cannot be deleted")
 
+  def _removeOrderedSpectrumViewIndex(self, index):
+    self.spectrumDisplay.removeOrderedSpectrumView(index)
+
+
   #CCPN functions
   def clone(self):
     """create new strip that duplicates this one, appending it at the end"""

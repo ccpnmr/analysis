@@ -171,7 +171,8 @@ class SpectrumToolBar(ToolBar):
     stripUpdateList = []
     for spectrumView in self.widget.spectrumViews:
       if spectrumView._apiDataSource == key:
-        stripUpdateList.append(spectrumView)
+        ind = self.widget.orderedSpectrumViews(self.widget.spectrumViews).index(spectrumView)
+        stripUpdateList.append(ind)
         # self.widget.removeOrderedSpectrumView(spectrumView)
 
         # this spawns the creation of all orderedSpectra
@@ -185,18 +186,18 @@ class SpectrumToolBar(ToolBar):
         try:
           # spectrumView._wrappedData.spectrumView.delete()
           # if not spectrumView.isDeleted:
-          # self.widget.project.blankNotifications()
+          # self.widget.project.blankNotification()
           # self.widget.removeOrderedSpectrumView(spectrumView)
-          # self.widget.project.unblankNotifications()
+          # self.widget.project.unblankNotification()
 
           spectrumView.delete()
         except Exception as es:
           pass
 
-    # for st in stripUpdateList:
+    for ind in stripUpdateList:
     # #   st.removeSpectrumView(None)
     #   if not st.isDeleted:
-    #     self.widget.removeOrderedSpectrumView(st)
+        self.widget.removeOrderedSpectrumView(ind)
 
     # spawn a redraw of the GL windows
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -287,7 +288,8 @@ class SpectrumToolBar(ToolBar):
       actionList = self.actions()
       try:
         # try and find the spectrumView in the orderedlist - for undo function
-        oldList = spectrumDisplay.orderedSpectrumViews()
+        oldList = spectrumDisplay.spectrumViews
+        oldList = spectrumDisplay.orderedSpectrumViews(oldList)
         oldIndex = oldList.index(spectrumView)
 
         if actionList and oldIndex < len(actionList):
@@ -333,6 +335,7 @@ class SpectrumToolBar(ToolBar):
     self.clear()
     for specView in spectrumViews:
 
+      # self._addSpectrumViewToolButtons(specView)
       spectrum = specView.spectrum
       spectrumName = spectrum.name
       if len(spectrumName) > 12:

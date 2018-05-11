@@ -280,15 +280,16 @@ class SpectrumDisplay(AbstractWrapperObject):
         finally:
             self._endCommandEchoBlock()
 
-    def removeOrderedSpectrumView(self, spectrumView):
-        defaults = collections.OrderedDict((('spectrumView', None),))
+    def removeOrderedSpectrumView(self, ind):
+        defaults = collections.OrderedDict((('ind', None),))
 
-        index = self.spectrumViews.index(spectrumView)
+        index = ind #.spectrumViews.index(spectrumView)
         self._startCommandEchoBlock('removeOrderedSpectrumView', values=locals(), defaults=defaults)
         try:
             if not self._orderedSpectrumViews:
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
             oldIndex = list(self.getOrderedSpectrumViewsIndex())
+            index = oldIndex.index(ind)
             oldIndex.remove(index)
             for ii in range(len(oldIndex)):
                 if oldIndex[ii] > index:

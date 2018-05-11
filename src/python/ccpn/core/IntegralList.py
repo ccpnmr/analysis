@@ -31,8 +31,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
-from typing import List
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
+from typing import List, Tuple, Optional
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
 import numpy as np
 from scipy.integrate import trapz
 
@@ -100,10 +100,7 @@ class IntegralList(AbstractWrapperObject):
   _childClasses = []
 
   # Qualified name of matching API class - NB shared with PeakList
-  _apiClassQualifiedName = ApiPeakList._metaclass.qualifiedName()
-
-  # Notifiers are handled through the PeakList class (which shares the ApiPeakList wrapped object)
-  _registerClassNotifiers = False
+  _apiClassQualifiedName = ApiIntegralList._metaclass.qualifiedName()
 
   # Special error-raising functions for people who think PeakList is a list
   def __iter__(self):
@@ -120,7 +117,7 @@ class IntegralList(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def _apiPeakList(self) -> ApiPeakList:
+  def _apiIntegralList(self) -> ApiIntegralList:
     """ API peakLists matching IntegralList"""
     return self._wrappedData
     
@@ -135,11 +132,11 @@ class IntegralList(AbstractWrapperObject):
     return self._wrappedData.serial
     
   @property
-  def _parent(self) -> Spectrum:
+  def _parent(self) -> Optional[Spectrum]:
     """Spectrum containing IntegralList."""
     return  self._project._data2Obj[self._wrappedData.dataSource]
   
-  spectrum = _parent
+  integralListParent = _parent
   
   @property
   def title(self) -> str:
@@ -179,17 +176,17 @@ class IntegralList(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent: Spectrum)-> list:
+  def _getAllWrappedData(cls, parent: Spectrum)-> Tuple[ApiIntegralList, ...]:
     """get wrappedData (PeakLists) for all IntegralList children of parent Spectrum"""
-    return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Integral']
+    return parent._wrappedData.sortedIntegralLists()
 
   # Library functions
 
   def automaticIntegral1D(self, minimalLineWidth=0.01, noiseThreshold=None,) -> List['Integral']:
-    '''
+    """
     minimalLineWidth:  an attempt to exclude noise. Below this threshold the area is discarded.
     noiseThreshold: value used to calculate the intersectingLine to get the peak limits
-    '''
+    """
     # TODO: add excludeRegions option. Calculate Negative peak integral.
     # self._project.suspendNotification()
     try:
@@ -229,7 +226,7 @@ def _newIntegralList(self:Spectrum, title:str=None, symbolColour:str=None,
   defaults = collections.OrderedDict((('title', None), ('comment', None),
                                       ('symbolColour',None), ('textColour',None)))
 
-  apiDataSource = self._wrappedData
+  apiParent = self._wrappedData
   self._startCommandEchoBlock('newIntegralList', values=locals(), defaults=defaults,
                               parName='newIntegralList')
   dd = {'name':title, 'details':comment, 'dataType':'Integral'}
@@ -238,28 +235,30 @@ def _newIntegralList(self:Spectrum, title:str=None, symbolColour:str=None,
   if textColour:
     dd['textColour'] = textColour
   try:
-    obj = apiDataSource.newPeakList(**dd)
+    apiIntegralList = apiParent.newIntegralList(**dd)
   finally:
     self._endCommandEchoBlock()
-  return self._project._data2Obj.get(obj)
 
-Spectrum.newIntegralList = _newIntegralList
+  result = self._project._data2Obj.get(apiIntegralList)
+  return result
+
+IntegralList._parentClass.newIntegralList = _newIntegralList
 del _newIntegralList
 
 
-def _factoryFunction(project:Project, wrappedData:ApiPeakList) -> AbstractWrapperObject:
-  """create PeakList or IntegralList from API PeakList"""
-  if wrappedData.dataType == 'Peak':
-    return PeakList(project, wrappedData)
-  elif wrappedData.dataType == 'Integral':
-    return IntegralList(project, wrappedData)
-  else:
-    raise ValueError("API PeakList object has illegal dataType: %s. Must be 'Peak' or 'Integral"
-                     % wrappedData.dataType)
-
-
-IntegralList._factoryFunction = staticmethod(_factoryFunction)
-PeakList._factoryFunction = staticmethod(_factoryFunction)
+# def _factoryFunction(project:Project, wrappedData:ApiIntegralList) -> AbstractWrapperObject:
+#   """create PeakList or IntegralList from API PeakList"""
+#   if wrappedData.dataType == 'Peak':
+#     return PeakList(project, wrappedData)
+#   elif wrappedData.dataType == 'Integral':
+#     return IntegralList(project, wrappedData)
+#   else:
+#     raise ValueError("API PeakList object has illegal dataType: %s. Must be 'Peak' or 'Integral"
+#                      % wrappedData.dataType)
+#
+#
+# IntegralList._factoryFunction = staticmethod(_factoryFunction)
+# PeakList._factoryFunction = staticmethod(_factoryFunction)
 
 
 

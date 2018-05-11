@@ -107,16 +107,17 @@ class SpectrumToolBar(ToolBar):
 
     for peakListView in peakListViews:
       if peakListView.spectrumView._apiDataSource == key:
-        action = contextMenu.addAction(peakListView.peakList.pid)
-        action.setCheckable(True)
-        if peakListView.isVisible():
-          action.setChecked(True)
-        # else:
-        #   allPlAction.setChecked(False)
-        action.toggled.connect(peakListView.setVisible)
+        if peakListView.peakList:
+          action = contextMenu.addAction(peakListView.peakList.pid)
+          action.setCheckable(True)
+          if peakListView.isVisible():
+            action.setChecked(True)
+          # else:
+          #   allPlAction.setChecked(False)
+          action.toggled.connect(peakListView.setVisible)
 
-        # TODO:ED check this is okay for each spectrum
-        action.toggled.connect(partial(self._updateVisiblePeakLists, peakListView.spectrumView))
+          # TODO:ED check this is okay for each spectrum
+          action.toggled.connect(partial(self._updateVisiblePeakLists, peakListView.spectrumView))
 
     contextMenu.addAction('Remove SP', partial(self._removeSpectrum, button))
     return contextMenu

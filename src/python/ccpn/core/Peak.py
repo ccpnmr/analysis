@@ -37,7 +37,7 @@ from ccpn.core.PeakList import PeakList
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
-from typing import Optional, Tuple, Union, Sequence
+from typing import Optional, Tuple, Union, Sequence, TypeVar
 
 
 class Peak(AbstractWrapperObject):
@@ -517,6 +517,28 @@ class Peak(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: PeakList)-> Tuple[Nmr.Peak, ...]:
     """get wrappedData (Peaks) for all Peak children of parent PeakList"""
     return parent._wrappedData.sortedPeaks()
+
+  @property
+  def integral(self):
+    """The integral attached to the peak"""
+    return self._project._data2Obj[self._wrappedData.integral] if self._wrappedData.integral else None
+
+  @integral.setter
+  def integral(self, integral:Union['Integral']=None):
+    """
+    link an integral to the peak
+    The peak must belong to the spectrum containing the peakList.
+    :param integral: single integral
+    """
+    undo = self._project._undo
+    integralStr = 'project.getByPid(%s)' % integral.pid if integral else None
+    self._startCommandEchoBlock('integral', integralStr, propertySetter=True)
+    try:
+      self._wrappedData.integral = integral._wrappedData if integral else None
+    except Exception as es:
+      raise TypeError('Error setting integral link')
+    finally:
+      self._endCommandEchoBlock()
 
 # Connections to parents:
 def _newPeak(self:PeakList,height:float=None, volume:float=None,

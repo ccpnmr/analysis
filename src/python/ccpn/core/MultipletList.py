@@ -36,7 +36,7 @@ from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
 # from ccpn.core.Multiplet import Multiplet
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as apiMultipletList
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
 from typing import Optional, Tuple
 
 
@@ -63,11 +63,11 @@ class MultipletList(AbstractWrapperObject):
   _childClasses = []
 
   # Qualified name of matching API class
-  _apiClassQualifiedName = apiMultipletList._metaclass.qualifiedName()
+  _apiClassQualifiedName = ApiMultipletList._metaclass.qualifiedName()
 
   # CCPN properties  
   @property
-  def _apiMultipletList(self) -> apiMultipletList:
+  def _apiMultipletList(self) -> ApiMultipletList:
     """ API multipletLists matching MultipletList"""
     return self._wrappedData
 
@@ -135,7 +135,7 @@ class MultipletList(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent: Spectrum) -> Tuple[apiMultipletList, ...]:
+  def _getAllWrappedData(cls, parent: Spectrum) -> Tuple[ApiMultipletList, ...]:
     """get wrappedData (MultipletLists) for all MultipletList children of parent MultipletListList"""
     return parent._wrappedData.sortedMultipletLists()
 

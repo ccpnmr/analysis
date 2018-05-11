@@ -30,7 +30,8 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Peak import Peak
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Integral as ApiIntegral
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
 from typing import Optional, Tuple, Sequence, List
 import numpy as np
 from scipy.integrate import trapz
@@ -57,10 +58,7 @@ class Integral(AbstractWrapperObject):
   _childClasses = []
 
   # Qualified name of matching API class - NB shared with Peak class
-  _apiClassQualifiedName = Nmr.Peak._metaclass.qualifiedName()
-
-  # Notifiers are handled through the Peak class (which shares the ApiPeak wrapped object)
-  _registerClassNotifiers = False
+  _apiClassQualifiedName = ApiIntegral._metaclass.qualifiedName()
 
   _baseline = None
   _linkedPeakNotifier = None
@@ -68,7 +66,7 @@ class Integral(AbstractWrapperObject):
 
   # CCPN properties  
   @property
-  def _apiPeak(self) -> Nmr.Peak:
+  def _apiIntegral(self) -> ApiIntegral:
     """ API peaks matching Integral"""
     return self._wrappedData
     
@@ -85,7 +83,7 @@ class Integral(AbstractWrapperObject):
   @property
   def _parent(self) -> IntegralList:
     """IntegralList containing Integral."""
-    return  self._project._data2Obj[self._wrappedData.peakList]
+    return  self._project._data2Obj[self._wrappedData.integralList]
   
   integralList = _parent
 
@@ -234,9 +232,9 @@ class Integral(AbstractWrapperObject):
 
   # Implementation functions
   @classmethod
-  def _getAllWrappedData(cls, parent: IntegralList)-> Tuple[Nmr.Peak, ...]:
-    """get wrappedData (Peaks) for all Integral children of parent IntegralList"""
-    return parent._wrappedData.sortedPeaks()
+  def _getAllWrappedData(cls, parent: IntegralList)-> Tuple[ApiIntegral, ...]:
+    """get wrappedData (Integrals) for all Integral children of parent IntegralList"""
+    return parent._wrappedData.sortedIntegrals()
 
 
 
@@ -257,27 +255,36 @@ class Integral(AbstractWrapperObject):
         return (baseline, x[dd], y[dd])
 # Connections to parents:
 
-  # def linkIntegralToPeak(self, peak):
-  #   # links the value of an integral to a peak
-  #   if peak is not None and not peak.isDeleted:
-  #     values = {'value':'volume', 'valueError':'volumeError', 'figureOfMerit':'figOfMerit', 'bias':'offset'}
-  #     for integraAttr, peakAttr in values.items():
-  #       setattr(peak, peakAttr, getattr(self, integraAttr))
-  #     if peak.pid not in self._ccpnInternalData[LinkedPeaks]:
-  #       self._ccpnInternalData[LinkedPeaks].append(peak.pid)
-  #   if not self._linkedPeakNotifier:
-  #     self._linkedPeakNotifier = self.project.registerNotifier(self.className, 'change', self._updateLinkedPeaks, onceOnly=True)
-  #
-  # def _updateLinkedPeaks(self, *args):
-  #
-  #   if self._ccpnInternalData[LinkedPeaks]:
-  #     peaks= [self.project.getByPid(p) for p in self._ccpnInternalData[LinkedPeaks]]
-  #     self.linkIntegralToPeaks(peaks)
-  #
-  # def linkIntegralToPeaks(self, peaks):
-  #   # add echo block
-  #   for peak in peaks:
-  #     self.linkIntegralToPeak(peak)
+  @property
+  def peak(self):
+    """The peak attached to the integral"""
+    return self._project._data2Obj[self._wrappedData.peak] if self._wrappedData.peak else None
+
+  @peak.setter
+  def peak(self, peak:Peak=None):
+    """
+    link a peak to the integral
+    The peak must belong to the spectrum containing the integralList.
+    :param peak: single peak
+    """
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # throw more understandable errors for the python console
+    spectrum = self._parent.integralListParent
+    if peak:
+      if not isinstance(peak, Peak):
+        raise TypeError('%s is not of type Peak' % peak)
+      if peak not in spectrum.peaks:
+        raise ValueError('%s does not belong to spectrum: %s' % (peak.pid, spectrum.pid))
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+
+    undo = self._project._undo
+    peakStr = 'project.getByPid(%s)' % peak.pid if peak else None
+    self._startCommandEchoBlock('peak', peakStr, propertySetter=True)
+    try:
+      self._wrappedData.peak = peak._wrappedData if peak else None
+    finally:
+      self._endCommandEchoBlock()
+
 
 def _newIntegral(self:IntegralList, value:List[float]=None,
                  valueError:List[float]=None, bias:float=0, slopes:List[float]=None,
@@ -294,11 +301,11 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
                               parName='newIntegral')
   self._project.blankNotification() # delay notifiers till peak is fully ready
   try:
-    apiPeakList = self._apiPeakList
-    apiPeak = apiPeakList.newPeak(volume=value, volumeError=valueError, figOfMerit=figureOfMerit,
+    apiParent = self._apiIntegralList
+    apiIntegral = apiParent.newIntegral(volume=value, volumeError=valueError, figOfMerit=figureOfMerit,
                                 offset=bias,annotation=annotation, details=comment)
 
-    result = self._project._data2Obj.get(apiPeak)
+    result = self._project._data2Obj.get(apiIntegral)
     if pointLimits:
       result.pointLimits = pointLimits
     elif limits:
@@ -306,6 +313,8 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
     if slopes:
       result.slopes = slopes
 
+  except Exception as es:
+    print ('>>>', str(es))
   finally:
     self._project.unblankNotification()
     self._endCommandEchoBlock()
@@ -315,24 +324,29 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
   # result._ccpnInternalData.update({LinkedPeaks:[]})
   return result
 
-IntegralList.newIntegral = _newIntegral
+Integral._parentClass.newIntegral = _newIntegral
 del _newIntegral
 
 
-def _factoryFunction(project:Project, wrappedData:Nmr.Peak) -> AbstractWrapperObject:
-  """create Peak or Integral from API Peak"""
-  if wrappedData.peakList.dataType == 'Peak':
-    return Peak(project, wrappedData)
-  elif wrappedData.peakList.dataType == 'Integral':
-    return Integral(project, wrappedData)
-  else:
-    raise ValueError("API Peak object has illegal parent dataType: %s. Must be 'Peak' or 'Integral"
-                     % wrappedData.dataType)
-
-
-Integral._factoryFunction = staticmethod(_factoryFunction)
-Peak._factoryFunction = staticmethod(_factoryFunction)
+# def _factoryFunction(project:Project, wrappedData:ApiIntegral) -> AbstractWrapperObject:
+#   """create Peak or Integral from API Peak"""
+#   if wrappedData.peakList.dataType == 'Peak':
+#     return Peak(project, wrappedData)
+#   elif wrappedData.peakList.dataType == 'Integral':
+#     return Integral(project, wrappedData)
+#   else:
+#     raise ValueError("API Peak object has illegal parent dataType: %s. Must be 'Peak' or 'Integral"
+#                      % wrappedData.dataType)
+#
+#
+# Integral._factoryFunction = staticmethod(_factoryFunction)
+# Peak._factoryFunction = staticmethod(_factoryFunction)
 
 # Additional Notifiers:
 # NB API level notifiers are defined in the Peak file for API Peaks
 # They will have the same effect for integrals
+
+Project._apiNotifiers.append(
+  ('_notifyRelatedApiObject', {'pathToObject':'peak.integral',  'action':'change'},
+   ApiPeakDim._metaclass.qualifiedName(), '')
+)

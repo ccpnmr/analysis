@@ -110,12 +110,13 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
       if ii<len(positions) and positions[ii]:
         strip._CcpnGLWidget.setAxisPosition(axisCode=axisCode, position=positions[ii], update=False)
 
+      flippedAxisCode = strip.axisCodes[ii]
       if widths is not None:
         if ii<len(widths) and widths[ii]:
 
           if isinstance(widths[ii], float):
 
-            strip._CcpnGLWidget.setAxisWidth(axisCode=axisCode, width=widths[ii],
+            strip._CcpnGLWidget.setAxisWidth(axisCode=flippedAxisCode, width=widths[ii],
                                                      update=False)
 
           elif isinstance(widths[ii], str):
@@ -123,7 +124,7 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
             if widths[ii] == 'full':
 
               range = strip.getAxisRange(stripAxisIndex)
-              strip._CcpnGLWidget.setAxisRange(axisCode=axisCode, range=range,
+              strip._CcpnGLWidget.setAxisRange(axisCode=flippedAxisCode, range=range,
                                                        update=False)
 
             elif widths[ii] == 'default':
@@ -132,10 +133,10 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
               if (commonUtil.name2IsotopeCode(axisCode) == '13C' or
                   commonUtil.name2IsotopeCode(axisCode) == '15N'):
 
-                strip._CcpnGLWidget.setAxisWidth(axisCode=axisCode, width=5,
+                strip._CcpnGLWidget.setAxisWidth(axisCode=flippedAxisCode, width=5,
                                                          update=False)
               else:
-                strip._CcpnGLWidget.setAxisWidth(axisCode=axisCode, width=0.5,
+                strip._CcpnGLWidget.setAxisWidth(axisCode=flippedAxisCode, width=0.5,
                                                          update=False)
 
     # build here so it doesn't conflict with OpenGl update

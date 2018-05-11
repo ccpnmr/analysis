@@ -370,7 +370,10 @@ class PeakListTableWidget(QuickTable):
 
         if peak.peakList.spectrum.dimensionCount <= 2:
           widths = _getCurrentZoomRatio(self.current.strip.viewRange())
-        navigateToPositionInStrip(strip = self.current.strip, positions=peak.position, widths=widths)
+        navigateToPositionInStrip(strip=self.current.strip,
+                                  positions=peak.position,
+                                  axisCodes=peak.axisCodes,
+                                  widths=widths)
     else:
       logger.warning('Impossible to navigate to peak position. Set a current strip first')
 

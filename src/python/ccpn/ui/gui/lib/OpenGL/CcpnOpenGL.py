@@ -4633,7 +4633,7 @@ class CcpnGLWidget(QOpenGLWidget):
     stripAxisIndex = self.axisCodes.index(axisCode)
 
     if stripAxisIndex == 0:
-      diff = np.sign(self.axisR-self.axisL) * width / 2.0
+      diff = np.sign(self.axisR-self.axisL) * abs(width) / 2.0
       mid = (self.axisR + self.axisL) / 2.0
       self.axisL = mid - diff
       self.axisR = mid + diff
@@ -4641,7 +4641,7 @@ class CcpnGLWidget(QOpenGLWidget):
       self._rescaleXAxis(update=update)
 
     elif stripAxisIndex == 1:
-      diff = np.sign(self.axisT-self.axisB) * width / 2.0
+      diff = np.sign(self.axisT-self.axisB) * abs(width) / 2.0
       mid = (self.axisT + self.axisB) / 2.0
       self.axisB = mid - diff
       self.axisT = mid + diff

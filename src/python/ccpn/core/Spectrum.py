@@ -1153,6 +1153,26 @@ Use axisCodes to set magnetisation transfers instead.""")
         pass
     return newSpectrum
 
+  def delete(self):
+    """Delete Spectrum"""
+    self._startCommandEchoBlock('delete')
+    try:
+      specDisplays = []
+      specViews = []
+      for sp in self.spectrumViews:
+        if sp._parent.spectrumDisplay not in specDisplays:
+          specDisplays.append(sp._parent.spectrumDisplay)
+          specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
+
+      # parent = self._parent
+      self._wrappedData.delete()
+      for sd in specViews:
+        sd[0]._removeOrderedSpectrumViewIndex(sd[1])
+      # parent._removeOrderedSpectrumViewIndex(index)
+    except Exception as es:
+      print('>>>', str(es))
+    finally:
+      self._endCommandEchoBlock()
 
 
 def _newSpectrum(self:Project, name:str) -> Spectrum:

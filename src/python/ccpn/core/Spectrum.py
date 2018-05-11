@@ -1164,13 +1164,10 @@ Use axisCodes to set magnetisation transfers instead.""")
           specDisplays.append(sp._parent.spectrumDisplay)
           specViews.append((sp._parent, sp._parent.spectrumViews.index(sp)))
 
-      # parent = self._parent
       self._wrappedData.delete()
       for sd in specViews:
         sd[0]._removeOrderedSpectrumViewIndex(sd[1])
-      # parent._removeOrderedSpectrumViewIndex(index)
-    except Exception as es:
-      print('>>>', str(es))
+
     finally:
       self._endCommandEchoBlock()
 

@@ -289,7 +289,7 @@ class SpectrumDisplay(AbstractWrapperObject):
             if not self._orderedSpectrumViews:
                 self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
             oldIndex = list(self.getOrderedSpectrumViewsIndex())
-            index = oldIndex.index(ind)
+            # index = oldIndex.index(ind)
             oldIndex.remove(index)
             for ii in range(len(oldIndex)):
                 if oldIndex[ii] > index:

@@ -63,11 +63,11 @@ class SpectrumToolBar(ToolBar):
       spectrumView = self.widget.project.getByPid(action.spectrumViewPid)
       newSpectrumViewsOrder.append(spectrumView)
 
-    self.widget.project.blankNotification()
+    # self.widget.project.blankNotification()
     # newIndex = [newIndex.index(ii) for ii in self.widget.getOrderedSpectrumViewsIndex()]
     newIndex = [self.widget.getOrderedSpectrumViewsIndex()[ii] for ii in newIndex]
     self.widget.setOrderedSpectrumViewsIndex(newIndex)
-    self.widget.project.unblankNotification()
+    # self.widget.project.unblankNotification()
 
     # defaults = OrderedDict((('newIndex', None),))
     #
@@ -162,7 +162,7 @@ class SpectrumToolBar(ToolBar):
     """
     Removes the spectrum from the display and its button from the toolbar.
     """
-
+    # TODO:ED this needs patching in to the spectrumView.delete()
     # remove the item from the toolbar
     self.removeAction(button.actions()[0])
 
@@ -171,7 +171,7 @@ class SpectrumToolBar(ToolBar):
     stripUpdateList = []
     for spectrumView in self.widget.spectrumViews:
       if spectrumView._apiDataSource == key:
-        ind = self.widget.orderedSpectrumViews(self.widget.spectrumViews).index(spectrumView)
+        ind = self.widget.spectrumViews.index(spectrumView)
         stripUpdateList.append(ind)
         # self.widget.removeOrderedSpectrumView(spectrumView)
 

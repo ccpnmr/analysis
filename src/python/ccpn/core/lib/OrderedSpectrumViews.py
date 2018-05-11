@@ -64,9 +64,7 @@ class OrderedSpectrumViews(object):
             # _wrappedData._ccpnInternalData won't flag for saving unless the dict changes
             tempCcpn = self.parent._ccpnInternalData.copy()
             tempCcpn[SPECTRUMVIEWINDEX] = spectrumViewIndex
-            self.parent.project.blankNotification()
             self.parent._ccpnInternalData = tempCcpn
-            self.parent.project.unblankNotification()
 
     # def orderedSpectra(self) -> Optional[Tuple]:
     #     """
@@ -158,7 +156,7 @@ class OrderedSpectrumViews(object):
                           , undoArgs=(_oldSpectrumViews,), redoArgs=(spectrumIndex,))
 
         # notify that the order has been changed - parent is SpectrumDisplay
-        self.parent._finaliseAction(action='change')
+        # self.parent._finaliseAction(action='change')
 
     # def appendSpectrumView(self, spectrumView):
     #     """

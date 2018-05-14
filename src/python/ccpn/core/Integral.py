@@ -128,17 +128,19 @@ class Integral(AbstractWrapperObject):
     """slope (in dimension order) used in calculating integral value
 
     The slope is defined as the intensity in point i+1 minus the intensity in point i"""
-    return [x.slope for x in self._wrappedData.sortedPeakDims()]
+    # return [x.slope for x in self._wrappedData.sortedPeakDims()]
+    return self._wrappedData.slopes
 
   @slopes.setter
   def slopes(self, value):
-    peakDims = self._wrappedData.sortedPeakDims()
-    if len(value) == len(peakDims):
-      for tt in zip(peakDims, value):
-        tt[0].slope = tt[1]
-    else:
-      raise ValueError("The slopes value %s does not match the dimensionality of the spectrum, %s"
-                       % value, len(peakDims))
+    self._wrappedData.slopes = value
+    # peakDims = self._wrappedData.sortedPeakDims()
+    # if len(value) == len(peakDims):
+    #   for tt in zip(peakDims, value):
+    #     tt[0].slope = tt[1]
+    # else:
+    #   raise ValueError("The slopes value %s does not match the dimensionality of the spectrum, %s"
+    #                    % value, len(peakDims))
 
   @property
   def annotation(self) -> Optional[str]:
@@ -165,70 +167,74 @@ class Integral(AbstractWrapperObject):
 
   @property
   def limits(self) -> List[Tuple[float,float]]:
-    """Integration limits in axis value (ppm), per dimension, with lowest value first
-
-    For Fid or sampled dimensions the individual limit values will be points"""
-    result = []
-    dataDimRefs = self.integralList.spectrum._mainDataDimRefs()
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      dataDimRef = dataDimRefs[ii]
-      if dataDimRef is None:
-        value = (peakDim.position or 0)
-        halfWidth = 0.5 * (peakDim.boxWidth or 0)
-      else:
-        value = (peakDim.value or 0)
-        halfWidth = abs(0.5 * (peakDim.boxWidth or 0) * dataDimRef.valuePerPoint)
-      result.append((value - halfWidth, value + halfWidth))
+    return self._wrappedData.limits
+    # """Integration limits in axis value (ppm), per dimension, with lowest value first
     #
-    return result
+    # For Fid or sampled dimensions the individual limit values will be points"""
+    # result = []
+    # dataDimRefs = self.integralList.spectrum._mainDataDimRefs()
+    # for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+    #   dataDimRef = dataDimRefs[ii]
+    #   if dataDimRef is None:
+    #     value = (peakDim.position or 0)
+    #     halfWidth = 0.5 * (peakDim.boxWidth or 0)
+    #   else:
+    #     value = (peakDim.value or 0)
+    #     halfWidth = abs(0.5 * (peakDim.boxWidth or 0) * dataDimRef.valuePerPoint)
+    #   result.append((value - halfWidth, value + halfWidth))
+    # #
+    # return result
 
   @limits.setter
   def limits(self, value):
-    dataDimRefs = self.integralList.spectrum._mainDataDimRefs()
-    for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-      dataDimRef = dataDimRefs[ii]
-      limit1, limit2 = value[ii]
-      if None in value[ii]:
-        peakDim.position = None
-        peakDim.boxWidth = None
-      elif dataDimRef is None:
-        peakDim.position = 0.5 * (limit1 + limit2)
-        peakDim.boxWidth = abs(limit1 - limit2)
-      else:
-        peakDim.value = 0.5 * (limit1 + limit2)
-        peakDim.boxWidth = abs((limit1 - limit2)/ dataDimRef.valuePerPoint)
-
-      # automatically calculates Volume given the limits
-      x = self.integralList.spectrum.positions
-      index01 = np.where((x <= limit2) & (x >= limit1))
-      self.value = float(trapz(index01))
+    self._wrappedData.limits = value
+    # dataDimRefs = self.integralList.spectrum._mainDataDimRefs()
+    # for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+    #   dataDimRef = dataDimRefs[ii]
+    #   limit1, limit2 = value[ii]
+    #   if None in value[ii]:
+    #     peakDim.position = None
+    #     peakDim.boxWidth = None
+    #   elif dataDimRef is None:
+    #     peakDim.position = 0.5 * (limit1 + limit2)
+    #     peakDim.boxWidth = abs(limit1 - limit2)
+    #   else:
+    #     peakDim.value = 0.5 * (limit1 + limit2)
+    #     peakDim.boxWidth = abs((limit1 - limit2)/ dataDimRef.valuePerPoint)
+    #
+    #   # automatically calculates Volume given the limits
+    #   x = self.integralList.spectrum.positions
+    #   index01 = np.where((x <= limit2) & (x >= limit1))
+    #   self.value = float(trapz(index01))
 
   @property
   def pointlimits(self) -> List[Tuple[float,float]]:
-    """Integration limits in points, per dimension, with lowest value first"""
-    result = []
-    for peakDim in self._wrappedData.sortedPeakDims():
-      position = peakDim.position
-      halfWidth = 0.5 * (peakDim.boxWidth or 0)
-      result.append(position - halfWidth, position + halfWidth)
-    #
-    return result
+    return self._wrappedData.pointLimits
+    # """Integration limits in points, per dimension, with lowest value first"""
+    # result = []
+    # for peakDim in self._wrappedData.sortedPeakDims():
+    #   position = peakDim.position
+    #   halfWidth = 0.5 * (peakDim.boxWidth or 0)
+    #   result.append(position - halfWidth, position + halfWidth)
+    # #
+    # return result
 
   @pointlimits.setter
   def pointlimits(self, value):
-    peakDims = self._wrappedData.sortedPeakDims()
-    if len(value) == len(peakDims):
-      for ii, peakDim in enumerate(peakDims):
-        if None in value[ii]:
-          peakDim.position = None
-          peakDim.boxWidth = None
-        else:
-          limit1, limit2 = value[ii]
-          peakDim.position = 0.5 * (limit1 + limit2)
-          peakDim.boxWidth = abs(limit1 - limit2)
-    else:
-      raise ValueError("The slopes value %s does not match the dimensionality of the spectrum, %s"
-                       % value, len(peakDims))
+    self._wrappedData.pointLimits = value
+    # peakDims = self._wrappedData.sortedPeakDims()
+    # if len(value) == len(peakDims):
+    #   for ii, peakDim in enumerate(peakDims):
+    #     if None in value[ii]:
+    #       peakDim.position = None
+    #       peakDim.boxWidth = None
+    #     else:
+    #       limit1, limit2 = value[ii]
+    #       peakDim.position = 0.5 * (limit1 + limit2)
+    #       peakDim.boxWidth = abs(limit1 - limit2)
+    # else:
+    #   raise ValueError("The slopes value %s does not match the dimensionality of the spectrum, %s"
+    #                    % value, len(peakDims))
 
   # Implementation functions
   @classmethod

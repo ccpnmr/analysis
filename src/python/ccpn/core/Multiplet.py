@@ -40,7 +40,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 # from ccpn.core.MultipletList import MultipletList
-from typing import Optional, Tuple, Any, Union, Sequence
+from typing import Optional, Tuple, Any, Union, Sequence, List
 from ccpn.util.Common import makeIterableList
 
 MULTIPLET_TYPES = ['singlet','doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
@@ -185,6 +185,31 @@ class Multiplet(AbstractWrapperObject):
   @comment.setter
   def comment(self, value: str):
     self._wrappedData.details = value
+
+  @property
+  def slopes(self) -> List[float]:
+    """slope (in dimension order) used in calculating integral value"""
+    return self._wrappedData.slopes
+
+  @slopes.setter
+  def slopes(self, value):
+    self._wrappedData.slopes = value
+
+  @property
+  def limits(self) -> List[Tuple[float,float]]:
+    return self._wrappedData.limits
+
+  @limits.setter
+  def limits(self, value):
+    self._wrappedData.limits = value
+
+  @property
+  def pointlimits(self) -> List[Tuple[float,float]]:
+    return self._wrappedData.pointLimits
+
+  @pointlimits.setter
+  def pointlimits(self, value):
+    self._wrappedData.pointLimits = value
 
   @property
   def peaks(self) -> Optional[Tuple[Any]]:

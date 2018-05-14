@@ -75,16 +75,18 @@ class MultipletTableModule(CcpnModule):
         self.current = mainWindow.application.current
         self.splitter = Splitter(QtCore.Qt.Horizontal)
         # mainWidget
-        self.peakListTable = PeakListTableWidget(parent=self.mainWidget
-                                                 , mainWindow=self.mainWindow
-                                                 , moduleParent=self
-                                                 , setLayout=False
-                                                 , grid=(0, 1))
+        self.peaksFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 1))
+        self.peakListTableLabel = Label(self.peaksFrame, 'Peaks:', grid=(0,0), )
+        self.peakListTableLabel.setFixedHeight(15)
 
-        self.multipletListTable = MultipletListTableWidget(parent=self.mainWidget
-                                                           , mainWindow=self.mainWindow
-                                                           , moduleParent=self
-                                                           , setLayout=True
+        self.peakListTable = PeakListTableWidget(parent=self.peaksFrame,
+                                                 mainWindow=self.mainWindow,
+                                                 moduleParent=self,
+                                                 setLayout=False,
+                                                 grid=(1, 0))
+
+        self.multipletListTable = MultipletListTableWidget(parent=self.mainWidget, mainWindow=self.mainWindow,
+                                                           moduleParent=self, setLayout=True
                                                            , grid=(0, 0))
 
         if multipletList is not None:
@@ -95,7 +97,7 @@ class MultipletTableModule(CcpnModule):
 
         self.peakListTable._widget.hide()
         self.splitter.addWidget(self.multipletListTable)
-        self.splitter.addWidget(self.peakListTable)
+        self.splitter.addWidget(self.peaksFrame)
         self.mainWidget.getLayout().addWidget(self.splitter)
         self.splitter.setStretchFactor(0, 1)
 

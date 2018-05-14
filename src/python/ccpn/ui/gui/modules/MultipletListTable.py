@@ -50,7 +50,7 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 logger = getLogger()
 
 
-UNITS = ['ppm', 'Hz', 'point']
+MultipletPosUnits = ['ppm', 'Hz']
 
 
 class MultipletTableModule(CcpnModule):
@@ -131,7 +131,7 @@ class MultipletListTableWidget(QuickTable):
     className = 'MultipletListTable'
     attributeName = 'multipletLists'
 
-    positionsUnit = UNITS[0] #default
+    positionsUnit = MultipletPosUnits[0] #default
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, multipletList=None, actionCallback=None, selectionCallback=None, **kwds):
         self.mainWindow = mainWindow
@@ -168,7 +168,7 @@ class MultipletListTableWidget(QuickTable):
         gridHPos+=1
         self.posUnitPulldownLabel = Label(parent=self._widget, text= ' Position Unit', grid=(0, gridHPos))
         gridHPos += 1
-        self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(0, gridHPos))
+        self.posUnitPulldown = PulldownList(parent=self._widget, texts=MultipletPosUnits, callback=self._pulldownUnitsCallback, grid=(0, gridHPos))
 
         self._widget.setFixedHeight(30)       # needed for the correct sizing of the table
 
@@ -316,11 +316,8 @@ class MultipletListTableWidget(QuickTable):
             self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
             self._highLightObjs(self.current.multiplets)
             multiplet  = self.current.multiplet
-            if multiplet:
-                peaks = multiplet.peaks
-                if len(peaks)>0:
-                    peakList = peaks[-1].peakList #needed to create the columns in the peak table
-                    self.peakListTable._updateTable(useSelectedPeakList=False, peaks=peaks, peakList=peakList)
+            #
+            self._updateMultipletPeaksOnTable()
             self.project.unblankNotification()
         else:
             self.clear()
@@ -394,7 +391,6 @@ class MultipletListTableWidget(QuickTable):
         set as current the selected multiplets on the table
         """
         multiplets = data[Notifier.OBJECT]
-        print('MU', multiplets)
         if multiplets is None:
             self.current.clearMultiplets()
             self.peakListTable.clear()
@@ -402,8 +398,14 @@ class MultipletListTableWidget(QuickTable):
             self.current.multiplets = multiplets
             #  show only the current multiplet peaks
             self._populateMultipletPeaksOnTable()
+            self._updateMultipletPeaksOnTable()
 
-
+    def _updateMultipletPeaksOnTable(self):
+        if self.current.multiplet:
+            peaks = self.current.multiplet.peaks
+            if len(peaks) > 0:
+                peakList = peaks[-1].peakList  # needed to create the columns in the peak table
+                self.peakListTable._updateTable(useSelectedPeakList=False, peaks=peaks, peakList=peakList)
 
     def _populateMultipletPeaksOnTable(self):
         '''populates a dedicate peak table containing peaks of the current multiplet '''
@@ -426,6 +428,8 @@ class MultipletListTableWidget(QuickTable):
         # update the table with new units
         self._setPositionUnit(unit)
         self._updateAllModule()
+        self.peakListTable._setPositionUnit(unit)
+        self._updateMultipletPeaksOnTable()
 
     def _pulldownPLcallback(self, data):
         self._updateAllModule()
@@ -482,7 +486,7 @@ class MultipletListTableWidget(QuickTable):
     #   MultipletListTableWidget.project.unblankNotification()
 
     def _setPositionUnit(self, value):
-        if value in UNITS:
+        if value in MultipletPosUnits:
             MultipletListTableWidget.positionsUnit = value
 
     def destroy(self):

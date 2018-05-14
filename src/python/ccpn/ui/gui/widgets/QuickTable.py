@@ -1187,7 +1187,7 @@ QuickTable::item::selected {
 
       for obj in rowObjs:
         row = self._dataFrameObject.find(self, str(obj.pid))
-        if row:
+        if row is not None:
           selectionModel.select(self.model().index(row, 0)
                                          , selectionModel.Select | selectionModel.Rows)
         # selectionModel.setCurrentIndex(self.model().index(row, 0)

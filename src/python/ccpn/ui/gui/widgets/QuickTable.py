@@ -676,7 +676,7 @@ QuickTable::item::selected {
       # stops the selection from the table when the right button is clicked
       event.accept()
     elif event.button() == QtCore.Qt.LeftButton:
-
+      self.clearSelection()
       # we are selecting from the table
       self._mousePressed = True
       event.ignore()
@@ -1104,25 +1104,29 @@ QuickTable::item::selected {
       singular = multiple[:-1]
       multipleAttr = getattr(self.current, multiple)
       singularAttr = getattr(self.current, singular)
-
-      if self.multiSelect:
-        if isinstance(objList, Iterable):
-          for obj in objList:
-            if obj in multipleAttr:
-              multipleAttr.remove(obj)
-            # try:
-            #   multipleAttr.remove(obj)
-            # except:
-            #   getLogger().warning('%s not found in the list' % obj)
-        else:
-          if objList in multipleAttr:
-            multipleAttr.remove(objList)
-          # try:
-          #   multipleAttr.remove(objList)
-          # except:
-          #   getLogger().warning('%s not found in the list' % objList)
-      else:
-        setattr(self.current, singular, None)
+      if len(multipleAttr)>0:
+        from ccpn.framework.Current import Remove
+        for obj in multipleAttr:
+          remove = getattr(self.current, Remove+obj.className)
+          if remove:
+            remove(obj)
+      # if self.multiSelect:
+      #   if isinstance(objList, Iterable):
+      #     for obj in objList:
+      #
+      #       # try:
+      #       #   multipleAttr.remove(obj)
+      #       # except:
+      #       #   getLogger().warning('%s not found in the list' % obj)
+      #   else:
+      #     if objList in multipleAttr:
+      #       multipleAttr.remove(objList)
+      #     # try:
+      #     #   multipleAttr.remove(objList)
+      #     # except:
+      #     #   getLogger().warning('%s not found in the list' % objList)
+      # else:
+      #   setattr(self.current, singular, None)
 
   def selectObjects(self, objList:list, setUpdatesEnabled:bool=False):
     """
@@ -1183,8 +1187,9 @@ QuickTable::item::selected {
 
       for obj in rowObjs:
         row = self._dataFrameObject.find(self, str(obj.pid))
-        selectionModel.select(self.model().index(row, 0)
-                                       , selectionModel.Select | selectionModel.Rows)
+        if row:
+          selectionModel.select(self.model().index(row, 0)
+                                         , selectionModel.Select | selectionModel.Rows)
         # selectionModel.setCurrentIndex(self.model().index(row, 0)
         #                                , selectionModel.SelectCurrent | selectionModel.Rows)
 

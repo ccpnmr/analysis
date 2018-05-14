@@ -52,7 +52,7 @@ from ccpn.ui._implementation.Strip import Strip
 # from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 SingularOnly = 'singularOnly'
-
+Remove = 'remove'
 
 _currentClasses = {
   SpectrumGroup:{SingularOnly:True},
@@ -393,7 +393,7 @@ Use print(current) to get a list of attribute, value pairs')
           values.remove(value)
         setField(self, values)
       #
-      setattr(cls, 'remove' + singular[0].upper() + singular[1:], remover)
+      setattr(cls, Remove + singular[0].upper() + singular[1:], remover)
 
       def clearer(self):
         """Clear current.%s""" % plural

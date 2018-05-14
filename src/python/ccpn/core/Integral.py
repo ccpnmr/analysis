@@ -161,7 +161,7 @@ class Integral(AbstractWrapperObject):
   @property
   def axisCodes(self) -> Tuple[str, ...]:
     """Spectrum axis codes in dimension order matching position."""
-    return self.peakList.spectrum.axisCodes
+    return self.integralList.spectrum.axisCodes
 
   @property
   def limits(self) -> List[Tuple[float,float]]:
@@ -269,7 +269,7 @@ class Integral(AbstractWrapperObject):
     """
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # throw more understandable errors for the python console
-    # spectrum = self._parent.integralListParent
+    spectrum = self._parent.spectrum
     if peak:
       if not isinstance(peak, Peak):
         raise TypeError('%s is not of type Peak' % peak)

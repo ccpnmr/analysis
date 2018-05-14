@@ -14,7 +14,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:44 +0100 (Fri, July 07, 2017) $"
 __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
@@ -29,7 +29,139 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 import numpy as np
 import pyqtgraph as pg
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
+from PyQt5 import QtCore, QtGui, QtWidgets
 
+# import pyqtgraph as pg
+
+from ccpn.core.Project import Project
+from ccpn.core.Peak import Peak
+# from ccpn.core.NmrAtom import NmrAtom
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpn.util.Logging import getLogger
+from ccpn.core.IntegralList import IntegralList
+
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import AbstractPeakDimContrib as ApiAbstractPeakDimContrib
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataDimRef as ApiDataDimRef
+# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import FreqDataDim as ApiFreqDataDim
+
+NULL_RECT = QtCore.QRectF()
+IDENTITY = QtGui.QTransform()
+IDENTITY.reset()
+
+
+class GuiIntegralListView(QtWidgets.QGraphicsItem):
+
+    def __init__(self):
+        """ peakList is the CCPN wrapper object
+        """
+        #FIXME: apparently it gets passed an object which already has crucial attributes
+        # A big NONO!!!
+        strip = self.spectrumView.strip
+        scene = strip.plotWidget.scene()
+        QtWidgets.QGraphicsItem.__init__(self)  # ejb - need to remove , scene=scene from here
+        self.scene = scene
+
+        ###self.strip = strip
+        ###self.peakList = peakList
+        self.peakItems = {}  # CCPN peak -> Qt peakItem
+        self.setFlag(QtWidgets.QGraphicsItem.ItemHasNoContents, True)
+        self.application = self.spectrumView.application
+
+        strip.viewBox.addItem(self)
+        ###self.parent = parent
+        # self.displayed = True
+        # self.symbolColour = None
+        # self.symbolStyle = None
+        # self.isSymbolDisplayed = True
+        # self.textColour = None
+        # self.isTextDisplayed = True
+        # self.regionChanged()
+
+        # ED - added to allow rebuilding of GLlists
+        self.buildMultipletLists = True
+        self.buildMultipletListLabels = True
+        # self.buildIntegralLists = True
+
+        # if isinstance(self.peakList, IntegralList):
+        #     self.setVisible(False)
+
+
+    def boundingRect(self):
+
+        return NULL_RECT
+
+    def paint(self, painter, option, widget):
+
+        return
+
+    # For notifiers - moved from core PeakListView
+    def _createdPeakListView(self):
+        spectrumView = self.spectrumView
+        spectrum = spectrumView.spectrum
+        # NBNB TBD FIXME we should get rid of this API-level access
+        # But that requires refactoring the spectrumActionDict
+        action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(spectrum._wrappedData)
+        if action:
+            action.toggled.connect(self.setVisible)  # TBD: need to undo this if peakListView removed
+
+        if not self.scene:  # this happens after an undo of a spectrum/peakList deletion
+            spectrumView.strip.plotWidget.scene().addItem(self)
+            spectrumView.strip.viewBox.addItem(self)
+
+        strip = spectrumView.strip
+        for peakList in spectrum.peakLists:
+            strip.showPeaks(peakList)
+
+    # For notifiers - moved from core PeakListView
+    def _deletedStripPeakListView(self):
+        spectrumView = self.spectrumView
+        strip = spectrumView.strip
+        spectrumDisplay = strip.spectrumDisplay
+
+        try:
+            peakItemDict = spectrumDisplay.activePeakItemDict[self]
+            peakItems = set(spectrumDisplay.inactivePeakItemDict[self])
+            for apiPeak in peakItemDict:
+                # NBNB TBD FIXME change to get rid of API peaks here
+                peakItem = peakItemDict[apiPeak]
+                peakItems.add(peakItem)
+
+            # TODO:ED should really remove all references at some point
+            # if strip.plotWidget:
+            #   scene = strip.plotWidget.scene()
+            #   for peakItem in peakItems:
+            #     scene.removeItem(peakItem.annotation)
+            #     if spectrumDisplay.is1D:
+            #       scene.removeItem(peakItem.symbol)
+            #     scene.removeItem(peakItem)
+            #   self.scene.removeItem(self)
+
+            del spectrumDisplay.activePeakItemDict[self]
+            del spectrumDisplay.inactivePeakItemDict[self]
+        except Exception as es:
+            getLogger().warning('Error: peakList does not exist in spectrum')
+
+    def _changedPeakListView(self):
+
+        pass
+        # for peakItem in self.peakItems.values():
+        #     if isinstance(peakItem, PeakNd):
+        #         peakItem.update()  # ejb - force a repaint of the peakItem
+        #         peakItem.annotation.setupPeakAnnotationItem(peakItem)
+
+    def setVisible(self, visible):
+        super(GuiIntegralListView, self).setVisible(visible)
+
+        # repaint all displays - this is called for each spectrumView in the spectrumDisplay
+        # all are attached to the same click
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        GLSignals = GLNotifier(parent=self)
+        GLSignals.emitPaintEvent()
 
 
 # WARNING:

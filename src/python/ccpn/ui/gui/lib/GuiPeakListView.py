@@ -285,59 +285,58 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
     # ED - added to allow rebuilding of GLlists
     self.buildPeakLists = True
     self.buildPeakListLabels = True
-    self.buildIntegralLists = True
+    # self.buildIntegralLists = True
 
-    if isinstance(self.peakList, IntegralList):
-      self.setVisible(False)
+    # if isinstance(self.peakList, IntegralList):
+    #   self.setVisible(False)
 
-
-  def _printToFile(self, printer):
-    # CCPN INTERNAL - called in _printToFile method of GuiSpectrumViewNd
-
-    # NOTE: only valid for ND so far
-
-    if not self.isVisible():
-      return
-    
-    width = printer.width
-    height = printer.height
-    xCount = printer.xCount
-    yCount = printer.yCount
-    scale = 0.01
-    peakHalfSize = scale * max(width, height)
-    strip = self.spectrumView.strip
-    plotWidget = strip.plotWidget
-    viewRegion = plotWidget.viewRange()
-    # dataDims = self.spectrumView._wrappedData.spectrumView.orderedDataDims
-    spectrumIndices = self.spectrumView._displayOrderSpectrumDimensionIndices
-    xAxisIndex = spectrumIndices[0]
-    yAxisIndex = spectrumIndices[1]
-
-    x1, x0 = viewRegion[0]  # TBD: relies on axes being backwards
-    xScale = width / (x1 - x0) / xCount
-    xTranslate = printer.x0 - x0 * xScale
-
-    y1, y0 = viewRegion[1]  # TBD: relies on axes being backwards
-    yScale = height / (y1 - y0) / yCount
-    yTranslate = printer.y0 - y0 * yScale
-
-    for peak in self.peakList.peaks:
-      if strip.peakIsInPlane(peak):
-        # xPpm = xScale*peak.position[dataDims[0].dimensionIndex] + xTranslate
-        # yPpm = yScale*peak.position[dataDims[1].dimensionIndex] + yTranslate
-        xPpm = xScale*peak.position[xAxisIndex] + xTranslate
-        yPpm = yScale*peak.position[yAxisIndex] + yTranslate
-        a0 = xPpm - peakHalfSize
-        b0 = height - (yPpm - peakHalfSize)
-        a1 = xPpm + peakHalfSize
-        b1 = height - (yPpm + peakHalfSize)
-        printer.writeLine(a0, b0, a1, b1)
-        printer.writeLine(a0, b1, a1, b0)
-
-        text = _getPeakAnnotation(peak)
-        if text:
-          offset = 0.5 * peakHalfSize
-          printer.writeText(text, a1+offset, b1-offset)
+  # def _printToFile(self, printer):
+  #   # CCPN INTERNAL - called in _printToFile method of GuiSpectrumViewNd
+  #
+  #   # NOTE: only valid for ND so far
+  #
+  #   if not self.isVisible():
+  #     return
+  #
+  #   width = printer.width
+  #   height = printer.height
+  #   xCount = printer.xCount
+  #   yCount = printer.yCount
+  #   scale = 0.01
+  #   peakHalfSize = scale * max(width, height)
+  #   strip = self.spectrumView.strip
+  #   plotWidget = strip.plotWidget
+  #   viewRegion = plotWidget.viewRange()
+  #   # dataDims = self.spectrumView._wrappedData.spectrumView.orderedDataDims
+  #   spectrumIndices = self.spectrumView._displayOrderSpectrumDimensionIndices
+  #   xAxisIndex = spectrumIndices[0]
+  #   yAxisIndex = spectrumIndices[1]
+  #
+  #   x1, x0 = viewRegion[0]  # TBD: relies on axes being backwards
+  #   xScale = width / (x1 - x0) / xCount
+  #   xTranslate = printer.x0 - x0 * xScale
+  #
+  #   y1, y0 = viewRegion[1]  # TBD: relies on axes being backwards
+  #   yScale = height / (y1 - y0) / yCount
+  #   yTranslate = printer.y0 - y0 * yScale
+  #
+  #   for peak in self.peakList.peaks:
+  #     if strip.peakIsInPlane(peak):
+  #       # xPpm = xScale*peak.position[dataDims[0].dimensionIndex] + xTranslate
+  #       # yPpm = yScale*peak.position[dataDims[1].dimensionIndex] + yTranslate
+  #       xPpm = xScale*peak.position[xAxisIndex] + xTranslate
+  #       yPpm = yScale*peak.position[yAxisIndex] + yTranslate
+  #       a0 = xPpm - peakHalfSize
+  #       b0 = height - (yPpm - peakHalfSize)
+  #       a1 = xPpm + peakHalfSize
+  #       b1 = height - (yPpm + peakHalfSize)
+  #       printer.writeLine(a0, b0, a1, b1)
+  #       printer.writeLine(a0, b1, a1, b0)
+  #
+  #       text = _getPeakAnnotation(peak)
+  #       if text:
+  #         offset = 0.5 * peakHalfSize
+  #         printer.writeText(text, a1+offset, b1-offset)
 
   def boundingRect(self):
 

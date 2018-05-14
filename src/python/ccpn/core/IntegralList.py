@@ -136,7 +136,7 @@ class IntegralList(AbstractWrapperObject):
     """Spectrum containing IntegralList."""
     return  self._project._data2Obj[self._wrappedData.dataSource]
   
-  integralListParent = _parent
+  spectrum = _parent
   
   @property
   def title(self) -> str:

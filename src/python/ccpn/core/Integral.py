@@ -269,7 +269,7 @@ class Integral(AbstractWrapperObject):
     """
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # throw more understandable errors for the python console
-    spectrum = self._parent.integralListParent
+    # spectrum = self._parent.integralListParent
     if peak:
       if not isinstance(peak, Peak):
         raise TypeError('%s is not of type Peak' % peak)

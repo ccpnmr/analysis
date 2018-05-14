@@ -97,6 +97,9 @@ class SpectrumToolBar(ToolBar):
       return None
     contextMenu = Menu('', self, isFloatWidget=True)
     peakListViews = self.widget.peakListViews
+    integralListViews = self.widget.integralListViews
+    multipletListViews = self.widget.multipletListViews
+
     action = button.actions()[0]
     keys = [key for key, value in self.widget.spectrumActionDict.items() if value is action]
     if not keys: # if you click on >> button which shows more spectra
@@ -105,6 +108,8 @@ class SpectrumToolBar(ToolBar):
     allPlAction = contextMenu.addAction('Show All PL', partial(self._allPeakLists, contextMenu, button))
     noPlAction = contextMenu.addAction('Hide All PL', partial(self._noPeakLists, contextMenu, button))
 
+    if peakListViews:
+      contextMenu.addSeparator()
     for peakListView in peakListViews:
       if peakListView.spectrumView._apiDataSource == key:
         if peakListView.peakList:
@@ -119,10 +124,53 @@ class SpectrumToolBar(ToolBar):
           # TODO:ED check this is okay for each spectrum
           action.toggled.connect(partial(self._updateVisiblePeakLists, peakListView.spectrumView))
 
+    if integralListViews:
+      contextMenu.addSeparator()
+    for integralListView in integralListViews:
+      if integralListView.spectrumView._apiDataSource == key:
+        if integralListView.integralList:
+          action = contextMenu.addAction(integralListView.integralList.pid)
+          action.setCheckable(True)
+          if integralListView.isVisible():
+            action.setChecked(True)
+          # else:
+          #   allPlAction.setChecked(False)
+          action.toggled.connect(integralListView.setVisible)
+
+          # TODO:ED check this is okay for each spectrum
+          action.toggled.connect(partial(self._updateVisibleIntegralLists, integralListView.spectrumView))
+
+    if multipletListViews:
+      contextMenu.addSeparator()
+    for multipletListView in multipletListViews:
+      if multipletListView.spectrumView._apiDataSource == key:
+        if multipletListView.multipletList:
+          action = contextMenu.addAction(multipletListView.multipletList.pid)
+          action.setCheckable(True)
+          if multipletListView.isVisible():
+            action.setChecked(True)
+          # else:
+          #   allPlAction.setChecked(False)
+          action.toggled.connect(multipletListView.setVisible)
+
+          # TODO:ED check this is okay for each spectrum
+          action.toggled.connect(partial(self._updateVisibleMultipletLists, multipletListView.spectrumView))
+
+    contextMenu.addSeparator()
     contextMenu.addAction('Remove SP', partial(self._removeSpectrum, button))
     return contextMenu
 
   def _updateVisiblePeakLists(self, spectrumView=None, visible=True):
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
+
+  def _updateVisibleIntegralLists(self, spectrumView=None, visible=True):
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
+
+  def _updateVisibleMultipletLists(self, spectrumView=None, visible=True):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()

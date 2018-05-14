@@ -1243,9 +1243,9 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       spectrum = self.project.getByPid(item.parent().text(0))
       if item.text(0) == "<New PeakList>":
         spectrum.newPeakList()
-      if item.text(0) == "<New IntegralList>":
+      elif item.text(0) == "<New IntegralList>":
         spectrum.newIntegralList()
-      if item.text(0) == "<New MultipletList>":
+      elif item.text(0) == "<New MultipletList>":
         spectrum.newMultipletList()
 
 

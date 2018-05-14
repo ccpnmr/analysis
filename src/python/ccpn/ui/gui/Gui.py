@@ -507,6 +507,7 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 # TODO:RASMUS move to individual files containing the wrapped class and Gui-class
 # Any Factory function to _implementation or abstractWrapper
 #
+
 ## PeakListView class
 coreClass = _coreClassMap['PeakListView']
 from ccpn.ui.gui.lib.GuiPeakListView import GuiPeakListView as _GuiPeakListView
@@ -521,6 +522,39 @@ class _PeakListView(coreClass, _GuiPeakListView):
     _GuiPeakListView.__init__(self)
 
 Gui._factoryFunctions[coreClass.className] = _PeakListView
+
+## IntegralListView class
+coreClass = _coreClassMap['IntegralListView']
+from ccpn.ui.gui.lib.GuiIntegralListView import GuiIntegralListView as _GuiIntegralListView
+class _IntegralListView(coreClass, _GuiIntegralListView):
+  """Integral List View for 1D or nD IntegralList"""
+  def __init__(self, project:Project, wrappedData:'ApiStripIntegralListView'):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    # hack for now
+    self._appBase = project._appBase
+    self.application = project._appBase
+    _GuiIntegralListView.__init__(self)
+
+Gui._factoryFunctions[coreClass.className] = _IntegralListView
+
+## MultipletListView class
+coreClass = _coreClassMap['MultipletListView']
+from ccpn.ui.gui.lib.GuiMultipletListView import GuiMultipletListView as _GuiMultipletListView
+class _MultipletListView(coreClass, _GuiMultipletListView):
+  """Multiplet List View for 1D or nD MultipletList"""
+  def __init__(self, project:Project, wrappedData:'ApiStripMultipletListView'):
+    """Local override init for Qt subclass"""
+    AbstractWrapperObject. __init__(self, project, wrappedData)
+    # hack for now
+    self._appBase = project._appBase
+    self.application = project._appBase
+    _GuiMultipletListView.__init__(self)
+
+Gui._factoryFunctions[coreClass.className] = _MultipletListView
+
+
+
 
 # Delete what we do not want in namespace
 del _factoryFunction

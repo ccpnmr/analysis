@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
@@ -40,9 +40,12 @@ from ccpn.core.Multiplet import Multiplet
 from ccpn.core.Multiplet import Multiplet
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.modules.PeakTable import PeakListTableWidget
 from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth, getMultipletPosition
+from ccpn.ui.gui.widgets.Splitter import Splitter
 
 logger = getLogger()
 
@@ -70,8 +73,14 @@ class MultipletTableModule(CcpnModule):
         self.application = mainWindow.application
         self.project = mainWindow.project
         self.current = mainWindow.application.current
-
+        self.splitter = Splitter(QtCore.Qt.Horizontal)
         # mainWidget
+        self.peakListTable = PeakListTableWidget(parent=self.mainWidget
+                                                 , mainWindow=self.mainWindow
+                                                 , moduleParent=self
+                                                 , setLayout=False
+                                                 , grid=(0, 1))
+
         self.multipletListTable = MultipletListTableWidget(parent=self.mainWidget
                                                            , mainWindow=self.mainWindow
                                                            , moduleParent=self
@@ -82,6 +91,13 @@ class MultipletTableModule(CcpnModule):
             self.selectMultipletList(multipletList)
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
+
+
+        self.peakListTable._widget.hide()
+        self.splitter.addWidget(self.multipletListTable)
+        self.splitter.addWidget(self.peakListTable)
+        self.mainWidget.getLayout().addWidget(self.splitter)
+        self.splitter.setStretchFactor(0, 1)
 
     def _maximise(self):
         """
@@ -123,7 +139,7 @@ class MultipletListTableWidget(QuickTable):
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
         self.moduleParent=moduleParent
-
+        self.peakListTable = self.moduleParent.peakListTable
         MultipletListTableWidget.project = self.project
 
 
@@ -277,59 +293,40 @@ class MultipletListTableWidget(QuickTable):
 
     def _updateAllModule(self):
         '''Updates the table and the settings widgets'''
+        # self.peakListTable.clear()
         self._updateTable()
 
-    def _updateTable(self, useSelectedMultipletList=True, multiplets=None):
+    def _updateTable(self, ):
         '''Display the multiplets on the table for the selected MultipletList.
         Obviously, If the multiplet has not been previously deleted and flagged isDeleted'''
 
         # self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
         self._selectedMultipletList = self.project.getByPid(self.mLwidget.getText())
 
-        if useSelectedMultipletList:
-            if self._selectedMultipletList:
 
-                self.project.blankNotification()
-                self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                                  , buildList=self._selectedMultipletList.multiplets
-                                                                  , colDefs=self._getTableColumns(self._selectedMultipletList)
-                                                                  , hiddenColumns=self._hiddenColumns)
+        if self._selectedMultipletList:
 
-                # populate from the Pandas dataFrame inside the dataFrameObject
-                self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-                self._highLightObjs(self.current.multiplets)
-                self.project.unblankNotification()
-            else:
-                self.clear()
+            self.project.blankNotification()
+            self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                              , buildList=self._selectedMultipletList.multiplets
+                                                              , colDefs=self._getTableColumns(self._selectedMultipletList)
+                                                              , hiddenColumns=self._hiddenColumns)
+
+            # populate from the Pandas dataFrame inside the dataFrameObject
+            self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+            self._highLightObjs(self.current.multiplets)
+            multiplet  = self.current.multiplet
+            if multiplet:
+                peaks = multiplet.peaks
+                if len(peaks)>0:
+                    peakList = peaks[-1].peakList #needed to create the columns in the peak table
+                    self.peakListTable._updateTable(useSelectedPeakList=False, peaks=peaks, peakList=peakList)
+            self.project.unblankNotification()
         else:
-            if multiplets:
+            self.clear()
+            self.peakListTable.clear()
 
-                self.project.blankNotification()
-                self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                                  , buildList=multiplets
-                                                                  , colDefs=self._getTableColumns(self._selectedMultipletList)
-                                                                  , hiddenColumns=self._hiddenColumns)
 
-                # populate from the Pandas dataFrame inside the dataFrameObject
-                self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-                self._highLightObjs(self.current.multiplets)
-                self.project.unblankNotification()
-            else:
-                self.clear()
-
-        # if useSelectedMultipletList:
-        #   if self._selectedMultipletList is not None:
-        #     multiplets = [multiplet for multiplet in self._selectedMultipletList.multiplets if not multiplet.isDeleted]
-        #     self.setObjectsAndColumns(objects=multiplets, columns=self._getTableColumns(self._selectedMultipletList))
-        #     self._selectOnTableCurrentMultiplets(self.current.multiplets)
-        #   else:
-        #     self.setObjects([]) #if not multiplets, make the table empty
-        # else: #set only specific multiplet of a multipletList
-        #   if multiplets is not None:
-        #     self.setObjectsAndColumns(objects=multiplets, columns=self._getTableColumns(self._selectedMultipletList))
-        #     self._selectOnTableCurrentMultiplets(self.current.multiplets)
-        #   else:
-        #     self.setObjects([]) #if not multiplets, make the table empty
 
     def _selectMultipletList(self, multipletList=None):
         """
@@ -397,12 +394,33 @@ class MultipletListTableWidget(QuickTable):
         set as current the selected multiplets on the table
         """
         multiplets = data[Notifier.OBJECT]
-
+        print('MU', multiplets)
         if multiplets is None:
             self.current.clearMultiplets()
+            self.peakListTable.clear()
         else:
-            # TODO:ED fix feedback loop
             self.current.multiplets = multiplets
+            #  show only the current multiplet peaks
+            self._populateMultipletPeaksOnTable()
+
+
+
+    def _populateMultipletPeaksOnTable(self):
+        '''populates a dedicate peak table containing peaks of the current multiplet '''
+
+        multiplet = self.current.multiplet
+        if multiplet:
+            if len(multiplet.peaks) > 0:
+                self.peakListTable._dataFrameObject = self.getDataFrameFromList(table=self
+                                                                                , buildList=multiplet.peaks
+                                                                                ,
+                                                                                colDefs=self.peakListTable._getTableColumns(
+                                                                                    multiplet.peaks[-1].peakList)
+                                                                                ,
+                                                                                hiddenColumns=self.peakListTable._hiddenColumns)
+                # populate from the Pandas dataFrame inside the dataFrameObject
+                self.peakListTable.setTableFromDataFrameObject(dataFrameObject=self.peakListTable._dataFrameObject)
+
 
     def _pulldownUnitsCallback(self, unit):
         # update the table with new units
@@ -416,7 +434,7 @@ class MultipletListTableWidget(QuickTable):
     #     pass
 
     def _editMultiplets(self):
-        from ui.gui.popups.EditMultipletPopup import EditMultipletPopup
+        from ccpn.ui.gui.popups.EditMultipletPopup import EditMultipletPopup
 
         multiplets = self.current.multiplets
         if len(multiplets) > 0:
@@ -445,8 +463,10 @@ class MultipletListTableWidget(QuickTable):
         """
         if len(currentMultiplets)>0:
             self._highLightObjs(currentMultiplets)
+            self._populateMultipletPeaksOnTable()
         else:
             self.clearSelection()
+            self.peakListTable.clear()
 
     # @staticmethod
     # def _getCommentText(multiplet):

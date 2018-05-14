@@ -55,7 +55,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 # Order to import ui implementation classes -
 _uiImportOrder = ('Window','Mark','SpectrumDisplay','Module','Strip',
-                'Axis','SpectrumView', 'PeakListView')
+                'Axis','SpectrumView', 'PeakListView', 'MultipletListView')
 
 # Necessary to ensure classes are always imported in the right order
 from ccpn import core

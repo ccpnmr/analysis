@@ -270,7 +270,7 @@ class PeakListTableWidget(QuickTable):
     '''Updates the table and the settings widgets'''
     self._updateTable()
 
-  def _updateTable(self, useSelectedPeakList=True, peaks=None):
+  def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
     '''Display the peaks on the table for the selected PeakList.
     Obviously, If the peak has not been previously deleted and flagged isDeleted'''
 
@@ -294,17 +294,17 @@ class PeakListTableWidget(QuickTable):
         self.clear()
     else:
       if peaks:
+        if peakList:
+          self.project.blankNotification()
+          self._dataFrameObject = self.getDataFrameFromList(table=self
+                                                            , buildList=peaks
+                                                            , colDefs=self._getTableColumns(peakList)
+                                                            , hiddenColumns=self._hiddenColumns)
 
-        self.project.blankNotification()
-        self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                          , buildList=peaks
-                                                          , colDefs=self._getTableColumns(self._selectedPeakList)
-                                                          , hiddenColumns=self._hiddenColumns)
-
-        # populate from the Pandas dataFrame inside the dataFrameObject
-        self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
-        self._highLightObjs(self.current.peaks)
-        self.project.unblankNotification()
+          # populate from the Pandas dataFrame inside the dataFrameObject
+          self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
+          self._highLightObjs(self.current.peaks)
+          self.project.unblankNotification()
       else:
         self.clear()
 
@@ -382,7 +382,6 @@ class PeakListTableWidget(QuickTable):
     set as current the selected peaks on the table
     """
     peaks = data[Notifier.OBJECT]
-
     if peaks is None:
       self.current.clearPeaks()
     else:
@@ -398,7 +397,7 @@ class PeakListTableWidget(QuickTable):
     self._updateAllModule()
 
   def _copyPeaks(self):
-    from ui.gui.popups.CopyPeaksPopup import CopyPeaks
+    from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
     popup = CopyPeaks(parent=self.mainWindow, mainWindow=self.mainWindow)
     self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
     if self._selectedPeakList is not None:

@@ -233,7 +233,7 @@ class GuiSpectrumDisplay(CcpnModule):
     if trigger == Notifier.CHANGE:
       # self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())
 
-      if data[Notifier.OBJECT] in self.strips:
+      if data[Notifier.OBJECT] == self:
         specViews = data[Notifier.OBJECT].spectrumViews
         self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
 

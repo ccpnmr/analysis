@@ -384,3 +384,4 @@ class SpectrumToolBar(ToolBar):
           widget = self.widgetForAction(act)
           widget.setIconSize(QtCore.QSize(120, 10))
           self._setSizes(act)
+    self.update()

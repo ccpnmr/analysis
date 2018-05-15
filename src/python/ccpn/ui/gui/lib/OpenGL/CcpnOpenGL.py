@@ -5070,7 +5070,78 @@ class CcpnGLWidget(QOpenGLWidget):
       # right click on canvas, not the axes
       event.accept()
       self._resetBoxes()
+
+
+      xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
+      yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
+      xPositions = [xPosition - 2 * xPeakWidth, xPosition + 2 * xPeakWidth]
+      yPositions = [yPosition - 2 * yPeakWidth, yPosition + 2 * yPeakWidth]
+      if len(self._orderedAxes) > 2:
+        # NBNB TBD FIXME what about 4D peaks?
+        zPositions = self._orderedAxes[2].region
+      else:
+        zPositions = None
+
+      peaks = list(self.current.peaks)
+
+
+      # now select (take first one within range)
+      for spectrumView in self._parent.spectrumViews:
+
+        # Nd peak selection - 1d is in the other class
+
+        # TODO:ED could change this to actually use the pids in the drawList
+        for peakListView in spectrumView.peakListViews:
+          if spectrumView.isVisible() and peakListView.isVisible():
+            # for peakList in spectrumView.spectrum.peakLists:
+            peakList = peakListView.peakList
+
+            if not isinstance(peakList, PeakList):
+              continue
+
+            spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+            xAxis = spectrumIndices[0]
+            yAxis = spectrumIndices[1]
+
+            for peak in peaks:
+              if len(peak.axisCodes) > 2 and zPositions is not None:
+
+                zAxis = spectrumIndices[2]
+                # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+                if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+
+                  if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                    if peak in peaks:
+                      self._parent.viewBox.menu = self._parent._peakMenu
+                    else:
+                      self._parent.viewBox.menu = self._parent._defaultMenu
+                  else:
+                    self._parent.viewBox.menu = self._parent._defaultMenu
+              elif len(peak.axisCodes) == 2:
+                # 2d check
+                if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+                        and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+                  if peak in peaks:
+                    self._parent.viewBox.menu = self._parent._peakMenu
+                  else:
+                    self._parent.viewBox.menu = self._parent._defaultMenu
+                else:
+                  self._parent.viewBox.menu = self._parent._defaultMenu
+
+              elif len(peak.axisCodes) == 1:
+                # 1d check
+                if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+                        and yPositions[0] < float(peak.height) < yPositions[1]):
+                  if peak in peaks:
+                    self._parent.viewBox.menu = self._parent._peakMenu
+                  else:
+                    self._parent.viewBox.menu = self._parent._defaultMenu
+                else:
+                  self._parent.viewBox.menu = self._parent._defaultMenu
+
+
       self._parent.viewBox._raiseContextMenu(event)
+      self._parent.viewBox.menu = self._parent._defaultMenu
 
     elif controlRightMouse(event) and axis is None:
       # control-right-mouse click: reset the zoom

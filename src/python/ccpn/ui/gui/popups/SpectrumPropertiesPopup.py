@@ -1122,7 +1122,9 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
     self.application = mainWindow.application
     self.project = mainWindow.application.project
     self.current = mainWindow.application.current
+    # FIXME Bug: check orderedSpectra is not None
     self.orderedSpectra = orderedSpectra
+
 
     self.tabWidget = QtWidgets.QTabWidget()
     self.tabWidget.setMinimumWidth(

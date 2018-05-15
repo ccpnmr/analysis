@@ -135,6 +135,15 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
           if spectrumView.spectrum is spectrum:
             spectrumView.plot.setPen(apiDataSource.sliceColour)
 
+  def adjustContours(self):
+    from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopup
+
+    # insert popup to modify colours
+    # TODO change with the orderedSpectra when fixed
+    spectra = list(set([sv.spectrum for sv in self.spectrumViews]))
+    popup = SpectrumDisplayPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, orderedSpectra=spectra)
+    popup.exec_()
+    popup.raise_()
 
 # Functions for notifiers
 

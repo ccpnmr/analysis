@@ -29,7 +29,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
-from PyQt5 import QtWidgets, QtCore, QtGui
 
 
 class MenuItemType:
@@ -103,13 +102,12 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
 
 
     menuItems = [
-        # (MenuItemType.item, 'ToolBar',               'toolbarAction',          '',                         'TB', True, True, guiStrip1d.spectrumDisplay.toggleToolbar, 'toolbarAction'),
-        # (MenuItemType.item, 'Grid',                  'gridAction',             '',                         'GS', True, True, guiStrip1d.spectrumDisplay.toggleGrid, 'gridAction'),
-        # (MenuItemType.actn, 'Cycle Peak Labels', 'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', 'PL', True, True, guiStrip1d.cyclePeakLabelling, ''),
-        # (MenuItemType.actn, 'Cycle Peak Symbols', 'icons/peak-symbols', 'Cycle Peak Symbols',              'PS', True, True, guiStrip1d.cyclePeakSymbols, ''),
+        (MenuItemType.item, 'ToolBar',               'toolbarAction',          '',                         'TB', True, True, guiStrip1d.spectrumDisplay.toggleToolbar, 'toolbarAction'),
+        (MenuItemType.item, 'Grid',                  'gridAction',             '',                         'GS', True, True, guiStrip1d.spectrumDisplay.toggleGrid, 'gridAction'),
+        (MenuItemType.actn, 'Cycle Peak Labels', 'icons/preferences-desktop-font', 'Cycle Peak Labelling Types', 'PL', True, True, guiStrip1d.cyclePeakLabelling, ''),
 
         (MenuItemType.sep, None, None, None, None, None, None, None, None),
-        (MenuItemType.actn, 'Colours...',           None,      None,            '', True, True, None, ''),
+        (MenuItemType.actn, 'Colours...',        'icons/contour-pos-neg'   ,      None,            '', True, True, guiStrip1d.spectrumDisplay.adjustContours, ''),
 
         (MenuItemType.actn, 'Zoom best fit',     'icons/zoom-best-fit-1d',    'Auto Scale',               '', None, None, guiStrip1d.resetYZoom, ''),
         (MenuItemType.actn, 'Zoom full',         'icons/zoom-full-1d',        'Auto Scale',               '', None, None, guiStrip1d.resetXZoom, ''),
@@ -141,6 +139,7 @@ def _get1dPhasingMenu(guiStrip1d) -> Menu:
                 (MenuItemType.actn, 'Add Trace',               None,                     'Add new trace',          'PT',   True,   True,       guiStrip1d._newPhasingTrace, ''),
                 (MenuItemType.actn, 'Remove All Traces',       None,                     'Remove all traces',      'TR',   True,   True,       guiStrip1d.removePhasingTraces,''),
                 (MenuItemType.actn, 'Set Pivot',               None,                     'Set pivot value',        'PV',   True,   True,       guiStrip1d._setPhasingPivot,''),
+
                 (MenuItemType.sep, None, None, None, None, None, None, None, None),
                 (MenuItemType.actn, 'Exit Phasing Console',  'icons/phase-console',   'Exit phasing console',      'PC',   True,   True,       guiStrip1d.spectrumDisplay.togglePhaseConsole,    ''),
                 ]
@@ -205,7 +204,24 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
         (MenuItemType.actn, 'Set Pivot',               None,                     'Set pivot value',        'PV',   True,   True,       guiStripNd._setPhasingPivot,''),
         (MenuItemType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',     'TU',   True,   True,       guiStripNd.spectrumDisplay.increaseTraceScale,''),
         (MenuItemType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',     'TD',   True,   True,       guiStripNd.spectrumDisplay.decreaseTraceScale,      ''),
+
         (MenuItemType.sep, None, None, None, None, None, None, None, None),
         (MenuItemType.actn, 'Exit Phasing Console', 'icons/phase-console',                     'Exit phasing console',   'PC',   True,   True,       guiStripNd.spectrumDisplay.togglePhaseConsole,    ''),
     ]
     return _createContextMenu(guiStripNd, menuItems)
+
+
+
+def _getPeakMenu(guiStrip) -> Menu:
+    """
+    Creates and returns the phasing Nd context menu
+
+    """
+
+    menuItems = [
+        (MenuItemType.actn, 'Add to a new multiplet',  None,  'Add peak to multiplet',  'AM',   None,   None,       guiStrip.mainWindow.addMultiplet,''),
+
+
+        (MenuItemType.sep, None, None, None, None, None, None, None, None),
+    ]
+    return _createContextMenu(guiStrip, menuItems)

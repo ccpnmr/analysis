@@ -239,7 +239,7 @@ class GuiWindow():
         self.application.current.peaks = [peak for peakList in peakLists for peak in peakList]
 
   def addMultiplet(self):
-    '''add current peakspy to a multiplet'''
+    '''add current peaks to a new multiplet'''
     if self.application.current.strip:
       if self.application.current.strip.spectrumDisplay:
         spectra = [spectrumView.spectrum for spectrumView in

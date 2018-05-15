@@ -145,6 +145,7 @@ class GuiStripNd(GuiStrip):
     self._defaultMenu = self.viewBox.menu
     self._phasingMenu = _getNdPhasingMenu(self)
 
+
     self.viewBox.invertX()
     self.viewBox.invertY()
     ###self.region = guiSpectrumDisplay.defaultRegion()

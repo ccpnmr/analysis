@@ -210,7 +210,7 @@ class FilePathValidator(QtGui.QValidator):
 
 
 class GeneralTab(QtWidgets.QWidget, Base):
-  def __init__(self, spectrum, parent=None, mainWindow=None, item=None):
+  def __init__(self, spectrum, parent=None, mainWindow=None, item=None, colourOnly=False):
 
     from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
     super(GeneralTab, self).__init__(parent)
@@ -1105,7 +1105,7 @@ class ContoursTab(QtWidgets.QWidget, Base):
       self.pythonConsole.writeConsoleCommand("spectrum.negativeContourColour = '%s'" % newColour, spectrum=spectrum)
 
 
-class SpectrumDisplayPropertiesPopup(CcpnDialog):
+class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
   """All spectra in the current display are added as tabs
   The apply button then steps through each tab, and calls each function in the _changes dictionary
   in order to set the parameters.
@@ -1221,3 +1221,206 @@ class SpectrumDisplayPropertiesPopup(CcpnDialog):
   def _okButton(self):
     if self._applyChanges() is True:
       self.accept()
+
+
+class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
+  """All spectra in the current display are added as tabs
+  The apply button then steps through each tab, and calls each function in the _changes dictionary
+  in order to set the parameters.
+  """
+
+  MINIMUM_WIDTH_PER_TAB = 120
+  MINIMUM_WIDTH = 400
+
+  def __init__(self, parent=None, mainWindow=None, orderedSpectrumViews=None
+               , title='Spectrum Display Properties', **kw):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
+    self.orderedSpectrumViews = orderedSpectrumViews
+    self.orderedSpectra = [spec.spectrum for spec in self.orderedSpectrumViews]
+
+    self.tabWidget = QtWidgets.QTabWidget()
+    self.tabWidget.setMinimumWidth(
+                   max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB*len(self.orderedSpectra)))
+
+    self._generalTab = []
+    for specNum, thisSpec in enumerate(self.orderedSpectra):
+      self._generalTab.append(ColourTab(thisSpec, mainWindow=self.mainWindow, parent=self))
+      self.tabWidget.addTab(self._generalTab[specNum], thisSpec.name)
+
+    self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
+
+    self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
+                                   callbacks=[self.reject, self._applyChanges, self._okButton],
+                                   tipTexts=['', '', '', None], direction='h',
+                                   hAlign='r', grid=(2,1), gridSpan=(1,4))
+
+    self._fillPullDowns()
+
+  def _fillPullDowns(self):
+    for aTab in self._generalTab:
+      fillColourPulldown(aTab.colourBox, allowAuto=False)
+
+  def _keyPressEvent(self, event):
+    if event.key() == QtCore.Qt.Key_Enter:
+      pass
+
+  def _repopulate(self):
+    pass
+    # if self._generalTab:
+    #   self._generalTab._repopulate()
+
+  def _applyAllChanges(self, changes):
+    for v in changes.values():
+      v()
+
+  def _applyChanges(self):
+    """
+    The apply button has been clicked
+    Define an undo block for setting the properties of the object
+    If there is an error setting any values then generate an error message
+      If anything has been added to the undo queue then remove it with application.undo()
+      repopulate the popup widgets
+    """
+    # tabs = self.tabWidget.findChildren(QtGui.QStackedWidget)[0].children()
+    # tabs = [t for t in tabs if not isinstance(t, QtGui.QStackedLayout)]
+
+    # ejb - error above, need to set the tabs explicitly
+    tabs = self._generalTab
+
+    applyAccept = False
+    oldUndo = self.project._undo.numItems()
+
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+
+    self.project._startCommandEchoBlock('_applyChanges', quiet=True)
+    try:
+      for t in tabs:
+        if t is not None:
+          changes = t._changes
+          self._applyAllChanges(changes)
+
+      for specNum, thisSpec in enumerate(self.orderedSpectra):
+        for specViews in thisSpec.spectrumViews:
+
+          specViews.buildContours = True
+
+      # repaint
+      GLSignals.emitPaintEvent()
+
+      applyAccept = True
+    except Exception as es:
+      showWarning(str(self.windowTitle()), str(es))
+    finally:
+      self.project._endCommandEchoBlock()
+
+    if applyAccept is False:
+      # should only undo if something new has been added to the undo deque
+      # may cause a problem as some things may be set with the same values
+      # and still be added to the change list, so only undo if length has changed
+      errorName = str(self.__class__.__name__)
+      if oldUndo != self.project._undo.numItems():
+        self.project._undo.undo()
+        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
+      else:
+        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
+
+      # repopulate popup
+      self._repopulate()
+      return False
+    else:
+      return True
+
+  def _okButton(self):
+    if self._applyChanges() is True:
+      self.accept()
+
+
+class ColourTab(QtWidgets.QWidget, Base):
+  def __init__(self, spectrum, parent=None, mainWindow=None, item=None, colourOnly=False):
+
+    from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
+    super(ColourTab, self).__init__(parent)
+    Base.__init__(self, setLayout=True)  # ejb
+
+    self.parent = parent
+    self.mainWindow = mainWindow
+    self.application = self.mainWindow.application
+    self.project = self.mainWindow.project
+
+    self.item = item
+    self.spectrum = spectrum
+    self._changes = dict()
+    self.atomCodes = ()
+
+    self.pythonConsole = mainWindow.pythonConsole
+    self.logger = self.spectrum.project._logger
+
+    Label(self, text="Colour", vAlign='t', hAlign='l', grid=(7, 0))
+    self.colourBox = PulldownList(self, vAlign='t', grid=(7, 1))
+
+    # populate initial pulldown
+    spectrumColourKeys = list(spectrumColours.keys())
+    fillColourPulldown(self.colourBox, allowAuto=False)
+    c = spectrum.sliceColour
+    if c in spectrumColourKeys:
+      self.colourBox.setCurrentText(spectrumColours[c])
+    else:
+      # TODO:ED may have to populate the other tab colour pulldowns
+      addNewColourString(c)
+      fillColourPulldown(self.colourBox, allowAuto=False)
+      spectrumColourKeys = list(spectrumColours.keys())
+      self.colourBox.setCurrentText(spectrumColours[c])
+
+    self.colourBox.currentIndexChanged.connect(partial(self._queueChangeSliceComboIndex, spectrum))
+    colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2), hPolicy='fixed',
+                          callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
+
+
+  def _repopulate(self):
+    pass
+
+  def _writeLoggingMessage(self, command):
+    self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
+    self.logger.info(command)
+
+  def _queueSetSpectrumColour(self, spectrum):
+    dialog = ColourDialog(self)
+
+    newColour = dialog.getColor()
+    if newColour:
+      # pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+      # pix.fill(QtGui.QColor(newColour))
+      # newIndex = str(len(spectrumColours.items())+1)
+      # self.colourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+      # # spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+      # addNewColour(newColour)
+      #
+      # self.colourBox.setCurrentIndex(int(newIndex)-1)
+
+      addNewColour(newColour)
+      self.parent._fillPullDowns()  #fillColourPulldown(self.colourBox, allowAuto=False)
+      self.colourBox.setCurrentText(spectrumColours[newColour.name()])
+
+      self._changes['spectrumColour'] = partial(self._setSpectrumColour, spectrum, newColour)
+
+  def _setSpectrumColour(self, spectrum, newColour):
+    spectrum._apiDataSource.setSliceColour(newColour.name())
+    self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour.name())
+    self.pythonConsole.writeConsoleCommand("spectrum.sliceColour = '%s'" % newColour.name(), spectrum=self.spectrum)
+
+  def _queueChangeSliceComboIndex(self, spectrum, value):
+    self._changes['sliceComboIndex'] = partial(self._changedSliceComboIndex, spectrum, value)
+
+  def _changedSliceComboIndex(self, spectrum, value):
+    # newColour = list(spectrumColours.keys())[value]
+    newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.colourBox.currentText())]
+    if newColour:
+      spectrum.sliceColour = newColour
+      self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour)
+      self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % newColour, spectrum=self.spectrum)

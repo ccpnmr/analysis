@@ -33,7 +33,7 @@ from ccpn.ui.gui.lib import GuiPeakListView
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopup
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopupNd
 
 
 from ccpn.util.Logging import getLogger
@@ -343,8 +343,8 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
 
   def adjustContours(self):
     # insert popup to modify contours
-    popup = SpectrumDisplayPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
-                                           orderedSpectra=self.orderedSpectrumViews(self.spectrumViews))
+    popup = SpectrumDisplayPropertiesPopupNd(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                             orderedSpectrumViews=self.orderedSpectrumViews(self.spectrumViews))
     popup.exec_()
     popup.raise_()
 

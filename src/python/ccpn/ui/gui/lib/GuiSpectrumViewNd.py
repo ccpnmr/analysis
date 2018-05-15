@@ -691,7 +691,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     # contourDict = self.constructContours(guiStrip, posLevels, negLevels)
     try:
-      self._constructContours(self.posLevels, self.negLevels, glList=glList)
+      self._constructContours(self.posLevels, self.negLevels, glList=glList, doRefresh=True)
     except FileNotFoundError:
       self._project._logger.warning("No data file found for %s" % self)
       return
@@ -827,19 +827,19 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     if (doRefresh or xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev 
       or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])):
-      self._releaseDisplayLists(self.posDisplayLists)
-      self._releaseDisplayLists(self.negDisplayLists)
+      # self._releaseDisplayLists(self.posDisplayLists)
+      # self._releaseDisplayLists(self.negDisplayLists)
       doPosLevels = doNegLevels = True
     else:
       if list(posLevels) == self.posLevelsPrev:
         doPosLevels = False
       else:
-        self._releaseDisplayLists(self.posDisplayLists)
+        # self._releaseDisplayLists(self.posDisplayLists)
         doPosLevels = posLevels and True
       if list(negLevels) == self.negLevelsPrev:
         doNegLevels = False
       else:
-        self._releaseDisplayLists(self.negDisplayLists)
+        # self._releaseDisplayLists(self.negDisplayLists)
         doNegLevels = negLevels and True
       
     ###self.previousRegion = self.guiSpectrumDisplay.region[:]  # TBD: not quite right, should be looking at the strip(s)
@@ -848,11 +848,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if doPosLevels:
       posLevelsArray = numpy.array(posLevels, numpy.float32)
       # print(posLevelsArray)
-      self._createDisplayLists(posLevelsArray, self.posDisplayLists)
+      # self._createDisplayLists(posLevelsArray, self.posDisplayLists)
       
     if doNegLevels:
       negLevelsArray = numpy.array(negLevels, numpy.float32)
-      self._createDisplayLists(negLevelsArray, self.negDisplayLists)
+      # self._createDisplayLists(negLevelsArray, self.negDisplayLists)
 
     self.posLevelsPrev = list(posLevels)
     self.negLevelsPrev = list(negLevels)

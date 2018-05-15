@@ -29,6 +29,7 @@ from typing import Sequence
 
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopup1d
 
 
 class SpectrumDisplay1d(GuiSpectrumDisplay):
@@ -139,14 +140,12 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
             spectrumView.plot.setPen(apiDataSource.sliceColour)
 
   def adjustContours(self):
-    from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopup
-
-    # insert popup to modify colours
-    # TODO change with the orderedSpectra when fixed
-    spectra = list(set([sv.spectrum for sv in self.spectrumViews]))
-    popup = SpectrumDisplayPropertiesPopup(parent=self.mainWindow, mainWindow=self.mainWindow, orderedSpectra=spectra)
+    # insert popup to modify contours
+    popup = SpectrumDisplayPropertiesPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                             orderedSpectrumViews=self.orderedSpectrumViews(self.spectrumViews))
     popup.exec_()
     popup.raise_()
+
 
 # Functions for notifiers
 

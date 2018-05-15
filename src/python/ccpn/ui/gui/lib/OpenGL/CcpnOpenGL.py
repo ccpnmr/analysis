@@ -134,7 +134,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
   AXIS_MARGINRIGHT = 40
   AXIS_MARGINBOTTOM = 25
-  AXIS_LINE = 10
+  AXIS_LINE = 7
   AXIS_OFFSET = 5
   YAXISUSEEFORMAT = False
   INVERTXAXIS = True
@@ -347,6 +347,8 @@ class CcpnGLWidget(QOpenGLWidget):
     self._maxReached = False
     self._maxX, self._minX = AXISLIMITS
     self._maxY, self._minY = AXISLIMITS
+
+    self._ordering = []
 
   def close(self):
     self.GLSignals.glXAxisChanged.disconnect()
@@ -2721,6 +2723,8 @@ class CcpnGLWidget(QOpenGLWidget):
     if self._blankDisplay:
       return
 
+    self._ordering = self._parent.spectrumDisplay.orderedSpectrumViews(self._parent.spectrumViews)
+
     currentShader = self.globalGL._shaderProgram1.makeCurrent()
     currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
                                     self.axisT, -1.0, 1.0)
@@ -2963,7 +2967,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.buildIntegralLists()
 
     # loop through the attached peakListViews to the strip
-    for spectrumView in self._parent.spectrumViews:
+    for spectrumView in self._ordering:                             #self._parent.spectrumViews:
       for peakListView in spectrumView.peakListViews:
         if spectrumView.isVisible() and peakListView.isVisible():
 
@@ -2997,7 +3001,7 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glLineWidth(lineThickness)
 
     # loop through the attached peakListViews to the strip
-    for spectrumView in self._parent.spectrumViews:
+    for spectrumView in self._ordering:                             #self._parent.spectrumViews:
       for peakListView in spectrumView.peakListViews:
         if spectrumView.isVisible() and peakListView.isVisible():
 
@@ -3013,7 +3017,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.buildPeakListLabels()
 
     # loop through the attached peakListViews to the strip
-    for spectrumView in self._parent.spectrumViews:
+    for spectrumView in self._ordering:                             #self._parent.spectrumViews:
       for peakListView in spectrumView.peakListViews:
         if spectrumView.isVisible() and peakListView.isVisible():
 
@@ -3031,7 +3035,7 @@ class CcpnGLWidget(QOpenGLWidget):
     GL.glLineWidth(1.0)
     GL.glDisable(GL.GL_BLEND)
 
-    for spectrumView in self._parent.spectrumViews:       #.orderedSpectrumViews():
+    for spectrumView in self._ordering:                             #self._parent.spectrumViews:       #.orderedSpectrumViews():
 
       if spectrumView.isDeleted:
         continue
@@ -3070,7 +3074,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # draw the bounding boxes
     GL.glEnable(GL.GL_BLEND)
     if self._preferences.showSpectrumBorder:
-      for spectrumView in self._parent.spectrumViews:
+      for spectrumView in self._ordering:                             #self._parent.spectrumViews:
         if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
           self._spectrumValues = spectrumView._getValues()
 

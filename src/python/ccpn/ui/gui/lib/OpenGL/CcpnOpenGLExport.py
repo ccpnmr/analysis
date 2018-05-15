@@ -88,6 +88,7 @@ class CcpnOpenGLExporter():
         self.filename = filename
         self.params = params
         self._report = Report(self, self.project, filename)
+        self._ordering = []
 
         import matplotlib.font_manager
         foundFonts = matplotlib.font_manager.findSystemFonts()
@@ -231,6 +232,8 @@ class CcpnOpenGLExporter():
         # add to the drawing object
         self._mainPlot.add(gr, name='mainPlotBox')
 
+        self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+
         self._addGridLines()
         self._addSpectrumContours()
         self._addSpectrumBoundaries()
@@ -268,7 +271,7 @@ class CcpnOpenGLExporter():
         Add the spectrum contours to the main drawing area.
         """
         colourGroups = OrderedDict()
-        for spectrumView in self.strip.orderedSpectrumViews():
+        for spectrumView in self._ordering:
 
             if spectrumView.isDeleted:
                 continue
@@ -338,7 +341,7 @@ class CcpnOpenGLExporter():
         Add the spectrum boundaries to the main drawing area.
         """
         colourGroups = OrderedDict()
-        for spectrumView in self.strip.orderedSpectrumViews():
+        for spectrumView in self._ordering:
             if spectrumView.isDeleted:
                 continue
 
@@ -428,7 +431,7 @@ class CcpnOpenGLExporter():
         Add the integral filled areas to the main drawing area.
         """
         colourGroups = OrderedDict()
-        for spectrumView in self.strip.orderedSpectrumViews():
+        for spectrumView in self._ordering:
             if spectrumView.isDeleted:
                 continue
 
@@ -510,7 +513,7 @@ class CcpnOpenGLExporter():
         Add the peak labels to the main drawing area.
         """
         colourGroups = OrderedDict()
-        for spectrumView in self.strip.orderedSpectrumViews():
+        for spectrumView in self._ordering:
             if spectrumView.isDeleted:
                 continue
 
@@ -925,7 +928,7 @@ class CcpnOpenGLExporter():
 
     def _appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name,
                                   fillMode=None, splitGroups=False):
-        for spectrumView in self.strip.orderedSpectrumViews():
+        for spectrumView in self._ordering:
             if spectrumView.isDeleted:
                 continue
 

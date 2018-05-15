@@ -46,8 +46,8 @@ from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel, StripHeader
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
-# from ccpn.ui.gui.widgets.Icon import Icon
-# from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui import guiSettings
 
 from ccpn.util import Ticks
@@ -410,6 +410,18 @@ class GuiStrip(Frame):
   #   "Hide the _stripResidueDir; convienience"
   #   self._stripResidueDir.setVisible(False)
   #   self._labelWidget.setFixedHeight(32)
+
+  def createMark(self):
+    """
+    Sets the marks at current position
+    """
+    self.spectrumDisplay.mainWindow.createMark()
+
+  def clearMarks(self):
+    """
+    Sets the marks at current position
+    """
+    self.spectrumDisplay.mainWindow.clearMarks()
 
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()

@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
 import numpy as np
 from ccpn.util.Logging import getLogger
-
+from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu
 
 class GuiStrip1d(GuiStrip):
   """
@@ -104,9 +104,9 @@ class GuiStrip1d(GuiStrip):
     self.viewBox.invertX()
     self.plotWidget.showGrid(x=False, y=False)
     self.gridShown = True
-    self.viewBox.menu = self._get1dContextMenu()
+    self.viewBox.menu = _get1dDefaultMenu(self)
     self._defaultMenu = self.viewBox.menu
-    self._phasingMenu = self._get1dContextPhasingMenu()
+    self._phasingMenu = _get1dPhasingMenu(self)
 
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.spectrumIndex = 0
@@ -118,125 +118,63 @@ class GuiStrip1d(GuiStrip):
     self.offsetValue = 0
     self.widgetIndex = 2 #start adding widgets from row 2
     
-  def _get1dContextMenu(self) -> Menu:
-    """
-    Creates and returns the 1d context menu
-    """
+  # def _get1dContextMenu(self) -> Menu:
+  #   """
+  #   Creates and returns the 1d context menu
+  #   """
+  #
+  #   self.contextMenu = Menu('', self, isFloatWidget=True)
+  #   action = self.contextMenu.addItem("Auto Scale", callback=self.resetYZoom)
+  #   action.setIcon(Icon('icons/zoom-best-fit-1d'))
+  #   self.contextMenu.addSeparator()
+  #   action = self.contextMenu.addItem("Full", callback=self.resetXZoom)
+  #   action.setIcon(Icon('icons/zoom-full-1d'))
+  #   # self.contextMenu.addItem("Zoom", callback=self.showZoomPopup)
+  #   action = self.contextMenu.addItem("Store Zoom", callback=self._storeZoom, shortcut='ZS')
+  #   action.setIcon(Icon('icons/zoom-store'))
+  #   action = self.contextMenu.addItem("Restore Zoom", callback=self._restoreZoom, shortcut='ZR')
+  #   action.setIcon(Icon('icons/zoom-restore'))
+  #
+  #   self.contextMenu.addSeparator()
+  #   self.contextMenu.addItem("Calibrate X...", callback=self._toggleCalibrateXSpectrum)
+  #   self.contextMenu.addItem("Calibrate Y...", callback=self._toggleCalibrateYSpectrum)
+  #   self.contextMenu.addSeparator()
+  #   self.stackAction = QtWidgets.QAction("Stack Spectra", self, triggered=self.toggleStack, checkable=True)
+  #   self.stackAction.setChecked(False)
+  #   self.contextMenu.addAction(self.stackAction)
+  #   self.contextMenu.addSeparator()
+  #
+  #   def tempMethod():  # ejb - how does this work?????
+  #     return
+  #
+  #   # add gridAction menu item
+  #   action = self.contextMenu.addItem('Grid', callback=self.spectrumDisplay.toggleGrid,
+  #                                     checkable=True, checked=self.gridIsVisible,
+  #                                     shortcut='GS')
+  #   tempMethod.__doc__ = ''
+  #   tempMethod.__name__ = 'gridAction'
+  #   setattr(self, tempMethod.__name__, action)
+  #
+  #   # self.gridAction = QtWidgets.QAction("Grid", self, triggered=self.spectrumDisplay.toggleGrid, checkable=True)
+  #   # # if self.gridShown:
+  #   # #   self.gridAction.setChecked(True)
+  #   # # else:
+  #   # #   self.gridAction.setChecked(False)
+  #   #
+  #   # self.gridAction.setChecked(self.gridIsVisible)
+  #   #
+  #   # self.contextMenu.addAction(self.gridAction)
+  #   self.contextMenu.addSeparator()
+  #
+  #   action = self.contextMenu.addItem("Enter Phasing Console", callback=self.spectrumDisplay.togglePhaseConsole, shortcut='PC')
+  #   action.setIcon(Icon('icons/phase-console'))
+  #
+  #   self.contextMenu.addSeparator()
+  #   self.contextMenu.addAction("Print to File...", self.showExportDialog)
+  #   self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+  #   return self.contextMenu
+  #
 
-    self.contextMenu = Menu('', self, isFloatWidget=True)
-    action = self.contextMenu.addItem("Auto Scale", callback=self.resetYZoom)
-    action.setIcon(Icon('icons/zoom-best-fit-1d'))
-    self.contextMenu.addSeparator()
-    action = self.contextMenu.addItem("Full", callback=self.resetXZoom)
-    action.setIcon(Icon('icons/zoom-full-1d'))
-    # self.contextMenu.addItem("Zoom", callback=self.showZoomPopup)
-    action = self.contextMenu.addItem("Store Zoom", callback=self._storeZoom, shortcut='ZS')
-    action.setIcon(Icon('icons/zoom-store'))
-    action = self.contextMenu.addItem("Restore Zoom", callback=self._restoreZoom, shortcut='ZR')
-    action.setIcon(Icon('icons/zoom-restore'))
-
-    self.contextMenu.addSeparator()
-    self.contextMenu.addItem("Calibrate X...", callback=self._toggleCalibrateXSpectrum)
-    self.contextMenu.addItem("Calibrate Y...", callback=self._toggleCalibrateYSpectrum)
-    self.contextMenu.addSeparator()
-    self.stackAction = QtWidgets.QAction("Stack Spectra", self, triggered=self.toggleStack, checkable=True)
-    self.stackAction.setChecked(False)
-    self.contextMenu.addAction(self.stackAction)
-    self.contextMenu.addSeparator()
-
-    def tempMethod():  # ejb - how does this work?????
-      return
-
-    # add gridAction menu item
-    action = self.contextMenu.addItem('Grid', callback=self.spectrumDisplay.toggleGrid,
-                                      checkable=True, checked=self.gridIsVisible,
-                                      shortcut='GS')
-    tempMethod.__doc__ = ''
-    tempMethod.__name__ = 'gridAction'
-    setattr(self, tempMethod.__name__, action)
-
-    # self.gridAction = QtWidgets.QAction("Grid", self, triggered=self.spectrumDisplay.toggleGrid, checkable=True)
-    # # if self.gridShown:
-    # #   self.gridAction.setChecked(True)
-    # # else:
-    # #   self.gridAction.setChecked(False)
-    #
-    # self.gridAction.setChecked(self.gridIsVisible)
-    #
-    # self.contextMenu.addAction(self.gridAction)
-    self.contextMenu.addSeparator()
-
-    action = self.contextMenu.addItem("Enter Phasing Console", callback=self.spectrumDisplay.togglePhaseConsole, shortcut='PC')
-    action.setIcon(Icon('icons/phase-console'))
-
-    self.contextMenu.addSeparator()
-    self.contextMenu.addAction("Print to File...", self.showExportDialog)
-    self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
-    return self.contextMenu
-
-  def _get1dContextPhasingMenu(self) -> Menu:
-    """
-    Creates and returns the Nd context menu
-    """
-    class tType:
-      menu, item, actn, sep = range(1,5)
-
-    self._spectrumUtilActions = {}
-    self.contextMenu = Menu('', self, isFloatWidget=True)     # generate new menu
-
-    toolBarItems = [
-       # type,      action name             icon                      tooltip/name                shortcut  active  checked,    callback,                             method
-      (tType.actn, 'Add Trace',               None,                     'Add new trace',          'PT',   True,   True,       self._newPhasingTrace, ''),
-      (tType.actn, 'Remove All Traces',       None,                     'Remove all traces',      'TR',   True,   True,       self.removePhasingTraces,''),
-      (tType.actn, 'Set Pivot',               None,                     'Set pivot value',        'PV',   True,   True,       self._setPhasingPivot,''),
-      # (tType.actn, 'Increase Trace Scale',    'icons/tracescale-up',  'Increase trace scale',   'TU',   True,   True,       self.spectrumDisplay._increaseTraceScale,''),
-      # (tType.actn, 'Decrease Trace Scale',    'icons/tracescale-down','Decrease trace scale',   'TD',   True,   True,       self.spectrumDisplay._decreaseTraceScale,      ''),
-      (tType.sep, None, None, None, None, None, None, None, None),
-      (tType.actn, 'Exit Phasing Console',  'icons/phase-console',   'Exit phasing console',      'PC',   True,   True,       self.spectrumDisplay.togglePhaseConsole,    ''),
-    ]
-
-    for aType, aName, icon, tooltip, shortcut, active, checked, callback, attrib in toolBarItems:     # build the menu items/actions
-      # self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
-      def tempMethod():           # ejb - how does this work?????
-        return
-      if aType == tType.menu:
-        action = self.contextMenu.addMenu(aName)
-        tempMethod.__doc__=''
-        tempMethod.__name__=attrib
-        setattr(self.contextMenu, tempMethod.__name__, action)      # add to the menu
-
-      elif aType == tType.item:
-        # self.gridAction = self.contextMenu.addItem("Grid", callback=self.toggleGrid, checkable=True)
-        action = self.contextMenu.addItem(aName, callback=callback, checkable=active, checked=checked)
-        tempMethod.__doc__=''
-        tempMethod.__name__=attrib
-        setattr(self, tempMethod.__name__, action)
-        # add to self
-
-      elif aType == tType.actn:
-        # printAction = self.contextMenu.addAction("Print to File...", lambda: self.spectrumDisplay.window.printToFile(self.spectrumDisplay))
-        action = self.contextMenu.addItem(aName, callback=callback, shortcut=shortcut)
-        if icon is not None:
-          ic = Icon(icon)
-          action.setIcon(ic)
-        self._spectrumUtilActions[aName] = action
-
-      elif aType == tType.sep:
-        self.contextMenu.addSeparator()
-
-    # self.navigateToMenu = self.contextMenu.addMenu('Navigate To')
-    # self.spectrumDisplays = self.getSpectrumDisplays()
-    # for spectrumDisplay in self.spectrumDisplays:
-    #   spectrumDisplayAction = self.navigateToMenu.addAction(spectrumDisplay.pid)
-    #   receiver = lambda spectrumDisplay=spectrumDisplay.pid: self.navigateTo(spectrumDisplay)
-    #   self.connect(spectrumDisplayAction, QtCore.SIGNAL('triggered()'), receiver)
-    #   self.navigateToMenu.addAction(spectrumDisplay)
-
-    # self.crossHairAction.setChecked(self.crossHairIsVisible)
-    # self.gridAction.setChecked(self.gridIsVisible)
-    # self.lastAxisOnlyCheckBox.setChecked(self.spectrumDisplay.lastAxisOnly)
-
-    return self.contextMenu
 
   def showExportDialog(self):
     from ccpn.ui.gui.widgets.CustomExportDialog import CustomGLExportDialog

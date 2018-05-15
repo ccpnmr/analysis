@@ -113,12 +113,28 @@ class Gui(Ui):
     project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
 
     from ccpn.ui.gui.lib import GuiPeakListView
-    project.registerNotifier('PeakListView', 'create',
-                             GuiPeakListView.GuiPeakListView._createdPeakListView)
-    project.registerNotifier('PeakListView', 'delete',
-                             GuiPeakListView.GuiPeakListView._deletedStripPeakListView)
-    project.registerNotifier('PeakListView', 'change',
-                             GuiPeakListView.GuiPeakListView._changedPeakListView)
+    # project.registerNotifier('PeakListView', 'create',
+    #                          GuiPeakListView.GuiPeakListView._createdPeakListView)
+    # project.registerNotifier('PeakListView', 'delete',
+    #                          GuiPeakListView.GuiPeakListView._deletedStripPeakListView)
+    # project.registerNotifier('PeakListView', 'change',
+    #                          GuiPeakListView.GuiPeakListView._changedPeakListView)
+    #
+    # from ccpn.ui.gui.lib import GuiIntegralListView
+    # project.registerNotifier('IntegralListView', 'create',
+    #                          GuiIntegralListView.GuiIntegralListView._createdIntegralListView)
+    # project.registerNotifier('IntegralListView', 'delete',
+    #                          GuiIntegralListView.GuiIntegralListView._deletedStripIntegralListView)
+    # project.registerNotifier('IntegralListView', 'change',
+    #                          GuiIntegralListView.GuiIntegralListView._changedIntegralListView)
+    #
+    # from ccpn.ui.gui.lib import GuiMultipletListView
+    # project.registerNotifier('MultipletListView', 'create',
+    #                          GuiMultipletListView.GuiMultipletListView._createdMultipletListView)
+    # project.registerNotifier('MultipletListView', 'delete',
+    #                          GuiMultipletListView.GuiMultipletListView._deletedStripMultipletListView)
+    # project.registerNotifier('MultipletListView', 'change',
+    #                          GuiMultipletListView.GuiMultipletListView._changedMultipletListView)
 
     # TODO:ED need to unregister these notifiers on close
     self._updateNotifier1 = Notifier(project

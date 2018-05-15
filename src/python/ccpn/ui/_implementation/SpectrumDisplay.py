@@ -285,7 +285,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         pass
 
     def removeOrderedSpectrumView(self, ind):
-        print ('>>>removeOrdered')
         defaults = collections.OrderedDict((('ind', None),))
 
         index = ind #.spectrumViews.index(spectrumView)

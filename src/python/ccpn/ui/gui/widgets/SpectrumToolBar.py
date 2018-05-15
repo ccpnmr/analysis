@@ -368,7 +368,7 @@ class SpectrumToolBar(ToolBar):
 
   def _toolbarChange(self, spectrumViews):
     actionList = self.actions()
-    self.clear()
+    # self.clear()
     for specView in spectrumViews:
 
       # self._addSpectrumViewToolButtons(specView)

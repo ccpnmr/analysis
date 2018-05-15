@@ -5084,7 +5084,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
       peaks = list(self.current.peaks)
 
-
+      openContextMenu = False
       # now select (take first one within range)
       for spectrumView in self._parent.spectrumViews:
 
@@ -5112,36 +5112,43 @@ class CcpnGLWidget(QOpenGLWidget):
 
                   if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                     if peak in peaks:
-                      self._parent.viewBox.menu = self._parent._peakMenu
+                        openContextMenu = True
+                        break
                     else:
-                      self._parent.viewBox.menu = self._parent._defaultMenu
-                  else:
-                    self._parent.viewBox.menu = self._parent._defaultMenu
+                        openContextMenu = False
+                else:
+                    openContextMenu = False
               elif len(peak.axisCodes) == 2:
                 # 2d check
                 if (xPositions[0] < float(peak.position[0]) < xPositions[1]
                         and yPositions[0] < float(peak.position[1]) < yPositions[1]):
                   if peak in peaks:
-                    self._parent.viewBox.menu = self._parent._peakMenu
+                      openContextMenu = True
+                      break
                   else:
-                    self._parent.viewBox.menu = self._parent._defaultMenu
+                      openContextMenu = False
                 else:
-                  self._parent.viewBox.menu = self._parent._defaultMenu
+                    openContextMenu = False
 
               elif len(peak.axisCodes) == 1:
                 # 1d check
                 if (xPositions[0] < float(peak.position[0]) < xPositions[1]
                         and yPositions[0] < float(peak.height) < yPositions[1]):
                   if peak in peaks:
-                    self._parent.viewBox.menu = self._parent._peakMenu
+                      openContextMenu = True
+                      break
                   else:
-                    self._parent.viewBox.menu = self._parent._defaultMenu
+                      openContextMenu = False
                 else:
-                  self._parent.viewBox.menu = self._parent._defaultMenu
+                    openContextMenu = False
 
+      if openContextMenu:
+        self._parent.viewBox.menu = self._parent._peakMenu
+      else:
+        self._parent.viewBox.menu = self._parent._defaultMenu
 
       self._parent.viewBox._raiseContextMenu(event)
-      self._parent.viewBox.menu = self._parent._defaultMenu
+
 
     elif controlRightMouse(event) and axis is None:
       # control-right-mouse click: reset the zoom

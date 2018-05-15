@@ -1319,7 +1319,6 @@ class GuiStrip(Frame):
 
 
 
-
 # Notifiers:
 def _updateDisplayedMarks(data):
   "Callback when marks have changed"

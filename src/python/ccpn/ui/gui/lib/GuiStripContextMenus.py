@@ -220,7 +220,10 @@ def _getPeakMenu(guiStrip) -> Menu:
 
     menuItems = [
         (MenuItemType.actn, 'Add to a new multiplet',  None,  'Add peak to multiplet',  'AM',   None,   None,       guiStrip.mainWindow.addMultiplet,''),
+        (MenuItemType.actn, 'Show in Peak Table', None, 'Open Peak Table', None, None, None, None, ''),
 
+        (MenuItemType.sep, None, None, None, None, None, None, None, None),
+        (MenuItemType.actn, 'Delete peak/s', None, 'Delete Peak/s from project ',None, None, None, guiStrip.mainWindow.deleteSelectedPeaks,''),
 
         (MenuItemType.sep, None, None, None, None, None, None, None, None),
     ]

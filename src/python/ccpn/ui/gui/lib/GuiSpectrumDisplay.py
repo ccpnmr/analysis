@@ -233,13 +233,14 @@ class GuiSpectrumDisplay(CcpnModule):
     if trigger == Notifier.CHANGE:
       # self.spectrumToolBar._toolbarChange(self.strips[0].orderedSpectrumViews())
 
-      specViews = data[Notifier.OBJECT].spectrumViews
-      self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
+      if data[Notifier.OBJECT] in self.strips:
+        specViews = data[Notifier.OBJECT].spectrumViews
+        self.spectrumToolBar._toolbarChange(self.orderedSpectrumViews(specViews))
 
-      # spawn a redraw of the GL windows
-      from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-      GLSignals = GLNotifier(parent=None)
-      GLSignals.emitPaintEvent()
+        # spawn a redraw of the GL windows
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        GLSignals = GLNotifier(parent=None)
+        GLSignals.emitPaintEvent()
 
   def _hoverEvent(self, event):
     event.accept()
@@ -1136,19 +1137,25 @@ class GuiSpectrumDisplay(CcpnModule):
     try:
       newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
       if newSpectrum:
+
+        index = list(self.getOrderedSpectrumViewsIndex())
+        index.append(len(index))
+        self.setOrderedSpectrumViewsIndex(tuple(index))
+
         # self._orderedSpectra.append(spectrum)
-        for strip in self.strips:
 
-          # displaySpectrum above creates a new spectrum for each strip in the display
-          # but only returns the first one
-          # this loops through the strips and adds each to the strip ordered list
-          existingViews = set(strip.orderedSpectrumViews())
-          newViews = set(strip.spectrumViews)
-          dSet = set(newViews).difference(existingViews)
-
-          # append those not found
-          for spInDSet in dSet:
-            strip.appendSpectrumView(spInDSet)
+        # for strip in self.strips:
+        #
+        #   # displaySpectrum above creates a new spectrum for each strip in the display
+        #   # but only returns the first one
+        #   # this loops through the strips and adds each to the strip ordered list
+        #   existingViews = set(strip.spectrumDisplay.orderedSpectrumViews(strip.spectrumViews))
+        #   newViews = set(strip.spectrumViews)
+        #   dSet = set(newViews).difference(existingViews)
+        #
+        #   # append those not found
+        #   for spInDSet in dSet:
+        #     strip.appendSpectrumView(spInDSet)
 
     except Exception as es:
       getLogger().warning('Error appending newSpectrum: %s' % spectrum)

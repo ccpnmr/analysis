@@ -2723,6 +2723,9 @@ class CcpnGLWidget(QOpenGLWidget):
     if self._blankDisplay:
       return
 
+    if self._parent.isDeleted:
+      return
+
     self._ordering = self._parent.spectrumDisplay.orderedSpectrumViews(self._parent.spectrumViews)
 
     currentShader = self.globalGL._shaderProgram1.makeCurrent()

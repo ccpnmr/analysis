@@ -43,14 +43,18 @@ class Menu(QtWidgets.QMenu, Base):
     self.setFont(menuFont)
 
 
-  def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False):
+  def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False, **kwargs):
     action = Action(self.parent(), text, callback=callback, shortcut=shortcut,
                          checked=checked, checkable=checkable, isFloatWidget=self.isFloatWidget)
     self.addAction(action)
     return action
     # print(shortcut)
-    
-  def addMenu(self, title):
+
+  def _addSeparator(self, **kwargs):
+    separator = self.addSeparator()
+    return separator
+
+  def addMenu(self, title, **kwargs):
     menu = Menu(title, self)
     QtWidgets.QMenu.addMenu(self, menu)
     return menu

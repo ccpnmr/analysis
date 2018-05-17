@@ -33,7 +33,62 @@ from ccpn.ui.gui.widgets.Menu import Menu
 
 class MenuItemType:
     menu, item, actn, sep = range(1, 5)
-    
+
+MENU =      'Menu'
+ITEM =      'Item'
+ACTION =    'Action'
+SEPARATOR = 'Separator'
+
+ItemTypes =  {
+             MENU:      Menu.addMenu.__name__,
+             ITEM:      Menu.addItem.__name__,
+             ACTION:    Menu.addItem.__name__,
+             SEPARATOR: Menu._addSeparator.__name__
+             }
+
+class _StripCMenuItem(object):
+
+    __dict__ = {'name':'','icon':None,'tooltip':'','shortcut':None,
+                'checkable':False,'checked':False,'callback':None,'stripMethodName':''}
+
+    def __init__(self, typeItem, **kwargs):
+        '''
+        :param typeItem: any value of ItemTypes: (menu,item,action,separator)
+        :param kwargs: needed  any of __dict__: name, icon, tooltip, shortcut, checkable, checked, callback, stripMethodName
+        for creating a new action/item. Not necessary for Separator and Menu type
+        '''
+
+        self.__dict__.update(kwargs)
+        for k,v in  self.__dict__.items():
+            setattr(self, k,v)
+        self.typeItem = typeItem
+
+def _createMenu(strip, items):
+
+    strip._spectrumUtilActions = {}
+    menu = strip.contextMenu = Menu('', strip, isFloatWidget=True)  # generate new menu
+    for i in items:
+        method = getattr(menu, i.typeItem)
+        if method:
+            action = method(i.name, **vars(i))
+            setattr(strip, i.stripMethodName, action)
+            strip._spectrumUtilActions[i.name] = action
+
+    return menu
+
+def _exampleMenu(strip):
+
+    items = [
+        _StripCMenuItem(ItemTypes.get(ACTION),
+                        name='toggleGrid', icon=None,
+                        callback=strip.toggleGrid,)
+          ]
+    return _createMenu(strip, items)
+
+
+
+
+
 def _createContextMenu(strip, menuItems) -> Menu:
 
     """

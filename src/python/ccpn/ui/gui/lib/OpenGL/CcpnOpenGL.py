@@ -1695,11 +1695,8 @@ class CcpnGLWidget(QOpenGLWidget):
           else:
             drawStr.setColour((*listCol, fade))
 
-  def _updateHighlightedIntegrals(self, spectrumView, peakListView):
-    if not isinstance(peakListView.peakList, IntegralList):
-      return
-
-    drawList = self._GLIntegralLists[peakListView]
+  def _updateHighlightedIntegrals(self, spectrumView, integralListView):
+    drawList = self._GLIntegralLists[integralListView]
     drawList._rebuild()
 
   def _updateHighlightedPeaks(self, spectrumView, peakListView):
@@ -2655,10 +2652,6 @@ class CcpnGLWidget(QOpenGLWidget):
       pls = peakListView.peakList
       # spectrumFrequency = spectrum.spectrometerFrequencies
 
-      # trap IntegralLists that are stored under the peakListView
-      if isinstance(pls, IntegralList):
-        return
-
       for peak in pls.peaks:
         self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
 
@@ -2883,7 +2876,7 @@ class CcpnGLWidget(QOpenGLWidget):
       drawList.clearArrays()
       drawList._clearRegions()
 
-      ils = integralListView.peakList
+      ils = integralListView.integralList
       listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
       for integral in ils.integrals:
@@ -4793,9 +4786,10 @@ class CcpnGLWidget(QOpenGLWidget):
           if GLNotifier.GLHIGHLIGHTINTEGRALS in triggers:
 
             for spectrumView in self._parent.spectrumViews:
-              for peakListView in spectrumView.peakListViews:
+              for integralListView in spectrumView.integralListViews:
 
-                self._updateHighlightedIntegrals(spectrumView, peakListView)
+                if integralListView in self._GLIntegralLists.keys():
+                  self._updateHighlightedIntegrals(spectrumView, integralListView)
 
           if GLNotifier.GLALLPEAKS in triggers:
 
@@ -4827,10 +4821,10 @@ class CcpnGLWidget(QOpenGLWidget):
           if GLNotifier.GLINTEGRALLISTS in triggers:
 
             for spectrumView in self._parent.spectrumViews:
-              for peakListView in spectrumView.peakListViews:
+              for integralListView in spectrumView.integralListViews:
 
-                if peakListView in self._GLIntegralLists.keys():
-                  peakListView.buildPeakLists = True
+                if integralListView in self._GLIntegralLists.keys():
+                  integralListView.buildIntegralLists = True
 
             # for ils in self._GLIntegralLists.values():
             #   if ils.integralListView.peakList in targets:
@@ -5419,8 +5413,8 @@ class CcpnGLWidget(QOpenGLWidget):
   def _createIntegral(self, integral):
     for ils in self._GLIntegralLists.values():
 
-      if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.peakList:
-        listCol = getAutoColourRgbRatio(ils.integralListView.peakList.symbolColour, ils.integralListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
+      if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
+        listCol = getAutoColourRgbRatio(ils.integralListView.integralList.symbolColour, ils.integralListView.integralList.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
         ils.addIntegral(integral, ils.integralListView, colour=None, brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
 

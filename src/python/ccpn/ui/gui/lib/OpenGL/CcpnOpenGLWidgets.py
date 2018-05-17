@@ -559,7 +559,7 @@ class GLIntegralRegion(GLExternalRegion):
       self.numVertices += 4
 
       newRegion.visible = True
-      newRegion._PP = (self.numVertices-4) * 2
+      newRegion._pp = (self.numVertices-4) * 2
     else:
 
       # Need to put the normal regions in here

@@ -48,7 +48,7 @@ class _SCMitem(object):
         :param typeItem: any value of ItemTypes: (menu,item,action,separator)
         :param kwargs: needed  any of _kwrgs: name, icon, tooltip, shortcut, checkable, checked, callback, stripMethodName
         for creating a new action/item. Not necessary for Separator and Menu type.
-        Not a strict rule, but the only difference between ITEM and ACTION seems to be: Action has an icon.
+        Not a strict rule, but the only difference between ITEM and ACTION seems to be: Action has usually an icon.
         Item has a checkbox on the left side.
         '''
         self._kwrgs = {'name': '', 'icon': None, 'tooltip': '', 'shortcut': None, 'checkable': False,
@@ -75,20 +75,6 @@ def _createMenu(strip, items):
 
     return menu
 
-def _exampleMenu(strip):
-
-    items = [
-        _SCMitem(ItemTypes.get(ACTION), name='toggleGrid', icon='icons/contour-pos-neg', callback=strip.toggleGrid,),
-        _SCMitem(ItemTypes.get(SEPARATOR),),
-        _SCMitem(ItemTypes.get(ITEM),name='test' )
-          ]
-
-    return _createMenu(strip, items)
-
-
-
-
-
 
 
 ##############################  1D menus ##############################
@@ -101,52 +87,65 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
     Creates and returns the 1d default context menu
     """
     items = [
-             _SCMitem(ItemTypes.get(ITEM), name='ToolBar',
-                      toolTip='toolbarAction',
-                      callback=guiStrip1d.spectrumDisplay.toggleToolbar,
-                      checkable=True, checked=True, shortcut='TB', stripMethodName='toolbarAction'),
+            _SCMitem(name='ToolBar',
+                        typeItem= ItemTypes.get(ITEM), toolTip='toolbarAction', callback=guiStrip1d.spectrumDisplay.toggleToolbar,
+                        checkable=True, checked=True, shortcut='TB', stripMethodName='toolbarAction'),
 
-            _SCMitem(ItemTypes.get(ITEM), name='Grid',
-                     toolTip='gridAction',
-                     callback=guiStrip1d.spectrumDisplay.toggleGrid,
-                     checkable=True, checked=True, shortcut='GS', stripMethodName='gridAction'),
+            _SCMitem(name='Grid',
+                        typeItem=ItemTypes.get(ITEM), toolTip='gridAction', callback=guiStrip1d.spectrumDisplay.toggleGrid,
+                        checkable=True, checked=True, shortcut='GS', stripMethodName='gridAction'),
 
-            _SCMitem(ItemTypes.get(ACTION), name='Cycle Peak Labels',
-                     icon='icons/preferences-desktop-font', toolTip='Cycle Peak Labelling Types',
-                     callback=guiStrip1d.cyclePeakLabelling,
-                     shortcut='PL', stripMethodName=''),
+            _SCMitem(name='Cycle Peak Labels',
+                         typeItem=ItemTypes.get(ACTION),  icon='icons/preferences-desktop-font', toolTip='Cycle Peak Labelling Types',
+                         callback=guiStrip1d.cyclePeakLabelling,shortcut='PL', stripMethodName=''),
 
-            _SCMitem(ItemTypes.get(SEPARATOR),),
+            _SCMitem(typeItem=ItemTypes.get(SEPARATOR)),
 
+            _SCMitem(name='Colours...',
+                        typeItem=ItemTypes.get(ACTION), icon='icons/contour-pos-neg', toolTip='Change colours',
+                        callback=guiStrip1d.spectrumDisplay.adjustContours),
 
-            ]
+            _SCMitem(name='Zoom best Y fit',
+                        typeItem=ItemTypes.get(ACTION), icon='icons/zoom-best-fit-1d', toolTip='Y Auto Scale',
+                        callback=guiStrip1d.resetYZoom),
+
+            _SCMitem(name='Zoom best X fit',
+                        typeItem=ItemTypes.get(ACTION),  icon='icons/zoom-full-1d', toolTip='X Auto Scale',
+                        callback=guiStrip1d.resetXZoom),
+
+            _SCMitem(typeItem=ItemTypes.get(SEPARATOR)),
+
+            _SCMitem(name='Calibrate X',
+                        typeItem=ItemTypes.get(ACTION), toolTip='calibrate X points', callback=guiStrip1d._toggleCalibrateXSpectrum),
+
+            _SCMitem(name='Calibrate Y',
+                        typeItem=ItemTypes.get(ACTION),toolTip='calibrate Y points', callback=guiStrip1d._toggleCalibrateYSpectrum),
+
+            _SCMitem(name='Stack Spectra',
+                        typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra', checkable=True, checked=False,
+                        callback=guiStrip1d.toggleStack, stripMethodName='stackAction'),
+
+            _SCMitem(typeItem=ItemTypes.get(SEPARATOR)),
+
+            _SCMitem(name='Enter Phasing Console',
+                        typeItem=ItemTypes.get(ACTION),icon= 'icons/phase-console', toolTip='Enter Phasing Console',
+                        shortcut='PC',callback=guiStrip1d.spectrumDisplay.togglePhaseConsole),
+
+            _SCMitem(typeItem=ItemTypes.get(SEPARATOR)),
+
+            _SCMitem(name='Clear Marks',
+                        typeItem=ItemTypes.get(ACTION), toolTip='Clear all Marks from', shortcut='MC',
+                        callback=guiStrip1d.clearMarks),
+
+            _SCMitem(typeItem=ItemTypes.get(SEPARATOR)),
+
+            _SCMitem(name='Print to File...',
+                        typeItem=ItemTypes.get(ACTION), icon='icons/print', toolTip='Print Spectrum Display to File',
+                        shortcut='PT', callback=guiStrip1d.showExportDialog),
+                ]
 
     return _createMenu(guiStrip1d, items)
 
-    menuItems = [
-
-        (MenuItemType.actn, 'Colours...',        'icons/contour-pos-neg'   ,      None,            '', True, True, guiStrip1d.spectrumDisplay.adjustContours, ''),
-
-        (MenuItemType.actn, 'Zoom best fit',     'icons/zoom-best-fit-1d',    'Auto Scale',               '', None, None, guiStrip1d.resetYZoom, ''),
-        (MenuItemType.actn, 'Zoom full',         'icons/zoom-full-1d',        'Auto Scale',               '', None, None, guiStrip1d.resetXZoom, ''),
-
-        (MenuItemType.sep, None, None, None, None, None, None, None, None),
-        (MenuItemType.actn, 'Calibrate X', None, 'calibrate X points ', None, True, False, guiStrip1d._toggleCalibrateXSpectrum, ''),
-        (MenuItemType.actn, 'Calibrate Y', None, 'calibrate y points ', None, True, False, guiStrip1d._toggleCalibrateYSpectrum, ''),
-        (MenuItemType.actn, 'Stack Spectra', None, 'Stack Spectra ', None, True, False,  guiStrip1d.toggleStack, ''),
-
-        (MenuItemType.sep, None, None, None, None, None, None, None, None),
-        (MenuItemType.actn, 'Enter Phasing Console',  'icons/phase-console',    'Enter Phasing Console',    'PC', True, True, guiStrip1d.spectrumDisplay.togglePhaseConsole, ''),
-
-        (MenuItemType.sep, None, None, None, None, None, None, None, None),
-        (MenuItemType.actn, 'Clear Marks', None,                     'Clear all mark',          'MC', True, False, guiStrip1d.clearMarks, ''),
-
-        (MenuItemType.sep, None, None, None, None, None, None, None, None),
-        (MenuItemType.actn, 'Print to File...',      'icons/print',            'Print Spectrum Display to File', 'PT', True, True, guiStrip1d.showExportDialog, ''),
-    ]
-
-    # return _createContextMenu(guiStrip1d, menuItems)
-    return _createMenu(guiStrip1d, [])
 
 def _get1dPhasingMenu(guiStrip1d) -> Menu:
     """

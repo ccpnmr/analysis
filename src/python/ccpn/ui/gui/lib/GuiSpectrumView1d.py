@@ -83,6 +83,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
     self.buildPeakLists = True
     self.buildPeakListLabels = True
     self.buildIntegralLists = True
+    self.buildIntegralListLabels = True
+    self.buildMultipletLists = True
+    self.buildMultipletListLabels = True
 
     # self.strip.viewBox.autoRange()
     # self.strip.zoomYAll()

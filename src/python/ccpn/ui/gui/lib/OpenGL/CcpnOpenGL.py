@@ -2848,6 +2848,10 @@ class CcpnGLWidget(QOpenGLWidget):
           for peakListView in spectrumView.peakListViews:
             peakListView.buildPeakLists = True
             peakListView.buildPeakListLabels = True
+            peakListView.buildIntegralLists = True
+            peakListView.buildIntegralListLabels = True
+            peakListView.buildMultipletLists = True
+            peakListView.buildMultipletListLabels = True
 
         spectrumView.buildContours = False
         spectrumView.buildContoursOnly = False
@@ -2895,22 +2899,19 @@ class CcpnGLWidget(QOpenGLWidget):
 
     for spectrumView in self._parent.spectrumViews:
 
-      for integralListView in spectrumView.peakListViews:
-
-        # only add the integral lists
-        if isinstance(integralListView.peakList, IntegralList):
-          if integralListView in self._GLIntegralLists.keys():
-            if self._GLIntegralLists[integralListView].renderMode == GLRENDERMODE_RESCALE:
-
-              self._buildIntegralLists(spectrumView, integralListView)
-
-          if integralListView.buildPeakLists:
-            integralListView.buildPeakLists = False
-
-            if integralListView in self._GLIntegralLists.keys():
-              self._GLIntegralLists[integralListView].renderMode = GLRENDERMODE_REBUILD
+      for integralListView in spectrumView.integralListViews:
+        if integralListView in self._GLIntegralLists.keys():
+          if self._GLIntegralLists[integralListView].renderMode == GLRENDERMODE_RESCALE:
 
             self._buildIntegralLists(spectrumView, integralListView)
+
+        if integralListView.buildIntegralLists:
+          integralListView.buildIntegralLists = False
+
+          if integralListView in self._GLIntegralLists.keys():
+            self._GLIntegralLists[integralListView].renderMode = GLRENDERMODE_REBUILD
+
+          self._buildIntegralLists(spectrumView, integralListView)
 
   def buildPeakLists(self):
     if self._parent.isDeleted:
@@ -2920,21 +2921,18 @@ class CcpnGLWidget(QOpenGLWidget):
     for spectrumView in self._parent.spectrumViews:
       for peakListView in spectrumView.peakListViews:
 
-        # only add the peak lists
-        if isinstance(peakListView.peakList, PeakList):
-
-          if peakListView in self._GLPeakLists.keys():
-            if self._GLPeakLists[peakListView].renderMode == GLRENDERMODE_RESCALE:
-              self._buildPeakLists(spectrumView, peakListView)
-
-          if peakListView.buildPeakLists:
-            peakListView.buildPeakLists = False
-
-            # set the interior flags for rebuilding the GLdisplay
-            if peakListView in self._GLPeakLists.keys():
-              self._GLPeakLists[peakListView].renderMode = GLRENDERMODE_REBUILD
-
+        if peakListView in self._GLPeakLists.keys():
+          if self._GLPeakLists[peakListView].renderMode == GLRENDERMODE_RESCALE:
             self._buildPeakLists(spectrumView, peakListView)
+
+        if peakListView.buildPeakLists:
+          peakListView.buildPeakLists = False
+
+          # set the interior flags for rebuilding the GLdisplay
+          if peakListView in self._GLPeakLists.keys():
+            self._GLPeakLists[peakListView].renderMode = GLRENDERMODE_REBUILD
+
+          self._buildPeakLists(spectrumView, peakListView)
 
   def buildPeakListLabels(self):
     if self._parent.isDeleted:
@@ -2944,20 +2942,18 @@ class CcpnGLWidget(QOpenGLWidget):
     for spectrumView in self._parent.spectrumViews:
       for peakListView in spectrumView.peakListViews:
 
-        if isinstance(peakListView.peakList, PeakList):
+        if peakListView in self._GLPeakListLabels.keys():
+          if self._GLPeakListLabels[peakListView].renderMode == GLRENDERMODE_RESCALE:
+            self._rescalePeakListLabels(spectrumView, peakListView, self._GLPeakListLabels[peakListView])
+
+        if peakListView.buildPeakListLabels:
+          peakListView.buildPeakListLabels = False
 
           if peakListView in self._GLPeakListLabels.keys():
-            if self._GLPeakListLabels[peakListView].renderMode == GLRENDERMODE_RESCALE:
-              self._rescalePeakListLabels(spectrumView, peakListView, self._GLPeakListLabels[peakListView])
+            self._GLPeakListLabels[peakListView].renderMode = GLRENDERMODE_REBUILD
 
-          if peakListView.buildPeakListLabels:
-            peakListView.buildPeakListLabels = False
-
-            if peakListView in self._GLPeakListLabels.keys():
-              self._GLPeakListLabels[peakListView].renderMode = GLRENDERMODE_REBUILD
-
-            # self._buildPeakListLabels(spectrumView, peakListView)
-            _buildList.append([spectrumView, peakListView])
+          # self._buildPeakListLabels(spectrumView, peakListView)
+          _buildList.append([spectrumView, peakListView])
 
     if _buildList:
       self._buildAllPeakListLabels(_buildList)
@@ -2969,16 +2965,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
     self.buildIntegralLists()
 
-    # loop through the attached peakListViews to the strip
+    # loop through the attached integralListViews to the strip
     for spectrumView in self._ordering:                             #self._parent.spectrumViews:
-      for peakListView in spectrumView.peakListViews:
-        if spectrumView.isVisible() and peakListView.isVisible():
+      for integralListView in spectrumView.integralListViews:
+        if spectrumView.isVisible() and integralListView.isVisible():
 
-          if peakListView in self._GLIntegralLists.keys():
-            self._GLIntegralLists[peakListView].drawIndexArray()
+          if integralListView in self._GLIntegralLists.keys():
+            self._GLIntegralLists[integralListView].drawIndexArray()
 
             # draw the integralAreas if they exist
-            for integralArea in self._GLIntegralLists[peakListView]._regions:
+            for integralArea in self._GLIntegralLists[integralListView]._regions:
               if hasattr(integralArea, '_integralArea'):
                 if self._stackingValue:
                   # use the stacking matrix to offset the 1D spectra
@@ -2989,10 +2985,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 integralArea._integralArea.drawVertexColor()
 
     self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
-
-    # for il in self._GLIntegralLists.values():
-    #   if il.spectrumView.isVisible() and il.integralListView.isVisible():
-    #     il.drawIndexArray()
 
   def drawPeakLists(self):
     if self._parent.isDeleted:

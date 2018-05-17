@@ -704,6 +704,10 @@ class Gui1dWidget(CcpnGLWidget):
           for peakListView in spectrumView.peakListViews:
             peakListView.buildPeakLists = True
             peakListView.buildPeakListLabels = True
+            peakListView.buildIntegralLists = True
+            peakListView.buildIntegralListLabels = True
+            peakListView.buildMultipletLists = True
+            peakListView.buildMultipletListLabels = True
 
         spectrumView.buildContours = False
         spectrumView.buildContoursOnly = False

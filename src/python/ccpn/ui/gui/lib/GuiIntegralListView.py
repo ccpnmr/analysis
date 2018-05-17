@@ -83,8 +83,8 @@ class GuiIntegralListView(QtWidgets.QGraphicsItem):
         # self.regionChanged()
 
         # ED - added to allow rebuilding of GLlists
-        self.buildMultipletLists = True
-        self.buildMultipletListLabels = True
+        self.buildIntegralLists = True
+        self.buildIntegralListLabels = True
         # self.buildIntegralLists = True
 
         # if isinstance(self.peakList, IntegralList):

@@ -152,6 +152,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.buildPeakLists = True
     self.buildPeakListLabels = True
     self.buildIntegralLists = True
+    self.buildIntegralListLabels = True
+    self.buildMultipletLists = True
+    self.buildMultipletListLabels = True
     # self._buildSignal = _spectrumSignal()   # TODO:ED check signalling
 
     # override of Qt setVisible

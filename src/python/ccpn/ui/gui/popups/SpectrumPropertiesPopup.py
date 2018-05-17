@@ -1165,6 +1165,11 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
 
     self._fillPullDowns()
 
+    # clear the changes dict in each tab
+    tabs = self._generalTab
+    for t in tabs:
+      t._changes = dict()
+
   def _fillPullDowns(self):
     for aTab in self._generalTab:
       fillColourPulldown(aTab.colourBox, allowAuto=False)

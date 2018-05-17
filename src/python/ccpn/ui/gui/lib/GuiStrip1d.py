@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
 import numpy as np
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu
+from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu,_exampleMenu
 
 class GuiStrip1d(GuiStrip):
   """

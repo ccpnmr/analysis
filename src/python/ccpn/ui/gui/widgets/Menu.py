@@ -43,14 +43,14 @@ class Menu(QtWidgets.QMenu, Base):
     self.setFont(menuFont)
 
 
-  def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False, **kwargs):
+  def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False,icon=None, **kwargs):
     action = Action(self.parent(), text, callback=callback, shortcut=shortcut,
-                         checked=checked, checkable=checkable, isFloatWidget=self.isFloatWidget)
+                         checked=checked, checkable=checkable,icon=icon, isFloatWidget=self.isFloatWidget)
     self.addAction(action)
     return action
     # print(shortcut)
 
-  def _addSeparator(self, **kwargs):
+  def _addSeparator(self,*args, **kwargs):
     separator = self.addSeparator()
     return separator
 
@@ -63,7 +63,6 @@ class Menu(QtWidgets.QMenu, Base):
     ''' this adds a normal QMenu '''
     QtWidgets.QMenu.addMenu(self, menu)
     return menu
-
 
 class MenuBar(QtWidgets.QMenuBar):
   def __init__(self, parent):

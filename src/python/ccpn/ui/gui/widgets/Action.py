@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets, QtCore
-
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 from ccpn.framework.Translation import getTranslator
@@ -63,6 +63,9 @@ class Action(Base, QtWidgets.QAction):
       # PyQt5 always seems to add a checked argument for Action callbacks
       self.triggered.connect(lambda checked, *args, **kw: callback(*args, **kw))
 
+    if icon is not None:
+      ic = Icon(icon)
+      self.setIcon(ic)
     self.setEnabled(enabled)
     # Base.__init__(self, **kw)
 

@@ -5345,8 +5345,8 @@ def loadFromStream(stream, topObjId=None, topObject=None, partialLoad=False):
 
     if ((topObjectKey is not None and topObjectKey != 'ignore')):
       xx = result.getFullKey()
-      if (topObjectKey != xx):
-        print('WARNING TopObject key changed on reading', topObjectKey, xx)
+      # if (topObjectKey != xx):
+      #   print('WARNING TopObject key changed on reading', topObjectKey, xx)
 
     for obj in list(objectDict.values()):
       obj.checkValid()

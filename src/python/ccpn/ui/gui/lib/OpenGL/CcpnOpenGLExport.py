@@ -387,6 +387,7 @@ class CcpnOpenGLExporter():
         """
         colourGroups = OrderedDict()
         self._appendIndexLineGroupFill(indArray=self.parent._GLPeakLists,
+                                       listView='peakListViews',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                PLOTBOTTOM: self.displayScale * self.mainB,
@@ -416,6 +417,7 @@ class CcpnOpenGLExporter():
         """
         colourGroups = OrderedDict()
         self._appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
+                                       listView='integralListViews',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                PLOTBOTTOM: self.displayScale * self.mainB,
@@ -435,12 +437,12 @@ class CcpnOpenGLExporter():
             if spectrumView.isDeleted:
                 continue
 
-            validPeakListViews = [pp for pp in spectrumView.peakListViews
+            validIntegralListViews = [pp for pp in spectrumView.integralListViews
                                   if pp.isVisible()
                                   and spectrumView.isVisible()
                                   and pp in self.parent._GLIntegralLists.keys()]
 
-            for peakListView in validPeakListViews:  # spectrumView.peakListViews:
+            for integralListView in validIntegralListViews:  # spectrumView.integralListViews:
                 mat = None
                 if spectrumView.spectrum.dimensionCount > 1:
                     if spectrumView in self.parent._spectrumSettings.keys():
@@ -458,7 +460,7 @@ class CcpnOpenGLExporter():
                             mat = None
 
                 # draw the integralAreas if they exist
-                for integralArea in self.parent._GLIntegralLists[peakListView]._regions:
+                for integralArea in self.parent._GLIntegralLists[integralListView]._regions:
                     if hasattr(integralArea, '_integralArea'):
 
                         thisSpec = integralArea._integralArea
@@ -926,20 +928,21 @@ class CcpnOpenGLExporter():
         if splitGroups:
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
 
-    def _appendIndexLineGroupFill(self, indArray, colourGroups, plotDim, name,
+    def _appendIndexLineGroupFill(self, indArray=None, listView=None, colourGroups=None, plotDim=None, name=None,
                                   fillMode=None, splitGroups=False):
         for spectrumView in self._ordering:
             if spectrumView.isDeleted:
                 continue
 
-            validPeakListViews = [pp for pp in spectrumView.peakListViews
+            attribList = getattr(spectrumView, listView)
+            validListViews = [pp for pp in attribList
                                   if pp.isVisible()
                                   and spectrumView.isVisible()]
 
-            for peakListView in validPeakListViews:       #spectrumView.peakListViews:
-                if peakListView in indArray.keys():
+            for thisListView in validListViews:
+                if thisListView in indArray.keys():
 
-                    thisSpec = indArray[peakListView]
+                    thisSpec = indArray[thisListView]
                     self._appendIndexLineGroup(indArray=thisSpec,
                                                colourGroups=colourGroups,
                                                plotDim=plotDim,

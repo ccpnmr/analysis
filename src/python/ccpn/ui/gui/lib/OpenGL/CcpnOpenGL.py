@@ -1272,8 +1272,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                              tol=delta):
               self._dragRegions.add((region, 'v', 3))   # both lines of v-region
               # break
-    # else:
-    #   self._dragRegions = set()         # nothing selected
 
     return self._dragRegions
 
@@ -1311,7 +1309,11 @@ class CcpnGLWidget(QOpenGLWidget):
     self.mousePressInCornerButtons(mx, my)
 
     #€ check for dragging of infinite lines, region boundaries, integrals
-    if not self.mousePressInRegion(self._infiniteLines):
+    self.mousePressInRegion(self._infiniteLines)
+    while len(self._dragRegions) > 1:
+      self._dragRegions.pop()
+
+    if not self._dragRegions:
       if not self.mousePressInRegion(self._externalRegions._regions):
         self.mousePressInIntegralLists()
 

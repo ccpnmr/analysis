@@ -1225,6 +1225,48 @@ class CcpnGLWidget(QOpenGLWidget):
         if (minDiff < button[2]) and (maxDiff < button[3]):
           button[4]()
 
+  def mousePressIn1DArea(self, regions):
+    for region in regions:
+      if region._objectView and not region._objectView.isVisible():
+        continue
+
+      if region._object and hasattr(region._object, '_1Dregions'):
+        # if not self._widthsChangedEnough((region.values[0], 0.0),
+        #                                  (self.cursorCoordinate[0], 0.0),
+        #                                  tol=abs(3*self.pixelX)):
+        #   self._dragRegions.add((region, 'v', 0))     # line 0 of v-region
+        #
+        # elif not self._widthsChangedEnough((region.values[1], 0.0),
+        #                                   (self.cursorCoordinate[0], 0.0),
+        #                                   tol=abs(3*self.pixelX)):
+        #   self._dragRegions.add((region, 'v', 1))     # line 1 of v-region
+        #
+        # else:
+        #   mid = (region.values[0]+region.values[1])/2.0
+        #   delta = abs(region.values[0]-region.values[1])/2.0
+        #   if not self._widthsChangedEnough((mid, 0.0),
+        #                                    (self.cursorCoordinate[0], 0.0),
+        #                                    tol=delta):
+        #     self._dragRegions.add((region, 'v', 3))   # both lines of v-region
+
+        mid = np.median(region._object._1Dregions[1])
+        delta = (np.max(region._object._1Dregions[1]) - np.min(region._object._1Dregions[1])) / 2.0
+        inX = self._widthsChangedEnough((mid, 0.0),
+                                         (self.cursorCoordinate[0], 0.0),
+                                         tol=delta)
+
+        mx = np.max([region._object._1Dregions[0], np.max(region._object._1Dregions[2])])
+        mn = np.min([region._object._1Dregions[0], np.min(region._object._1Dregions[2])])
+        mid = (mx+mn) / 2.0
+        delta = (mx-mn) / 2.0
+        inY = self._widthsChangedEnough((0.0, mid),
+                                         (0.0, self.cursorCoordinate[1]),
+                                         tol=delta)
+        if not inX and not inY:
+          self._dragRegions.add((region, 'v', 3))
+
+    return self._dragRegions
+
   def mousePressInRegion(self, regions):
     for region in regions:
       if region._objectView and not region._objectView.isVisible():
@@ -4563,8 +4605,8 @@ class CcpnGLWidget(QOpenGLWidget):
     return labelling, labelsChanged
 
   def _widthsChangedEnough(self, r1, r2, tol=1e-5):
-    r1 = sorted(r1)
-    r2 = sorted(r2)
+    # r1 = sorted(r1)
+    # r2 = sorted(r2)
     minDiff = abs(r1[0] - r2[0])
     maxDiff = abs(r1[1] - r2[1])
     return (minDiff > tol) or (maxDiff > tol)
@@ -5014,9 +5056,9 @@ class CcpnGLWidget(QOpenGLWidget):
       for reg in self._GLIntegralLists.values():
         if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
           continue
-        integralPressed = self.mousePressInRegion(reg._regions)
+        integralPressed = self.mousePressIn1DArea(reg._regions)
         if integralPressed:
-          self.current.integrals = [integralPressed._object]
+          self.current.integrals = [ilp[0]._object for ilp in integralPressed]
           break
 
     elif shiftRightMouse(event):

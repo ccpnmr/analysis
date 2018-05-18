@@ -166,55 +166,51 @@ def _printItem(strip):
             shortcut='PT', callback=strip.showExportDialog)
 
 
+def _separator():
+    return _SCMitem(typeItem=ItemTypes.get(SEPARATOR))
+
 # Common Peak Menu items
 
 def _deletePeakItem(strip):
     return _SCMitem(name='Delete peak/s',
-            typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak/s from project', callback=strip.mainWindow.deleteSelectedPeaks),
+            typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak/s from project', callback=strip.mainWindow.deleteSelectedPeaks)
 
-def _separator():
-    return _SCMitem(typeItem=ItemTypes.get(SEPARATOR))
 
 
 
 ###### Common Phasing Menu Items
 
+def _addTraceItem(strip):
+    return _SCMitem(name='Add Trace',
+             typeItem=ItemTypes.get(ITEM), toolTip='Add new trace',
+             shortcut='PT', callback=strip._newPhasingTrace)
 
-def _commonPhasingMenuItems(strip):
-    '''
-
-    :param strip: 1D or nD GuiStrip Object
-    :return: A list of common menu item used in the phasing contect menu, both in nd and 1D
-    '''
-    items = [
-            _SCMitem(name='Add Trace',
-                         typeItem=ItemTypes.get(ITEM), toolTip='Add new trace',
-                         shortcut='PT', callback=strip._newPhasingTrace),
-
-            _SCMitem(name='Remove All Traces',
+def _removeAllTracesItem(strip):
+    return _SCMitem(name='Remove All Traces',
                          typeItem=ItemTypes.get(ITEM), toolTip='Remove all traces',
-                         shortcut='TR', callback=strip.removePhasingTraces),
+                         shortcut='TR', callback=strip.removePhasingTraces)
 
-            _SCMitem(name='Increase Trace Scale',
+def _increaseTraceScaleItem(strip):
+    return _SCMitem(name='Increase Trace Scale',
                          typeItem=ItemTypes.get(ITEM), toolTip='Increase Trace Scale',
-                         shortcut='TU',icon='icons/tracescale-up', callback=strip.spectrumDisplay.increaseTraceScale),
+                         shortcut='TU',icon='icons/tracescale-up', callback=strip.spectrumDisplay.increaseTraceScale)
 
-            _SCMitem(name='Decrease Trace Scale',
+def _decreaseTraceScaleItem(strip):
+    return _SCMitem(name='Decrease Trace Scale',
                          typeItem=ItemTypes.get(ITEM), toolTip='Decrease Trace Scale',
-                         shortcut='TD', icon='icons/tracescale-down', callback=strip.spectrumDisplay.decreaseTraceScale),
+                         shortcut='TD', icon='icons/tracescale-down', callback=strip.spectrumDisplay.decreaseTraceScale)
 
-            _SCMitem(name='Set Pivot',
+def _setPivotItem(strip):
+    return _SCMitem(name='Set Pivot',
                          typeItem=ItemTypes.get(ITEM), toolTip='Set pivot value', checkable=True, checked=True,
-                         shortcut='PV', callback=strip._setPhasingPivot),
+                         shortcut='PV', callback=strip._setPhasingPivot)
 
-            _separator(),
-
-            _SCMitem(name='Exit Phasing Console',
+def _exitPhasingConsoleItem(strip):
+    return _SCMitem(name='Exit Phasing Console',
                          typeItem=ItemTypes.get(ITEM), toolTip='Exit phasing console', checkable=True, checked=True,
-                         shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole, icon='icons/phase-console', )
-            ]
+                         shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole, icon='icons/phase-console',)
 
-    return items
+
 
 
 ########################################################################################################################
@@ -268,21 +264,25 @@ def _get1dPhasingMenu(guiStrip1d) -> Menu:
     """
     Creates and returns the phasing 1d context menu. Opened when right clicked on the background canvas in "phasing State mode"
     """
-    items = _commonPhasingMenuItems(guiStrip1d)
 
+    items = [
+            _addTraceItem(guiStrip1d),
+            _removeAllTracesItem(guiStrip1d),        
+            _setPivotItem(guiStrip1d),
+            _separator(),
+            _exitPhasingConsoleItem(guiStrip1d)          
+            ]
     return _createMenu(guiStrip1d, items)
 
 
 def _get1dPeakMenu(guiStrip1d) -> Menu:
     """
     Creates and returns the current peak 1d context menu. Opened when right clicked on selected peak/s
-
     """
     items = [
             _deletePeakItem(guiStrip1d),
 
             ]
-
 
     return _createMenu(guiStrip1d, items)
 
@@ -345,8 +345,15 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
     """
     Creates and returns the phasing Nd context menu.  Opened when right clicked on the background canvas in "phasing State mode"
     """
-    items = _commonPhasingMenuItems(guiStripNd)
-
+    items = [
+            _addTraceItem(guiStripNd),
+            _removeAllTracesItem(guiStripNd),
+            _increaseTraceScaleItem(guiStripNd),
+            _decreaseTraceScaleItem(guiStripNd),
+            _setPivotItem(guiStripNd),
+            _separator(),
+            _exitPhasingConsoleItem(guiStripNd)
+            ]
     return _createMenu(guiStripNd, items)
 
 
@@ -357,7 +364,6 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
     """
     items = [
             _deletePeakItem(guiStripNd)
-
             ]
 
     return _createMenu(guiStripNd, items)

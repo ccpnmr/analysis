@@ -5093,7 +5093,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
       peaks = list(self.current.peaks)
 
-      openContextMenu = False
+      if len(peaks)>0:
+        from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems
+        ii = strip._contextMenus.get(PeakMenu)
+        _hidePeaksSingleActionItems(strip, ii)
+
       # now select (take first one within range)
       for spectrumView in self._parent.spectrumViews:
 

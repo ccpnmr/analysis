@@ -47,7 +47,6 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui import guiSettings
-from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPeakMenu
 
 from ccpn.util import Ticks
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
@@ -208,7 +207,6 @@ class GuiStrip(Frame):
     self.axisPositionDict = {}  # axisCode --> position
 
     self._contextMenuMode = DefaultMenu
-    self._peakMenu = _get1dPeakMenu(self)
 
     self._contextMenus = {DefaultMenu  :None,
                           PeakMenu     :None,
@@ -355,6 +353,14 @@ class GuiStrip(Frame):
   # def hideStripLabel(self):
   #   "Hide the _stripLabel; convienience"
   #   self._stripLabel.setVisible(False)
+
+  def _openCopySelectedPeaks(self):
+    from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
+    popup = CopyPeaks(parent=self.mainWindow, mainWindow=self.mainWindow)
+    peaks = self.current.peaks
+    popup._selectPeaks(peaks)
+    popup.exec()
+    popup.raise_()
 
   def _updateStripLabel(self, callbackDict):
     "Update the striplabel if it represented a NmrResidue that has changed its id"

@@ -53,7 +53,7 @@ class _SCMitem(object):
         :param kwargs: needed  any of _kwrgs: name, icon, tooltip, shortcut, checkable, checked, callback, stripMethodName
         '''
         self._kwrgs = {'name': '', 'icon': None, 'tooltip': '', 'shortcut': None, 'checkable': False,
-                       'checked': False, 'callback': None, 'stripMethodName': ''}
+                       'checked': False, 'callback': None, 'stripMethodName': '', 'obj':self}
         self._kwrgs.update(kwargs)
         for k,v in  self._kwrgs.items():
             setattr(self, k,v)
@@ -173,11 +173,25 @@ def _separator():
 
 # Common Peak Menu items
 
+def _copyPeakItem(strip):
+    return _SCMitem(name='Copy peak(s)',
+            typeItem=ItemTypes.get(ITEM), toolTip='Copy Peak(s) to a PeakList', callback=strip._openCopySelectedPeaks)
+
+
 def _deletePeakItem(strip):
-    return _SCMitem(name='Delete peak/s',
-            typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak/s from project', callback=strip.mainWindow.deleteSelectedPeaks)
+    return _SCMitem(name='Delete peak(s)',
+            typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project', callback=strip.mainWindow.deleteSelectedPeaks)
+
+def _editPeakAssignmentItem(strip):
+    return _SCMitem(name='Edit peak',
+            typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
 
 
+def _hidePeaksSingleActionItems(strip, menu):
+    ''' Greys out item that should appear only if one single peak is selected'''
+    for action in menu.actions():
+        if action.text() == _editPeakAssignmentItem(strip).name:
+            action.setEnabled(False)
 
 
 ###### Common Phasing Menu Items
@@ -283,6 +297,8 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
     """
     items = [
             _deletePeakItem(guiStrip1d),
+            _copyPeakItem(guiStrip1d),
+            _editPeakAssignmentItem(guiStrip1d)
 
             ]
 
@@ -365,7 +381,10 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
     Creates and returns the current peak Nd context menu. Opened when right clicked on selected peak/s
     """
     items = [
-            _deletePeakItem(guiStripNd)
+
+        _deletePeakItem(guiStripNd),
+        _copyPeakItem(guiStripNd),
+        _editPeakAssignmentItem(guiStripNd)
             ]
 
     return _createMenu(guiStripNd, items)

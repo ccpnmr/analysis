@@ -193,36 +193,35 @@ class GuiWindow():
 
           validViews = [sv for sv in strip.spectrumViews if sv.isVisible()]
 
-          for spectrumView in validViews:
+          strip._startCommandEchoBlock('addIntegral1D', limits)
+          try:
+            for spectrumView in validViews:
 
-            validIntegralLists = [il.peakList for il in spectrumView.peakListViews if isinstance(il.peakList, IntegralList)
-                                 ]
+              if not spectrumView.spectrum.integralLists:
+                spectrumView.spectrum.newIntegralList()
 
-            if len(validIntegralLists) > 1: # make a integralView always visible if there is only one and are creating a new integral
-              validIntegralLists = [il for il in validIntegralLists if il.isVisible()]
+              validIntegralLists = [il.integralList for il in spectrumView.integralListViews]
 
-            if len(validIntegralLists) == 1:
-              for il in spectrumView.peakListViews:
-                if isinstance(il.peakList, IntegralList):
-                  il.setVisible(True)
+              if len(
+                      validIntegralLists) > 1:  # make a integralView always visible if there is only one and are creating a new integral
+                validIntegralLists = [il for il in validIntegralLists if il.isVisible()]
 
+              if len(validIntegralLists) == 1:
+                for il in spectrumView.peakListViews:
+                  if isinstance(il.peakList, IntegralList):
+                    il.setVisible(True)
 
-            for integralList in validIntegralLists:
-              integral = integralList.newIntegral(value=None, limits=[limits,])
-              self.current.integral = integral
-              if peak:
-                integral.peak = peak
-              else:
-                if len(self.current.peaks) == 1:
-                  integral.peak = self.current.peak
+              for integralList in validIntegralLists:
+                integral = integralList.newIntegral(value=None, limits=[limits, ])
+                self.current.integrals += (integral,)
+                if peak:
+                  integral.peak = peak
+                else:
+                  if len(self.current.peaks) == 1:
+                    integral.peak = self.current.peak
+          finally:
+            strip._endCommandEchoBlock()
 
-          # if not len(spectrumView.spectrum.integralLists) >0:
-            #   spectrumView.spectrum.newIntegralList()
-            # integral = spectrumView.spectrum.integralLists[-1].newIntegral(value=None, limits=[limits,])
-            # self.current.integrals += (integral,)
-
-            # TODO:ED disable to stop integralLines error
-            # strip.plotWidget.viewBox._showIntegralLines()
       else:
         getLogger().warning('Current strip is not 1D')
 

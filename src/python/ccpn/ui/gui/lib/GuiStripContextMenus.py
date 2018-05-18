@@ -221,15 +221,12 @@ def _exitPhasingConsoleItem(strip):
 
 
 def _get1dDefaultMenu(guiStrip1d) -> Menu:
-    """
-    Creates and returns the 1d default context menu. Opened when right clicked on the background canvas
-    """
     items = [
             _toolBarItem(guiStrip1d),
-            _gridItem(guiStrip1d),
             _crossHairItem(guiStrip1d),
+            _gridItem(guiStrip1d),
             _cyclePeakLabelsItem(guiStrip1d),
-            _separator(),       
+            _separator(),
             _SCMitem(name='Colours...',
                         typeItem=ItemTypes.get(ITEM), icon='icons/contour-pos-neg', toolTip='Change colours',
                         callback=guiStrip1d.spectrumDisplay.adjustContours),
@@ -259,6 +256,9 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
             _separator(),
             _printItem(guiStrip1d),
             ]
+    """
+    Creates and returns the 1d default context menu. Opened when right clicked on the background canvas
+    """
     return _createMenu(guiStrip1d, items)
 
 

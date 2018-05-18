@@ -5079,7 +5079,8 @@ class CcpnGLWidget(QOpenGLWidget):
       event.accept()
       self._resetBoxes()
 
-
+      # Search if the event is in a range of a selected peak.
+      # TODO make shorter way to get an object position from the gl
       xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
       yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
       xPositions = [xPosition - 2 * xPeakWidth, xPosition + 2 * xPeakWidth]
@@ -5134,7 +5135,6 @@ class CcpnGLWidget(QOpenGLWidget):
                     strip.contextMenuMode = PeakMenu
                     menu = strip._contextMenus.get(strip.contextMenuMode)
                     break
-
 
               elif len(peak.axisCodes) == 1:
                 # 1d check

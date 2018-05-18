@@ -47,7 +47,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui import guiSettings
-from ccpn.ui.gui.lib.GuiStripContextMenus import _getPeakMenu
+from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPeakMenu
 
 from ccpn.util import Ticks
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
@@ -199,7 +199,7 @@ class GuiStrip(Frame):
     # need to keep track of mouse position because Qt shortcuts don't provide
     # the widget or the position of where the cursor is
     self.axisPositionDict = {}  # axisCode --> position
-    self._peakMenu = _getPeakMenu(self)
+    self._peakMenu = _get1dPeakMenu(self)
     self._initRulers()
 
     self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)

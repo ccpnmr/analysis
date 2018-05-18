@@ -201,10 +201,10 @@ def _newMultipletItem(strip):
             typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
                     callback=strip.mainWindow.addMultiplet)
 
-def _integrateItem(strip):
+def _integrate1DItem(strip):
     return _SCMitem(name='Integrate Peak',
-            typeItem=ItemTypes.get(ITEM), toolTip='Add integral and link to peak',
-            callback=strip.mainWindow.addIntegral)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Add integral and link to peak',
+                    callback=strip.mainWindow.add1DIntegral)
 
 # def _propagateAssignmentItem(strip):
 #     # Not implemented
@@ -216,10 +216,16 @@ def _enableAllItems(menu):
 
 def _hidePeaksSingleActionItems(strip, menu):
     ''' Greys out items that should appear only if one single peak is selected'''
+    hideItems = [
+                _editPeakAssignmentItem(strip).name,
+                _integrateItem(strip).name
+                ]
 
     for action in menu.actions():
-        if action.text() == _editPeakAssignmentItem(strip).name:
-            action.setEnabled(False)
+        for item in hideItems:
+            if action.text() == item:
+                action.setEnabled(False)
+
 
 ##############################  Common Phasing  menu items ##############################
 ## This items are used to create both 1D and Nd Phasing menus
@@ -329,7 +335,7 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
             _editPeakAssignmentItem(guiStrip1d),
             _separator(),
             _newMultipletItem(guiStrip1d),
-            _integrateItem(guiStrip1d)
+            _integrate1DItem(guiStrip1d)
 
             ]
 
@@ -418,7 +424,6 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _editPeakAssignmentItem(guiStripNd),
         _separator(),
         _newMultipletItem(guiStripNd),
-        _integrateItem(guiStripNd)
 
 
             ]

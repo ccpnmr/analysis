@@ -83,7 +83,7 @@ class GuiWindow():
     addShortCut("t, r", self, self.removePhasingTraces, context=context)
     addShortCut("a, m", self, self.addMultiplet, context=context)
     addShortCut("p, t", self, self.newPhasingTrace, context=context)
-    addShortCut("i, 1", self, self.addIntegral, context=context)
+    addShortCut("i, 1", self, self.add1DIntegral, context=context)
     addShortCut("w, 1", self, self.getCurrentPositionAndStrip, context=context)
     addShortCut("r, p", self, self.refitCurrentPeaks, context=context)
     addShortCut("Tab,Tab", self, self.moveToNextSpectrum, context=context)
@@ -180,8 +180,8 @@ class GuiWindow():
       peak.position = position
       peak.lineWidths = lineWidths
 
-  def addIntegral(self, peak=None):
-    # TODO MAKE SURE WORKS FOR ANY DIMENSIONS
+  def add1DIntegral(self, peak=None):
+    # TODO MAKE FOR ANY DIMENSIONS
     ''' Peak: take self.currentPeak as default'''
     strip = self.current.strip
 

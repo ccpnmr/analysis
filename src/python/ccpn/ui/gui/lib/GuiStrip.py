@@ -214,7 +214,7 @@ class GuiStrip(Frame):
                           MultipletMenu:None,
                           }
 
-
+    self.navigateToSubMenu = None
     self._initRulers()
     self._isPhasingOn = False
     self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
@@ -463,6 +463,36 @@ class GuiStrip(Frame):
     self._CcpnGLWidget._processPeakNotifier(data)
     # except Exception as es:
     #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
+  def _addItemsToNavigateToDisplayMenu(self):
+    ''' Copied from old viewbox. This function apparently take the current peak
+    position and uses to pan a selected display from the list of spectrumViews or the current cursor position
+    TODO needs clear documentation'''
+    from functools import partial
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+    from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
+
+    # try:
+    if self.navigateToSubMenu:
+      self.navigateToSubMenu.clear()
+
+      if self.current.peak:
+        for spectrumDisplay in self.current.project.spectrumDisplays:
+          strip = spectrumDisplay.strips[0]
+          if len(list(set(strip.axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
+            self.navigateToSubMenu.addAction(spectrumDisplay.pid,
+                                               partial(navigateToPeakPosition, self.current.project,
+                                                       self.current.peak, [spectrumDisplay.pid]))
+      else:
+        for spectrumDisplay in self.current.project.spectrumDisplays:
+          axisCodes = self.current.strip.axisCodes
+          strip = spectrumDisplay.strips[0]
+          if len(list(set(strip.axisCodes) & set(axisCodes))) <= 2:
+            self.navigateToSubMenu.addAction(spectrumDisplay.pid,
+                                               partial(navigateToPositionInStrip, strip, self.current.cursorPosition,
+                                                       axisCodes))
+    # except:
+    #   pass
 
   def _updateDisplayedIntegrals(self, data):
     "Callback when peaks have changed"
@@ -759,7 +789,6 @@ class GuiStrip(Frame):
     self.vPhasingPivot.setVisible(False)
 
     # change menu
-    self.viewBox.menu = self._defaultMenu
     self._isPhasingOn = False
     for spectrumView in self.spectrumViews:
       spectrumView._turnOffPhasing()

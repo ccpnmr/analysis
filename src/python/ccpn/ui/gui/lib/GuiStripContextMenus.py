@@ -76,7 +76,6 @@ def _createMenu(strip, items):
                 strip._spectrumUtilActions[i.name] = action
         except Exception as e:
             print(e, "menus")
-
     return menu
 
 
@@ -129,11 +128,7 @@ def _resetZoom(strip):
              callback=strip.resetZoom)
 
 
-def _navigateItem(strip):
-    return _SCMitem(name='Navigate To',
-             typeItem=ItemTypes.get(MENU), toolTip='Navigate To ...',
-             shortcut='NT', stripMethodName='navigateToMenu',
-             callback=None)
+
 
 def _toggleHorizontalTraceItem(strip):
     return _SCMitem(name='Horizontal Trace',
@@ -205,6 +200,13 @@ def _integrate1DItem(strip):
     return _SCMitem(name='Integrate Peak',
                     typeItem=ItemTypes.get(ITEM), toolTip='Add integral and link to peak',
                     callback=strip.mainWindow.add1DIntegral)
+
+def _navigateToDisplayItem(strip):
+    return  _SCMitem(name='Navigate To Position in:',
+             typeItem=ItemTypes.get(MENU), toolTip='Move other display at peak position',
+             shortcut='NT', stripMethodName='navigateToSubMenu',
+             callback=None)
+
 
 # def _propagateAssignmentItem(strip):
 #     # Not implemented
@@ -335,7 +337,9 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
             _editPeakAssignmentItem(guiStrip1d),
             _separator(),
             _newMultipletItem(guiStrip1d),
-            _integrate1DItem(guiStrip1d)
+            _integrate1DItem(guiStrip1d),
+            _separator(),
+            _navigateToDisplayItem(guiStrip1d),
 
             ]
 
@@ -381,7 +385,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
             #          typeItem=ItemTypes.get(ITEM), icon='icons/zoom-restore', toolTip='Restore Zoom',
             #          callback=guiStripNd.spectrumDisplay._restoreZoom),
             _resetZoom(guiStripNd),
-            _navigateItem(guiStripNd),
+
             _separator(),
             _toggleHorizontalTraceItem(guiStripNd),
             _toggleVerticalTraceItem(guiStripNd),
@@ -424,6 +428,8 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _editPeakAssignmentItem(guiStripNd),
         _separator(),
         _newMultipletItem(guiStripNd),
+        _separator(),
+        _navigateToDisplayItem(guiStripNd),
 
 
             ]

@@ -5099,6 +5099,7 @@ class CcpnGLWidget(QOpenGLWidget):
         _hidePeaksSingleActionItems(strip, ii)
       else:
         _enableAllItems(ii)
+        strip._addItemsToNavigateToDisplayMenu()
 
 
       # now select (take first one within range)

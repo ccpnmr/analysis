@@ -263,7 +263,9 @@ class TestNmrAtomCreation(WrapperTesting):
 
 
   def test_CreateNmrAtomByProducingFromProjectWithParametersMismatchedType(self):
-    self.assertRaises(ValueError, self.project._produceNmrAtom, '@2.@1.ARG.NE')
+    # self.assertRaises(ValueError, self.project._produceNmrAtom, '@2.@1.ARG.NE')
+    newNmrAtom1 = self.project._produceNmrAtom(atomId='@2.@1.ARG.NE')
+    self.assertEqual(newNmrAtom1.pid, 'NA:@2.@1..NE')
 
 
   def test_CreateNmrAtomByProducingFromProjectByPidWithChain(self):
@@ -275,9 +277,6 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(self.project.nmrAtoms, [newNmrAtom])
     self.assertIs(self.nmrResidue, newNmrAtom.nmrResidue)
     self.assertEqual(self.project.nmrResidues, [self.nmrResidue])
-
-  def test_CreateNmrAtomByProducingFromProjectByPidMismatchedType(self):
-    self.assertRaises(ValueError, self.project._produceNmrAtom, '@2.@1.ARG.NE')
 
 
   def test_CreateNmrAtomByProducingFromProjectWithParameters(self):

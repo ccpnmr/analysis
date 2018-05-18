@@ -43,6 +43,8 @@ ItemTypes =  {
              SEPARATOR: Menu._addSeparator.__name__
              }
 
+
+
 class _SCMitem(object):
     '''Strip context menu item base class. Used to autogenerate the context menu items in a Gui strip '''
     def __init__(self, typeItem, **kwargs):
@@ -207,7 +209,7 @@ def _setPivotItem(strip):
 
 def _exitPhasingConsoleItem(strip):
     return _SCMitem(name='Exit Phasing Console',
-                         typeItem=ItemTypes.get(ITEM), toolTip='Exit phasing console', checkable=True, checked=True,
+                         typeItem=ItemTypes.get(ITEM), toolTip='Exit phasing console',
                          shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole, icon='icons/phase-console',)
 
 

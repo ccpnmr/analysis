@@ -56,8 +56,15 @@ from ccpn.util.Logging import getLogger
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
 
+DefaultMenu = 'DefaultMenu'
+PeakMenu = 'PeakMenu'
+MultipletMenu = 'MultipletMenu'
+PhasingMenu = 'PhasingMenu'
+
 
 class GuiStrip(Frame):
+
+
 
   def __init__(self, spectrumDisplay, useOpenGL=False):
     """
@@ -199,9 +206,19 @@ class GuiStrip(Frame):
     # need to keep track of mouse position because Qt shortcuts don't provide
     # the widget or the position of where the cursor is
     self.axisPositionDict = {}  # axisCode --> position
-    self._peakMenu = _get1dPeakMenu(self)
-    self._initRulers()
 
+    self._contextMenuMode = DefaultMenu
+    self._peakMenu = _get1dPeakMenu(self)
+
+    self._contextMenus = {DefaultMenu  :None,
+                          PeakMenu     :None,
+                          PhasingMenu  :None,
+                          MultipletMenu:None,
+                          }
+
+
+    self._initRulers()
+    self._isPhasingOn = False
     self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
     self.hPhasingPivot.setVisible(False)
     self.plotWidget.addItem(self.hPhasingPivot)
@@ -619,6 +636,20 @@ class GuiStrip(Frame):
     for spectrumView in self.spectrumViews:
       spectrumView.traceScale = traceScale
 
+
+  @property
+  def contextMenuMode(self):
+      return self._contextMenuMode
+
+  @contextMenuMode.getter
+  def contextMenuMode(self):
+      return self._contextMenuMode
+
+  @contextMenuMode.setter
+  def contextMenuMode(self, mode):
+      self._contextMenuMode = mode
+
+
   def turnOnPhasing(self):
 
     phasingFrame = self.spectrumDisplay.phasingFrame
@@ -626,6 +657,7 @@ class GuiStrip(Frame):
     self.vPhasingPivot.setVisible(True)
 
     # change menu
+    self._isPhasingOn = True
     self.viewBox.menu = self._phasingMenu
 
     if self.spectrumDisplay.is1D:
@@ -722,7 +754,7 @@ class GuiStrip(Frame):
 
     # change menu
     self.viewBox.menu = self._defaultMenu
-
+    self._isPhasingOn = False
     for spectrumView in self.spectrumViews:
       spectrumView._turnOffPhasing()
 

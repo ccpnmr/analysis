@@ -63,8 +63,8 @@ from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar #, PlaneSelectorWidget
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Logging import getLogger
 
-from ccpn.ui.gui.lib.GuiStrip import GuiStrip
-from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu,MultipletMenu, PhasingMenu
+from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu
 # from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 
 
@@ -145,6 +145,8 @@ class GuiStripNd(GuiStrip):
     self._defaultMenu = self.viewBox.menu
     self._phasingMenu = _getNdPhasingMenu(self)
 
+    self._contextMenus.update({DefaultMenu:_getNdDefaultMenu(self),
+                               PhasingMenu:_getNdPhasingMenu(self), PeakMenu:_getNdPeakMenu(self)})
 
     self.viewBox.invertX()
     self.viewBox.invertY()

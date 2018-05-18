@@ -29,12 +29,13 @@ from PyQt5 import QtWidgets
 
 from ccpn.core.PeakList import PeakList
 
-from ccpn.ui.gui.lib.GuiStrip import GuiStrip
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu,MultipletMenu, PhasingMenu
+
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Menu import Menu
 import numpy as np
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu
+from ccpn.ui.gui.lib.GuiStripContextMenus import _get1dPhasingMenu, _get1dDefaultMenu, _get1dPeakMenu
 
 class GuiStrip1d(GuiStrip):
   """
@@ -104,9 +105,15 @@ class GuiStrip1d(GuiStrip):
     self.viewBox.invertX()
     self.plotWidget.showGrid(x=False, y=False)
     self.gridShown = True
-    self.viewBox.menu = _get1dDefaultMenu(self)
-    self._defaultMenu = self.viewBox.menu
+
+    # self.viewBox.menu = _get1dDefaultMenu(self)
+    # self._defaultMenu = self.viewBox.menu
+
+    self._defaultMenu = _get1dDefaultMenu(self)
     self._phasingMenu = _get1dPhasingMenu(self)
+    self._peakMenu = _get1dPeakMenu(self)
+
+    self._contextMenus.update({DefaultMenu:self._defaultMenu, PhasingMenu:self._phasingMenu, PeakMenu:self._peakMenu})
 
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.spectrumIndex = 0

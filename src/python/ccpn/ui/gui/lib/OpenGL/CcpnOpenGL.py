@@ -78,6 +78,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, getCurrentMouseMode
+from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu,MultipletMenu, PhasingMenu
 
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
@@ -166,12 +167,16 @@ class CcpnGLWidget(QOpenGLWidget):
   SPECTRUMYZOOM = 1.0e1
 
   def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
+    # TODO add documentation, clarify
+    # :param parent: strip ? should be called strip, since is made for a strip!
+    # :param rightMenu:  Not sure if has been ever used? Context menu has an automatic loader
+
     super(CcpnGLWidget, self).__init__(parent)
 
     # flag to display paintGL but keep an empty screen
     self._blankDisplay = False
 
-    self._rightMenu = rightMenu
+    self._rightMenu = rightMenu # Not sure if has been ever used? Context menu has an automatic loader
     if not parent:        # don't initialise if nothing there
       return
 
@@ -5068,6 +5073,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     elif rightMouse(event) and axis is None:
       # right click on canvas, not the axes
+      strip = self._parent
+      menus = strip._contextMenus
+      menu = None
       event.accept()
       self._resetBoxes()
 
@@ -5112,42 +5120,36 @@ class CcpnGLWidget(QOpenGLWidget):
 
                   if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                     if peak in peaks:
-                        openContextMenu = True
+                        strip.contextMenuMode = PeakMenu
+                        menu = strip._contextMenus.get(strip.contextMenuMode)
+                        # set peak menu mode on gui strip
                         break
-                    else:
-                        openContextMenu = False
-                else:
-                    openContextMenu = False
+
+
               elif len(peak.axisCodes) == 2:
                 # 2d check
                 if (xPositions[0] < float(peak.position[0]) < xPositions[1]
                         and yPositions[0] < float(peak.position[1]) < yPositions[1]):
                   if peak in peaks:
-                      openContextMenu = True
-                      break
-                  else:
-                      openContextMenu = False
-                else:
-                    openContextMenu = False
+                    strip.contextMenuMode = PeakMenu
+                    menu = strip._contextMenus.get(strip.contextMenuMode)
+                    break
+
 
               elif len(peak.axisCodes) == 1:
                 # 1d check
                 if (xPositions[0] < float(peak.position[0]) < xPositions[1]
                         and yPositions[0] < float(peak.height) < yPositions[1]):
                   if peak in peaks:
-                      openContextMenu = True
-                      break
-                  else:
-                      openContextMenu = False
-                else:
-                    openContextMenu = False
+                    strip.contextMenuMode = PeakMenu
+                    menu = strip._contextMenus.get(strip.contextMenuMode)
+                    break
 
-      if openContextMenu:
-        self._parent.viewBox.menu = self._parent._peakMenu
+      if menu is not  None:
+        strip.viewBox.menu = menu
       else:
-        self._parent.viewBox.menu = self._parent._defaultMenu
-
-      self._parent.viewBox._raiseContextMenu(event)
+        strip.viewBox.menu = self._getCanvasContextMenu()
+      strip.viewBox._raiseContextMenu(event)
 
 
     elif controlRightMouse(event) and axis is None:
@@ -5163,6 +5165,21 @@ class CcpnGLWidget(QOpenGLWidget):
       event.ignore()
 
     self.update()
+
+  def _getCanvasContextMenu(self):
+    ''' give  a needed menu based on strip mode  '''
+    strip = self._parent
+    menu = strip._contextMenus.get(DefaultMenu)
+    if strip._isPhasingOn:
+      menu = strip._contextMenus.get(PhasingMenu)
+
+    return menu
+
+  def _setContextMenu(self, menu):
+    ''' set  a needed menu based on strip mode  '''
+
+    self._parent.viewBox.menu = menu
+
 
   def _mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
     if controlShiftLeftMouse(event):

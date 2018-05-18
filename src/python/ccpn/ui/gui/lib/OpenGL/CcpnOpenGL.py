@@ -218,7 +218,7 @@ class CcpnGLWidget(QOpenGLWidget):
     self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
 
     # install handler to resize when moving between displays
-    self.mainWindow.window().windowHandle().screenChanged.connect(self._screenChanged)
+    self.mainWindow.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 
   def _initialiseAll(self):
     """
@@ -615,12 +615,20 @@ class CcpnGLWidget(QOpenGLWidget):
       self._minY = min(self._minY, fy1)
 
   @pyqtSlot()
+  def _screenChangedEvent(self, *args):
+    self._screenChanged(*args)
+    self.update()
+
   def _screenChanged(self, *args):
     screens = QApplication.screens()
-    screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
+    if self.hasFocus():
+      # follow the mouse if has focus
+      screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
+    else:
+      # otherwise follow the position of self
+      screen = QApplication.desktop().screenNumber(self)
     self._devicePixelRatio = screens[screen].devicePixelRatio()
     self.viewports._devicePixelRatio = self._devicePixelRatio
-    self.update()
 
   def _getValidAspectRatio(self, axisCode):
     va = [ax for ax in self._preferences.aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]
@@ -630,11 +638,7 @@ class CcpnGLWidget(QOpenGLWidget):
     # must be set here to catch the change of screen
     # self._devicePixelRatio = QApplication.primaryScreen().devicePixelRatio()   #.instance().devicePixelRatio()
     # self.viewports._devicePixelRatio = self._devicePixelRatio
-
-    screens = QApplication.screens()
-    screen = QApplication.desktop().screenNumber(QtGui.QCursor().pos())
-    self._devicePixelRatio = screens[screen].devicePixelRatio()
-    self.viewports._devicePixelRatio = self._devicePixelRatio
+    self._screenChanged()
 
     self.w = w
     self.h = h
@@ -1089,7 +1093,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
     # initialise a common to all OpenGL windows
     self.globalGL = GLGlobalData(parent=self, strip=self._parent)
-    self._devicePixelRatio = QApplication.instance().devicePixelRatio()
 
     # initialise the arrays for the grid and axes
     self.gridList = []
@@ -1135,7 +1138,10 @@ class CcpnGLWidget(QOpenGLWidget):
                                        , dimension=4
                                        , GLContext=self)
 
-    self.viewports = GLViewports(self._devicePixelRatio)
+    self.viewports = GLViewports()
+    # self._devicePixelRatio = QApplication.instance().devicePixelRatio()
+    self._devicePixelRatio = self._screenChanged()
+    self.viewports.setDevicePixelRatio(self._devicePixelRatio)
 
     # TODO:ED error here when calculating the top offset, FOUND
 

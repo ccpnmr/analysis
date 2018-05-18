@@ -36,9 +36,12 @@ except ImportError:
 
 class GLViewports(object):
   # Class to handle the different viewports in the display
-  def __init__(self, pixelRatio):
+  def __init__(self, pixelRatio=1.0):
     # define a new empty list
     self._views = {}
+    self._devicePixelRatio = pixelRatio
+
+  def setDevicePixelRatio(self, pixelRatio):
     self._devicePixelRatio = pixelRatio
 
   def addViewport(self, name, parent, left, bottom, rightOffset, topOffset):

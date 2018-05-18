@@ -17,6 +17,6 @@ FILENAME=$*
 FILENAME=${FILENAME##*/};FILENAME=${FILENAME%.*}
 STAMP="$(date +%Y%m%d_%H%M%S)"
 
-# execute nosetests and redirect all output to file 'TESTOUT<timestamp>.txt'
+# execute nosetests and redirect all output to file 'TESTOUT_<timestamp>.txt'
 ${ANACONDA3}/bin/nosetests -s $* > TESTOUT_$STAMP.txt 2>&1
 

@@ -5093,10 +5093,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
       peaks = list(self.current.peaks)
 
-      if len(peaks)>0:
-        from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems
-        ii = strip._contextMenus.get(PeakMenu)
+      from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
+      ii = strip._contextMenus.get(PeakMenu)
+      if len(peaks)>1:
         _hidePeaksSingleActionItems(strip, ii)
+      else:
+        _enableAllItems(ii)
+
 
       # now select (take first one within range)
       for spectrumView in self._parent.spectrumViews:
@@ -5125,10 +5128,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                   if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                     if peak in peaks:
-                        strip.contextMenuMode = PeakMenu
-                        menu = strip._contextMenus.get(strip.contextMenuMode)
-                        # set peak menu mode on gui strip
-                        break
+                      strip.contextMenuMode = PeakMenu
+                      menu = strip._contextMenus.get(strip.contextMenuMode)
+                      break
 
 
               elif len(peak.axisCodes) == 2:
@@ -5149,7 +5151,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     menu = strip._contextMenus.get(strip.contextMenuMode)
                     break
 
-      if menu is not  None:
+      if menu is not None:
         strip.viewBox.menu = menu
       else:
         strip.viewBox.menu = self._getCanvasContextMenu()

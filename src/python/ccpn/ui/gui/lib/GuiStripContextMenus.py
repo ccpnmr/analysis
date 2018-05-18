@@ -80,7 +80,8 @@ def _createMenu(strip, items):
     return menu
 
 
-##############################  Common menu items ##############################
+##############################  Common default  menu items ##############################
+## This items are used to create both 1D and Nd menus
 
 
 def _toolBarItem(strip):
@@ -171,11 +172,19 @@ def _printItem(strip):
 def _separator():
     return _SCMitem(typeItem=ItemTypes.get(SEPARATOR))
 
-# Common Peak Menu items
+
+
+
+
+##############################  Common Peak  menu items ##############################
+## This items are used to create both 1D and Nd Peak menus
+
+
 
 def _copyPeakItem(strip):
     return _SCMitem(name='Copy peak(s)',
-            typeItem=ItemTypes.get(ITEM), toolTip='Copy Peak(s) to a PeakList', callback=strip._openCopySelectedPeaks)
+            typeItem=ItemTypes.get(ITEM), toolTip='Copy Peak(s) to a PeakList', shortcut='CP',
+            callback=strip._openCopySelectedPeaks)
 
 
 def _deletePeakItem(strip):
@@ -187,14 +196,33 @@ def _editPeakAssignmentItem(strip):
             typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
 
 
+def _newMultipletItem(strip):
+    return _SCMitem(name='New multiplet',
+            typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
+                    callback=strip.mainWindow.addMultiplet)
+
+def _integrateItem(strip):
+    return _SCMitem(name='Integrate Peak',
+            typeItem=ItemTypes.get(ITEM), toolTip='Add integral and link to peak',
+            callback=strip.mainWindow.addIntegral)
+
+# def _propagateAssignmentItem(strip):
+#     # Not implemented
+#     return
+
+def _enableAllItems(menu):
+    for action in menu.actions():
+        action.setEnabled(True)
+
 def _hidePeaksSingleActionItems(strip, menu):
-    ''' Greys out item that should appear only if one single peak is selected'''
+    ''' Greys out items that should appear only if one single peak is selected'''
+
     for action in menu.actions():
         if action.text() == _editPeakAssignmentItem(strip).name:
             action.setEnabled(False)
 
-
-###### Common Phasing Menu Items
+##############################  Common Phasing  menu items ##############################
+## This items are used to create both 1D and Nd Phasing menus
 
 def _addTraceItem(strip):
     return _SCMitem(name='Add Trace',
@@ -298,7 +326,10 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
     items = [
             _deletePeakItem(guiStrip1d),
             _copyPeakItem(guiStrip1d),
-            _editPeakAssignmentItem(guiStrip1d)
+            _editPeakAssignmentItem(guiStrip1d),
+            _separator(),
+            _newMultipletItem(guiStrip1d),
+            _integrateItem(guiStrip1d)
 
             ]
 
@@ -384,7 +415,12 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
 
         _deletePeakItem(guiStripNd),
         _copyPeakItem(guiStripNd),
-        _editPeakAssignmentItem(guiStripNd)
+        _editPeakAssignmentItem(guiStripNd),
+        _separator(),
+        _newMultipletItem(guiStripNd),
+        _integrateItem(guiStripNd)
+
+
             ]
 
     return _createMenu(guiStripNd, items)

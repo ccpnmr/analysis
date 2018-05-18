@@ -2904,7 +2904,7 @@ class CcpnGLWidget(QOpenGLWidget):
       listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
       for integral in ils.integrals:
-        drawList.add1DIntegral(integral, integralListView, colour=None, brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
+        drawList.addIntegral(integral, integralListView, colour=None, brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
 
     elif drawList.renderMode == GLRENDERMODE_RESCALE:
       drawList.renderMode = GLRENDERMODE_DRAW               # back to draw mode
@@ -5437,7 +5437,7 @@ class CcpnGLWidget(QOpenGLWidget):
       if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.peakList:
         listCol = getAutoColourRgbRatio(ils.integralListView.peakList.symbolColour, ils.integralListView.peakList.spectrum, self.SPECTRUMPOSCOLOUR, getColours()[CCPNGLWIDGET_FOREGROUND])
 
-        ils.add1DIntegral(integral, ils.integralListView, colour=None, brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
+        ils.addIntegral(integral, ils.integralListView, colour=None, brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
 
     self.update()
     return

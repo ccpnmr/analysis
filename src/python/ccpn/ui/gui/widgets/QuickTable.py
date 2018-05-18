@@ -997,7 +997,7 @@ QuickTable::item::selected {
       try:
         self.findExportFormats(str(path) + self.saveDialog.selectedNameFilter(), sheet_name)
       except:
-        print('Format file not supported')
+        getLogger().warning('Format file not supported')
 
   def dataFrameToExcel(self, dataFrameObject, path, sheet_name='Table'):
     visColumns = dataFrameObject.visibleColumnHeadings
@@ -1241,7 +1241,7 @@ QuickTable::item::selected {
       if tSelect:
 
         multiple = self._tableData['classCallBack']
-        print(tSelect, multiple)
+        # print(tSelect, multiple)
         multipleAttr = getattr(tSelect, multiple)
 
         if multipleAttr:
@@ -1252,13 +1252,13 @@ QuickTable::item::selected {
             colName = self.horizontalHeaderItem(cc).text()
             if colName == DATAFRAME_INDEX:
               indCol = cc
-              print (DATAFRAME_INDEX, cc)
+              # print (DATAFRAME_INDEX, cc)
             elif colName == DATAFRAME_OBJECT:
               objCol = cc
-              print (DATAFRAME_OBJECT, cc)
+              # print (DATAFRAME_OBJECT, cc)
           if objCol and indCol:
-            print ('INDEXING')
-            print (multipleAttr)
+            # print ('INDEXING')
+            # print (multipleAttr)
             for rr in range(self.rowCount()):
 
               thisObj = self.item(rr, objCol).value
@@ -1399,7 +1399,7 @@ QuickTable::item::selected {
 
                 # get the array containing the objects displayed in the table
                 multiple = self._tableData['classCallBack']
-                print(tSelect, multiple)
+                # print(tSelect, multiple)
                 multipleAttr = getattr(tSelect, multiple)
 
                 self._dataFrameObject.appendObject(row, multipleAttr=multipleAttr)

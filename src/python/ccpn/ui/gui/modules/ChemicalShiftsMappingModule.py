@@ -115,13 +115,13 @@ class CustomNmrResidueTable(NmrResidueTable):
     # NmrResidueTable.__init__(self, parent=parent, application=application,actionCallback=actionCallback,
     #                          selectionCallback=selectionCallback, nmrChain=nmrChain, multiSelect = True, **kwds)
 
-    NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow
-                             , moduleParent=moduleParent
-                             , actionCallback=actionCallback
-                             , selectionCallback=selectionCallback
-                             , checkBoxCallback = checkBoxCallback
-                             , nmrChain=nmrChain
-                             , multiSelect=True,
+    NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow,
+                             moduleParent=moduleParent,
+                             actionCallback=actionCallback,
+                             selectionCallback=selectionCallback,
+                             checkBoxCallback = checkBoxCallback,
+                             nmrChain=nmrChain,
+                             multiSelect=True,
                              **kwds)
 
     self.NMRcolumns = ColumnClass([

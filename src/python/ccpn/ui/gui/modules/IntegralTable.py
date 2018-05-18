@@ -71,11 +71,11 @@ class IntegralTableModule(CcpnModule):
     # self._ITwidget = Widget(self.settingsWidget, setLayout=True,
     #                         grid=(0, 0), vAlign='top', hAlign='left')
 
-    self.integralTable = IntegralTable(parent=self.mainWidget
-                                       , mainWindow=self.mainWindow
-                                       , moduleParent=self
-                                       , setLayout=True
-                                       , grid=(0, 0))
+    self.integralTable = IntegralTable(parent=self.mainWidget,
+                                       mainWindow=self.mainWindow,
+                                       moduleParent=self,
+                                       setLayout=True,
+                                       grid=(0, 0))
     # settingsWidget
 
     if integralList is not None:
@@ -153,18 +153,18 @@ class IntegralTable(QuickTable):
     )   #      [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForIntegrals method
-    self.spacer = Spacer(self._widget, 5, 5
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(0, 0), gridSpan=(1, 1))
-    self.itWidget = IntegralListPulldown(parent=self._widget
-                                         , project=self.project, default=0
-                                         , grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100)
-                                         , showSelectName=True
-                                         , sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents
-                                         , callback= self._selectionPulldownCallback)
-    self.spacer = Spacer(self._widget, 5, 5
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(2, 0), gridSpan=(1, 1))
+    self.spacer = Spacer(self._widget, 5, 5,
+                         QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+                         grid=(0, 0), gridSpan=(1, 1))
+    self.itWidget = IntegralListPulldown(parent=self._widget,
+                                         project=self.project, default=0,
+                                         grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                         showSelectName=True,
+                                         sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                         callback= self._selectionPulldownCallback)
+    self.spacer = Spacer(self._widget, 5, 5,
+                         QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+                         grid=(2, 0), gridSpan=(1, 1))
 
     self._widget.setFixedHeight(30)
 
@@ -173,15 +173,15 @@ class IntegralTable(QuickTable):
     self.dataFrameObject = None
 
     # initialise the table
-    QuickTable.__init__(self, parent=parent
-                        , mainWindow=self.mainWindow
-                        , dataFrameObject=None
-                        , setLayout=True
-                        , autoResize=True
-                        , selectionCallback=self._selectionCallback
-                        , actionCallback=self._actionCallback
-                        , multiSelect=True
-                        , grid=(3, 0), gridSpan=(1, 6))
+    QuickTable.__init__(self, parent=parent,
+                        mainWindow=self.mainWindow,
+                        dataFrameObject=None,
+                        setLayout=True,
+                        autoResize=True,
+                        selectionCallback=self._selectionCallback,
+                        actionCallback=self._actionCallback,
+                        multiSelect=True,
+                        grid=(3, 0), gridSpan=(1, 6))
 
     # self.linearRegions = LinearRegionsPlot(values=[0,0], orientation='v', bounds=None,
     #                                        brush=None, colour='purple', movable=True)

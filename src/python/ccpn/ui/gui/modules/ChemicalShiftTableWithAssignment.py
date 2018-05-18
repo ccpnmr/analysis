@@ -374,10 +374,10 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
 
   def getColumns(self):
     "get columns for initialisation of table"
-    columns = ColumnClass([('Peak', lambda pk: pk.serial, '', None)
-                            , ('Pid', lambda pk: pk.pid, 'Pid of peak', None)
-                           , ('_object', lambda pk: pk, 'Object', None)
-                          , ('id', lambda pk: pk.serial, '', None)])
+    columns = ColumnClass([('Peak', lambda pk: pk.serial, '', None),
+                            ('Pid', lambda pk: pk.pid, 'Pid of peak', None),
+                           ('_object', lambda pk: pk, 'Object', None),
+                          ('id', lambda pk: pk.serial, '', None)])
     tipTexts = []
     # get the maxmimum number of dimensions from all spectra in the project
     numDim = max([sp.dimensionCount for sp in self.application.project.spectra] + [1])

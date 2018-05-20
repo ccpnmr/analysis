@@ -254,11 +254,14 @@ class GuiWindow():
         self.application.current.peaks = [peak for peakList in peakLists for peak in peakList]
 
   def addMultiplet(self):
-    '''add current peaks to a new multiplet'''
-    if self.application.current.strip:
-      if self.application.current.strip.spectrumDisplay:
+    """add current peaks to a new multiplet"""
+    strip = self.application.current.strip
+
+    strip._startCommandEchoBlock('addMultiplet')
+    try:
+      if strip and strip.spectrumDisplay:
         spectra = [spectrumView.spectrum for spectrumView in
-                   self.application.current.strip.spectrumDisplay.spectrumViews if spectrumView.isVisible()]
+                   strip.spectrumDisplay.spectrumViews if spectrumView.isVisible()]
         for spectrum in spectra:
           if len(spectrum.multipletLists)<1:
             multipletList = spectrum.newMultipletList()
@@ -267,7 +270,8 @@ class GuiWindow():
           peaks = [peak for peakList in spectrum.peakLists for peak in peakList.peaks if peak in self.current.peaks]
           multiplet = multipletList.newMultiplet(peaks=peaks)
           self.application.current.multiplet = multiplet
-
+    finally:
+      strip._endCommandEchoBlock()
 
 
   def traceScaleScale(self, window:'GuiWindow', scale:float):

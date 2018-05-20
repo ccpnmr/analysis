@@ -5349,14 +5349,23 @@ class CcpnGLWidget(QOpenGLWidget):
       for peak in peaks:
         peak.startPosition = peak.position
 
-      # if event.isFinish():
-      self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
-      for peak in peaks:
-        self._movePeak(peak, deltaPosition)
-      self.project.unblankNotification()
-      for peak in peaks:
-        peak._finaliseAction('change')
-      # self.application.ui.echoCommands(("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
+      # # if event.isFinish():
+      # self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
+      # for peak in peaks:
+      #   self._movePeak(peak, deltaPosition)
+      # self.project.unblankNotification()
+      # for peak in peaks:
+      #   peak._finaliseAction('change')
+      # # self.application.ui.echoCommands(("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
+
+      self.project._startCommandEchoBlock('movePeaks')
+      try:
+        for peak in peaks:
+          self._movePeak(peak, deltaPosition)
+      finally:
+        self.project._endCommandEchoBlock()
+
+
 
       self.current.peaks = peaks
       # else:  # this is when is being dragged

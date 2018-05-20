@@ -177,22 +177,24 @@ def _separator():
 
 
 def _copyPeakItem(strip):
-    return _SCMitem(name='Copy peak(s)',
+    return _SCMitem(name='Copy Peak(s)',
             typeItem=ItemTypes.get(ITEM), toolTip='Copy Peak(s) to a PeakList', shortcut='CP',
             callback=strip._openCopySelectedPeaks)
 
 
 def _deletePeakItem(strip):
-    return _SCMitem(name='Delete peak(s)',
+    return _SCMitem(name='Delete Peak(s)',
             typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project', callback=strip.mainWindow.deleteSelectedPeaks)
 
 def _editPeakAssignmentItem(strip):
-    return _SCMitem(name='Edit peak',
-            typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
-
+    try:
+        return _SCMitem(name='Edit Peak',
+                typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
+    except:
+        return None
 
 def _newMultipletItem(strip):
-    return _SCMitem(name='New multiplet',
+    return _SCMitem(name='New Multiplet',
             typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
                     callback=strip.mainWindow.addMultiplet)
 
@@ -217,11 +219,12 @@ def _enableAllItems(menu):
         action.setEnabled(True)
 
 def _hidePeaksSingleActionItems(strip, menu):
-    ''' Greys out items that should appear only if one single peak is selected'''
+    """ Greys out items that should appear only if one single peak is selected"""
     hideItems = [
-                _editPeakAssignmentItem(strip).name,
-                _integrate1DItem(strip).name
+                _editPeakAssignmentItem(strip).name if _editPeakAssignmentItem(strip) else None,
+                _integrate1DItem(strip).name if _integrate1DItem(strip) else None
                 ]
+    hideItems = [itm for itm in hideItems if itm is not None]
 
     for action in menu.actions():
         for item in hideItems:
@@ -254,7 +257,7 @@ def _decreaseTraceScaleItem(strip):
 
 def _setPivotItem(strip):
     return _SCMitem(name='Set Pivot',
-                         typeItem=ItemTypes.get(ITEM), toolTip='Set pivot value', checkable=True, checked=True,
+                         typeItem=ItemTypes.get(ITEM), toolTip='Set pivot value',
                          shortcut='PV', callback=strip._setPhasingPivot)
 
 def _exitPhasingConsoleItem(strip):
@@ -271,6 +274,9 @@ def _exitPhasingConsoleItem(strip):
 
 
 def _get1dDefaultMenu(guiStrip1d) -> Menu:
+    """
+    Creates and returns the 1d default context menu. Opened when right clicked on the background canvas
+    """
     items = [
             _toolBarItem(guiStrip1d),
             _crossHairItem(guiStrip1d),
@@ -290,10 +296,12 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
                         callback=guiStrip1d.resetXZoom),
             _separator(),
             _SCMitem(name='Calibrate X',
-                        typeItem=ItemTypes.get(ITEM), toolTip='calibrate X points', callback=guiStrip1d._toggleCalibrateXSpectrum),
+                        typeItem=ItemTypes.get(ITEM), toolTip='calibrate X points', checkable=True, checked=False,
+                        callback=guiStrip1d._toggleCalibrateXSpectrum, stripMethodName='calibrateXAction'),
 
             _SCMitem(name='Calibrate Y',
-                        typeItem=ItemTypes.get(ITEM),toolTip='calibrate Y points', callback=guiStrip1d._toggleCalibrateYSpectrum),
+                        typeItem=ItemTypes.get(ITEM),toolTip='calibrate Y points', checkable=True, checked=False,
+                        callback=guiStrip1d._toggleCalibrateYSpectrum, stripMethodName='calibrateYAction'),
 
             _SCMitem(name='Stack Spectra',
                         typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra', checkable=True, checked=False,
@@ -306,9 +314,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
             _separator(),
             _printItem(guiStrip1d),
             ]
-    """
-    Creates and returns the 1d default context menu. Opened when right clicked on the background canvas
-    """
+    items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
 
 
@@ -316,14 +322,16 @@ def _get1dPhasingMenu(guiStrip1d) -> Menu:
     """
     Creates and returns the phasing 1d context menu. Opened when right clicked on the background canvas in "phasing State mode"
     """
-
     items = [
             _addTraceItem(guiStrip1d),
             _removeAllTracesItem(guiStrip1d),        
             _setPivotItem(guiStrip1d),
             _separator(),
-            _exitPhasingConsoleItem(guiStrip1d)          
+            _exitPhasingConsoleItem(guiStrip1d),
+            _separator(),
+            _printItem(guiStrip1d),
             ]
+    items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
 
 
@@ -340,9 +348,8 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
             _integrate1DItem(guiStrip1d),
             _separator(),
             _navigateToDisplayItem(guiStrip1d),
-
             ]
-
+    items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
 
 
@@ -396,8 +403,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
             _separator(),
             _printItem(guiStripNd),
             ]
+    items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
-
 
 
 def _getNdPhasingMenu(guiStripNd) -> Menu:
@@ -411,10 +418,12 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
             _decreaseTraceScaleItem(guiStripNd),
             _setPivotItem(guiStripNd),
             _separator(),
-            _exitPhasingConsoleItem(guiStripNd)
+            _exitPhasingConsoleItem(guiStripNd),
+            _separator(),
+            _printItem(guiStripNd),
             ]
+    items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
-
 
 
 def _getNdPeakMenu(guiStripNd) -> Menu:
@@ -430,10 +439,6 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _newMultipletItem(guiStripNd),
         _separator(),
         _navigateToDisplayItem(guiStripNd),
-
-
-            ]
-
+        ]
+    items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
-
-

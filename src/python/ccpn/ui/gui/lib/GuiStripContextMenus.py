@@ -31,6 +31,7 @@ __date__ = "$Date: 2018-05-17 10:28:43 +0000 (Thu, May 17, 2018) $"
 
 
 from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.util.Logging import getLogger
 
 
 MENU =      'Menu'
@@ -51,6 +52,7 @@ class _SCMitem(object):
         '''
         :param typeItem: any value of ItemTypes: (menu,item,separator)
         :param kwargs: needed  any of _kwrgs: name, icon, tooltip, shortcut, checkable, checked, callback, stripMethodName
+        or any other accepted by Base or Action widgets
         '''
         self._kwrgs = {'name': '', 'icon': None, 'tooltip': '', 'shortcut': None, 'checkable': False,
                        'checked': False, 'callback': None, 'stripMethodName': '', 'obj':self}
@@ -75,7 +77,7 @@ def _createMenu(strip, items):
                 setattr(strip, i.stripMethodName, action)
                 strip._spectrumUtilActions[i.name] = action
         except Exception as e:
-            print(e, "menus")
+            getLogger().warning('Menu error:' % e)
     return menu
 
 
@@ -187,11 +189,8 @@ def _deletePeakItem(strip):
             typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project', callback=strip.mainWindow.deleteSelectedPeaks)
 
 def _editPeakAssignmentItem(strip):
-    try:
-        return _SCMitem(name='Edit Peak',
-                typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
-    except:
-        return None
+    return _SCMitem(name='Edit Peak',
+            typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
 
 def _newMultipletItem(strip):
     return _SCMitem(name='New Multiplet',
@@ -204,7 +203,7 @@ def _integrate1DItem(strip):
                     callback=strip.mainWindow.add1DIntegral)
 
 def _navigateToDisplayItem(strip):
-    return  _SCMitem(name='Navigate To Position in:',
+    return  _SCMitem(name='Show this Position in:',
              typeItem=ItemTypes.get(MENU), toolTip='Move other display at peak position',
              shortcut='NT', stripMethodName='navigateToSubMenu',
              callback=None)

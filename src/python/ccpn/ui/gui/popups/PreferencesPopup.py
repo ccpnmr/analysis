@@ -610,8 +610,7 @@ class PreferencesPopup(CcpnDialog):
         for spectrumView in strip.spectrumViews:
           spectrumView._setBorderItemHidden(checked)
     elif preference == 'autoBackupEnabled':
-      application = self.project._appBase
-      application.updateAutoBackup()
+      self.application.updateAutoBackup()
 
   def _setPymolPath(self):
     pymolPath = self.pymolPath.get()
@@ -633,8 +632,7 @@ class PreferencesPopup(CcpnDialog):
     except:
       return
     self.preferences.general.autoBackupFrequency = frequency
-    application = self.project._appBase
-    application.updateAutoBackup()
+    self.application.updateAutoBackup()
 
   def _setRegionPadding(self):
     try:

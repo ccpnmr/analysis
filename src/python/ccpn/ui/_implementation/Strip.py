@@ -281,8 +281,8 @@ class Strip(AbstractWrapperObject):
         layout.setColumnStretch(0, 1)
 
       # move to widget store
-      self._project._appBase.ui.mainWindow._TESTFRAME.layout().addWidget(self)
-      # self.setParent(self._project._appBase.ui.mainWindow._TESTFRAME)
+      self.mainWindow._TESTFRAME.layout().addWidget(self)
+
       self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
       # # TODO:ED HACK HACK HACK HACK - put ccpnStrip back into strips - not sure if needed here
@@ -294,12 +294,12 @@ class Strip(AbstractWrapperObject):
       #     # ccpnStrip.__dict__['index'] = currentIndex-1
 
       # store the old information
-      _stripDeleteDict = {'currentRow': currentRow
-                          , 'currentIndex': currentIndex
-                          , 'currentStripDirection': currentStripDirection
-                          , 'currentStripItem': currentStripItem
-                          , 'currentParent': currentParent
-                          , 'currentWrapped': currentWrapped}
+      _stripDeleteDict = {'currentRow': currentRow,
+                          'currentIndex': currentIndex,
+                          'currentStripDirection': currentStripDirection,
+                          'currentStripItem': currentStripItem,
+                          'currentParent': currentParent,
+                          'currentWrapped': currentWrapped}
       ccpnStrip.__dict__['_stripDeleteDict'] = _stripDeleteDict
 
       _undo = self.project._undo
@@ -332,7 +332,7 @@ class Strip(AbstractWrapperObject):
       currentParent = _stripDeleteDict['currentParent']
       currentWrapped = _stripDeleteDict['currentWrapped']
 
-      self._project._appBase.ui.mainWindow._TESTFRAME.layout().removeWidget(self)
+      self.mainWindow._TESTFRAME.layout().removeWidget(self)
       # self.setParent(currentParent)
       self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
@@ -807,7 +807,7 @@ class Strip(AbstractWrapperObject):
     result = []
 
     project = self.project
-    minDropfactor = project._appBase.preferences.general.peakDropFactor
+    minDropfactor = self.application.preferences.general.peakDropFactor
 
     self._startCommandEchoBlock('peakPickRegion_OLD', selectedRegion)
     self._project.blankNotification()
@@ -879,7 +879,7 @@ class Strip(AbstractWrapperObject):
     result = []
 
     project = self.project
-    minDropfactor = project._appBase.preferences.general.peakDropFactor
+    minDropfactor = self.application.preferences.general.peakDropFactor
 
     self._startCommandEchoBlock('peakPickRegion', selectedRegion)
     self._project.blankNotification()

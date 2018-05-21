@@ -94,13 +94,13 @@ class SpectrumProjectionPopup(CcpnDialog):
   def _getSpectrumFile(self):
     if os.path.exists('/'.join(self.filePathLineEdit.text().split('/')[:-1])):
       currentSpectrumDirectory = '/'.join(self.filePathLineEdit.text().split('/')[:-1])
-    elif self.project._appBase.preferences.general.dataPath:
-      currentSpectrumDirectory = self.project._appBase.preferences.general.dataPath
+    elif self.application.preferences.general.dataPath:
+      currentSpectrumDirectory = self.application.preferences.general.dataPath
     else:
       currentSpectrumDirectory = os.path.expanduser('~')
     dialog = FileDialog(self, text='Select Projection File', directory=currentSpectrumDirectory,
                         fileMode=0, acceptMode=1,
-                        preferences=self.project._appBase.preferences.general)
+                        preferences=self.application.preferences.general)
     directory = dialog.selectedFiles()
     if len(directory) > 0:
       self.filePathLineEdit.setText(directory[0])

@@ -32,6 +32,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.core.lib.CcpnSorting import stringSortKey
 
 # from ccpn.ui.gui.base.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,
 #                                                       peaksAreOnLine, intersectionOfAll,
@@ -42,13 +43,16 @@ from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 #                                                       matchingNmrAtomsForDimensionOfPeaks)
 
 class ObjectAssigner(QtWidgets.QWidget, Base):
-  def __init__(self, parent, project, dim, objects, opts, **kw):
+  def __init__(self, parent, mainWindow, dim, objects, opts, **kw):
 
     QtWidgets.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
+    self.mainWindow = mainWindow
+    self.application = mainWindow.application
+    self.project = mainWindow.application.project
+    self.current = mainWindow.application.current
 
-    self.project = project
     self.dim = dim
     self.opts = opts
     self.objects = objects
@@ -160,16 +164,16 @@ class ObjectAssigner(QtWidgets.QWidget, Base):
 
   def setNmrChain(self, item):
     # NBNB FIxed. Assumes that item is a chainCode. NBNB otherwise will BERAK!.  Rasmus Dec 2015
-    self.project._appBase.current.nmrAtom.nmrResidue.assignTo(chainCode=item)
+    self.current.nmrAtom.nmrResidue.assignTo(chainCode=item)
 
   def setSequenceCode(self, item):
-    self.project._appBase.current.nmrAtom.nmrResidue.sequenceCode = item
+    self.current.nmrAtom.nmrResidue.sequenceCode = item
 
   def setResidueType(self, item):
-    self.project._appBase.current.nmrAtom.nmrResidue.residueType = item
+    self.current.nmrAtom.nmrResidue.residueType = item
 
   def setAtomType(self, item):
-    self.project._appBase.current.nmrAtom.name = item
+    self.current.nmrAtom.name = item
 
   # Obsolete, replaced by CcpnSorting.stringSortKey
   # def natural_key(self, string_):
@@ -182,7 +186,7 @@ class ObjectAssigner(QtWidgets.QWidget, Base):
   def getNmrAtom(self, dim, item):
     # print(item.text(), self.project.getById(item.text()))
     nmrAtom = self.project.getById(item.text())
-    self.project._appBase.current.nmrAtom = nmrAtom
+    self.current.nmrAtom = nmrAtom
     chain = nmrAtom.nmrResidue.nmrChain
     sequenceCode = nmrAtom.nmrResidue.sequenceCode
     residueType = nmrAtom.nmrResidue.residueType
@@ -196,7 +200,7 @@ class ObjectAssigner(QtWidgets.QWidget, Base):
       # self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))
       self.chainPulldowns[dim].setCallback(partial(self.setNmrChain))
       sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
-      self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=CcpnSorting.stringSortKey))
+      self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=stringSortKey))
       # self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))
       self.seqCodePulldowns[dim].setCallback(partial(self.setSequenceCode))
       residueTypes = [code.upper() for code in CCP_CODES] + ['']
@@ -208,7 +212,7 @@ class ObjectAssigner(QtWidgets.QWidget, Base):
       self.atomTypePulldowns[dim].setData(atomNames)
       # self.atomTypePulldowns[dim].setIndex(self.atomTypePulldowns[dim].texts.index(nmrAtom.name))
       self.atomTypePulldowns[dim].setCallback(partial(self.setAtomType))
-    # print(self.project._appBase.current.nmrResidue, 'currentNmrResidue AssignmentModule')
+
     else:
       self.chainPulldowns[dim].setData([])
       self.seqCodePulldowns[dim].setData([])

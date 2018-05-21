@@ -56,7 +56,7 @@ class ResidueInformation(CcpnModule):
     chainPulldown.setData(chainPulldownData)
     self.selectedChain = self.project.getByPid(chainPulldown.currentText())
     self.residueLabel = Label(self.mainWidget, text='Residue ', grid=(0, 3))
-    # self.colourScheme = project._appBase.colourScheme
+
     self.colourScheme = self.application.colourScheme
     self.residuePulldown = PulldownList(self.mainWidget, callback=self._setCurrentResidue
                                    , grid=(0, 4))

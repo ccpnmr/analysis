@@ -202,10 +202,18 @@ class Integral(AbstractWrapperObject):
     #     peakDim.value = 0.5 * (limit1 + limit2)
     #     peakDim.boxWidth = abs((limit1 - limit2)/ dataDimRef.valuePerPoint)
     #
-    #   # automatically calculates Volume given the limits
-    #   x = self.integralList.spectrum.positions
-    #   index01 = np.where((x <= limit2) & (x >= limit1))
-    #   self.value = float(trapz(index01))
+
+    # automatically calculates Volume given the limits for 1Ds
+    spectrum = self.integralList.spectrum
+
+    if spectrum.dimensionCount == 1:
+      for ii in range(spectrum.dimensionCount):
+        limits = value[ii]
+        if len(limits) == 2:
+          limit1, limit2 = limits
+          x = self.integralList.spectrum.positions
+          index01 = np.where((x <= limit2) & (x >= limit1))
+          self.value = float(trapz(index01))
 
   @property
   def pointlimits(self) -> List[Tuple[float,float]]:

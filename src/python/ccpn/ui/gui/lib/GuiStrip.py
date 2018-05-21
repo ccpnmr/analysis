@@ -464,48 +464,31 @@ class GuiStrip(Frame):
     # except Exception as es:
     #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
+
+
   def _addItemsToNavigateToDisplayMenu(self):
-    ''' Copied from old viewbox. This function apparently take the current peak
-    position and uses to pan a selected display from the list of spectrumViews or the current cursor position
+    ''' Copied from old viewbox. This function apparently take the current cursorPosition
+     and uses to pan a selected display from the list of spectrumViews or the current cursor position
     TODO needs clear documentation'''
     from functools import partial
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
-    # try:
     if self.navigateToSubMenu:
       self.navigateToSubMenu.clear()
-      peak = self.current.peak
-      widths = None
-      if peak:
-        currentStrip = self.current.strip
-        if currentStrip:
-          for spectrumDisplay in self.current.project.spectrumDisplays:
-            for strip in spectrumDisplay.strips:
-              if strip != currentStrip:
-                p = [round(x,3) for x in peak.position]
-                toolTip = 'Show cursor in strip %s at position %s' % (str(strip.id), str(p))
-
-                if len(list(set(strip.axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
-                  self.navigateToSubMenu.addItem(text=strip.pid,callback=partial(navigateToPositionInStrip,
-                                                                                  strip=strip,
-                                                                                  positions=peak.position,
-                                                                                  axisCodes=peak.axisCodes,
-                                                                                  widths=widths),
-                                                   toolTip=toolTip)
+      currentStrip = self.current.strip
+      position = self.current.cursorPosition
+      if currentStrip:
+        for spectrumDisplay in self.current.project.spectrumDisplays:
+          for strip in spectrumDisplay.strips:
+            if strip != currentStrip:
+              toolTip = 'Show cursor in strip %s at position %s' % (str(strip.id), str([round(x,3) for x in position]))
+              if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 2:
+                self.navigateToSubMenu.addItem(text=strip.pid,
+                                               callback=partial(navigateToPositionInStrip, strip=strip,
+                                                                positions=position, axisCodes=currentStrip.axisCodes,),
+                                               toolTip=toolTip)
             self.navigateToSubMenu.addSeparator()
 
-      # else:
-      # This should be a different function --> navigate to cursorPosition, otherwise very confusing
-
-      #   for spectrumDisplay in self.current.project.spectrumDisplays:
-      #     axisCodes = self.current.strip.axisCodes
-      #     strip = spectrumDisplay.strips[0]
-      #     if len(list(set(strip.axisCodes) & set(axisCodes))) <= 2:
-      #       self.navigateToSubMenu.addAction(spectrumDisplay.pid,
-      #                                          partial(navigateToPositionInStrip, strip, self.current.cursorPosition,
-      #                                                  axisCodes))
-    # except:
-    #   pass
 
   def _updateDisplayedIntegrals(self, data):
     "Callback when peaks have changed"

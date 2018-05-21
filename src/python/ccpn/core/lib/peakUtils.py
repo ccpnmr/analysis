@@ -39,31 +39,31 @@ C = 'C'
 DefaultAtomWeights = OrderedDict(((H, 7.00), (N, 1.00), (C, 4.00), (OTHER, 1.00)))
 
 def getMultipletPosition(multiplet, dim, unit='ppm'):
-    # try:
-    if multiplet.position[dim] is None:
-      value = None              #"*NOT SET*"
+    try:
+      if multiplet.position[dim] is None:
+        value = None              #"*NOT SET*"
 
-    elif unit == 'ppm':
-      value = multiplet.position[dim]
+      elif unit == 'ppm':
+        value = multiplet.position[dim]
 
-    #  NOT implemented for multiplets
-    # elif unit == 'point':
-    #   value = multiplet.pointPosition[dim]
+      #  NOT implemented for multiplets
+      # elif unit == 'point':
+      #   value = multiplet.pointPosition[dim]
 
-    elif unit == 'Hz':
-      # value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf
-      value = multiplet.position[dim] * multiplet.multipletList.spectrum.spectrometerFrequencies[dim]
+      elif unit == 'Hz':
+        # value = peak.position[dim]*peak._apiPeak.sortedPeakDims()[dim].dataDimRef.expDimRef.sf
+        value = multiplet.position[dim] * multiplet.multipletList.spectrum.spectrometerFrequencies[dim]
 
-    else: # sampled
-      # value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]
-      raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
-                     % unit)
+      else: # sampled
+        # value = unit.pointValues[int(peak._apiPeak.sortedPeakDims()[dim].position)-1]
+        raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
+                       % unit)
 
-    if isinstance(value, (int, float, np.float32, np.float64)):
-      return '{0:.2f}'.format(value)
-    # except:
-    #   print('Testing FAILED')
-    return None
+      if isinstance(value, (int, float, np.float32, np.float64)):
+        return '{0:.2f}'.format(value)
+    except:
+      print('Testing FAILED')
+  # return None
 
 def getMultipletLinewidth(peak, dim):
   if dim < len(peak.lineWidths):

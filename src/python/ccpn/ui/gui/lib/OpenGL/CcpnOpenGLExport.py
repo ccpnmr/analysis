@@ -31,7 +31,6 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Flowable
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
-from contextlib import contextmanager
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
     GLLINE_STYLES_ARRAY
 from collections import OrderedDict, Iterable
@@ -1159,76 +1158,3 @@ if __name__ == '__main__':
     c.drawPath(p, fill=1, stroke=1)
 
     c.save()
-
-
-
-# class svgFileOutput():
-#   def __init__(self, filename):
-#     self._code = []
-#     self._filename = filename
-#     self._useGroups = []
-#
-#   @property
-#   def svgCode(self):
-#     return self._code
-#
-#   def _AKWtoStr(self, *args, **kwargs):
-#     fmsg = []
-#     if args: fmsg.append(', '.join([str(arg) for arg in args]))
-#     if kwargs: fmsg.append(' '.join([str(ky)+'='+str(kwargs[ky]) for ky in kwargs.keys()]))
-#     return fmsg
-#
-#   @contextmanager
-#   def newSvgFile(self, *args, **kwargs):
-#     try:
-#       # initialise the file
-#       self._code = []
-#
-#       fmsg = self._AKWtoStr(args, kwargs)
-#       # viewBox="0 0 453 200" width="453" height="200"
-#       self._code.append('<?xml version="1.0" encoding="utf-8"?>')
-#       self._code.append("<!DOCTYPE svg")
-#       self._code.append("  PUBLIC '-//W3C//DTD SVG 1.0//EN'")
-#       self._code.append("  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>")
-#       self._code.append('<svg fill-rule="evenodd" height="200.23536165327212" preserveAspectRatio="xMinYMin meet" version="1.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
-#
-#       yield
-#
-#     finally:
-#       # write footer to array
-#       self._code.append('</svg>')
-#
-#   @contextmanager
-#   def newSvgBlock(self):
-#     try:
-#       self._code.append('<svg>')    # some more info
-#     finally:
-#       self._code.append('</svg>')
-#
-#   @contextmanager
-#   def newSvgGroup(self):
-#     try:
-#       self._code.append('<g>')    # some more info
-#     finally:
-#       self._code.append('</g>')
-#
-#   @contextmanager
-#   def newSvgSymbol(self):
-#     try:
-#       self._code.append('<symbol>')    # some more info
-#     finally:
-#       self._code.append('</symbol>')
-#
-#   def svgWriteString(self, value):
-#     self._code.append(value)
-#
-#   def svgTitle(self, title):
-#     self._code.append('<title>%s</title>' % title)
-#
-#   def svgDesc(self, desc):
-#     self._code.append('<desc>%s</desc>' % desc)
-#
-#   def writeFile(self):
-#     with open(self._filename, 'w') as f:
-#       for ll in self._code:
-#         f.write(self._code[ll])

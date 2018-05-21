@@ -184,28 +184,50 @@ def _newMark(self:Project, colour:str, positions:Sequence[float], axisCodes:Sequ
   defaults = collections.OrderedDict((('style', 'simple'), ('units', ()),
                                      ('labels', ())))
 
-  self._startCommandEchoBlock('newMark', colour, positions, axisCodes, values=locals(),
-                              defaults=defaults, parName='newMark')
-  try:
-    apiMark = apiGuiTask.newMark(colour=colour, style=style)
+  # self._startCommandEchoBlock('newMark', colour, positions, axisCodes, values=locals(),
+  #                             defaults=defaults, parName='newMark')
+  # try:
+  #   apiMark = apiGuiTask.newMark(colour=colour, style=style)
+  #
+  #   for ii,position in enumerate(positions):
+  #     dd = {'position':position, 'axisCode':axisCodes[ii]}
+  #     if units:
+  #       unit = units[ii]
+  #       if unit is not None:
+  #        dd['unit'] = unit
+  #     if labels:
+  #       label = labels[ii]
+  #       if label is not None:
+  #        dd['label'] = label
+  #     apiRuler = apiMark.newRuler(**dd)
+  #   #
+  #   result =  self._data2Obj.get(apiMark)
+  # finally:
+  #   self._endCommandEchoBlock()
 
-    for ii,position in enumerate(positions):
-      dd = {'position':position, 'axisCode':axisCodes[ii]}
-      if units:
-        unit = units[ii]
-        if unit is not None:
-         dd['unit'] = unit
-      if labels:
-        label = labels[ii]
-        if label is not None:
-         dd['label'] = label
-      apiRuler = apiMark.newRuler(**dd)
-    #
-    result =  self._data2Obj.get(apiMark)
-  finally:
-    self._endCommandEchoBlock()
+  result = None
+  from ccpn.core.lib.ContextManagers import undoBlock, echoCommand
 
+  with echoCommand(self, 'newMark', colour, positions, axisCodes, values=locals(),
+                              defaults=defaults, parName='newMark'):
+    with undoBlock(self._appBase):      # testing -> _appBase will disappear with the new framework
+      apiMark = apiGuiTask.newMark(colour=colour, style=style)
+
+      for ii,position in enumerate(positions):
+        dd = {'position':position, 'axisCode':axisCodes[ii]}
+        if units:
+          unit = units[ii]
+          if unit is not None:
+           dd['unit'] = unit
+        if labels:
+          label = labels[ii]
+          if label is not None:
+           dd['label'] = label
+        apiRuler = apiMark.newRuler(**dd)
+
+      result =  self._data2Obj.get(apiMark)
   return result
+
 Project.newMark = _newMark
 
 def _newSimpleMark(self:Project, colour:str, position:float, axisCode:str, style:str='simple',

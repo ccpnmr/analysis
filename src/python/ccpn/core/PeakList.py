@@ -432,7 +432,7 @@ class PeakList(AbstractWrapperObject):
     tolerances = self.spectrum.assignmentTolerances
     limits = self.spectrum.spectrumLimits
     selectedRegion = []
-    minDropFactor = self.project.application.preferences.general.peakDropFactor
+    minDropFactor = self.project._appBase.preferences.general.peakDropFactor
 
     for ii, mapping in enumerate(axisCodeMapping):
       if mapping is not None:

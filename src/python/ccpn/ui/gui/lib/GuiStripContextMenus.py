@@ -202,10 +202,16 @@ def _integrate1DItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Add integral and link to peak',
                     callback=strip.mainWindow.add1DIntegral)
 
-def _navigateToDisplayItem(strip):
+def _navigateToCursorPosItem(strip):
     return  _SCMitem(name='Navigate to:',
              typeItem=ItemTypes.get(MENU), toolTip='Show this position in the selected strip ',
-             stripMethodName='navigateToSubMenu',
+             stripMethodName='navigateCursorMenu',
+             callback=None)
+
+def _navigateToPeakPosItem(strip):
+    return  _SCMitem(name='Navigate to:',
+             typeItem=ItemTypes.get(MENU), toolTip='Show this position in the selected strip ',
+             stripMethodName='navigateToPeakMenu',
              callback=None)
 
 
@@ -311,6 +317,8 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
             _marksItem(guiStrip1d),
             _clearMarksItem(guiStrip1d),
             _separator(),
+            _navigateToCursorPosItem(guiStrip1d),
+            _separator(),
             _printItem(guiStrip1d),
             ]
     items = [itm for itm in items if itm is not None]
@@ -346,7 +354,7 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
             _newMultipletItem(guiStrip1d),
             _integrate1DItem(guiStrip1d),
             _separator(),
-            _navigateToDisplayItem(guiStrip1d),
+            _navigateToPeakPosItem(guiStrip1d),
             ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
@@ -400,6 +408,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
             _marksItem(guiStripNd),
             _clearMarksItem(guiStripNd),
             _separator(),
+            _navigateToCursorPosItem(guiStripNd),
+            _separator(),
             _printItem(guiStripNd),
             ]
     items = [itm for itm in items if itm is not None]
@@ -437,7 +447,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _separator(),
         _newMultipletItem(guiStripNd),
         _separator(),
-        _navigateToDisplayItem(guiStripNd),
+        _navigateToPeakPosItem(guiStripNd),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)

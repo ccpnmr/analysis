@@ -5096,7 +5096,6 @@ class CcpnGLWidget(QOpenGLWidget):
     elif rightMouse(event) and axis is None:
       # right click on canvas, not the axes
       strip = self._parent
-      menus = strip._contextMenus
       menu = None
       event.accept()
       self._resetBoxes()
@@ -5114,7 +5113,7 @@ class CcpnGLWidget(QOpenGLWidget):
         zPositions = None
 
       peaks = list(self.current.peaks)
-      # strip._addItemsToNavigateToDisplayMenu()
+      strip._addItemsToNavigateToCursorPosMenu()
 
       from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
       ii = strip._contextMenus.get(PeakMenu)
@@ -5122,7 +5121,7 @@ class CcpnGLWidget(QOpenGLWidget):
         _hidePeaksSingleActionItems(strip, ii)
       else:
         _enableAllItems(ii)
-        strip._addItemsToNavigateToDisplayMenu()
+        strip._addItemsToNavigateToPeakMenu()
 
 
       # now select (take first one within range)

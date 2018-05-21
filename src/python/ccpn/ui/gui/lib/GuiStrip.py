@@ -214,7 +214,8 @@ class GuiStrip(Frame):
                           MultipletMenu:None,
                           }
 
-    self.navigateToSubMenu = None
+    self.navigateToPeakMenu = None #set from context menu and in CcpnOpenGL rightClick
+    self.navigateToCursorMenu = None #set from context menu and in CcpnOpenGL rightClick
     self._initRulers()
     self._isPhasingOn = False
     self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
@@ -464,30 +465,52 @@ class GuiStrip(Frame):
     # except Exception as es:
     #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
+  def _addItemsToNavigateToPeakMenu(self):
+    ''' Adds item to navigate to peak position from context menu'''
+    # TODO, merge the two menu (cursor and peak) in one single menu to avoid code duplication. Issues: when tried, only one menu at the time worked!
+    from functools import partial
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
+    if self.navigateToPeakMenu:
+      self.navigateToPeakMenu.clear()
+      currentStrip = self.current.strip
+      position = self.current.cursorPosition
+      if currentStrip:
+        if self.current.peak:
+          for spectrumDisplay in self.current.project.spectrumDisplays:
+            for strip in spectrumDisplay.strips:
+              if strip != currentStrip:
+                toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
+                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 2:
+                  self.navigateToPeakMenu.addItem(text=strip.pid,
+                                                 callback=partial(navigateToPositionInStrip, strip=strip,
+                                                                  positions=self.current.peak.position, axisCodes=self.current.peak.axisCodes),
+                                                 toolTip=toolTip)
+              self.navigateToPeakMenu.addSeparator()
 
-  def _addItemsToNavigateToDisplayMenu(self):
+  def _addItemsToNavigateToCursorPosMenu(self):
     ''' Copied from old viewbox. This function apparently take the current cursorPosition
      and uses to pan a selected display from the list of spectrumViews or the current cursor position
     TODO needs clear documentation'''
     from functools import partial
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
-    if self.navigateToSubMenu:
-      self.navigateToSubMenu.clear()
+    if self.navigateCursorMenu:
+      self.navigateCursorMenu.clear()
       currentStrip = self.current.strip
       position = self.current.cursorPosition
       if currentStrip:
         for spectrumDisplay in self.current.project.spectrumDisplays:
           for strip in spectrumDisplay.strips:
             if strip != currentStrip:
-              toolTip = 'Show cursor in strip %s at position %s' % (str(strip.id), str([round(x,3) for x in position]))
+              toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x,3) for x in position]))
               if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 2:
-                self.navigateToSubMenu.addItem(text=strip.pid,
+                self.navigateCursorMenu.addItem(text=strip.pid,
                                                callback=partial(navigateToPositionInStrip, strip=strip,
                                                                 positions=position, axisCodes=currentStrip.axisCodes,),
                                                toolTip=toolTip)
-            self.navigateToSubMenu.addSeparator()
+            self.navigateCursorMenu.addSeparator()
+
 
 
   def _updateDisplayedIntegrals(self, data):

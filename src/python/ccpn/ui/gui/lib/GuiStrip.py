@@ -477,16 +477,20 @@ class GuiStrip(Frame):
       position = self.current.cursorPosition
       if currentStrip:
         if self.current.peak:
-          for spectrumDisplay in self.current.project.spectrumDisplays:
-            for strip in spectrumDisplay.strips:
-              if strip != currentStrip:
-                toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
-                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 2:
-                  self.navigateToPeakMenu.addItem(text=strip.pid,
-                                                 callback=partial(navigateToPositionInStrip, strip=strip,
-                                                                  positions=self.current.peak.position, axisCodes=self.current.peak.axisCodes),
-                                                 toolTip=toolTip)
-              self.navigateToPeakMenu.addSeparator()
+          if len(self.current.project.spectrumDisplays) > 1:
+            self.navigateToPeakMenu.setEnabled(True)
+            for spectrumDisplay in self.current.project.spectrumDisplays:
+              for strip in spectrumDisplay.strips:
+                if strip != currentStrip:
+                  toolTip = 'Show cursor in strip %s at Peak position %s' % (str(strip.id), str([round(x, 3) for x in position]))
+                  if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 2:
+                    self.navigateToPeakMenu.addItem(text=strip.pid,
+                                                    callback=partial(navigateToPositionInStrip, strip=strip,
+                                                                     positions=self.current.peak.position, axisCodes=self.current.peak.axisCodes),
+                                                    toolTip=toolTip)
+                self.navigateToPeakMenu.addSeparator()
+          else:
+            self.navigateToPeakMenu.setEnabled(False)
 
   def _addItemsToNavigateToCursorPosMenu(self):
     ''' Copied from old viewbox. This function apparently take the current cursorPosition
@@ -500,16 +504,20 @@ class GuiStrip(Frame):
       currentStrip = self.current.strip
       position = self.current.cursorPosition
       if currentStrip:
-        for spectrumDisplay in self.current.project.spectrumDisplays:
-          for strip in spectrumDisplay.strips:
-            if strip != currentStrip:
-              toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x,3) for x in position]))
-              if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 2:
-                self.navigateCursorMenu.addItem(text=strip.pid,
-                                               callback=partial(navigateToPositionInStrip, strip=strip,
-                                                                positions=position, axisCodes=currentStrip.axisCodes,),
-                                               toolTip=toolTip)
-            self.navigateCursorMenu.addSeparator()
+        if len(self.current.project.spectrumDisplays)>1:
+          self.navigateCursorMenu.setEnabled(True)
+          for spectrumDisplay in self.current.project.spectrumDisplays:
+            for strip in spectrumDisplay.strips:
+              if strip != currentStrip:
+                toolTip = 'Show cursor in strip %s at Cursor position %s' % (str(strip.id), str([round(x,3) for x in position]))
+                if len(list(set(strip.axisCodes) & set(currentStrip.axisCodes))) <= 2:
+                  self.navigateCursorMenu.addItem(text=strip.pid,
+                                                 callback=partial(navigateToPositionInStrip, strip=strip,
+                                                                  positions=position, axisCodes=currentStrip.axisCodes,),
+                                                 toolTip=toolTip)
+              self.navigateCursorMenu.addSeparator()
+        else:
+          self.navigateCursorMenu.setEnabled(False)
 
 
 

@@ -213,12 +213,14 @@ class GuiWindow():
 
               for integralList in validIntegralLists:
                 integral = integralList.newIntegral(value=None, limits=[limits, ])
-                self.current.integrals += (integral,)
+                self.current.integral = integral
                 if peak:
                   integral.peak = peak
                 else:
                   if len(self.current.peaks) == 1:
-                    integral.peak = self.current.peak
+                    if self.current.peak.peakList.spectrum == integral.integralList.spectrum:
+
+                      integral.peak = self.current.peak
           finally:
             strip._endCommandEchoBlock()
 

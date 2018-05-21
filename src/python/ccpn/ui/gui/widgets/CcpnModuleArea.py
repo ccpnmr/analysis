@@ -152,22 +152,30 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     DockArea.dragMoveEvent(self, *args)
     event.accept()
 
-  def paintEvent(self, ev):
-    """
-    Draws central label
-    """
+  def _paint(self,ev):
     p = QtGui.QPainter(self)
     # set font
     p.setFont(self.fontLabel)
     # set colour
     p.setPen(QtGui.QColor(*self.colourLabel))
 
-     # set size
+    # set size
     rgn = self.contentsRect()
     rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height())
-    align  = QtCore.Qt.AlignVCenter|QtCore.Qt.AlignHCenter
+    align = QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter
     self.hint = p.drawText(rgn, align, DropAreaLabel)
     p.end()
+
+  def paintEvent(self, ev):
+    """
+    Draws central label
+    """
+    if not self.ccpnModules:
+      self._paint(ev)
+
+    elif len(self.ccpnModules) == len(self._tempModules()):
+      # means all modules are popuout, so paint the label in the mai module area
+      self._paint(ev)
 
   def _updateModuleNames(self):
     for module in self.ccpnModules:
@@ -204,6 +212,10 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       if hasattr(module, '_repopulateModule'):
         module._repopulateModule()
     pass
+
+  def _tempModules(self):
+    ''':return list of modules in temp Areas '''
+    return [a.ccpnModules for a in self.tempAreas]
 
   def addModule(self, module, position=None, relativeTo=None, **kwds):
     """With these settings the user can close all the modules from the label 'close module' or pop up and

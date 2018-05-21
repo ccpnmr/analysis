@@ -470,27 +470,40 @@ class GuiStrip(Frame):
     TODO needs clear documentation'''
     from functools import partial
     from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
-    from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 
     # try:
     if self.navigateToSubMenu:
       self.navigateToSubMenu.clear()
+      peak = self.current.peak
+      widths = None
+      if peak:
+        currentStrip = self.current.strip
+        if currentStrip:
+          for spectrumDisplay in self.current.project.spectrumDisplays:
+            for strip in spectrumDisplay.strips:
+              if strip != currentStrip:
+                p = [round(x,3) for x in peak.position]
+                toolTip = 'Show cursor in strip %s at position %s' % (str(strip.id), str(p))
 
-      if self.current.peak:
-        for spectrumDisplay in self.current.project.spectrumDisplays:
-          strip = spectrumDisplay.strips[0]
-          if len(list(set(strip.axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
-            self.navigateToSubMenu.addAction(spectrumDisplay.pid,
-                                               partial(navigateToPeakPosition, self.current.project,
-                                                       self.current.peak, [spectrumDisplay.pid]))
-      else:
-        for spectrumDisplay in self.current.project.spectrumDisplays:
-          axisCodes = self.current.strip.axisCodes
-          strip = spectrumDisplay.strips[0]
-          if len(list(set(strip.axisCodes) & set(axisCodes))) <= 2:
-            self.navigateToSubMenu.addAction(spectrumDisplay.pid,
-                                               partial(navigateToPositionInStrip, strip, self.current.cursorPosition,
-                                                       axisCodes))
+                if len(list(set(strip.axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
+                  self.navigateToSubMenu.addItem(text=strip.pid,callback=partial(navigateToPositionInStrip,
+                                                                                  strip=strip,
+                                                                                  positions=peak.position,
+                                                                                  axisCodes=peak.axisCodes,
+                                                                                  widths=widths),
+                                                   toolTip=toolTip)
+            self.navigateToSubMenu.addSeparator()
+
+      # else:
+      # This should be a different function --> navigate to cursorPosition, otherwise very confusing
+
+      #   for spectrumDisplay in self.current.project.spectrumDisplays:
+      #     axisCodes = self.current.strip.axisCodes
+      #     strip = spectrumDisplay.strips[0]
+      #     if len(list(set(strip.axisCodes) & set(axisCodes))) <= 2:
+      #       self.navigateToSubMenu.addAction(spectrumDisplay.pid,
+      #                                          partial(navigateToPositionInStrip, strip, self.current.cursorPosition,
+      #                                                  axisCodes))
     # except:
     #   pass
 

@@ -5114,6 +5114,7 @@ class CcpnGLWidget(QOpenGLWidget):
         zPositions = None
 
       peaks = list(self.current.peaks)
+      # strip._addItemsToNavigateToDisplayMenu()
 
       from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
       ii = strip._contextMenus.get(PeakMenu)

@@ -203,9 +203,9 @@ def _integrate1DItem(strip):
                     callback=strip.mainWindow.add1DIntegral)
 
 def _navigateToDisplayItem(strip):
-    return  _SCMitem(name='Show this Position in:',
-             typeItem=ItemTypes.get(MENU), toolTip='Move other display at peak position',
-             shortcut='NT', stripMethodName='navigateToSubMenu',
+    return  _SCMitem(name='Navigate to:',
+             typeItem=ItemTypes.get(MENU), toolTip='Show this position in the selected strip ',
+             stripMethodName='navigateToSubMenu',
              callback=None)
 
 

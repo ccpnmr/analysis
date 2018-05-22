@@ -30,7 +30,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.core.lib import AssignmentLib
 from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
+from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition
 from ccpn.ui.gui import guiSettings
 from ccpn.util.Logging import getLogger
 from functools import partial
@@ -68,8 +68,8 @@ class GuiWindow():
     addShortCut("m, c", self, self.clearMarks, context=context)
     # addShortCut("f, n", self, partial(navigateToNmrResidue, self._parent.project), context=context)
     addShortCut("f, p", self,
-                        partial(navigateToPeakPosition, self.application.project),
-                        context=context)
+                partial(navigateToCurrentPeakPosition, self.application),
+                context=context)
     addShortCut("c, a", self,
                         partial(AssignmentLib.propagateAssignments,current=self.application.current),
                         context=context)

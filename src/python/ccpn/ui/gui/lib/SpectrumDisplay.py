@@ -4,38 +4,36 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project
 from typing import List
-from ccpn.ui.gui.lib.GuiStrip import GuiStrip
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, navigateToNmrAtomsInStrip
 from ccpn.util.Logging import getLogger
 
 
-def navigateToPeakPosition(project:Project, peak:Peak=None,
-   selectedDisplays:List[GuiSpectrumDisplay]=None, strip:GuiStrip=None):
-  """
-  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
-  to the positions specified by the peak.
+def navigateToCurrentPeakPosition(application):
   """
 
-  if selectedDisplays is None and not strip:
-    selectedDisplays = [display.pid for display in project.spectrumDisplays]
+  Takes the current peak position and navigates (centres) to that position all strips and spectrum displays of the project.
+  Called by shortcut. No reasons to give parameters to this function. For a more generic usage refer to:  "navigateToPositionInStrip"
+  instead
+  """
+
+  project = application.project
+  displays = project.spectrumDisplays
+  peak = application.current.peak
+
+  if len(displays) < 1:
+    getLogger().warning('No Displays where to navigate.')
+    return
 
   if peak is None:
-    peak = project._appBase.current.peak
-    if peak is None:
-      getLogger().warning('No peak selected.')
-      return
+    getLogger().warning('No peak selected.')
+    return
 
-  positions = peak.position
-  axisCodes = peak.axisCodes
+  for display in displays:
+    for strip in display.strips:
+      if strip:
+        navigateToPositionInStrip(strip, peak.position, peak.axisCodes)
 
-  if not strip:
-    for displayPid in selectedDisplays:
-      display = project.getByPid(displayPid)
-      for strip in display.strips:
-        navigateToPositionInStrip(strip, positions, axisCodes)
-  else:
-    navigateToPositionInStrip(strip, positions, axisCodes)
 
 
 def makeStripPlot(spectrumDisplay:GuiSpectrumDisplay, nmrAtomPairs:List[List[NmrAtom]], autoWidth=True, widths=None):

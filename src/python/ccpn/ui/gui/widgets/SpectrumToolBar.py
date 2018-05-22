@@ -36,6 +36,9 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui._implementation.PeakListView import  PeakListView
 from ccpn.ui._implementation.IntegralListView import  IntegralListView
 from ccpn.ui._implementation.MultipletListView import  MultipletListView
+from ccpn.core.PeakList import  PeakList
+from ccpn.core.IntegralList import  IntegralList
+from ccpn.core.MultipletList import  MultipletList
 
 class SpectrumToolBar(ToolBar):
 
@@ -95,14 +98,16 @@ class SpectrumToolBar(ToolBar):
     Creates a context menu containing a command to delete the spectrum from the display and its
     button from the toolbar.
     """
+    from collections import OrderedDict
+
     if not button:
       return None
     contextMenu = Menu('', self, isFloatWidget=True)
-    viewObjs = [PeakListView, IntegralListView, MultipletListView]
-    for viewObj in viewObjs:
-      title = viewObj._pluralLinkName
-      smenu =  contextMenu.addMenu(title)
-      views = getattr(self.widget, title)
+    dd = OrderedDict([(PeakList,PeakListView), (IntegralList,IntegralListView), (MultipletList,MultipletListView)])
+
+    for coreObj, viewObj in dd.items():
+      smenu =  contextMenu.addMenu(coreObj.className)
+      views = getattr(self.widget, viewObj._pluralLinkName)
       smenu.setEnabled(len(views) > 0)
       smenu.addAction('Show All', partial(self._setVisibleAllFromList, True, smenu, views))
       smenu.addAction('Hide All', partial(self._setVisibleAllFromList, False, smenu, views))

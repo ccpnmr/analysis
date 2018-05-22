@@ -33,7 +33,9 @@ from functools import partial
 from ccpn.core.lib.Notifiers import Notifier
 from collections import OrderedDict
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-
+from ccpn.ui._implementation.PeakListView import  PeakListView
+from ccpn.ui._implementation.IntegralListView import  IntegralListView
+from ccpn.ui._implementation.MultipletListView import  MultipletListView
 
 class SpectrumToolBar(ToolBar):
 
@@ -96,8 +98,9 @@ class SpectrumToolBar(ToolBar):
     if not button:
       return None
     contextMenu = Menu('', self, isFloatWidget=True)
-    subMenuTitles = ['peakListViews','integralListViews','multipletListViews']
-    for title in subMenuTitles:
+    viewObjs = [PeakListView, IntegralListView, MultipletListView]
+    for viewObj in viewObjs:
+      title = viewObj._pluralLinkName
       smenu =  contextMenu.addMenu(title)
       views = getattr(self.widget, title)
       smenu.setEnabled(len(views) > 0)
@@ -233,34 +236,34 @@ class SpectrumToolBar(ToolBar):
       return spvs[0]
 
 
-  def _allPeakLists(self, contextMenu, button):
-    key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
-    for peakListView in self.widget.peakListViews:
-      if peakListView.spectrumView._apiDataSource == key:
-        for action in contextMenu.actions():
-          if action is not self.sender():
-            if not action.isChecked():
-              action.setChecked(True)
-              action.toggled.connect(peakListView.setVisible)
-    self._updateVisiblePeakLists()
-
-  def _noPeakLists(self, contextMenu, button):
-    key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
-    for peakListView in self.widget.peakListViews:
-      if peakListView.spectrumView._apiDataSource == key:
-        for action in contextMenu.actions():
-          if action is not self.sender():
-            if action.isChecked():
-              action.setChecked(False)
-              action.toggled.connect(peakListView.setVisible)
-    self._updateVisiblePeakLists()
+  # def _allPeakLists(self, contextMenu, button):
+  #   key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+  #   for peakListView in self.widget.peakListViews:
+  #     if peakListView.spectrumView._apiDataSource == key:
+  #       for action in contextMenu.actions():
+  #         if action is not self.sender():
+  #           if not action.isChecked():
+  #             action.setChecked(True)
+  #             action.toggled.connect(peakListView.setVisible)
+  #   self._updateVisiblePeakLists()
+  #
+  # def _noPeakLists(self, contextMenu, button):
+  #   key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+  #   for peakListView in self.widget.peakListViews:
+  #     if peakListView.spectrumView._apiDataSource == key:
+  #       for action in contextMenu.actions():
+  #         if action is not self.sender():
+  #           if action.isChecked():
+  #             action.setChecked(False)
+  #             action.toggled.connect(peakListView.setVisible)
+  #   self._updateVisiblePeakLists()
 
   def _setVisibleAllFromList(self,abool, menu, views):
     '''
     
     :param abool: T or F
     :param menu: 
-    :param views: 
+    :param views: any of Views obj _pluralLinkName
     :return: 
     '''
     if views:

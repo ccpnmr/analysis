@@ -1207,8 +1207,6 @@ def _spectrumMakeFirstPeakList(project:Project, dataSource:Nmr.DataSource):
   """Add PeakList if none is present - also IntegralList for 1D. For notifiers."""
   if not dataSource.findFirstPeakList(dataType='Peak'):
     dataSource.newPeakList()
-  if dataSource.numDim == 1 and not dataSource.findFirstPeakList(dataType='Integral'):
-    dataSource.newPeakList(dataType='Integral')
 Project._setupApiNotifier(_spectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')
 del _spectrumMakeFirstPeakList
 

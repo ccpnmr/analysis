@@ -81,6 +81,11 @@ class IntegralListView(AbstractWrapperObject):
         return str(self._wrappedData.integralListView.integralListSerial)
 
     @property
+    def _childClass(self):
+        """Ccpn core obj that integralListView refers to"""
+        return self.integralList
+
+    @property
     def _localCcpnSortKey(self) -> typing.Tuple:
         """Local sorting key, in context of parent."""
         return (self._wrappedData.integralListView.integralListSerial,)

@@ -71,6 +71,11 @@ class MultipletListView(AbstractWrapperObject):
 
     spectrumView = _parent
 
+    @property
+    def _childClass(self):
+        """Ccpn core obj that multipletListView refers to"""
+        return self.multipletList
+
     def delete(self):
         """MultipletListViews cannot be deleted, except as a byproduct of deleting other things"""
         raise Exception("MultipletListViews cannot be deleted directly")

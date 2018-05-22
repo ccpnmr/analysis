@@ -165,6 +165,11 @@ class PeakListView(AbstractWrapperObject):
     """PeakList that PeakListView refers to"""
     return self._project._data2Obj.get(self._wrappedData.peakListView.peakList)
 
+  @property
+  def _childClass(self):
+    """Ccpn core obj that PeakListView refers to"""
+    return self.peakList
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:SpectrumView)-> typing.Optional[list]:

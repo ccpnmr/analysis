@@ -1089,7 +1089,7 @@ class GuiSpectrumDisplay(CcpnModule):
       peakItemDict = self.activePeakItemDict[peakListView]
       peakItem = peakItemDict.get(apiPeak)
       if peakItem:
-        peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
+        # peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
         del peakItemDict[apiPeak]
         inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
         if inactivePeakItems:

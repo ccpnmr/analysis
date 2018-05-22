@@ -96,6 +96,12 @@ class SpectrumToolBar(ToolBar):
     if not button:
       return None
     contextMenu = Menu('', self, isFloatWidget=True)
+    plMenu =  contextMenu.addMenu('PeakList')
+    ilMenu =  contextMenu.addMenu('IntegralList')
+    mlMenu =  contextMenu.addMenu('MultipletList')
+
+
+
     peakListViews = self.widget.peakListViews
     integralListViews = self.widget.integralListViews
     multipletListViews = self.widget.multipletListViews
@@ -105,31 +111,33 @@ class SpectrumToolBar(ToolBar):
     if not keys: # if you click on >> button which shows more spectra
       return None
     key = keys[0]
-    allPlAction = contextMenu.addAction('Show All PL', partial(self._allPeakLists, contextMenu, button))
-    noPlAction = contextMenu.addAction('Hide All PL', partial(self._noPeakLists, contextMenu, button))
 
-    if peakListViews:
-      contextMenu.addSeparator()
+    plMenu.setEnabled(len(peakListViews)>0)
+    plMenu.addAction('Show All', partial(self._setVisibleAllFromList,True, plMenu, peakListViews))
+    plMenu.addAction('Hide All', partial(self._setVisibleAllFromList,False, plMenu, peakListViews))
+    plMenu.addSeparator()
     for peakListView in peakListViews:
       if peakListView.spectrumView._apiDataSource == key:
         if peakListView.peakList:
-          action = contextMenu.addAction(peakListView.peakList.pid)
+          action = plMenu.addAction(peakListView.peakList.pid)
           action.setCheckable(True)
           if peakListView.isVisible():
             action.setChecked(True)
           # else:
           #   allPlAction.setChecked(False)
           action.toggled.connect(peakListView.setVisible)
-
           # TODO:ED check this is okay for each spectrum
           action.toggled.connect(partial(self._updateVisiblePeakLists, peakListView.spectrumView))
 
-    if integralListViews:
-      contextMenu.addSeparator()
+
+    ilMenu.setEnabled(len(integralListViews)>0)
+    ilMenu.addAction('Show All', partial(self._setVisibleAllFromList,True, ilMenu, integralListViews))
+    ilMenu.addAction('Hide All', partial(self._setVisibleAllFromList,False, ilMenu, integralListViews))
+    ilMenu.addSeparator()
     for integralListView in integralListViews:
       if integralListView.spectrumView._apiDataSource == key:
         if integralListView.integralList:
-          action = contextMenu.addAction(integralListView.integralList.pid)
+          action = ilMenu.addAction(integralListView.integralList.pid)
           action.setCheckable(True)
           if integralListView.isVisible():
             action.setChecked(True)
@@ -140,12 +148,14 @@ class SpectrumToolBar(ToolBar):
           # TODO:ED check this is okay for each spectrum
           action.toggled.connect(partial(self._updateVisibleIntegralLists, integralListView.spectrumView))
 
-    if multipletListViews:
-      contextMenu.addSeparator()
+    mlMenu.setEnabled(len(multipletListViews)>0)
+    mlMenu.addAction('Show All', partial(self._setVisibleAllFromList,True, mlMenu, multipletListViews))
+    mlMenu.addAction('Hide All', partial(self._setVisibleAllFromList,False, mlMenu, multipletListViews))
+    mlMenu.addSeparator()
     for multipletListView in multipletListViews:
       if multipletListView.spectrumView._apiDataSource == key:
         if multipletListView.multipletList:
-          action = contextMenu.addAction(multipletListView.multipletList.pid)
+          action = mlMenu.addAction(multipletListView.multipletList.pid)
           action.setCheckable(True)
           if multipletListView.isVisible():
             action.setChecked(True)
@@ -207,6 +217,22 @@ class SpectrumToolBar(ToolBar):
               action.setChecked(False)
               action.toggled.connect(peakListView.setVisible)
     self._updateVisiblePeakLists()
+
+  def _setVisibleAllFromList(self,abool, menu, views):
+    '''
+    
+    :param abool: T or F
+    :param menu: 
+    :param views: 
+    :return: 
+    '''
+    if views:
+      for view in views:
+        view.setVisible(abool)
+        for action in menu.actions():
+          if action.text() == view.pid:
+            action.setChecked(abool)
+
 
   def _removeSpectrum(self, button:QtWidgets.QToolButton):
     """

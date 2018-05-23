@@ -13,13 +13,17 @@ def navigateToCurrentPeakPosition(application):
   """
 
   Takes the current peak position and navigates (centres) to that position all strips and spectrum displays of the project.
-  Called by shortcut. No reasons to give parameters to this function. For a more generic usage refer to:  "navigateToPositionInStrip"
+  Called by shortcut. For a more generic usage refer to:  "navigateToPositionInStrip"
   instead
   """
 
   project = application.project
   displays = project.spectrumDisplays
   peak = application.current.peak
+
+  if len(application.current.peaks)>1:
+    getLogger().warning('More than one peak selected. Select only one for the "navigateToCurrentPeakPosition" command.')
+    return
 
   if len(displays) < 1:
     getLogger().warning('No Displays where to navigate.')

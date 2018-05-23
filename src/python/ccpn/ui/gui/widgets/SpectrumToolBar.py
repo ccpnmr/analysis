@@ -92,6 +92,37 @@ class SpectrumToolBar(ToolBar):
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitPaintEvent()
 
+  def _addSubMenusToContext(self, contextMenu, button):
+    dd = OrderedDict([(PeakList, PeakListView), (IntegralList, IntegralListView), (MultipletList, MultipletListView)])
+    spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
+    widgetSPviews = self.widget.spectrumViews
+    if spectrum:
+      for coreObj, viewObj in dd.items():
+        smenu = contextMenu.addMenu(coreObj.className)
+        allViews = []
+        vv = getattr(self.widget, viewObj._pluralLinkName)
+        if vv:
+          for view in vv:
+            s = coreObj.className
+            o = getattr(view, s[0].lower() + s[1:])
+            if o:
+              if o._parent == spectrum:
+                allViews.append(view)
+        views = list(set(allViews))
+        smenu.setEnabled(len(views) > 0)
+        smenu.addAction('Show All', partial(self._setVisibleAllFromList, True, smenu, views))
+        smenu.addAction('Hide All', partial(self._setVisibleAllFromList, False, smenu, views))
+        smenu.addSeparator()
+        for view in views:
+          ccpnObj = view._childClass
+          if ccpnObj:
+            strip = view._parent._parent
+            action = smenu.addAction(str(strip.id + ' ' + ccpnObj.id))
+            action.setCheckable(True)
+            if view.isVisible():
+              action.setChecked(True)
+            action.toggled.connect(view.setVisible)
+            action.toggled.connect(self._updateGl)
 
   def _createContextMenu(self, button:QtWidgets.QToolButton):
     """
@@ -102,25 +133,11 @@ class SpectrumToolBar(ToolBar):
 
     if not button:
       return None
-    contextMenu = Menu('', self, isFloatWidget=True)
-    dd = OrderedDict([(PeakList,PeakListView), (IntegralList,IntegralListView), (MultipletList,MultipletListView)])
+    if len(button.actions())<1:
+      return None
 
-    for coreObj, viewObj in dd.items():
-      smenu =  contextMenu.addMenu(coreObj.className)
-      views = getattr(self.widget, viewObj._pluralLinkName)
-      smenu.setEnabled(len(views) > 0)
-      smenu.addAction('Show All', partial(self._setVisibleAllFromList, True, smenu, views))
-      smenu.addAction('Hide All', partial(self._setVisibleAllFromList, False, smenu, views))
-      smenu.addSeparator()
-      for view in views:
-        ccpnObj = view._childClass
-        if ccpnObj:
-          action = smenu.addAction(ccpnObj.pid)
-          action.setCheckable(True)
-          if view.isVisible():
-            action.setChecked(True)
-          action.toggled.connect(view.setVisible)
-          action.toggled.connect(partial(self._updateGl, view._parent))
+    contextMenu = Menu('', self, isFloatWidget=True)
+    self._addSubMenusToContext(contextMenu, button)
 
     contextMenu.addSeparator()
     contextMenu.addAction('Remove Spectrum', partial(self._removeSpectrum, button))
@@ -208,7 +225,7 @@ class SpectrumToolBar(ToolBar):
   #   contextMenu.addAction('Remove Spectrum', partial(self._removeSpectrum, button))
   #   return contextMenu
 
-  def _updateGl(self):
+  def _updateGl(self, ):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()
@@ -405,12 +422,15 @@ class SpectrumToolBar(ToolBar):
 
           # create a new action and move it to the correct place in the list
           action = self.addAction(spectrumName)
+          action.setObjectName(spectrum.pid)
           self.insertAction(nextAction, action)
         else:
           action = self.addAction(spectrumName)
+          action.setObjectName(spectrum.pid)
 
       except Exception as es:
         action = self.addAction(spectrumName)
+        action.setObjectName(spectrum.pid)
 
 
       action.setCheckable(True)

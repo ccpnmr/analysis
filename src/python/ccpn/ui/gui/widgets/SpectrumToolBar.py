@@ -386,8 +386,9 @@ class SpectrumToolBar(ToolBar):
     if not action:
       # add toolbar action (button)
       spectrumName = spectrum.name
-      if len(spectrumName) > 12:
-        spectrumName = spectrumName[:12]+'.....'
+      # This is a bug, it changes the name of button and crashes when moving them across
+      # if len(spectrumName) > 12:
+      #   spectrumName = spectrumName[:12]+'.....'
 
       actionList = self.actions()
       try:

@@ -95,7 +95,6 @@ class SpectrumToolBar(ToolBar):
   def _addSubMenusToContext(self, contextMenu, button):
     dd = OrderedDict([(PeakList, PeakListView), (IntegralList, IntegralListView), (MultipletList, MultipletListView)])
     spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
-    widgetSPviews = self.widget.spectrumViews
     if spectrum:
       for coreObj, viewObj in dd.items():
         smenu = contextMenu.addMenu(coreObj.className)
@@ -113,11 +112,19 @@ class SpectrumToolBar(ToolBar):
         smenu.addAction('Show All', partial(self._setVisibleAllFromList, True, smenu, views))
         smenu.addAction('Hide All', partial(self._setVisibleAllFromList, False, smenu, views))
         smenu.addSeparator()
-        for view in views:
+        for view in sorted(views, reverse=False):
           ccpnObj = view._childClass
+          strip = view._parent._parent
+          toolTip = 'Toggle {0} {1} on strip {2}'.format(coreObj.className, ccpnObj._key, strip.id)
           if ccpnObj:
-            strip = view._parent._parent
-            action = smenu.addAction(str(strip.id + ' ' + ccpnObj.id))
+            if len(self.widget.strips)>1: #add shows in which strips the view is
+              currentTxt = '' # add in which strip is current
+              if self.widget.current.strip == strip:
+                currentTxt = ' Current'
+              action = smenu.addItem('{0} ({1}{2})'.format(ccpnObj.id, strip.id, currentTxt), toolTip=toolTip)
+            else:
+              action = smenu.addItem(ccpnObj.id, toolTip=toolTip)
+
             action.setCheckable(True)
             if view.isVisible():
               action.setChecked(True)

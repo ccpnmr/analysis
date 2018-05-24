@@ -63,14 +63,14 @@ EXPANDSELECTION = 'expandSelection'
 class ExportNefPopup(CcpnDialog):
 
 
-  def __init__(self, parent=None, mainWindow=None, title='Export to Nef File'
-               , fileMode=FileDialog.AnyFile
-               , text='Export File'
-               , acceptMode=FileDialog.AcceptSave
-               , preferences=None
-               , selectFile=None
-               , filter='*'
-               , **kw):
+  def __init__(self, parent=None, mainWindow=None, title='Export to Nef File',
+               fileMode=FileDialog.AnyFile,
+               text='Export File',
+               acceptMode=FileDialog.AcceptSave,
+               preferences=None,
+               selectFile=None,
+               filter='*',
+               **kw):
     """
     Initialise the widget
     """
@@ -83,12 +83,12 @@ class ExportNefPopup(CcpnDialog):
 
     # pre __init__ to process extra keywords
 
-    # B = {'fileMode':None
-    #       , 'text':None
-    #       , 'acceptMode':None
-    #       , 'preferences':None
-    #       , 'selectFile':None
-    #       , 'filter':None}
+    # B = {'fileMode':None,
+    #       'text':None,
+    #       'acceptMode':None,
+    #       'preferences':None,
+    #       'selectFile':None,
+    #       'filter':None}
     # self.saveDict = {k:v for k, v in kw.items() if k in B}
     # filterKw = {k:v for k, v in kw.items() if k not in B}
 
@@ -100,23 +100,23 @@ class ExportNefPopup(CcpnDialog):
     self.current = mainWindow.application.current
 
     self.options = Frame(self, setLayout=True, grid=(0,0))
-    self.buttonCCPN = CheckBox(self.options, checked=True
-                               , text='include CCPN tags'
-                               , grid=(0,0), hAlign ='l')
-    self.buttonExpand = CheckBox(self.options, checked=False
-                               , text='expand selection'
-                               , grid=(1,0), hAlign ='l')
-    # self.spacer = Spacer(self.options, 3, 3
-    #                      , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-    #                      , grid=(1,1), gridSpan=(1,1))
+    self.buttonCCPN = CheckBox(self.options, checked=True,
+                               text='include CCPN tags',
+                               grid=(0,0), hAlign ='l')
+    self.buttonExpand = CheckBox(self.options, checked=False,
+                               text='expand selection',
+                               grid=(1,0), hAlign ='l')
+    # self.spacer = Spacer(self.options, 3, 3,
+    #                      QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+    #                      grid=(1,1), gridSpan=(1,1))
     # self._includeCCPN = True
     # self._includeExpand = False
 
     # put save options in this section
 
-    self.spacer = Spacer(self, 3, 3
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(1,0), gridSpan=(1,1))
+    self.spacer = Spacer(self, 3, 3,
+                         QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+                         grid=(1,0), gridSpan=(1,1))
 
     # self.labelFrame = Frame(self, setLayout=True, grid=(2,0))
     # self.labelLeft = Label(self.labelFrame, text='Items in Project', grid=(1,0), hAlign='c')
@@ -160,18 +160,18 @@ class ExportNefPopup(CcpnDialog):
     self.pathEdited = True
     self.saveText.textEdited.connect(self._editPath)
 
-    self.spacer = Spacer(self.saveFrame, 13, 3
-                         , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                         , grid=(0,2), gridSpan=(1,1))
-    self.pathButton = Button(self.saveFrame, text=''
-                             , icon=self.openPathIcon
-                             , callback=self._openFileDialog
-                             , grid=(0, 3), hAlign='c')
+    self.spacer = Spacer(self.saveFrame, 13, 3,
+                         QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+                         grid=(0,2), gridSpan=(1,1))
+    self.pathButton = Button(self.saveFrame, text='',
+                             icon=self.openPathIcon,
+                             callback=self._openFileDialog,
+                             grid=(0, 3), hAlign='c')
 
     self.buttonFrame = Frame(self, setLayout=True, grid=(9,0))
-    self.spacer = Spacer(self.buttonFrame, 3, 3
-                         , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
-                         , grid=(0,0), gridSpan=(1,1))
+    self.spacer = Spacer(self.buttonFrame, 3, 3,
+                         QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+                         grid=(0,0), gridSpan=(1,1))
     self.buttons = ButtonList(self.buttonFrame, ['Cancel', 'Save'], [self._rejectDialog, self._acceptDialog], grid=(0,1))
 
     # this show/hide button doesn't quite work yet
@@ -204,13 +204,13 @@ class ExportNefPopup(CcpnDialog):
     # self.fileSaveDialog._setParent(self, self._acceptDialog, self._rejectDialog)  # why does this work?
 
     # self.fileSaveDialog = NefFileDialog(self, **self.saveDict)
-    self.fileSaveDialog = NefFileDialog(self
-                                        , fileMode = self._nefFileMode
-                                        , text = self._nefText
-                                        , acceptMode = self._nefAcceptMode
-                                        , preferences = self._nefPreferences
-                                        , selectFile = self._nefSelectFile
-                                        , filter = self._nefFilter)
+    self.fileSaveDialog = NefFileDialog(self,
+                                        fileMode = self._nefFileMode,
+                                        text = self._nefText,
+                                        acceptMode = self._nefAcceptMode,
+                                        preferences = self._nefPreferences,
+                                        selectFile = self._nefSelectFile,
+                                        filter = self._nefFilter)
 
     if selectFile is not None:    # and self.application.preferences.general.useNative is False:
       self.saveText.setText(self.fileSaveDialog.selectedFile())
@@ -276,9 +276,9 @@ class ExportNefPopup(CcpnDialog):
     return self.exitFileName, self.flags, self.newList
 
     # this is the old bit that reads from the drag boxes
-    self.exclusionDict = {Chain._pluralLinkName: self.chainCopy.getLeftList()
-                         , NmrChain._pluralLinkName: self.nmrChainCopy.getLeftList()
-                         , RestraintList._pluralLinkName: self.restraintCopy.getLeftList()}
+    self.exclusionDict = {Chain._pluralLinkName: self.chainCopy.getLeftList(),
+                         NmrChain._pluralLinkName: self.nmrChainCopy.getLeftList(),
+                         RestraintList._pluralLinkName: self.restraintCopy.getLeftList()}
 
     # from ccpn.core.Chain import Chain
     # from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -292,21 +292,21 @@ class ExportNefPopup(CcpnDialog):
     # from ccpn.core.SpectrumGroup import SpectrumGroup
     # from ccpn.core.Note import Note
     #
-    # checkList = [Chain._pluralLinkName
-    #              , ChemicalShiftList._pluralLinkName
-    #              , RestraintList._pluralLinkName
-    #              , PeakList._pluralLinkName
-    #              , Sample._pluralLinkName
-    #              , Substance._pluralLinkName
-    #              , NmrChain._pluralLinkName
-    #              , DataSet._pluralLinkName
-    #              , Complex._pluralLinkName
-    #              , SpectrumGroup._pluralLinkName
-    #              , Note._pluralLinkName]
+    # checkList = [Chain._pluralLinkName,
+    #              ChemicalShiftList._pluralLinkName,
+    #              RestraintList._pluralLinkName,
+    #              PeakList._pluralLinkName,
+    #              Sample._pluralLinkName,
+    #              Substance._pluralLinkName,
+    #              NmrChain._pluralLinkName,
+    #              DataSet._pluralLinkName,
+    #              Complex._pluralLinkName,
+    #              SpectrumGroup._pluralLinkName,
+    #              Note._pluralLinkName]
 
-      # CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS
-      # , SAMPLES, SUBSTANCES, NMRCHAINS
-      # , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
+      # CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS,
+      # SAMPLES, SUBSTANCES, NMRCHAINS,
+      # DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
 
     self.pidList = []                                # start with an empty list
 
@@ -329,13 +329,13 @@ class ExportNefPopup(CcpnDialog):
     return self.exitFileName, self.flags, self.pidList
 
   def _openFileDialog(self):
-    self.fileDialog = FileDialog(self                       # ejb - old, , **self.saveDict)
-                                 , fileMode=self._nefFileMode
-                                 , text=self._nefText
-                                 , acceptMode=self._nefAcceptMode
-                                 , preferences=self._nefPreferences
-                                 , selectFile=self.saveText.text()
-                                 , filter=self._nefFilter)
+    self.fileDialog = FileDialog(self,                       # ejb - old, , **self.saveDict)
+                                 fileMode=self._nefFileMode,
+                                 text=self._nefText,
+                                 acceptMode=self._nefAcceptMode,
+                                 preferences=self._nefPreferences,
+                                 selectFile=self.saveText.text(),
+                                 filter=self._nefFilter)
     selectedFile = self.fileDialog.selectedFile()
     if selectedFile:
       self.saveText.setText(str(selectedFile))

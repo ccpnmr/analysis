@@ -47,12 +47,12 @@ MULTIPLET_TYPES = ['singlet','doublet', 'triplet', 'quartet', 'quintet', 'sextet
                    'doublet of doublets', 'doublet of triplets', 'triplet of doublets', 'doublet of doublet of doublets']
 
 def _calculateCenterOfMass(multiplet):
-  '''
+  """
 
   :param multiplet: multiplet obj containing peaks.
   :return: the center of mass of the multiplet that can be used as peak position
            if you consider the multiplet as a single peak
-  '''
+  """
 
   if len(multiplet.peaks) > 0:
     position = ()

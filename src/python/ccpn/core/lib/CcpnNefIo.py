@@ -1,6 +1,4 @@
-
 """Code for CCPN-specific NEF I/O
-
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -54,6 +52,9 @@ from ccpn.core.Complex import Complex
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
+from ccpn.core.MultipletList import MultipletList
+from ccpn.core.Multiplet import Multiplet
+from ccpn.core.PeakCluster import PeakCluster
 from ccpn.core.Peak import Peak
 from ccpn.core.Sample import Sample
 # from ccpn.core.SampleComponent import SampleComponent
@@ -91,6 +92,8 @@ CHAINS = 'chains'
 CHEMICALSHIFTLISTS = 'chemicalShiftLists'
 RESTRAINTLISTS = 'restraintLists'
 PEAKLISTS = 'peakLists'
+INTEGRALLISTS = 'integralLists'
+MULTIPLETLISTS = 'multipletLists'
 SAMPLES = 'samples'
 SUBSTANCES = 'substances'
 NMRCHAINS = 'nmrChains'
@@ -98,6 +101,7 @@ DATASETS = 'dataSets'
 COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
+PEAKCLUSTERS = 'peakClusters'
 
 #  - saveframe category names in reading order
 # The order is significant, because setting of crosslinks relies on the order frames are read
@@ -118,6 +122,7 @@ saveFrameReadingOrder = [
   'ccpn_complex',
   'ccpn_spectrum_group',
   'ccpn_restraint_list',
+  'ccpn_peak_clusters',
   'ccpn_notes',
   'ccpn_additional_data'
 ]
@@ -415,8 +420,12 @@ nef2CcpnMap = {
     ('nef_peak',_isALoop),
     ('ccpn_integral_list',_isALoop),
     ('ccpn_integral',_isALoop),
+    ('ccpn_multiplet_list',_isALoop),
+    ('ccpn_multiplet',_isALoop),
+    ('ccpn_multiplet_peaks',_isALoop),
     ('ccpn_spectrum_hit',_isALoop),
   )),
+
   'nef_spectrum_dimension':OD((
     ('dimension_id',None),
     ('axis_unit','axisUnits'),
@@ -429,6 +438,7 @@ nef2CcpnMap = {
     ('is_acquisition',None),
     ('ccpn_axis_code','axisCodes'),
   )),
+
   # NB PseudoDimensions are not yet supported
   'ccpn_spectrum_dimension':OD((
     ('dimension_id',None),
@@ -554,6 +564,7 @@ nef2CcpnMap = {
     ('residue_name_15',None),
     ('atom_name_15',None),
     ('ccpn_figure_of_merit','figureOfMerit'),
+    ('ccpn_linked_integral',None),
     ('ccpn_annotation','annotation'),
     ('ccpn_comment','comment'),
   )),
@@ -626,8 +637,60 @@ nef2CcpnMap = {
     ('upper_limits_3',None),
     ('lower_limits_4',None),
     ('upper_limits_4',None),
+    ('ccpn_linked_peak',None),
     ('annotation','annotation'),
     ('comment','comment'),
+  )),
+
+  'ccpn_multiplet_list':OD((
+    ('serial',None),
+    ('name','title'),
+    ('symbol_colour','symbolColour'),
+    ('text_colour','textColour'),
+    ('comment','comment'),
+  )),
+
+  'ccpn_multiplet':OD((
+    ('multiplet_list_serial','multipletList.serial'),
+    ('multiplet_serial',None),
+    ('height','height'),
+    ('height_uncertainty','heightError'),
+    ('volume','volume'),
+    ('volume_uncertainty','volumeError'),
+    ('figure_of_merit','figureOfMerit'),
+    ('slopes_1',None),
+    ('slopes_2',None),
+    ('slopes_3',None),
+    ('slopes_4',None),
+    ('lower_limits_1',None),
+    ('upper_limits_1',None),
+    ('lower_limits_2',None),
+    ('upper_limits_2',None),
+    ('lower_limits_3',None),
+    ('upper_limits_3',None),
+    ('lower_limits_4',None),
+    ('upper_limits_4',None),
+    # ('ccpn_multiplet_peaks',_isALoop),
+    ('annotation','annotation'),
+    ('comment','comment'),
+  )),
+
+  'ccpn_multiplet_peaks': OD((
+    ('multiplet_list_serial', None),
+    ('multiplet_serial', None),
+    ('multiplet_peak', None),
+  )),
+
+  'ccpn_peak_clusters':OD((
+    ('serial',None),
+    ('ccpn_peak_cluster',_isALoop),
+  )),
+
+  'ccpn_peak_cluster':OD((
+    ('serial',None),
+    ('peak',None),
+    ('name',None),
+    ('comment',None),
   )),
 
   # NB Sample crosslink to spectrum is handled on the spectrum side
@@ -827,10 +890,10 @@ nef2CcpnMap = {
 
   # TODO add function to get NefReader to load multiple projects, settings
 
-def saveNefProject(project:Project
-                   , path:str
-                   , overwriteExisting:bool=False
-                   , skipPrefixes=()):
+def saveNefProject(project:Project,
+                   path:str,
+                   overwriteExisting:bool=False,
+                   skipPrefixes=()):
   """Save project NEF file to path"""
 
   dirPath, fileName = os.path.split(path)
@@ -850,13 +913,13 @@ def saveNefProject(project:Project
 
   open(filePath, 'w').write(text)
 
-def exportNef(project:Project
-               , path:str
-               , overwriteExisting:bool=False
-               , skipPrefixes:typing.Sequence=()
-               , expandSelection:bool=True
-               # , exclusionDict={}
-               , pidList:typing.Sequence=None):
+def exportNef(project:Project,
+               path:str,
+               overwriteExisting:bool=False,
+               skipPrefixes:typing.Sequence=(),
+               expandSelection:bool=True,
+               # exclusionDict={},
+               pidList:typing.Sequence=None):
   #TODO:ED check that the calling order to correct and matches command line action
   """export NEF file to path"""
   # ejb - dialog added to allow the changing of the name from the current project name.
@@ -879,13 +942,13 @@ def exportNef(project:Project
   with open(path, 'w') as f:            # save write
     f.write(text)
 
-def convertToDataBlock(project:Project
-                       # , path:str
-                       # , overwriteExisting:bool=False
-                       , skipPrefixes:typing.Sequence=()
-                       , expandSelection:bool=True
-                       # , exclusionDict={}
-                       , pidList:typing.Sequence=None):
+def convertToDataBlock(project:Project,
+                       # path:str,
+                       # overwriteExisting:bool=False,
+                       skipPrefixes:typing.Sequence=(),
+                       expandSelection:bool=True,
+                       # exclusionDict={},
+                       pidList:typing.Sequence=None):
   #TODO:ED check that the calling order to correct and matches command line action
   """export NEF file to path"""
   # ejb - dialog added to allow the changing of the name from the current project name.
@@ -1010,13 +1073,16 @@ class CcpnNefWriter:
                     chemicalShiftLists:typing.Sequence[ChemicalShiftList]=(),
                     restraintLists:typing.Sequence[RestraintList]=(),
                     peakLists:typing.Sequence[PeakList]=(),
+                    integralLists:typing.Sequence[IntegralList]=(),
+                    multipletLists:typing.Sequence[MultipletList]=(),
                     samples:typing.Sequence[Sample]=(),
                     substances:typing.Sequence[Substance]=(),
                     nmrChains:typing.Sequence[NmrChain]=(),
                     dataSets:typing.Sequence[DataSet]=(),
                     complexes:typing.Sequence[Complex]=(),
                     spectrumGroups:typing.Sequence[SpectrumGroup]=(),
-                    notes:typing.Sequence[Note]=(),):
+                    notes:typing.Sequence[Note]=(),
+                    peakClusters:typing.Sequence[PeakCluster] = (),):
     """Export objects passed in and objects they are linked to.
 
     if expandSelection is True (strongly recommended):
@@ -1038,18 +1104,44 @@ class CcpnNefWriter:
 
       # SpectrumGroups and PeakLists
       peakLists = list(peakLists)
+      integralLists = list(integralLists)
+      multipletLists = list(multipletLists)
+
       spectrumSet = set(x.spectrum for x in peakLists)
       for spectrumGroup in spectrumGroups:
         for spectrum in spectrumGroup.spectra:
           if spectrum not in spectrumSet:
             spectrumSet.add(spectrum)
+
             pl = spectrum.peakLists
             if pl:
               # Add one of the peakLists
               peakLists.append(pl[0])
             else:
               peakLists.append(spectrum.newPeakList())
+
+            il = spectrum.integralLists
+            if il:
+              # Add one of the peakLists
+              integralLists.append(il[0])
+            else:
+              integralLists.append(spectrum.newIntegralList())
+
+            ml = spectrum.multipletLists
+            if ml:
+              # Add one of the peakLists
+              multipletLists.append(ml[0])
+            else:
+              multipletLists.append(spectrum.newMultipletList())
       peakLists = sorted(peakLists)
+      integralLists = sorted(integralLists)
+      multipletLists = sorted(multipletLists)
+
+      # PeakClusters
+      peakClusterLists = set(peakClusters)
+      for peakCluster in peakClusterLists:
+        peakClusterLists.add(peakCluster)
+      peakClusterLists = sorted(peakClusters)
 
       # ChemicalShiftLists
       chemicalShiftListSet = set(chemicalShiftLists)
@@ -1160,6 +1252,11 @@ class CcpnNefWriter:
     for obj in project.spectrumGroups:
       saveFrames.append(self.spectrumGroup2Nef(obj))
 
+    # PeakClusters
+    saveFrame = self.peakClusters2Nef(sorted(peakClusters))
+    if saveFrame:
+      saveFrames.append(saveFrame)
+
     # Samples
     for obj in sorted(samples):
       saveFrames.append(self.sample2Nef(obj))
@@ -1234,10 +1331,11 @@ class CcpnNefWriter:
       return self.exportObjects(expandSelection=expandSelection,
                                 chains=project.chains, chemicalShiftLists=project.chemicalShiftLists,
                                 restraintLists=project.restraintLists, peakLists=project.peakLists,
+                                integralLists=project.integralLists, multipletLists=project.multipletLists,
                                 samples=project.samples, substances=project.substances,
                                 nmrChains=project.nmrChains, dataSets=project.dataSets,
                                 complexes=project.complexes, spectrumGroups=project.spectrumGroups,
-                                notes=project.notes)
+                                notes=project.notes, peakClusters=project.peakClusters)
     else:
       # export selection of objects
       # either everything minus the exclusionDict or the list of pids
@@ -1249,6 +1347,8 @@ class CcpnNefWriter:
       self.chemicalShiftLists = []
       self.restraintLists = []
       self.peakLists = []
+      self.integralLists = []
+      self.multipletLists = []
       self.samples = []
       self.substances = []
       self.nmrChains = []
@@ -1256,10 +1356,12 @@ class CcpnNefWriter:
       self.complexes = []
       self.spectrumGroups = []
       self.notes = []
+      self.peakClusters = []
 
-      checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS
-                   , SAMPLES, SUBSTANCES, NMRCHAINS
-                   , DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES]
+      checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS,
+                   INTEGRALLISTS, MULTIPLETLISTS,
+                   SAMPLES, SUBSTANCES, NMRCHAINS,
+                   DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES, PEAKCLUSTERS]
 
       # put the pids in the correct lists
       for name in checkList:
@@ -1280,10 +1382,11 @@ class CcpnNefWriter:
       return self.exportObjects(expandSelection=expandSelection,
                                 chains=self.chains, chemicalShiftLists=self.chemicalShiftLists,
                                 restraintLists=self.restraintLists, peakLists=self.peakLists,
+                                integralLists=self.integralLists, multipletLists=self.multipletLists,
                                 samples=self.samples, substances=self.substances,
                                 nmrChains=self.nmrChains, dataSets=self.dataSets,
                                 complexes=self.complexes, spectrumGroups=self.spectrumGroups,
-                                notes=self.notes)
+                                notes=self.notes, peakClusters=self.peakClusters)
 
 
     self.ccpn2SaveFrameName = {}
@@ -1319,6 +1422,9 @@ class CcpnNefWriter:
       saveFrames.append(saveFrame)
 
     # Now add CCPN-specific data:
+
+    # PeakClusters
+    saveFrames.append(self.peakClusters2Nef(project))
 
     # NmrChains
     saveFrames.append(self.assignments2Nef(project))
@@ -1444,6 +1550,25 @@ class CcpnNefWriter:
 
     else:
       return self._newNefSaveFrame(None, category, category)
+
+  def peakClusters2Nef(self, peakClusters) -> StarIo.NmrSaveFrame:
+    """Convert PeakClusters to saveframe"""
+
+    category = 'ccpn_peak_clusters'
+    if peakClusters:
+      result = self._newNefSaveFrame(peakClusters[0].project, category, category)
+
+      loopName = 'ccpn_peak_cluster'
+      loop = result[loopName]
+
+      for peakCluster in sorted(peakClusters[0].project.peakClusters):
+        # rowdata = self._loopRowData(loopName, peakCluster)
+        for peak in peakCluster.peaks:
+          row = loop.newRow(self._loopRowData(loopName, peak))
+          # row['peakcluster_serial'] = peakCluster.serial
+          # row['peakcluster_peak'] = peak.id
+
+      return result
 
   def assignments2Nef(self, project:Project) -> StarIo.NmrSaveFrame:
     """Convert NmrChains, NmrResidues and NmrAtoms to saveframe"""
@@ -1867,6 +1992,7 @@ class CcpnNefWriter:
         # # NB the row._set function will set position_1, position_2 etc.
         # row._set('position', peak.position)
         # row._set('position_uncertainty', peak.positionError)
+      row['ccpn_linked_integral'] = None if peak.integral is None else peak.integral.id
 
 
     if exportCompleteSpectrum and spectrum.spectrumHits:
@@ -1897,17 +2023,68 @@ class CcpnNefWriter:
       for integral in sorted(spectrum.integrals):
         row = loop.newRow(self._loopRowData(loopName, integral))
         row['integral_serial'] = integral.serial
-        values =integral.slopes
+        values = integral.slopes
         for ii, tag in enumerate(multipleAttributes['slopes']):
-          row[tag] = values[ii]
-        lowerlimits,upperLimits = zip(integral.limits)
+          row[tag] = None if values is None else values[ii]
+        # lowerlimits,upperLimits = zip(integral.limits)
+        lowerlimits = integral.limits
+        upperLimits = integral.limits
         for ii, tag in enumerate(multipleAttributes['lowerLimits']):
-          row[tag] = lowerlimits[ii]
+          row[tag] = None if lowerlimits is None else lowerlimits[ii]
         for ii, tag in enumerate(multipleAttributes['upperLimits']):
-          row[tag] = upperLimits[ii]
+          row[tag] = None if upperLimits is None else upperLimits[ii]
+        row['ccpn_linked_peak'] = None if integral.peak is None else integral.peak.id
     else:
       del result['ccpn_integral_list']
       del result['ccpn_integral']
+
+
+    if exportCompleteSpectrum and spectrum.multipletLists:
+      loopName = 'ccpn_multiplet_list'
+
+      loop = result[loopName]
+      for tag in loop.columns:
+        if any(tag.endswith(x) for x in removeNameEndings):
+          loop.removeColumn(tag)
+      for multipletList in sorted(spectrum.multipletLists):
+        row = loop.newRow(self._loopRowData(loopName, multipletList))
+        row['serial'] = multipletList.serial
+
+      loopName = 'ccpn_multiplet'
+      loop = result[loopName]
+      for tag in loop.columns:
+        if any(tag.endswith(x) for x in removeNameEndings):
+          loop.removeColumn(tag)
+      for multiplet in sorted(spectrum.multiplets):
+        row = loop.newRow(self._loopRowData(loopName, multiplet))
+        row['multiplet_serial'] = multiplet.serial
+        values = multiplet.slopes
+        for ii, tag in enumerate(multipleAttributes['slopes']):
+          row[tag] = None if values is None else values[ii]
+        # lowerlimits,upperLimits = zip(multiplet.limits)
+        lowerlimits = multiplet.limits
+        upperLimits = multiplet.limits
+        for ii, tag in enumerate(multipleAttributes['lowerLimits']):
+          row[tag] = None if lowerlimits is None else lowerlimits[ii]
+        for ii, tag in enumerate(multipleAttributes['upperLimits']):
+          row[tag] = None if upperLimits is None else upperLimits[ii]
+
+      loopName = 'ccpn_multiplet_peaks'
+      loop = result[loopName]
+      for tag in loop.columns:
+        if any(tag.endswith(x) for x in removeNameEndings):
+          loop.removeColumn(tag)
+      for multiplet in sorted(spectrum.multiplets):
+        for peak in multiplet.peaks:
+          row = loop.newRow(self._loopRowData(loopName, peak))
+          row['multiplet_list_serial'] = multiplet.multipletList.serial
+          row['multiplet_serial'] = multiplet.serial
+          row['multiplet_peak'] = peak.id
+
+    else:
+      del result['ccpn_multiplet_list']
+      del result['ccpn_multiplet']
+
 
       # NB do more later (e.g. SpectrumReference)
 
@@ -2159,7 +2336,11 @@ class CcpnNefWriter:
     for neftag,attrstring in nef2CcpnMap[loopName].items():
       if attrstring is not None:
 
-        val = attrgetter(attrstring)(wrapperObj)
+        try:
+          val = attrgetter(attrstring)(wrapperObj)
+        except Exception as es:
+          pass
+        
         if val != '':
           rowdata[neftag] = val
         else:

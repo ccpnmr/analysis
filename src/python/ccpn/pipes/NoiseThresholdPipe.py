@@ -32,7 +32,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
+from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 import numpy as np
 
 ########################################################################################################################
@@ -54,7 +54,7 @@ DefaultNoiseThreshold = [0,0]
 def _getNoiseThreshold(spectrum, factor=5):
   if spectrum is not None:
     x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
-    return _estimateNoiseLevel1D(x, y, factor=factor)
+    return _oldEstimateNoiseLevel1D(x, y, factor=factor)
 
 
 ########################################################################################################################

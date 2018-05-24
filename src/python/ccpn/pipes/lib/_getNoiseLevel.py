@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 import numpy as np
-from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
+from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 
 def _getNoiseLevelForPipe(cls, spectrum, estimateNoiseThreshold_var, noiseThreshold_var):
   '''Gets the noise level from the pipeline if a previous pipe was set. Otherwise takes from Spectrum.noiseLevel if set.
@@ -44,7 +44,7 @@ def _getNoiseLevelForPipe(cls, spectrum, estimateNoiseThreshold_var, noiseThresh
         # print('@2', (negativeNoiseThreshold, positiveNoiseThreshold))
         return (negativeNoiseThreshold, positiveNoiseThreshold)
       else:
-        positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.intensities), factor=15)
+        positiveNoiseThreshold = _oldEstimateNoiseLevel1D(np.array(spectrum.intensities), factor=15)
         negativeNoiseThreshold = -positiveNoiseThreshold
         spectrum.noiseLevel = positiveNoiseThreshold
         # print('@3', (negativeNoiseThreshold, positiveNoiseThreshold))
@@ -59,7 +59,7 @@ def _getNoiseLevelForPipe(cls, spectrum, estimateNoiseThreshold_var, noiseThresh
 
   if spectrum.noiseLevel == 0.0 or spectrum.noiseLevel is None:
     # print('@5', (negativeNoiseThreshold, positiveNoiseThreshold))
-    positiveNoiseThreshold = _estimateNoiseLevel1D(np.array(spectrum.intensities), factor=15)
+    positiveNoiseThreshold = _oldEstimateNoiseLevel1D(np.array(spectrum.intensities), factor=15)
     negativeNoiseThreshold = - positiveNoiseThreshold
     spectrum.noiseLevel = positiveNoiseThreshold
     # print('@6', (negativeNoiseThreshold, positiveNoiseThreshold))

@@ -36,13 +36,13 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
 import numpy as np
 from scipy.integrate import trapz
 
-from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
+from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 
 
 
 def _createIntersectingLine(x, y):
   '''create a straight line with x values like the original spectrum and y value from the estimated noise level'''
-  return [_estimateNoiseLevel1D(x, y)] * len(x)
+  return [_oldEstimateNoiseLevel1D(x, y)] * len(x)
 
 
 def _getIntersectionPoints(x, y, line):

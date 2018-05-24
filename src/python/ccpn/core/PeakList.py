@@ -37,12 +37,82 @@ from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
-from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
-
+from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
+from tqdm import *
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 # from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
+
+
+def _estimateNoiseLevel1D(y):
+  '''
+  Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
+  only noise is present. To increase the threshold value: increase the factor.
+  return:  float of estimated noise threshold
+  '''
+  import numpy as np
+  import math
+
+  if y is not None:
+    firstEstimation = np.std(y[:int(len(y) / 20)])
+    estimatedGaussian = np.random.normal(size=y.shape) * firstEstimation
+    e = (np.std(estimatedGaussian) + (np.std(firstEstimation) - np.std(estimatedGaussian)))
+    e2 = np.max(estimatedGaussian) + (abs(np.min(estimatedGaussian)))
+    if e < e2:
+      e = e2
+
+    eS = np.where(y >= e)
+    eSN = np.where(y <= -e)
+    eN = np.where((y < e) & (y > -e))
+    estimatedSignalRegionPos = y[eS]
+    estimatedSignalRegionNeg = y[eSN]
+    estimatedSignalRegion = np.concatenate((estimatedSignalRegionPos, estimatedSignalRegionNeg))
+    estimatedNoiseRegion = y[eN]
+
+    lenghtESR = len(estimatedSignalRegion)
+    lenghtENR = len(estimatedNoiseRegion)
+    if lenghtESR > lenghtENR:
+      l = lenghtENR
+    else:
+      l = lenghtESR
+    if l == 0:
+      SNR = 1
+    else:
+      noise = estimatedNoiseRegion[:l - 1]
+      signalAndNoise = estimatedSignalRegion[:l - 1]
+      signal = abs(signalAndNoise - noise)
+
+      signal[::-1].sort()  # descending
+      noise[::1].sort()
+      signal = signal.compressed()  # remove the mask
+      noise = noise.compressed()  # remove the mask
+      s = signal[:int(l / 2)]
+      n = noise[:int(l / 2)]
+      if len(signal) == 0:
+        return 1, e
+
+      SNR = math.log10(abs(np.mean(s) ** 2 / np.mean(n) ** 2))
+      if SNR:
+        return SNR, e
+      else:
+        return 1, e
+
+    return SNR, e
+  else:
+    return 1, 0
+
+def _filtered1DArray(data, ignoredRegions):
+  # returns an array without ignoredRegions. Used for automatic 1d peak picking
+  ppmValues = data[0]
+  masks = []
+  for region in ignoredRegions:
+    mask = (ppmValues > region[0]) | (ppmValues < region[1])
+    masks.append(mask)
+  fullmask = [all(mask) for mask in zip(*masks)]
+  newArray = (numpy.ma.MaskedArray(data, mask=numpy.logical_not((fullmask, fullmask))))
+  return newArray
+
 
 class PeakList(AbstractWrapperObject):
   """An object containing Peaks. Note: the object is not a (subtype of a) Python list.
@@ -304,13 +374,13 @@ class PeakList(AbstractWrapperObject):
       data = numpy.array([spectrum.positions, spectrum.intensities])
       ppmValues = data[0]
       if positiveNoiseThreshold == 0.0 or positiveNoiseThreshold is None:
-        positiveNoiseThreshold = _estimateNoiseLevel1D(spectrum.intensities, factor=factor)
+        positiveNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
         if spectrum.noiseLevel is None:
-          positiveNoiseThreshold = _estimateNoiseLevel1D(spectrum.intensities, factor=factor)
+          positiveNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
           negativeNoiseThreshold = -positiveNoiseThreshold
 
       if negativeNoiseThreshold == 0.0 or negativeNoiseThreshold is None:
-        negativeNoiseThreshold = _estimateNoiseLevel1D(spectrum.intensities, factor=factor)
+        negativeNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
         if spectrum.noiseLevel is None:
           negativeNoiseThreshold = -positiveNoiseThreshold
 
@@ -345,6 +415,53 @@ class PeakList(AbstractWrapperObject):
 
     finally:
       self._endCommandEchoBlock()
+    return peaks
+
+
+
+  def automatic1dPeakPicking(self, sizeFactor=3, negativePeaks=True, ignoredRegions=None):
+    '''
+    :param ignoredRegions: in the form [[-20.1, -19.1]]
+    :param noiseThreshold: float
+    :param sizeFactor: smoothing value. increase to pick less "shoulder" point of peaks
+    :param negativePeaks: pick peaks in the negative region
+    :return: 
+    '''
+
+
+    data =[numpy.array(self.spectrum.positions), numpy.array(self.spectrum.intensities)]
+    if ignoredRegions is None:
+      ignoredRegions = [[-20.1, -19.1]]
+
+    peaks = []
+    SNR = None
+    size = 9 #Default value but automatically calculated below
+    filteredArray = _filtered1DArray(data, ignoredRegions)
+
+    SNR, noiseThreshold = _estimateNoiseLevel1D(filteredArray[1])
+    ratio = numpy.max(abs(filteredArray[1])) / noiseThreshold
+    size = (1 / ratio) * 100 * sizeFactor
+
+    posBoolsVal = filteredArray[1] > noiseThreshold
+    maxFilter = maximum_filter(filteredArray[1], size=size, mode='wrap')
+    boolsMax = filteredArray[1] == maxFilter
+    boolsPeak = posBoolsVal & boolsMax
+    indices = numpy.argwhere(boolsPeak)
+
+    if negativePeaks:
+      minFilter = minimum_filter(filteredArray[1], size=size, mode='wrap')
+      boolsMin = filteredArray[1] == minFilter
+      negBoolsVal = filteredArray[1] < -noiseThreshold
+      negBoolsPeak = negBoolsVal & boolsMin
+      indicesMin = numpy.argwhere(negBoolsPeak)
+      indices = numpy.append(indices, indicesMin)
+
+    for position in tqdm(indices):
+      peakPosition = [float(filteredArray[0][position])]
+      height = filteredArray[1][position]
+      peaks.append(self.newPeak(height=float(height), position=peakPosition))
+
+    self.spectrum.signalToNoiseRatio = SNR
 
     return peaks
 

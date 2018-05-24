@@ -42,7 +42,7 @@ def getExperimentClassifications(project:Project) -> dict:
   return getExpClassificationDict(project._wrappedData)
 
 
-# def _estimateNoiseLevel1D(x, y, factor=3):
+# def _oldEstimateNoiseLevel1D(x, y, factor=3):
 #   '''
 #   :param x,y:  spectrum.positions, spectrum.intensities
 #   :param factor: optional. Increase factor to increase the STD and therefore the noise level threshold
@@ -57,14 +57,14 @@ def getExperimentClassifications(project:Project) -> dict:
 #   return value
 
 
-def _estimateNoiseLevel1D(y, factor=0.5):
+def _oldEstimateNoiseLevel1D(y, factor=0.5):
   '''
   Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
   only noise is present. To increase the threshold value: increase the factor.
   return:  float of estimated noise threshold
   '''
   if y is not None:
-    # print('_estimateNoiseLevel1D',max(y[:int(len(y)/20)]) * factor, 'STD, ')
+    # print('_oldEstimateNoiseLevel1D',max(y[:int(len(y)/20)]) * factor, 'STD, ')
     return max(y[:int(len(y)/20)]) * factor
   else:
     return 0

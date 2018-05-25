@@ -122,7 +122,7 @@ saveFrameReadingOrder = [
   'ccpn_complex',
   'ccpn_spectrum_group',
   'ccpn_restraint_list',
-  'ccpn_peak_clusters',
+  'ccpn_peak_cluster_list',
   'ccpn_notes',
   'ccpn_additional_data'
 ]
@@ -681,16 +681,23 @@ nef2CcpnMap = {
     ('multiplet_peak', None),
   )),
 
-  'ccpn_peak_clusters':OD((
-    ('serial',None),
-    ('ccpn_peak_cluster',_isALoop),
+  'ccpn_peak_cluster_list':OD((
+    # ('serial',None),
+    # ('comment','comment'),
+    ('ccpn_peak_clusters',_isALoop),
+    ('ccpn_peak_cluster_peaks', _isALoop),
   )),
-
-  'ccpn_peak_cluster':OD((
+  'ccpn_peak_clusters': OD((
+    ('serial',None),
+    ('annotation','annotation'),
+    # ('peak', None),
+    # ('ccpn_peak_cluster',_isALoop),
+  )),
+  'ccpn_peak_cluster_peaks':OD((
     ('serial',None),
     ('peak',None),
-    ('name',None),
-    ('comment',None),
+    # ('name',None),
+    # ('comment',None),
   )),
 
   # NB Sample crosslink to spectrum is handled on the spectrum side
@@ -1554,19 +1561,24 @@ class CcpnNefWriter:
   def peakClusters2Nef(self, peakClusters) -> StarIo.NmrSaveFrame:
     """Convert PeakClusters to saveframe"""
 
-    category = 'ccpn_peak_clusters'
+    category = 'ccpn_peak_cluster_list'
     if peakClusters:
       result = self._newNefSaveFrame(peakClusters[0].project, category, category)
 
-      loopName = 'ccpn_peak_cluster'
+      loopName = 'ccpn_peak_clusters'
       loop = result[loopName]
-
       for peakCluster in sorted(peakClusters[0].project.peakClusters):
-        # rowdata = self._loopRowData(loopName, peakCluster)
+        row = loop.newRow(self._loopRowData(loopName, peakCluster))
+        row['serial'] = peakCluster.serial
+
+      loopName = 'ccpn_peak_cluster_peaks'
+      loop = result[loopName]
+      for peakCluster in sorted(peakClusters[0].project.peakClusters):
+
         for peak in peakCluster.peaks:
           row = loop.newRow(self._loopRowData(loopName, peak))
-          # row['peakcluster_serial'] = peakCluster.serial
-          # row['peakcluster_peak'] = peak.id
+          row['serial'] = peakCluster.serial
+          row['peak'] = peak.id
 
       return result
 

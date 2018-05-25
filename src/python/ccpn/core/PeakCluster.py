@@ -93,6 +93,15 @@ class PeakCluster(AbstractWrapperObject):
   peakClusterParent = _parent
 
   @property
+  def annotation(self) -> Optional[str]:
+    """Peak text annotation"""
+    return self._wrappedData.annotation
+
+  @annotation.setter
+  def annotation(self, value: str):
+    self._wrappedData.annotation = value
+
+  @property
   def peaks(self) -> Optional[Tuple[Any]]:
     """List of peaks attached to the peakCluster"""
     try:

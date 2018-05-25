@@ -30,6 +30,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Sequence, List, Optional
 import collections
 import numpy
+
 from numpy import argwhere
 from scipy.ndimage import maximum_filter, minimum_filter
 from ccpn.util import Common as commonUtil
@@ -417,9 +418,21 @@ class PeakList(AbstractWrapperObject):
       self._endCommandEchoBlock()
     return peaks
 
+  def _noiseLineWidth(self):
+    from ccpn.core.IntegralList import _getPeaksLimits
 
+    x, y = numpy.array(self.spectrum.positions), numpy.array(self.spectrum.intensities)
+    x,y = x[:int(len(x)/10)], y[:int(len(x)/10)],
+    noiseMean = numpy.mean(y)
+    intersectingLine = [noiseMean] * len(x)
+    limitsPairs = _getPeaksLimits(x, y, intersectingLine)
+    widths = [0]
+    for i in limitsPairs:
+      lineWidth = abs(i[0] - i[1])
+      widths.append(lineWidth)
+    return numpy.max(widths)
 
-  def automatic1dPeakPicking(self, sizeFactor=3, negativePeaks=True, ignoredRegions=None):
+  def automatic1dPeakPicking(self, sizeFactor=3, negativePeaks=True,minimalLineWidth=None, ignoredRegions=None):
     '''
     :param ignoredRegions: in the form [[-20.1, -19.1]]
     :param noiseThreshold: float
@@ -428,40 +441,76 @@ class PeakList(AbstractWrapperObject):
     :return: 
     '''
 
+    from ccpn.core.IntegralList import _getPeaksLimits
 
-    data =[numpy.array(self.spectrum.positions), numpy.array(self.spectrum.intensities)]
-    if ignoredRegions is None:
-      ignoredRegions = [[-20.1, -19.1]]
+    self._startCommandEchoBlock('automatic1dPeakPicking', values=locals())
+    integralList = self.spectrum.newIntegralList()
+    if minimalLineWidth is None:
+      minimalLineWidth = self._noiseLineWidth()
+    try:
+      x,y = numpy.array(self.spectrum.positions), numpy.array(self.spectrum.intensities)
 
-    peaks = []
-    SNR = None
-    size = 9 #Default value but automatically calculated below
-    filteredArray = _filtered1DArray(data, ignoredRegions)
+      data =[x,y]
+      if ignoredRegions is None:
+        ignoredRegions = [[-20.1, -19.1]]
 
-    SNR, noiseThreshold = _estimateNoiseLevel1D(filteredArray[1])
-    ratio = numpy.max(abs(filteredArray[1])) / noiseThreshold
-    size = (1 / ratio) * 100 * sizeFactor
+      peaks = []
+      SNR = None
+      size = 9 #Default value but automatically calculated below
+      filteredArray = _filtered1DArray(data, ignoredRegions)
 
-    posBoolsVal = filteredArray[1] > noiseThreshold
-    maxFilter = maximum_filter(filteredArray[1], size=size, mode='wrap')
-    boolsMax = filteredArray[1] == maxFilter
-    boolsPeak = posBoolsVal & boolsMax
-    indices = numpy.argwhere(boolsPeak)
+      SNR, noiseThreshold = _estimateNoiseLevel1D(filteredArray[1])
+      ratio = numpy.max(abs(filteredArray[1])) / noiseThreshold
+      size = (1 / ratio) * 100 * sizeFactor
 
-    if negativePeaks:
-      minFilter = minimum_filter(filteredArray[1], size=size, mode='wrap')
-      boolsMin = filteredArray[1] == minFilter
-      negBoolsVal = filteredArray[1] < -noiseThreshold
-      negBoolsPeak = negBoolsVal & boolsMin
-      indicesMin = numpy.argwhere(negBoolsPeak)
-      indices = numpy.append(indices, indicesMin)
+      posBoolsVal = filteredArray[1] > noiseThreshold
+      maxFilter = maximum_filter(filteredArray[1], size=size, mode='wrap')
+      boolsMax = filteredArray[1] == maxFilter
+      boolsPeak = posBoolsVal & boolsMax
+      indices = numpy.argwhere(boolsPeak)
 
-    for position in tqdm(indices):
-      peakPosition = [float(filteredArray[0][position])]
-      height = filteredArray[1][position]
-      peaks.append(self.newPeak(height=float(height), position=peakPosition))
+      if negativePeaks:
+        minFilter = minimum_filter(filteredArray[1], size=size, mode='wrap')
+        boolsMin = filteredArray[1] == minFilter
+        negBoolsVal = filteredArray[1] < -noiseThreshold
+        negBoolsPeak = negBoolsVal & boolsMin
+        indicesMin = numpy.argwhere(negBoolsPeak)
+        indices = numpy.append(indices, indicesMin)
 
-    self.spectrum.signalToNoiseRatio = SNR
+      for position in tqdm(indices):
+        peakPosition = [float(filteredArray[0][position])]
+        height = filteredArray[1][position]
+
+
+        #searches for integrals
+        intersectingLine = [noiseThreshold]*len(x)
+        limitsPairs = _getPeaksLimits(x, y, intersectingLine)
+
+        for i in limitsPairs:
+          lineWidth = abs(i[0] - i[1])
+          if lineWidth > minimalLineWidth:
+            if i[0]>peakPosition[0]>i[1]: #peak  position is between limits
+
+              # start from min of the limit to the peak position
+              halfWidthPoint = peakPosition[0]-min(i)
+              newMax = halfWidthPoint+peakPosition[0]
+              index01 = numpy.where((x <= i[0]) & (x >= newMax))
+              newLineWidth = lineWidth = abs(i[0] - newMax)
+              if newLineWidth > minimalLineWidth:
+                from scipy.integrate import trapz
+                integral = trapz(index01)
+                peak = self.newPeak(height=float(height), position=peakPosition, volume=float(integral),
+                                    lineWidths=[newLineWidth,])
+                newIntegral = integralList.newIntegral(value=float(integral), limits=[[min(i), newMax]])
+                newIntegral.peak = peak
+
+            # peaks.append(peak)
+
+
+      self.spectrum.signalToNoiseRatio = SNR
+
+    finally:
+      self._endCommandEchoBlock()
 
     return peaks
 

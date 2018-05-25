@@ -67,7 +67,7 @@ class Integral(AbstractWrapperObject):
   # CCPN properties  
   @property
   def _apiIntegral(self) -> ApiIntegral:
-    """ API peaks matching Integral"""
+    """ API integrals matching Integral"""
     return self._wrappedData
     
   @property
@@ -122,6 +122,24 @@ class Integral(AbstractWrapperObject):
   @figureOfMerit.setter
   def figureOfMerit(self, value:float):
     self._wrappedData.figOfMerit = value
+
+  @property
+  def offset(self) -> Optional[float]:
+    """offset of Integral"""
+    return self._wrappedData.offset
+
+  @offset.setter
+  def offset(self, value: float):
+    self._wrappedData.offset = value
+
+  @property
+  def constraintWeight(self) -> Optional[float]:
+    """constraintWeight of Integral"""
+    return self._wrappedData.constraintWeight
+
+  @constraintWeight.setter
+  def constraintWeight(self, value: float):
+    self._wrappedData.constraintWeight = value
 
   @property
   def slopes(self) -> List[float]:
@@ -306,32 +324,44 @@ class Integral(AbstractWrapperObject):
       self._endCommandEchoBlock()
 
 
-def _newIntegral(self:IntegralList, value:List[float]=None,
-                 valueError:List[float]=None, bias:float=0, slopes:List[float]=None,
+def _newIntegral(self:IntegralList,
+                 value:List[float]=None, valueError:List[float]=None, bias:float=0,
+                 offset: float = None, constraintWeight: float = None,
                  figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
-                 limits:Sequence[Tuple[float,float]]=(),
+                 limits:Sequence[Tuple[float,float]]=(), slopes:List[float]=None,
                  pointLimits:Sequence[Tuple[float,float]]=()) -> Integral:
   """Create new Integral within IntegralList"""
 
-  defaults = collections.OrderedDict((('value', None), ('valueError', None), ('bias', None),
-                                     ('slopes', None), ('figureOfMerit', 1.0), ('annotation', None),
-                                     ('comment', None), ('limits', ()), ('pointLimits', ()) ))
+  defaults = collections.OrderedDict((('annotation', None),
+                                      ('value', None), ('valueError', None),
+                                      ('offset', None),
+                                      ('figureOfMerit', 1.0),
+                                      ('constraintWeight', None),
+                                      ('comment', None),
+                                      ('limits', ()), ('slopes', ()), ('pointLimits', ()),))
+
+  dd = {'volume':value, 'volumeError':valueError, 'offset':offset, 'slopes':slopes,
+        'figOfMerit': figureOfMerit, 'constraintWeight':constraintWeight,
+        'annotation': annotation, 'details':comment,
+        'limits':limits, 'pointLimits':pointLimits}
 
   self._startCommandEchoBlock('newIntegral', values=locals(), defaults=defaults,
                               parName='newIntegral')
+
   self._project.blankNotification() # delay notifiers till peak is fully ready
   try:
     apiParent = self._apiIntegralList
-    apiIntegral = apiParent.newIntegral(volume=value, volumeError=valueError, figOfMerit=figureOfMerit,
-                                offset=bias,annotation=annotation, details=comment)
+    # apiIntegral = apiParent.newIntegral(volume=value, volumeError=valueError, figOfMerit=figureOfMerit,
+    #                             offset=bias,annotation=annotation, details=comment)
+    apiIntegral = apiParent.newIntegral(**dd)
 
     result = self._project._data2Obj.get(apiIntegral)
-    if pointLimits:
-      result.pointLimits = pointLimits
-    elif limits:
-      result.limits = limits
-    if slopes:
-      result.slopes = slopes
+    # if pointLimits:
+    #   result.pointLimits = pointLimits
+    # elif limits:
+    #   result.limits = limits
+    # if slopes:
+    #   result.slopes = slopes
 
   finally:
     self._project.unblankNotification()

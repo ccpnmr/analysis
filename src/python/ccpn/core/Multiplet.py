@@ -124,7 +124,7 @@ class Multiplet(AbstractWrapperObject):
 
   @property
   def height(self) -> Optional[float]:
-    """height of Peak"""
+    """height of Multiplet"""
     height = _getMultipletHeight(self)
     return height
 
@@ -134,7 +134,7 @@ class Multiplet(AbstractWrapperObject):
 
   @property
   def heightError(self) -> Optional[float]:
-    """height error of Peak"""
+    """height error of Multiplet"""
     return self._wrappedData.heightError
 
   @heightError.setter
@@ -143,7 +143,7 @@ class Multiplet(AbstractWrapperObject):
 
   @property
   def volume(self) -> Optional[float]:
-    """volume of Peak"""
+    """volume of Multiplet"""
     return self._wrappedData.volume
 
   @volume.setter
@@ -151,8 +151,26 @@ class Multiplet(AbstractWrapperObject):
     self._wrappedData.volume = value
 
   @property
+  def offset(self) -> Optional[float]:
+    """offset of Multiplet"""
+    return self._wrappedData.offset
+
+  @offset.setter
+  def offset(self, value: float):
+    self._wrappedData.offset = value
+
+  @property
+  def constraintWeight(self) -> Optional[float]:
+    """constraintWeight of Multiplet"""
+    return self._wrappedData.constraintWeight
+
+  @constraintWeight.setter
+  def constraintWeight(self, value: float):
+    self._wrappedData.constraintWeight = value
+
+  @property
   def volumeError(self) -> Optional[float]:
-    """volume error of Peak"""
+    """volume error of Multiplet"""
     return self._wrappedData.volumeError
 
   @volumeError.setter
@@ -161,7 +179,7 @@ class Multiplet(AbstractWrapperObject):
 
   @property
   def figureOfMerit(self) -> Optional[float]:
-    """figureOfMerit of Peak, between 0.0 and 1.0 inclusive."""
+    """figureOfMerit of Multiplet, between 0.0 and 1.0 inclusive."""
     return self._wrappedData.figOfMerit
 
   @figureOfMerit.setter
@@ -170,7 +188,7 @@ class Multiplet(AbstractWrapperObject):
 
   @property
   def annotation(self) -> Optional[str]:
-    """Peak text annotation"""
+    """Multiplet text annotation"""
     return self._wrappedData.annotation
 
   @annotation.setter
@@ -251,7 +269,8 @@ class Multiplet(AbstractWrapperObject):
   @property
   def positionError(self) -> Tuple[Optional[float], ...]:
     """Peak position error in ppm (or other relevant unit)."""
-    return tuple(x.valueError for x in self._wrappedData.sortedPeaks())
+    # TODO:LUCA calulate this :)
+    return None # tuple(x.valueError for x in self._wrappedData.sortedPeaks())
 
   @property
   def boxWidths(self) -> Tuple[Optional[float], ...]:
@@ -342,7 +361,16 @@ class Multiplet(AbstractWrapperObject):
 
 
 # Connections to parents:
-def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> Multiplet:
+def _newMultiplet(self:MultipletList, 
+                  height:float=0.0, heightError:float=0.0,
+                  volume: float = 0.0, volumeError: float = 0.0,
+                  offset: float = None, constraintWeight:float=None,
+                  figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
+                  position:List[float]=None, positionError: List[float] =None,
+                  limits:Sequence[Tuple[float,float]]=(), slopes:List[float]=None,
+                  pointLimits:Sequence[Tuple[float,float]]=(),
+                  peaks:['Peak']=None) -> Multiplet:
+
   """Create new Multiplet within multipletList"""
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
@@ -355,23 +383,40 @@ def _newMultiplet(self:MultipletList, peaks:['Peak']=None, serial:int=None) -> M
     if pp not in spectrum.peaks:
       raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-  defaults = collections.OrderedDict(
-    (('peaks', None), ('serial', None),
-    )
-  )
+
+  defaults = collections.OrderedDict((('annotation', None),
+                                      ('height', 0.0), ('heightError', None),
+                                      ('volume', None), ('volumeError', None),
+                                      ('offset', None),
+                                      ('figureOfMerit', 1.0),
+                                      ('constraintWeight', None),
+                                      ('comment', None),
+                                      ('position', None), ('positionError', None),
+                                      ('limits', ()), ('slopes', ()), ('pointLimits', ()),
+                                      ('peaks', None)))
+  dd = {'height':height, 'heightError':heightError, 
+        'volume':volume, 'volumeError':volumeError, 'offset':offset, 'slopes':slopes,
+        'figOfMerit': figureOfMerit, 'constraintWeight':constraintWeight,
+        'annotation': annotation, 'details':comment,
+        # 'position': position, 'positionError': positionError,   # these can't be set
+        'limits':limits, 'pointLimits':pointLimits}
+  if peaks:
+    dd['peaks'] = peaks
+
   undo = self._project._undo
   self._startCommandEchoBlock('newMultiplet', values=locals(), defaults=defaults,
                               parName='newMultiplet')
   try:
     apiParent = self._apiMultipletList
-    if pks:
-      apiMultiplet = apiParent.newMultiplet(multipletType='multiplet',
-                                              peaks=[p._wrappedData for p in pks])
-    else:
-      apiMultiplet = apiParent.newMultiplet(multipletType='multiplet')
-    
-    result = self._project._data2Obj.get(apiMultiplet)
+    # if pks:
+    #   apiMultiplet = apiParent.newMultiplet(multipletType='multiplet',
+    #                                           peaks=[p._wrappedData for p in pks])
+    # else:
+    #   apiMultiplet = apiParent.newMultiplet(multipletType='multiplet')
 
+    apiMultiplet = apiParent.newMultiplet(multipletType='multiplet', **dd)
+
+    result = self._project._data2Obj.get(apiMultiplet)
   finally:
     self._endCommandEchoBlock()
 

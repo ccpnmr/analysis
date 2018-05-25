@@ -621,25 +621,24 @@ nef2CcpnMap = {
   'ccpn_integral':OD((
     ('integral_list_serial','integralList.serial'),
     ('integral_serial',None),
+
     ('value','value'),
     ('value_uncertainty','valueError'),
-    ('bias','bias'),
-    ('figure_of_merit','figureOfMerit'),
-    ('slopes_1',None),
-    ('slopes_2',None),
-    ('slopes_3',None),
-    ('slopes_4',None),
-    ('lower_limits_1',None),
-    ('upper_limits_1',None),
-    ('lower_limits_2',None),
-    ('upper_limits_2',None),
-    ('lower_limits_3',None),
-    ('upper_limits_3',None),
-    ('lower_limits_4',None),
-    ('upper_limits_4',None),
+    # ('volume', 'volume'),
+    # ('volume_uncertainty', 'volumeError'),
+    # ('height', 'height'),
+    # ('height_uncertainty', 'heightError'),
+    ('offset', 'offset'),
+    ('figure_of_merit', 'figureOfMerit'),
+    ('constraint_weight', 'constraintWeight'),
+    # ('position', 'position'),
+    # ('position_uncertainty', 'positionError'),
+    ('slopes', 'slopes'),
+    ('limits', 'limits'),
+    ('point_limits', 'pointlimits'),
     ('ccpn_linked_peak',None),
-    ('annotation','annotation'),
-    ('comment','comment'),
+    ('annotation', 'annotation'),
+    ('comment', 'comment'),
   )),
 
   'ccpn_multiplet_list':OD((
@@ -657,20 +656,14 @@ nef2CcpnMap = {
     ('height_uncertainty','heightError'),
     ('volume','volume'),
     ('volume_uncertainty','volumeError'),
+    ('offset','offset'),
     ('figure_of_merit','figureOfMerit'),
-    ('slopes_1',None),
-    ('slopes_2',None),
-    ('slopes_3',None),
-    ('slopes_4',None),
-    ('lower_limits_1',None),
-    ('upper_limits_1',None),
-    ('lower_limits_2',None),
-    ('upper_limits_2',None),
-    ('lower_limits_3',None),
-    ('upper_limits_3',None),
-    ('lower_limits_4',None),
-    ('upper_limits_4',None),
-    # ('ccpn_multiplet_peaks',_isALoop),
+    ('constraint_weight','constraintWeight'),
+    ('position','position'),
+    ('position_uncertainty','positionError'),
+    ('slopes','slopes'),
+    ('limits','limits'),
+    ('point_limits','pointlimits'),
     ('annotation','annotation'),
     ('comment','comment'),
   )),
@@ -1578,7 +1571,7 @@ class CcpnNefWriter:
         for peak in peakCluster.peaks:
           row = loop.newRow(self._loopRowData(loopName, peak))
           row['serial'] = peakCluster.serial
-          row['peak'] = peak.id
+          row['peak'] = peak.pid
 
       return result
 
@@ -2004,7 +1997,7 @@ class CcpnNefWriter:
         # # NB the row._set function will set position_1, position_2 etc.
         # row._set('position', peak.position)
         # row._set('position_uncertainty', peak.positionError)
-      row['ccpn_linked_integral'] = None if peak.integral is None else peak.integral.id
+      row['ccpn_linked_integral'] = None if peak.integral is None else peak.integral.pid
 
 
     if exportCompleteSpectrum and spectrum.spectrumHits:
@@ -2035,17 +2028,17 @@ class CcpnNefWriter:
       for integral in sorted(spectrum.integrals):
         row = loop.newRow(self._loopRowData(loopName, integral))
         row['integral_serial'] = integral.serial
-        values = integral.slopes
-        for ii, tag in enumerate(multipleAttributes['slopes']):
-          row[tag] = None if values is None else values[ii]
-        # lowerlimits,upperLimits = zip(integral.limits)
-        lowerlimits = integral.limits
-        upperLimits = integral.limits
-        for ii, tag in enumerate(multipleAttributes['lowerLimits']):
-          row[tag] = None if lowerlimits is None else lowerlimits[ii]
-        for ii, tag in enumerate(multipleAttributes['upperLimits']):
-          row[tag] = None if upperLimits is None else upperLimits[ii]
-        row['ccpn_linked_peak'] = None if integral.peak is None else integral.peak.id
+        # values = integral.slopes
+        # for ii, tag in enumerate(multipleAttributes['slopes']):
+        #   row[tag] = None if values is None else values[ii]
+        # # lowerlimits,upperLimits = zip(integral.limits)
+        # lowerlimits = integral.limits
+        # upperLimits = integral.limits
+        # for ii, tag in enumerate(multipleAttributes['lowerLimits']):
+        #   row[tag] = None if lowerlimits is None else lowerlimits[ii]
+        # for ii, tag in enumerate(multipleAttributes['upperLimits']):
+        #   row[tag] = None if upperLimits is None else upperLimits[ii]
+        row['ccpn_linked_peak'] = None if integral.peak is None else integral.peak.pid
     else:
       del result['ccpn_integral_list']
       del result['ccpn_integral']
@@ -2070,16 +2063,16 @@ class CcpnNefWriter:
       for multiplet in sorted(spectrum.multiplets):
         row = loop.newRow(self._loopRowData(loopName, multiplet))
         row['multiplet_serial'] = multiplet.serial
-        values = multiplet.slopes
-        for ii, tag in enumerate(multipleAttributes['slopes']):
-          row[tag] = None if values is None else values[ii]
-        # lowerlimits,upperLimits = zip(multiplet.limits)
-        lowerlimits = multiplet.limits
-        upperLimits = multiplet.limits
-        for ii, tag in enumerate(multipleAttributes['lowerLimits']):
-          row[tag] = None if lowerlimits is None else lowerlimits[ii]
-        for ii, tag in enumerate(multipleAttributes['upperLimits']):
-          row[tag] = None if upperLimits is None else upperLimits[ii]
+        # values = multiplet.slopes
+        # for ii, tag in enumerate(multipleAttributes['slopes']):
+        #   row[tag] = None if values is None else values[ii]
+        # # lowerlimits,upperLimits = zip(multiplet.limits)
+        # lowerlimits = multiplet.limits
+        # upperLimits = multiplet.limits
+        # for ii, tag in enumerate(multipleAttributes['lowerLimits']):
+        #   row[tag] = None if lowerlimits is None else lowerlimits[ii]
+        # for ii, tag in enumerate(multipleAttributes['upperLimits']):
+        #   row[tag] = None if upperLimits is None else upperLimits[ii]
 
       loopName = 'ccpn_multiplet_peaks'
       loop = result[loopName]
@@ -2091,7 +2084,7 @@ class CcpnNefWriter:
           row = loop.newRow(self._loopRowData(loopName, peak))
           row['multiplet_list_serial'] = multiplet.multipletList.serial
           row['multiplet_serial'] = multiplet.serial
-          row['multiplet_peak'] = peak.id
+          row['multiplet_peak'] = peak.pid
 
     else:
       del result['ccpn_multiplet_list']
@@ -2348,11 +2341,7 @@ class CcpnNefWriter:
     for neftag,attrstring in nef2CcpnMap[loopName].items():
       if attrstring is not None:
 
-        try:
-          val = attrgetter(attrstring)(wrapperObj)
-        except Exception as es:
-          pass
-        
+        val = attrgetter(attrstring)(wrapperObj)
         if val != '':
           rowdata[neftag] = val
         else:
@@ -3242,7 +3231,7 @@ class CcpnNefReader:
       if loop:
         self.load_ccpn_spectrum_dimension(spectrum, loop)
 
-    # Make PeakLst
+    # Make PeakList
     peakList = spectrum.newPeakList(**peakListParameters)
 
     # Load peaks
@@ -3457,41 +3446,174 @@ class CcpnNefReader:
     #
     return result
 
+  importers['ccpn_integral_list'] = load_ccpn_integral_list
 
-  def load_ccpn_integral(self, spectrum:Spectrum,
-                              loop:StarIo.NmrLoop) -> List[Integral]:
+
+  def load_ccpn_multiplet_list(self, spectrum: Spectrum,
+                              loop: StarIo.NmrLoop) -> List[MultipletList]:
+
+      result = []
+
+      mapping = nef2CcpnMap[loop.name]
+      map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+      creatorFunc = spectrum.newMultipletList
+      for row in loop.data:
+          parameters = self._parametersFromLoopRow(row, map2)
+          multipletList = creatorFunc(**parameters)
+          multipletList.resetSerial(row['serial'])
+          # NB former call was BROKEN!
+          # modelUtil.resetSerial(multipletList, row['serial'], 'multipletLists')
+          result.append(multipletList)
+
+      return result
+
+  importers['ccpn_multiplet_list'] = load_ccpn_multiplet_list
+
+
+  def load_ccpn_integral(self, spectrum: Spectrum,
+                         loop: StarIo.NmrLoop) -> List[Integral]:
+
+      result = []
+
+      # Get name map for per-dimension attributes
+      max = spectrum.dimensionCount + 1
+      multipleAttributes = {
+          'slopes': tuple('slopes_%s' % ii for ii in range(1, max)),
+          'lowerLimits': tuple('lower_limits_%s' % ii for ii in range(1, max)),
+          'upperLimits': tuple('upper_limits_%s' % ii for ii in range(1, max)),
+      }
+
+      serial2creatorFunc = dict((x.serial, x.newIntegral) for x in spectrum.integralLists)
+
+      mapping = nef2CcpnMap[loop.name]
+      map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+      for row in loop.data:
+          parameters = self._parametersFromLoopRow(row, map2)
+          integral = serial2creatorFunc[row['integral_list_serial']](**parameters)
+
+          # integral.slopes = tuple(row.get(x) for x in multipleAttributes['slopes'])
+          # lowerLimits = tuple(row.get(x) for x in multipleAttributes['lowerLimits'])
+          # upperLimits = tuple(row.get(x) for x in multipleAttributes['upperLimits'])
+          # # integral.slopes = row._get('slopes')
+          # # lowerLimits = row._get('lower_limits')
+          # # upperLimits = row._get('upper_limits')
+          # integral.limits = zip((lowerLimits, upperLimits))
+
+          if row['slopes']:
+            integral.slopes = eval(row['slopes'])
+          if row['limits']:
+            integral.limits = eval(row['limits'])
+          if row['point_limits']:
+            integral.pointlimits = eval(row['point_limits'])
+
+          integral.resetSerial(row['integral_serial'])
+          # NB former call was BROKEN!
+          # modelUtil.resetSerial(integral, row['integral_serial'], 'integrals')
+          mPeak = row['ccpn_linked_peak']
+          peak = spectrum.project.getByPid(mPeak)
+          if peak:
+            integral.peak = peak
+
+          result.append(integral)
+      #
+      return result
+
+  importers['ccpn_integral'] = load_ccpn_integral
+
+  def load_ccpn_multiplet(self, spectrum:Spectrum,
+                              loop:StarIo.NmrLoop) -> List[Multiplet]:
 
     result = []
 
     # Get name map for per-dimension attributes
     max = spectrum.dimensionCount + 1
-    multipleAttributes = {
-      'slopes':tuple('slopes_%s' % ii for ii in range(1, max)),
-      'lowerLimits':tuple('lower_limits_%s' % ii for ii in range(1, max)),
-      'upperLimits':tuple('upper_limits_%s' % ii for ii in range(1, max)),
-    }
-
-    serial2creatorFunc = dict((x.serial,x.newIntegral) for x in spectrum.integralLists)
+    serial2creatorFunc = dict((x.serial,x.newMultiplet) for x in spectrum.multipletLists)
 
     mapping = nef2CcpnMap[loop.name]
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
-    creatorFunc = spectrum.newIntegralList
     for row in loop.data:
       parameters = self._parametersFromLoopRow(row, map2)
-      integral = serial2creatorFunc[row['integral_list_serial']](**parameters)
-      integral.slopes = tuple(row.get(x) for x in multipleAttributes['slopes'])
-      lowerLimits = tuple(row.get(x) for x in multipleAttributes['lowerLimits'])
-      upperLimits = tuple(row.get(x) for x in multipleAttributes['upperLimits'])
-      # integral.slopes = row._get('slopes')
-      # lowerLimits = row._get('lower_limits')
-      # upperLimits = row._get('upper_limits')
-      integral.limits = zip((lowerLimits, upperLimits))
-      integral.resetSerial(row['integral_serial'])
-      # NB former call was BROKEN!
-      # modelUtil.resetSerial(integral, row['integral_serial'], 'integrals')
-      result.append(integral)
-    #
+      multiplet = serial2creatorFunc[row['multiplet_list_serial']](**parameters)
+
+      if row['slopes']:
+        multiplet.slopes = eval(row['slopes'])
+      if row['limits']:
+        multiplet.limits = eval(row['limits'])
+      if row['point_limits']:
+        multiplet.pointlimits = eval(row['point_limits'])
+
+      multiplet.resetSerial(row['multiplet_serial'])
+      result.append(multiplet)
+
     return result
+
+  importers['ccpn_multiplet'] = load_ccpn_multiplet
+
+
+  def load_ccpn_multiplet_peaks(self, spectrum:Spectrum,
+                                loop:StarIo.NmrLoop) -> List[Multiplet]:
+
+    result = []
+
+    # Get name map for per-dimension attributes
+    max = spectrum.dimensionCount + 1
+    serial2creatorFunc = dict((x.serial,x.newMultiplet) for x in spectrum.multipletLists)
+
+    # mapping = nef2CcpnMap[loop.name]
+    # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    for row in loop.data:
+
+      mList = row['multiplet_list_serial']
+      mSerial = row['multiplet_serial']
+      mPeak = row['multiplet_peak']
+
+      mlList = [ml for ml in spectrum.multipletLists if ml.serial == mList]
+      mlts = [mt for ml in mlList for mt in ml.multiplets if mt.serial == mSerial]
+      peak = spectrum.project.getByPid(mPeak)
+      if mlts and peak:
+        mlts[0].addPeaks(peak)
+
+  importers['ccpn_multiplet_peaks'] = load_ccpn_multiplet_peaks
+
+
+
+  def load_ccpn_peak_cluster_list(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
+
+    # load ccpn_peak_clusters
+    loopName = 'ccpn_peak_clusters'
+    loop = saveFrame[loopName]
+    creatorFunc = project.newPeakCluster
+
+    result = []
+    mapping = nef2CcpnMap[loopName]
+    map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    for row in loop.data:
+      parameters = self._parametersFromLoopRow(row, map2)
+      obj = creatorFunc(**parameters)
+
+      # load time stamps and serial = must bypass the API, as they are frozen
+      apiPeakCluster = obj._wrappedData
+      obj.resetSerial(row['serial'])
+      result.append(obj)
+
+    # load ccpn_peak_clusters
+    loopName = 'ccpn_peak_cluster_peaks'
+    loop = saveFrame[loopName]
+
+    for row in loop.data:
+      pSerial = row['serial']
+      pPeak = row['peak']
+
+      pcs = [pc for pc in project.peakClusters if pc.serial == pSerial]
+      peak = project.getByPid(pPeak)
+      if pcs and peak:
+        pcs[0].addPeaks(peak)
+
+    return result
+
+  importers['ccpn_peak_cluster_list'] = load_ccpn_peak_cluster_list
+
+
 
   def load_nef_peak(self, peakList:PeakList, loop:StarIo.NmrLoop) -> List[Peak]:
     """Serves to load nef_peak loop"""

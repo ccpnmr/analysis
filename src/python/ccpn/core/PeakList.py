@@ -34,6 +34,7 @@ import numpy
 from numpy import argwhere
 from scipy.ndimage import maximum_filter, minimum_filter
 from ccpn.util import Common as commonUtil
+from scipy.integrate import trapz
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
@@ -477,34 +478,86 @@ class PeakList(AbstractWrapperObject):
         indicesMin = numpy.argwhere(negBoolsPeak)
         indices = numpy.append(indices, indicesMin)
 
+      ps = []
+
       for position in tqdm(indices):
         peakPosition = [float(filteredArray[0][position])]
         height = filteredArray[1][position]
-
+        ps.append({'positions': peakPosition, 'height': height})
 
         #searches for integrals
-        intersectingLine = [noiseThreshold]*len(x)
-        limitsPairs = _getPeaksLimits(x, y, intersectingLine)
+      intersectingLine = [noiseThreshold]*len(x)
+      limitsPairs = _getPeaksLimits(x, y, intersectingLine)
 
-        for i in limitsPairs:
-          lineWidth = abs(i[0] - i[1])
-          if lineWidth > minimalLineWidth:
+      results = []
+      for i in limitsPairs:
+        peakPositionBetweenLimits = []
+
+        lineWidth = abs(i[0] - i[1])
+        if lineWidth > minimalLineWidth:
+          for p in ps:
+            peakPosition = p['positions']
+            height = p['height']
             if i[0]>peakPosition[0]>i[1]: #peak  position is between limits
-
+              peakPositionBetweenLimits.append(peakPosition[0])
+        results.append({'limits':i, 'peakPositionBetweenLimits':peakPositionBetweenLimits})
               # start from min of the limit to the peak position
-              halfWidthPoint = peakPosition[0]-min(i)
-              newMax = halfWidthPoint+peakPosition[0]
-              index01 = numpy.where((x <= i[0]) & (x >= newMax))
-              newLineWidth = lineWidth = abs(i[0] - newMax)
-              if newLineWidth > minimalLineWidth:
-                from scipy.integrate import trapz
-                integral = trapz(index01)
-                peak = self.newPeak(height=float(height), position=peakPosition, volume=float(integral),
-                                    lineWidths=[newLineWidth,])
-                newIntegral = integralList.newIntegral(value=float(integral), limits=[[min(i), newMax]])
-                newIntegral.peak = peak
+              # halfWidthPoint = peakPosition[0]-min(i)
+              # newMax = halfWidthPoint+peakPosition[0]
+              # index01 = numpy.where((x <= i[0]) & (x >= newMax))
+              # newLineWidth = lineWidth = abs(i[0] - newMax)
+              # if newLineWidth > minimalLineWidth:
+              #   from scipy.integrate import trapz
+              #   integral = trapz(index01)
+              #   peak = self.newPeak(height=float(height), position=peakPosition, volume=float(integral),
+              #                       lineWidths=[newLineWidth,])
+              #   newIntegral = integralList.newIntegral(limits=[[min(i), newMax]])
+              #   newIntegral.peak = peak
+              #   newIntegral._baseline = noiseThreshold
+      if len(results)>1:
+        ll = []
+        for item in results:
+          peakPositionBetweenLimits = item['peakPositionBetweenLimits']
+          limits = item['limits'] #list of [max, min]
+          if len(peakPositionBetweenLimits) == 1: #only a peak inside.
+            lw = abs(limits[0] - limits[1])
+            region = numpy.where((x <= limits[0]) & (x >= limits[1]))
+            integral = trapz(region)
+            peak = self.newPeak(height=0, position=peakPositionBetweenLimits, volume=float(integral),
+                                lineWidths=[lw,])
+            newIntegral = integralList.newIntegral(limits=[[min(limits), max(limits)]])
+            newIntegral.peak = peak
+            newIntegral._baseline = noiseThreshold
 
-            # peaks.append(peak)
+          if len(peakPositionBetweenLimits)>1:
+            minL = min(limits)
+
+            for pp in sorted(peakPositionBetweenLimits):  # smallest to biggest
+              oldMin = minL
+              deltaPos = abs(pp - minL)
+              tot = pp + deltaPos
+              minL = tot
+              if minL > max(limits):
+                minL = max(limits)
+
+                print('new: ({},{}), OrigL: {}, pos: {} '.format(oldMin,minL, limits, pp, ))
+              ll.append({'limits':(oldMin, minL), 'position':pp})
+
+
+        for d in ll:
+          newMax = max(d['limits'])
+          newMin = min(d['limits'])
+          pp = d['position']
+          newLw = abs(newMax - newMin)
+          region = numpy.where((x <= newMax) & (x >= newMin))
+          integral = trapz(region)
+          peak = self.newPeak(height=0, position=[pp], volume=float(integral),
+                              lineWidths=[newLw, ])
+          newIntegral = integralList.newIntegral(limits=[[newMin,newMax]])
+          newIntegral.peak = peak
+          newIntegral._baseline = noiseThreshold
+
+
 
 
       self.spectrum.signalToNoiseRatio = SNR
@@ -513,6 +566,12 @@ class PeakList(AbstractWrapperObject):
       self._endCommandEchoBlock()
 
     return peaks
+
+  # def _simplePeakSplitting(self, limits, positions):
+  #   ''' give limits to peaks within a range'''
+  #   minLim, maxLim = min(limits), max(limits)
+  #   for position in positions:
+
 
   def copyTo(self, targetSpectrum:Spectrum, **kwargs) -> 'PeakList':
     """Make (and return) a copy of the PeakList attached to targetSpectrum

@@ -423,7 +423,7 @@ class PeakList(AbstractWrapperObject):
     from ccpn.core.IntegralList import _getPeaksLimits
 
     x, y = numpy.array(self.spectrum.positions), numpy.array(self.spectrum.intensities)
-    x,y = x[:int(len(x)/10)], y[:int(len(x)/10)],
+    x,y = x[:int(len(x)/20)], y[:int(len(x)/20)],
     noiseMean = numpy.mean(y)
     intersectingLine = [noiseMean] * len(x)
     limitsPairs = _getPeaksLimits(x, y, intersectingLine)
@@ -431,7 +431,7 @@ class PeakList(AbstractWrapperObject):
     for i in limitsPairs:
       lineWidth = abs(i[0] - i[1])
       widths.append(lineWidth)
-    return numpy.max(widths)
+    return numpy.std(widths)
 
   def automatic1dPeakPicking(self, sizeFactor=3, negativePeaks=True,minimalLineWidth=None, ignoredRegions=None):
     '''
@@ -457,12 +457,24 @@ class PeakList(AbstractWrapperObject):
 
       peaks = []
       SNR = None
-      size = 9 #Default value but automatically calculated below
+      defaultSize = 9 #Default value but automatically calculated below
       filteredArray = _filtered1DArray(data, ignoredRegions)
 
       SNR, noiseThreshold = _estimateNoiseLevel1D(filteredArray[1])
-      ratio = numpy.max(abs(filteredArray[1])) / noiseThreshold
-      size = (1 / ratio) * 100 * sizeFactor
+      ratio = numpy.std(abs(filteredArray[1])) / noiseThreshold
+      # size = (1 / ratio) * 100 * sizeFactor
+      # important bit to auto calculate the smooting factor (size)
+      import math
+      plusPercent = 20
+      ftr = math.log(noiseThreshold)
+      size = (SNR*ftr)/SNR
+      if size is None or 0:
+        size = defaultSize
+      percent = (size*plusPercent)/100
+      size+=percent
+
+      print('noiseThreshold: {} , SNR: {} ,ratio: {},  size: {}, '.format(noiseThreshold,
+                                                                                        SNR, ratio, size))
 
       posBoolsVal = filteredArray[1] > noiseThreshold
       maxFilter = maximum_filter(filteredArray[1], size=size, mode='wrap')
@@ -491,7 +503,7 @@ class PeakList(AbstractWrapperObject):
 
       results = []
       for i in limitsPairs:
-        peakPositionBetweenLimits = []
+        peaksBetweenLimits = []
 
         lineWidth = abs(i[0] - i[1])
         if lineWidth > minimalLineWidth:
@@ -499,66 +511,58 @@ class PeakList(AbstractWrapperObject):
             peakPosition = p['positions']
             height = p['height']
             if i[0]>peakPosition[0]>i[1]: #peak  position is between limits
-              peakPositionBetweenLimits.append(peakPosition[0])
-        results.append({'limits':i, 'peakPositionBetweenLimits':peakPositionBetweenLimits})
-              # start from min of the limit to the peak position
-              # halfWidthPoint = peakPosition[0]-min(i)
-              # newMax = halfWidthPoint+peakPosition[0]
-              # index01 = numpy.where((x <= i[0]) & (x >= newMax))
-              # newLineWidth = lineWidth = abs(i[0] - newMax)
-              # if newLineWidth > minimalLineWidth:
-              #   from scipy.integrate import trapz
-              #   integral = trapz(index01)
-              #   peak = self.newPeak(height=float(height), position=peakPosition, volume=float(integral),
-              #                       lineWidths=[newLineWidth,])
-              #   newIntegral = integralList.newIntegral(limits=[[min(i), newMax]])
-              #   newIntegral.peak = peak
-              #   newIntegral._baseline = noiseThreshold
+              peaksBetweenLimits.append(p)
+        results.append({'limits':i, 'peaksBetweenLimits':peaksBetweenLimits})
+
       if len(results)>1:
         ll = []
         for item in results:
-          peakPositionBetweenLimits = item['peakPositionBetweenLimits']
+          peaks = item['peaksBetweenLimits']
           limits = item['limits'] #list of [max, min]
-          if len(peakPositionBetweenLimits) == 1: #only a peak inside.
+          if len(peaks) == 1: #only a peak inside.
+            peakPos = peaks[0].get('positions')
+            peakHeigh = float(peaks[0].get('height'))
+
             lw = abs(limits[0] - limits[1])
             region = numpy.where((x <= limits[0]) & (x >= limits[1]))
             integral = trapz(region)
-            peak = self.newPeak(height=0, position=peakPositionBetweenLimits, volume=float(integral),
+            peak = self.newPeak(height=peakHeigh, position=peakPos, volume=float(integral),
                                 lineWidths=[lw,])
             newIntegral = integralList.newIntegral(limits=[[min(limits), max(limits)]])
             newIntegral.peak = peak
             newIntegral._baseline = noiseThreshold
 
-          if len(peakPositionBetweenLimits)>1:
+          if len(peaks)>1:
             minL = min(limits)
 
-            for pp in sorted(peakPositionBetweenLimits):  # smallest to biggest
+            for peak in sorted(peaks, key=lambda k: k['positions'][0]):  # smallest to biggest
+
+
+              peakPos = peak.get('positions')
+              peakHeigh = float(peak.get('height'))
               oldMin = minL
-              deltaPos = abs(pp - minL)
-              tot = pp + deltaPos
+              deltaPos = abs(peakPos - minL)
+              tot = peakPos + deltaPos
               minL = tot
               if minL > max(limits):
                 minL = max(limits)
-
-                print('new: ({},{}), OrigL: {}, pos: {} '.format(oldMin,minL, limits, pp, ))
-              ll.append({'limits':(oldMin, minL), 'position':pp})
-
+              ll.append({'limits':(oldMin, minL), 'peak':peak})
 
         for d in ll:
           newMax = max(d['limits'])
           newMin = min(d['limits'])
-          pp = d['position']
+          peak = d['peak']
+
+          peakPos = peak.get('positions')
+          peakHeigh = float(peak.get('height'))
           newLw = abs(newMax - newMin)
           region = numpy.where((x <= newMax) & (x >= newMin))
           integral = trapz(region)
-          peak = self.newPeak(height=0, position=[pp], volume=float(integral),
-                              lineWidths=[newLw, ])
+          peak = self.newPeak(height=peakHeigh, position=peakPos, volume=float(integral),
+                              )
           newIntegral = integralList.newIntegral(limits=[[newMin,newMax]])
           newIntegral.peak = peak
           newIntegral._baseline = noiseThreshold
-
-
-
 
       self.spectrum.signalToNoiseRatio = SNR
 

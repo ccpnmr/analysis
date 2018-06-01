@@ -82,7 +82,7 @@ def _createMenu(strip, items):
 
 
 ##############################  Common default  menu items ##############################
-## This items are used to create both 1D and Nd menus
+## These items are used to create both 1D and Nd menus
 
 
 def _toolBarItem(strip):
@@ -174,7 +174,7 @@ def _separator():
 
 
 ##############################  Common Peak  menu items ##############################
-## This items are used to create both 1D and Nd Peak menus
+## These items are used to create both 1D and Nd Peak menus
 
 
 
@@ -238,7 +238,7 @@ def _hidePeaksSingleActionItems(strip, menu):
 
 
 ##############################  Common Phasing  menu items ##############################
-## This items are used to create both 1D and Nd Phasing menus
+## These items are used to create both 1D and Nd Phasing menus
 
 def _addTraceItem(strip):
     return _SCMitem(name='Add Trace',

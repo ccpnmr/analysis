@@ -125,7 +125,7 @@ import sys
 from numpy import NaN, Inf, arange, isscalar, asarray, array
 
 
-def peakdet(v, delta, x=None):
+def peakdet(y,x, delta):
     """
     Converted from MATLAB script at http://billauer.co.il/peakdet.html
     % Eli Billauer, 3.4.05 (Explicitly not copyrighted).
@@ -134,16 +134,13 @@ def peakdet(v, delta, x=None):
     maxtab = []
     mintab = []
 
-    if x is None:
-        x = arange(len(v))
-
     mn, mx = Inf, -Inf
     mnpos, mxpos = NaN, NaN
 
     lookformax = True
 
-    for i in arange(len(v)):
-        this = v[i]
+    for i in arange(len(y)):
+        this = y[i]
         if this > mx:
             mx = this
             mxpos = x[i]

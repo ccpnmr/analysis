@@ -581,14 +581,14 @@ class PeakList(AbstractWrapperObject):
     x,y = spectrum.positions, spectrum.intensities
     masked = _filtered1DArray(numpy.array([x,y]), ignoredRegions)
     filteredX, filteredY = masked[0], masked[1]
-    maxtab, mintab = peakdet(v=filteredY, x=filteredX, delta=_estimateDeltaPeakDetect(y))
+    maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=_estimateDeltaPeakDetect(y))
 
-    for i in maxtab:
+    for i in maxValues:
       if i[1] > 0:
         peaks.append(self.newPeak(position=[i[0]], height=i[1]))
 
     if negativePeaks:
-      for i in mintab:
+      for i in minValues:
         if i[1] < 0:
           peaks.append(self.newPeak(position=[i[0]], height=i[1]))
 

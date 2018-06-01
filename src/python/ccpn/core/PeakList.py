@@ -465,7 +465,7 @@ class PeakList(AbstractWrapperObject):
       # size = (1 / ratio) * 100 * sizeFactor
       # important bit to auto calculate the smooting factor (size)
       import math
-      plusPercent = 20
+      plusPercent = sizeFactor
       ftr = math.log(noiseThreshold)
       size = (SNR*ftr)/SNR
       if size is None or 0:
@@ -473,9 +473,9 @@ class PeakList(AbstractWrapperObject):
       percent = (size*plusPercent)/100
       size+=percent
 
-      print('noiseThreshold: {} , SNR: {} ,ratio: {},  size: {}, '.format(noiseThreshold,
-                                                                                        SNR, ratio, size))
-
+      size = sizeFactor
+      # print('noiseThreshold: {} , SNR: {} ,ratio: {},  size: {}, '.format(noiseThreshold, SNR, ratio, size))
+      print('size: {}, '.format(size))
       posBoolsVal = filteredArray[1] > noiseThreshold
       maxFilter = maximum_filter(filteredArray[1], size=size, mode='wrap')
       boolsMax = filteredArray[1] == maxFilter
@@ -571,11 +571,38 @@ class PeakList(AbstractWrapperObject):
 
     return peaks
 
-  # def _simplePeakSplitting(self, limits, positions):
-  #   ''' give limits to peaks within a range'''
-  #   minLim, maxLim = min(limits), max(limits)
-  #   for position in positions:
 
+  def peakFinder1D(self, ignoredRegions=[[20, 19]], negativePeaks = True):
+    from ccpn.core.lib.peakUtils import _estimateDeltaPeakDetect
+    from ccpn.core.lib.peakUtils import peakdet
+
+    spectrum = self.spectrum
+    peaks = []
+    x,y = spectrum.positions, spectrum.intensities
+    masked = _filtered1DArray(numpy.array([x,y]), ignoredRegions)
+    filteredX, filteredY = masked[0], masked[1]
+    maxtab, mintab = peakdet(v=filteredY, x=filteredX, delta=_estimateDeltaPeakDetect(y))
+
+    for i in maxtab:
+      if i[1] > 0:
+        peaks.append(self.newPeak(position=[i[0]], height=i[1]))
+
+    if negativePeaks:
+      for i in mintab:
+        if i[1] < 0:
+          peaks.append(self.newPeak(position=[i[0]], height=i[1]))
+
+    return peaks
+
+
+  def _testMultiplePicking(self, value=10):
+    spectrum = self.spectrum
+    for i in range(value):
+      peakList = spectrum.newPeakList()
+      import random
+
+      randomFactor =  random.uniform(0, 1)
+      peaks = peakList.automatic1dPeakPicking(sizeFactor=randomFactor*100 )
 
   def copyTo(self, targetSpectrum:Spectrum, **kwargs) -> 'PeakList':
     """Make (and return) a copy of the PeakList attached to targetSpectrum

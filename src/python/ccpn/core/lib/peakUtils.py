@@ -113,6 +113,74 @@ def getPeakLinewidth(peak, dim):
     if lw:
       return float(lw)
 
+def _get1DPeaksPosAndHeightAsArray(peakList):
+  import numpy as np
+  positions = np.array([peak.position[0] for peak in peakList.peaks])
+  heights = np.array([peak.height for peak in peakList.peaks])
+  return [positions, heights]
+
+
+
+import sys
+from numpy import NaN, Inf, arange, isscalar, asarray, array
+
+
+def peakdet(v, delta, x=None):
+    """
+    Converted from MATLAB script at http://billauer.co.il/peakdet.html
+    % Eli Billauer, 3.4.05 (Explicitly not copyrighted).
+    % This function is released to the public domain; Any use is allowed.
+    """
+    maxtab = []
+    mintab = []
+
+    if x is None:
+        x = arange(len(v))
+
+    mn, mx = Inf, -Inf
+    mnpos, mxpos = NaN, NaN
+
+    lookformax = True
+
+    for i in arange(len(v)):
+        this = v[i]
+        if this > mx:
+            mx = this
+            mxpos = x[i]
+        if this < mn:
+            mn = this
+            mnpos = x[i]
+
+        if lookformax:
+            if this < mx - delta:
+                maxtab.append((float(mxpos), float(mx)))
+                mn = this
+                mnpos = x[i]
+                lookformax = False
+        else:
+            if this > mn + delta:
+                mintab.append((float(mnpos), float(mn)))
+                mx = this
+                mxpos = x[i]
+                lookformax = True
+
+    return maxtab, mintab
+
+def _estimateDeltaPeakDetect(y,xPercent=20):
+  deltas = y[1:] - y[:-1]
+  delta = np.std(np.absolute(deltas))
+
+  # just on the noisy part of spectrum
+  partialYpercent = (len(y)*xPercent)/100
+  partialY = y[:int(partialYpercent)]
+  partialDeltas = partialY[1:] - partialY[:-1]
+  partialDelta = np.std(np.absolute(partialDeltas))
+
+  if delta > partialDelta:
+    return delta
+  else:
+    return partialDelta
+
 
 def _getAtomWeight(axisCode, atomWeights) -> float or int:
   '''

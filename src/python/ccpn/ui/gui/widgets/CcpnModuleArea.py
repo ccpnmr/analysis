@@ -183,6 +183,8 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
   def _setSerial(self, module):
     if module.className in self._modulesNames:
+      if [m.className for m in self.ccpnModules].count(module.className) == 0:
+        self._modulesNames[module.className] = []
       if isinstance(self._modulesNames[module.className], list):
         self._modulesNames[module.className].append(module.name())
     else:

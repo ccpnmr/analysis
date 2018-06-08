@@ -37,6 +37,7 @@ from ccpn.core.Note import Note
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
 
 logger = getLogger()
 
@@ -86,22 +87,26 @@ class NotesEditorModule(CcpnModule):
     self.noteWidget.hide()
 
     self.label1 = Label(self.noteWidget, text='Note name', grid=(1,0), vAlign='centre', hAlign='right')
+    self.label1.setMaximumHeight(30)
     self.lineEdit1 = LineEdit(self.noteWidget, grid=(1,1), gridSpan=(1,2), vAlign='top')
+    self.lineEdit1.editingFinished.connect(self._applyNote) # *1
     self.spacer = Spacer(self.noteWidget, 5, 5
                          , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
                          , grid=(2,3), gridSpan=(1,1))
-    self.textBox = TextEditor(self.noteWidget, grid=(3,0), gridSpan=(1,6))
 
-    self.buttonBox = ButtonList(self.noteWidget, texts=['Apply', 'Delete']
-                                , callbacks=[self._applyNote, self._deleteNote]
-                                , grid=(6,4), gridSpan=(1,2))
-    self.buttonBox.setFixedWidth(self.buttonBox.sizeHint().width()*1.5)
+    self.textBox = TextEditor(self.noteWidget, grid=(3,0), gridSpan=(1,6))
+    self.textBox.editingFinished.connect(self._applyNote) # *1
+
+    # *1 Automatically save the note when it loses the focus.
+    # Otherwise is very dangerous of loosing all the carefully written notes if you forget to press the button apply!
+
+
     #~~~~~~~~~~ end of noteWidget box
 
     # this spacer is expanding, will fill the space when the textbox is invisible
     self.spacer = Spacer(self.mainWidget, 5, 5
                          , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-                         , grid=(7,4), gridSpan=(1,1))
+                         , grid=(6,4), gridSpan=(1,1))
 
     self.mainWidget.setContentsMargins(5, 5, 5, 5)
 
@@ -111,7 +116,6 @@ class NotesEditorModule(CcpnModule):
 
     if note is not None:
       self.selectNote(note)
-
 
 
   def _processDroppedItems(self, data):

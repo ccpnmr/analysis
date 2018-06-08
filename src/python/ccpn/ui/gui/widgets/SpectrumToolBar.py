@@ -148,8 +148,14 @@ class SpectrumToolBar(ToolBar):
 
     contextMenu.addSeparator()
     contextMenu.addAction('Remove Spectrum', partial(self._removeSpectrum, button))
+    contextMenu.addAction('Select on SideBar', partial(self._showOnSideBar, button))
     return contextMenu
 
+  def _showOnSideBar(self, button):
+    spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
+    if spectrum:
+      sideBar = self.widget.application.ui.mainWindow.sideBar
+      sideBar.selectPid(spectrum.pid)
 
   # old to be deleted
   # def _createContextMenuOld(self, button:QtWidgets.QToolButton):

@@ -380,6 +380,12 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       project._logger.error("Double-click activation not implemented for Pid %s, object %s"
                             % (dataPid, obj))
 
+  def selectPid(self, pid):
+
+    ws = self._findItems(pid) #not sure why this returns a list!
+    for i in ws:
+        self.setCurrentItem(i)
+
   def _processDroppedItems(self, data):
     "Handle the dropped urls"
     # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviours
@@ -413,11 +419,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                 getLogger().warning('Error: %s' % str(es))
 
       else:
-        with progressManager(self.mainWindow, 'Loading data... ' + url):
-          try:
+        # with progressManager(self.mainWindow, 'Loading data... ' + url):
+        #   try:
             self.project.loadData(url)
-          except Exception as es:
-            getLogger().warning('loadData Error: %s' % str(es))
+          # except Exception as es:
+          #   getLogger().warning('loadData Error: %s' % str(es))
 
       # if objects is not None:
       #   # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner

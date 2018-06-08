@@ -147,8 +147,8 @@ class SpectrumToolBar(ToolBar):
     self._addSubMenusToContext(contextMenu, button)
 
     contextMenu.addSeparator()
-    contextMenu.addAction('Remove Spectrum', partial(self._removeSpectrum, button))
     contextMenu.addAction('Select on SideBar', partial(self._showOnSideBar, button))
+    contextMenu.addAction('Remove Spectrum', partial(self._removeSpectrum, button))
     return contextMenu
 
   def _showOnSideBar(self, button):

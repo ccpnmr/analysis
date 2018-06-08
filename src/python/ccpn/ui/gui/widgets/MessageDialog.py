@@ -325,6 +325,28 @@ def progressManager(parent, title=None, progressMax=100):
     QtWidgets.QApplication.processEvents()    # hopefully it will redraw the popup
     thisProg.close()
 
+
+def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
+    ''' Use this for opening a _stoppableProgressBar before time consuming operations. the cancel button allows
+     the user to stop the loop manually.
+    eg:
+    for i in _stoppableProgressBar(range(10), title, buttonText):
+        # do stuff
+        pass
+    '''
+
+    widget = QtWidgets.QProgressDialog(title,buttonText, 0, len(data)) # starts = 0, ends = len(data)
+    c=0
+    for v in iter(data):
+        QtCore.QCoreApplication.instance().processEvents()
+        if widget.wasCanceled():
+           raise RuntimeError('Stopped by user')
+        c+=1
+        widget.setValue(c)
+        yield(v)
+
+
+
 import math, sys
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import *
@@ -398,6 +420,12 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
   from ccpn.ui.gui.widgets.BasePopup import BasePopup
   from ccpn.ui.gui.widgets.Button import Button
+  import time
+
+  app = QtWidgets.QApplication(sys.argv)
+
+  for i in _stoppableProgressBar([1]*10000):
+      time.sleep(0.2)
 
   def callback():
     print(showInfo('My info window', 'test info'))
@@ -408,14 +436,14 @@ if __name__ == '__main__':
     print(showRetryIgnoreCancel('Test', 'Some message'))
     print(showWarning('Test', 'Warning message'))
  
-  app = TestApplication()
-  # popup = BasePopup(title='Test MessageReporter')
-  #popup.setSize(200,30)
-  # button = Button(popup, text='hit me', callback=callback)
-
-  popup = progressPopup(busyFunc=callback)
-
-  popup.show()
-  popup.raise_()
-
-  app.start()
+  # app = TestApplication()
+  # # popup = BasePopup(title='Test MessageReporter')
+  # #popup.setSize(200,30)
+  # # button = Button(popup, text='hit me', callback=callback)
+  #
+  # popup = progressPopup(busyFunc=callback)
+  #
+  # popup.show()
+  # popup.raise_()
+  #
+  # app.start()

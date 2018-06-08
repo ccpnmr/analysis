@@ -525,7 +525,7 @@ class PeakList(AbstractWrapperObject):
 
             lw = abs(limits[0] - limits[1])
             region = numpy.where((x <= limits[0]) & (x >= limits[1]))
-            integral = trapz(region)
+            integral = trapz(y[region])
             peak = self.newPeak(height=peakHeigh, position=peakPos, volume=float(integral),
                                 lineWidths=[lw,])
             newIntegral = integralList.newIntegral(limits=[[min(limits), max(limits)]])
@@ -573,26 +573,49 @@ class PeakList(AbstractWrapperObject):
 
 
   def peakFinder1D(self, ignoredRegions=[[20, 19]], negativePeaks = True):
-    from ccpn.core.lib.peakUtils import _estimateDeltaPeakDetect
-    from ccpn.core.lib.peakUtils import peakdet
+    from ccpn.core.lib.peakUtils import _estimateDeltaPeakDetect, _estimateDeltaPeakDetectSTD
+    from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
+    from scipy import signal
+    import numpy as np
+    import  time
+    self._startCommandEchoBlock('automatic1dPeakPicking', values=locals())
+    try:
+      spectrum = self.spectrum
+      integralList = self.spectrum.newIntegralList()
 
-    spectrum = self.spectrum
-    peaks = []
-    x,y = spectrum.positions, spectrum.intensities
-    masked = _filtered1DArray(numpy.array([x,y]), ignoredRegions)
-    filteredX, filteredY = masked[0], masked[1]
-    maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=_estimateDeltaPeakDetect(y))
+      peaks = []
+      x,y = spectrum.positions, spectrum.intensities
+      masked = _filtered1DArray(numpy.array([x,y]), ignoredRegions)
+      filteredX, filteredY = masked[0], masked[1]
+      delta = _estimateDeltaPeakDetectSTD(y, 2)
+      maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=delta)
+      for position, height in maxValues:
+        peak = self.newPeak(position=[position], height=height)
 
-    for i in maxValues:
-      if i[1] > 0:
-        peaks.append(self.newPeak(position=[i[0]], height=i[1]))
-
-    if negativePeaks:
-      for i in minValues:
-        if i[1] < 0:
-          peaks.append(self.newPeak(position=[i[0]], height=i[1]))
-
-    return peaks
+      # const = round(len(y) * 0.0039, 1)
+      # correlatedSignal1 = signal.correlate(y, np.ones(int(const)), mode='same') / const
+      # intersectionPoints = _getIntersectionPoints(x, y, correlatedSignal1)
+      # pairIntersectionPoints = _pairIntersectionPoints(intersectionPoints)
+      #
+      #
+      # for limits in list(pairIntersectionPoints):
+      #   for position, height in maxValues:
+      #     if height > delta: # ensure are only the positive peaks
+      #       if max(limits) > position > min(limits):  # peak  position is between limits
+      #         lw = max(limits) - min(limits)
+      #         peak = self.newPeak(position=[position], height=height, lineWidths = [lw])
+      #         newIntegral = integralList.newIntegral(limits=[[min(limits), max(limits)]])
+      #         newIntegral.peak = peak
+      #         peak.volume = newIntegral.value
+      #         peaks.append(peak)
+      #
+      # if negativePeaks:
+      #   for i in minValues:
+      #     if i[1] < -delta:
+      #       peaks.append(self.newPeak(position=[i[0]], height=i[1]))
+    finally:
+      self._endCommandEchoBlock()
+    # return peaks
 
 
   def _testMultiplePicking(self, value=10):

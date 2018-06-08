@@ -231,7 +231,8 @@ class Integral(AbstractWrapperObject):
           limit1, limit2 = limits
           x = self.integralList.spectrum.positions
           index01 = np.where((x <= limit2) & (x >= limit1))
-          self.value = float(trapz(index01))
+          values = spectrum.intensities[index01]
+          self.value = float(trapz(values))
           # set to the attached peak if any
           if self.peak:
             self.peak.volume = self.value
@@ -280,15 +281,15 @@ class Integral(AbstractWrapperObject):
     :return:baseline of the integral, x regions and y regions in  separate arrays
     """
     baseline =  self._baseline
-    if not baseline:
-      baseline = 0.0
     for i in self.limits:
       x = self.integralList.spectrum.positions
       y =  self.integralList.spectrum.intensities
-      index01 = np.where((x <= max(i)) & (x >= min(i)))
-      for dd in index01:
+      xRegions = np.where((x <= max(i)) & (x >= min(i)))
+      for xRegion in xRegions:
+        if not baseline:
+          baseline = min(y[xRegion])
         # should be just one for 1D
-        return (baseline, x[dd], y[dd])
+        return (baseline, x[xRegion], y[xRegion])
 # Connections to parents:
 
   @property

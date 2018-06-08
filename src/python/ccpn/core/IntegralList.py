@@ -38,13 +38,10 @@ from scipy.integrate import trapz
 
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 
-
-
+# moved on peakUtil ####################################################################
 def _createIntersectingLine(x, y):
   '''create a straight line with x values like the original spectrum and y value from the estimated noise level'''
   return [_oldEstimateNoiseLevel1D(x, y)] * len(x)
-
-
 def _getIntersectionPoints(x, y, line):
   '''
   :param line: x points of line to intersect y points
@@ -57,18 +54,13 @@ def _getIntersectionPoints(x, y, line):
   x_intersect = x[:-1] - dx / (z[1:] - z[:-1]) * z[:-1]
   negatives = np.where(cross < 0)
   points = x_intersect[negatives]
-
   return points
-
-
 def _pairIntersectionPoints(intersectionPoints):
   """ Yield successive pair chunks from list of intersectionPoints """
   for i in range(0, len(intersectionPoints), 2):
     pair = intersectionPoints[i:i + 2]
     if len(pair) == 2:
       yield pair
-
-
 def _getPeaksLimits(x, y, intersectingLine=None):
   '''Get the limits of each peak of the spectrum given an intersecting line. If
    intersectingLine is None, it is calculated by the STD of the spectrum'''
@@ -77,7 +69,7 @@ def _getPeaksLimits(x, y, intersectingLine=None):
   limits = _getIntersectionPoints(x, y, intersectingLine)
   limitsPairs = list(_pairIntersectionPoints(limits))
   return limitsPairs
-
+########################################################################################################################################
 
 
 
@@ -203,8 +195,6 @@ class IntegralList(AbstractWrapperObject):
       for i in limitsPairs:
         lineWidth = abs(i[0] - i[1])
         if lineWidth > minimalLineWidth:
-          index01 = np.where((x <= i[0]) & (x >= i[1]))
-          # integral = trapz(index01)
           newIntegral = self.newIntegral(value= None, limits=[[min(i), max(i)],])
           if intersectingLine:
             newIntegral._baseline = intersectingLine[0]

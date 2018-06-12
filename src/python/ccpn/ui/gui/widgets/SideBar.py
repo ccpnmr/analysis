@@ -533,6 +533,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
     self._restoreExpandedState(sideBarState)
 
+  def _createSpectrumGroup(self, spectra= None or []):
+    popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, addNew=True, spectra = spectra)
+    popup.exec_()
+    popup.raise_()
+
   def _refreshParentNmrChain(self, data):     #nmrResidue:NmrResidue, oldPid:Pid=None):     # ejb - catch oldName
     """Reset NmrChain sidebar - needed when NmrResidue is created or renamed to trigger re-sort
 
@@ -1090,6 +1095,10 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       openableObjs = [obj for obj in objs if isinstance(obj, tuple(OpenObjAction.keys()))]
       if len(openableObjs)>0:
         contextMenu.addAction('Open as a module', partial(_openItemObject, self.mainWindow, openableObjs))
+        spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
+        if len(spectra) > 0:
+          contextMenu.addAction('Make SpectrumGroup From Selected', partial(self._createSpectrumGroup, spectra))
+
       contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
       canBeCloned = True
       for obj in objs:

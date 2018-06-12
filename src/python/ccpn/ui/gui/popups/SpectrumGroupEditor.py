@@ -39,7 +39,7 @@ from ccpn.util.Logging import getLogger
 
 class SpectrumGroupEditor(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None
-               , spectrumGroup=None, addNew=False, editorMode=False
+               , spectrumGroup=None, addNew=False, editorMode=False, spectra = None or []
                , title='Spectrum Group Setup', **kw):
     """
     Initialise the widget
@@ -54,6 +54,7 @@ class SpectrumGroupEditor(CcpnDialog):
     self.addNewSpectrumGroup = addNew
     self.spectrumGroup = spectrumGroup
     self.editorMode = editorMode
+    self._spectra = spectra #open popup with already these spectra in. Ready to create the group.
 
     self._setMainLayout()
     self._setLeftWidgets()
@@ -70,6 +71,9 @@ class SpectrumGroupEditor(CcpnDialog):
 
     if self.addNewSpectrumGroup:
       self._checkCurrentSpectrumGroups()
+
+    if self._spectra is not None or len(self._spectra)>0:
+      self._addSpectraOnStart()
 
   def _setMainLayout(self):
     self.mainLayout = QtWidgets.QGridLayout()
@@ -285,6 +289,18 @@ class SpectrumGroupEditor(CcpnDialog):
         self.rightPullDownSelectionData.remove(self.spectrumGroup.pid)
     return self.rightPullDownSelectionData
 
+  def _addSpectraOnStart(self):
+    if self._spectra:
+
+      # update other widgets
+      self.selectInitialRadioButtons.radioButtons[0].setChecked(True)
+      self._initialOptionsCallBack()
+
+      # add spectra on left list widget ready to create a new Group
+      for spectrum in self._spectra:
+        item = QtWidgets.QListWidgetItem(str(spectrum.id))
+        self.spectrumGroupListWidgetLeft.addItem(item)
+
   def _getAllSpectra(self):
     if self.spectrumGroup:
       allSpectra = [sp for sp in self.project.spectra]
@@ -294,7 +310,9 @@ class SpectrumGroupEditor(CcpnDialog):
           allSpectra.remove(spectrumSG)
       return allSpectra
     else:
-      return self.project.spectra
+      leftWidgetSpectra = self._getItemListWidgets()['leftWidgetSpectra']
+      availableSpectra = [sp for sp in self.project.spectra if sp not in leftWidgetSpectra] # make sure to don't have spectra on left and right at the same time
+      return availableSpectra
 
   def _changeLeftSpectrumGroupName(self):
     if self.leftSpectrumGroupLineEdit.isModified():

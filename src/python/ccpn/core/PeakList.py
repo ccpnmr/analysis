@@ -40,7 +40,6 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
-from tqdm import *
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 # from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
@@ -492,7 +491,7 @@ class PeakList(AbstractWrapperObject):
 
       ps = []
 
-      for position in tqdm(indices):
+      for position in indices:
         peakPosition = [float(filteredArray[0][position])]
         height = filteredArray[1][position]
         ps.append({'positions': peakPosition, 'height': height})

@@ -30,19 +30,91 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Sequence, List, Optional
 import collections
 import numpy
+
 from numpy import argwhere
 from scipy.ndimage import maximum_filter, minimum_filter
 from ccpn.util import Common as commonUtil
+from scipy.integrate import trapz
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
-from ccpn.core.lib.SpectrumLib import _estimateNoiseLevel1D
-
+from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
+from tqdm import *
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 # from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
+
+
+def _estimateNoiseLevel1D(y):
+  '''
+  Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
+  only noise is present. To increase the threshold value: increase the factor.
+  return:  float of estimated noise threshold
+  '''
+  import numpy as np
+  import math
+
+  if y is not None:
+    firstEstimation = np.std(y[:int(len(y) / 20)])
+    estimatedGaussian = np.random.normal(size=y.shape) * firstEstimation
+    e = (np.std(estimatedGaussian) + (np.std(firstEstimation) - np.std(estimatedGaussian)))
+    e2 = np.max(estimatedGaussian) + (abs(np.min(estimatedGaussian)))
+    if e < e2:
+      e = e2
+
+    eS = np.where(y >= e)
+    eSN = np.where(y <= -e)
+    eN = np.where((y < e) & (y > -e))
+    estimatedSignalRegionPos = y[eS]
+    estimatedSignalRegionNeg = y[eSN]
+    estimatedSignalRegion = np.concatenate((estimatedSignalRegionPos, estimatedSignalRegionNeg))
+    estimatedNoiseRegion = y[eN]
+
+    lenghtESR = len(estimatedSignalRegion)
+    lenghtENR = len(estimatedNoiseRegion)
+    if lenghtESR > lenghtENR:
+      l = lenghtENR
+    else:
+      l = lenghtESR
+    if l == 0:
+      SNR = 1
+    else:
+      noise = estimatedNoiseRegion[:l - 1]
+      signalAndNoise = estimatedSignalRegion[:l - 1]
+      signal = abs(signalAndNoise - noise)
+
+      signal[::-1].sort()  # descending
+      noise[::1].sort()
+      signal = signal.compressed()  # remove the mask
+      noise = noise.compressed()  # remove the mask
+      s = signal[:int(l / 2)]
+      n = noise[:int(l / 2)]
+      if len(signal) == 0:
+        return 1, e
+
+      SNR = math.log10(abs(np.mean(s) ** 2 / np.mean(n) ** 2))
+      if SNR:
+        return SNR, e
+      else:
+        return 1, e
+
+    return SNR, e
+  else:
+    return 1, 0
+
+def _filtered1DArray(data, ignoredRegions):
+  # returns an array without ignoredRegions. Used for automatic 1d peak picking
+  ppmValues = data[0]
+  masks = []
+  for region in ignoredRegions:
+    mask = (ppmValues > region[0]) | (ppmValues < region[1])
+    masks.append(mask)
+  fullmask = [all(mask) for mask in zip(*masks)]
+  newArray = (numpy.ma.MaskedArray(data, mask=numpy.logical_not((fullmask, fullmask))))
+  return newArray
+
 
 class PeakList(AbstractWrapperObject):
   """An object containing Peaks. Note: the object is not a (subtype of a) Python list.
@@ -304,13 +376,13 @@ class PeakList(AbstractWrapperObject):
       data = numpy.array([spectrum.positions, spectrum.intensities])
       ppmValues = data[0]
       if positiveNoiseThreshold == 0.0 or positiveNoiseThreshold is None:
-        positiveNoiseThreshold = _estimateNoiseLevel1D(spectrum.intensities, factor=factor)
+        positiveNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
         if spectrum.noiseLevel is None:
-          positiveNoiseThreshold = _estimateNoiseLevel1D(spectrum.intensities, factor=factor)
+          positiveNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
           negativeNoiseThreshold = -positiveNoiseThreshold
 
       if negativeNoiseThreshold == 0.0 or negativeNoiseThreshold is None:
-        negativeNoiseThreshold = _estimateNoiseLevel1D(spectrum.intensities, factor=factor)
+        negativeNoiseThreshold = _oldEstimateNoiseLevel1D(spectrum.intensities, factor=factor)
         if spectrum.noiseLevel is None:
           negativeNoiseThreshold = -positiveNoiseThreshold
 
@@ -345,8 +417,215 @@ class PeakList(AbstractWrapperObject):
 
     finally:
       self._endCommandEchoBlock()
+    return peaks
+
+  def _noiseLineWidth(self):
+    from ccpn.core.IntegralList import _getPeaksLimits
+
+    x, y = numpy.array(self.spectrum.positions), numpy.array(self.spectrum.intensities)
+    x,y = x[:int(len(x)/20)], y[:int(len(x)/20)],
+    noiseMean = numpy.mean(y)
+    intersectingLine = [noiseMean] * len(x)
+    limitsPairs = _getPeaksLimits(x, y, intersectingLine)
+    widths = [0]
+    for i in limitsPairs:
+      lineWidth = abs(i[0] - i[1])
+      widths.append(lineWidth)
+    return numpy.std(widths)
+
+  def automatic1dPeakPicking(self, sizeFactor=3, negativePeaks=True,minimalLineWidth=None, ignoredRegions=None):
+    '''
+    :param ignoredRegions: in the form [[-20.1, -19.1]]
+    :param noiseThreshold: float
+    :param sizeFactor: smoothing value. increase to pick less "shoulder" point of peaks
+    :param negativePeaks: pick peaks in the negative region
+    :return: 
+    '''
+
+    from ccpn.core.IntegralList import _getPeaksLimits
+
+    self._startCommandEchoBlock('automatic1dPeakPicking', values=locals())
+    integralList = self.spectrum.newIntegralList()
+    if minimalLineWidth is None:
+      minimalLineWidth = self._noiseLineWidth()
+    try:
+      x,y = numpy.array(self.spectrum.positions), numpy.array(self.spectrum.intensities)
+
+      data =[x,y]
+      if ignoredRegions is None:
+        ignoredRegions = [[-20.1, -19.1]]
+
+      peaks = []
+      SNR = None
+      defaultSize = 9 #Default value but automatically calculated below
+      filteredArray = _filtered1DArray(data, ignoredRegions)
+
+      SNR, noiseThreshold = _estimateNoiseLevel1D(filteredArray[1])
+      ratio = numpy.std(abs(filteredArray[1])) / noiseThreshold
+      # size = (1 / ratio) * 100 * sizeFactor
+      # important bit to auto calculate the smooting factor (size)
+      import math
+      plusPercent = sizeFactor
+      ftr = math.log(noiseThreshold)
+      size = (SNR*ftr)/SNR
+      if size is None or 0:
+        size = defaultSize
+      percent = (size*plusPercent)/100
+      size+=percent
+
+      size = sizeFactor
+      # print('noiseThreshold: {} , SNR: {} ,ratio: {},  size: {}, '.format(noiseThreshold, SNR, ratio, size))
+      print('size: {}, '.format(size))
+      posBoolsVal = filteredArray[1] > noiseThreshold
+      maxFilter = maximum_filter(filteredArray[1], size=size, mode='wrap')
+      boolsMax = filteredArray[1] == maxFilter
+      boolsPeak = posBoolsVal & boolsMax
+      indices = numpy.argwhere(boolsPeak)
+
+      if negativePeaks:
+        minFilter = minimum_filter(filteredArray[1], size=size, mode='wrap')
+        boolsMin = filteredArray[1] == minFilter
+        negBoolsVal = filteredArray[1] < -noiseThreshold
+        negBoolsPeak = negBoolsVal & boolsMin
+        indicesMin = numpy.argwhere(negBoolsPeak)
+        indices = numpy.append(indices, indicesMin)
+
+      ps = []
+
+      for position in tqdm(indices):
+        peakPosition = [float(filteredArray[0][position])]
+        height = filteredArray[1][position]
+        ps.append({'positions': peakPosition, 'height': height})
+
+        #searches for integrals
+      intersectingLine = [noiseThreshold]*len(x)
+      limitsPairs = _getPeaksLimits(x, y, intersectingLine)
+
+      results = []
+      for i in limitsPairs:
+        peaksBetweenLimits = []
+
+        lineWidth = abs(i[0] - i[1])
+        if lineWidth > minimalLineWidth:
+          for p in ps:
+            peakPosition = p['positions']
+            height = p['height']
+            if i[0]>peakPosition[0]>i[1]: #peak  position is between limits
+              peaksBetweenLimits.append(p)
+        results.append({'limits':i, 'peaksBetweenLimits':peaksBetweenLimits})
+
+      if len(results)>1:
+        ll = []
+        for item in results:
+          peaks = item['peaksBetweenLimits']
+          limits = item['limits'] #list of [max, min]
+          if len(peaks) == 1: #only a peak inside.
+            peakPos = peaks[0].get('positions')
+            peakHeigh = float(peaks[0].get('height'))
+
+            lw = abs(limits[0] - limits[1])
+            region = numpy.where((x <= limits[0]) & (x >= limits[1]))
+            integral = trapz(y[region])
+            peak = self.newPeak(height=peakHeigh, position=peakPos, volume=float(integral),
+                                lineWidths=[lw,])
+            newIntegral = integralList.newIntegral(limits=[[min(limits), max(limits)]])
+            newIntegral.peak = peak
+            newIntegral._baseline = noiseThreshold
+
+          if len(peaks)>1:
+            minL = min(limits)
+
+            for peak in sorted(peaks, key=lambda k: k['positions'][0]):  # smallest to biggest
+
+
+              peakPos = peak.get('positions')
+              peakHeigh = float(peak.get('height'))
+              oldMin = minL
+              deltaPos = abs(peakPos - minL)
+              tot = peakPos + deltaPos
+              minL = tot
+              if minL > max(limits):
+                minL = max(limits)
+              ll.append({'limits':(oldMin, minL), 'peak':peak})
+
+        for d in ll:
+          newMax = max(d['limits'])
+          newMin = min(d['limits'])
+          peak = d['peak']
+
+          peakPos = peak.get('positions')
+          peakHeigh = float(peak.get('height'))
+          newLw = abs(newMax - newMin)
+          region = numpy.where((x <= newMax) & (x >= newMin))
+          integral = trapz(region)
+          peak = self.newPeak(height=peakHeigh, position=peakPos, volume=float(integral),
+                              )
+          newIntegral = integralList.newIntegral(limits=[[newMin,newMax]])
+          newIntegral.peak = peak
+          newIntegral._baseline = noiseThreshold
+
+      self.spectrum.signalToNoiseRatio = SNR
+
+    finally:
+      self._endCommandEchoBlock()
 
     return peaks
+
+
+  def peakFinder1D(self, deltaFactor = 1.5, ignoredRegions=[[20, 19]], negativePeaks = True):
+    from ccpn.core.lib.peakUtils import _estimateDeltaPeakDetect, _estimateDeltaPeakDetectSTD
+    from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
+    from scipy import signal
+    import numpy as np
+    import  time
+    self._startCommandEchoBlock('automatic1dPeakPicking', values=locals())
+    try:
+      spectrum = self.spectrum
+      integralList = self.spectrum.newIntegralList()
+
+      peaks = []
+      x,y = spectrum.positions, spectrum.intensities
+      masked = _filtered1DArray(numpy.array([x,y]), ignoredRegions)
+      filteredX, filteredY = masked[0], masked[1]
+      delta = _estimateDeltaPeakDetectSTD(y)
+      maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=delta*deltaFactor)
+      for position, height in maxValues:
+        peak = self.newPeak(position=[position], height=height)
+
+      # const = round(len(y) * 0.0039, 1)
+      # correlatedSignal1 = signal.correlate(y, np.ones(int(const)), mode='same') / const
+      # intersectionPoints = _getIntersectionPoints(x, y, correlatedSignal1)
+      # pairIntersectionPoints = _pairIntersectionPoints(intersectionPoints)
+      #
+      #
+      # for limits in list(pairIntersectionPoints):
+      #   for position, height in maxValues:
+      #     if height > delta: # ensure are only the positive peaks
+      #       if max(limits) > position > min(limits):  # peak  position is between limits
+      #         lw = max(limits) - min(limits)
+      #         peak = self.newPeak(position=[position], height=height, lineWidths = [lw])
+      #         newIntegral = integralList.newIntegral(limits=[[min(limits), max(limits)]])
+      #         newIntegral.peak = peak
+      #         peak.volume = newIntegral.value
+      #         peaks.append(peak)
+      #
+      # if negativePeaks:
+      #   for i in minValues:
+      #     if i[1] < -delta:
+      #       peaks.append(self.newPeak(position=[i[0]], height=i[1]))
+    finally:
+      self._endCommandEchoBlock()
+    # return peaks
+
+
+  def _testMultiplePicking(self, value=10):
+    spectrum = self.spectrum
+    for i in range(value):
+      peakList = spectrum.newPeakList()
+      import random
+
+      randomFactor =  random.uniform(0, 1)
+      peaks = peakList.automatic1dPeakPicking(sizeFactor=randomFactor*100 )
 
   def copyTo(self, targetSpectrum:Spectrum, **kwargs) -> 'PeakList':
     """Make (and return) a copy of the PeakList attached to targetSpectrum

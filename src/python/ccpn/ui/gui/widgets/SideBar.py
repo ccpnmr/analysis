@@ -380,6 +380,12 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       project._logger.error("Double-click activation not implemented for Pid %s, object %s"
                             % (dataPid, obj))
 
+  def selectPid(self, pid):
+
+    ws = self._findItems(pid) #not sure why this returns a list!
+    for i in ws:
+        self.setCurrentItem(i)
+
   def _processDroppedItems(self, data):
     "Handle the dropped urls"
     # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviours
@@ -413,11 +419,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                 getLogger().warning('Error: %s' % str(es))
 
       else:
-        with progressManager(self.mainWindow, 'Loading data... ' + url):
-          try:
+        # with progressManager(self.mainWindow, 'Loading data... ' + url):
+        #   try:
             self.project.loadData(url)
-          except Exception as es:
-            getLogger().warning('loadData Error: %s' % str(es))
+          # except Exception as es:
+          #   getLogger().warning('loadData Error: %s' % str(es))
 
       # if objects is not None:
       #   # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner
@@ -526,6 +532,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         self._createItem({Notifier.OBJECT: obj})
 
     self._restoreExpandedState(sideBarState)
+
+  def _createSpectrumGroup(self, spectra= None or []):
+    popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, addNew=True, spectra = spectra)
+    popup.exec_()
+    popup.raise_()
 
   def _refreshParentNmrChain(self, data):     #nmrResidue:NmrResidue, oldPid:Pid=None):     # ejb - catch oldName
     """Reset NmrChain sidebar - needed when NmrResidue is created or renamed to trigger re-sort
@@ -1084,6 +1095,10 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       openableObjs = [obj for obj in objs if isinstance(obj, tuple(OpenObjAction.keys()))]
       if len(openableObjs)>0:
         contextMenu.addAction('Open as a module', partial(_openItemObject, self.mainWindow, openableObjs))
+        spectra = [o for o in openableObjs if isinstance(o, Spectrum)]
+        if len(spectra) > 0:
+          contextMenu.addAction('Make SpectrumGroup From Selected', partial(self._createSpectrumGroup, spectra))
+
       contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
       canBeCloned = True
       for obj in objs:

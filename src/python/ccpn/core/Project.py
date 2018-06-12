@@ -59,6 +59,8 @@ CHAINS = 'chains'
 CHEMICALSHIFTLISTS = 'chemicalShiftLists'
 RESTRAINTLISTS = 'restraintLists'
 PEAKLISTS = 'peakLists'
+INTEGRALLISTS = 'integralLists'
+MULTIPLETLISTS = 'multipletLists'
 SAMPLES = 'samples'
 SUBSTANCES = 'substances'
 NMRCHAINS = 'nmrChains'
@@ -66,6 +68,7 @@ DATASETS = 'dataSets'
 COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
+PEAKCLUSTERS = 'peakClusters'
 
 
 class Project(AbstractWrapperObject):
@@ -885,11 +888,11 @@ class Project(AbstractWrapperObject):
 
   # Library functions
 
-  def exportNef(self, path:str=None
-                , overwriteExisting:bool=False
-                , skipPrefixes:typing.Sequence=()
-                , expandSelection:bool=True
-                , pidList:list=None):
+  def exportNef(self, path:str=None,
+                overwriteExisting:bool=False,
+                skipPrefixes:typing.Sequence=(),
+                expandSelection:bool=True,
+                pidList:list=None):
     """
     Export selected contents of the project to a Nef file.
 
@@ -911,11 +914,11 @@ class Project(AbstractWrapperObject):
     from ccpn.core.lib import CcpnNefIo
     from collections import OrderedDict
 
-    defaults = OrderedDict((('path', None)
-                            , ('overwriteExisting', None)
-                            , ('skipPrefixes', None)
-                            , ('expandSelection', None)
-                            , ('pidList', None)))
+    defaults = OrderedDict((('path', None),
+                            ('overwriteExisting', None),
+                            ('skipPrefixes', None),
+                            ('expandSelection', None),
+                            ('pidList', None)))
 
     self._startCommandEchoBlock('exportNef', values=locals(), defaults=defaults)
     undo = self._undo
@@ -925,11 +928,11 @@ class Project(AbstractWrapperObject):
 
     try:
       t0 = time()
-      CcpnNefIo.exportNef(self, path
-                          , overwriteExisting=overwriteExisting
-                          , skipPrefixes=skipPrefixes
-                          , expandSelection=expandSelection
-                          , pidList=pidList)
+      CcpnNefIo.exportNef(self, path,
+                          overwriteExisting=overwriteExisting,
+                          skipPrefixes=skipPrefixes,
+                          expandSelection=expandSelection,
+                          pidList=pidList)
       t2 = time()
       getLogger().info('Exported NEF file, time = %.2fs' % (t2 - t0))
 
@@ -939,9 +942,9 @@ class Project(AbstractWrapperObject):
       if undo is not None:
         undo.decreaseBlocking()
 
-  def _convertToDataBlock(self, skipPrefixes:typing.Sequence=()
-                            , expandSelection:bool=True
-                            , pidList:list=None):
+  def _convertToDataBlock(self, skipPrefixes:typing.Sequence=(),
+                            expandSelection:bool=True,
+                            pidList:list=None):
     """
     Export selected contents of the project to a Nef file.
 
@@ -961,9 +964,9 @@ class Project(AbstractWrapperObject):
     """
     from ccpn.core.lib import CcpnNefIo
 
-    defaults = OrderedDict((('skipPrefixes', None)
-                            , ('expandSelection', None)
-                            , ('pidList', None)))
+    defaults = OrderedDict((('skipPrefixes', None),
+                            ('expandSelection', None),
+                            ('pidList', None)))
 
     self._startCommandEchoBlock('exportNef', values=locals(), defaults=defaults)
     undo = self._undo
@@ -975,9 +978,9 @@ class Project(AbstractWrapperObject):
     newPath = None
     try:
       t0 = time()
-      dataBlock = CcpnNefIo.convertToDataBlock(self, skipPrefixes=skipPrefixes
-                                                , expandSelection=expandSelection
-                                                , pidList=pidList)
+      dataBlock = CcpnNefIo.convertToDataBlock(self, skipPrefixes=skipPrefixes,
+                                                expandSelection=expandSelection,
+                                                pidList=pidList)
       t2 = time()
       getLogger().info('File to dataBlock, time = %.2fs' % (t2 - t0))
 
@@ -989,14 +992,14 @@ class Project(AbstractWrapperObject):
 
     return dataBlock
 
-  def _writeDataBlockToFile(self, dataBlock:DataBlock=None, path:str=None
-                            , overwriteExisting:bool=False):
+  def _writeDataBlockToFile(self, dataBlock:DataBlock=None, path:str=None,
+                            overwriteExisting:bool=False):
     # Export the modified dataBlock to file
     from ccpn.core.lib import CcpnNefIo
 
-    defaults = OrderedDict((('dataBlock', None)
-                            , ('path', None)
-                            , ('overwriteExisting', None)))
+    defaults = OrderedDict((('dataBlock', None),
+                            ('path', None),
+                            ('overwriteExisting', None)))
 
     self._startCommandEchoBlock('writeDataBlockToFile', values=locals(), defaults=defaults)
     undo = self._undo

@@ -40,6 +40,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakCluster as apiPeakCluster
 # from ccpn.core.PeakClusterList import PeakClusterList
 from typing import Optional, Tuple, Any, Union, Sequence
+from ccpn.util.Common import makeIterableList
 
 
 class PeakCluster(AbstractWrapperObject):
@@ -92,6 +93,15 @@ class PeakCluster(AbstractWrapperObject):
   peakClusterParent = _parent
 
   @property
+  def annotation(self) -> Optional[str]:
+    """Peak text annotation"""
+    return self._wrappedData.annotation
+
+  @annotation.setter
+  def annotation(self, value: str):
+    self._wrappedData.annotation = value
+
+  @property
   def peaks(self) -> Optional[Tuple[Any]]:
     """List of peaks attached to the peakCluster"""
     try:
@@ -108,6 +118,73 @@ class PeakCluster(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: Project)-> Tuple[apiPeakCluster, ...]:
     """get wrappedData (PeakClusters) for all PeakCluster children of parent PeakClusterList"""
     return parent._wrappedData.sortedPeakClusters()
+
+
+  def addPeaks(self, peaks: ['Peak'] = None):
+    """
+    Add a peak or list of peaks to the peakCluster
+    The peaks must belong to the spectrum containing the multipletList.
+
+    :param peaks - single peak or list of peaks:
+    """
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # throw more understandable errors for the python console
+    # spectrum = self._parent.spectrum
+    pks = makeIterableList(peaks)
+    for pp in pks:
+      if not isinstance(pp, Peak):
+        raise TypeError('%s is not of type Peak' % pp)
+    #   if pp not in spectrum.peaks:
+    #     raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+
+    defaults = collections.OrderedDict(
+            (('peaks', None),
+             )
+    )
+    undo = self._project._undo
+    self._startCommandEchoBlock('addPeaks', values=locals(), defaults=defaults,
+                                parName='addPeaks')
+    try:
+      for pk in pks:
+        self._wrappedData.addPeak(pk._wrappedData)
+    finally:
+      self._endCommandEchoBlock()
+
+
+  def removePeaks(self, peaks: ['Peak'] = None):
+    """
+    Remove a peak or list of peaks from the peakCluster
+    The peaks must belong to the multiplet.
+
+    :param peaks - single peak or list of peaks:
+    """
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+    # throw more understandable errors for the python console
+    # spectrum = self._parent.spectrum
+    pks = makeIterableList(peaks)
+    for pp in pks:
+      if not isinstance(pp, Peak):
+        raise TypeError('%s is not of type Peak' % pp)
+      if pp not in self.peaks:
+        raise ValueError('%s does not belong to multiplet: %s' % (pp.pid, self.pid))
+      # if pp not in spectrum.peaks:
+      #   raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
+
+    defaults = collections.OrderedDict(
+            (('peaks', None),
+             )
+    )
+    undo = self._project._undo
+    self._startCommandEchoBlock('removePeaks', values=locals(), defaults=defaults,
+                                parName='removePeaks')
+    try:
+      for pk in pks:
+        self._wrappedData.removePeak(pk._wrappedData)
+    finally:
+      self._endCommandEchoBlock()
+
 
 # Connections to parents:
 def _newPeakCluster(self:Project, peaks:['Peak']=None, serial:int=None) -> PeakCluster:

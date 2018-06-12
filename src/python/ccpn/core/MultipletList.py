@@ -141,24 +141,34 @@ class MultipletList(AbstractWrapperObject):
 
 
 # Connections to parents:
-def _newMultipletList(self: Spectrum, multiplets:['Multiplet'] = None, serial: int = None) -> MultipletList:
+def _newMultipletList(self:Spectrum, title:str=None, symbolColour:str=None,
+                     textColour:str=None, comment:str=None, multiplets:['Multiplet']=None) -> MultipletList:
   """Create new MultipletList within Spectrum"""
 
   defaults = collections.OrderedDict(
-    (('multiplets', None), ('serial', None),
+    (('title', None), ('symbolColour', None), ('textColour', None), ('comment', None), ('multiplets', None),
      )
   )
+
+  dd = {'name':title, 'details':comment}
+  if symbolColour:
+    dd['symbolColour'] = symbolColour
+  if textColour:
+    dd['textColour'] = textColour
+  if multiplets:
+    dd['multiplets'] = multiplets
 
   undo = self._project._undo
   self._startCommandEchoBlock('newMultipletList', values=locals(), defaults=defaults,
                               parName='newMultipletList')
-
   try:
     apiParent = self._wrappedData
-    if multiplets:
-      apiMultipletList = apiParent.newMultipletList(multiplets=[mm._wrappedData for mm in multiplets])
-    else:
-      apiMultipletList = apiParent.newMultipletList()
+    # if multiplets:
+    #   apiMultipletList = apiParent.newMultipletList(multiplets=[mm._wrappedData for mm in multiplets])
+    # else:
+    #   apiMultipletList = apiParent.newMultipletList()
+
+    apiMultipletList = apiParent.newMultipletList(**dd)
 
     result = self._project._data2Obj.get(apiMultipletList)
 

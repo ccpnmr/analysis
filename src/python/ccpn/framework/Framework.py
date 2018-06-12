@@ -1041,7 +1041,7 @@ class Framework:
       (),
       ("Notes Table", self.showNotesEditor, [('shortcut', 'no')]),
       (),
-      ("Python Console", self.toggleConsole, [('shortcut', 'py'),
+      ("Python Console", self._toggleConsole, [('shortcut', '  '),
                                               ('checkable', True),
                                               ('checked', False)])
     ]
@@ -2191,7 +2191,7 @@ class Framework:
     #
     # return None
 
-  def toggleConsole(self):
+  def _toggleConsole(self):
     """
     Toggles whether python console is displayed at bottom of the main window.
     """
@@ -2199,10 +2199,6 @@ class Framework:
     #GWV should not be here; moved to GuiMainWindow
     self.ui.mainWindow.toggleConsole()
 
-    # from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
-    #
-    # mainWindow = self.ui.mainWindow
-    #
     # openList = [m for m in PythonConsoleModule.getInstances()]
     # # if 'Python Console' in mainWindow.moduleArea.findAll()[1]:
     # # if len(openList)>0:

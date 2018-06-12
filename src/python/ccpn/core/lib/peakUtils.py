@@ -113,6 +113,107 @@ def getPeakLinewidth(peak, dim):
     if lw:
       return float(lw)
 
+def _get1DPeaksPosAndHeightAsArray(peakList):
+  import numpy as np
+  positions = np.array([peak.position[0] for peak in peakList.peaks])
+  heights = np.array([peak.height for peak in peakList.peaks])
+  return [positions, heights]
+
+
+
+import sys
+from numpy import NaN, Inf, arange, isscalar, asarray, array
+
+
+def peakdet(y,x, delta):
+    """
+    Converted from MATLAB script at http://billauer.co.il/peakdet.html
+    % Eli Billauer, 3.4.05 (Explicitly not copyrighted).
+    % This function is released to the public domain; Any use is allowed.
+    """
+    # import time
+    #
+    # start = time.time()
+
+    maxtab = []
+    mintab = []
+    mn, mx = Inf, -Inf
+    mnpos, mxpos = NaN, NaN
+    lookformax = True
+
+    for i in arange(len(y)):
+        this = y[i]
+        if this > mx:
+            mx = this
+            mxpos = x[i]
+        if this < mn:
+            mn = this
+            mnpos = x[i]
+        if lookformax:
+            if abs(this) < mx - delta: #changed to abs for STDs test
+                maxtab.append((float(mxpos), float(mx)))
+                mn = this
+                mnpos = x[i]
+                lookformax = False
+        else:
+            if this > mn + delta:
+                mintab.append((float(mnpos), float(mn)))
+                mx = this
+                mxpos = x[i]
+                lookformax = True
+
+    return maxtab, mintab
+
+def _estimateDeltaPeakDetect(y,xPercent=10):
+
+  import numpy as np
+  deltas = y[1:] - y[:-1]
+  delta = np.std(np.absolute(deltas))
+  # just on the noisy part of spectrum
+  partialYpercent = (len(y)*xPercent)/100
+  partialY = y[:int(partialYpercent)]
+  partialDeltas = partialY[1:] - partialY[:-1]
+  partialDelta = np.std(np.absolute(partialDeltas))
+  diff =abs(partialDelta+delta)/2
+  return delta
+
+def _estimateDeltaPeakDetectSTD(y, xPercent=10):
+    '''
+    :param y: intensities of spectrum
+    :param xPercent: the percentage of the spectra points to use as training to calculate delta.
+    :return: a delta intesities of the required percentage of the spectra
+    '''
+
+    import numpy as np
+    # just on the noisy part of spectrum
+    partialYpercent = (len(y)*xPercent)/100
+    partialY = y[:int(partialYpercent)]
+    partialDeltas = partialY[1:] - partialY[:-1]
+    partialDelta = np.amax(np.absolute(partialDeltas))
+
+    return partialDelta
+
+def _pairIntersectionPoints(intersectionPoints):
+  """ Yield successive pair chunks from list of intersectionPoints """
+  for i in range(0, len(intersectionPoints), 2):
+    pair = intersectionPoints[i:i + 2]
+    if len(pair) == 2:
+      yield pair
+
+def _getIntersectionPoints(x, y, line):
+  '''
+  :param line: x points of line to intersect y points
+  :return: list of intersecting points
+  '''
+  z = y - line
+  dx = x[1:] - x[:-1]
+  cross = np.sign(z[:-1] * z[1:])
+
+  x_intersect = x[:-1] - dx / (z[1:] - z[:-1]) * z[:-1]
+  negatives = np.where(cross < 0)
+  points = x_intersect[negatives]
+
+  return points
 
 def _getAtomWeight(axisCode, atomWeights) -> float or int:
   '''

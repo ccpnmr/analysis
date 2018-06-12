@@ -39,6 +39,7 @@ from ccpn.ui._implementation.MultipletListView import  MultipletListView
 from ccpn.core.PeakList import  PeakList
 from ccpn.core.IntegralList import  IntegralList
 from ccpn.core.MultipletList import  MultipletList
+from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 
 class SpectrumToolBar(ToolBar):
 
@@ -147,9 +148,25 @@ class SpectrumToolBar(ToolBar):
     self._addSubMenusToContext(contextMenu, button)
 
     contextMenu.addSeparator()
+    contextMenu.addAction('Jump on SideBar', partial(self._jumpOnSideBar, button))
+    contextMenu.addAction('Properties...', partial(self._showSpectrumProperties, button))
     contextMenu.addAction('Remove Spectrum', partial(self._removeSpectrum, button))
     return contextMenu
 
+  def _jumpOnSideBar(self, button):
+    spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
+    if spectrum:
+      sideBar = self.widget.application.ui.mainWindow.sideBar
+      sideBar.selectPid(spectrum.pid)
+
+
+  def _showSpectrumProperties(self, button):
+    spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
+    mainWindow = self.widget.application.ui.mainWindow
+    if spectrum: #not sure why It needs parent = mainWindow. copied from SideBar
+      popup = SpectrumPropertiesPopup(parent=mainWindow, mainWindow=mainWindow, spectrum=spectrum)
+      popup.exec_()
+      popup.raise_()
 
   # old to be deleted
   # def _createContextMenuOld(self, button:QtWidgets.QToolButton):

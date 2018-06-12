@@ -28,12 +28,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 import sys
 import os
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.guiSettings import fixedWidthFont
 
 class TextEditor(QtWidgets.QTextEdit, Base):
+  editingFinished = QtCore.pyqtSignal()
+  receivedFocus = QtCore.pyqtSignal()
 
   def __init__(self, parent=None, filename=None, **kw):
     super(TextEditor, self).__init__(parent)
@@ -48,6 +51,48 @@ class TextEditor(QtWidgets.QTextEdit, Base):
     #   self.setText(fileData)
     #
     # self.show()
+    self._changed = False
+    self.setTabChangesFocus(True)
+    self.textChanged.connect(self._handle_text_changed)
+
+    self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+    self.customContextMenuRequested.connect(self.context_menu)
+
+
+
+  def context_menu(self):
+    a = self.createStandardContextMenu()
+    actions = a.actions()
+    edit = Action(a, text='Fonts', callback=self._setFont)
+    a.insertAction(actions[3],edit)
+
+
+    a.exec_(QtGui.QCursor.pos())
+
+  def _setFont(self):
+    font, ok = QtWidgets.QFontDialog.getFont(self.font(), self)
+    if ok:
+      # QApplication.setFont(font)
+      self.setFont(font)
+
+  def focusInEvent(self, event):
+    super(TextEditor, self).focusInEvent(event)
+    self.receivedFocus.emit()
+
+  def focusOutEvent(self, event):
+    if self._changed:
+      self.editingFinished.emit()
+    super(TextEditor, self).focusOutEvent(event)
+
+  def _handle_text_changed(self):
+    self._changed = True
+
+  def setTextChanged(self, state=True):
+    self._changed = state
+
+  def setHtml(self, html):
+    QtGui.TextEditor.setHtml(self, html)
+    self._changed = False
 
   def get(self):
     return self.toPlainText()
@@ -55,3 +100,27 @@ class TextEditor(QtWidgets.QTextEdit, Base):
   def set(self, value):
     self.setText(value)
 
+  def zoom(self, delta):
+    if delta < 0:
+      self.zoomOut(1)
+    elif delta > 0:
+      self.zoomIn(5)
+
+
+
+
+if __name__ == '__main__':
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from ccpn.ui.gui.widgets.Widget import Widget
+
+
+    app = TestApplication()
+
+
+    popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
+    widget = TextEditor(parent=popup, grid=(0,0))
+
+    popup.show()
+    popup.raise_()
+    app.start()

@@ -572,7 +572,7 @@ class PeakList(AbstractWrapperObject):
     return peaks
 
 
-  def peakFinder1D(self, ignoredRegions=[[20, 19]], negativePeaks = True):
+  def peakFinder1D(self, deltaFactor = 1.5, ignoredRegions=[[20, 19]], negativePeaks = True):
     from ccpn.core.lib.peakUtils import _estimateDeltaPeakDetect, _estimateDeltaPeakDetectSTD
     from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
     from scipy import signal
@@ -587,8 +587,8 @@ class PeakList(AbstractWrapperObject):
       x,y = spectrum.positions, spectrum.intensities
       masked = _filtered1DArray(numpy.array([x,y]), ignoredRegions)
       filteredX, filteredY = masked[0], masked[1]
-      delta = _estimateDeltaPeakDetectSTD(y, 2)
-      maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=delta)
+      delta = _estimateDeltaPeakDetectSTD(y)
+      maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=delta*deltaFactor)
       for position, height in maxValues:
         peak = self.newPeak(position=[position], height=height)
 

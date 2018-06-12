@@ -151,7 +151,6 @@ def peakdet(y,x, delta):
             mnpos = x[i]
         if lookformax:
             if abs(this) < mx - delta: #changed to abs for STDs test
-                print('this : {} . mx {} .  delta {}'.format(this, mx, delta))
                 maxtab.append((float(mxpos), float(mx)))
                 mn = this
                 mnpos = x[i]
@@ -162,8 +161,7 @@ def peakdet(y,x, delta):
                 mx = this
                 mxpos = x[i]
                 lookformax = True
-    # end = time.time()
-    # print('TIME = ',end - start)
+
     return maxtab, mintab
 
 def _estimateDeltaPeakDetect(y,xPercent=10):
@@ -177,13 +175,11 @@ def _estimateDeltaPeakDetect(y,xPercent=10):
   partialDeltas = partialY[1:] - partialY[:-1]
   partialDelta = np.std(np.absolute(partialDeltas))
   diff =abs(partialDelta+delta)/2
-  print('partialDelta: {}, fullDelta: {}, diff: {} '.format(partialDelta,delta, diff))
   return delta
 
-def _estimateDeltaPeakDetectSTD(y,factor=1.5, xPercent=10):
+def _estimateDeltaPeakDetectSTD(y, xPercent=10):
     '''
     :param y: intensities of spectrum
-    :param factor: an arbitrary number to multiply the final delta. Eg. 3 X delta
     :param xPercent: the percentage of the spectra points to use as training to calculate delta.
     :return: a delta intesities of the required percentage of the spectra
     '''
@@ -194,12 +190,8 @@ def _estimateDeltaPeakDetectSTD(y,factor=1.5, xPercent=10):
     partialY = y[:int(partialYpercent)]
     partialDeltas = partialY[1:] - partialY[:-1]
     partialDelta = np.amax(np.absolute(partialDeltas))
-    print('STD -- > partialDelta: {},'.format(partialDelta))
 
-    deltas = y[1:] - y[:-1]
-    delta = np.std(np.absolute(deltas))
-    print('STD -- > delta: {},'.format(delta))
-    return partialDelta*factor
+    return partialDelta
 
 def _pairIntersectionPoints(intersectionPoints):
   """ Yield successive pair chunks from list of intersectionPoints """

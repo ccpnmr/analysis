@@ -99,7 +99,7 @@ class GuiWindow():
     addShortCut("z, o", self, self.zoomOut, context=context)
     addShortCut("p, l", self, self.cyclePeakLabelling, context=context)
     addShortCut("p, s", self, self.cyclePeakSymbols, context=context)
-    addShortCut("Space, Space", self, self.toggleConsole, context=context)
+    # addShortCut("Space, Space", self, self.toggleConsole, context=context) # this is not needed here, already set on Menus!!
     addShortCut("CTRL+a", self, self.selectAllPeaks, context=context)
 
   def _setUserShortcuts(self, preferences=None, mainWindow=None):
@@ -621,16 +621,15 @@ class GuiWindow():
     mainWindow = self
 
     openList = [m for m in PythonConsoleModule.getInstances()]
-    # if 'Python Console' in mainWindow.moduleArea.findAll()[1]:
-    # if len(openList)>0:
+
     if mainWindow.pythonConsoleModule is not None:
-
         if mainWindow.pythonConsoleModule.isVisible():
-
           # TODO:ED causes a problem if the console is in a tempAreaWindow
           mainWindow.pythonConsoleModule.hide()
         else:
           mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
+    elif len(openList)>0:
+      mainWindow.pythonConsoleModule =  openList[0] #otherwise creates duplicates
 
     else:
       action = self._findMenuAction('View', 'Python Console')

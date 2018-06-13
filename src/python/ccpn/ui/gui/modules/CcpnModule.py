@@ -635,8 +635,11 @@ class CcpnModule(Dock, DropBase):
     """
     Close the module
     """
-    if self.closeFunc:
-      self.closeFunc()
+    try:
+      if self.closeFunc:
+        self.closeFunc()
+    except:
+      pass
 
     if ref(self) in self._instances:
       self._instances.remove(ref(self))

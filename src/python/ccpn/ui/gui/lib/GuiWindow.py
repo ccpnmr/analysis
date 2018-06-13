@@ -622,16 +622,24 @@ class GuiWindow():
 
     openList = [m for m in PythonConsoleModule.getInstances()]
 
-    if mainWindow.pythonConsoleModule is not None:
-        if mainWindow.pythonConsoleModule.isVisible():
-          # TODO:ED causes a problem if the console is in a tempAreaWindow
-          mainWindow.pythonConsoleModule.hide()
-        else:
-          mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
-    elif len(openList)>0:
-      mainWindow.pythonConsoleModule =  openList[0] #otherwise creates duplicates
+    try: # FIXME 'RuntimeError: wrapped C/C++ object of type PythonConsoleModule has been deleted'
+      if mainWindow.pythonConsoleModule is not None:
+          if mainWindow.pythonConsoleModule.isVisible():
+            # TODO:ED causes a problem if the console is in a tempAreaWindow
+            mainWindow.pythonConsoleModule.hide()
+          else:
+            mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
+      elif len(openList)>0:
+        mainWindow.pythonConsoleModule =  openList[0] #otherwise creates duplicates
 
-    else:
+      else:
+        action = self._findMenuAction('View', 'Python Console')
+        closeFunc = action.trigger if action else None
+        mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
+        mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
+
+    except Exception as e:
+      getLogger().debug('Error Opening PythonConsole. Created a new one', e)
       action = self._findMenuAction('View', 'Python Console')
       closeFunc = action.trigger if action else None
       mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)

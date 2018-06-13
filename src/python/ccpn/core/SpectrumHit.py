@@ -207,6 +207,23 @@ For this reason SpectrumHits cannot be renamed."""
     """get wrappedData (Nmr.SpectrumHit) for all SpectrumHit children of parent Spectrum"""
     return parent._wrappedData.sortedSpectrumHits()
 
+
+  # specific for 1d Screening
+
+  def _getTotalPeakHitCount(self):
+    ''' Total score calculated by sum of peak hits. Peaks are taken by the parent spectrumHit.
+        PeakLists where are contained the hits are and must be flagged as simulated. Default is taken the last '''
+    simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
+    pp = [p for p in simulatedPeakLists[-1].peaks if p is not None]
+    return len(pp)
+
+  def _getTotalScore(self):
+    ''' Total score calculated by sum of peak intensities. Peaks are taken by the parent spectrum hit.
+    PeakList where are contained the hits are and must be flagged as simulated. Default is taken the last'''
+    simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
+    heights = [p.height for p in simulatedPeakLists[-1].peaks if p.height is not None]
+    return sum(heights)
+
 # Connections to parents:
 def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
                      pseudoDimensionNumber:int=0, pseudoDimension:PseudoDimension=None,

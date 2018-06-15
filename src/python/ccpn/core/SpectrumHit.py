@@ -224,6 +224,20 @@ For this reason SpectrumHits cannot be renamed."""
     heights = [p.height for p in simulatedPeakLists[-1].peaks if p.height is not None]
     return sum(heights)
 
+  def _getMatchedReferenceSpectra(self):
+    ''''''
+    simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
+    annotations = [p.annotation for p in simulatedPeakLists[-1].peaks if p.annotation is not None]
+    return list(set(annotations))
+
+  def _getLinkedReferenceSpectra(self):
+    ''''''
+    simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
+    peaks = [p._linkedPeak for p in simulatedPeakLists[-1].peaks if p._linkedPeak is not None]
+    spectra = [p.peakList.spectrum for p in peaks]
+    return list(set(spectra))
+
+
 # Connections to parents:
 def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
                      pseudoDimensionNumber:int=0, pseudoDimension:PseudoDimension=None,

@@ -586,8 +586,11 @@ class PeakList(AbstractWrapperObject):
       x,y = spectrum.positions, spectrum.intensities
       masked = _filtered1DArray(numpy.array([x,y]), ignoredRegions)
       filteredX, filteredY = masked[0], masked[1]
+      SNR, noiseThreshold = _estimateNoiseLevel1D(filteredY)
+      print('SNR: {}, noiseThreshold: {}'.format(SNR, noiseThreshold))
       delta = _estimateDeltaPeakDetectSTD(y)
-      maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=delta*deltaFactor)
+      # maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=delta*deltaFactor)
+      maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=noiseThreshold/deltaFactor)
       for position, height in maxValues:
         peak = self.newPeak(position=[position], height=height)
 

@@ -214,29 +214,31 @@ For this reason SpectrumHits cannot be renamed."""
     ''' Total score calculated by sum of peak hits. Peaks are taken by the parent spectrumHit.
         PeakLists where are contained the hits are and must be flagged as simulated. Default is taken the last '''
     simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
-    pp = [p for p in simulatedPeakLists[-1].peaks if p is not None]
-    return len(pp)
+    if len(simulatedPeakLists) > 0:
+      pp = [p for p in simulatedPeakLists[-1].peaks if p is not None]
+      return len(pp)
+    return 0
 
   def _getTotalScore(self):
     ''' Total score calculated by sum of peak intensities. Peaks are taken by the parent spectrum hit.
     PeakList where are contained the hits are and must be flagged as simulated. Default is taken the last'''
     simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
-    heights = [p.height for p in simulatedPeakLists[-1].peaks if p.height is not None]
-    return sum(heights)
+    if len(simulatedPeakLists) > 0:
+      heights = [p.height for p in simulatedPeakLists[-1].peaks if p.height is not None]
+      return sum(heights)
+    return None
 
-  def _getMatchedReferenceSpectra(self):
-    ''''''
-    simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
-    annotations = [p.annotation for p in simulatedPeakLists[-1].peaks if p.annotation is not None]
-    return list(set(annotations))
+
 
   def _getLinkedReferenceSpectra(self):
-    ''''''
+    '''Return reference spectra identified as hit in a particular mixture. The mixture is the spectrumHit'''
+    linkedSpectra = []
     simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
-    peaks = [p._linkedPeak for p in simulatedPeakLists[-1].peaks if p._linkedPeak is not None]
-    spectra = [p.peakList.spectrum for p in peaks]
-    return list(set(spectra))
-
+    if len(simulatedPeakLists)>0:
+        peaks = [p._linkedPeak for p in simulatedPeakLists[-1].peaks if p._linkedPeak is not None]
+        spectra = [p.peakList.spectrum for p in peaks]
+        linkedSpectra =  list(set(spectra))
+    return linkedSpectra
 
 # Connections to parents:
 def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,

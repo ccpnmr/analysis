@@ -36,6 +36,11 @@ from ccpn.core.lib import Pid
 from ccpn.util import Constants
 
 
+#
+SpectrumHitPeakList = 'SpectrumHitPeakList'
+
+
+
 class SpectrumHit(AbstractWrapperObject):
   """Used in screening and metabolomics implementations to describe
 a 'hit', i.e. that a Substance has been found to be present (metabolomics) or active (screening) in a given
@@ -43,6 +48,9 @@ spectrum.
 
 The Substance referred to is defined by the SubsanceName attribute, which is part of the ID.
 For this reason SpectrumHits cannot be renamed."""
+
+  # A spectrumHit will provide extra information for screening 1D. These are stored in _ccpnInternal as dataFrame
+
 
   #: Short class name, for PID.
   shortClassName = 'SH'
@@ -176,7 +184,7 @@ For this reason SpectrumHits cannot be renamed."""
 
   @property
   def concentrationUnit(self) -> str:
-    """Unit of SpectrumHit.concentration, one of: %s """ % Constants.concentrationUnits
+    """Unit of SpectrumHit.concentration, one of: %s% Constants.concentrationUnits """
 
     result = self._wrappedData.concentrationUnit
     if result not in Constants.concentrationUnits:
@@ -213,32 +221,86 @@ For this reason SpectrumHits cannot be renamed."""
   def _getTotalPeakHitCount(self):
     ''' Total score calculated by sum of peak hits. Peaks are taken by the parent spectrumHit.
         PeakLists where are contained the hits are and must be flagged as simulated. Default is taken the last '''
-    simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
-    if len(simulatedPeakLists) > 0:
-      pp = [p for p in simulatedPeakLists[-1].peaks if p is not None]
-      return len(pp)
-    return 0
+    pp = self._getPeakHits()
+    return len(pp)
+
 
   def _getTotalScore(self):
     ''' Total score calculated by sum of peak intensities. Peaks are taken by the parent spectrum hit.
     PeakList where are contained the hits are and must be flagged as simulated. Default is taken the last'''
-    simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
-    if len(simulatedPeakLists) > 0:
-      heights = [p.height for p in simulatedPeakLists[-1].peaks if p.height is not None]
+    pp = self._getPeakHits()
+    if len(pp) == 0:
+        return 0
+    score = self._scoreByIntesities(pp)
+    return score
+
+  def _getPeakHits(self):
+      ''' get the peaks marked as peakHits'''
+      simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated and pl.title == SpectrumHitPeakList]
+      if len(simulatedPeakLists) > 0:
+          pp = [p for p in simulatedPeakLists[-1].peaks if p is not None]
+          return pp
+      else:
+          return []
+
+  def _getReferencePeakHits(self, referencePeakList):
+      peakHits = self._getPeakHits()
+      referencePeaks = [p for p in referencePeakList.peaks]
+      referencePeakHits = []
+      for p in peakHits:
+          for linkedPeak in p._linkedPeaks:
+              if linkedPeak in referencePeaks:
+                  referencePeakHits.append(p)
+      return referencePeakHits
+
+  def _scoreByIntesities(self, peaks):
+      heights = [p.height for p in peaks if p.height is not None]
       return sum(heights)
-    return None
+
+  def _getSingleScore(self, referencePeakList):
+      ''' calculate as Total score but for the single reference spectrum'''
+      peakHits = self._getReferencePeakHits(referencePeakList)
+      score = self._scoreByIntesities(peakHits)
+      return score
+
+  def _getSample(self):
+      '''
+
+      :return: sample of the spectrumHit if any
+      '''
+      return self._parent.sample
+
+  def _getReferenceGrade(self, referenceSpectrum):
+      '''
+
+      :return:int  the hit grade based on  how many experiment type the reference has appeared to be a hit.
+      EG. STD only -- Grade:1
+      EG. STD and Wlogsy -- Grade:2 etc
+      '''
+
+      experimentTypes = []
+      spectrumHits = referenceSpectrum.spectrumHits
+      for sh in spectrumHits:
+          experimentTypes.append(sh._parent.experimentType)
+      grade = len(set(experimentTypes))
+      return grade
 
 
-
-  def _getLinkedReferenceSpectra(self):
+  def _getReferenceHitsSpectra(self):
     '''Return reference spectra identified as hit in a particular mixture. The mixture is the spectrumHit'''
-    linkedSpectra = []
-    simulatedPeakLists = [pl for pl in self._parent.peakLists if pl.isSimulated]
-    if len(simulatedPeakLists)>0:
-        peaks = [p._linkedPeak for p in simulatedPeakLists[-1].peaks if p._linkedPeak is not None]
-        spectra = [p.peakList.spectrum for p in peaks]
-        linkedSpectra =  list(set(spectra))
+
+    peaks = self._getPeakHits()
+    spectra = [p.peakList.spectrum for p in peaks]
+    linkedSpectra =  list(set(spectra))
     return linkedSpectra
+
+  def _getPeakHits(self):
+    '''
+
+    :return: peak which are considered hits. Peaks belong to the parent spectrum
+
+    '''
+
 
 # Connections to parents:
 def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,

@@ -288,7 +288,7 @@ class ExcelReader(object):
 
               else:                                        ### needs to find the path from the excel file:
                 self.directoryPath = str(pathlib.Path(self.excelPath).parent)
-                filePath = self.directoryPath+'/'+value
+                filePath = self.directoryPath+'/'+str(value)
                 if os.path.exists(filePath):               ### is a folder, e.g Bruker type. The project can handle.
                   self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
 
@@ -324,7 +324,8 @@ class ExcelReader(object):
           try:
             data[0].experimentType = dct[EXP_TYPE]
           except Exception as e:
-            _debug3(getLogger(), msg=(e, data[0], dct[EXP_TYPE]))
+            print(e, dct)
+            # _debug3(getLogger(), msg=(e, data[0], dct[EXP_TYPE]))
 
   ######################################################################################################################
   ######################              ADD SPECTRUM TO RELATIVE OBJECTS              ####################################

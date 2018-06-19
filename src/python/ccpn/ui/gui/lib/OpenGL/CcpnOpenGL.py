@@ -963,6 +963,42 @@ class CcpnGLWidget(QOpenGLWidget):
       return True
     return super(CcpnGLWidget, self).eventFilter(obj, event)
 
+
+  def _singleKeyAction(self, event):
+    """Implements Arrows up,down, left, right to pan the spectrum """
+    movePercent = 20 # percentage of the view to set as single step
+
+    if type(event) == QtGui.QKeyEvent:
+      moveFactor = movePercent / 100.0
+      dx = (self.axisR - self.axisL) / 2.0
+      dy = (self.axisT - self.axisB) / 2.0
+
+      key = event.key()
+
+      if key == QtCore.Qt.Key_Left:
+        self.axisL -= moveFactor * dx
+        self.axisR -= moveFactor * dx
+
+      elif key == QtCore.Qt.Key_Up:
+        self.axisT += moveFactor * dy
+        self.axisB += moveFactor * dy
+        self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                                           axisB=self.axisB, axisT=self.axisT,
+                                           axisL=self.axisL, axisR=self.axisR)
+      elif key == QtCore.Qt.Key_Right:
+        self.axisL += moveFactor * dx
+        self.axisR += moveFactor * dx
+
+      elif key == QtCore.Qt.Key_Down:
+        self.axisT -= moveFactor * dy
+        self.axisB -= moveFactor * dy
+        self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                                           axisB=self.axisB, axisT=self.axisT,
+                                           axisL=self.axisL, axisR=self.axisR)
+      self._rescaleAllAxes()
+
+
+
   def initialiseAxes(self, strip=None):
     """
     setup the correct axis range and padding
@@ -1399,6 +1435,9 @@ class CcpnGLWidget(QOpenGLWidget):
   def keyPressEvent(self, event: QtGui.QKeyEvent):
     self._key = event.key()
     self._checkKeys(event)
+    self._singleKeyAction(event)
+
+
 
   def _clearKeys(self):
     self._key = ''

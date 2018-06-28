@@ -348,12 +348,15 @@ def _newIntegral(self:IntegralList,
 
   self._startCommandEchoBlock('newIntegral', values=locals(), defaults=defaults,
                               parName='newIntegral')
-
+  # FIXME
+  if not constraintWeight: del dd['constraintWeight']
+  if not offset: del dd['offset']
   self._project.blankNotification() # delay notifiers till peak is fully ready
   try:
     apiParent = self._apiIntegralList
     # apiIntegral = apiParent.newIntegral(volume=value, volumeError=valueError, figOfMerit=figureOfMerit,
     #                             offset=bias,annotation=annotation, details=comment)
+
     apiIntegral = apiParent.newIntegral(**dd)
 
     result = self._project._data2Obj.get(apiIntegral)

@@ -212,7 +212,7 @@ class GuiWindow():
                     il.setVisible(True)
 
               for integralList in validIntegralLists:
-                integral = integralList.newIntegral(value=None, limits=[limits, ])
+                integral = integralList.newIntegral(limits=[limits, ])
                 self.current.integral = integral
                 if peak:
                   integral.peak = peak

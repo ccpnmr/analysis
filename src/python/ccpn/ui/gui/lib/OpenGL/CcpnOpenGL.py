@@ -994,7 +994,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisB -= moveFactor * dy
         self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
                                            axisB=self.axisB, axisT=self.axisT,
-                                           axisL=self.axisL, axisR=self.axisR)
+                                        axisL=self.axisL, axisR=self.axisR)
+      elif key == QtCore.Qt.Key_Plus:
+        self.zoomIn()
+      elif key == QtCore.Qt.Key_Minus:
+        self.zoomOut()
+
       self._rescaleAllAxes()
 
 

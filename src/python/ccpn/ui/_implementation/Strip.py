@@ -925,7 +925,7 @@ class Strip(AbstractWrapperObject):
           else:
             # 1D's
             # NBNB This is a change - valuea are now rounded to three decimal places. RHF April 2017
-            newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]))
+            newPeaks = peakList.pickPeaks1d(selectedRegion[0], sorted(selectedRegion[1]), size=minDropfactor*100)
             # y0 = startPosition.y()
             # y1 = endPosition.y()
             # y0, y1 = min(y0, y1), max(y0, y1)

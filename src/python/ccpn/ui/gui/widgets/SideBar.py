@@ -41,6 +41,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Note import Note
+from ccpn.core.Sample import Sample
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.StructureEnsemble import StructureEnsemble
@@ -180,6 +181,22 @@ def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None
     if spectrumGroup.spectra[0].dimensionCount == 1:
       mainWindow.application.current.strip.plotWidget.autoRange()
 
+def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
+  """
+  Add spectra linked to sample and sampleComponent. Particularly used for screening
+  """
+  if len(sample.spectra) > 0:
+    spectrumDisplay = mainWindow.createSpectrumDisplay(sample.spectra[0])
+    mainWindow.moduleArea.addModule(spectrumDisplay, position=position, relativeTo=relativeTo)
+    for spectrum in sample.spectra:
+      spectrumDisplay.displaySpectrum(spectrum)
+    for sampleComponent in sample.sampleComponents:
+      if sampleComponent.substance is not None:
+        for spectrum in sampleComponent.substance.referenceSpectra:
+          spectrumDisplay.displaySpectrum(spectrum)
+    mainWindow.application.current.strip = spectrumDisplay.strips[0]
+    if all(sample.spectra[0].dimensionCount) == 1:
+      mainWindow.application.current.strip.plotWidget.autoRange()
 
 def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):
   application = mainWindow.application
@@ -219,6 +236,7 @@ OpenObjAction = {
                   MultipletList:_openMultipletList,
                   NmrChain: _openNmrResidueTable,
                   SpectrumGroup:_openSpectrumGroup,
+                  Sample:_openSampleSpectra,
                   ChemicalShiftList:_openChemicalShiftList,
                   RestraintList: _openRestraintList,
                   Note:_openNote,

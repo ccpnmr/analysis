@@ -34,6 +34,8 @@ from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.Sample import Sample
+
 #from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
@@ -315,6 +317,10 @@ class GuiSpectrumDisplay(CcpnModule):
         with suspendSideBarNotifications(self.project):
           self._handleSpectrumGroup(obj)
         success = True
+      elif obj is not None and isinstance(obj, Sample):
+        with suspendSideBarNotifications(self.project):
+          self._handleSample(obj)
+        success = True
       elif obj is not None and isinstance(obj, NmrAtom):
         nmrAtoms.append(obj)
 
@@ -364,6 +370,20 @@ class GuiSpectrumDisplay(CcpnModule):
       self.displaySpectrum(spectrum)
     if self.current.strip not in self.strips:
       self.current.strip = self.strips[0]
+
+  def _handleSample(self, sample):
+    """
+    Add spectra linked to sample and sampleComponent. Used for screening
+    """
+    for spectrum in sample.spectra:
+      self.displaySpectrum(spectrum)
+    for sampleComponent in sample.sampleComponents:
+      if sampleComponent.substance is not None:
+        for spectrum in sampleComponent.substance.referenceSpectra:
+          self.displaySpectrum(spectrum)
+    if self.current.strip not in self.strips:
+      self.current.strip = self.strips[0]
+
 
   def _handleNmrChains(self, nmrChains):
     for chain in nmrChains:

@@ -54,7 +54,7 @@ DefaultNoiseThreshold = [0,0]
 def _getNoiseThreshold(spectrum, factor=5):
   if spectrum is not None:
     x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
-    return _oldEstimateNoiseLevel1D(x, y, factor=factor)
+    return _oldEstimateNoiseLevel1D(y, factor=factor)
 
 
 ########################################################################################################################

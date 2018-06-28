@@ -46,11 +46,14 @@ from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 
 
+
+
 def _estimateNoiseLevel1D(y):
   '''
+  # TODO split in two functions . Clean up line 62:  e =
   Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
   only noise is present. To increase the threshold value: increase the factor.
-  return:  float of estimated noise threshold
+  return:  float of estimated noise threshold and Signal to Noise Ratio
   '''
   import numpy as np
   import math
@@ -588,7 +591,7 @@ class PeakList(AbstractWrapperObject):
       filteredX, filteredY = masked[0], masked[1]
       SNR, noiseThreshold = _estimateNoiseLevel1D(filteredY)
       print('SNR: {}, noiseThreshold: {}'.format(SNR, noiseThreshold))
-      delta = _estimateDeltaPeakDetectSTD(y)
+      # delta = _estimateDeltaPeakDetectSTD(y)
       # maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=delta*deltaFactor)
       maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=noiseThreshold/deltaFactor)
       for position, height in maxValues:

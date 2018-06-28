@@ -40,6 +40,22 @@ from ccpn.util import Constants
 SpectrumHitPeakList = 'SpectrumHitPeakList'
 
 
+def _getReferenceLevel(project, referenceSpectrum):
+    '''
+
+    :return:int  the hit level based on  how many experiment type the reference has appeared to be a hit.
+    EG. STD only -- Grade:1
+    EG. STD and Wlogsy -- Grade:2 etc
+    '''
+    experimentTypes = []
+    levelHit = 1
+    for spectrumHit in project.spectrumHits:
+        linkedReferenceSpectra = spectrumHit._linkedReferenceSpectra
+        if referenceSpectrum in linkedReferenceSpectra:
+            experimentTypes.append(spectrumHit._parent.experimentType)
+            levelHit = len(set(experimentTypes))
+
+    return levelHit
 
 class SpectrumHit(AbstractWrapperObject):
   """Used in screening and metabolomics implementations to describe
@@ -69,7 +85,7 @@ For this reason SpectrumHits cannot be renamed."""
   _apiClassQualifiedName = ApiSpectrumHit._metaclass.qualifiedName()
 
   # link To a reference Spectrum #LM needed for screening hit analysis
-  _referenceSpectrum = None
+  _linkedReferenceSpectra = []
 
   # CCPN properties
   @property
@@ -98,7 +114,7 @@ For this reason SpectrumHits cannot be renamed."""
   spectrum = _parent
 
   @property
-  def substanceName(self) -> int:
+  def substanceName(self) -> str:
     """Name of hit substance"""
     return self._wrappedData.substanceName
 
@@ -263,6 +279,12 @@ For this reason SpectrumHits cannot be renamed."""
       score = self._scoreByIntesities(peakHits)
       return score
 
+  def _getSinglePeakCount(self, referencePeakList):
+      ''' calculate as Total score but for the single reference spectrum'''
+      peakHits = self._getReferencePeakHits(referencePeakList)
+      c = len(peakHits)
+      return c
+
   def _getSample(self):
       '''
 
@@ -270,36 +292,46 @@ For this reason SpectrumHits cannot be renamed."""
       '''
       return self._parent.sample
 
-  def _getReferenceGrade(self, referenceSpectrum):
+  def _getExperimentType(self):
       '''
 
-      :return:int  the hit grade based on  how many experiment type the reference has appeared to be a hit.
-      EG. STD only -- Grade:1
-      EG. STD and Wlogsy -- Grade:2 etc
+      :return: experimentType of the spectrumHit parent if any
       '''
+      return self._parent.experimentType
 
-      experimentTypes = []
-      spectrumHits = referenceSpectrum.spectrumHits
-      for sh in spectrumHits:
-          experimentTypes.append(sh._parent.experimentType)
-      grade = len(set(experimentTypes))
-      return grade
+
 
 
   def _getReferenceHitsSpectra(self):
     '''Return reference spectra identified as hit in a particular mixture. The mixture is the spectrumHit'''
 
-    peaks = self._getPeakHits()
-    spectra = [p.peakList.spectrum for p in peaks]
+    peaks = self._getPeakHits() # each peak hit of the spectrum. Each peak is linked to a peak belonging to the reference spectrum
+    linkedPeaks = [p._linkedPeaks for p in peaks]
+    spectra = [p.peakList.spectrum for lps in linkedPeaks for p in lps]
     linkedSpectra =  list(set(spectra))
+    self._linkedReferenceSpectra = linkedSpectra
     return linkedSpectra
 
-  def _getPeakHits(self):
-    '''
+  def _getReferencePeakList(self, referenceSpectrum):
+      '''
+      :return: peakList of the reference
+      '''
 
-    :return: peak which are considered hits. Peaks belong to the parent spectrum
+      peaks = self._getPeakHits()
+      peakLists = []
+      linkedPeaks = [p._linkedPeaks for p in peaks]
+      for lps in linkedPeaks:
+          for lp in lps:
+              if lp is not None:
+                peakLists.append(lp.peakList)
+      peakLists = list(set(peakLists))
+      referencePeakList = [pl for pl in peakLists if pl in referenceSpectrum.peakLists]
+      if len(referencePeakList) == 1:
+        return  referencePeakList[0]
+      else:
+          print('ADD Warning')
 
-    '''
+
 
 
 # Connections to parents:

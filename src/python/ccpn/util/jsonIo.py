@@ -95,7 +95,7 @@ class _CcpnMultiEncoder(json.JSONEncoder):
 
     elif isinstance(obj, numpy.ndarray):
       typ = 'numpy.ndarray'
-      data = obj.toList()
+      data = obj.tolist()
 
     else:
       try:

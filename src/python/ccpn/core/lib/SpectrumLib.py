@@ -87,6 +87,11 @@ def _calibrateY1D(spectrum, currentPosition, newPosition):
   shift = newPosition - currentPosition
   spectrum.intensities = spectrum.intensities+shift
 
+def _set1DRawDataFromCcpnInternal(spectrum):
+     if not spectrum._ccpnInternalData['positions'] and not spectrum._ccpnInternalData['intensities']:
+         return
+     spectrum.positions = np.array(spectrum._ccpnInternalData['positions'])
+     spectrum.intensities = np.array(spectrum._ccpnInternalData['intensities'])
 
 
 def _negLogLikelihood(deltas, queryPeakPositions, kde):

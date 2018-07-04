@@ -264,6 +264,7 @@ QuickTable::item::selected {
     # set internal flags
     self._mousePressed = False
     self._tableData = {}
+    self._rawData = None # this is set when called setData()
     self._tableNotifier = None
     self._rowNotifier = None
     self._cellNotifiers = []
@@ -435,13 +436,14 @@ QuickTable::item::selected {
     if selection:
       row = itemSelection.row()
       col = itemSelection.column()
-      if self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
+      if self._dataFrameObject:
+        if self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
 
-        item = self.item(row, col)
-        item.setEditable(True)
-        # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
-        # item.textChanged.connect(partial(self._changeMe, item))
-        self.editItem(item)
+          item = self.item(row, col)
+          item.setEditable(True)
+          # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
+          # item.textChanged.connect(partial(self._changeMe, item))
+          self.editItem(item)
 
   def _doubleClickCallback(self, itemSelection):
     # TODO:ED generate a callback dict for the selected item
@@ -482,12 +484,16 @@ QuickTable::item::selected {
 
         if self._actionCallback and self._dataFrameObject and not self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback
           self._actionCallback(data)
+
         elif self._dataFrameObject and self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback:
           item = self.item(row, col)
           item.setEditable(True)
           # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
           # item.textChanged.connect(partial(self._changeMe, item))
           self.editItem(item)         # enter the editing mode
+        else:
+          if self._actionCallback:
+            self._actionCallback(data)
 
   @_defersort
   def setRow(self, row, vals):
@@ -805,9 +811,16 @@ QuickTable::item::selected {
     * list-of-lists  [[1,2,3], [4,5,6]]
     * dict-of-lists  {'x': [1,2,3], 'y': [4,5,6]}
     * list-of-dicts  [{'x': 1, 'y': 4}, {'x': 2, 'y': 5}, ...]
+    * Pandas Dataframes
+
     """
+    if isinstance(data, pd.DataFrame):
+      dataFrame = data.transpose()
+      data = dataFrame.to_dict(into=OrderedDict)
+
     self.clear()
     self.appendData(data)
+    self._rawData = data
 
   @contextmanager
   def _quickTableUpdate(self, dataFrameObject):
@@ -1000,12 +1013,21 @@ QuickTable::item::selected {
         getLogger().warning('Format file not supported')
 
   def dataFrameToExcel(self, dataFrameObject, path, sheet_name='Table'):
-    visColumns = dataFrameObject.visibleColumnHeadings
-    # writer = pd.ExcelWriter(path, engine='xlsxwriter')
-    #
-    # dataFrameExcel = dataFrameObject.dataFrame.apply(pd.to_numeric, errors='ignore')
-    # dataFrameExcel.to_excel(writer, sheet_name=sheet_name, index=False, columns=visColumns)
-    dataFrameObject.dataFrame.to_excel(path, sheet_name=sheet_name, index=False, columns=visColumns)
+    if dataFrameObject is not None:
+      visColumns = dataFrameObject.visibleColumnHeadings
+      # writer = pd.ExcelWriter(path, engine='xlsxwriter')
+      #
+      # dataFrameExcel = dataFrameObject.dataFrame.apply(pd.to_numeric, errors='ignore')
+      # dataFrameExcel.to_excel(writer, sheet_name=sheet_name, index=False, columns=visColumns)
+      dataFrameObject.dataFrame.to_excel(path, sheet_name=sheet_name, index=False, columns=visColumns)
+    else:
+      if self._rawData is not None:
+        try:
+          df = pd.DataFrame(self._rawData).transpose()
+          df.to_excel(path, sheet_name=sheet_name)
+        except Exception as e:
+          getLogger().warning(e)
+
 
   def dataFrameToCsv(self, dataFrameObject, path):
     dataFrameObject.dataFrame.to_csv(path)
@@ -1813,8 +1835,6 @@ if __name__ == '__main__':
   # table.item(0, 0).setCheckState(QtCore.Qt.Unchecked)
   # table.item(0,0).setFormat(float(table.item(0,0).format))
   # print(table.item(0,0)._format)
-
-  print('AA',table.horizontalHeaderItem(1).text())
   table.horizontalHeaderItem(1).setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
   table.horizontalHeaderItem(1).setCheckState(QtCore.Qt.Checked)
 

@@ -32,9 +32,9 @@ BG_COLOR = QtGui.QColor('#E0E0E0')
 
 # TODO:ED add some documentation here
 class ColumnClass:
-  def __init__(self, columnList=None):
+  def __init__(self, columnList=[None]*4):
     self._columns = [Column(colName, func, tipText=tipText, setEditValue=editValue) for
-                     colName, func, tipText, editValue in columnList]
+                     colName, func, tipText, editValue in columnList]    # FIXME . this mechanism is very fragile
 
   def addColumn(self, newColumn):
     columnToAdd = [Column(colName, func, tipText=tipText, setEditValue=editValue) for

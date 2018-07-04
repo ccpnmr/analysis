@@ -51,7 +51,7 @@ class GuiWindow():
     self.application = application
     self.current = self.application.current
 
-    self.pythonConsoleModule = None # Python console; initialised upon first 'toggle'
+    self.pythonConsoleModule = None # Python console module; defined upon first time Class initialisation. Either by toggleConsole or Restoring layouts
 
   def _setShortcuts(self):
     """
@@ -614,37 +614,24 @@ class GuiWindow():
 
   def toggleConsole(self):
     """
-    Toggles whether python console is displayed at bottom of the main window.
+
+    - Opens a new pythonConsole module if none available.
+    - Closes the  pythonConsole module if already one available.
+
     """
+    # NB. The  pythonConsole module is only a container for the IpythonConsole Widget,
+    #     which is always present in the application and never gets destroyed until the project is closed.
+    #     The pythonConsole module instead is created and closed all the time this function is called.
+    #     Destroying the module has been the most stable way of handle this toggling feature. Hiding,moving or any other
+    #     kind, has created many bugs in the past, including misbehaviour on tempAreas, containers QT errors etc.
+
     from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
 
-    mainWindow = self
+    if self.pythonConsoleModule is None: # No pythonConsole module detected, so create one.
+      self.moduleArea.addModule(PythonConsoleModule(self), 'bottom')
 
-    openList = [m for m in PythonConsoleModule.getInstances()]
-
-    try: # FIXME 'RuntimeError: wrapped C/C++ object of type PythonConsoleModule has been deleted'
-      if mainWindow.pythonConsoleModule is not None:
-          if mainWindow.pythonConsoleModule.isVisible():
-            # TODO:ED causes a problem if the console is in a tempAreaWindow
-            mainWindow.pythonConsoleModule.hide()
-          else:
-            mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
-      elif len(openList)>0:
-        mainWindow.pythonConsoleModule =  openList[0] #otherwise creates duplicates
-
-      else:
-        action = self._findMenuAction('View', 'Python Console')
-        closeFunc = action.trigger if action else None
-        mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
-        mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
-
-    except Exception as e:
-      getLogger().debug('Error Opening PythonConsole. Created a new one', e)
-      action = self._findMenuAction('View', 'Python Console')
-      closeFunc = action.trigger if action else None
-      mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
-      mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
-
+    else: # just close it!
+      self.pythonConsoleModule._closeModule()
 
 
 

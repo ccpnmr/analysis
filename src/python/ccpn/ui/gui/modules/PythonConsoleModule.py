@@ -44,11 +44,21 @@ class PythonConsoleModule(CcpnModule):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name, closeFunc=closeFunc)
 
     self.mainWindow = mainWindow
+    self.application = mainWindow.application
     self.pythonConsoleWidget = self.mainWindow.pythonConsole
 
     self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 
     self.pythonConsoleWidget._startChannels()
+    self.mainWindow.pythonConsoleModule = self
 
+  def _setMenuItemChecked(self):
+    '''Sets as checked in general menus when opening for the first time'''
+    action = self.application._findMenuAction('View', 'Python Console')
+    action.setChecked(True)
+
+  def _closeModule(self):
+    self.mainWindow.pythonConsoleModule = None
+    super(PythonConsoleModule, self)._closeModule()
 
 

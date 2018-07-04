@@ -2240,26 +2240,8 @@ class Framework:
     Toggles whether python console is displayed at bottom of the main window.
     """
 
-    #GWV should not be here; moved to GuiMainWindow
     self.ui.mainWindow.toggleConsole()
 
-    # openList = [m for m in PythonConsoleModule.getInstances()]
-    # # if 'Python Console' in mainWindow.moduleArea.findAll()[1]:
-    # # if len(openList)>0:
-    # if mainWindow.pythonConsoleModule is not None:
-    #
-    #     if mainWindow.pythonConsoleModule.isVisible():
-    #
-    #       # TODO:ED causes a problem if the console is in a tempAreaWindow
-    #       mainWindow.pythonConsoleModule.hide()
-    #     else:
-    #       mainWindow.moduleArea.moveModule(mainWindow.pythonConsoleModule, 'bottom', None)
-    #
-    # else:
-    #   action = self._findMenuAction('View', 'Python Console')
-    #   closeFunc = action.trigger if action else None
-    #   mainWindow.pythonConsoleModule = PythonConsoleModule(mainWindow, closeFunc=closeFunc)
-    #   mainWindow.moduleArea.addModule(mainWindow.pythonConsoleModule, 'bottom')
 
   def showChemicalShiftMapping(self):
     from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping

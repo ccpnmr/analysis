@@ -45,48 +45,31 @@ class SetupNmrResiduesPopup(CcpnDialog):
     self.project = self.mainWindow.project
 
     label1a = Label(self, text="Source PeakList ", grid=(0, 0))
-    # Fixme , needs notifier for this pulldown. 
     self.peakListPulldown = PulldownList(self, grid=(0, 1))
-    self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists
-      if peakList.spectrum.experimentType == 'H[N]' or peakList.spectrum.experimentType == 'H[N[CO]]'])
+    self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists])
     label1a = Label(self, text="NmrChain ", grid=(0, 2))
     self.nmrChainPulldown = PulldownList(self, grid=(0, 3))
     self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
-    newWidget = QtWidgets.QWidget()
-    newWidget.setLayout(QtWidgets.QGridLayout())
-    self.assignmentCheckBox = CheckBox(newWidget, checked=True)
-    assignmentLabel = Label(newWidget, "Keep existing assignments")
-    newWidget.layout().addWidget(self.assignmentCheckBox, 0, 0)
-    newWidget.layout().addWidget(assignmentLabel, 0, 1)
-    self.layout().addWidget(newWidget, 1, 0, 1, 2)
-
+    self.assignmentCheckBox = CheckBox(self,text= "Keep existing assignments", checked=False, grid=(1,0))
+    self.assignmentCheckBox.setEnabled(False) #This option is broken.
     self.buttonBox = ButtonList(self, grid=(1, 3), texts=['Cancel', 'Ok'],
                                 callbacks=[self.reject, self._setupNmrResidues])
 
 
   def _setupNmrResidues(self):
-    # FIXME This is broken! remove all hardcoded str
     self.project._startCommandEchoBlock('_setupNmrResidues')
     try:
       peakList = self.project.getByPid(self.peakListPulldown.currentText())
       nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
-      keepAssignments = self.assignmentCheckBox.checkState()
-      isotopeCodes = peakList.spectrum.isotopeCodes
-      axisCodes = peakList.spectrum.axisCodes
-      if (isotopeCodes.count('1H') == 1 and isotopeCodes.count('15N') == 1):
-        ndim = isotopeCodes.index('15N')
-        hdim = isotopeCodes.index('1H')
-        for peak in peakList.peaks:
-          if not keepAssignments or not any(len(dimensionNmrAtoms) > 0 for dimensionNmrAtoms in peak.dimensionNmrAtoms):
-            r = nmrChain.newNmrResidue()
-            a = r.fetchNmrAtom(name='N')
-            a2 = r.fetchNmrAtom(name='H')
-            peak.assignDimension(axisCode=axisCodes[ndim], value=a)
-            peak.assignDimension(axisCode=axisCodes[hdim], value=a2)
-      else:
-        self.project._logger.warning('''Incompatible peak list selected. Only experiments with one 1H dimension
-        and one 15N dimension can be used.''')
-        return
+      keepAssignments = self.assignmentCheckBox.checkState() #This option is broken.
+
+      for peak in peakList.peaks:
+        for i, axisCode in enumerate(peak.axisCodes):
+        # if not keepAssignments or not any(len(dimensionNmrAtoms) > 0 for dimensionNmrAtoms in peak.dimensionNmrAtoms)
+          nmrResidue = nmrChain.newNmrResidue()
+          nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
+          peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
+
     finally:
       self.accept()
       self.project._endCommandEchoBlock()

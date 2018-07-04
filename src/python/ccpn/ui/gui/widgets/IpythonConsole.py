@@ -137,19 +137,22 @@ class IpythonConsole(Widget, Base):
       """
       writes the specified string to the python console text box.
       """
-      self.textEditor.moveCursor(QtGui.QTextCursor.End)
-      if html:
-          self.textEditor.textCursor().insertHtml(msg)
-      else:
-        # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
-        self.textEditor.insertPlainText(msg)
-        # self.textEditor.insertPlainText('\n')
-        self.mainWindow.statusBar().showMessage(msg)
-      if self.mainWindow.recordingMacro is True:
-        try:
-          self.mainWindow.editor.textBox.insertPlainText(msg)
-        except:
-          getLogger().warning('Warning: macro editor does not exist')
+      try:
+        self.textEditor.moveCursor(QtGui.QTextCursor.End)
+        if html:
+            self.textEditor.textCursor().insertHtml(msg)
+        else:
+          # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
+          self.textEditor.insertPlainText(msg)
+          # self.textEditor.insertPlainText('\n')
+          self.mainWindow.statusBar().showMessage(msg)
+        if self.mainWindow.recordingMacro is True:
+          try:
+            self.mainWindow.editor.textBox.insertPlainText(msg)
+          except:
+            getLogger().warning('Warning: macro editor does not exist')
+      except Exception as e:
+        getLogger().warning('Error on IpythonConsole: %s' %e)
 
 
     def _setUndoWaypoint(self):

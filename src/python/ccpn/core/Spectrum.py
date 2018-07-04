@@ -98,6 +98,8 @@ class Spectrum(AbstractWrapperObject):
   # Qualified name of matching API class
   _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
 
+  _referenceSpectrumHit = None
+
   def __init__(self, project:Project, wrappedData:Nmr.ShiftList):
 
     self._intensities = None

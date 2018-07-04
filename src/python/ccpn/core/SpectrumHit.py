@@ -331,8 +331,8 @@ For this reason SpectrumHits cannot be renamed."""
       else:
           print('ADD Warning')
 
-
-
+  def _removeReference(self, referenceSpectrum):
+     pass
 
 # Connections to parents:
 def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,

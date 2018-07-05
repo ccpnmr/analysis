@@ -59,13 +59,14 @@ class SpectrumGroupToolBar(ToolBar):
     """
     if event.button() == QtCore.Qt.RightButton:
       button = self.childAt(event.pos())
-      sg = self._project.getByPid(button.text())
-      if sg is not None:
-        if len(button.actions())>0:
-          menu = self._setupContextMenu(button.actions()[0], sg)
-          if menu:
-            menu.move(event.globalPos().x(), event.globalPos().y() + 10)
-            menu.exec()
+      if button:
+        sg = self._project.getByPid(button.text())
+        if sg is not None:
+          if len(button.actions())>0:
+            menu = self._setupContextMenu(button.actions()[0], sg)
+            if menu:
+              menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+              menu.exec()
 
   def _setupContextMenu(self, action, spectrumGroup):
 

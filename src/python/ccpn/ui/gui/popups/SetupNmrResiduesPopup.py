@@ -46,7 +46,7 @@ class SetupNmrResiduesPopup(CcpnDialog):
 
     label1a = Label(self, text="Source PeakList ", grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1))
-    self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists])
+    self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists if len(peakList.peaks)>0])
     label1a = Label(self, text="NmrChain ", grid=(0, 2))
     self.nmrChainPulldown = PulldownList(self, grid=(0, 3))
     self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
@@ -64,9 +64,9 @@ class SetupNmrResiduesPopup(CcpnDialog):
       keepAssignments = self.assignmentCheckBox.checkState() #This option is broken.
 
       for peak in peakList.peaks:
+        nmrResidue = nmrChain.newNmrResidue()
         for i, axisCode in enumerate(peak.axisCodes):
         # if not keepAssignments or not any(len(dimensionNmrAtoms) > 0 for dimensionNmrAtoms in peak.dimensionNmrAtoms)
-          nmrResidue = nmrChain.newNmrResidue()
           nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
           peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
 

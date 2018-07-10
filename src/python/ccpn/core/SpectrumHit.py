@@ -269,6 +269,13 @@ For this reason SpectrumHits cannot be renamed."""
                   referencePeakHits.append(p)
       return referencePeakHits
 
+  def _getDeltaPositions(self, referencePeakList):
+    deltas = [round(abs(lp.position[0] - p.position[0]), 4)
+              for p in self._getPeakHits() for lp in p._linkedPeaks
+              if len(p.position)>0 and len(lp.position)>0
+              if lp in referencePeakList.peaks]
+    return deltas
+
   def _scoreByIntesities(self, peaks):
       heights = [p.height for p in peaks if p.height is not None]
       return sum(heights)

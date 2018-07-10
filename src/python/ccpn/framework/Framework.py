@@ -632,10 +632,13 @@ class Framework:
 
     # Initialise SpectrumViews
     for spectrumDisplay in project.spectrumDisplays:
-      for strip in spectrumDisplay.strips:
 
-        # TODO:ED use orderedSpectra
-        # for spectrumView in strip.spectrumViews:
+      strips = spectrumDisplay.strips
+      for strip in strips:
+
+        # move to the correct place in the widget
+        stripIndex = strips.index(strip)
+        spectrumDisplay.stripFrame.layout().addWidget(strip, 0, stripIndex)
 
         specViews = strip.spectrumViews
         # for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):
@@ -644,6 +647,45 @@ class Framework:
           spectrumView._createdSpectrumView(iSV)
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)
+
+      # some of the strips may not be instantiated at this point
+      spectrumDisplay.showAxes()
+      spectrumDisplay.setColumnStretches(True)
+
+#~~~~~~~~~~~~~~~~
+    #
+    # # Initialise SpectrumDisplays, SpectrumViews
+    # for spectrumDisplay in project.spectrumDisplays:
+    #
+    #   # self.moduleArea.addModule(spectrumDisplay, position='right')
+    #   strips = spectrumDisplay.strips
+    #   for strip in strips:
+    #
+    #     # move to the correct place in the widget
+    #     stripIndex = strips.index(strip)
+    #     spectrumDisplay.stripFrame.layout().addWidget(strip, 0, stripIndex)
+    #
+    #     specViews = strip.spectrumViews
+    #     # for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
+    #     for iSV, spectrumView in enumerate(specViews):
+    #
+    #       # set up the Z widgets and add new toolbar button
+    #       spectrumDisplay._createdSpectrumView({Notifier.OBJECT: spectrumView})  #iSV)
+    #
+    #       for peakList in spectrumView.spectrum.peakLists:
+    #         strip.showPeaks(peakList)
+    #
+    #   # some of the strips may no be instantiated at this point
+    #   spectrumDisplay.showAxes()
+    #   spectrumDisplay.setColumnStretches(True)
+    #
+#~~~~~~~~~~~~~~~~
+
+
+
+
+
+
     if self.current.strip is None:
       if len(self.project.strips)>0:
         self.current.strip = self.project.strips[0]
@@ -1019,10 +1061,12 @@ class Framework:
       ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ###("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
       ###(),
-      ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
-                                                    ('checkable', True),
-                                                    ('checked', False)
-                                                    ]),
+
+      # sequenceModule has been incorporated into sequence graph
+      # ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
+      #                                               ('checkable', True),
+      #                                               ('checked', False)
+      #                                               ]),
       (),
       ("Show/hide Modules", ([
                               ("None", None, [('checkable', True),

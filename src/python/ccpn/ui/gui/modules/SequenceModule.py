@@ -53,9 +53,10 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import progressManager, showWarning
+from ccpn.ui.gui.widgets.Frame import Frame
 
 
-class SequenceModule(CcpnModule):
+class SequenceModule():
   """
   The module displays all chains in the project as one-letter amino acids. The one letter residue
   sequence codes are all instances of the GuiChainResidue class and the style applied to a residue
@@ -73,34 +74,42 @@ class SequenceModule(CcpnModule):
 
   className = 'SequenceModule'
 
-  def __init__(self, mainWindow, name='Sequence'):
+  def __init__(self, parent=None, mainWindow=None, name='Sequence'):
     #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
     #TODO: make closable
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+    # CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
+    # super(SequenceModule, self).__init__(setLayout=True)
+
+    self.parent = parent
     self.mainWindow = mainWindow
     self.project = mainWindow.application.project
     #self.label.hide()
 
-    self.setAcceptDrops(True)
+    # self.setAcceptDrops(True)
+    self.parent.setAcceptDrops(True)
+
     self.scrollArea = QtWidgets.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
-    self.scrollArea.scene = QtWidgets.QGraphicsScene(self)
-    self.scrollContents = QtWidgets.QGraphicsView(self.scrollArea.scene, self)
+    self.scrollArea.scene = QtWidgets.QGraphicsScene(self.parent)
+    self.scrollContents = QtWidgets.QGraphicsView(self.scrollArea.scene, self.parent)
     self.scrollContents.setAcceptDrops(True)
     self.scrollContents.setInteractive(True)
 
-    self.scrollContents.setAlignment(QtCore.Qt.AlignLeft)
+    self.scrollContents.setAlignment(QtCore.Qt.AlignTop)
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
     self.horizontalLayout2 = QtWidgets.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
 
     self.colours = getColours()
-    self.setStyleSheet("""QScrollArea QScrollBar::horizontal {max-height: 20px;}
-                          QScrollArea QScrollBar::vertical{max-width:20px;}
-                      """)
+    # self.setStyleSheet("""QScrollArea QScrollBar::horizontal {max-height: 20px;}
+    #                       QScrollArea QScrollBar::vertical{max-width:20px;}
+    #                   """)
     self.residueCount = 0
-    self.mainWidget.layout().addWidget(self.scrollArea)
+
+    # self.mainWidget.layout().addWidget(self.scrollArea)
+    self.parent.layout().addWidget(self.scrollArea)
+
     # connect graphics scene dragMoveEvent to CcpnModule dragMoveEvent - required for drag-and-drop
     # assignment routines.
     self.scrollArea.scene.dragMoveEvent = self._dragMoveEvent
@@ -112,8 +121,8 @@ class SequenceModule(CcpnModule):
     #GWV: removed fixed height restrictions but maximum height instead
     #self.setFixedHeight(2*self.widgetHeight)
     #self.scrollContents.setFixedHeight(2*self.widgetHeight)
-    self.setMaximumHeight(100)
-    self.scrollContents.setMaximumHeight(100)
+    # self.parent.setMaximumHeight(100)
+    # self.scrollContents.setMaximumHeight(100)
 
     #GWV: explicit intialisation to prevent crashes
     self._chainNotifier = None
@@ -213,15 +222,15 @@ class SequenceModule(CcpnModule):
             endRes = endRes.nextResidue
 
         except:
-          showWarning(str(self.windowTitle()), 'Too close to the start of the chain')
+          showWarning('Sequence Graph', 'Too close to the start of the chain')
           return
 
         if not chainRes:
-          showWarning(str(self.windowTitle()), 'Too close to the start of the chain')
+          showWarning('Sequence Graph', 'Too close to the start of the chain')
           return
 
         if not endRes:
-          showWarning(str(self.windowTitle()), 'Too close to the end of the chain')
+          showWarning('Sequence Graph', 'Too close to the end of the chain')
           return
 
         residues = [chainRes]
@@ -249,7 +258,7 @@ class SequenceModule(CcpnModule):
             try:
               nmrChain.assignConnectedResidues(residues[0])
             except Exception as es:
-              showWarning(str(self.windowTitle()), str(es))
+              showWarning('Sequence Graph', str(es))
 
           for ii, res in enumerate(residues):
             if hasattr(self, 'guiChainLabel'):

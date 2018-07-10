@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-05-10 16:04:41 +0000 (Wed, May 10, 2017) $"
 
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 
 class PythonConsoleModule(CcpnModule):
@@ -34,7 +35,7 @@ class PythonConsoleModule(CcpnModule):
   This class implements the module by wrapping a PeakListTable instance
   '''
 
-  includeSettingsWidget = False
+  includeSettingsWidget = True
   maxSettingsState = 2
   settingsPosition = 'top'
 
@@ -54,6 +55,16 @@ class PythonConsoleModule(CcpnModule):
     self._menuAction = self.mainWindow._findMenuAction('View', 'Python Console')
     if self._menuAction:
       self._menuAction.setChecked(True)
+
+
+    self.settingsEditorCheckBox = CheckBox(self.settingsWidget, checked=True, text='Log Display', callback=self._toggleTextEditor,
+                                           grid=(0,0))
+
+  def _toggleTextEditor(self, value):
+    if value:
+      self.pythonConsoleWidget.textEditor.show()
+    else:
+      self.pythonConsoleWidget.textEditor.hide()
 
 
   def _closeModule(self):

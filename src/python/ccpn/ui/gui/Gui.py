@@ -436,6 +436,9 @@ class Strip1d(coreClass, _GuiStrip1d):
 
     Logging.getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
     _GuiStrip1d.__init__(self, self.spectrumDisplay)
+
+    return
+
     stripIndex = self.spectrumDisplay.orderedStrips.index(self)
     self.spectrumDisplay.stripFrame.layout().addWidget(self, 0, stripIndex)
 
@@ -453,6 +456,8 @@ class StripNd(coreClass, _GuiStripNd):
 
     Logging.getLogger().debug('StripNd>> spectrumDisplay: %s' % self.spectrumDisplay)
     _GuiStripNd.__init__(self, self.spectrumDisplay)
+
+    return
 
     # cannot add the Frame until fully done
     stripIndex = self.spectrumDisplay.orderedStrips.index(self)

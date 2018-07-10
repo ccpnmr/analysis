@@ -39,7 +39,10 @@ NULL = object()
 class PulldownList(QtWidgets.QComboBox, Base):
 
   def __init__(self, parent, texts=None, objects=None,
-               icons=None, callback=None, index=0, headerText=None, headerEnabled=False, headerIcon=None, **kw):
+               icons=None, callback=None, index=0,
+               backgroundText=None, headerText=None,
+               headerEnabled=False, headerIcon=None,
+               editable=False, **kw):
     '''
 
     :param parent:
@@ -48,6 +51,9 @@ class PulldownList(QtWidgets.QComboBox, Base):
     :param icons:
     :param callback:
     :param index:
+    :param backgroundText: a transparent text that will disapear as soon as you click to type.
+                            the place holder or the transparent "backgroundText" will work only if the pulldown is editable.
+                            Otherwise use HeaderText and enabled = False if you need only a title inside the pulldown
     :param headerText: text of first item of the pullDown. E.g. '-- Select Item --'
     :param headerEnabled: True to be selectable, False to disable and be grayed out
     :param kw:
@@ -63,6 +69,12 @@ class PulldownList(QtWidgets.QComboBox, Base):
     self.headerText = headerText
     self.headerEnabled = headerEnabled
     self.headerIcon = headerIcon
+    self.backgroundText = backgroundText
+
+    if editable:
+      self.setEditable(editable)
+      if self.backgroundText:
+        self.lineEdit().setPlaceholderText(str(self.backgroundText))
     # self.setIconSize(QtCore.QSize(22,22))
 
     PulldownList.setData(self, texts, objects, index, icons,

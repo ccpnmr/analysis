@@ -637,14 +637,20 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                 integralList.delete()
               obj.delete()
             except Exception as es:
-              showWarning('Delete', str(es))
+              showWarning('Delete Objects', str(es))
             finally:
               self.project._endCommandEchoBlock()
 
           else:
             self.project._startCommandEchoBlock('deleteObjects', str(obj.pid))
-            obj.delete()
-            self.project._endCommandEchoBlock()
+            try:
+
+              # delete the object
+              obj.delete()
+            except Exception as es:
+              showWarning('Delete Object', str(es))
+            finally:
+              self.project._endCommandEchoBlock()
 
             # # try:
             # ll = self._getChildren(obj)

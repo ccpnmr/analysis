@@ -280,14 +280,14 @@ class SequenceModule():
     self.moduleParent.predictSequencePosition(self.moduleParent.predictedStretch)
     return
 
-    from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraphModule
-    seqGraphs = [sg for sg in SequenceGraphModule.getInstances()]
-
-    if seqGraphs:
-      try:
-        seqGraphs[0].predictSequencePosition(seqGraphs[0].predictedStretch)
-      except Exception as es:
-        getLogger().warning('Error: no predictedStretch found: %s' % str(es))
+    # from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraphModule
+    # seqGraphs = [sg for sg in SequenceGraphModule.getInstances()]
+    #
+    # if seqGraphs:
+    #   try:
+    #     seqGraphs[0].predictSequencePosition(seqGraphs[0].predictedStretch)
+    #   except Exception as es:
+    #     getLogger().warning('Error: no predictedStretch found: %s' % str(es))
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
     """

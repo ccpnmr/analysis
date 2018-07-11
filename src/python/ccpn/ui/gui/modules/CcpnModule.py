@@ -147,7 +147,7 @@ class CcpnModule(Dock, DropBase):
   settingsMinimumSizes = (100, 50)
   _restored = False
 
-  _instances = set()
+  # _instances = set()
 
   def __init__(self, mainWindow, name, closable=True, closeFunc=None, **kwds):
 
@@ -358,7 +358,7 @@ class CcpnModule(Dock, DropBase):
     self._updateStyle()
     self.update()     # ejb - make sure that the widgetArea starts the correct size
 
-    self._instances.add(ref(self))
+    # self._instances.add(ref(self))
     self._allChildren = set()
 
   def _findChildren(self, widget):
@@ -366,19 +366,18 @@ class CcpnModule(Dock, DropBase):
       self._allChildren.update({i})
       self._findChildren(i)
 
-
-  @classmethod
-  def getInstances(cls):
-    dead = set()
-    for ref in cls._instances:
-      obj = ref()
-      if obj is not None:
-        # if isinstance(obj, cls):
-        if obj.className == cls.className:
-          yield obj
-      else:
-        dead.add(ref)
-    cls._instances -= dead
+  # @classmethod
+  # def getInstances(cls):
+  #   dead = set()
+  #   for ref in cls._instances:
+  #     obj = ref()
+  #     if obj is not None:
+  #       # if isinstance(obj, cls):
+  #       if obj.className == cls.className:
+  #         yield obj
+  #     else:
+  #       dead.add(ref)
+  #   cls._instances -= dead
 
   @property
   def titleName(self):
@@ -641,8 +640,8 @@ class CcpnModule(Dock, DropBase):
     except:
       pass
 
-    if ref(self) in self._instances:
-      self._instances.remove(ref(self))
+    # if ref(self) in self._instances:
+    #   self._instances.remove(ref(self))
 
     getLogger().debug('Closing %s' % str(self.container()))
     if not self._container:

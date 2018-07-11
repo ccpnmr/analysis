@@ -295,6 +295,48 @@ class Residue(AbstractWrapperObject):
 
   # Implementation functions
 
+  def _setFragmentResidues(self, chainFragment, residues):
+    """set the residues connected to the chainFragment
+    CCPN Internal - ussed to handle removing reside link from the api
+    """
+    chainFragment.__dict__['residues'] = tuple(residues)
+
+  def delete(self):
+    """delete residue.
+    Causes an error when just calling residue._wrappedData.delete()
+    new method to delete from the chainFragment
+    """
+    chainFragment = self._wrappedData.chainFragment
+    apiResidue = self._wrappedData
+
+    if self.allNmrResidues:
+      raise TypeError('Cannot delete assigned residue')
+
+    if self._wrappedData in chainFragment.residues:
+
+      self._startCommandEchoBlock('delete')
+      undo = self._project._undo
+
+      try:
+        oldResidues = list(chainFragment.residues)
+        newResidues = list(chainFragment.residues)
+        delRes = newResidues.pop(newResidues.index(apiResidue))
+        delRes.delete()
+
+        # delete the residue from the fragment
+        chainFragment.__dict__['residues'] = tuple(newResidues)
+
+        # add new undo item to set the residues in the chainFragment
+        if undo is not None:
+          undo.newItem(self._setFragmentResidues, self._setFragmentResidues,
+                         undoArgs=(chainFragment, oldResidues),
+                         redoArgs=(chainFragment, newResidues))
+
+      finally:
+        self._endCommandEchoBlock()
+
+    pass
+
   @classmethod
   def _getAllWrappedData(cls, parent: Chain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""

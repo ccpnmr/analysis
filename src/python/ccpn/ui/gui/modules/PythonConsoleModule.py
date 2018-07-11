@@ -31,9 +31,9 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
 
 class PythonConsoleModule(CcpnModule):
-  '''
+  """
   This class implements the module by wrapping a PeakListTable instance
-  '''
+  """
 
   includeSettingsWidget = True
   maxSettingsState = 2
@@ -68,6 +68,7 @@ class PythonConsoleModule(CcpnModule):
 
 
   def _closeModule(self):
+    self.pythonConsoleWidget._stopChannels()
     self.mainWindow.pythonConsoleModule = None
     if self._menuAction:
       self._menuAction.setChecked(False)

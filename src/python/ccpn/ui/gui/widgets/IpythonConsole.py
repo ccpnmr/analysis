@@ -58,7 +58,7 @@ class IpythonConsole(Widget, Base):
         self.setStyleSheet(self.mainWindow.styleSheet())
         self.ipythonWidget._set_font(fixedWidthFont)
         self.ipythonWidget.kernel_manager = km
-        self.ipythonWidget.kernel_client = km.client()
+        # self.ipythonWidget.kernel_client = km.client()
         #TODO:LUCA:The Widget class already has a layout: can just do grid=(row,col)
         #use getLayout() of the widget class to get hold of the widget layout in case you need to do something special
 
@@ -93,11 +93,11 @@ class IpythonConsole(Widget, Base):
         # historyButton.setText('Show History')
         # buttonLayout.addWidget(historyButton, 0, 1)
 
-        self.buttons = ButtonList(self.consoleFrame
-                                , texts=['Run Macro', 'Show History']
-                                , callbacks=[self._runMacro, self._showHistory]
-                                , direction='H', hAlign='c'
-                                , grid=(1,0))
+        self.buttons = ButtonList(self.consoleFrame,
+                                texts=['Run Macro', 'Show History'],
+                                callbacks=[self._runMacro, self._showHistory],
+                                direction='H', hAlign='c',
+                                grid=(1,0))
 
         self.splitter.setStretchFactor(1,8)
         self.splitter.setChildrenCollapsible(False)
@@ -123,8 +123,15 @@ class IpythonConsole(Widget, Base):
       """
       # CCPN INTERNAL - called in constructor of PythonConsoleModule.
       """
-
+      self.ipythonWidget.kernel_client = self.ipythonWidget.kernel_manager.client()
       self.ipythonWidget.kernel_client.start_channels()
+
+    def _stopChannels(self):
+      """
+      # CCPN INTERNAL - called in constructor of PythonConsoleModule.
+      """
+      self.ipythonWidget.kernel_client.stop_channels()
+      self.ipythonWidget.kernel_client = None
 
     def _showHistory(self):
       """

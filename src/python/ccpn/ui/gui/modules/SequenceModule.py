@@ -74,13 +74,14 @@ class SequenceModule():
 
   className = 'SequenceModule'
 
-  def __init__(self, parent=None, mainWindow=None, name='Sequence'):
+  def __init__(self, moduleParent=None, parent=None, mainWindow=None, name='Sequence'):
     #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
     #TODO: make closable
     # CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     # super(SequenceModule, self).__init__(setLayout=True)
 
+    self.moduleParent = moduleParent
     self.parent = parent
     self.mainWindow = mainWindow
     self.project = mainWindow.application.project
@@ -275,6 +276,10 @@ class SequenceModule():
     Take the selected chain from the first opened sequenceGraph and highlight in module
     """
     # get the list of open sequenceGraphs
+
+    self.moduleParent.predictSequencePosition(self.moduleParent.predictedStretch)
+    return
+
     from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraphModule
     seqGraphs = [sg for sg in SequenceGraphModule.getInstances()]
 
@@ -310,7 +315,13 @@ class SequenceModule():
         # guiResidue.setHtml('<div style="color: %s;text-align: center; padding: 0px;">' %
         #                     self.colours[GUICHAINRESIDUE_POSSIBLE] +  residue.shortName+'</div>')
     except Exception as es:
-      pass
+      getLogger().warning('_highlightPossibleStretches: %s' % str(es))
+
+  def _chainCallBack(self, data):
+    """callback for chain notifier
+    """
+    chain = data[Notifier.OBJECT]
+    self._addChainLabel(chain=chain)
 
   def _addChainLabel(self, chain:Chain, placeholder=False, tryToUseSequenceCodes=False):
     """
@@ -328,7 +339,25 @@ class SequenceModule():
     self.chainLabels.append(self.chainLabel)
     self.widgetHeight += (0.8*(self.chainLabel.boundingRect().height()))
 
-  def _addChainResidue(self, residue):
+  def _addChainResidueCallback(self, data):
+    """callback for residue change notifier
+    """
+    residue = data[Notifier.OBJECT]
+
+    if self.chainLabel.chain is not residue.chain: # they should always be equal if function just called as a notifier
+      return
+    number = residue.chain.residues.index(residue)
+    self.chainLabel._addResidue(number, residue)
+    self.populateFromSequenceGraphs()
+
+  def _deleteChainResidueCallback(self, data):
+    """callback for residue change notifier
+    """
+    residue = data[Notifier.OBJECT]
+
+    self._refreshChainLabels()
+    return
+
     if self.chainLabel.chain is not residue.chain: # they should always be equal if function just called as a notifier
       return
     number = residue.chain.residues.index(residue)
@@ -336,31 +365,39 @@ class SequenceModule():
     self.populateFromSequenceGraphs()
 
   def _registerNotifiers(self):
-    # self.project.registerNotifier('Chain', 'create', self._addChainLabel)
-    # self.project.registerNotifier('Residue', 'create', self._addChainResidue)
-    # self.project.registerNotifier('Chain', 'delete', self._refreshChainLabels)
-
+    """register notifiers
+    """
     self._chainNotifier = Notifier(self.project,
                                   [Notifier.CREATE],
                                   'Chain',
-                                  self._addChainLabel)
+                                  self._chainCallBack)
     self._residueNotifier = Notifier(self.project,
-                                  [Notifier.CREATE, Notifier.CHANGE],
+                                     [Notifier.CREATE, Notifier.CHANGE],
                                   'Residue',
-                                  self._addChainResidue,
-                                  onceOnly=True)
+                                     self._addChainResidueCallback,
+                                     onceOnly=True)
+    self._residueDeleteNotifier = Notifier(self.project,
+                                     [Notifier.DELETE],
+                                  'Residue',
+                                     self._deleteChainResidueCallback,
+                                     onceOnly=True)
     self._chainDeleteNotifier = Notifier(self.project,
                                   [Notifier.DELETE],
                                   'Chain',
                                   self._refreshChainLabels)
 
   def _unRegisterNotifiers(self):
+    """unregister notifiers
+    """
     if self._chainNotifier:
       self._chainNotifier.unRegister()
       self._chainNotifier = None
     if self._residueNotifier:
       self._residueNotifier.unRegister()
       self._residueNotifier = None
+    if self._residueDeleteNotifier:
+      self._residueDeleteNotifier.unRegister()
+      self._residueDeleteNotifier = None
     if self._chainDeleteNotifier:
       self._chainDeleteNotifier.unRegister()
       self._chainDeleteNotifier = None
@@ -376,7 +413,9 @@ class SequenceModule():
   def close(self):
     self._closeModule()     # ejb - needed when closing/opening project
 
-  def _refreshChainLabels(self, *args, **kw):
+  def _refreshChainLabels(self, data=None):
+    """callback to refresh chains notifier
+    """
     for chainLabel in self.chainLabels:
       for item in chainLabel.items:
         self.scrollArea.scene.removeItem(item)

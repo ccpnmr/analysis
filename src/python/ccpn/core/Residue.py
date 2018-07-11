@@ -310,7 +310,7 @@ class Residue(AbstractWrapperObject):
     apiResidue = self._wrappedData
 
     if self.allNmrResidues:
-      raise TypeError('Cannot delete residue that has an assignment.')
+      raise TypeError('Cannot delete residue that has assigned nmrResidues')
 
     if self._wrappedData in chainFragment.residues:
 

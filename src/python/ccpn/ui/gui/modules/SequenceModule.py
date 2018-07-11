@@ -324,8 +324,7 @@ class SequenceModule():
     self._addChainLabel(chain=chain)
 
   def _addChainLabel(self, chain:Chain, placeholder=False, tryToUseSequenceCodes=False):
-    """
-    Creates and adds a GuiChainLabel to the sequence module.
+    """Creates and adds a GuiChainLabel to the sequence module.
     """
     if len(self.project.chains) == 1 and len(self.chainLabels) == 1:
       # first new chain created so get rid of placeholder label
@@ -343,26 +342,27 @@ class SequenceModule():
     """callback for residue change notifier
     """
     residue = data[Notifier.OBJECT]
+    self._refreshChainLabels()
 
-    if self.chainLabel.chain is not residue.chain: # they should always be equal if function just called as a notifier
-      return
-    number = residue.chain.residues.index(residue)
-    self.chainLabel._addResidue(number, residue)
-    self.populateFromSequenceGraphs()
+    # residue = data[Notifier.OBJECT]
+    #
+    # if self.chainLabel.chain is not residue.chain: # they should always be equal if function just called as a notifier
+    #   return
+    # number = residue.chain.residues.index(residue)
+    # self.chainLabel._addResidue(number, residue)
+    # self.populateFromSequenceGraphs()
 
   def _deleteChainResidueCallback(self, data):
     """callback for residue change notifier
     """
     residue = data[Notifier.OBJECT]
-
     self._refreshChainLabels()
-    return
 
-    if self.chainLabel.chain is not residue.chain: # they should always be equal if function just called as a notifier
-      return
-    number = residue.chain.residues.index(residue)
-    self.chainLabel._addResidue(number, residue)
-    self.populateFromSequenceGraphs()
+    # if self.chainLabel.chain is not residue.chain: # they should always be equal if function just called as a notifier
+    #   return
+    # number = residue.chain.residues.index(residue)
+    # self.chainLabel._addResidue(number, residue)
+    # self.populateFromSequenceGraphs()
 
   def _registerNotifiers(self):
     """register notifiers
@@ -437,6 +437,9 @@ class SequenceModule():
     self._highlight.setPlainText('')
     # self._highlight.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
     self.scrollArea.scene.addItem(self._highlight)
+
+    # re-highlight any predicted stretches
+    self.populateFromSequenceGraphs()
 
 
 class GuiChainLabel(QtWidgets.QGraphicsTextItem):

@@ -117,7 +117,7 @@ class SequenceModule():
     self.scrollArea.scene.dropEvent = self._dropEvent
     self.chainLabels = []
     self._highlight = None
-    self._refreshChainLabels()
+    self._initialiseChainLabels()
 
     #GWV: removed fixed height restrictions but maximum height instead
     #self.setFixedHeight(2*self.widgetHeight)
@@ -289,21 +289,29 @@ class SequenceModule():
     #   except Exception as es:
     #     getLogger().warning('Error: no predictedStretch found: %s' % str(es))
 
-  def _highlightPossibleStretches(self, residues:typing.List[Residue]):
+  def _clearStretches(self, chainNum):
     """
     CCPN INTERNAL called in predictSequencePosition method of SequenceGraph.
     Highlights regions on the sequence specified by the list of residues passed in.
     """
-    for res1 in self.chainLabels[0].residueDict.values():
+    for res1 in self.chainLabels[chainNum].residueDict.values():
       res1._styleResidue()
+
+  def _highlightPossibleStretches(self, chainNum, residues:typing.List[Residue]):
+    """
+    CCPN INTERNAL called in predictSequencePosition method of SequenceGraph.
+    Highlights regions on the sequence specified by the list of residues passed in.
+    """
+    # for res1 in self.chainLabels[chainNum].residueDict.values():
+    #   res1._styleResidue()
 
     try:
       for residue in residues:
-        guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
+        guiResidue = self.chainLabels[chainNum].residueDict[residue.sequenceCode]
         guiResidue._styleResidue()
       guiResidues = []
       for residue in residues:
-        guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
+        guiResidue = self.chainLabels[chainNum].residueDict[residue.sequenceCode]
         guiResidues.append(guiResidue)
 
         if guiResidue.residue.nmrResidue is not None:
@@ -413,15 +421,15 @@ class SequenceModule():
   def close(self):
     self._closeModule()     # ejb - needed when closing/opening project
 
-  def _refreshChainLabels(self, data=None):
-    """callback to refresh chains notifier
+  def _initialiseChainLabels(self):
+    """initialise the chain label widgets
     """
     for chainLabel in self.chainLabels:
       for item in chainLabel.items:
         self.scrollArea.scene.removeItem(item)
-      chainLabel.items = [] # probably don't need to do this
+      chainLabel.items = []  # probably don't need to do this
     self.chainLabels = []
-    self.widgetHeight = 0 # dynamically calculated from the number of chains
+    self.widgetHeight = 0  # dynamically calculated from the number of chains
 
     if not self.project.chains:
       self._addChainLabel(chain=None, placeholder=True)
@@ -438,7 +446,11 @@ class SequenceModule():
     # self._highlight.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
     self.scrollArea.scene.addItem(self._highlight)
 
-    # re-highlight any predicted stretches
+  def _refreshChainLabels(self, data=None):
+    """callback to refresh chains notifier
+    """
+    self._initialiseChainLabels()
+    # highlight any predicted stretches
     self.populateFromSequenceGraphs()
 
 

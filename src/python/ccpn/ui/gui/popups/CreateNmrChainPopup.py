@@ -200,6 +200,13 @@ class CreateNmrChainPopup(CcpnDialog):
         if len(self._nmrChain.nmrResidues) > 0:
           self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
           for nmrResidue in self._nmrChain.nmrResidues[:-1]:
+
+            # need to check whether the mainResidue exists before creating the +/- residues
+            if nmrResidue.relativeOffset:
+              mainSequence = nmrResidue.mainNmrResidue.sequenceCode
+              newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=mainSequence,
+                                                        residueType=nmrResidue.residueType)
+
             newNmrResidue = newNmrChain.newNmrResidue(sequenceCode=nmrResidue.sequenceCode, residueType=nmrResidue.residueType)
             for nmrAtom in nmrResidue.nmrAtoms:
               newNmrResidue.fetchNmrAtom(nmrAtom.name)

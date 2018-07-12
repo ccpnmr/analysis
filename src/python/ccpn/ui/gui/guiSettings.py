@@ -85,7 +85,8 @@ fixedWidthHugeFont    = monaco20
 moduleLabelFont       = helvetica12        # for text of left-label of modules
 sidebarFont           = lucidaGrande12     # sidebar
 menuFont              = lucidaGrande14     # Menus
-messageFont           = helvetica14        # use in popup messages; does not seem to affect the dialog on OSX
+messageFont           = helvetica14        # used in popup messages;
+messageFontBold       = helveticaBold14    # used in popup messages;
 
 # Colours
 LIGHT = 'light'

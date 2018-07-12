@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from ccpn.ui.gui.guiSettings import messageFont
+from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
 Ok          = QtWidgets.QMessageBox.Ok
 Cancel      = QtWidgets.QMessageBox.Cancel
@@ -52,7 +52,6 @@ class MessageDialog(QtWidgets.QMessageBox):
   """
   def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None):
     QtWidgets.QMessageBox.__init__(self, None)
-    self.setFont(messageFont)
     self.setWindowModality(QtCore.Qt.WindowModal)
 
     self._parent = parent
@@ -60,7 +59,26 @@ class MessageDialog(QtWidgets.QMessageBox):
     self.setText(basicText)
     self.setInformativeText(message)
     self.setIcon(icon)
-    self.setMinimumWidth(300)
+    self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+
+    # self.setFont(messageFont)  #GWV:  Does not seem to do anything
+    # self.setMinimumSize(QtCore.QSize(300, 100))  #GWV:  Does not seem to do anything
+    # self.resize(300, 100)  #GWV:  Does not seem to do anything
+    # Adapted from best solution so far from: http://apocalyptech.com/linux/qt/qmessagebox/
+    layout = self.layout()
+    item = layout.itemAtPosition(0, 2)
+    widget = item.widget()
+    # GWV: setting font of basicText widget
+    widget.setFont(messageFontBold)
+    # GWV: setting font and width of message
+    item = layout.itemAtPosition(1, 2)
+    widget = item.widget()
+    # GWV: Estimating minimumwidth
+    widget.setMinimumWidth(max(len(message)*5, 200))
+    widget.setFont(messageFont)
+
+    # textEdit = self.findChild(QtGui.QTextEdit)
+    # textEdit.setFont(messageFont)
 
     palette = QtGui.QPalette()
     self.setPalette(palette)
@@ -278,6 +296,7 @@ class progressPopup(CcpnDialog):
     self.timer.timeout.connect(self.progress_simulation)
 
     self.label = Label(self, title, grid=(0, 0))
+    self.label.setFont(messageFont)
     # self.layout().addWidget(self.progressbar)
 
     # vlayout.addWidget(self.btn_start)
@@ -424,8 +443,8 @@ if __name__ == '__main__':
 
   app = QtWidgets.QApplication(sys.argv)
 
-  for i in _stoppableProgressBar([1]*10000):
-      time.sleep(0.2)
+  # for i in _stoppableProgressBar([1]*10000):
+  #     time.sleep(0.2)
 
   def callback():
     print(showInfo('My info window', 'test info'))
@@ -447,3 +466,4 @@ if __name__ == '__main__':
   # popup.raise_()
   #
   # app.start()
+  callback()

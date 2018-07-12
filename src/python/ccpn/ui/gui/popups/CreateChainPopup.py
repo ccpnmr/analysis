@@ -108,11 +108,16 @@ class CreateChainPopup(CcpnDialog):
     self.sequenceEditor.textChanged.connect(self._setSequence)
 
   def _createSequence(self):
+    """Creates a sequence using the values specified in the text widget.
+    Single-letter codes must be entered with no spacing
+    Three-letter codes can be entered as space or <return> separated
     """
-    Creates a sequence using the values specified in the text widget.
-    """
-    # check the sequence for consistency
+    # check the sequence for consistency, sequence widget does most of the work
     seq = self.sequence
+
+    # split and remove white spaces
+    if isinstance(seq, str):
+      seq = seq.split()
 
     # trap rogue spaces and lower case residues entered by 3-letter code
     if seq and len(seq) == 1 and not isinstance(seq, str):
@@ -122,6 +127,8 @@ class CreateChainPopup(CcpnDialog):
       for s in seq:
         newSeq.append(s.upper())
       seq = tuple(newSeq)
+    else:
+      seq.strip('\n')
 
     self.project.createChain(sequence=seq, compoundName=self.moleculeName,
                                  startNumber=self.sequenceStart, shortName=self.chainCode,

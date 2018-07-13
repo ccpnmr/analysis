@@ -695,3 +695,37 @@ def refitPeaks(peaks:Sequence[Peak], method:str='gaussian'):
 
   from ccpnmodel.ccpncore.lib.spectrum import Peak as LibPeak
   LibPeak.fitExistingPeaks([peak._wrappedData for peak in peaks], method)
+
+
+def _assignNmrAtomsToPeaks(strip, peaks, nmrAtoms):
+  ''' CCPN Internal. Used to assign via Drag and drop and atom selector Module'''
+  if len(peaks) > 0:
+    for peak in peaks:
+      for peakListView in peak.peakList.peakListViews:
+        if peakListView.isVisible():
+          orderedAxes = strip.orderedAxes
+          for ax in orderedAxes:
+            if ax.code == 'intensity':
+              continue
+            if ax.code:
+              matchingNmrAtoms = []
+              for nmrAtom in nmrAtoms:
+                if len(ax.code) > 0:
+                  if ax.code.isupper():
+                    if ax.code == nmrAtom.name:
+                      matchingNmrAtoms.append(nmrAtom)
+                      break
+                    else:
+                      if ax.code[0] in nmrAtom.name:
+                        matchingNmrAtoms.append(nmrAtom)
+                  else:
+                    if ax.code[0] in nmrAtom.name:
+                      matchingNmrAtoms.append(nmrAtom)
+              if len(matchingNmrAtoms)>0:
+                # if ax.code.isupper():
+                  try: # sometime A
+                    peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
+                  except:
+                    peak.assignDimension(ax.code[0], list(set(matchingNmrAtoms)))
+                # else:
+                #   peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))

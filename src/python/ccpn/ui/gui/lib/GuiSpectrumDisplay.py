@@ -55,6 +55,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks
 
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
@@ -437,41 +438,11 @@ class GuiSpectrumDisplay(CcpnModule):
     # FIXME THIS IS ONLY A Starting Point for Assign from SideBar.
     # FIXME Needs to be cleaned up, removed any hacks and crazy axes codes checks!
     if self.current.strip:
-      self._assignNmrAtomsToCurrentPeaks(nmrAtoms)
+      _assignNmrAtomsToPeaks(strip=self.current.strip,
+                             nmrAtoms=nmrAtoms, peaks=self.current.peaks)
 
 
-  def _assignNmrAtomsToCurrentPeaks(self, nmrAtoms):
-    peaks = self.current.peaks
-    if len(peaks) > 0:
-      for peak in peaks:
-        for peakListView in peak.peakList.peakListViews:
-          if peakListView.isVisible():
-            orderedAxes = self.current.strip.orderedAxes
-            for ax in orderedAxes:
-              if ax.code == 'intensity':
-                continue
-              if ax.code:
-                matchingNmrAtoms = []
-                for nmrAtom in nmrAtoms:
-                  if len(ax.code) > 0:
-                    if ax.code.isupper():
-                      if ax.code == nmrAtom.name:
-                        matchingNmrAtoms.append(nmrAtom)
-                        break
-                      else:
-                        if ax.code[0] in nmrAtom.name:
-                          matchingNmrAtoms.append(nmrAtom)
-                    else:
-                      if ax.code[0] in nmrAtom.name:
-                        matchingNmrAtoms.append(nmrAtom)
-                if len(matchingNmrAtoms)>0:
-                  # if ax.code.isupper():
-                    try: # sometime A
-                      peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
-                    except:
-                      peak.assignDimension(ax.code[0], list(set(matchingNmrAtoms)))
-                  # else:
-                  #   peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
+
 
   def _processDragEnterEvent(self, data):
     pass

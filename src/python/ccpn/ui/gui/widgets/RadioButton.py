@@ -28,7 +28,6 @@ class RadioButton(QtWidgets.QRadioButton, Base):
                             ''')
 
   def get(self):
-
     return self.text()
 
   def set(self, text=''):
@@ -36,6 +35,10 @@ class RadioButton(QtWidgets.QRadioButton, Base):
       text = translator.translate(text)
     self.setText(text)
 
+
+  def getText(self):
+    "Get the text of the button"
+    return self.get()
 
 
   def setCallback(self, callback):

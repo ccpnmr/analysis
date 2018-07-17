@@ -54,6 +54,10 @@ class CheckBox(QtWidgets.QCheckBox, Base):
     # self.connect(self, QtCore.SIGNAL('clicked()'), callback)
     self.clicked.connect(callback)
 
+  def getText(self):
+    "Get the text of the button"
+    return self.get()
+
 
 
 class EditableCheckBox(QtWidgets.QWidget, Base):

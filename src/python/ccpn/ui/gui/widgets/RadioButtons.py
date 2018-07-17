@@ -123,16 +123,19 @@ if __name__ == '__main__':
 
   from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-  def testCallback(a):
-    print(a)
+  def testCallback():
+    print('TEST')
 
   app = TestApplication()
-  popup = CcpnDialog(windowTitle='Test radioButtons')
+  popup = CcpnDialog(windowTitle='Test radioButtons', setLayout=True)
 
-
-  radioButtons = RadioButtons(parent=popup, texts=['Test1','Test2','Test3'], selectedInd=1,
-               callback=testCallback, grid=(0, 0))
-  radioButtons.radioButtons[0].setEnabled(False)
+  buttonGroup = QtWidgets.QButtonGroup(popup)
+  # radioButtons = RadioButtons(parent=popup,
+  #              callback=testCallback, grid=(0, 0))
+  for i in range(10):
+    button = RadioButton(popup, text='TEST', grid=(i, 0)
+                         , callback=None)  # partial(self.assignSelect
+    buttonGroup.addButton(button)
 
 
   popup.raise_()

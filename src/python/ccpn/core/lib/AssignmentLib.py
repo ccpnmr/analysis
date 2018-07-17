@@ -721,11 +721,13 @@ def _assignNmrAtomsToPeaks(strip, peaks, nmrAtoms):
                   else:
                     if ax.code[0] in nmrAtom.name:
                       matchingNmrAtoms.append(nmrAtom)
+
               if len(matchingNmrAtoms)>0:
-                # if ax.code.isupper():
-                  try: # sometime A
-                    peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
-                  except:
-                    peak.assignDimension(ax.code[0], list(set(matchingNmrAtoms)))
-                # else:
-                #   peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
+                for aC in (ax.code, *ax.code): # Try to assign based on the crazy names of AxesCodes
+                  try:
+                    peak.assignDimension(aC, list(set(matchingNmrAtoms)))
+                    break
+                  except: # carry on with an other axis Combination (Eg. sometime works H, others Hn)
+                    continue
+                else: # give up
+                  pass

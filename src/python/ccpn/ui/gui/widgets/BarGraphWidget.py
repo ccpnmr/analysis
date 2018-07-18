@@ -43,13 +43,13 @@ class BarGraphWidget(Widget, Base):
     Base.__init__(self, **kw)
     self.application = application
     # set background from application
-    if self.application:
-      if self.application.colourScheme == 'light':
-        self.backgroundColour = '#f7ffff'
-      else:
-        self.backgroundColour = '#080000'
-    else:
-      self.backgroundColour = 'w'
+    # if self.application:
+    #   if self.application.colourScheme == 'light':
+    #     self.backgroundColour = '#f7ffff'
+    #   else:
+    #     self.backgroundColour = '#080000'
+    # else:
+    self.backgroundColour = 'w'
     self.thresholdLineColour = 'b'
 
     self._setViewBox()

@@ -697,6 +697,40 @@ def refitPeaks(peaks:Sequence[Peak], method:str='gaussian'):
   LibPeak.fitExistingPeaks([peak._wrappedData for peak in peaks], method)
 
 
+def _assignNmrResiduesToPeaks(peaks, nmrResidues):
+  ''' CCPN Internal. Used to assign via Drag and drop.
+  Searches for matches of peak Axis code to the nmrAtoms Names of all residues if any will do the assignment'''
+
+
+  for peak in peaks:
+    for axisCode in peak.axisCodes:
+      if axisCode == 'intensity':
+        continue
+      if axisCode:
+        if len(axisCode) > 0:
+          code = axisCode[0]
+          nmrAtoms = [nmrAtom for nmrResidue in nmrResidues for nmrAtom in nmrResidue.nmrAtoms if
+                      code in nmrAtom.name]
+          matchingNmrAtoms = []
+          for nmrAtom in nmrAtoms:
+            if code == nmrAtom.name:
+              matchingNmrAtoms.append(nmrAtom)
+            else:
+              if len(nmrAtoms) > 0:
+                if axisCode == nmrAtom.name:
+                  matchingNmrAtoms.append(nmrAtom)
+                else:
+                  matchingNmrAtoms.append(nmrAtoms[0])
+          if len(matchingNmrAtoms) > 0:
+            if axisCode.isupper():
+              try:
+                peak.assignDimension(axisCode, list(set(matchingNmrAtoms)))
+              except:
+                peak.assignDimension(axisCode[0], list(set(matchingNmrAtoms)))
+            else:
+              peak.assignDimension(axisCode, list(set(matchingNmrAtoms)))
+
+
 def _assignNmrAtomsToPeaks(peaks, nmrAtoms):
   ''' CCPN Internal. Used to assign via Drag and drop and atom selector Module.
   Searches for matches of peak Axis code to the nmrAtoms Names if any will do the assignment'''

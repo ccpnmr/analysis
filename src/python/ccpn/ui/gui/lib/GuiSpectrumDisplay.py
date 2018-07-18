@@ -55,7 +55,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks
+from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
 
 from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
@@ -395,48 +395,16 @@ class GuiSpectrumDisplay(CcpnModule):
       for nmrResidue in nmrResidues:
         self._createNmrResidueMarks(nmrResidue)
 
-    # FIXME THIS IS ONLY A Starting Point for Assign from SideBar
+    # Assign nmrResidues atoms to peaks
     if self.current.strip:
-      peaks = self.current.peaks
-      if len(peaks) > 0:
-        for peak in peaks:
-          for peakListView in peak.peakList.peakListViews:
-            if peakListView.isVisible():
-              orderedAxes = self.current.strip.orderedAxes
-              for ax in orderedAxes:
-                if ax.code == 'intensity':
-                  continue
-                if ax.code:
-                  if len(ax.code) > 0:
-                    code = ax.code[0]
-                    nmrAtoms = [nmrAtom for nmrResidue in nmrResidues for nmrAtom in nmrResidue.nmrAtoms if code in nmrAtom.name]
-                    matchingNmrAtoms = []
-                    for nmrAtom in nmrAtoms:
-                      if code == nmrAtom.name:
-                        matchingNmrAtoms.append(nmrAtom)
-                      else:
-                        if len(nmrAtoms) > 0:
-                          if ax.code == nmrAtom.name:
-                            matchingNmrAtoms.append(nmrAtom)
-                          else:
-                            matchingNmrAtoms.append(nmrAtoms[0])
-                    if len(matchingNmrAtoms) > 0:
-                      if ax.code.isupper():
-                        try:
-                          peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
-                        except:
-                          peak.assignDimension(ax.code[0], list(set(matchingNmrAtoms)))
-                      else:
-                        peak.assignDimension(ax.code, list(set(matchingNmrAtoms)))
-
+      _assignNmrResiduesToPeaks(peaks=self.current.peaks, nmrResidues=nmrResidues)
 
   def _handleNmrAtoms(self, nmrAtoms):
     if not self.current.peak:
       for nmrAtom in nmrAtoms:
         self._markNmrAtom(nmrAtom)
 
-    # FIXME THIS IS ONLY A Starting Point for Assign from SideBar.
-    # FIXME Needs to be cleaned up, removed any hacks and crazy axes codes checks!
+    # Assign nmrAtoms to peaks
     if self.current.strip:
       _assignNmrAtomsToPeaks(nmrAtoms=nmrAtoms, peaks=self.current.peaks)
 

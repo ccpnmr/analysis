@@ -438,8 +438,7 @@ class GuiSpectrumDisplay(CcpnModule):
     # FIXME THIS IS ONLY A Starting Point for Assign from SideBar.
     # FIXME Needs to be cleaned up, removed any hacks and crazy axes codes checks!
     if self.current.strip:
-      _assignNmrAtomsToPeaks(strip=self.current.strip,
-                             nmrAtoms=nmrAtoms, peaks=self.current.peaks)
+      _assignNmrAtomsToPeaks(nmrAtoms=nmrAtoms, peaks=self.current.peaks)
 
 
 

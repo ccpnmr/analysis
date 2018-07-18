@@ -697,37 +697,35 @@ def refitPeaks(peaks:Sequence[Peak], method:str='gaussian'):
   LibPeak.fitExistingPeaks([peak._wrappedData for peak in peaks], method)
 
 
-def _assignNmrAtomsToPeaks(strip, peaks, nmrAtoms):
-  ''' CCPN Internal. Used to assign via Drag and drop and atom selector Module'''
-  if len(peaks) > 0:
-    for peak in peaks:
-      for peakListView in peak.peakList.peakListViews:
-        if peakListView.isVisible():
-          orderedAxes = strip.orderedAxes
-          for ax in orderedAxes:
-            if ax.code == 'intensity':
-              continue
-            if ax.code:
-              matchingNmrAtoms = []
-              for nmrAtom in nmrAtoms:
-                if len(ax.code) > 0:
-                  if ax.code.isupper():
-                    if ax.code == nmrAtom.name:
-                      matchingNmrAtoms.append(nmrAtom)
-                      break
-                    else:
-                      if ax.code[0] in nmrAtom.name:
-                        matchingNmrAtoms.append(nmrAtom)
-                  else:
-                    if ax.code[0] in nmrAtom.name:
-                      matchingNmrAtoms.append(nmrAtom)
+def _assignNmrAtomsToPeaks(peaks, nmrAtoms):
+  ''' CCPN Internal. Used to assign via Drag and drop and atom selector Module.
+  Searches for matches of peak Axis code to the nmrAtoms Names if any will do the assignment'''
 
-              if len(matchingNmrAtoms)>0:
-                for aC in (ax.code, *ax.code): # Try to assign based on the crazy names of AxesCodes
-                  try:
-                    peak.assignDimension(aC, list(set(matchingNmrAtoms)))
-                    break
-                  except: # carry on with an other axis Combination (Eg. sometime works H, others Hn)
-                    continue
-                else: # give up
-                  pass
+  for peak in peaks:
+    for axisCode in peak.axisCodes:
+      if axisCode == 'intensity':
+        continue
+      if axisCode:
+        matchingNmrAtoms = []
+        for nmrAtom in nmrAtoms:
+          if len(axisCode) > 0:
+            if axisCode.isupper():
+              if axisCode == nmrAtom.name:
+                matchingNmrAtoms.append(nmrAtom)
+                break
+              else:
+                if axisCode[0] in nmrAtom.name:
+                  matchingNmrAtoms.append(nmrAtom)
+            else:
+              if axisCode[0] in nmrAtom.name:
+                matchingNmrAtoms.append(nmrAtom)
+
+        if len(matchingNmrAtoms)>0:
+          for aC in (axisCode, *axisCode): # Try to assign based on the crazy names of AxesCodes
+            try:
+              peak.assignDimension(aC, list(set(matchingNmrAtoms)))
+              break
+            except: # carry on with an other axis Combination (Eg. sometime works H, others Hn)
+              continue
+          else: # give up
+            pass

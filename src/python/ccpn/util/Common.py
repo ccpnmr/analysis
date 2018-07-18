@@ -583,6 +583,14 @@ def makeIterableList(inList=None):
     else:
       return []
 
+def _truncateText(text, splitter= ' , ', maxWords=4):
+  "Splits the text by the given splitter. If more then maxWords, it return the maxWord plus dots, otherwise just the text"
+  words = text.split(splitter)
+  if len(words)>maxWords:
+    return splitter.join(words[:maxWords]) + ' ...'
+  else:
+    return text
+
 def _traverse(obj, tree_types=(list, tuple)):
   """
   used to flat the state in a long list

@@ -1200,9 +1200,9 @@ QuickTable::item::selected {
 
       for obj in objList:
         row = self._dataFrameObject.find(self, str(obj.pid))
-        if row:
-          selectionModel.select(self.model().index(row, 0)
-                                         , selectionModel.Select | selectionModel.Rows)
+        if row is not None:
+          selectionModel.select(self.model().index(row, 0),
+                                          selectionModel.Select | selectionModel.Rows)
 
       self.setUpdatesEnabled(True)
       # self.blockSignals(False)

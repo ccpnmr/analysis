@@ -798,6 +798,9 @@ QuickTable::item::selected {
     self.show()
     self._silenceCallback = False
     self.resizeColumnsToContents()
+
+    self.update()
+
     # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
   # def resizeColumnsToContents(self):
@@ -894,7 +897,7 @@ QuickTable::item::selected {
     self.setHorizontalHeaderLabels(dataFrameObject.headings)
     self.showColumns(dataFrameObject)
     # self.resizeColumnsToContents()
-    self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+    # self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
 
     # required to make the header visible
     self.setColumnCount(dataFrameObject.numColumns)
@@ -906,10 +909,11 @@ QuickTable::item::selected {
     if dataFrameObject.dataFrame.empty:
       self.setRowCount(0)
 
-    self.show()
     self._silenceCallback = False
     # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+    self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
     self.resizeColumnsToContents()
+    self.show()
 
     # else:
     #   self.clearTableContents(dataFrameObject=dataFrameObject)

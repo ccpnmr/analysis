@@ -84,9 +84,9 @@ class PreferencesPopup(CcpnDialog):
         self._setTabs()
 
         # self.buttonBox = Button(self, text='Close', callback=self._accept, grid=(1, 2))
-        self.buttonBox = ButtonList(self, texts=['Apply', 'Close'],
-                                    callbacks=[self._applyChanges, self._accept],
-                                    tipTexts=['Apply changes to all strips', 'Close and update preferences'],
+        self.buttonBox = ButtonList(self, texts=['Close', 'Apply'],
+                                    callbacks=[self._accept, self._applyChanges],
+                                    tipTexts=['Close and update preferences', 'Apply changes to all strips'],
                                     direction='h', hAlign='r', grid=(1, 2))
 
     def _applyChanges(self):

@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-05-10 16:04:41 +0000 (Wed, May 10, 2017) $"
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 
 
 class PythonConsoleModule(CcpnModule):
@@ -47,7 +48,8 @@ class PythonConsoleModule(CcpnModule):
     self.mainWindow = mainWindow
     self.application = mainWindow.application
     self.pythonConsoleWidget = self.mainWindow.pythonConsole
-
+    if self.pythonConsoleWidget is None: # For some reason it can get destroid!
+      self.mainWindow.pythonConsole = self.pythonConsoleWidget= IpythonConsole(self)
     self.mainWidget.getLayout().addWidget(self.pythonConsoleWidget)
 
     self.pythonConsoleWidget._startChannels()

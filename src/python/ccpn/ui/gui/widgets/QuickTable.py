@@ -623,6 +623,12 @@ QuickTable::item::selected {
         self._checkBoxCallback(data)
 
   def showColumns(self, dataFrameObject):
+    # # hide all columns
+    # for i in range(self.columnCount()):
+    #   self.hideColumn(i)
+    #
+    # return
+
     # show the columns in the list
     for i, colName in enumerate(dataFrameObject.headings):
       if dataFrameObject.hiddenColumns:
@@ -880,25 +886,42 @@ QuickTable::item::selected {
       # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
       self.setData(dataFrameObject.dataFrame.values)
-      # needed after setting the column headings
-      self.setHorizontalHeaderLabels(dataFrameObject.headings)
-      self.showColumns(dataFrameObject)
-      # self.resizeColumnsToContents()
-      self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
-
-      # required to make the header visible
-      self.setColumnCount(dataFrameObject.numColumns)
     else:
-      self.clearTableContents()
+      # set a dummy row of the correct length
+      self.setData([list(range(len(dataFrameObject.headings)))])
+
+    # needed after setting the column headings
+    self.setHorizontalHeaderLabels(dataFrameObject.headings)
+    self.showColumns(dataFrameObject)
+    # self.resizeColumnsToContents()
+    self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+
+    # required to make the header visible
+    self.setColumnCount(dataFrameObject.numColumns)
 
     # re-sort the table
     if sortColumn < self.columnCount():
       self.sortByColumn(sortColumn, sortOrder)
 
+    if dataFrameObject.dataFrame.empty:
+      self.setRowCount(0)
+
     self.show()
     self._silenceCallback = False
     # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
     self.resizeColumnsToContents()
+
+    # else:
+    #   self.clearTableContents(dataFrameObject=dataFrameObject)
+
+    # # re-sort the table
+    # if sortColumn < self.columnCount():
+    #   self.sortByColumn(sortColumn, sortOrder)
+    #
+    # self.show()
+    # self._silenceCallback = False
+    # # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+    # self.resizeColumnsToContents()
 
   def getDataFrameFromList(self, table=None,
                            buildList=None,
@@ -1234,11 +1257,13 @@ QuickTable::item::selected {
     self.resizeColumnsToContents()
     # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
-  def clearTableContents(self):
+  def clearTableContents(self, dataFrameObject=None):
     self.clearContents()
     self.verticalHeadersSet = True
     self.horizontalHeadersSet = True
     self.sortModes = {}
+
+    self._dataFrameObject = dataFrameObject if dataFrameObject else None
 
     if self._dataFrameObject:
       # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)

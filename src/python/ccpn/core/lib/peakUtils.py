@@ -32,6 +32,7 @@ VOLUME = 'volume'
 LINEWIDTHS = 'lineWidths'
 
 MODES = [POSITIONS, HEIGHT, VOLUME, LINEWIDTHS]
+
 OTHER = 'Other'
 H = 'H'
 N = 'N'

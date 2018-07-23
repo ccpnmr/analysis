@@ -435,7 +435,7 @@ class PeakList(AbstractWrapperObject):
       widths.append(lineWidth)
     return numpy.std(widths)
 
-  def automatic1dPeakPicking(self, sizeFactor=3, negativePeaks=True,minimalLineWidth=None, ignoredRegions=None):
+  def automatic1dPeakPicking(self, sizeFactor=3, negativePeaks=True, minimalLineWidth=None, ignoredRegions=None):
     '''
     :param ignoredRegions: in the form [[-20.1, -19.1]]
     :param noiseThreshold: float
@@ -575,7 +575,6 @@ class PeakList(AbstractWrapperObject):
 
 
   def peakFinder1D(self, deltaFactor = 1.5, ignoredRegions=[[20, 19]], negativePeaks = True):
-    from ccpn.core.lib.peakUtils import _estimateDeltaPeakDetect, _estimateDeltaPeakDetectSTD
     from ccpn.core.lib.peakUtils import peakdet, _getIntersectionPoints, _pairIntersectionPoints
     from scipy import signal
     import numpy as np
@@ -590,9 +589,7 @@ class PeakList(AbstractWrapperObject):
       masked = _filtered1DArray(numpy.array([x,y]), ignoredRegions)
       filteredX, filteredY = masked[0], masked[1]
       SNR, noiseThreshold = _estimateNoiseLevel1D(filteredY)
-      print('SNR: {}, noiseThreshold: {}'.format(SNR, noiseThreshold))
-      # delta = _estimateDeltaPeakDetectSTD(y)
-      # maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=delta*deltaFactor)
+
       maxValues, minValues = peakdet(y=filteredY, x=filteredX, delta=noiseThreshold/deltaFactor)
       for position, height in maxValues:
         peak = self.newPeak(position=[position], height=height)
@@ -623,14 +620,7 @@ class PeakList(AbstractWrapperObject):
     # return peaks
 
 
-  def _testMultiplePicking(self, value=10):
-    spectrum = self.spectrum
-    for i in range(value):
-      peakList = spectrum.newPeakList()
-      import random
 
-      randomFactor =  random.uniform(0, 1)
-      peaks = peakList.automatic1dPeakPicking(sizeFactor=randomFactor*100 )
 
   def copyTo(self, targetSpectrum:Spectrum, **kwargs) -> 'PeakList':
     """Make (and return) a copy of the PeakList attached to targetSpectrum

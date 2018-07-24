@@ -37,7 +37,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.Label import Label
@@ -771,7 +771,7 @@ class ContoursTab(QtWidgets.QWidget, Base):
     positiveContoursCheckBox.stateChanged.connect(self._queueChangePositiveContourDisplay)
 
     positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(2, 0), vAlign='c', hAlign='l')
-    positiveBaseLevelData = DoubleSpinbox(self, grid=(2, 1), vAlign='t')
+    positiveBaseLevelData = ScientificDoubleSpinBox(self, grid=(2, 1), vAlign='t')
     positiveBaseLevelData.setMaximum(1e12)
     positiveBaseLevelData.setMinimum(0.1)
     positiveBaseLevelData.setValue(self.spectrum.positiveContourBase)
@@ -829,7 +829,7 @@ class ContoursTab(QtWidgets.QWidget, Base):
     negativeContoursCheckBox.stateChanged.connect(self._queueChangeNegativeContourDisplay)
 
     negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='c', hAlign='l')
-    negativeBaseLevelData = DoubleSpinbox(self, grid=(7, 1), vAlign='t')
+    negativeBaseLevelData = ScientificDoubleSpinBox(self, grid=(7, 1), vAlign='t')
     negativeBaseLevelData.setMaximum(-0.1)
     negativeBaseLevelData.setMinimum(-1e12)
     negativeBaseLevelData.setValue(self.spectrum.negativeContourBase)

@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -393,8 +393,8 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         zoomPercent = self.preferences.general.zoomPercent
         self.zoomPercentLabel = Label(parent, text="Manual Zoom (%)", grid=(row, 0))
-        self.zoomPercentData = DoubleSpinbox(parent, step=1
-                                             , min=1, max=100, grid=(row, 1), hAlign='l')
+        self.zoomPercentData = DoubleSpinbox(parent, step=1,
+                                             min=1, max=100, grid=(row, 1), hAlign='l')
         self.zoomPercentData.setValue(int(zoomPercent))
         self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
         self.zoomPercentData.editingFinished.connect(self._setZoomPercent)
@@ -402,8 +402,8 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         stripWidthZoomPercent = self.preferences.general.stripWidthZoomPercent
         self.stripWidthZoomPercentLabel = Label(parent, text="Strip Width Zoom (%)", grid=(row, 0))
-        self.stripWidthZoomPercentData = DoubleSpinbox(parent, step=1
-                                                       , min=1, max=100, grid=(row, 1), hAlign='l')
+        self.stripWidthZoomPercentData = DoubleSpinbox(parent, step=1,
+                                                       min=1, max=100, grid=(row, 1), hAlign='l')
         self.stripWidthZoomPercentData.setValue(int(stripWidthZoomPercent))
         self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
         self.stripWidthZoomPercentData.editingFinished.connect(self._setStripWidthZoomPercent)
@@ -439,8 +439,8 @@ class PreferencesPopup(CcpnDialog):
         for aspect in sorted(self.preferences.general.aspectRatios.keys()):
             aspectValue = self.preferences.general.aspectRatios[aspect]
             self.aspectLabel[aspect] = Label(parent, text=aspect, grid=(row, 0), hAlign='r')
-            self.aspectData[aspect] = DoubleSpinbox(parent, step=1
-                                                    , min=1, grid=(row, 1), hAlign='l')
+            self.aspectData[aspect] = ScientificDoubleSpinBox(parent, #step=1,
+                                                              min=1, grid=(row, 1), hAlign='l')
             self.aspectData[aspect].setValue(aspectValue)
             self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
             self.aspectData[aspect].editingFinished.connect(partial(self._setAspect, aspect))
@@ -475,8 +475,8 @@ class PreferencesPopup(CcpnDialog):
                                        )
         row += 1
         self.peakSymbolSizeLabel = Label(parent, text="Peak Symbol Size (ppm)", grid=(row, 0))
-        self.peakSymbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01
-                                                , min=0.01, max=1.0, grid=(row, 1), hAlign='l')
+        self.peakSymbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01,
+                                                min=0.01, max=1.0, grid=(row, 1), hAlign='l')
         self.peakSymbolSizeData.setMinimumWidth(LineEditsMinimumWidth)
         symbolSize = self.preferences.general.peakSymbolSize
         self.peakSymbolSizeData.setValue(float('%.3f' % symbolSize))
@@ -484,8 +484,8 @@ class PreferencesPopup(CcpnDialog):
 
         row += 1
         self.peakSymbolThicknessLabel = Label(parent, text="Peak Symbol Thickness (point)", grid=(row, 0))
-        self.peakSymbolThicknessData = Spinbox(parent, step=1
-                                               , min=1, max=20, grid=(row, 1), hAlign='l')
+        self.peakSymbolThicknessData = Spinbox(parent, step=1,
+                                               min=1, max=20, grid=(row, 1), hAlign='l')
         self.peakSymbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         symbolThickness = self.preferences.general.peakSymbolThickness
         self.peakSymbolThicknessData.setValue(int(symbolThickness))

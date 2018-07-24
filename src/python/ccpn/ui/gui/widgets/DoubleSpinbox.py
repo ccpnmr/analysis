@@ -31,6 +31,7 @@ import sys
 import re
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
+from math import floor, log10
 
 
 class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
@@ -127,11 +128,14 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         self._callback = callback
 
 
+
 # Regular expression to find floats. Match groups are the whole string, the
 # whole coefficient, the decimal part of the coefficient, and the exponent
 # part.
 _float_re = re.compile(r'(([+-]?\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?)')
 
+def fexp(f):
+    return int(floor(log10(abs(f)))) if f != 0 else 0
 
 def valid_float_string(string):
     match = _float_re.search(string)
@@ -153,12 +157,11 @@ class FloatValidator(QtGui.QValidator):
 
 
 class ScientificDoubleSpinBox(DoubleSpinbox):
-
+    """Constructs a spinbox in which the values can be set using Sci notation
+    """
     def __init__(self, *args, **kwargs):
-        super(ScientificDoubleSpinBox, self).__init__(*args, **kwargs)
-        # self.setMinimum(-np.inf)
-        # self.setMaximum(np.inf)
         self.validator = FloatValidator()
+        super(ScientificDoubleSpinBox, self).__init__(*args, **kwargs)
         self.setDecimals(1000)
 
     def validate(self, text, position):
@@ -174,16 +177,22 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         return self.format_float(value)
 
     def stepBy(self, steps):
+        """Increment the current value.
+        Step if 1/10th of the current rounded value * step
+        """
         text = self.cleanText()
         groups = _float_re.search(text).groups()
         decimal = float(groups[1])
         # decimal += steps
-        decimal += steps * (decimal / 10)
-        new_string = "{:g}".format(decimal) + (groups[3] if groups[3] else "")
-        self.lineEdit().setText(new_string)
+        decimal += steps * 10**fexp(decimal/10)     #     (decimal / 10)
+        new_string = '{:g}'.format(decimal) + (groups[3] if groups[3] else '')
+
+        # the double convert ensures number stays to the closest Sci notation
+        self.lineEdit().setText(self.textFromValue(self.valueFromText(new_string)))
 
     def format_float(self, value):
-        """Modified form of the 'g' format specifier."""
+        """Modified form of the 'g' format specifier.
+        """
         string = "{:g}".format(value).replace("e+", "e")
         string = re.sub("e(-?)0*(\d+)", r"e\1\2", string)
         return string

@@ -55,7 +55,7 @@ DefaultPeakListIndex = -1
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
-
+# see in ccpn.core.PeakList.py function peakFinder1D
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
@@ -125,7 +125,7 @@ class PeakPicker1DPipe(SpectraPipe):
                                                               ignoredRegions=excludeRegions,
                                                               negativePeaks = negativePeaks)
       else:
-        getLogger().warning('Error: PeakList not found. Add a new PeakList first')
+        getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
 
     return spectra
 

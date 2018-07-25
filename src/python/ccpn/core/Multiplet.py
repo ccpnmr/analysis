@@ -280,7 +280,7 @@ class Multiplet(AbstractWrapperObject):
 
   @property
   def lineWidths(self) -> Tuple[Optional[float], ...]:
-    """Full-width-half-height of peak/multiplet for each dimension, in Hz. """
+    """Full-width-half-height of peak/multiplet for each dimension. """
     result = tuple()
     pks = self.peaks
     pksWidths = [pp.lineWidths for pp in pks]
@@ -288,6 +288,10 @@ class Multiplet(AbstractWrapperObject):
       result = tuple(sum(item) for item in zip(*pksWidths))
     finally:
       return result
+
+  @lineWidths.setter
+  def lineWidths(self, value):
+    self.lineWidths = value
 
   # Implementation functions
   @classmethod
@@ -364,12 +368,12 @@ class Multiplet(AbstractWrapperObject):
 def _newMultiplet(self:MultipletList, 
                   height:float=0.0, heightError:float=0.0,
                   volume: float = 0.0, volumeError: float = 0.0,
-                  offset: float = None, constraintWeight:float=None,
+                  offset: float = 0.0, constraintWeight:float=0.0,
                   figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
-                  position:List[float]=None, positionError: List[float] =None,
-                  limits:Sequence[Tuple[float,float]]=(), slopes:List[float]=None,
+                  position:List[float]=(), positionError: List[float] =(),
+                  limits:Sequence[Tuple[float,float]]=(), slopes:List[float]=(),
                   pointLimits:Sequence[Tuple[float,float]]=(),
-                  peaks:['Peak']=None) -> Multiplet:
+                  peaks:['Peak']=()) -> Multiplet:
 
   """Create new Multiplet within multipletList"""
 
@@ -385,15 +389,15 @@ def _newMultiplet(self:MultipletList,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
   defaults = collections.OrderedDict((('annotation', None),
-                                      ('height', 0.0), ('heightError', None),
-                                      ('volume', None), ('volumeError', None),
-                                      ('offset', None),
+                                      ('height', 0.0), ('heightError', 0.0),
+                                      ('volume', 0.0), ('volumeError', 0.0),
+                                      ('offset', 0.0),
                                       ('figureOfMerit', 1.0),
-                                      ('constraintWeight', None),
+                                      ('constraintWeight', 0.0),
                                       ('comment', None),
-                                      ('position', None), ('positionError', None),
+                                      ('position', ()), ('positionError', ()),
                                       ('limits', ()), ('slopes', ()), ('pointLimits', ()),
-                                      ('peaks', None)))
+                                      ('peaks', [])))
   dd = {'height':height, 'heightError':heightError, 
         'volume':volume, 'volumeError':volumeError, 'offset':offset, 'slopes':slopes,
         'figOfMerit': figureOfMerit, 'constraintWeight':constraintWeight,
@@ -401,7 +405,7 @@ def _newMultiplet(self:MultipletList,
         # 'position': position, 'positionError': positionError,   # these can't be set
         'limits':limits, 'pointLimits':pointLimits}
   if peaks:
-    dd['peaks'] = peaks
+    dd['peaks'] = [p._wrappedData for p in peaks]
 
   undo = self._project._undo
   self._startCommandEchoBlock('newMultiplet', values=locals(), defaults=defaults,

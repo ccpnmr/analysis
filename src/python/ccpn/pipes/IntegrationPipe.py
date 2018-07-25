@@ -124,7 +124,8 @@ class CalculateAreaPipe(SpectraPipe):
                                                                              noiseThreshold=positiveNoiseThreshold)
 
       else:
-        getLogger().warning('Error: IntegralList not found. Add a new IntegralList first')
+        integralList = spectrum.newIntegralList()
+        integralList.automaticIntegral1D(minimalLineWidth=float(minimalLineWidth),noiseThreshold=positiveNoiseThreshold)
 
     return spectra
 

@@ -123,17 +123,17 @@ class AssignMultipletsPipe(SpectraPipe):
     for spectrum in spectra:
       noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum, estimateNoiseThreshold_var=EstimateNoiseThreshold,
                                              noiseThreshold_var=NoiseThreshold)
-      if noiseThreshold:
+      if noiseThreshold and len(noiseThreshold)>=1:
         positiveNoiseThreshold = noiseThreshold[1]
 
       peakListIndex = int(DefaultReferencePeakList)
-      if len(spectrum.peakLists) > 0:
+      if len(spectrum.peakLists) >= peakListIndex:
         referencePeakList = spectrum.peakLists[peakListIndex]
         if referencePeakList is not None:
           if referencePeakList.peaks:
             _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth = minimalLineWidth)
           else:
-            getLogger().warning('Error: Found no peaks to assign a volume value. Pick the peaks first.')
+            getLogger().warning('Error: Found no peaks to assign a volume value. Pick peaks first.')
       else:
         getLogger().warning('Error: PeakLists not found. Add a new PeakList first')
 

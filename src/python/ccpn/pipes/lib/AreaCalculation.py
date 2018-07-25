@@ -38,6 +38,7 @@ import numpy as np
 from scipy.integrate import trapz
 from ccpn.core.IntegralList import _getPeaksLimits
 
+from ccpn.util.Logging import getLogger , _debug3
 
 
 
@@ -86,10 +87,9 @@ def _getMultiplet(peaks, limitA, limitB):
   '''
   multiplet = []
   for peak in peaks:
-    print(peaks)
     matchedPosition = _matchingPosition(np.array(peak.position), limitA, limitB)
     if matchedPosition:
-      multiplet.append((peak))
+      multiplet.append(peak)
   if len(multiplet) > 0:
     return multiplet
   else:
@@ -144,7 +144,7 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
   peaks = []
   # integrals = []
 
-  newPeakList = spectrum.newPeakList()
+  newMultipletList = spectrum.newMultipletList()
   # if spectrum.integralLists:
   #   integralList = spectrum.integralLists[0]
   # else:
@@ -154,20 +154,31 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
     lineWidth = abs(i[0] - i[1]) # calculate line width
     if lineWidth > minimalLineWidth:  # an attempt to exclude noise
       index01 = np.where((x <= i[0]) & (x >= i[1])) # calculate integrals
-      integral = trapz(index01)
-      multiplet = _getMultiplet(peakList.peaks, limitA=i[0], limitB=i[1]) # get multiplets
+      values = spectrum.intensities[index01]
 
+      integral = trapz(values)
+      multipletPeaks = _getMultiplet(peakList.peaks, limitA=i[0], limitB=i[1]) # get multiplets
       # calculate center of mass position for multiplets, these will be the new peak position and the multipl will be counted as one single peak.
-      centerOfMass = _calculateCenterOfMass(multiplet)
+      # centerOfMass = _calculateCenterOfMass(multipletPeaks)
       # calculate new intensity for multiplet ( if single peak stays the same)
-      height = _getMultipletIntensity(multiplet)
-      if centerOfMass and  height is not None:
-        ## create a new Peak object
-        spectrum.project.suspendNotification()
-        try:
-          peak = newPeakList.newPeak(height= height, position = (centerOfMass,),volume= float(integral),lineWidths= (lineWidth,))
-          peaks.append(peak)
-          # integral = integralList.newIntegral(value=float(integral), limits=[[min(i), max(i)],])
-          # integrals.append(integral)
-        finally:
-          spectrum.project.resumeNotification()
+      # height = _getMultipletIntensity(multipletPeaks)
+      # if centerOfMass and  height is not None:
+      ## create a new Peak object
+      spectrum.project.suspendNotification()
+      try:
+        multiplet = newMultipletList.newMultiplet(peaks = multipletPeaks, volume= float(integral))
+        multiplet.lineWidths = (lineWidth,)
+        if len(multipletPeaks)==1:
+          peak = multipletPeaks[0]
+          peak.lineWidths = (lineWidth,)
+          peak.volume = float(integral)
+
+        # peak = newPeakList.newPeak(height= height, position = (centerOfMass,),volume= float(integral),lineWidths= (lineWidth,))
+        # peaks.append(peak)
+        # integral = integralList.newIntegral(value=float(integral), limits=[[min(i), max(i)],])
+        # integrals.append(integral)
+      except Exception as e:
+        getLogger().warning('Error: %s' %e)
+
+      finally:
+        spectrum.project.resumeNotification()

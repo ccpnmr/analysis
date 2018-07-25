@@ -52,6 +52,7 @@ from ccpn.util import Ticks
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
 from ccpn.util.Logging import getLogger
+from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
 
@@ -634,13 +635,13 @@ class GuiStrip(Frame):
 
     mouseMovedDict = self.current.mouseMovedDict
     if direction == 0:
-      for mm in mouseMovedDict.keys():
+      for mm in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
         if mm[0] == self.axisCodes[0][0]:
-          position = mouseMovedDict[mm]
+          position = mouseMovedDict[AXIS_MATCHATOMTYPE][mm]
     else:
-      for mm in mouseMovedDict.keys():
+      for mm in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
         if mm[0] == self.axisCodes[1][0]:
-          position = mouseMovedDict[mm]
+          position = mouseMovedDict[AXIS_MATCHATOMTYPE][mm]
 
     phasingFrame.pivotEntry.set(position)
     self._updatePivot()
@@ -1091,7 +1092,7 @@ class GuiStrip(Frame):
 
       colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
 
-      positions = [self.current.mouseMovedDict[ax] for ax in self.axisCodes]
+      positions = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
       self._project.newMark(colourDict[guiSettings.DEFAULT], positions, self.axisCodes)  # the 'white' is overridden in PlotWidget._addRulerLine()
       # self._project.newMark('#e0e0e0', self.current.cursorPosition[:2], self.axisCodes[:2])  # the 'white' is overridden in PlotWidget._addRulerLine()
 

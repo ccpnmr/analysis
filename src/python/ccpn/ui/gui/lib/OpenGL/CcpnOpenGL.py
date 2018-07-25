@@ -79,7 +79,7 @@ from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
-from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu,MultipletMenu, PhasingMenu
+from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, MultipletMenu, PhasingMenu
 
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
@@ -105,6 +105,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExterna
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import CcpnOpenGLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.util.Common import makeIterableList
+from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
 
 try:
   from OpenGL import GL, GLU, GLUT
@@ -1509,7 +1510,10 @@ class CcpnGLWidget(QOpenGLWidget):
     try:
       mouseMovedDict = self.current.mouseMovedDict
     except:
-      mouseMovedDict = dict(strip=self._parent)   #strip)
+      # initialise a new mouse moved dict
+      mouseMovedDict = {'strip':self._parent,
+                        AXIS_MATCHATOMTYPE:{},
+                        AXIS_FULLATOMNAME:{}}     #     dict(strip=self._parent)   #strip)
 
     xPos = yPos = 0
     for n, axisCode in enumerate(self._axisCodes):
@@ -1518,12 +1522,11 @@ class CcpnGLWidget(QOpenGLWidget):
       elif n == 1:
         yPos = pos = self.cursorCoordinate[1]
       else:
-        try:
-          # get the remaining axes
-          pos = self._orderedAxes[n].position
-        except:
-          pos = 0
-      mouseMovedDict[axisCode] = pos
+        pos = self._orderedAxes[n].position if n in self._orderedAxes else 0
+
+      # populate the mouse moved dict
+      mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
+      mouseMovedDict[AXIS_FULLATOMNAME][axisCode] = pos
 
     self.current.cursorPosition = (xPos, yPos) # TODO: is there a better place for this to be set?
     self.current.mouseMovedDict = mouseMovedDict
@@ -4797,17 +4800,29 @@ class CcpnGLWidget(QOpenGLWidget):
 
       currentPos = self.current.cursorPosition
 
-      # cursorPosition = self.cursorCoordinates
-      for n, axis in enumerate(self._axisOrder[:2]):
-        if self._preferences.matchAxisCode == 0:       # default - match atom type
-          for ax in mouseMovedDict.keys():
+      if self._preferences.matchAxisCode == AXIS_MATCHATOMTYPE:
+        for n, axis in enumerate(self._axisOrder[:2]):
+          for ax in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
             if ax and axis and ax[0] == axis[0]:
-              self.cursorCoordinate[n] = mouseMovedDict[ax]
+              self.cursorCoordinate[n] = mouseMovedDict[AXIS_MATCHATOMTYPE][ax]
               break
+      elif self._preferences.matchAxisCode == AXIS_FULLATOMNAME:
+        for n, axis in enumerate(self._axisOrder[:2]):
+          for ax in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+            if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
+              self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
 
-        elif self._preferences.matchAxisCode == 1:     # match full code
-          if axis in mouseMovedDict.keys():
-            self.cursorCoordinate[n] = mouseMovedDict[axis]
+      # # cursorPosition = self.cursorCoordinates
+      # for n, axis in enumerate(self._axisOrder[:2]):
+      #   if self._preferences.matchAxisCode == 0:       # default - match atom type
+      #     for ax in mouseMovedDict.keys():
+      #       if ax and axis and ax[0] == axis[0]:
+      #         self.cursorCoordinate[n] = mouseMovedDict[ax]
+      #         break
+      #
+      #   elif self._preferences.matchAxisCode == 1:     # match full code
+      #     if axis in mouseMovedDict.keys():
+      #       self.cursorCoordinate[n] = mouseMovedDict[axis]
 
       # if cursorPosition:
       #   position = list(cursorPosition)

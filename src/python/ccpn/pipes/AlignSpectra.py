@@ -104,7 +104,6 @@ def _alignSpectra(referenceSpectrum, spectra, referenceRegion=(3,2),intensityFac
   # get estimated IntensityFactor
   mxValues = [max(maxYTargs), maxYRef]
   eIf = abs(max(mxValues)/min(mxValues))*intensityFactor
-  print(eIf, 'FFFF')
   eif = 10**len(str(int(eIf)))
   # get a common shift from all the shifts found
   if engine in Engines.keys():
@@ -118,14 +117,18 @@ def _alignSpectra(referenceSpectrum, spectra, referenceRegion=(3,2),intensityFac
   # Apply the shift to all spectra
   for sp in spectra:
     if shift is not None:
-
-      print('intensityFactor', intensityFactor, 'shift = ', float(shift)/eif)
-
       sp.positions -= float(shift)/eif
       alignedSpectra.append(sp)
   return alignedSpectra
 
 
+def addShiftToSpectra(spectra, shift):
+  alignedSpectra=[]
+  for sp in spectra:
+    if shift is not None:
+      sp.positions += float(shift)
+      alignedSpectra.append(sp)
+  return alignedSpectra
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################

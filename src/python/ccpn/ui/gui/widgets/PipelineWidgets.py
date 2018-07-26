@@ -35,7 +35,7 @@ from ccpn.ui.gui.lib.GuiGenerator import generateWidget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -57,6 +57,7 @@ commonWidgets =           {
                             CheckBox.__name__:              ('get',         'setChecked'),
                             ColourDialog.__name__:          ('getColor',    'setColor'  ),
                             DoubleSpinbox.__name__:         ('value',       'setValue'  ),
+                            ScientificDoubleSpinBox.__name__:('value',       'setValue'  ),
                             Label.__name__:                 ('get',         'setText'   ),
                             LineEdit.__name__:              ('get',         'setText'   ),
                             LineEditButtonDialog.__name__:  ('get',         'setText'   ),

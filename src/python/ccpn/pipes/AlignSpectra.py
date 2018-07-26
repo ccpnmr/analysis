@@ -27,11 +27,15 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
+
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from scipy import signal
 import numpy as np
+from scipy import stats
 from ccpn.util.Logging import getLogger , _debug3
 
 
@@ -41,8 +45,15 @@ from ccpn.util.Logging import getLogger , _debug3
 ########################################################################################################################
 
 ReferenceSpectrum = 'Reference_Spectrum'
-PipeName = 'AlignSpectra'
+PipeName = 'Align Spectra'
 HeaderText = '-- Select Spectrum --'
+IntensityFactor = 'Intensity_Factor'
+DefaultIntensityFactor = 10.0
+ReferenceRegion = 'Reference_Region'
+DefaultReferenceRegion = (3.5, 2.5)
+EnginesVar = 'Engines'
+Engines = {'median': np.median, 'mode':stats.mode, 'mean':np.mean}
+DefaultEngine = 'median'
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -60,14 +71,58 @@ def _getShift(ref_x, ref_y, target_y):
   return (np.argmax(signal.correlate(ref_y, target_y)) - len(target_y)) * np.mean(np.diff(ref_x))
 
 
-def _alignSpectra(referenceSpectrum, spectra):
+def _alignSpectra(referenceSpectrum, spectra, referenceRegion=(3,2),intensityFactor=1.0, engine='median'):
+  '''
+
+  :param referenceSpectrum:
+  :param spectra:
+  :param referenceRegion:
+  :param intensityFactor:
+  :param engine: one of 'median', 'mode', 'mean'
+  :return:
+  '''
 
   alignedSpectra = []
+  shifts = []
+  point1, point2 = max(referenceRegion), min(referenceRegion)
+  xRef, yRef = referenceSpectrum.positions, referenceSpectrum.intensities
+  ref_x_filtered = np.where((xRef <= point1) & (xRef >= point2))
+  ref_y_filtered = yRef[ref_x_filtered]
+  maxYRef = max(ref_y_filtered)
+  #  find the shift for each spectrum
+
+  maxYTargs = [0.01] # a non zero default
   for sp in spectra:
-    shift = _getShift(ref_x=referenceSpectrum.positions, ref_y=referenceSpectrum.intensities, target_y=sp.intensities)
-    sp._positions = sp.positions
-    sp._positions += shift
-    alignedSpectra.append(sp)
+    xTarg, yTarg = sp.positions, sp.intensities
+    x_TargetFilter = np.where((xTarg <= point1) & (xTarg >= point2))
+    y_TargetValues = yTarg[x_TargetFilter]
+    maxYTargs.append(max(y_TargetValues))
+    shift = _getShift(ref_x_filtered, ref_y_filtered, y_TargetValues)
+    if shift is not None:
+      shifts.append(shift)
+
+  # get estimated IntensityFactor
+  mxValues = [max(maxYTargs), maxYRef]
+  eIf = abs(max(mxValues)/min(mxValues))*intensityFactor
+  print(eIf, 'FFFF')
+  eif = 10**len(str(int(eIf)))
+  # get a common shift from all the shifts found
+  if engine in Engines.keys():
+    shift = Engines[engine](shifts)
+    if isinstance(shift, stats.stats.ModeResult):
+      shift = shift.mode[0]
+
+  else: # default
+    shift = np.median(shifts)
+
+  # Apply the shift to all spectra
+  for sp in spectra:
+    if shift is not None:
+
+      print('intensityFactor', intensityFactor, 'shift = ', float(shift)/eif)
+
+      sp.positions -= float(shift)/eif
+      alignedSpectra.append(sp)
   return alignedSpectra
 
 
@@ -86,8 +141,31 @@ class AlignSpectraGuiPipe(GuiPipe):
     super(AlignSpectraGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-    self.spectrumLabel = Label(self.pipeFrame, ReferenceSpectrum,  grid=(0,0))
-    setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame, headerText=HeaderText, headerIcon=self._warningIcon,  grid=(0,1)) )
+
+    row = 0
+    #  Reference Spectrum
+    self.spectrumLabel = Label(self.pipeFrame, ReferenceSpectrum,  grid=(row,0))
+    setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame, headerText=HeaderText,
+                                                  headerIcon=self._warningIcon, grid=(row,1)))
+    row += 1
+
+    # target region
+    self.tregionLabel = Label(self.pipeFrame, text=ReferenceRegion, grid=(row, 0))
+    setattr(self, ReferenceRegion, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
+                                                                    values=DefaultReferenceRegion, orientation='v',
+                                                                    grid=(row, 1)))
+    row += 1
+
+    # factor
+    self.factorLabel = Label(self.pipeFrame, IntensityFactor, grid=(row, 0))
+    setattr(self, IntensityFactor, ScientificDoubleSpinBox(self.pipeFrame, value=DefaultIntensityFactor,
+                                                 max = 1e20,min=0.01, grid=(row, 1)))
+
+    row += 1
+    #  Engines
+    self.enginesLabel = Label(self.pipeFrame, EnginesVar, grid=(row, 0))
+    setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=list(Engines.keys()), grid=(row, 1)))
+
     self._updateWidgets()
 
   def _updateWidgets(self):
@@ -116,7 +194,10 @@ class AlignSpectra(SpectraPipe):
   pipeName = PipeName
 
   _kwargs  =   {
-               ReferenceSpectrum: 'spectrum.pid'
+               ReferenceSpectrum: 'spectrum.pid',
+               IntensityFactor  :DefaultIntensityFactor,
+               ReferenceRegion  :DefaultReferenceRegion,
+               EnginesVar       :DefaultEngine
                }
 
 
@@ -126,14 +207,20 @@ class AlignSpectra(SpectraPipe):
     :param spectra: inputData
     :return: aligned spectra
     '''
+    referenceRegion = self._kwargs[ReferenceRegion]
+    intensityFactor = self._kwargs[IntensityFactor]
+    engine = self._kwargs[EnginesVar]
     if self.project is not None:
       referenceSpectrumPid = self._kwargs[ReferenceSpectrum]
       referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
       if referenceSpectrum is not None:
         spectra = [spectrum for spectrum in spectra if spectrum != referenceSpectrum]
         if spectra:
-          return _alignSpectra(referenceSpectrum, spectra)
-
+          return _alignSpectra(referenceSpectrum, spectra,
+                               referenceRegion=referenceRegion,intensityFactor=intensityFactor,engine=engine)
+        else:
+          getLogger().warning('Spectra not Aligned. Returned original spectra')
+          return spectra
       else:
         getLogger().warning('Spectra not Aligned. Returned original spectra')
         return spectra

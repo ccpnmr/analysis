@@ -44,7 +44,7 @@ PipeName = 'Calculate Integrals'
 IntegralListIndex = 'Add_To_Integral'
 NoiseThreshold = 'Noise_Threshold'
 MinimalLineWidth = 'Minimal_LineWidth'
-FindPeak = 'Link_peak'
+FindPeak = 'Find_peak'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 
 DefaultMinimalLineWidth =  0.01

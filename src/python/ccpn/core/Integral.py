@@ -360,6 +360,7 @@ def _newIntegral(self:IntegralList,
     apiIntegral = apiParent.newIntegral(**dd)
 
     result = self._project._data2Obj.get(apiIntegral)
+    result.limits = limits #needs to fire the first time for automatic calculation of the value
     # if pointLimits:
     #   result.pointLimits = pointLimits
     # elif limits:

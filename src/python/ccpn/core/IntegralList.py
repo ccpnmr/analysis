@@ -174,15 +174,18 @@ class IntegralList(AbstractWrapperObject):
 
   # Library functions
 
-  def automaticIntegral1D(self, minimalLineWidth=0.01, noiseThreshold=None,) -> List['Integral']:
+  def automaticIntegral1D(self, minimalLineWidth=0.01,deltaFactor=1.5, findPeak=False, noiseThreshold=None) -> List['Integral']:
     """
     minimalLineWidth:  an attempt to exclude noise. Below this threshold the area is discarded.
     noiseThreshold: value used to calculate the intersectingLine to get the peak limits
     """
     # TODO: add excludeRegions option. Calculate Negative peak integral.
     # self._project.suspendNotification()
+    from ccpn.core.lib.peakUtils import peakdet
+
     try:
       spectrum = self.spectrum
+      peakList = spectrum.newPeakList()
       x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
       if noiseThreshold is None:
         intersectingLine = None
@@ -196,6 +199,34 @@ class IntegralList(AbstractWrapperObject):
         lineWidth = abs(i[0] - i[1])
         if lineWidth > minimalLineWidth:
           newIntegral = self.newIntegral(value= None, limits=[[min(i), max(i)],])
+          filteredX = np.where((x <= i[0]) & (x >= i[1]))
+          filteredY = spectrum.intensities[filteredX]
+          if findPeak: # pick peaks and link to integral
+            maxValues, minValues = peakdet(y=filteredY, x=filteredX[0], delta=noiseThreshold / deltaFactor)
+            if len(maxValues)>1: #calculate centre of mass or     #   add to multiplet ??
+
+              positions=[]
+              heights =[]
+              numerator = []
+              for position, height in maxValues:
+                positions.append(x[position])
+                heights.append(height)
+              for p, h in zip(positions, heights):
+                numerator.append(p * h)
+                centerOfMass = sum(numerator) / sum(heights)
+                newPeak = peakList.newPeak(position=[centerOfMass, ], height=max(heights))
+                newIntegral.peak = newPeak
+                newPeak.volume = newIntegral.value
+                newPeak.lineWidths = (lineWidth,)
+
+            else:
+              for position, height in maxValues:
+                newPeak = peakList.newPeak(position=[float(x[position]),], height=height)
+                newIntegral.peak = newPeak
+                newPeak.volume = newIntegral.value
+                newPeak.lineWidths = (lineWidth,)
+
+
           if intersectingLine:
             newIntegral._baseline = intersectingLine[0]
 

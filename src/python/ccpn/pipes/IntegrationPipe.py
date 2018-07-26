@@ -27,6 +27,8 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
@@ -42,11 +44,13 @@ PipeName = 'Calculate Integrals'
 IntegralListIndex = 'Add_To_Integral'
 NoiseThreshold = 'Noise_Threshold'
 MinimalLineWidth = 'Minimal_LineWidth'
+FindPeak = 'Link_peak'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 
 DefaultMinimalLineWidth =  0.01
 DefaultNoiseThreshold = [0.0, 0.0]
 DefaultIntegralListIndex = -1
+DefaultFindPeak = True
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -76,6 +80,10 @@ class CalculateAreaGuiPipe(GuiPipe):
 
     self.mlwLabel = Label(self.pipeFrame, MinimalLineWidth, grid=(row, 0))
     setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
+    
+    row += 1
+    self.peakLabel = Label(self.pipeFrame, FindPeak, grid=(row, 0))
+    setattr(self, FindPeak, CheckBox(self.pipeFrame, checked=DefaultFindPeak, grid=(row, 1)))
 
 
 
@@ -96,6 +104,7 @@ class CalculateAreaPipe(SpectraPipe):
                     NoiseThreshold: DefaultNoiseThreshold,
                     MinimalLineWidth: DefaultMinimalLineWidth,
                     EstimateNoiseThreshold: True,
+                    FindPeak: DefaultFindPeak
                    }
 
 
@@ -110,6 +119,7 @@ class CalculateAreaPipe(SpectraPipe):
 
     minimalLineWidth = self._kwargs[MinimalLineWidth]
     positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
+    findPeak = self._kwargs[FindPeak]
 
     for spectrum in spectra:
       noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum,
@@ -121,11 +131,13 @@ class CalculateAreaPipe(SpectraPipe):
 
       if len(spectrum.integralLists) > 0:
         spectrum.integralLists[DefaultIntegralListIndex].automaticIntegral1D(minimalLineWidth=float(minimalLineWidth),
-                                                                             noiseThreshold=positiveNoiseThreshold)
+                                                                             noiseThreshold=positiveNoiseThreshold,
+                                                                             findPeak = findPeak)
 
       else:
         integralList = spectrum.newIntegralList()
-        integralList.automaticIntegral1D(minimalLineWidth=float(minimalLineWidth),noiseThreshold=positiveNoiseThreshold)
+        integralList.automaticIntegral1D(minimalLineWidth=float(minimalLineWidth),noiseThreshold=positiveNoiseThreshold,
+                                         findPeak=findPeak)
 
     return spectra
 

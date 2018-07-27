@@ -27,44 +27,44 @@ __date__ = "$Date$"
 
 import sys
 import math
-from threading import Thread
+# from threading import Thread
 # from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
-from PyQt5.QtWidgets import QApplication, QOpenGLWidget
+# from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
+# from PyQt5.QtWidgets import QApplication, QOpenGLWidget
 from ccpn.util.Logging import getLogger
 import numpy as np
-from pyqtgraph import functions as fn
-from ccpn.core.PeakList import PeakList
-from ccpn.core.IntegralList import IntegralList
-from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
-from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, MultipletMenu, PhasingMenu
+# from pyqtgraph import functions as fn
+# from ccpn.core.PeakList import PeakList
+# from ccpn.core.IntegralList import IntegralList
+# from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
+# from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, MultipletMenu, PhasingMenu
 
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \
     CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours
-from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
-import ccpn.util.Phasing as Phasing
-from ccpn.ui.gui.lib.mouseEvents import \
-    leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
-    middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
+# from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
+# import ccpn.util.Phasing as Phasing
+# from ccpn.ui.gui.lib.mouseEvents import \
+#     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
+#     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
+# from ccpn.core.lib.Notifiers import Notifier
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDERMODE_DRAW, \
     GLRENDERMODE_RESCALE, GLRENDERMODE_REBUILD, \
     GLREFRESHMODE_NEVER, GLREFRESHMODE_ALWAYS, \
     GLREFRESHMODE_REBUILD, GLVertexArray, \
     GLPeakLabelsArray, GLPeakListArray
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
-    GLRegion, REGION_COLOURS
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
+#     GLRegion, REGION_COLOURS
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-from ccpn.util.Common import makeIterableList
-from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
+# from ccpn.util.Common import makeIterableList
+# from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
 
 
 try:
@@ -89,8 +89,8 @@ class GLLabelling():
         self.labelict = labelDict
         self.objectList = objectList
 
-        self._GLSymbolItems = {}
-        self._GLSymbolLabels = {}
+        self._GLSymbolItems = symbolDict
+        self._GLSymbolLabels = labelDict
 
     def _isSelected(self, obj):
         """return True if the obj in the defined object list
@@ -98,22 +98,127 @@ class GLLabelling():
         if self.objectList:
             return obj in self.objectList
 
+    def _rescalePeakList(self, spectrumView, peakListView):
+        drawList = self._GLSymbolItems[peakListView]
+
+        # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
+
+        symbolType = self.strip.peakSymbolType
+        symbolWidth = self.strip.peakSymbolSize / 2.0
+        x = abs(self._GLParent.pixelX)
+        y = abs(self._GLParent.pixelY)
+
+        # fix the aspect ratio of the cross to match the screen
+        minIndex = 0 if x <= y else 1
+        # pos = [symbolWidth, symbolWidth * y / x]
+        # w = r = pos[minIndex]
+
+        if x <= y:
+            r = symbolWidth
+            w = symbolWidth * y / x
+        else:
+            w = symbolWidth
+            r = symbolWidth * x / y
+
+        if symbolType == 0:  # a cross
+            # drawList.clearVertices()
+            # drawList.vertices.copy(drawList.attribs)
+            offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
+            for pp in range(0, 2 * drawList.numVertices, 8):
+                drawList.vertices[pp:pp + 8] = drawList.attribs[pp:pp + 8] + offsets
+
+        elif symbolType == 1:  # an ellipse
+            numPoints = 12
+            angPlus = 1.0 * np.pi
+            skip = 2
+
+            np2 = 2 * numPoints
+            ang = list(range(numPoints))
+
+            offsets = np.empty(56)
+            for an in ang:
+                offsets[4 * an:4 * an + 4] = [- r * math.sin(skip * an * angPlus / numPoints),
+                                              - w * math.cos(skip * an * angPlus / numPoints),
+                                              - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                              - w * math.cos((skip * an + 1) * angPlus / numPoints)]
+                offsets[48:56] = [-r, -w, +r, +w, +r, -w, -r, +w]
+
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+                if drawList.pids[pp + 2] == 12:
+                    index = 2 * drawList.pids[pp + 1]
+                    drawList.vertices[index:index + 56] = drawList.attribs[index:index + 56] + offsets
+
+        elif symbolType == 2:  # filled ellipse
+            numPoints = 12
+            angPlus = 1.0 * np.pi
+            skip = 2
+
+            np2 = 2 * numPoints
+            ang = list(range(numPoints))
+
+            offsets = np.empty(48)
+            for an in ang:
+                offsets[4 * an:4 * an + 4] = [- r * math.sin(skip * an * angPlus / numPoints),
+                                              - w * math.cos(skip * an * angPlus / numPoints),
+                                              - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                              - w * math.cos((skip * an + 1) * angPlus / numPoints)]
+
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+                if drawList.pids[pp + 2] == 12:
+                    index = 2 * drawList.pids[pp + 1]
+                    drawList.vertices[index:index + 48] = drawList.attribs[index:index + 48] + offsets
+
+    def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
+        # drawList = self._GLPeakListLabels[peakListView]
+        # strip = self._parent
+
+        # pls = peakListView.peakList
+        symbolType = self.strip.peakSymbolType
+        symbolWidth = self.strip.peakSymbolSize / 2.0
+        x = abs(self._GLParent.pixelX)
+        y = abs(self._GLParent.pixelY)
+
+        if symbolType == 0:  # a cross
+            # fix the aspect ratio of the cross to match the screen
+            # minIndex = 0 if x <= y else 1
+            # pos = [symbolWidth, symbolWidth * y / x]
+
+            if x <= y:
+                r = symbolWidth
+                w = symbolWidth * y / x
+            else:
+                w = symbolWidth
+                r = symbolWidth * x / y
+
+            for drawStr in drawList.stringList:
+                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+
+        elif symbolType == 1:
+            for drawStr in drawList.stringList:
+                r, w = 0.7 * drawStr.lineWidths[0], 0.7 * drawStr.lineWidths[1]
+                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+
+        elif symbolType == 2:
+            for drawStr in drawList.stringList:
+                r, w = 0.7 * drawStr.lineWidths[0], 0.7 * drawStr.lineWidths[1]
+                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+
     def _buildPeakLists(self, spectrumView, peakListView):
         spectrum = spectrumView.spectrum
 
-        if peakListView not in self._GLPeakLists:
-            self._GLPeakLists[peakListView] = GLPeakListArray(GLContext=self,
+        if peakListView not in self._GLSymbolItems:
+            self._GLSymbolItems[peakListView] = GLPeakListArray(GLContext=self,
                                                               spectrumView=spectrumView,
                                                               peakListView=peakListView)
 
-        drawList = self._GLPeakLists[peakListView]
+        drawList = self._GLSymbolItems[peakListView]
 
         if drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
             self._rescalePeakListLabels(spectrumView=spectrumView,
                                         peakListView=peakListView,
-                                        drawList=self._GLPeakListLabels[peakListView])
+                                        drawList=self._GLSymbolLabels[peakListView])
 
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
@@ -123,11 +228,11 @@ class GLLabelling():
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            symbolType = self._parent.peakSymbolType
-            symbolWidth = self._parent.peakSymbolSize / 2.0
+            symbolType = self.strip.peakSymbolType
+            symbolWidth = self.strip.peakSymbolSize / 2.0
 
-            x = abs(self.pixelX)
-            y = abs(self.pixelY)
+            x = abs(self._GLParent.pixelX)
+            y = abs(self._GLParent.pixelY)
             if x <= y:
                 r = symbolWidth
                 w = symbolWidth * y / x
@@ -161,7 +266,7 @@ class GLLabelling():
             indexPtr = 0
 
             pls = peakListView.peakList
-            listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.SPECTRUMPOSCOLOUR,
+            listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
 
             spectrumFrequency = spectrum.spectrometerFrequencies
@@ -182,7 +287,7 @@ class GLLabelling():
                     continue
 
                 if self._isSelected(peak):
-                    cols = self.highlightColour[:3]
+                    cols = self._GLParent.highlightColour[:3]
                 else:
                     cols = listCol
 
@@ -191,17 +296,17 @@ class GLLabelling():
                 lineWidths = [None] * 2  #len(self.axisOrder)
                 frequency = [0.0] * 2  #len(self.axisOrder)
                 axisCount = 0
-                for ps, psCode in enumerate(self.axisOrder[0:2]):
+                for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
                     for pp, ppCode in enumerate(peak.axisCodes):
 
-                        if self._preferences.matchAxisCode == 0:  # default - match atom type
+                        if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
                             if ppCode[0] == psCode[0]:
                                 p0[ps] = peak.position[pp]
                                 lineWidths[ps] = peak.lineWidths[pp]
                                 frequency[ps] = spectrumFrequency[pp]
                                 axisCount += 1
 
-                        elif self._preferences.matchAxisCode == 1:  # match full code
+                        elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
                             if ppCode == psCode:
                                 p0[ps] = peak.position[pp]
                                 lineWidths[ps] = peak.lineWidths[pp]

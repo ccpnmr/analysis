@@ -71,7 +71,7 @@ PDFCLOSEPATH = 'closePath'
 PDFLINES = 'lines'
 
 
-class CcpnOpenGLExporter():
+class GLExporter():
     """
     Class container for exporting OpenGL stripDisplay to a file or object
     """

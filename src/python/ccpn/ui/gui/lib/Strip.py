@@ -140,7 +140,7 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
                                                          update=False)
 
     # build here so it doesn't conflict with OpenGl update
-    strip._CcpnGLWidget.buildAll()
+    strip._CcpnGLWidget.buildAllContours()
     strip._CcpnGLWidget.update()
 
   except:

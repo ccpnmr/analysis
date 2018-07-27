@@ -1422,7 +1422,7 @@ class GuiStrip(Frame):
     :return reportlab drawing object:
     """
     if self._CcpnGLWidget:
-      from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import CcpnOpenGLExporter
+      from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 
       glReport = self._CcpnGLWidget.exportToSVG()
       if glReport:

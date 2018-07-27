@@ -102,7 +102,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDE
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
     GLRegion, REGION_COLOURS
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import CcpnOpenGLExporter
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLLabelling
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.util.Common import makeIterableList
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
@@ -116,19 +117,20 @@ except ImportError:
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
-AXISLIMITS = [-1.0e12, 1.0e12]
-INVERTED_AXISLIMITS = [1.0e12, -1.0e12]
-RANGELIMITS = [1.0e12, 0.0]
 
-LENPID = 8
-LENVERTICES = 2
-LENINDICES = 1
-LENCOLORS = 4
-LENTEXCOORDS = 2
-LENATTRIBS = 4
-LENOFFSETS = 4
-
-FADE_FACTOR = 0.25
+# AXISLIMITS = [-1.0e12, 1.0e12]
+# INVERTED_AXISLIMITS = [1.0e12, -1.0e12]
+# RANGELIMITS = [1.0e12, 0.0]
+#
+# LENPID = 8
+# LENVERTICES = 2
+# LENINDICES = 1
+# LENCOLORS = 4
+# LENTEXCOORDS = 2
+# LENATTRIBS = 4
+# LENOFFSETS = 4
+#
+# FADE_FACTOR = 0.25
 
 
 class CcpnGLWidget(QOpenGLWidget):
@@ -293,11 +295,22 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._GLPeakLists = {}
         self._GLPeakListLabels = {}
+        self._GLIntegralLists = {}
+        self._GLIntegralLabels = {}
+        self._GLPeakLists = {}
+        self._GLPeakListLabels = {}
+
         self._marksAxisCodes = []
         self._regions = []
-        self._GLIntegralLists = {}
         self._infiniteLines = []
         self._buildTextFlag = True
+
+        # define a new class holding the entire peaklist symbols and labelling
+
+        self._GLSymbols = [GLLabelling(parent=self, strip=self._parent,
+                                       name='peaks', resizeGL=True,
+                                       symbolDict=self._GLPeakLists,
+                                       labelDict=self._GLPeakListLabels)]
 
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
@@ -343,12 +356,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self._dragRegions = set()
 
         # define zoom limits for the display
-        self._minXRange, self._maxXRange = RANGELIMITS
-        self._minYRange, self._maxYRange = RANGELIMITS
+        self._minXRange, self._maxXRange = GLDefs.RANGELIMITS
+        self._minYRange, self._maxYRange = GLDefs.RANGELIMITS
         self._minReached = False
         self._maxReached = False
-        self._maxX, self._minX = AXISLIMITS
-        self._maxY, self._minY = AXISLIMITS
+        self._maxX, self._minX = GLDefs.AXISLIMITS
+        self._maxY, self._minY = GLDefs.AXISLIMITS
 
         self._ordering = []
 
@@ -486,10 +499,10 @@ class CcpnGLWidget(QOpenGLWidget):
         # rescale the matrices each spectrumView
         stackCount = 0
 
-        self._minXRange, self._maxXRange = RANGELIMITS
-        self._minYRange, self._maxYRange = RANGELIMITS
-        self._maxX, self._minX = AXISLIMITS
-        self._maxY, self._minY = AXISLIMITS
+        self._minXRange, self._maxXRange = GLDefs.RANGELIMITS
+        self._minYRange, self._maxYRange = GLDefs.RANGELIMITS
+        self._maxX, self._minX = GLDefs.AXISLIMITS
+        self._maxY, self._minY = GLDefs.AXISLIMITS
 
         for spectrumView in self._parent.spectrumViews:  #.orderedSpectrumViews():
             # self._spectrumSettings[spectrumView] = {}
@@ -1154,12 +1167,12 @@ class CcpnGLWidget(QOpenGLWidget):
                                          dimension=2,
                                          GLContext=self)
 
-        self._testSpectrum = GLVertexArray(numLists=1
-                                           , renderMode=GLRENDERMODE_REBUILD
-                                           , blendMode=True
-                                           , drawMode=GL.GL_TRIANGLES
-                                           , dimension=4
-                                           , GLContext=self)
+        self._testSpectrum = GLVertexArray(numLists=1,
+                                           renderMode=GLRENDERMODE_REBUILD,
+                                           blendMode=True,
+                                           drawMode=GL.GL_TRIANGLES,
+                                           dimension=4,
+                                           GLContext=self)
 
         self.viewports = GLViewports()
         # self._devicePixelRatio = QApplication.instance().devicePixelRatio()
@@ -1169,43 +1182,43 @@ class CcpnGLWidget(QOpenGLWidget):
         # TODO:ED error here when calculating the top offset, FOUND
 
         # define the main viewports
-        self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
-                                   , (-self.AXIS_MARGINRIGHT, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
+        self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                   (-self.AXIS_MARGINRIGHT, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-        self.viewports.addViewport(GLDefs.MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
-                                   , (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
+        self.viewports.addViewport(GLDefs.MAINVIEWFULLWIDTH, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                   (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-        self.viewports.addViewport(GLDefs.MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a')
-                                   , (-self.AXIS_MARGINRIGHT, 'w'), (0, 'h'))
+        self.viewports.addViewport(GLDefs.MAINVIEWFULLHEIGHT, self, (0, 'a'), (0, 'a'),
+                                   (-self.AXIS_MARGINRIGHT, 'w'), (0, 'h'))
 
         # define the viewports for the right axis bar
-        self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w')
-                                   , (self.AXIS_MARGINBOTTOM, 'a')
-                                   , (self.AXIS_LINE, 'a'), (-self.AXIS_MARGINBOTTOM, 'h'))
+        self.viewports.addViewport(GLDefs.RIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
+                                   (self.AXIS_MARGINBOTTOM, 'a'),
+                                   (self.AXIS_LINE, 'a'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
         self.viewports.addViewport(GLDefs.RIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'),
-                                   (self.AXIS_MARGINBOTTOM, 'a')
-                                   , (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
+                                   (self.AXIS_MARGINBOTTOM, 'a'),
+                                   (0, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
 
-        self.viewports.addViewport(GLDefs.FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w')
-                                   , (0, 'a')
-                                   , (self.AXIS_LINE, 'a'), (0, 'h'))
+        self.viewports.addViewport(GLDefs.FULLRIGHTAXIS, self, (-(self.AXIS_MARGINRIGHT + self.AXIS_LINE), 'w'),
+                                   (0, 'a'),
+                                   (self.AXIS_LINE, 'a'), (0, 'h'))
 
-        self.viewports.addViewport(GLDefs.FULLRIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a')
-                                   , (0, 'w'), (0, 'h'))
+        self.viewports.addViewport(GLDefs.FULLRIGHTAXISBAR, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'),
+                                   (0, 'w'), (0, 'h'))
 
         # define the viewports for the bottom axis bar
-        self.viewports.addViewport(GLDefs.BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
-                                   , (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_LINE, 'a'))
+        self.viewports.addViewport(GLDefs.BOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                   (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_LINE, 'a'))
 
-        self.viewports.addViewport(GLDefs.BOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
-                                   , (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+        self.viewports.addViewport(GLDefs.BOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
+                                   (-self.AXIS_MARGINRIGHT, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
-        self.viewports.addViewport(GLDefs.FULLBOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a')
-                                   , (0, 'w'), (self.AXIS_LINE, 'a'))
+        self.viewports.addViewport(GLDefs.FULLBOTTOMAXIS, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
+                                   (0, 'w'), (self.AXIS_LINE, 'a'))
 
-        self.viewports.addViewport(GLDefs.FULLBOTTOMAXISBAR, self, (0, 'a'), (0, 'a')
-                                   , (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+        self.viewports.addViewport(GLDefs.FULLBOTTOMAXISBAR, self, (0, 'a'), (0, 'a'),
+                                   (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
         # define the full viewport
         self.viewports.addViewport(GLDefs.FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
@@ -1682,8 +1695,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def _rescaleOverlayText(self):
         if self.stripIDString:
             vertices = self.stripIDString.numVertices
-            offsets = [self.axisL + (10.0 * self.pixelX)
-                , self.axisT - (1.5 * self.globalGL.glSmallFont.height * self.pixelY)]
+            offsets = [self.axisL + (10.0 * self.pixelX),
+                       self.axisT - (1.5 * self.globalGL.glSmallFont.height * self.pixelY)]
             for pp in range(0, 2 * vertices, 2):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
 
@@ -1732,7 +1745,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                               - w * math.cos((skip * an + 1) * angPlus / numPoints)]
                 offsets[48:56] = [-r, -w, +r, +w, +r, -w, -r, +w]
 
-            for pp in range(0, len(drawList.pids), LENPID):
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
                 if drawList.pids[pp + 2] == 12:
                     index = 2 * drawList.pids[pp + 1]
                     drawList.vertices[index:index + 56] = drawList.attribs[index:index + 56] + offsets
@@ -1752,7 +1765,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                               - r * math.sin((skip * an + 1) * angPlus / numPoints),
                                               - w * math.cos((skip * an + 1) * angPlus / numPoints)]
 
-            for pp in range(0, len(drawList.pids), LENPID):
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
                 if drawList.pids[pp + 2] == 12:
                     index = 2 * drawList.pids[pp + 1]
                     drawList.vertices[index:index + 48] = drawList.attribs[index:index + 48] + offsets
@@ -1780,7 +1793,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 _isInPlane = strip.peakIsInPlane(peak)
                 if not _isInPlane:
                     _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                    fade = FADE_FACTOR
+                    fade = GLDefs.FADE_FACTOR
                 else:
                     _isInFlankingPlane = None
                     fade = 1.0
@@ -1816,7 +1829,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if symbolType == 0:
             # for peak in pls.peaks:
-            for pp in range(0, len(drawList.pids), LENPID):
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
 
                 # check whether the peaks still exists
                 peak = drawList.pids[pp]
@@ -1828,7 +1841,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     _isInPlane = strip.peakIsInPlane(peak)
                     if not _isInPlane:
                         _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                        fade = FADE_FACTOR
+                        fade = GLDefs.FADE_FACTOR
                     else:
                         _isInFlankingPlane = None
                         fade = 1.0
@@ -1860,7 +1873,7 @@ class CcpnGLWidget(QOpenGLWidget):
         elif symbolType == 1:
 
             # for peak in pls.peaks:
-            for pp in range(0, len(drawList.pids), LENPID):
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
 
                 # check whether the peaks still exists
                 peak = drawList.pids[pp]
@@ -1875,7 +1888,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     _isInPlane = strip.peakIsInPlane(peak)
                     if not _isInPlane:
                         _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                        fade = FADE_FACTOR
+                        fade = GLDefs.FADE_FACTOR
                     else:
                         _isInFlankingPlane = None
                         fade = 1.0
@@ -1904,7 +1917,7 @@ class CcpnGLWidget(QOpenGLWidget):
         elif symbolType == 2:
 
             # for peak in pls.peaks:
-            for pp in range(0, len(drawList.pids), LENPID):
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
 
                 # check whether the peaks still exists
                 peak = drawList.pids[pp]
@@ -1919,7 +1932,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     _isInPlane = strip.peakIsInPlane(peak)
                     if not _isInPlane:
                         _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                        fade = FADE_FACTOR
+                        fade = GLDefs.FADE_FACTOR
                     else:
                         _isInFlankingPlane = None
                         fade = 1.0
@@ -1975,18 +1988,18 @@ class CcpnGLWidget(QOpenGLWidget):
                 drawList.vertices = np.delete(drawList.vertices, np.s_[2 * offset:2 * (offset + numPoints)])
                 drawList.attribs = np.delete(drawList.attribs, np.s_[2 * offset:2 * (offset + numPoints)])
                 drawList.colors = np.delete(drawList.colors, np.s_[4 * offset:4 * (offset + numPoints)])
-                drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + LENPID])
+                drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + GLDefs.LENPID])
                 drawList.numVertices -= numPoints
                 break
             else:
-                pp += LENPID
+                pp += GLDefs.LENPID
 
         # clean up the rest of the list
         while (pp < len(drawList.pids)):
             drawList.pids[pp + 1] -= numPoints
             drawList.pids[pp + 6] -= indexOffset
             drawList.pids[pp + 7] -= indexOffset
-            pp += LENPID
+            pp += GLDefs.LENPID
 
     def _appendPeakListItem(self, spectrumView, peakListView, peak):
         spectrum = spectrumView.spectrum
@@ -2048,7 +2061,7 @@ class CcpnGLWidget(QOpenGLWidget):
         _isInPlane = strip.peakIsInPlane(peak)
         if not _isInPlane:
             _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-            fade = FADE_FACTOR
+            fade = GLDefs.FADE_FACTOR
         else:
             _isInFlankingPlane = None
             fade = 1.0
@@ -2104,15 +2117,15 @@ class CcpnGLWidget(QOpenGLWidget):
                         drawList.indices = np.append(drawList.indices, [index, index + 2, index + 2, index + 1,
                                                                         index, index + 3, index + 3, index + 1])
 
-                drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
-                    , p0[0] + r, p0[1] + w
-                    , p0[0] + r, p0[1] - w
-                    , p0[0] - r, p0[1] + w])
+                drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+                                                                  p0[0] + r, p0[1] + w,
+                                                                  p0[0] + r, p0[1] - w,
+                                                                  p0[0] - r, p0[1] + w])
                 drawList.colors = np.append(drawList.colors, [*listCol, fade] * 4)
-                drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
-                    , p0[0], p0[1]
-                    , p0[0], p0[1]
-                    , p0[0], p0[1]])
+                drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1],
+                                                                p0[0], p0[1],
+                                                                p0[0], p0[1],
+                                                                p0[0], p0[1]])
 
                 # keep a pointer to the peak
                 drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, 4,
@@ -2155,21 +2168,16 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                         index + np2 + 3, index + np2 + 1])
 
                 # draw an ellipse at lineWidth
-                drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints)
-                                                                      ,
-                                                                   p0[1] - w * math.cos(skip * an * angPlus / numPoints)
-                                                                      ,
-                                                                   p0[0] - r * math.sin(
-                                                                           (skip * an + 1) * angPlus / numPoints)
-                                                                      ,
-                                                                   p0[1] - w * math.cos(
-                                                                           (skip * an + 1) * angPlus / numPoints)]
+                drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                                   p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                                   p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                                                   p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
                                                                   for an in ang])
-                drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
-                    , p0[0] + r, p0[1] + w
-                    , p0[0] + r, p0[1] - w
-                    , p0[0] - r, p0[1] + w
-                    , p0[0], p0[1]])
+                drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+                                                                  p0[0] + r, p0[1] + w,
+                                                                  p0[0] + r, p0[1] - w,
+                                                                  p0[0] - r, p0[1] + w,
+                                                                  p0[0], p0[1]])
 
                 drawList.colors = np.append(drawList.colors, [*listCol, fade] * (np2 + 5))
                 drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
@@ -2211,21 +2219,16 @@ class CcpnGLWidget(QOpenGLWidget):
                                                   ang])
 
                 # draw an ellipse at lineWidth
-                drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints)
-                                                                      ,
-                                                                   p0[1] - w * math.cos(skip * an * angPlus / numPoints)
-                                                                      ,
-                                                                   p0[0] - r * math.sin(
-                                                                           (skip * an + 1) * angPlus / numPoints)
-                                                                      ,
-                                                                   p0[1] - w * math.cos(
-                                                                           (skip * an + 1) * angPlus / numPoints)]
+                drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                                   p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                                   p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                                                   p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
                                                                   for an in ang])
-                drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
-                    , p0[0] + r, p0[1] + w
-                    , p0[0] + r, p0[1] - w
-                    , p0[0] - r, p0[1] + w
-                    , p0[0], p0[1]])
+                drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+                                                                  p0[0] + r, p0[1] + w,
+                                                                  p0[0] + r, p0[1] - w,
+                                                                  p0[0] - r, p0[1] + w,
+                                                                  p0[0], p0[1]])
 
                 drawList.colors = np.append(drawList.colors, [*listCol, fade] * (np2 + 5))
                 drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
@@ -2315,7 +2318,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 _isInPlane = strip.peakIsInPlane(peak)
                 if not _isInPlane:
                     _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                    fade = FADE_FACTOR
+                    fade = GLDefs.FADE_FACTOR
                 else:
                     _isInFlankingPlane = None
                     fade = 1.0
@@ -2369,15 +2372,15 @@ class CcpnGLWidget(QOpenGLWidget):
                             else:
                                 drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
 
-                        drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
-                            , p0[0] + r, p0[1] + w
-                            , p0[0] + r, p0[1] - w
-                            , p0[0] - r, p0[1] + w])
-                        drawList.colors = np.append(drawList.colors, [*cols, fade] * LENCOLORS)
-                        drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]
-                            , p0[0], p0[1]
-                            , p0[0], p0[1]
-                            , p0[0], p0[1]])
+                        drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+                                                                          p0[0] + r, p0[1] + w,
+                                                                          p0[0] + r, p0[1] - w,
+                                                                          p0[0] - r, p0[1] + w])
+                        drawList.colors = np.append(drawList.colors, [*cols, fade] * GLDefs.LENCOLORS)
+                        drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1],
+                                                                        p0[0], p0[1],
+                                                                        p0[0], p0[1],
+                                                                        p0[0], p0[1]])
 
                         # keep a pointer to the peak
                         drawList.pids = np.append(drawList.pids, [peak, index, 4,
@@ -2421,17 +2424,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         # draw an ellipse at lineWidth
                         drawList.vertices = np.append(drawList.vertices,
-                                                      [[p0[0] - r * math.sin(skip * an * angPlus / numPoints)
-                                                           , p0[1] - w * math.cos(skip * an * angPlus / numPoints)
-                                                           , p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints)
-                                                           ,
+                                                      [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                        p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                        p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
                                                         p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)] for
                                                        an in ang])
-                        drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
-                            , p0[0] + r, p0[1] + w
-                            , p0[0] + r, p0[1] - w
-                            , p0[0] - r, p0[1] + w
-                            , p0[0], p0[1]])
+                        drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+                                                                          p0[0] + r, p0[1] + w,
+                                                                          p0[0] + r, p0[1] - w,
+                                                                          p0[0] - r, p0[1] + w,
+                                                                          p0[0], p0[1]])
 
                         drawList.colors = np.append(drawList.colors, [*cols, fade] * (np2 + 5))
                         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
@@ -2475,17 +2477,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         # draw an ellipse at lineWidth
                         drawList.vertices = np.append(drawList.vertices,
-                                                      [[p0[0] - r * math.sin(skip * an * angPlus / numPoints)
-                                                           , p0[1] - w * math.cos(skip * an * angPlus / numPoints)
-                                                           , p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints)
-                                                           ,
+                                                      [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                        p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                        p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
                                                         p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)] for
                                                        an in ang])
-                        drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w
-                            , p0[0] + r, p0[1] + w
-                            , p0[0] + r, p0[1] - w
-                            , p0[0] - r, p0[1] + w
-                            , p0[0], p0[1]])
+                        drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+                                                                          p0[0] + r, p0[1] + w,
+                                                                          p0[0] + r, p0[1] - w,
+                                                                          p0[0] - r, p0[1] + w,
+                                                                          p0[0], p0[1]])
 
                         drawList.colors = np.append(drawList.colors, [*cols, fade] * (np2 + 5))
                         drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
@@ -2636,7 +2637,7 @@ class CcpnGLWidget(QOpenGLWidget):
             _isInPlane = strip.peakIsInPlane(peak)
             if not _isInPlane:
                 _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                fade = FADE_FACTOR
+                fade = GLDefs.FADE_FACTOR
             else:
                 _isInFlankingPlane = None
                 fade = 1.0
@@ -2941,7 +2942,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # # reset blend function
         # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
-    def buildAll(self):
+    def buildAllContours(self):
         for spectrumView in self._parent.spectrumViews:
             spectrumView.buildContours = True
 
@@ -3358,8 +3359,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.viewports.setViewport(self._currentRightAxisBarView)
                 self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
                 self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT
-                                                                  , self.axisB, self.axisT, -1.0, 1.0)
+                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT,
+                                                                  self.axisB, self.axisT, -1.0, 1.0)
                 self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
                 for lb in self._axisYLabelling:
@@ -3973,7 +3974,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 diffCoords = self.diffMouseFormat % (self._axisOrder[0], (self.cursorCoordinate[0] -
                                                                           self._startCoordinate[0]),
                                                      self._axisOrder[1], (self.cursorCoordinate[1] -
-                                                                            self._startCoordinate[1]))
+                                                                          self._startCoordinate[1]))
 
                 self.diffMouseString = GLString(text=diffCoords,
                                                 font=self.globalGL.glSmallFont,
@@ -4544,8 +4545,8 @@ class CcpnGLWidget(QOpenGLWidget):
             for y0 in range(0, npY - 1):
                 for x0 in range(0, npX - 1):
                     corner = x0 + (y0 * npX)
-                    indices = [corner, corner + 1, corner + npX
-                        , corner + 1, corner + npX, corner + 1 + npX]
+                    indices = [corner, corner + 1, corner + npX,
+                               corner + 1, corner + npX, corner + 1 + npX]
                     drawList.indices[ii * 6:ii * 6 + 6] = indices
                     ii += 1
             break
@@ -5600,10 +5601,10 @@ class CcpnGLWidget(QOpenGLWidget):
                     return
 
     def exportToPDF(self, filename='default.pdf', params=None):
-        return CcpnOpenGLExporter(self, self._parent, filename, params)
+        return GLExporter(self, self._parent, filename, params)
 
     def exportToSVG(self, filename='default.svg', params=None):
-        return CcpnOpenGLExporter(self, self._parent, filename, params)
+        return GLExporter(self, self._parent, filename, params)
 
     def cohenSutherlandClip(self, x0, y0, x1, y1):
         """

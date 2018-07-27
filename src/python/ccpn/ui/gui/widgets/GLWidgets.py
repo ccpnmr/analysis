@@ -30,8 +30,8 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_FOREGROUND, getColours
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLPeakListArray, GLVertexArray, GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE,\
-                                  GLRENDERMODE_REBUILD, GLREFRESHMODE_REBUILD,\
-                                  LENCOLORS, LENPID
+                                  GLRENDERMODE_REBUILD, GLREFRESHMODE_REBUILD
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import LENCOLORS, LENPID
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
 from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation
 import ccpn.util.Phasing as Phasing

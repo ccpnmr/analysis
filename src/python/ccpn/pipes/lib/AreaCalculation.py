@@ -121,10 +121,10 @@ def _getMultipletIntensity(multiplet):
 
 
 
-def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWidth=0.01):
+def _addAreaValuesToPeaks(spectrum, peakList, noiseThreshold=None, minimalLineWidth=0.01):
   ''' CCPNmr specific
 
-  Create new peaks and adds to a new peakList. Needs a peakList with already picked peaks (with peak positions and height).
+  Create new multiplets. Needs a peakList with already picked peaks (with peak positions and height).
    This function will not replace any peak in the original peakList. It will be like a copy of the first plus the new peak will
    have  limits ,  Area, lineWidth,  center of mass as position, height.
    If multiplets they will be calculated as a single peak.
@@ -158,6 +158,8 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
 
       integral = trapz(values)
       multipletPeaks = _getMultiplet(peakList.peaks, limitA=i[0], limitB=i[1]) # get multiplets
+      if len(multipletPeaks) == 0:
+        continue
       # calculate center of mass position for multiplets, these will be the new peak position and the multipl will be counted as one single peak.
       # centerOfMass = _calculateCenterOfMass(multipletPeaks)
       # calculate new intensity for multiplet ( if single peak stays the same)
@@ -167,7 +169,7 @@ def _addAreaValuesToPeaks(spectrum, peakList,noiseThreshold=None, minimalLineWid
       spectrum.project.suspendNotification()
       try:
         multiplet = newMultipletList.newMultiplet(peaks = multipletPeaks, volume= float(integral))
-        multiplet.lineWidths = (lineWidth,)
+        multiplet.lineWidths= (lineWidth,)
         if len(multipletPeaks)==1:
           peak = multipletPeaks[0]
           peak.lineWidths = (lineWidth,)

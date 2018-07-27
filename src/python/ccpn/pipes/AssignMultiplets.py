@@ -39,7 +39,7 @@ from ccpn.util.Logging import getLogger , _debug3
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Assign Multiplets'
+PipeName = 'Find Multiplets'
 
 ExcludeRegions = 'Exclude_Regions'
 ReferencePeakList = 'Reference_PeakList'
@@ -52,6 +52,10 @@ DefaultMinimalLineWidth =  0.01
 DefaultReferencePeakList =  -1
 DefaultNoiseThreshold = [0.0, 0.0]
 DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
+
+INFO = "This Pipe will group existing peaks in Multiplets. Volume, lineWidths," \
+       " and position will be calculated for new multiplets or derived from the peaks values."
+
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -67,13 +71,14 @@ DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 
 
 
-class AssignMultipletsGuiPipe(GuiPipe):
+class FindMultipletsGuiPipe(GuiPipe):
 
   preferredPipe = True
   pipeName = PipeName
+  info = INFO
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(AssignMultipletsGuiPipe, self)
+    super(FindMultipletsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
@@ -95,9 +100,9 @@ class AssignMultipletsGuiPipe(GuiPipe):
 
 
 
-class AssignMultipletsPipe(SpectraPipe):
+class FindMultipletsPipe(SpectraPipe):
 
-  guiPipe  = AssignMultipletsGuiPipe
+  guiPipe  = FindMultipletsGuiPipe
   pipeName = PipeName
 
   _kwargs =       {
@@ -140,6 +145,6 @@ class AssignMultipletsPipe(SpectraPipe):
     return spectra
 
 
-AssignMultipletsPipe.register() # Registers the pipe in the pipeline
+FindMultipletsPipe.register() # Registers the pipe in the pipeline
 
 

@@ -60,10 +60,14 @@ def getMultipletPosition(multiplet, dim, unit='ppm'):
         raise ValueError("Unit passed to getPeakPosition must be 'ppm', 'point', or 'Hz', was %s"
                        % unit)
 
+      if not value:
+        return
+
       if isinstance(value, (int, float, np.float32, np.float64)):
         return '{0:.2f}'.format(value)
-    except:
-      print('Testing FAILED')
+    except Exception as e:
+      getLogger().warning('Error on setting Position. %s' %e)
+
   # return None
 
 def getMultipletLinewidth(peak, dim):

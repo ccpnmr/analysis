@@ -255,11 +255,11 @@ class MultipletListTableWidget(QuickTable):
                                lambda ml, dim=i, unit=MultipletListTableWidget.positionsUnit: getMultipletPosition(ml, dim, unit),
                                positionTipText, None))
 
-        # linewidth column TODO remove hardcoded Hz unit
+        # linewidth column
         for i in range(multipletList.spectrum.dimensionCount):
             linewidthTipTexts = 'Multiplet line width %s' % str(i + 1)
             columnDefs.append(
-                    ('LW F%s (Hz)' % str(i + 1), lambda ml, dim=i: getPeakLinewidth(ml, dim), linewidthTipTexts, None))
+                    ('LW F%s' % str(i + 1), lambda ml, dim=i: getPeakLinewidth(ml, dim), linewidthTipTexts, None))
 
         # height column
         heightTipText = 'Magnitude of spectrum intensity at multiplet center (interpolated), unless user edited'

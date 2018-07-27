@@ -270,7 +270,7 @@ class Multiplet(AbstractWrapperObject):
   def positionError(self) -> Tuple[Optional[float], ...]:
     """Peak position error in ppm (or other relevant unit)."""
     # TODO:LUCA calulate this :)
-    return None # tuple(x.valueError for x in self._wrappedData.sortedPeaks())
+    return tuple() # tuple(x.valueError for x in self._wrappedData.sortedPeaks())
 
   @property
   def boxWidths(self) -> Tuple[Optional[float], ...]:
@@ -286,12 +286,14 @@ class Multiplet(AbstractWrapperObject):
     pksWidths = [pp.lineWidths for pp in pks]
     try:
       result = tuple(sum(item) for item in zip(*pksWidths))
+    except:
+      result = self._wrappedData.lineWidths
     finally:
       return result
 
   @lineWidths.setter
   def lineWidths(self, value):
-    self.lineWidths = value
+    self._wrappedData.lineWidths = value
 
   # Implementation functions
   @classmethod

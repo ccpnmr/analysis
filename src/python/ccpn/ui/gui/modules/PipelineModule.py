@@ -559,7 +559,6 @@ class GuiPipeline(CcpnModule, Pipeline):
     self.jsonData.append(guiPipesState)
     self.jsonData.append(list(self.pipelineSettingsParams.items()))
     pipelineFilePath = self._saveToJson()
-    print(pipelineFilePath, 'pipelineFilePath')
     return pipelineFilePath
     # else:
     #   getLogger().warn('No Gui Pipes to save.')
@@ -643,10 +642,10 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
   def _getInputDataHeaderLabel(self):
-    color = QtGui.QColor('Red')
+    # color = QtGui.QColor('green')
     header = QtWidgets.QListWidgetItem(DropHereLabel)
     header.setFlags(QtCore.Qt.NoItemFlags)
-    header.setBackground(color)
+    # header.setBackground(color)
     return header
 
   def _createAllSettingWidgets(self):

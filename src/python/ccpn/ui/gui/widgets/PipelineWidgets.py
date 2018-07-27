@@ -33,6 +33,7 @@ from pyqtgraph.dockarea.Container import  SplitContainer
 
 from ccpn.ui.gui.lib.GuiGenerator import generateWidget
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
@@ -306,6 +307,7 @@ class GuiPipe(Dock, DockDrop):
   applicationSpecificPipe = False
   pipeName = ''
   pipe = None
+  info = "Pipe details not available yet." #This will appear as toolTip when hovering the GuiPipe Label.
   _alreadyOpened = False #Use this to open the guiPipe only once. Inside the GuiPipe do: MyGuiPipe._alreadyOpened = True
 
   def __init__(self, parent, name, project=None, widgetsParams=None, **kw):
@@ -610,6 +612,14 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
     self.updateStyle()
     self.setExtraButtons()
     self.name = name
+    # This is a terrible way to get the parent. Need to check the hierarchy classes from QtGraph and fix this
+    if len(args)>0:
+      if isinstance(args[0], GuiPipe):
+        self.parent = args[0]
+        if self.parent:
+          self.setToolTip(self.parent.info)
+
+
 
 
   def updateStyle(self):
@@ -617,30 +627,21 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
     self.setStyleSheet(self.hStyle)
 
   def setExtraButtons(self):
-    self.checkBox = QtWidgets.QCheckBox(self)
+    self.checkBox = CheckBox(self, text='Active', callback=None)
     self.checkBox.setMaximumHeight(15)
     # self.checkBox.setStyleSheet("""QCheckBox {background-color: transparent;}""")
 
 
-    self.activeLabel = QtWidgets.QPushButton(self)
-    self.activeLabel.setText('Active')
-    # self.activeLabel.setStyleSheet("""QPushButton {background-color: transparent;
-    #                                               color:black;
-    #                                               border: 0px solid transparent}""")
 
-    self.closeButton = QtWidgets.QPushButton(self)
-    # self.closeButton.setStyleSheet("""QPushButton {background-color: transparent;
-    #                                               color:black;
-    #                                               border: 0px solid transparent}}""")
+    self.closeButton = Button(self)
+    self.closeButton.setStyleSheet("""QPushButton {background-color: transparent;
+                                                  color:black;
+                                                  border: 0px solid transparent}}""")
     self.closeButton.setIcon(QtWidgets.QApplication.style().standardIcon(QtGui.QStyle.SP_TitleBarCloseButton))
     self.closeButton.setMaximumHeight(15)
-    self.activeLabel.clicked.connect(self.checkActiveBox)
 
-  def checkActiveBox(self):
-    if self.checkBox.isChecked():
-      self.checkBox.setChecked(False)
-    else:
-      self.checkBox.setChecked(True)
+  # def checkActiveBox(self):
+    # self.checkBox.setChecked(not self.checkBox.isChecked())
 
   def mousePressEvent(self, ev):
 
@@ -657,7 +658,7 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
     size = ev.size().height()
 
     pos = QtCore.QPoint(ev.size().width() -60, 0)
-    self.activeLabel.move(pos)
+    # self.activeLabel.move(pos)
     # self.lineEdit.move(pos)
 
     pos = QtCore.QPoint(ev.size().width() - 80, 0)

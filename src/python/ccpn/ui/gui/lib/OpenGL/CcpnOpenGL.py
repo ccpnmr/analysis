@@ -297,8 +297,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._GLPeakListLabels = {}
         self._GLIntegralLists = {}
         self._GLIntegralLabels = {}
-        self._GLPeakLists = {}
-        self._GLPeakListLabels = {}
+        self._GLMultipletLists = {}
+        self._GLMultipletLabels = {}
 
         self._marksAxisCodes = []
         self._regions = []
@@ -4957,12 +4957,13 @@ class CcpnGLWidget(QOpenGLWidget):
                     # TODO:ED test trigger for the minute
                     if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
 
-                        for spectrumView in self.strip.spectrumViews:
-                            for peakListView in spectrumView.peakListViews:
-
-                                if peakListView in self._GLPeakLists.keys():
-                                    self._updateHighlightedPeaks(spectrumView, peakListView)
-                                    self._updateHighlightedPeakLabels(spectrumView, peakListView)
+                        self._GLSymbols[0].updateHighlightSymbols()
+                        # for spectrumView in self.strip.spectrumViews:
+                        #     for peakListView in spectrumView.peakListViews:
+                        #
+                        #         if peakListView in self._GLPeakLists.keys():
+                        #             self._updateHighlightedPeaks(spectrumView, peakListView)
+                        #             self._updateHighlightedPeakLabels(spectrumView, peakListView)
 
                     if GLNotifier.GLHIGHLIGHTINTEGRALS in triggers:
 
@@ -4974,12 +4975,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLALLPEAKS in triggers:
 
-                        for spectrumView in self.strip.spectrumViews:
-                            for peakListView in spectrumView.peakListViews:
-
-                                if peakListView in self._GLPeakLists.keys():
-                                    peakListView.buildPeakLists = True
-                                    peakListView.buildPeakListLabels = True
+                        self._GLSymbols[0].updateAllSymbols()
+                        # for spectrumView in self.strip.spectrumViews:
+                        #     for peakListView in spectrumView.peakListViews:
+                        #
+                        #         if peakListView in self._GLPeakLists.keys():
+                        #             peakListView.buildPeakLists = True
+                        #             peakListView.buildPeakListLabels = True
 
                         # self.buildPeakLists()
                         # self.buildPeakListLabels()
@@ -4989,12 +4991,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLPEAKNOTIFY in targets:
 
-                        for spectrumView in self.strip.spectrumViews:
-                            for peakListView in spectrumView.peakListViews:
-
-                                if peakListView in self._GLPeakLists.keys():
-                                    peakListView.buildPeakLists = True
-                                    peakListView.buildPeakListLabels = True
+                        self._GLSymbols[0].updateHighlightSymbols()
+                        # for spectrumView in self.strip.spectrumViews:
+                        #     for peakListView in spectrumView.peakListViews:
+                        #
+                        #         if peakListView in self._GLPeakLists.keys():
+                        #             peakListView.buildPeakLists = True
+                        #             peakListView.buildPeakListLabels = True
 
                         # self.buildPeakLists()
                         # self.buildPeakListLabels()

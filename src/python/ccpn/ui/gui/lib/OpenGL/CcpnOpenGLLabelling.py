@@ -91,15 +91,16 @@ class GLLabelling():
         self.objectList = objectList
         self._threads = {}
         self._threadupdate = False
+        self.current = self.strip.current
 
         self._GLSymbolItems = {}        #symbolDict
         self._GLSymbolLabels = {}       #labelDict
 
-    def _isSelected(self, obj):
+    def _isSelected(self, peak):
         """return True if the obj in the defined object list
         """
-        if self.objectList:
-            return obj in self.objectList
+        if self.current.peaks:
+            return peak in self.current.peaks
 
     def rescale(self):
         if self.resizeGL:
@@ -580,7 +581,29 @@ class GLLabelling():
                     else:
                         drawStr.setColour((*listCol, fade))
 
+    def updateHighlightSymbols(self):
+        """Respond to an update highlight notifier and update the highlighted symbols/labels
+        """
+        for spectrumView in self.strip.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+
+                if peakListView in self._GLSymbolItems.keys():
+                    self._updateHighlightedSymbols(spectrumView, peakListView)
+                    self._updateHighlightedLabels(spectrumView, peakListView)
+
+    def updateAllSymbols(self):
+        """Respond to update all notifier
+        """
+        for spectrumView in self.strip.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+
+                if peakListView in self._GLSymbolItems.keys():
+                    peakListView.buildPeakLists = True
+                    peakListView.buildPeakListLabels = True
+
     def _updateHighlightedSymbols(self, spectrumView, peakListView):
+        """update the highlighted symbols
+        """
         spectrum = spectrumView.spectrum
         strip = self.strip
 

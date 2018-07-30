@@ -93,8 +93,8 @@ class GLLabelling():
         self._threadupdate = False
         self.current = self.strip.current
 
-        self._GLSymbolItems = {}
-        self._GLSymbolLabels = {}
+        self._GLSymbols = {}
+        self._GLLabels = {}
 
 
 class GLpeakNdLabelling(GLLabelling):
@@ -106,103 +106,113 @@ class GLpeakNdLabelling(GLLabelling):
         """
         super(GLpeakNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
 
+    def rescale(self):
+        if self.resizeGL:
+            for pp in self._GLSymbols.values():
+                pp.renderMode = GLRENDERMODE_RESCALE
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List handlers
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     def _isSelected(self, peak):
         """return True if the obj in the defined object list
         """
         if self.current.peaks:
             return peak in self.current.peaks
 
-    def rescale(self):
-        if self.resizeGL:
-            for pp in self._GLSymbolItems.values():
-                pp.renderMode = GLRENDERMODE_RESCALE
-
+    def objectList(self, obj):
+        return obj.peakList
+ 
+    def listView(self, thisList):
+        return thisList.peakListViews
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Handle notifiers
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _deletePeakListItem(self, peak):
+    def _deleteSymbol(self, peak):
         pls = peak.peakList
         if pls:
             spectrum = pls.spectrum
 
             for peakListView in pls.peakListViews:
-                if peakListView in self._GLSymbolItems.keys():
+                if peakListView in self._GLSymbols.keys():
                     for spectrumView in spectrum.spectrumViews:
                         if spectrumView in self.strip.spectrumViews:
-                            self._removePeakListItem(spectrumView, peakListView, peak)
+                            self._removeSymbol(spectrumView, peakListView, peak)
                             self._updateHighlightedSymbols(spectrumView, peakListView)
 
-    def _createPeakListItem(self, peak):
+    def _createSymbol(self, peak):
         pls = peak.peakList
         if pls:
             spectrum = pls.spectrum
 
             for peakListView in pls.peakListViews:
-                if peakListView in self._GLSymbolItems.keys():
+                if peakListView in self._GLSymbols.keys():
                     for spectrumView in spectrum.spectrumViews:
                         if spectrumView in self.strip.spectrumViews:
-                            self._appendPeakListItem(spectrumView, peakListView, peak)
+                            self._appendSymbol(spectrumView, peakListView, peak)
                             self._updateHighlightedSymbols(spectrumView, peakListView)
 
-    def _changePeakListLabel(self, peak):
-        self._deletePeakListLabel(peak)
-        self._createPeakListLabel(peak)
+    def _changeLabel(self, peak):
+        self._deleteLabel(peak)
+        self._createLabel(peak)
 
-    def _changePeakListItem(self, peak):
+    def _changeSymbol(self, peak):
         pls = peak.peakList
         if pls:
             spectrum = pls.spectrum
 
             for peakListView in pls.peakListViews:
-                if peakListView in self._GLSymbolLabels.keys():
+                if peakListView in self._GLLabels.keys():
                     for spectrumView in spectrum.spectrumViews:
                         if spectrumView in self.strip.spectrumViews:
-                            self._removePeakListItem(spectrumView, peakListView, peak)
-                            self._appendPeakListItem(spectrumView, peakListView, peak)
+                            self._removeSymbol(spectrumView, peakListView, peak)
+                            self._appendSymbol(spectrumView, peakListView, peak)
                             self._updateHighlightedSymbols(spectrumView, peakListView)
 
-    def _deletePeakListLabel(self, peak):
-        for pll in self._GLSymbolLabels.keys():
-            drawList = self._GLSymbolLabels[pll]
+    def _deleteLabel(self, peak):
+        for pll in self._GLLabels.keys():
+            drawList = self._GLLabels[pll]
 
             for drawStr in drawList.stringList:
                 if drawStr.object == peak:
                     drawList.stringList.remove(drawStr)
                     break
 
-    def _createPeakListLabel(self, peak):
+    def _createLabel(self, peak):
         pls = peak.peakList
         if pls:
             spectrum = pls.spectrum
 
             for peakListView in pls.peakListViews:
-                if peakListView in self._GLSymbolLabels.keys():
+                if peakListView in self._GLLabels.keys():
                     for spectrumView in spectrum.spectrumViews:
                         if spectrumView in self.strip.spectrumViews:
-                            drawList = self._GLSymbolLabels[peakListView]
-                            self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
-                            self._rescalePeakListLabels(spectrumView, peakListView, drawList)
+                            drawList = self._GLLabels[peakListView]
+                            self._appendLabel(spectrumView, peakListView, drawList.stringList, peak)
+                            self._rescaleLabels(spectrumView, peakListView, drawList)
 
     def _processNotifier(self, data):
         """Process notifiers
         """
         triggers = data[Notifier.TRIGGER]
-        peak = data[Notifier.OBJECT]
+        obj = data[Notifier.OBJECT]
 
         if Notifier.DELETE in triggers:
-            self._deletePeakListItem(peak)
-            self._deletePeakListLabel(peak)
+            self._deleteSymbol(obj)
+            self._deleteLabel(obj)
 
         if Notifier.CREATE in triggers:
-            self._createPeakListItem(peak)
-            self._createPeakListLabel(peak)
+            self._createSymbol(obj)
+            self._createLabel(obj)
 
         if Notifier.CHANGE in triggers:
-            self._changePeakListItem(peak)
-            self._changePeakListLabel(peak)
+            self._changeSymbol(obj)
+            self._changeLabel(obj)
 
-    def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
+    def _appendLabel(self, spectrumView, peakListView, stringList, peak):
         """Append a new label to the end of the list
         """
         spectrum = spectrumView.spectrum
@@ -278,12 +288,12 @@ class GLpeakNdLabelling(GLLabelling):
                                        GLContext=self._GLParent,
                                        obj=peak))
 
-    def _removePeakListItem(self, spectrumView, peakListView, delPeak):
+    def _removeSymbol(self, spectrumView, peakListView, delPeak):
         """Remove a symbol from the list
         """
         symbolType = self.strip.peakSymbolType
 
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
 
         index = 0
         indexOffset = 0
@@ -325,11 +335,11 @@ class GLpeakNdLabelling(GLLabelling):
             drawList.pids[pp + 7] -= indexOffset
             pp += GLDefs.LENPID
 
-    def _appendPeakListItem(self, spectrumView, peakListView, peak):
+    def _appendSymbol(self, spectrumView, peakListView, peak):
         """Append a new symbol to the end of the list
         """
         spectrum = spectrumView.spectrum
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
 
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
@@ -570,7 +580,7 @@ class GLpeakNdLabelling(GLLabelling):
                 drawList.numVertices += np2 + 5
 
     def _updateHighlightedLabels(self, spectrumView, peakListView):
-        drawList = self._GLSymbolLabels[peakListView]
+        drawList = self._GLLabels[peakListView]
         strip = self.strip
 
         pls = peakListView.peakList
@@ -604,7 +614,7 @@ class GLpeakNdLabelling(GLLabelling):
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
 
-                if peakListView in self._GLSymbolItems.keys():
+                if peakListView in self._GLSymbols.keys():
                     self._updateHighlightedSymbols(spectrumView, peakListView)
                     self._updateHighlightedLabels(spectrumView, peakListView)
 
@@ -614,7 +624,7 @@ class GLpeakNdLabelling(GLLabelling):
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
 
-                if peakListView in self._GLSymbolItems.keys():
+                if peakListView in self._GLSymbols.keys():
                     peakListView.buildPeakLists = True
                     peakListView.buildPeakListLabels = True
 
@@ -628,7 +638,7 @@ class GLpeakNdLabelling(GLLabelling):
         symbolWidth = strip.peakSymbolSize / 2.0
         lineThickness = strip.peakSymbolThickness / 2.0
 
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
         drawList.indices = np.empty(0, dtype=np.uint)
 
         index = 0
@@ -770,10 +780,10 @@ class GLpeakNdLabelling(GLLabelling):
     # Rescaling
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _rescalePeakList(self, spectrumView, peakListView):
+    def _rescaleSymbols(self, spectrumView, peakListView):
         """rescale symbols when the screen dimensions change
         """
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
 
         # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
@@ -842,7 +852,7 @@ class GLpeakNdLabelling(GLLabelling):
                     index = 2 * drawList.pids[pp + 1]
                     drawList.vertices[index:index + 48] = drawList.attribs[index:index + 48] + offsets
 
-    def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
+    def _rescaleLabels(self, spectrumView=None, peakListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen
         """
         symbolType = self.strip.peakSymbolType
@@ -882,19 +892,19 @@ class GLpeakNdLabelling(GLLabelling):
     def _buildSymbols(self, spectrumView, peakListView):
         spectrum = spectrumView.spectrum
 
-        if peakListView not in self._GLSymbolItems:
-            self._GLSymbolItems[peakListView] = GLPeakListArray(GLContext=self,
+        if peakListView not in self._GLSymbols:
+            self._GLSymbols[peakListView] = GLPeakListArray(GLContext=self,
                                                                 spectrumView=spectrumView,
                                                                 peakListView=peakListView)
 
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
 
         if drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-            self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
-            self._rescalePeakListLabels(spectrumView=spectrumView,
-                                        peakListView=peakListView,
-                                        drawList=self._GLSymbolLabels[peakListView])
+            self._rescaleSymbols(spectrumView=spectrumView, peakListView=peakListView)
+            self._rescaleLabels(spectrumView=spectrumView,
+                                peakListView=peakListView,
+                                drawList=self._GLLabels[peakListView])
 
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
@@ -1146,28 +1156,28 @@ class GLpeakNdLabelling(GLLabelling):
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
 
-                if peakListView in self._GLSymbolItems.keys():
-                    if self._GLSymbolItems[peakListView].renderMode == GLRENDERMODE_RESCALE:
+                if peakListView in self._GLSymbols.keys():
+                    if self._GLSymbols[peakListView].renderMode == GLRENDERMODE_RESCALE:
                         self._buildSymbols(spectrumView, peakListView)
 
                 if peakListView.buildPeakLists:
                     peakListView.buildPeakLists = False
 
                     # set the interior flags for rebuilding the GLdisplay
-                    if peakListView in self._GLSymbolItems.keys():
-                        self._GLSymbolItems[peakListView].renderMode = GLRENDERMODE_REBUILD
+                    if peakListView in self._GLSymbols.keys():
+                        self._GLSymbols[peakListView].renderMode = GLRENDERMODE_REBUILD
 
                     self._buildSymbols(spectrumView, peakListView)
 
     def _buildLabels(self, spectrumView, peakListView):
         # spectrum = spectrumView.spectrum
 
-        if peakListView not in self._GLSymbolLabels.keys():
-            self._GLSymbolLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
+        if peakListView not in self._GLLabels.keys():
+            self._GLLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
                                                                    spectrumView=spectrumView,
                                                                    peakListView=peakListView)
 
-        drawList = self._GLSymbolLabels[peakListView]
+        drawList = self._GLLabels[peakListView]
         if drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
 
@@ -1194,11 +1204,11 @@ class GLpeakNdLabelling(GLLabelling):
             # spectrumFrequency = spectrum.spectrometerFrequencies
 
             for peak in pls.peaks:
-                self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
+                self._appendLabel(spectrumView, peakListView, drawList.stringList, peak)
 
         elif drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-            self._rescalePeakListLabels(spectrumView, peakListView, drawList)
+            self._rescaleLabels(spectrumView, peakListView, drawList)
 
     def buildLabels(self):
         if self.strip.isDeleted:
@@ -1208,15 +1218,15 @@ class GLpeakNdLabelling(GLLabelling):
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
 
-                if peakListView in self._GLSymbolLabels.keys():
-                    if self._GLSymbolLabels[peakListView].renderMode == GLRENDERMODE_RESCALE:
-                        self._rescalePeakListLabels(spectrumView, peakListView, self._GLSymbolLabels[peakListView])
+                if peakListView in self._GLLabels.keys():
+                    if self._GLLabels[peakListView].renderMode == GLRENDERMODE_RESCALE:
+                        self._rescaleLabels(spectrumView, peakListView, self._GLLabels[peakListView])
 
                 if peakListView.buildPeakListLabels:
                     peakListView.buildPeakListLabels = False
 
-                    if peakListView in self._GLSymbolLabels.keys():
-                        self._GLSymbolLabels[peakListView].renderMode = GLRENDERMODE_REBUILD
+                    if peakListView in self._GLLabels.keys():
+                        self._GLLabels[peakListView].renderMode = GLRENDERMODE_REBUILD
 
                     # self._buildPeakListLabels(spectrumView, peakListView)
                     _buildList.append([spectrumView, peakListView])
@@ -1229,11 +1239,11 @@ class GLpeakNdLabelling(GLLabelling):
         for ii, view in enumerate(viewList):
             spectrumView = view[0]
             peakListView = view[1]
-            if peakListView not in self._GLSymbolLabels.keys():
-                self._GLSymbolLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
+            if peakListView not in self._GLLabels.keys():
+                self._GLLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
                                                                        spectrumView=spectrumView,
                                                                        peakListView=peakListView)
-                drawList = self._GLSymbolLabels[peakListView]
+                drawList = self._GLLabels[peakListView]
                 drawList.stringList = []
 
         # if self._parent in self._threads:
@@ -1248,7 +1258,7 @@ class GLpeakNdLabelling(GLLabelling):
         # if not p.is_alive(): continue
         # os.kill(p.pid, signal.SIGKILL)
         # buildQueue = Queue()
-        buildQueue = (viewList, self._GLParent, self._GLSymbolLabels)
+        buildQueue = (viewList, self._GLParent, self._GLLabels)
         buildPeaks = Thread(name=str(self.strip.pid),
                             target=self._threadBuildAllLabels,
                             args=buildQueue)
@@ -1271,7 +1281,7 @@ class GLpeakNdLabelling(GLLabelling):
         pls = peakListView.peakList
 
         for peak in pls.peaks:
-            self._appendPeakListLabel(spectrumView, peakListView, tempList, peak)
+            self._appendLabel(spectrumView, peakListView, tempList, peak)
 
         # self._rescalePeakListLabels(spectrumView, peakListView, drawList)
         drawList.stringList = tempList
@@ -1315,8 +1325,8 @@ class GLpeakNdLabelling(GLLabelling):
             for peakListView in spectrumView.peakListViews:
                 if spectrumView.isVisible() and peakListView.isVisible():
 
-                    if peakListView in self._GLSymbolItems.keys():
-                        self._GLSymbolItems[peakListView].drawIndexArray()
+                    if peakListView in self._GLSymbols.keys():
+                        self._GLSymbols[peakListView].drawIndexArray()
 
         GL.glLineWidth(1.0)
 
@@ -1333,9 +1343,9 @@ class GLpeakNdLabelling(GLLabelling):
             for peakListView in spectrumView.peakListViews:
                 if spectrumView.isVisible() and peakListView.isVisible():
 
-                    if peakListView in self._GLSymbolLabels.keys():
+                    if peakListView in self._GLLabels.keys():
 
-                        for drawString in self._GLSymbolLabels[peakListView].stringList:
+                        for drawString in self._GLLabels[peakListView].stringList:
                             drawString.drawTextArray()
 
 
@@ -1358,7 +1368,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         symbolWidth = strip.peakSymbolSize / 2.0
         lineThickness = strip.peakSymbolThickness / 2.0
 
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
         drawList.indices = np.empty(0, dtype=np.uint)
 
         index = 0
@@ -1402,19 +1412,19 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
     def _buildSymbols(self, spectrumView, peakListView):
         spectrum = spectrumView.spectrum
 
-        if peakListView not in self._GLSymbolItems:
-            self._GLSymbolItems[peakListView] = GLPeakListArray(GLContext=self,
+        if peakListView not in self._GLSymbols:
+            self._GLSymbols[peakListView] = GLPeakListArray(GLContext=self,
                                                                 spectrumView=spectrumView,
                                                                 peakListView=peakListView)
 
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
 
         if drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-            self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
-            self._rescalePeakListLabels(spectrumView=spectrumView,
-                                        peakListView=peakListView,
-                                        drawList=self._GLSymbolLabels[peakListView])
+            self._rescaleSymbols(spectrumView=spectrumView, peakListView=peakListView)
+            self._rescaleLabels(spectrumView=spectrumView,
+                                peakListView=peakListView,
+                                drawList=self._GLLabels[peakListView])
 
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
@@ -1514,10 +1524,10 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                     index += 4
                     drawList.numVertices += 4
 
-    def _rescalePeakList(self, spectrumView, peakListView):
+    def _rescaleSymbols(self, spectrumView, peakListView):
         """rescale symbols when the screen dimensions change
         """
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
 
         # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
@@ -1545,11 +1555,11 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             for pp in range(0, 2 * drawList.numVertices, 8):
                 drawList.vertices[pp:pp + 8] = drawList.attribs[pp:pp + 8] + offsets
 
-    def _appendPeakListItem(self, spectrumView, peakListView, peak):
+    def _appendSymbol(self, spectrumView, peakListView, peak):
         """Append a new symbol to the end of the list
         """
         spectrum = spectrumView.spectrum
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
 
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
@@ -1647,12 +1657,12 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             index += 4
             drawList.numVertices += 4
 
-    def _removePeakListItem(self, spectrumView, peakListView, delPeak):
+    def _removeSymbol(self, spectrumView, peakListView, delPeak):
         """Remove a symbol from the list
         """
         symbolType = self.strip.peakSymbolType
 
-        drawList = self._GLSymbolItems[peakListView]
+        drawList = self._GLSymbols[peakListView]
 
         index = 0
         indexOffset = 0
@@ -1691,7 +1701,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             drawList.pids[pp + 7] -= indexOffset
             pp += GLDefs.LENPID
 
-    def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
+    def _appendLabel(self, spectrumView, peakListView, stringList, peak):
         """Append a new label to the end of the list
         """
         spectrum = spectrumView.spectrum
@@ -1744,7 +1754,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                                    GLContext=self._GLParent,
                                    obj=peak))
 
-    def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
+    def _rescaleLabels(self, spectrumView=None, peakListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen
         """
         symbolType = self.strip.peakSymbolType

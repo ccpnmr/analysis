@@ -1703,7 +1703,11 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
         self.drawSpectra()
-        self.drawPeakLists()
+
+        # self.drawPeakLists()
+        for symbolList in self._GLSymbols:
+            symbolList.drawSymbols()
+
         self.drawMarksRulers()
         self.drawIntegralLists()
         self.drawRegions()
@@ -1720,7 +1724,11 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
 
         self.enableTexture()
-        self.drawPeakListLabels()
+
+        # self.drawPeakListLabels()
+        for symbolList in self._GLSymbols:
+            symbolList.drawLabels()
+
         self.drawMarksAxisCodes()
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
@@ -1907,12 +1915,6 @@ class CcpnGLWidget(QOpenGLWidget):
                                 integralArea._integralArea.drawVertexColor()
 
         self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
-
-    def drawPeakLists(self):
-        self._GLSymbols[0].drawSymbols()
-
-    def drawPeakListLabels(self):
-        self._GLSymbols[0].drawLabels()
 
     def drawSpectra(self):
         if self.strip.isDeleted:

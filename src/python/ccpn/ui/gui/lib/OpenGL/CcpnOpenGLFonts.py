@@ -363,7 +363,6 @@ class GLString(GLVertexArray):
         # GL.glBindTexture(GL.GL_TEXTURE_2D, self.font.textureId)
 
         self._GLContext.globalGL._shaderProgramTex.setGLUniform1i('texture', self.font.activeTextureNum)
-
         super(GLString, self).drawTextArray()
 
     def setColour(self, col):

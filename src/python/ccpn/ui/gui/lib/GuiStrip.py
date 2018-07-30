@@ -123,7 +123,7 @@ class GuiStrip(Frame):
       else:
         from ccpn.ui.gui.widgets.GLWidgets import GuiNdWidget as CcpnGLWidget
 
-      self._CcpnGLWidget = CcpnGLWidget(parent=self, mainWindow=self.mainWindow)
+      self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
       self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)    # (3,0) if not hiding plotWidget
       self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding
                                                , QtWidgets.QSizePolicy.Expanding)

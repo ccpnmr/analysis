@@ -52,8 +52,8 @@ class GuiNdWidget(CcpnGLWidget):
   SPECTRUMPOSCOLOUR = 'positiveContourColour'
   SPECTRUMNEGCOLOUR = 'negativeContourColour'
 
-  def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
-    super(GuiNdWidget, self).__init__(parent=parent,
+  def __init__(self, strip=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
+    super(GuiNdWidget, self).__init__(strip=strip,
                                       mainWindow=mainWindow,
                                       rightMenu=rightMenu,
                                       stripIDLabel=stripIDLabel)
@@ -71,8 +71,8 @@ class Gui1dWidget(CcpnGLWidget):
   SPECTRUMXZOOM = 1.0e2
   SPECTRUMYZOOM = 1.0e6
 
-  def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
-    super(Gui1dWidget, self).__init__(parent=parent,
+  def __init__(self, strip=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
+    super(Gui1dWidget, self).__init__(strip=strip,
                                       mainWindow=mainWindow,
                                       rightMenu=rightMenu,
                                       stripIDLabel=stripIDLabel)

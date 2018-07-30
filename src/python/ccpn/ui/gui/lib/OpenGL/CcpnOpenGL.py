@@ -147,22 +147,22 @@ class CcpnGLWidget(QOpenGLWidget):
     SPECTRUMXZOOM = 1.0e1
     SPECTRUMYZOOM = 1.0e1
 
-    def __init__(self, parent=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
+    def __init__(self, strip=None, mainWindow=None, rightMenu=None, stripIDLabel=None):
         # TODO add documentation, clarify
         # :param parent: strip ? should be called strip, since is made for a strip!
         # :param rightMenu:  Not sure if has been ever used? Context menu has an automatic loader
 
-        super(CcpnGLWidget, self).__init__(parent)
+        super(CcpnGLWidget, self).__init__(strip)
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False
 
         self._rightMenu = rightMenu  # Not sure if has been ever used? Context menu has an automatic loader
-        if not parent:  # don't initialise if nothing there
+        if not strip:  # don't initialise if nothing there
             return
 
-        self._parent = parent
-        self.spectrumDisplay = parent.spectrumDisplay
+        self.strip = strip
+        self.spectrumDisplay = strip.spectrumDisplay
 
         self.mainWindow = mainWindow
         if mainWindow:
@@ -174,7 +174,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.project = None
             self.current = None
 
-        self._preferences = self._parent.application.preferences.general
+        self._preferences = self.strip.application.preferences.general
         self.globalGL = None
         self.stripIDLabel = stripIDLabel if stripIDLabel else ''
 
@@ -190,7 +190,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.setMinimumSize(self.AXIS_MARGINRIGHT + 10, self.AXIS_MARGINBOTTOM + 10)
 
         # set the pyqtsignal responders
-        self.GLSignals = GLNotifier(parent=self, strip=parent)
+        self.GLSignals = GLNotifier(parent=self, strip=strip)
         self.GLSignals.glXAxisChanged.connect(self._glXAxisChanged)
         self.GLSignals.glYAxisChanged.connect(self._glYAxisChanged)
         self.GLSignals.glAllAxesChanged.connect(self._glAllAxesChanged)
@@ -306,7 +306,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._buildTextFlag = True
 
         # define a new class holding the entire peaklist symbols and labelling
-        self._GLSymbols = [GLLabelling(parent=self, strip=self._parent,
+        self._GLSymbols = [GLLabelling(parent=self, strip=self.strip,
                                        name='peaks', resizeGL=True,
                                        symbolDict=self._GLPeakLists,
                                        labelDict=self._GLPeakListLabels,
@@ -348,9 +348,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.cursorCoordinate = np.zeros((4,), dtype=np.float32)
 
         # get information from the parent class (strip)
-        self.orderedAxes = self._parent.orderedAxes
-        self.axisOrder = self._parent.axisOrder
-        self.axisCodes = self._parent.axisCodes
+        self.orderedAxes = self.strip.orderedAxes
+        self.axisOrder = self.strip.axisOrder
+        self.axisCodes = self.strip.axisCodes
         self.initialiseTraces()
 
         self._dragRegions = set()
@@ -381,16 +381,16 @@ class CcpnGLWidget(QOpenGLWidget):
     change to axes of the view, axis visibility, scale and rebuild matrices when necessary
     to improve display speed
     """
-        if self._parent.isDeleted or not self.globalGL:
+        if self.strip.isDeleted or not self.globalGL:
             return
 
         # use the upated size
         w = self.w
         h = self.h
 
-        # symbolType = self._parent.peakSymbolType
-        symbolWidth = self._parent.peakSymbolSize / 2.0
-        # lineThickness = self._parent.peakSymbolThickness / 2.0
+        # symbolType = self.strip.peakSymbolType
+        symbolWidth = self.strip.peakSymbolSize / 2.0
+        # lineThickness = self.strip.peakSymbolThickness / 2.0
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
@@ -493,7 +493,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def rescaleSpectra(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         # rescale the matrices each spectrumView
@@ -504,7 +504,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._maxX, self._minX = GLDefs.AXISLIMITS
         self._maxY, self._minY = GLDefs.AXISLIMITS
 
-        for spectrumView in self._parent.spectrumViews:  #.orderedSpectrumViews():
+        for spectrumView in self.strip.spectrumViews:  #.orderedSpectrumViews():
             # self._spectrumSettings[spectrumView] = {}
 
             if spectrumView.isDeleted:
@@ -516,7 +516,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 stackCount += 1
 
     def _maximiseRegions(self):
-        for spectrumView in self._parent.spectrumViews:  #.orderedSpectrumViews():
+        for spectrumView in self.strip.spectrumViews:  #.orderedSpectrumViews():
             if spectrumView.isDeleted:
                 self._spectrumSettings[spectrumView] = {}
                 continue
@@ -661,8 +661,10 @@ class CcpnGLWidget(QOpenGLWidget):
         # put stuff in here that will change on a resize
         for li in self.gridList:
             li.renderMode = GLRENDERMODE_REBUILD
-        for pp in self._GLPeakLists.values():
-            pp.renderMode = GLRENDERMODE_RESCALE
+        # for pp in self._GLPeakLists.values():
+        #     pp.renderMode = GLRENDERMODE_RESCALE
+        for symbolLists in self._GLSymbols:
+            symbolLists.rescale()
 
         self.update()
 
@@ -674,7 +676,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # def between(val, l, r):
         #   return (l-val)*(r-val) <= 0
 
-        if self._parent and not self._parent.spectrumViews:
+        if self.strip and not self.strip.spectrumViews:
             event.accept()
             return
 
@@ -758,7 +760,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisB = mby + zoomOut * (self.axisB - mby)
                 self.axisT = mby - zoomOut * (mby - self.axisT)
 
-            self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+            self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                axisB=self.axisB, axisT=self.axisT,
                                                axisL=self.axisL, axisR=self.axisR)
 
@@ -781,7 +783,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisR = mbx - zoomOut * (mbx - self.axisR)
 
             if not self._axisLocked:
-                self.GLSignals._emitXAxisChanged(source=self, strip=self._parent,
+                self.GLSignals._emitXAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR)
 
@@ -796,7 +798,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisB = mby + ratio * self.sign(self.axisB - mby)
                 self.axisT = mby - ratio * self.sign(mby - self.axisT)
 
-                self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR)
 
@@ -819,7 +821,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisT = mby - zoomOut * (mby - self.axisT)
 
             if not self._axisLocked:
-                self.GLSignals._emitYAxisChanged(source=self, strip=self._parent,
+                self.GLSignals._emitYAxisChanged(source=self, strip=self.strip,
                                                  axisB=self.axisB, axisT=self.axisT,
                                                  axisL=self.axisL, axisR=self.axisR)
 
@@ -834,7 +836,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
                 self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
 
-                self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR)
 
@@ -853,7 +855,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisL = mbx + ratio * self.sign(self.axisL - mbx)
             self.axisR = mbx - ratio * self.sign(mbx - self.axisR)
 
-            # self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+            # self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
             #                                    axisB=self.axisB, axisT=self.axisT,
             #                                    axisL=self.axisL, axisR=self.axisR)
 
@@ -868,8 +870,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.gridList[2].renderMode = GLRENDERMODE_REBUILD
 
         # ratios have changed so rescale the peaks symbols
-        for pp in self._GLPeakLists.values():
-            pp.renderMode = GLRENDERMODE_RESCALE
+        # for pp in self._GLPeakLists.values():
+        #     pp.renderMode = GLRENDERMODE_RESCALE
+        for symbolLists in self._GLSymbols:
+            symbolLists.rescale()
 
         self._rescaleOverlayText()
 
@@ -891,8 +895,10 @@ class CcpnGLWidget(QOpenGLWidget):
             self.gridList[1].renderMode = GLRENDERMODE_REBUILD
 
         # ratios have changed so rescale the peaks symbols
-        for pp in self._GLPeakLists.values():
-            pp.renderMode = GLRENDERMODE_RESCALE
+        # for pp in self._GLPeakLists.values():
+        #     pp.renderMode = GLRENDERMODE_RESCALE
+        for symbolLists in self._GLSymbols:
+            symbolLists.rescale()
 
         self._rescaleOverlayText()
 
@@ -957,8 +963,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if self._axisLocked:
             # ratios have changed so rescale the peaks symbols
-            for pp in self._GLPeakLists.values():
-                pp.renderMode = GLRENDERMODE_RESCALE
+            # for pp in self._GLPeakLists.values():
+            #     pp.renderMode = GLRENDERMODE_RESCALE
+            for symbolLists in self._GLSymbols:
+                symbolLists.rescale()
 
         self._rescaleOverlayText()
 
@@ -998,7 +1006,7 @@ class CcpnGLWidget(QOpenGLWidget):
             elif key == QtCore.Qt.Key_Up:
                 self.axisT += moveFactor * dy
                 self.axisB += moveFactor * dy
-                self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR)
             elif key == QtCore.Qt.Key_Right:
@@ -1008,7 +1016,7 @@ class CcpnGLWidget(QOpenGLWidget):
             elif key == QtCore.Qt.Key_Down:
                 self.axisT -= moveFactor * dy
                 self.axisB -= moveFactor * dy
-                self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                    axisB=self.axisB, axisT=self.axisT,
                                                    axisL=self.axisL, axisR=self.axisR)
             elif key == QtCore.Qt.Key_Plus:
@@ -1097,7 +1105,7 @@ class CcpnGLWidget(QOpenGLWidget):
     """
         axisLimits = []
 
-        for spectrumView in self._parent.spectrumViews:
+        for spectrumView in self.strip.spectrumViews:
             if not axisLimits:
                 axisLimits = [self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MAXXALIAS],
                               self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MINXALIAS],
@@ -1127,7 +1135,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._GLVersion = GL.glGetString(GL.GL_VERSION)
 
         # initialise a common to all OpenGL windows
-        self.globalGL = GLGlobalData(parent=self, strip=self._parent)
+        self.globalGL = GLGlobalData(parent=self, strip=self.strip)
 
         # initialise the arrays for the grid and axes
         self.gridList = []
@@ -1234,8 +1242,8 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
         self.setBackgroundColour(self.background)
 
-        if self._parent:
-            self.initialiseAxes(self._parent)
+        if self.strip:
+            self.initialiseAxes(self.strip)
 
     def setBackgroundColour(self, col, silent=False):
         """
@@ -1272,7 +1280,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _toggleAxisLocked(self):
         self._axisLocked = not self._axisLocked
-        self.GLSignals._emitAxisLockChanged(source=self, strip=self._parent, lock=self._axisLocked)
+        self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lock=self._axisLocked)
 
     def mousePressInCornerButtons(self, mx, my):
         if self.AXISLOCKEDBUTTON:
@@ -1418,7 +1426,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if not self.mousePressInRegion(self._externalRegions._regions):
                 self.mousePressInIntegralLists()
 
-        self.current.strip = self._parent
+        self.current.strip = self.strip
         self.update()
 
     def mouseReleaseEvent(self, ev):
@@ -1496,9 +1504,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._clearAndUpdate()
 
     def mouseMoveEvent(self, event):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
-        if not self._parent.spectrumViews:
+        if not self.strip.spectrumViews:
             return
 
         if abs(self.axisL - self.axisR) < 1.0e-6 or abs(self.axisT - self.axisB) < 1.0e-6:
@@ -1527,9 +1535,9 @@ class CcpnGLWidget(QOpenGLWidget):
             mouseMovedDict = self.current.mouseMovedDict
         except:
             # initialise a new mouse moved dict
-            mouseMovedDict = {'strip': self._parent,
+            mouseMovedDict = {'strip': self.strip,
                               AXIS_MATCHATOMTYPE: {},
-                              AXIS_FULLATOMNAME: {}}  #     dict(strip=self._parent)   #strip)
+                              AXIS_FULLATOMNAME: {}}  #     dict(strip=self.strip)   #strip)
 
         xPos = yPos = 0
         for n, axisCode in enumerate(self._axisCodes):
@@ -1605,7 +1613,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     self.axisR -= dx * self.pixelX
                     self.axisT += dy * self.pixelY
                     self.axisB += dy * self.pixelY
-                    self.GLSignals._emitAllAxesChanged(source=self, strip=self._parent,
+                    self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                        axisB=self.axisB, axisT=self.axisT,
                                                        axisL=self.axisL, axisR=self.axisR)
                     self._selectionMode = 0
@@ -1657,14 +1665,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
         GL.glCallList(self.GLMarkList[0])
 
-    def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
-        self._GLSymbols[0]._rescalePeakListLabels(spectrumView, peakListView, drawList)
+    # def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
+    #     self._GLSymbols[0]._rescalePeakListLabels(spectrumView, peakListView, drawList)
     #     # drawList = self._GLPeakListLabels[peakListView]
-    #     # strip = self._parent
+    #     # strip = self.strip
     #
     #     # pls = peakListView.peakList
-    #     symbolType = self._parent.peakSymbolType
-    #     symbolWidth = self._parent.peakSymbolSize / 2.0
+    #     symbolType = self.strip.peakSymbolType
+    #     symbolWidth = self.strip.peakSymbolSize / 2.0
     #     x = abs(self.pixelX)
     #     y = abs(self.pixelY)
     #
@@ -1706,8 +1714,8 @@ class CcpnGLWidget(QOpenGLWidget):
     #
     #     # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
     #
-    #     symbolType = self._parent.peakSymbolType
-    #     symbolWidth = self._parent.peakSymbolSize / 2.0
+    #     symbolType = self.strip.peakSymbolType
+    #     symbolWidth = self.strip.peakSymbolSize / 2.0
     #     x = abs(self.pixelX)
     #     y = abs(self.pixelY)
     #
@@ -1778,471 +1786,475 @@ class CcpnGLWidget(QOpenGLWidget):
             return False
 
     def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
-        drawList = self._GLPeakListLabels[peakListView]
-        strip = self._parent
+        self._GLSymbols[0]._updateHighlightedLabels(spectrumView, peakListView)
 
-        pls = peakListView.peakList
-        listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR,
-                                        getColours()[CCPNGLWIDGET_FOREGROUND])
-
-        for drawStr in drawList.stringList:
-
-            peak = drawStr.object
-
-            if peak and not peak.isDeleted:
-                # _isSelected = False
-                _isInPlane = strip.peakIsInPlane(peak)
-                if not _isInPlane:
-                    _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                    fade = GLDefs.FADE_FACTOR
-                else:
-                    _isInFlankingPlane = None
-                    fade = 1.0
-
-                if _isInPlane or _isInFlankingPlane:
-
-                    if self._isSelected(peak):
-                        drawStr.setColour((*self.highlightColour[:3], fade))
-                    else:
-                        drawStr.setColour((*listCol, fade))
+        # drawList = self._GLPeakListLabels[peakListView]
+        # strip = self.strip
+        #
+        # pls = peakListView.peakList
+        # listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR,
+        #                                 getColours()[CCPNGLWIDGET_FOREGROUND])
+        #
+        # for drawStr in drawList.stringList:
+        #
+        #     peak = drawStr.object
+        #
+        #     if peak and not peak.isDeleted:
+        #         # _isSelected = False
+        #         _isInPlane = strip.peakIsInPlane(peak)
+        #         if not _isInPlane:
+        #             _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        #             fade = GLDefs.FADE_FACTOR
+        #         else:
+        #             _isInFlankingPlane = None
+        #             fade = 1.0
+        #
+        #         if _isInPlane or _isInFlankingPlane:
+        #
+        #             if self._isSelected(peak):
+        #                 drawStr.setColour((*self.highlightColour[:3], fade))
+        #             else:
+        #                 drawStr.setColour((*listCol, fade))
 
     def _updateHighlightedIntegrals(self, spectrumView, integralListView):
         drawList = self._GLIntegralLists[integralListView]
         drawList._rebuild()
 
     def _updateHighlightedPeaks(self, spectrumView, peakListView):
-        spectrum = spectrumView.spectrum
-        strip = self._parent
-
-        symbolType = self._parent.peakSymbolType
-        symbolWidth = self._parent.peakSymbolSize / 2.0
-        lineThickness = self._parent.peakSymbolThickness / 2.0
-
-        drawList = self._GLPeakLists[peakListView]
-        drawList.indices = np.empty(0, dtype=np.uint)
-
-        index = 0
-        indexPtr = 0
-
-        pls = peakListView.peakList
-        listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.SPECTRUMPOSCOLOUR,
-                                        getColours()[CCPNGLWIDGET_FOREGROUND])
-
-        if symbolType == 0:
-            # for peak in pls.peaks:
-            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
-
-                # check whether the peaks still exists
-                peak = drawList.pids[pp]
-                offset = drawList.pids[pp + 1]
-                numPoints = drawList.pids[pp + 2]
-
-                if not peak.isDeleted:
-                    _isSelected = False
-                    _isInPlane = strip.peakIsInPlane(peak)
-                    if not _isInPlane:
-                        _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                        fade = GLDefs.FADE_FACTOR
-                    else:
-                        _isInFlankingPlane = None
-                        fade = 1.0
-
-                    if _isInPlane or _isInFlankingPlane:
-                        if self._isSelected(peak):
-                            _isSelected = True
-                            cols = self.highlightColour[:3]
-                            drawList.indices = np.append(drawList.indices,
-                                                         np.array([index, index + 1, index + 2, index + 3,
-                                                                   index, index + 2, index + 2, index + 1,
-                                                                   index, index + 3, index + 3, index + 1],
-                                                                  dtype=np.uint))
-                        else:
-                            cols = listCol
-
-                            drawList.indices = np.append(drawList.indices,
-                                                         np.array([index, index + 1, index + 2, index + 3],
-                                                                  dtype=np.uint))
-                        drawList.colors[offset * 4:(offset + numPoints) * 4] = [*cols, fade] * numPoints
-
-                    # list MAY contain out of plane peaks
-                    drawList.pids[pp + 3:pp + 8] = [_isInPlane, _isInFlankingPlane, _isSelected,
-                                                    indexPtr, len(drawList.indices)]
-                    indexPtr = len(drawList.indices)
-
-                index += numPoints
-
-        elif symbolType == 1:
-
-            # for peak in pls.peaks:
-            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
-
-                # check whether the peaks still exists
-                peak = drawList.pids[pp]
-                offset = drawList.pids[pp + 1]
-                numPoints = drawList.pids[pp + 2]
-                np2 = 2 * numPoints
-
-                if not peak.isDeleted:
-                    ang = list(range(numPoints))
-
-                    _isSelected = False
-                    _isInPlane = strip.peakIsInPlane(peak)
-                    if not _isInPlane:
-                        _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                        fade = GLDefs.FADE_FACTOR
-                    else:
-                        _isInFlankingPlane = None
-                        fade = 1.0
-
-                    if _isInPlane or _isInFlankingPlane:
-                        drawList.indices = np.append(drawList.indices,
-                                                     [[index + (2 * an), index + (2 * an) + 1] for an in ang])
-                        if self._isSelected(peak):
-                            _isSelected = True
-                            cols = self.highlightColour[:3]
-                            drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
-                                                                            index + np2 + 2, index + np2 + 1,
-                                                                            index + np2, index + np2 + 3,
-                                                                            index + np2 + 3, index + np2 + 1])
-                        else:
-                            cols = listCol
-
-                        drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [*cols, fade] * (np2 + 5)
-
-                    drawList.pids[pp + 3:pp + 8] = [_isInPlane, _isInFlankingPlane, _isSelected,
-                                                    indexPtr, len(drawList.indices)]
-                    indexPtr = len(drawList.indices)
-
-                index += np2 + 5
-
-        elif symbolType == 2:
-
-            # for peak in pls.peaks:
-            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
-
-                # check whether the peaks still exists
-                peak = drawList.pids[pp]
-                offset = drawList.pids[pp + 1]
-                numPoints = drawList.pids[pp + 2]
-                np2 = 2 * numPoints
-
-                if not peak.isDeleted:
-                    ang = list(range(numPoints))
-
-                    _isSelected = False
-                    _isInPlane = strip.peakIsInPlane(peak)
-                    if not _isInPlane:
-                        _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                        fade = GLDefs.FADE_FACTOR
-                    else:
-                        _isInFlankingPlane = None
-                        fade = 1.0
-
-                    if _isInPlane or _isInFlankingPlane:
-                        drawList.indices = np.append(drawList.indices,
-                                                     [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4] for an
-                                                      in ang])
-                        if self._isSelected(peak):
-                            _isSelected = True
-                            cols = self.highlightColour[:3]
-                        else:
-                            cols = listCol
-
-                        drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [*cols, fade] * (np2 + 5)
-
-                    drawList.pids[pp + 3:pp + 8] = [_isInPlane, _isInFlankingPlane, _isSelected,
-                                                    indexPtr, len(drawList.indices)]
-                    indexPtr = len(drawList.indices)
-
-                index += np2 + 5
-
-    def _removePeakListItem(self, spectrumView, peakListView, delPeak):
-        symbolType = self._parent.peakSymbolType
-
-        drawList = self._GLPeakLists[peakListView]
-
-        index = 0
-        indexOffset = 0
-        numPoints = 0
-
-        pp = 0
-        while (pp < len(drawList.pids)):
-            # check whether the peaks still exists
-            peak = drawList.pids[pp]
-
-            if peak == delPeak:
-                offset = drawList.pids[pp + 1]
-                numPoints = drawList.pids[pp + 2]
-
-                # TODO:ED don't like this - should be same code for all
-                if symbolType != 0:
-                    numPoints = 2 * numPoints + 5
-
-                # _isInPlane = drawList.pids[pp + 3]
-                # _isInFlankingPlane = drawList.pids[pp + 4]
-                # _isSelected = drawList.pids[pp + 5]
-                indexStart = drawList.pids[pp + 6]
-                indexEnd = drawList.pids[pp + 7]
-                indexOffset = indexEnd - indexStart
-
-                drawList.indices = np.delete(drawList.indices, np.s_[indexStart:indexEnd])
-                drawList.vertices = np.delete(drawList.vertices, np.s_[2 * offset:2 * (offset + numPoints)])
-                drawList.attribs = np.delete(drawList.attribs, np.s_[2 * offset:2 * (offset + numPoints)])
-                drawList.colors = np.delete(drawList.colors, np.s_[4 * offset:4 * (offset + numPoints)])
-                drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + GLDefs.LENPID])
-                drawList.numVertices -= numPoints
-                break
-            else:
-                pp += GLDefs.LENPID
-
-        # clean up the rest of the list
-        while (pp < len(drawList.pids)):
-            drawList.pids[pp + 1] -= numPoints
-            drawList.pids[pp + 6] -= indexOffset
-            drawList.pids[pp + 7] -= indexOffset
-            pp += GLDefs.LENPID
-
-    def _appendPeakListItem(self, spectrumView, peakListView, peak):
-        spectrum = spectrumView.spectrum
-        drawList = self._GLPeakLists[peakListView]
-
-        # find the correct scale to draw square pixels
-        # don't forget to change when the axes change
-
-        symbolType = self._parent.peakSymbolType
-        symbolWidth = self._parent.peakSymbolSize / 2.0
-        lineThickness = self._parent.peakSymbolThickness / 2.0
-
-        x = abs(self.pixelX)
-        y = abs(self.pixelY)
-        # fix the aspect ratio of the cross to match the screen
-        minIndex = 0 if x <= y else 1
-        # pos = [symbolWidth, symbolWidth * y / x]
-        # w = r = pos[minIndex]
-
-        if x <= y:
-            r = symbolWidth
-            w = symbolWidth * y / x
-        else:
-            w = symbolWidth
-            r = symbolWidth * x / y
-
-        if symbolType == 0:  # a cross
-
-            # change the ratio on resize
-            drawList.refreshMode = GLREFRESHMODE_REBUILD
-            drawList.drawMode = GL.GL_LINES
-            drawList.fillMode = None
-
-        elif symbolType == 1:  # draw an ellipse at lineWidth
-
-            # fix the size to the axes
-            drawList.refreshMode = GLREFRESHMODE_NEVER
-            drawList.drawMode = GL.GL_LINES
-            drawList.fillMode = None
-
-        elif symbolType == 2:  # draw a filled ellipse at lineWidth
-
-            # fix the size to the axes
-            drawList.refreshMode = GLREFRESHMODE_NEVER
-            drawList.drawMode = GL.GL_TRIANGLES
-            drawList.fillMode = GL.GL_FILL
-
-        # build the peaks VBO
-        index = 0
-        indexPtr = len(drawList.indices)
-
-        # for pls in spectrum.peakLists:
-
-        pls = peakListView.peakList
-        spectrumFrequency = spectrum.spectrometerFrequencies
-
-        # TODO:ED display the required peaks - possibly build all then on draw selected later
-        strip = spectrumView.strip
-        _isInPlane = strip.peakIsInPlane(peak)
-        if not _isInPlane:
-            _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-            fade = GLDefs.FADE_FACTOR
-        else:
-            _isInFlankingPlane = None
-            fade = 1.0
-
-        # ignore if not visible
-        if not _isInPlane and not _isInFlankingPlane:
-            return
-
-        if self._isSelected(peak):
-            listCol = self.highlightColour[:3]
-        else:
-            listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR,
-                                            getColours()[CCPNGLWIDGET_FOREGROUND])
-
-        # get the correct coordinates based on the axisCodes
-        p0 = [0.0] * 2  # len(self.axisOrder)
-        lineWidths = [None] * 2  # len(self.axisOrder)
-        frequency = [0.0] * 2  # len(self.axisOrder)
-        axisCount = 0
-        for ps, psCode in enumerate(self.axisOrder[0:2]):
-            for pp, ppCode in enumerate(peak.axisCodes):
-
-                if self._preferences.matchAxisCode == 0:  # default - match atom type
-                    if ppCode[0] == psCode[0]:
-                        p0[ps] = peak.position[pp]
-                        lineWidths[ps] = peak.lineWidths[pp]
-                        frequency[ps] = spectrumFrequency[pp]
-                        axisCount += 1
-
-                elif self._preferences.matchAxisCode == 1:  # match full code
-                    if ppCode == psCode:
-                        p0[ps] = peak.position[pp]
-                        lineWidths[ps] = peak.lineWidths[pp]
-                        frequency[ps] = spectrumFrequency[pp]
-                        axisCount += 1
-
-        if axisCount != 2:
-            getLogger().debug('Bad peak.axisCodes: %s - %s' % (peak.pid, peak.axisCodes))
-        else:
-            if symbolType == 0:
-
-                # draw a cross
-                # keep the cross square at 0.1ppm
-
-                _isSelected = False
-                # unselected
-                if _isInPlane or _isInFlankingPlane:
-                    drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
-
-                    if self._isSelected(peak):
-                        # if hasattr(peak, '_isSelected') and peak._isSelected:
-                        _isSelected = True
-                        drawList.indices = np.append(drawList.indices, [index, index + 2, index + 2, index + 1,
-                                                                        index, index + 3, index + 3, index + 1])
-
-                drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
-                                                                  p0[0] + r, p0[1] + w,
-                                                                  p0[0] + r, p0[1] - w,
-                                                                  p0[0] - r, p0[1] + w])
-                drawList.colors = np.append(drawList.colors, [*listCol, fade] * 4)
-                drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1],
-                                                                p0[0], p0[1],
-                                                                p0[0], p0[1],
-                                                                p0[0], p0[1]])
-
-                # keep a pointer to the peak
-                drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, 4,
-                                                          _isInPlane, _isInFlankingPlane, _isSelected,
-                                                          indexPtr, len(drawList.indices)])
-
-                index += 4
-                drawList.numVertices += 4
-
-            elif symbolType == 1:  # draw an ellipse at lineWidth
-
-                if lineWidths[0] and lineWidths[1]:
-                    # draw 24 connected segments
-                    r = 0.5 * lineWidths[0] / frequency[0]
-                    w = 0.5 * lineWidths[1] / frequency[1]
-                    numPoints = 24
-                    angPlus = 2 * np.pi
-                    skip = 1
-                else:
-                    # draw 12 disconnected segments (dotted)
-                    # r = symbolWidth
-                    # w = symbolWidth
-                    numPoints = 12
-                    angPlus = 1.0 * np.pi
-                    skip = 2
-
-                np2 = 2 * numPoints
-                ang = list(range(numPoints))
-                _isSelected = False
-
-                if _isInPlane or _isInFlankingPlane:
-                    drawList.indices = np.append(drawList.indices,
-                                                 [[index + (2 * an), index + (2 * an) + 1] for an in ang])
-
-                    if self._isSelected(peak):
-                        _isSelected = True
-                        drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
-                                                                        index + np2 + 2, index + np2 + 1,
-                                                                        index + np2, index + np2 + 3,
-                                                                        index + np2 + 3, index + np2 + 1])
-
-                # draw an ellipse at lineWidth
-                drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                   p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                   p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                   p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
-                                                                  for an in ang])
-                drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
-                                                                  p0[0] + r, p0[1] + w,
-                                                                  p0[0] + r, p0[1] - w,
-                                                                  p0[0] - r, p0[1] + w,
-                                                                  p0[0], p0[1]])
-
-                drawList.colors = np.append(drawList.colors, [*listCol, fade] * (np2 + 5))
-                drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
-                drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
-                drawList.lineWidths = (r, w)
-
-                # keep a pointer to the peak
-                drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, numPoints,
-                                                          _isInPlane, _isInFlankingPlane, _isSelected,
-                                                          indexPtr, len(drawList.indices)])
-
-                index += np2 + 5
-                drawList.numVertices += np2 + 5
-
-            elif symbolType == 2:  # draw a filled ellipse at lineWidth
-
-                if lineWidths[0] and lineWidths[1]:
-                    # draw 24 connected segments
-                    r = 0.5 * lineWidths[0] / frequency[0]
-                    w = 0.5 * lineWidths[1] / frequency[1]
-                    numPoints = 24
-                    angPlus = 2 * np.pi
-                    skip = 1
-                else:
-                    # draw 12 disconnected segments (dotted)
-                    # r = symbolWidth
-                    # w = symbolWidth
-                    numPoints = 12
-                    angPlus = 1.0 * np.pi
-                    skip = 2
-
-                np2 = 2 * numPoints
-                ang = list(range(numPoints))
-                _isSelected = False
-
-                if _isInPlane or _isInFlankingPlane:
-                    drawList.indices = np.append(drawList.indices,
-                                                 [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4] for an in
-                                                  ang])
-
-                # draw an ellipse at lineWidth
-                drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                   p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                   p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                   p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
-                                                                  for an in ang])
-                drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
-                                                                  p0[0] + r, p0[1] + w,
-                                                                  p0[0] + r, p0[1] - w,
-                                                                  p0[0] - r, p0[1] + w,
-                                                                  p0[0], p0[1]])
-
-                drawList.colors = np.append(drawList.colors, [*listCol, fade] * (np2 + 5))
-                drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
-                drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
-                drawList.lineWidths = (r, w)
-
-                # keep a pointer to the peak
-                drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, numPoints,
-                                                          _isInPlane, _isInFlankingPlane, _isSelected,
-                                                          indexPtr, len(drawList.indices)])
-
-                index += np2 + 5
-                drawList.numVertices += np2 + 5
+        self._GLSymbols[0]._updateHighlightedSymbols(spectrumView, peakListView)
+
+        # spectrum = spectrumView.spectrum
+        # strip = self.strip
+        #
+        # symbolType = self.strip.peakSymbolType
+        # symbolWidth = self.strip.peakSymbolSize / 2.0
+        # lineThickness = self.strip.peakSymbolThickness / 2.0
+        #
+        # drawList = self._GLPeakLists[peakListView]
+        # drawList.indices = np.empty(0, dtype=np.uint)
+        #
+        # index = 0
+        # indexPtr = 0
+        #
+        # pls = peakListView.peakList
+        # listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.SPECTRUMPOSCOLOUR,
+        #                                 getColours()[CCPNGLWIDGET_FOREGROUND])
+        #
+        # if symbolType == 0:
+        #     # for peak in pls.peaks:
+        #     for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+        #
+        #         # check whether the peaks still exists
+        #         peak = drawList.pids[pp]
+        #         offset = drawList.pids[pp + 1]
+        #         numPoints = drawList.pids[pp + 2]
+        #
+        #         if not peak.isDeleted:
+        #             _isSelected = False
+        #             _isInPlane = strip.peakIsInPlane(peak)
+        #             if not _isInPlane:
+        #                 _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        #                 fade = GLDefs.FADE_FACTOR
+        #             else:
+        #                 _isInFlankingPlane = None
+        #                 fade = 1.0
+        #
+        #             if _isInPlane or _isInFlankingPlane:
+        #                 if self._isSelected(peak):
+        #                     _isSelected = True
+        #                     cols = self.highlightColour[:3]
+        #                     drawList.indices = np.append(drawList.indices,
+        #                                                  np.array([index, index + 1, index + 2, index + 3,
+        #                                                            index, index + 2, index + 2, index + 1,
+        #                                                            index, index + 3, index + 3, index + 1],
+        #                                                           dtype=np.uint))
+        #                 else:
+        #                     cols = listCol
+        #
+        #                     drawList.indices = np.append(drawList.indices,
+        #                                                  np.array([index, index + 1, index + 2, index + 3],
+        #                                                           dtype=np.uint))
+        #                 drawList.colors[offset * 4:(offset + numPoints) * 4] = [*cols, fade] * numPoints
+        #
+        #             # list MAY contain out of plane peaks
+        #             drawList.pids[pp + 3:pp + 8] = [_isInPlane, _isInFlankingPlane, _isSelected,
+        #                                             indexPtr, len(drawList.indices)]
+        #             indexPtr = len(drawList.indices)
+        #
+        #         index += numPoints
+        #
+        # elif symbolType == 1:
+        #
+        #     # for peak in pls.peaks:
+        #     for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+        #
+        #         # check whether the peaks still exists
+        #         peak = drawList.pids[pp]
+        #         offset = drawList.pids[pp + 1]
+        #         numPoints = drawList.pids[pp + 2]
+        #         np2 = 2 * numPoints
+        #
+        #         if not peak.isDeleted:
+        #             ang = list(range(numPoints))
+        #
+        #             _isSelected = False
+        #             _isInPlane = strip.peakIsInPlane(peak)
+        #             if not _isInPlane:
+        #                 _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        #                 fade = GLDefs.FADE_FACTOR
+        #             else:
+        #                 _isInFlankingPlane = None
+        #                 fade = 1.0
+        #
+        #             if _isInPlane or _isInFlankingPlane:
+        #                 drawList.indices = np.append(drawList.indices,
+        #                                              [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+        #                 if self._isSelected(peak):
+        #                     _isSelected = True
+        #                     cols = self.highlightColour[:3]
+        #                     drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
+        #                                                                     index + np2 + 2, index + np2 + 1,
+        #                                                                     index + np2, index + np2 + 3,
+        #                                                                     index + np2 + 3, index + np2 + 1])
+        #                 else:
+        #                     cols = listCol
+        #
+        #                 drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [*cols, fade] * (np2 + 5)
+        #
+        #             drawList.pids[pp + 3:pp + 8] = [_isInPlane, _isInFlankingPlane, _isSelected,
+        #                                             indexPtr, len(drawList.indices)]
+        #             indexPtr = len(drawList.indices)
+        #
+        #         index += np2 + 5
+        #
+        # elif symbolType == 2:
+        #
+        #     # for peak in pls.peaks:
+        #     for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+        #
+        #         # check whether the peaks still exists
+        #         peak = drawList.pids[pp]
+        #         offset = drawList.pids[pp + 1]
+        #         numPoints = drawList.pids[pp + 2]
+        #         np2 = 2 * numPoints
+        #
+        #         if not peak.isDeleted:
+        #             ang = list(range(numPoints))
+        #
+        #             _isSelected = False
+        #             _isInPlane = strip.peakIsInPlane(peak)
+        #             if not _isInPlane:
+        #                 _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        #                 fade = GLDefs.FADE_FACTOR
+        #             else:
+        #                 _isInFlankingPlane = None
+        #                 fade = 1.0
+        #
+        #             if _isInPlane or _isInFlankingPlane:
+        #                 drawList.indices = np.append(drawList.indices,
+        #                                              [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4] for an
+        #                                               in ang])
+        #                 if self._isSelected(peak):
+        #                     _isSelected = True
+        #                     cols = self.highlightColour[:3]
+        #                 else:
+        #                     cols = listCol
+        #
+        #                 drawList.colors[offset * 4:(offset + np2 + 5) * 4] = [*cols, fade] * (np2 + 5)
+        #
+        #             drawList.pids[pp + 3:pp + 8] = [_isInPlane, _isInFlankingPlane, _isSelected,
+        #                                             indexPtr, len(drawList.indices)]
+        #             indexPtr = len(drawList.indices)
+        #
+        #         index += np2 + 5
+
+    # def _removePeakListItem(self, spectrumView, peakListView, delPeak):
+    #     symbolType = self.strip.peakSymbolType
+    #
+    #     drawList = self._GLPeakLists[peakListView]
+    #
+    #     index = 0
+    #     indexOffset = 0
+    #     numPoints = 0
+    #
+    #     pp = 0
+    #     while (pp < len(drawList.pids)):
+    #         # check whether the peaks still exists
+    #         peak = drawList.pids[pp]
+    #
+    #         if peak == delPeak:
+    #             offset = drawList.pids[pp + 1]
+    #             numPoints = drawList.pids[pp + 2]
+    #
+    #             # TODO:ED don't like this - should be same code for all
+    #             if symbolType != 0:
+    #                 numPoints = 2 * numPoints + 5
+    #
+    #             # _isInPlane = drawList.pids[pp + 3]
+    #             # _isInFlankingPlane = drawList.pids[pp + 4]
+    #             # _isSelected = drawList.pids[pp + 5]
+    #             indexStart = drawList.pids[pp + 6]
+    #             indexEnd = drawList.pids[pp + 7]
+    #             indexOffset = indexEnd - indexStart
+    #
+    #             drawList.indices = np.delete(drawList.indices, np.s_[indexStart:indexEnd])
+    #             drawList.vertices = np.delete(drawList.vertices, np.s_[2 * offset:2 * (offset + numPoints)])
+    #             drawList.attribs = np.delete(drawList.attribs, np.s_[2 * offset:2 * (offset + numPoints)])
+    #             drawList.colors = np.delete(drawList.colors, np.s_[4 * offset:4 * (offset + numPoints)])
+    #             drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + GLDefs.LENPID])
+    #             drawList.numVertices -= numPoints
+    #             break
+    #         else:
+    #             pp += GLDefs.LENPID
+    #
+    #     # clean up the rest of the list
+    #     while (pp < len(drawList.pids)):
+    #         drawList.pids[pp + 1] -= numPoints
+    #         drawList.pids[pp + 6] -= indexOffset
+    #         drawList.pids[pp + 7] -= indexOffset
+    #         pp += GLDefs.LENPID
+
+    # def _appendPeakListItem(self, spectrumView, peakListView, peak):
+    #     spectrum = spectrumView.spectrum
+    #     drawList = self._GLPeakLists[peakListView]
+    #
+    #     # find the correct scale to draw square pixels
+    #     # don't forget to change when the axes change
+    #
+    #     symbolType = self.strip.peakSymbolType
+    #     symbolWidth = self.strip.peakSymbolSize / 2.0
+    #     lineThickness = self.strip.peakSymbolThickness / 2.0
+    #
+    #     x = abs(self.pixelX)
+    #     y = abs(self.pixelY)
+    #     # fix the aspect ratio of the cross to match the screen
+    #     minIndex = 0 if x <= y else 1
+    #     # pos = [symbolWidth, symbolWidth * y / x]
+    #     # w = r = pos[minIndex]
+    #
+    #     if x <= y:
+    #         r = symbolWidth
+    #         w = symbolWidth * y / x
+    #     else:
+    #         w = symbolWidth
+    #         r = symbolWidth * x / y
+    #
+    #     if symbolType == 0:  # a cross
+    #
+    #         # change the ratio on resize
+    #         drawList.refreshMode = GLREFRESHMODE_REBUILD
+    #         drawList.drawMode = GL.GL_LINES
+    #         drawList.fillMode = None
+    #
+    #     elif symbolType == 1:  # draw an ellipse at lineWidth
+    #
+    #         # fix the size to the axes
+    #         drawList.refreshMode = GLREFRESHMODE_NEVER
+    #         drawList.drawMode = GL.GL_LINES
+    #         drawList.fillMode = None
+    #
+    #     elif symbolType == 2:  # draw a filled ellipse at lineWidth
+    #
+    #         # fix the size to the axes
+    #         drawList.refreshMode = GLREFRESHMODE_NEVER
+    #         drawList.drawMode = GL.GL_TRIANGLES
+    #         drawList.fillMode = GL.GL_FILL
+    #
+    #     # build the peaks VBO
+    #     index = 0
+    #     indexPtr = len(drawList.indices)
+    #
+    #     # for pls in spectrum.peakLists:
+    #
+    #     pls = peakListView.peakList
+    #     spectrumFrequency = spectrum.spectrometerFrequencies
+    #
+    #     # TODO:ED display the required peaks - possibly build all then on draw selected later
+    #     strip = spectrumView.strip
+    #     _isInPlane = strip.peakIsInPlane(peak)
+    #     if not _isInPlane:
+    #         _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+    #         fade = GLDefs.FADE_FACTOR
+    #     else:
+    #         _isInFlankingPlane = None
+    #         fade = 1.0
+    #
+    #     # ignore if not visible
+    #     if not _isInPlane and not _isInFlankingPlane:
+    #         return
+    #
+    #     if self._isSelected(peak):
+    #         listCol = self.highlightColour[:3]
+    #     else:
+    #         listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR,
+    #                                         getColours()[CCPNGLWIDGET_FOREGROUND])
+    #
+    #     # get the correct coordinates based on the axisCodes
+    #     p0 = [0.0] * 2  # len(self.axisOrder)
+    #     lineWidths = [None] * 2  # len(self.axisOrder)
+    #     frequency = [0.0] * 2  # len(self.axisOrder)
+    #     axisCount = 0
+    #     for ps, psCode in enumerate(self.axisOrder[0:2]):
+    #         for pp, ppCode in enumerate(peak.axisCodes):
+    #
+    #             if self._preferences.matchAxisCode == 0:  # default - match atom type
+    #                 if ppCode[0] == psCode[0]:
+    #                     p0[ps] = peak.position[pp]
+    #                     lineWidths[ps] = peak.lineWidths[pp]
+    #                     frequency[ps] = spectrumFrequency[pp]
+    #                     axisCount += 1
+    #
+    #             elif self._preferences.matchAxisCode == 1:  # match full code
+    #                 if ppCode == psCode:
+    #                     p0[ps] = peak.position[pp]
+    #                     lineWidths[ps] = peak.lineWidths[pp]
+    #                     frequency[ps] = spectrumFrequency[pp]
+    #                     axisCount += 1
+    #
+    #     if axisCount != 2:
+    #         getLogger().debug('Bad peak.axisCodes: %s - %s' % (peak.pid, peak.axisCodes))
+    #     else:
+    #         if symbolType == 0:
+    #
+    #             # draw a cross
+    #             # keep the cross square at 0.1ppm
+    #
+    #             _isSelected = False
+    #             # unselected
+    #             if _isInPlane or _isInFlankingPlane:
+    #                 drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
+    #
+    #                 if self._isSelected(peak):
+    #                     # if hasattr(peak, '_isSelected') and peak._isSelected:
+    #                     _isSelected = True
+    #                     drawList.indices = np.append(drawList.indices, [index, index + 2, index + 2, index + 1,
+    #                                                                     index, index + 3, index + 3, index + 1])
+    #
+    #             drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+    #                                                               p0[0] + r, p0[1] + w,
+    #                                                               p0[0] + r, p0[1] - w,
+    #                                                               p0[0] - r, p0[1] + w])
+    #             drawList.colors = np.append(drawList.colors, [*listCol, fade] * 4)
+    #             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1],
+    #                                                             p0[0], p0[1],
+    #                                                             p0[0], p0[1],
+    #                                                             p0[0], p0[1]])
+    #
+    #             # keep a pointer to the peak
+    #             drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, 4,
+    #                                                       _isInPlane, _isInFlankingPlane, _isSelected,
+    #                                                       indexPtr, len(drawList.indices)])
+    #
+    #             index += 4
+    #             drawList.numVertices += 4
+    #
+    #         elif symbolType == 1:  # draw an ellipse at lineWidth
+    #
+    #             if lineWidths[0] and lineWidths[1]:
+    #                 # draw 24 connected segments
+    #                 r = 0.5 * lineWidths[0] / frequency[0]
+    #                 w = 0.5 * lineWidths[1] / frequency[1]
+    #                 numPoints = 24
+    #                 angPlus = 2 * np.pi
+    #                 skip = 1
+    #             else:
+    #                 # draw 12 disconnected segments (dotted)
+    #                 # r = symbolWidth
+    #                 # w = symbolWidth
+    #                 numPoints = 12
+    #                 angPlus = 1.0 * np.pi
+    #                 skip = 2
+    #
+    #             np2 = 2 * numPoints
+    #             ang = list(range(numPoints))
+    #             _isSelected = False
+    #
+    #             if _isInPlane or _isInFlankingPlane:
+    #                 drawList.indices = np.append(drawList.indices,
+    #                                              [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+    #
+    #                 if self._isSelected(peak):
+    #                     _isSelected = True
+    #                     drawList.indices = np.append(drawList.indices, [index + np2, index + np2 + 2,
+    #                                                                     index + np2 + 2, index + np2 + 1,
+    #                                                                     index + np2, index + np2 + 3,
+    #                                                                     index + np2 + 3, index + np2 + 1])
+    #
+    #             # draw an ellipse at lineWidth
+    #             drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+    #                                                                p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+    #                                                                p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+    #                                                                p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
+    #                                                               for an in ang])
+    #             drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+    #                                                               p0[0] + r, p0[1] + w,
+    #                                                               p0[0] + r, p0[1] - w,
+    #                                                               p0[0] - r, p0[1] + w,
+    #                                                               p0[0], p0[1]])
+    #
+    #             drawList.colors = np.append(drawList.colors, [*listCol, fade] * (np2 + 5))
+    #             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
+    #             drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
+    #             drawList.lineWidths = (r, w)
+    #
+    #             # keep a pointer to the peak
+    #             drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, numPoints,
+    #                                                       _isInPlane, _isInFlankingPlane, _isSelected,
+    #                                                       indexPtr, len(drawList.indices)])
+    #
+    #             index += np2 + 5
+    #             drawList.numVertices += np2 + 5
+    #
+    #         elif symbolType == 2:  # draw a filled ellipse at lineWidth
+    #
+    #             if lineWidths[0] and lineWidths[1]:
+    #                 # draw 24 connected segments
+    #                 r = 0.5 * lineWidths[0] / frequency[0]
+    #                 w = 0.5 * lineWidths[1] / frequency[1]
+    #                 numPoints = 24
+    #                 angPlus = 2 * np.pi
+    #                 skip = 1
+    #             else:
+    #                 # draw 12 disconnected segments (dotted)
+    #                 # r = symbolWidth
+    #                 # w = symbolWidth
+    #                 numPoints = 12
+    #                 angPlus = 1.0 * np.pi
+    #                 skip = 2
+    #
+    #             np2 = 2 * numPoints
+    #             ang = list(range(numPoints))
+    #             _isSelected = False
+    #
+    #             if _isInPlane or _isInFlankingPlane:
+    #                 drawList.indices = np.append(drawList.indices,
+    #                                              [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4] for an in
+    #                                               ang])
+    #
+    #             # draw an ellipse at lineWidth
+    #             drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+    #                                                                p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+    #                                                                p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+    #                                                                p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)]
+    #                                                               for an in ang])
+    #             drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+    #                                                               p0[0] + r, p0[1] + w,
+    #                                                               p0[0] + r, p0[1] - w,
+    #                                                               p0[0] - r, p0[1] + w,
+    #                                                               p0[0], p0[1]])
+    #
+    #             drawList.colors = np.append(drawList.colors, [*listCol, fade] * (np2 + 5))
+    #             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1]] * (np2 + 5))
+    #             drawList.offsets = np.append(drawList.offsets, [p0[0], p0[1]] * (np2 + 5))
+    #             drawList.lineWidths = (r, w)
+    #
+    #             # keep a pointer to the peak
+    #             drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, numPoints,
+    #                                                       _isInPlane, _isInFlankingPlane, _isSelected,
+    #                                                       indexPtr, len(drawList.indices)])
+    #
+    #             index += np2 + 5
+    #             drawList.numVertices += np2 + 5
 
     # def _buildPeakLists(self, spectrumView, peakListView):
     #     spectrum = spectrumView.spectrum
@@ -2269,8 +2281,8 @@ class CcpnGLWidget(QOpenGLWidget):
     #         # find the correct scale to draw square pixels
     #         # don't forget to change when the axes change
     #
-    #         symbolType = self._parent.peakSymbolType
-    #         symbolWidth = self._parent.peakSymbolSize / 2.0
+    #         symbolType = self.strip.peakSymbolType
+    #         symbolWidth = self.strip.peakSymbolSize / 2.0
     #
     #         x = abs(self.pixelX)
     #         y = abs(self.pixelY)
@@ -2503,72 +2515,72 @@ class CcpnGLWidget(QOpenGLWidget):
     #                     index += np2 + 5
     #                     drawList.numVertices += np2 + 5
 
-    def _deletePeakListItem(self, peak):
-        pls = peak.peakList
-        if pls:
-            spectrum = pls.spectrum
-
-            for peakListView in pls.peakListViews:
-                if peakListView in self._GLPeakLists.keys():
-                    for spectrumView in spectrum.spectrumViews:
-                        if spectrumView in self._parent.spectrumViews:
-                            self._removePeakListItem(spectrumView, peakListView, peak)
-                            self._updateHighlightedPeaks(spectrumView, peakListView)
-
-    def _createPeakListItem(self, peak):
-        pls = peak.peakList
-        if pls:
-            spectrum = pls.spectrum
-
-            for peakListView in pls.peakListViews:
-                if peakListView in self._GLPeakLists.keys():
-                    for spectrumView in spectrum.spectrumViews:
-                        if spectrumView in self._parent.spectrumViews:
-                            self._appendPeakListItem(spectrumView, peakListView, peak)
-                            self._updateHighlightedPeaks(spectrumView, peakListView)
-
-    def _changePeakListLabel(self, peak):
-        self._deletePeakListLabel(peak)
-        self._createPeakListLabel(peak)
-
-    def _changePeakListItem(self, peak):
-        pls = peak.peakList
-        if pls:
-            spectrum = pls.spectrum
-
-            for peakListView in pls.peakListViews:
-                if peakListView in self._GLPeakListLabels.keys():
-                    for spectrumView in spectrum.spectrumViews:
-                        if spectrumView in self._parent.spectrumViews:
-                            self._removePeakListItem(spectrumView, peakListView, peak)
-                            self._appendPeakListItem(spectrumView, peakListView, peak)
-                            self._updateHighlightedPeaks(spectrumView, peakListView)
-
-    def _deletePeakListLabel(self, peak):
-        for pll in self._GLPeakListLabels.keys():
-            drawList = self._GLPeakListLabels[pll]
-
-            for drawStr in drawList.stringList:
-                if drawStr.object == peak:
-                    drawList.stringList.remove(drawStr)
-                    break
-
-    def _createPeakListLabel(self, peak):
-        pls = peak.peakList
-        if pls:
-            spectrum = pls.spectrum
-
-            for peakListView in pls.peakListViews:
-                if peakListView in self._GLPeakListLabels.keys():
-                    for spectrumView in spectrum.spectrumViews:
-                        if spectrumView in self._parent.spectrumViews:
-                            drawList = self._GLPeakListLabels[peakListView]
-                            self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
-                            self._rescalePeakListLabels(spectrumView, peakListView, drawList)
+    # def _deletePeakListItem(self, peak):
+    #     pls = peak.peakList
+    #     if pls:
+    #         spectrum = pls.spectrum
+    #
+    #         for peakListView in pls.peakListViews:
+    #             if peakListView in self._GLPeakLists.keys():
+    #                 for spectrumView in spectrum.spectrumViews:
+    #                     if spectrumView in self.strip.spectrumViews:
+    #                         self._removePeakListItem(spectrumView, peakListView, peak)
+    #                         self._updateHighlightedPeaks(spectrumView, peakListView)
+    #
+    # def _createPeakListItem(self, peak):
+    #     pls = peak.peakList
+    #     if pls:
+    #         spectrum = pls.spectrum
+    #
+    #         for peakListView in pls.peakListViews:
+    #             if peakListView in self._GLPeakLists.keys():
+    #                 for spectrumView in spectrum.spectrumViews:
+    #                     if spectrumView in self.strip.spectrumViews:
+    #                         self._appendPeakListItem(spectrumView, peakListView, peak)
+    #                         self._updateHighlightedPeaks(spectrumView, peakListView)
+    #
+    # def _changePeakListLabel(self, peak):
+    #     self._deletePeakListLabel(peak)
+    #     self._createPeakListLabel(peak)
+    #
+    # def _changePeakListItem(self, peak):
+    #     pls = peak.peakList
+    #     if pls:
+    #         spectrum = pls.spectrum
+    #
+    #         for peakListView in pls.peakListViews:
+    #             if peakListView in self._GLPeakListLabels.keys():
+    #                 for spectrumView in spectrum.spectrumViews:
+    #                     if spectrumView in self.strip.spectrumViews:
+    #                         self._removePeakListItem(spectrumView, peakListView, peak)
+    #                         self._appendPeakListItem(spectrumView, peakListView, peak)
+    #                         self._updateHighlightedPeaks(spectrumView, peakListView)
+    #
+    # def _deletePeakListLabel(self, peak):
+    #     for pll in self._GLPeakListLabels.keys():
+    #         drawList = self._GLPeakListLabels[pll]
+    #
+    #         for drawStr in drawList.stringList:
+    #             if drawStr.object == peak:
+    #                 drawList.stringList.remove(drawStr)
+    #                 break
+    #
+    # def _createPeakListLabel(self, peak):
+    #     pls = peak.peakList
+    #     if pls:
+    #         spectrum = pls.spectrum
+    #
+    #         for peakListView in pls.peakListViews:
+    #             if peakListView in self._GLPeakListLabels.keys():
+    #                 for spectrumView in spectrum.spectrumViews:
+    #                     if spectrumView in self.strip.spectrumViews:
+    #                         drawList = self._GLPeakListLabels[peakListView]
+    #                         self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
+    #                         self._rescalePeakListLabels(spectrumView, peakListView, drawList)
 
     def _processPeakNotifier(self, data):
         # TODO:ED change this for the quick one
-        # for spectrumView in self._parent.spectrumViews:
+        # for spectrumView in self.strip.spectrumViews:
         #   for peakListView in spectrumView.peakListViews:
         #     peakListView.buildPeakLists = True
         #     peakListView.buildPeakListLabels = True
@@ -2576,243 +2588,247 @@ class CcpnGLWidget(QOpenGLWidget):
         # self.buildPeakListLabels()
         # return
 
-        triggers = data[Notifier.TRIGGER]
-        peak = data[Notifier.OBJECT]
+        self._GLSymbols[0]._processNotifier(data)
 
-        if Notifier.DELETE in triggers:
-            self._deletePeakListItem(peak)
-            self._deletePeakListLabel(peak)
-
-        if Notifier.CREATE in triggers:
-            self._createPeakListItem(peak)
-            self._createPeakListLabel(peak)
-
-        if Notifier.CHANGE in triggers:
-            self._changePeakListItem(peak)
-            self._changePeakListLabel(peak)
+        # triggers = data[Notifier.TRIGGER]
+        # peak = data[Notifier.OBJECT]
+        #
+        # if Notifier.DELETE in triggers:
+        #     self._deletePeakListItem(peak)
+        #     self._deletePeakListLabel(peak)
+        #
+        # if Notifier.CREATE in triggers:
+        #     self._createPeakListItem(peak)
+        #     self._createPeakListLabel(peak)
+        #
+        # if Notifier.CHANGE in triggers:
+        #     self._changePeakListItem(peak)
+        #     self._changePeakListLabel(peak)
 
         self._clearKeys()
         self.update()
 
-    def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
-        # get the correct coordinates based on the axisCodes
+    # def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
+    #     # get the correct coordinates based on the axisCodes
+    #
+    #     spectrum = spectrumView.spectrum
+    #     spectrumFrequency = spectrum.spectrometerFrequencies
+    #     pls = peakListView.peakList
+    #
+    #     symbolWidth = self.strip.peakSymbolSize / 2.0
+    #
+    #     p0 = [0.0] * 2  # len(self.axisOrder)
+    #     lineWidths = [None] * 2  # len(self.axisOrder)
+    #     frequency = [0.0] * 2  # len(self.axisOrder)
+    #     axisCount = 0
+    #     for ps, psCode in enumerate(self.axisOrder[0:2]):
+    #         for pp, ppCode in enumerate(peak.axisCodes):
+    #
+    #             if self._preferences.matchAxisCode == 0:  # default - match atom type
+    #                 if ppCode[0] == psCode[0]:
+    #                     p0[ps] = peak.position[pp]
+    #                     lineWidths[ps] = peak.lineWidths[pp]
+    #                     frequency[ps] = spectrumFrequency[pp]
+    #                     axisCount += 1
+    #
+    #             elif self._preferences.matchAxisCode == 1:  # match full code
+    #                 if ppCode == psCode:
+    #                     p0[ps] = peak.position[pp]
+    #                     lineWidths[ps] = peak.lineWidths[pp]
+    #                     frequency[ps] = spectrumFrequency[pp]
+    #                     axisCount += 1
+    #
+    #     if lineWidths[0] and lineWidths[1]:
+    #         # draw 24 connected segments
+    #         r = 0.5 * lineWidths[0] / frequency[0]
+    #         w = 0.5 * lineWidths[1] / frequency[1]
+    #     else:
+    #         r = symbolWidth
+    #         w = symbolWidth
+    #
+    #     if axisCount == 2:
+    #         # TODO:ED display the required peaks
+    #         strip = spectrumView.strip
+    #         _isInPlane = strip.peakIsInPlane(peak)
+    #         if not _isInPlane:
+    #             _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+    #             fade = GLDefs.FADE_FACTOR
+    #         else:
+    #             _isInFlankingPlane = None
+    #             fade = 1.0
+    #
+    #         if not _isInPlane and not _isInFlankingPlane:
+    #             return
+    #
+    #         if self._isSelected(peak):
+    #             listCol = self.highlightColour[:3]
+    #         else:
+    #             listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR,
+    #                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+    #
+    #         if self.strip.peakLabelling == 0:
+    #             text = _getScreenPeakAnnotation(peak, useShortCode=True)
+    #         elif self.strip.peakLabelling == 1:
+    #             text = _getScreenPeakAnnotation(peak, useShortCode=False)
+    #         else:
+    #             text = _getPeakAnnotation(peak)  # original 'pid'
+    #
+    #         # TODO:ED check axisCodes and ordering
+    #         stringList.append(GLString(text=text,
+    #                                    font=self.globalGL.glSmallFont if _isInPlane else self.globalGL.glSmallTransparentFont,
+    #                                    x=p0[0], y=p0[1],
+    #                                    ox=r, oy=w,
+    #                                    # x=self._screenZero[0], y=self._screenZero[1]
+    #                                    color=(*listCol, fade), GLContext=self,
+    #                                    obj=peak))
 
-        spectrum = spectrumView.spectrum
-        spectrumFrequency = spectrum.spectrometerFrequencies
-        pls = peakListView.peakList
+    # def _threadBuildPeakListLabels(self, spectrumView, peakListView, drawList, glStrip):
+    #     tempList = []
+    #     pls = peakListView.peakList
+    #
+    #     # trap IntegralLists that are stored under the peakListView
+    #     if isinstance(pls, IntegralList):
+    #         return
+    #
+    #     for peak in pls.peaks:
+    #         self._appendPeakListLabel(spectrumView, peakListView, tempList, peak)
+    #
+    #     # self._rescalePeakListLabels(spectrumView, peakListView, drawList)
+    #     drawList.stringList = tempList
+    #     drawList.renderMode = GLRENDERMODE_RESCALE
+    #     glStrip.GLSignals.emitPaintEvent(source=glStrip)
 
-        symbolWidth = self._parent.peakSymbolSize / 2.0
+    # def _threadBuildAllPeakListLabels(self, viewList, glStrip, _outList):
+    #     # def _threadBuildAllPeakListLabels(self, threadQueue):#viewList, glStrip, _outList):
+    #     #   print ([obj for obj in threadQueue])
+    #     #   viewList = threadQueue[0]
+    #     #   glStrip = threadQueue[1]
+    #     #   _outList = threadQueue[2]
+    #     #   stringList = threadQueue[3]
+    #
+    #     for ii, view in enumerate(viewList):
+    #         spectrumView = view[0]
+    #         peakListView = view[1]
+    #         self._threadBuildPeakListLabels(spectrumView, peakListView,
+    #                                         _outList[peakListView],
+    #                                         glStrip)
+    #
+    #     glStrip.GLSignals.emitPaintEvent(source=glStrip)
 
-        p0 = [0.0] * 2  # len(self.axisOrder)
-        lineWidths = [None] * 2  # len(self.axisOrder)
-        frequency = [0.0] * 2  # len(self.axisOrder)
-        axisCount = 0
-        for ps, psCode in enumerate(self.axisOrder[0:2]):
-            for pp, ppCode in enumerate(peak.axisCodes):
+    # def _buildAllPeakListLabels(self, viewList):
+    #     self._GLSymbols[0]._buildAllLabels(viewList)
 
-                if self._preferences.matchAxisCode == 0:  # default - match atom type
-                    if ppCode[0] == psCode[0]:
-                        p0[ps] = peak.position[pp]
-                        lineWidths[ps] = peak.lineWidths[pp]
-                        frequency[ps] = spectrumFrequency[pp]
-                        axisCount += 1
-
-                elif self._preferences.matchAxisCode == 1:  # match full code
-                    if ppCode == psCode:
-                        p0[ps] = peak.position[pp]
-                        lineWidths[ps] = peak.lineWidths[pp]
-                        frequency[ps] = spectrumFrequency[pp]
-                        axisCount += 1
-
-        if lineWidths[0] and lineWidths[1]:
-            # draw 24 connected segments
-            r = 0.5 * lineWidths[0] / frequency[0]
-            w = 0.5 * lineWidths[1] / frequency[1]
-        else:
-            r = symbolWidth
-            w = symbolWidth
-
-        if axisCount == 2:
-            # TODO:ED display the required peaks
-            strip = spectrumView.strip
-            _isInPlane = strip.peakIsInPlane(peak)
-            if not _isInPlane:
-                _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
-                fade = GLDefs.FADE_FACTOR
-            else:
-                _isInFlankingPlane = None
-                fade = 1.0
-
-            if not _isInPlane and not _isInFlankingPlane:
-                return
-
-            if self._isSelected(peak):
-                listCol = self.highlightColour[:3]
-            else:
-                listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.SPECTRUMPOSCOLOUR,
-                                                getColours()[CCPNGLWIDGET_FOREGROUND])
-
-            if self._parent.peakLabelling == 0:
-                text = _getScreenPeakAnnotation(peak, useShortCode=True)
-            elif self._parent.peakLabelling == 1:
-                text = _getScreenPeakAnnotation(peak, useShortCode=False)
-            else:
-                text = _getPeakAnnotation(peak)  # original 'pid'
-
-            # TODO:ED check axisCodes and ordering
-            stringList.append(GLString(text=text,
-                                       font=self.globalGL.glSmallFont if _isInPlane else self.globalGL.glSmallTransparentFont,
-                                       x=p0[0], y=p0[1],
-                                       ox=r, oy=w,
-                                       # x=self._screenZero[0], y=self._screenZero[1]
-                                       color=(*listCol, fade), GLContext=self,
-                                       obj=peak))
-
-    def _threadBuildPeakListLabels(self, spectrumView, peakListView, drawList, glStrip):
-        tempList = []
-        pls = peakListView.peakList
-
-        # trap IntegralLists that are stored under the peakListView
-        if isinstance(pls, IntegralList):
-            return
-
-        for peak in pls.peaks:
-            self._appendPeakListLabel(spectrumView, peakListView, tempList, peak)
-
-        # self._rescalePeakListLabels(spectrumView, peakListView, drawList)
-        drawList.stringList = tempList
-        drawList.renderMode = GLRENDERMODE_RESCALE
-        glStrip.GLSignals.emitPaintEvent(source=glStrip)
-
-    def _threadBuildAllPeakListLabels(self, viewList, glStrip, _outList):
-        # def _threadBuildAllPeakListLabels(self, threadQueue):#viewList, glStrip, _outList):
-        #   print ([obj for obj in threadQueue])
-        #   viewList = threadQueue[0]
-        #   glStrip = threadQueue[1]
-        #   _outList = threadQueue[2]
-        #   stringList = threadQueue[3]
-
-        for ii, view in enumerate(viewList):
-            spectrumView = view[0]
-            peakListView = view[1]
-            self._threadBuildPeakListLabels(spectrumView, peakListView,
-                                            _outList[peakListView],
-                                            glStrip)
-
-        glStrip.GLSignals.emitPaintEvent(source=glStrip)
-
-    def _buildAllPeakListLabels(self, viewList):
-        for ii, view in enumerate(viewList):
-            spectrumView = view[0]
-            peakListView = view[1]
-            if peakListView not in self._GLPeakListLabels.keys():
-                self._GLPeakListLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
-                                                                         spectrumView=spectrumView,
-                                                                         peakListView=peakListView)
-                drawList = self._GLPeakListLabels[peakListView]
-                drawList.stringList = []
-
-        # if self._parent in self._threads:
-        #   print('>>>here')
-        #   # if self._threads[self._parent]._pool[0].is_alive():
-        #   if self._threads[self._parent].is_alive():
-        #     print('  >>>kill')
-        #     # self._threads[self._parent].terminate()
-        #     # self._threads[self._parent].join()
+        # for ii, view in enumerate(viewList):
+        #     spectrumView = view[0]
+        #     peakListView = view[1]
+        #     if peakListView not in self._GLPeakListLabels.keys():
+        #         self._GLPeakListLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
+        #                                                                  spectrumView=spectrumView,
+        #                                                                  peakListView=peakListView)
+        #         drawList = self._GLPeakListLabels[peakListView]
+        #         drawList.stringList = []
         #
-        # for a process:
-        # if not p.is_alive(): continue
-        # os.kill(p.pid, signal.SIGKILL)
-        # buildQueue = Queue()
-        buildQueue = (viewList, self, self._GLPeakListLabels)
-        buildPeaks = Thread(name=str(self._parent.pid),
-                            target=self._threadBuildAllPeakListLabels,
-                            args=buildQueue)
-        # buildPeaks.daemon = True
+        # # if self.strip in self._threads:
+        # #   print('>>>here')
+        # #   # if self._threads[self.strip]._pool[0].is_alive():
+        # #   if self._threads[self.strip].is_alive():
+        # #     print('  >>>kill')
+        # #     # self._threads[self.strip].terminate()
+        # #     # self._threads[self.strip].join()
+        # #
+        # # for a process:
+        # # if not p.is_alive(): continue
+        # # os.kill(p.pid, signal.SIGKILL)
+        # # buildQueue = Queue()
+        # buildQueue = (viewList, self, self._GLPeakListLabels)
+        # buildPeaks = Thread(name=str(self.strip.pid),
+        #                     target=self._threadBuildAllPeakListLabels,
+        #                     args=buildQueue)
+        # # buildPeaks.daemon = True
+        #
+        # # buildPeaks = pool.ThreadPool(processes=1)
+        # self._threads[self.strip] = buildPeaks
+        #
+        # # buildPeaks.apply_async(self._threadBuildAllPeakListLabels,
+        # #                         args=(viewList, self))
+        #
+        # buildPeaks.start()
 
-        # buildPeaks = pool.ThreadPool(processes=1)
-        self._threads[self._parent] = buildPeaks
+    # def _buildPeakListLabels(self, spectrumView, peakListView):
+    #     # spectrum = spectrumView.spectrum
+    #
+    #     if peakListView not in self._GLPeakListLabels.keys():
+    #         self._GLPeakListLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
+    #                                                                  spectrumView=spectrumView,
+    #                                                                  peakListView=peakListView)
+    #
+    #     drawList = self._GLPeakListLabels[peakListView]
+    #     if drawList.renderMode == GLRENDERMODE_REBUILD:
+    #         drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+    #
+    #         # drawList.clearArrays()
+    #         drawList.stringList = []
+    #
+    #         # if spectrumView in self._threads:
+    #         #   self._threads[spectrumView].terminate()
+    #
+    #         buildPeaks = Thread(name=str(self.strip.pid + spectrumView.pid),
+    #                             target=self._threadBuildPeakListLabels,
+    #                             args=(spectrumView, peakListView, drawList, self))
+    #         # self._threads[spectrumView] = buildPeaks
+    #         buildPeaks.start()
+    #         return
+    #
+    #         drawList.clearArrays()
+    #         drawList.stringList = []
+    #
+    #         # symbolWidth = self.strip.peakSymbolSize / 2.0
+    #
+    #         pls = peakListView.peakList
+    #         # spectrumFrequency = spectrum.spectrometerFrequencies
+    #
+    #         for peak in pls.peaks:
+    #             self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
+    #
+    #     elif drawList.renderMode == GLRENDERMODE_RESCALE:
+    #         drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+    #         self._rescalePeakListLabels(spectrumView, peakListView, drawList)
 
-        # buildPeaks.apply_async(self._threadBuildAllPeakListLabels,
-        #                         args=(viewList, self))
+    # def _drawVertexColor(self, drawList):
+    #     # new bit to use a vertex array to draw the peaks, very fast and easy
+    #     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    #     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+    #
+    #     GL.glVertexPointer(2, GL.GL_FLOAT, 0, drawList[2])
+    #     GL.glColorPointer(4, GL.GL_FLOAT, 0, drawList[3])
+    #     GL.glDrawArrays(GL.GL_LINES, 0, drawList[4])
+    #
+    #     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    #     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
-        buildPeaks.start()
-
-    def _buildPeakListLabels(self, spectrumView, peakListView):
-        # spectrum = spectrumView.spectrum
-
-        if peakListView not in self._GLPeakListLabels.keys():
-            self._GLPeakListLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
-                                                                     spectrumView=spectrumView,
-                                                                     peakListView=peakListView)
-
-        drawList = self._GLPeakListLabels[peakListView]
-        if drawList.renderMode == GLRENDERMODE_REBUILD:
-            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-
-            # drawList.clearArrays()
-            drawList.stringList = []
-
-            # if spectrumView in self._threads:
-            #   self._threads[spectrumView].terminate()
-
-            buildPeaks = Thread(name=str(self._parent.pid + spectrumView.pid),
-                                target=self._threadBuildPeakListLabels,
-                                args=(spectrumView, peakListView, drawList, self))
-            # self._threads[spectrumView] = buildPeaks
-            buildPeaks.start()
-            return
-
-            drawList.clearArrays()
-            drawList.stringList = []
-
-            # symbolWidth = self._parent.peakSymbolSize / 2.0
-
-            pls = peakListView.peakList
-            # spectrumFrequency = spectrum.spectrometerFrequencies
-
-            for peak in pls.peaks:
-                self._appendPeakListLabel(spectrumView, peakListView, drawList.stringList, peak)
-
-        elif drawList.renderMode == GLRENDERMODE_RESCALE:
-            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-            self._rescalePeakListLabels(spectrumView, peakListView, drawList)
-
-    def _drawVertexColor(self, drawList):
-        # new bit to use a vertex array to draw the peaks, very fast and easy
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-
-        GL.glVertexPointer(2, GL.GL_FLOAT, 0, drawList[2])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, drawList[3])
-        GL.glDrawArrays(GL.GL_LINES, 0, drawList[4])
-
-        GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-
-    def _drawPeakListVertices(self, spectrumView, peakListView):
-        drawList = self._GLPeakLists[peakListView]
-
-        # new bit to use a vertex array to draw the peaks, very fast and easy
-        GL.glEnable(GL.GL_BLEND)
-
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-
-        GL.glVertexPointer(2, GL.GL_FLOAT, 0, drawList[2])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, drawList[3])
-        GL.glDrawArrays(GL.GL_LINES, 0, drawList[4])
-
-        GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-
-        # GL.glEnable(GL.GL_TEXTURE_2D)
-        # GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
-        # GL.glListBase( self.globalGL.glSmallFont.base )
-        # GL.glCallList(drawList[0])        # temporarily call the drawing of the text
-        # GL.glDisable(GL.GL_TEXTURE_2D)
-
-        GL.glDisable(GL.GL_BLEND)
+    # def _drawPeakListVertices(self, spectrumView, peakListView):
+    #     drawList = self._GLPeakLists[peakListView]
+    #
+    #     # new bit to use a vertex array to draw the peaks, very fast and easy
+    #     GL.glEnable(GL.GL_BLEND)
+    #
+    #     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    #     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+    #
+    #     GL.glVertexPointer(2, GL.GL_FLOAT, 0, drawList[2])
+    #     GL.glColorPointer(4, GL.GL_FLOAT, 0, drawList[3])
+    #     GL.glDrawArrays(GL.GL_LINES, 0, drawList[4])
+    #
+    #     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    #     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+    #
+    #     # GL.glEnable(GL.GL_TEXTURE_2D)
+    #     # GL.glBindTexture(GL.GL_TEXTURE_2D, self.globalGL.glSmallFont.textureId)
+    #     # GL.glListBase( self.globalGL.glSmallFont.base )
+    #     # GL.glCallList(drawList[0])        # temporarily call the drawing of the text
+    #     # GL.glDisable(GL.GL_TEXTURE_2D)
+    #
+    #     GL.glDisable(GL.GL_BLEND)
 
     # def _drawPeakListLabels(self, spectrumView, peakListView):
     #   drawList = self._GLPeakListLabels[peakListView.pid]
@@ -2835,10 +2851,10 @@ class CcpnGLWidget(QOpenGLWidget):
         if self._blankDisplay:
             return
 
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
-        self._ordering = self._parent.spectrumDisplay.orderedSpectrumViews(self._parent.spectrumViews)
+        self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
@@ -2888,7 +2904,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
-        if self._parent.crosshairVisible:
+        if self.strip.crosshairVisible:
             self.drawMouseCoords()
 
         self.drawOverlayText()
@@ -2944,15 +2960,15 @@ class CcpnGLWidget(QOpenGLWidget):
         # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
     def buildAllContours(self):
-        for spectrumView in self._parent.spectrumViews:
+        for spectrumView in self.strip.spectrumViews:
             spectrumView.buildContours = True
 
     def buildSpectra(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         # self._spectrumSettings = {}
-        for spectrumView in self._parent.spectrumViews:
+        for spectrumView in self.strip.spectrumViews:
 
             if spectrumView.buildContours or spectrumView.buildContoursOnly:
 
@@ -3009,10 +3025,10 @@ class CcpnGLWidget(QOpenGLWidget):
             drawList._rebuildIntegralAreas()
 
     def buildIntegralLists(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
-        for spectrumView in self._parent.spectrumViews:
+        for spectrumView in self.strip.spectrumViews:
 
             for integralListView in spectrumView.integralListViews:
                 if integralListView in self._GLIntegralLists.keys():
@@ -3027,62 +3043,66 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     self._buildIntegralLists(spectrumView, integralListView)
 
-    def buildPeakLists(self):
-        if self._parent.isDeleted:
-            return
+    # def buildPeakLists(self):
+    #     self._GLSymbols[0].buildSymbols()
 
-        # list through the valid peakListViews attached to the strip - including undeleted
-        for spectrumView in self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
+        # if self.strip.isDeleted:
+        #     return
+        #
+        # # list through the valid peakListViews attached to the strip - including undeleted
+        # for spectrumView in self.strip.spectrumViews:
+        #     for peakListView in spectrumView.peakListViews:
+        #
+        #         if peakListView in self._GLPeakLists.keys():
+        #             if self._GLPeakLists[peakListView].renderMode == GLRENDERMODE_RESCALE:
+        #                 # self._buildPeakLists(spectrumView, peakListView)
+        #                 self._GLSymbols[0]._buildPeakLists(spectrumView, peakListView)
+        #
+        #         if peakListView.buildPeakLists:
+        #             peakListView.buildPeakLists = False
+        #
+        #             # set the interior flags for rebuilding the GLdisplay
+        #             if peakListView in self._GLPeakLists.keys():
+        #                 self._GLPeakLists[peakListView].renderMode = GLRENDERMODE_REBUILD
+        #
+        #             # self._buildPeakLists(spectrumView, peakListView)
+        #             self._GLSymbols[0]._buildPeakLists(spectrumView, peakListView)
 
-                if peakListView in self._GLPeakLists.keys():
-                    if self._GLPeakLists[peakListView].renderMode == GLRENDERMODE_RESCALE:
-                        # self._buildPeakLists(spectrumView, peakListView)
-                        self._GLSymbols[0]._buildPeakLists(spectrumView, peakListView)
+    # def buildPeakListLabels(self):
+    #     self._GLSymbols[0].buildLabels()
 
-                if peakListView.buildPeakLists:
-                    peakListView.buildPeakLists = False
-
-                    # set the interior flags for rebuilding the GLdisplay
-                    if peakListView in self._GLPeakLists.keys():
-                        self._GLPeakLists[peakListView].renderMode = GLRENDERMODE_REBUILD
-
-                    # self._buildPeakLists(spectrumView, peakListView)
-                    self._GLSymbols[0]._buildPeakLists(spectrumView, peakListView)
-
-    def buildPeakListLabels(self):
-        if self._parent.isDeleted:
-            return
-
-        _buildList = []
-        for spectrumView in self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
-
-                if peakListView in self._GLPeakListLabels.keys():
-                    if self._GLPeakListLabels[peakListView].renderMode == GLRENDERMODE_RESCALE:
-                        self._rescalePeakListLabels(spectrumView, peakListView, self._GLPeakListLabels[peakListView])
-
-                if peakListView.buildPeakListLabels:
-                    peakListView.buildPeakListLabels = False
-
-                    if peakListView in self._GLPeakListLabels.keys():
-                        self._GLPeakListLabels[peakListView].renderMode = GLRENDERMODE_REBUILD
-
-                    # self._buildPeakListLabels(spectrumView, peakListView)
-                    _buildList.append([spectrumView, peakListView])
-
-        if _buildList:
-            self._buildAllPeakListLabels(_buildList)
-            # self._rescalePeakListLabels(spectrumView, peakListView, self._GLPeakListLabels[peakListView])
+        # if self.strip.isDeleted:
+        #     return
+        #
+        # _buildList = []
+        # for spectrumView in self.strip.spectrumViews:
+        #     for peakListView in spectrumView.peakListViews:
+        #
+        #         if peakListView in self._GLPeakListLabels.keys():
+        #             if self._GLPeakListLabels[peakListView].renderMode == GLRENDERMODE_RESCALE:
+        #                 self._rescalePeakListLabels(spectrumView, peakListView, self._GLPeakListLabels[peakListView])
+        #
+        #         if peakListView.buildPeakListLabels:
+        #             peakListView.buildPeakListLabels = False
+        #
+        #             if peakListView in self._GLPeakListLabels.keys():
+        #                 self._GLPeakListLabels[peakListView].renderMode = GLRENDERMODE_REBUILD
+        #
+        #             # self._buildPeakListLabels(spectrumView, peakListView)
+        #             _buildList.append([spectrumView, peakListView])
+        #
+        # if _buildList:
+        #     self._buildAllPeakListLabels(_buildList)
+        #     # self._rescalePeakListLabels(spectrumView, peakListView, self._GLPeakListLabels[peakListView])
 
     def drawIntegralLists(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         self.buildIntegralLists()
 
         # loop through the attached integralListViews to the strip
-        for spectrumView in self._ordering:  #self._parent.spectrumViews:
+        for spectrumView in self._ordering:  #self.strip.spectrumViews:
             for integralListView in spectrumView.integralListViews:
                 if spectrumView.isVisible() and integralListView.isVisible():
 
@@ -3105,42 +3125,46 @@ class CcpnGLWidget(QOpenGLWidget):
         self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
     def drawPeakLists(self):
-        if self._parent.isDeleted:
-            return
+        self._GLSymbols[0].drawSymbols()
 
-        self.buildPeakLists()
-
-        lineThickness = self._parent.peakSymbolThickness
-        GL.glLineWidth(lineThickness)
-
-        # loop through the attached peakListViews to the strip
-        for spectrumView in self._ordering:  #self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
-                if spectrumView.isVisible() and peakListView.isVisible():
-
-                    if peakListView in self._GLPeakLists.keys():
-                        self._GLPeakLists[peakListView].drawIndexArray()
-
-        GL.glLineWidth(1.0)
+        # if self.strip.isDeleted:
+        #     return
+        #
+        # self.buildPeakLists()
+        #
+        # lineThickness = self.strip.peakSymbolThickness
+        # GL.glLineWidth(lineThickness)
+        #
+        # # loop through the attached peakListViews to the strip
+        # for spectrumView in self._ordering:  #self.strip.spectrumViews:
+        #     for peakListView in spectrumView.peakListViews:
+        #         if spectrumView.isVisible() and peakListView.isVisible():
+        #
+        #             if peakListView in self._GLPeakLists.keys():
+        #                 self._GLPeakLists[peakListView].drawIndexArray()
+        #
+        # GL.glLineWidth(1.0)
 
     def drawPeakListLabels(self):
-        if self._parent.isDeleted:
-            return
+        self._GLSymbols[0].drawLabels()
 
-        self.buildPeakListLabels()
-
-        # loop through the attached peakListViews to the strip
-        for spectrumView in self._ordering:  #self._parent.spectrumViews:
-            for peakListView in spectrumView.peakListViews:
-                if spectrumView.isVisible() and peakListView.isVisible():
-
-                    if peakListView in self._GLPeakListLabels.keys():
-
-                        for drawString in self._GLPeakListLabels[peakListView].stringList:
-                            drawString.drawTextArray()
+        # if self.strip.isDeleted:
+        #     return
+        #
+        # self.buildPeakListLabels()
+        #
+        # # loop through the attached peakListViews to the strip
+        # for spectrumView in self._ordering:  #self.strip.spectrumViews:
+        #     for peakListView in spectrumView.peakListViews:
+        #         if spectrumView.isVisible() and peakListView.isVisible():
+        #
+        #             if peakListView in self._GLPeakListLabels.keys():
+        #
+        #                 for drawString in self._GLPeakListLabels[peakListView].stringList:
+        #                     drawString.drawTextArray()
 
     def drawSpectra(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         self.buildSpectra()
@@ -3148,7 +3172,7 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glLineWidth(1.0)
         GL.glDisable(GL.GL_BLEND)
 
-        for spectrumView in self._ordering:  #self._parent.spectrumViews:       #.orderedSpectrumViews():
+        for spectrumView in self._ordering:  #self.strip.spectrumViews:       #.orderedSpectrumViews():
 
             if spectrumView.isDeleted:
                 continue
@@ -3188,7 +3212,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the bounding boxes
         GL.glEnable(GL.GL_BLEND)
         if self._preferences.showSpectrumBorder:
-            for spectrumView in self._ordering:  #self._parent.spectrumViews:
+            for spectrumView in self._ordering:  #self.strip.spectrumViews:
                 if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
                     self._spectrumValues = spectrumView._getValues()
 
@@ -3244,7 +3268,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.buildGrid()
         GL.glEnable(GL.GL_BLEND)
 
-        if self._parent.gridVisible:
+        if self.strip.gridVisible:
             self.viewports.setViewport(self._currentView)
             # self.axisLabelling, self.labelsChanged = self._buildAxes(self.gridList[0], axisList=[0,1], scaleGrid=[1,0], r=1.0, g=1.0, b=1.0, transparency=300.0)
             self.gridList[0].drawIndexArray()
@@ -3413,7 +3437,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 axisCode = self._axisCodes[0]
                 orientation = 'v'
 
-        self._infiniteLines.append(GLRegion(self._parent, self._regionList,
+        self._infiniteLines.append(GLRegion(self.strip, self._regionList,
                                             values=values,
                                             axisCode=axisCode,
                                             orientation=orientation,
@@ -3492,7 +3516,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 axisCode = self._axisCodes[0]
                 orientation = 'v'
 
-        self._regions.append(GLRegion(self._parent, self._regionList,
+        self._regions.append(GLRegion(self.strip, self._regionList,
                                       values=values,
                                       axisCode=axisCode,
                                       orientation=orientation,
@@ -3651,7 +3675,7 @@ class CcpnGLWidget(QOpenGLWidget):
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
 
     def drawMarksRulers(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         if self.buildMarks:
@@ -3661,14 +3685,14 @@ class CcpnGLWidget(QOpenGLWidget):
         self._marksList.drawIndexArray()
 
     def drawRegions(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         self.buildRegions()
         self._externalRegions.drawIndexArray()
 
     def drawMarksAxisCodes(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         # strings are generated when the marksRulers are modified
@@ -3679,7 +3703,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the cursors
         # need to change to VBOs
 
-        if self._parent.crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
+        if self.strip.crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
             GL.glBegin(GL.GL_LINES)
 
             # TODO:ED may want to put other icons for other modes
@@ -4259,7 +4283,7 @@ class CcpnGLWidget(QOpenGLWidget):
             tracesDict[spectrumView].clearArrays()
 
     def updateTraces(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         position = [self.cursorCoordinate[0], self.cursorCoordinate[1]]  #list(cursorPosition)
@@ -4268,9 +4292,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        for spectrumView in self._parent.spectrumViews:
+        for spectrumView in self.strip.spectrumViews:
 
-            phasingFrame = self._parent.spectrumDisplay.phasingFrame
+            phasingFrame = self.strip.spectrumDisplay.phasingFrame
             if phasingFrame.isVisible():
                 ph0 = phasingFrame.slider0.value()
                 ph1 = phasingFrame.slider1.value()
@@ -4308,12 +4332,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
         positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        for spectrumView in self._parent.spectrumViews:
+        for spectrumView in self.strip.spectrumViews:
 
             # only add phasing trace for the visible spectra
             if spectrumView.isVisible():
 
-                phasingFrame = self._parent.spectrumDisplay.phasingFrame
+                phasingFrame = self.strip.spectrumDisplay.phasingFrame
 
                 ph0 = phasingFrame.slider0.value()
                 ph1 = phasingFrame.slider1.value()
@@ -4357,7 +4381,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def buildStaticTraces(self):
 
-        phasingFrame = self._parent.spectrumDisplay.phasingFrame
+        phasingFrame = self.strip.spectrumDisplay.phasingFrame
         if phasingFrame.isVisible():
             ph0 = phasingFrame.slider0.value()
             ph1 = phasingFrame.slider1.value()
@@ -4420,10 +4444,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._staticVTraces.remove(dd)
 
     def drawTraces(self):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
-        phasingFrame = self._parent.spectrumDisplay.phasingFrame
+        phasingFrame = self.strip.spectrumDisplay.phasingFrame
         if phasingFrame.isVisible():
 
             self.buildStaticTraces()
@@ -4474,7 +4498,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def initialiseTraces(self):
         # set up the arrays and dimension for showing the horizontal/vertical traces
         stackCount = 0
-        for spectrumView in self._parent.spectrumViews:
+        for spectrumView in self.strip.spectrumViews:
             self._spectrumSettings[spectrumView] = {}
 
             self._spectrumValues = spectrumView._getValues()
@@ -4715,10 +4739,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     @pyqtSlot(dict)
     def _glXAxisChanged(self, aDict):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
-        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
 
             # match only the scale for the X axis
             axisL = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLLEFTAXISVALUE]
@@ -4733,10 +4757,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     @pyqtSlot(dict)
     def _glAxisLockChanged(self, aDict):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
-        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
             self._axisLocked = aDict[GLNotifier.GLVALUES]
             self.update()
 
@@ -4801,10 +4825,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
     @pyqtSlot(dict)
     def _glYAxisChanged(self, aDict):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
-        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
 
             # match the Y axis
             axisB = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLBOTTOMAXISVALUE]
@@ -4817,13 +4841,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
     @pyqtSlot(dict)
     def _glAllAxesChanged(self, aDict):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         sDisplay = aDict[GLNotifier.GLSPECTRUMDISPLAY]
         source = aDict[GLNotifier.GLSOURCE]
 
-        if source != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._parent.spectrumDisplay:
+        if source != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
 
             # match the values for the Y axis, and scale for the X axis
             axisB = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLBOTTOMAXISVALUE]
@@ -4843,7 +4867,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     @pyqtSlot(dict)
     def _glMouseMoved(self, aDict):
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         if aDict[GLNotifier.GLSOURCE] != self:
@@ -4889,7 +4913,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
             # only need to redraw if we can see the cursor
-            if self._parent.crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
+            if self.strip.crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
                 # if self._updateVTrace or self._updateHTrace:
                 #   self.updateTraces()
                 self.update()
@@ -4900,7 +4924,7 @@ class CcpnGLWidget(QOpenGLWidget):
     process events from the application/popups and other strips
     :param aDict - dictionary containing event flags:
     """
-        if self._parent.isDeleted:
+        if self.strip.isDeleted:
             return
 
         if aDict:
@@ -4912,7 +4936,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if triggers or targets:
                     if GLNotifier.GLPEAKLISTS in triggers:
-                        for spectrumView in self._parent.spectrumViews:
+                        for spectrumView in self.strip.spectrumViews:
                             for peakListView in spectrumView.peakListViews:
                                 for peakList in targets:
                                     if peakList == peakListView.peakList:
@@ -4920,7 +4944,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         # self.buildPeakLists()
 
                     if GLNotifier.GLPEAKLISTLABELS in triggers:
-                        for spectrumView in self._parent.spectrumViews:
+                        for spectrumView in self.strip.spectrumViews:
                             for peakListView in spectrumView.peakListViews:
                                 for peakList in targets:
                                     if peakList == peakListView.peakList:
@@ -4933,7 +4957,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     # TODO:ED test trigger for the minute
                     if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
 
-                        for spectrumView in self._parent.spectrumViews:
+                        for spectrumView in self.strip.spectrumViews:
                             for peakListView in spectrumView.peakListViews:
 
                                 if peakListView in self._GLPeakLists.keys():
@@ -4942,7 +4966,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLHIGHLIGHTINTEGRALS in triggers:
 
-                        for spectrumView in self._parent.spectrumViews:
+                        for spectrumView in self.strip.spectrumViews:
                             for integralListView in spectrumView.integralListViews:
 
                                 if integralListView in self._GLIntegralLists.keys():
@@ -4950,7 +4974,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLALLPEAKS in triggers:
 
-                        for spectrumView in self._parent.spectrumViews:
+                        for spectrumView in self.strip.spectrumViews:
                             for peakListView in spectrumView.peakListViews:
 
                                 if peakListView in self._GLPeakLists.keys():
@@ -4965,7 +4989,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLPEAKNOTIFY in targets:
 
-                        for spectrumView in self._parent.spectrumViews:
+                        for spectrumView in self.strip.spectrumViews:
                             for peakListView in spectrumView.peakListViews:
 
                                 if peakListView in self._GLPeakLists.keys():
@@ -4977,7 +5001,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLINTEGRALLISTS in triggers:
 
-                        for spectrumView in self._parent.spectrumViews:
+                        for spectrumView in self.strip.spectrumViews:
                             for integralListView in spectrumView.integralListViews:
 
                                 if integralListView in self._GLIntegralLists.keys():
@@ -4991,11 +5015,11 @@ class CcpnGLWidget(QOpenGLWidget):
                         # self._processPeakNotifier(targets)
 
                     if GLNotifier.GLCLEARPHASING in triggers:
-                        if self._parent.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
+                        if self.strip.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
                             self.clearStaticTraces()
 
                     if GLNotifier.GLADD1DPHASING in triggers:
-                        if self._parent.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
+                        if self.strip.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
                             self.clearStaticTraces()
                             self.newTrace()
 
@@ -5012,9 +5036,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _selectPeak(self, xPosition, yPosition):
         """
-    (de-)Select first peak near cursor xPosition, yPosition
-    if peak already was selected, de-select it
-    """
+        (de-)Select first peak near cursor xPosition, yPosition
+        if peak already was selected, de-select it
+        """
         xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
         yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
         xPositions = [xPosition - 0.5 * xPeakWidth, xPosition + 0.5 * xPeakWidth]
@@ -5027,7 +5051,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         peaks = list(self.current.peaks)
         # now select (take first one within range)
-        for spectrumView in self._parent.spectrumViews:
+        for spectrumView in self.strip.spectrumViews:
 
             # Nd peak selection - 1d is in the other class
 
@@ -5070,9 +5094,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _dragPeak(self, xPosition, yPosition):
         """
-    (de-)Select first peak near cursor xPosition, yPosition
-    if peak already was selected, de-select it
-    """
+        (de-)Select first peak near cursor xPosition, yPosition
+        if peak already was selected, de-select it
+        """
         xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
         yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
         xPositions = [xPosition - 0.5 * xPeakWidth, xPosition + 0.5 * xPeakWidth]
@@ -5084,7 +5108,7 @@ class CcpnGLWidget(QOpenGLWidget):
             zPositions = None
 
         # now select (take first one within range)
-        for spectrumView in self._parent.spectrumViews:
+        for spectrumView in self.strip.spectrumViews:
             if spectrumView.spectrum.dimensionCount == 1:
                 continue
 
@@ -5105,9 +5129,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                     self.current.addPeak(peak)
 
     def _pickAtMousePosition(self, event):
+        """pick the peaks at the mouse position
         """
-    pick the peaks at the mouse position
-    """
         event.accept()
         self._resetBoxes()
 
@@ -5116,7 +5139,7 @@ class CcpnGLWidget(QOpenGLWidget):
         for orderedAxis in self._orderedAxes[2:]:
             position.append(orderedAxis.position)
 
-        newPeaks, peakLists = self._parent.peakPickPosition(position)  #self.current.mouseMovedDict)
+        newPeaks, peakLists = self.strip.peakPickPosition(position)  #self.current.mouseMovedDict)
 
         # should fire peak notifier
         # self.GLSignals.emitEvent(targets=peakLists, triggers=[GLNotifier.GLPEAKLISTS,
@@ -5134,7 +5157,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def _mouseClickEvent(self, event: QtGui.QMouseEvent, axis=None):
-        # self.current.strip = self._parent
+        # self.current.strip = self.strip
         xPosition = self.cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
         yPosition = self.cursorCoordinate[1]  # self.mapSceneToView(event.pos()).y()
         self.current.positions = [xPosition, yPosition]
@@ -5208,7 +5231,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         elif rightMouse(event) and axis is None:
             # right click on canvas, not the axes
-            strip = self._parent
+            strip = self.strip
             menu = None
             event.accept()
             self._resetBoxes()
@@ -5237,7 +5260,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 strip._addItemsToNavigateToPeakMenu()
 
             # now select (take first one within range)
-            for spectrumView in self._parent.spectrumViews:
+            for spectrumView in self.strip.spectrumViews:
 
                 # Nd peak selection - 1d is in the other class
 
@@ -5310,7 +5333,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _getCanvasContextMenu(self):
         ''' give  a needed menu based on strip mode  '''
-        strip = self._parent
+        strip = self.strip
         menu = strip._contextMenus.get(DefaultMenu)
         if strip._isPhasingOn:
             menu = strip._contextMenus.get(PhasingMenu)
@@ -5320,7 +5343,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _setContextMenu(self, menu):
         ''' set  a needed menu based on strip mode  '''
 
-        self._parent.viewBox.menu = menu
+        self.strip.viewBox.menu = menu
 
     def _mouseDragEvent(self, event: QtGui.QMouseEvent, axis=None):
         if controlShiftLeftMouse(event):
@@ -5355,7 +5378,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # self.project.blankNotification()
 
             # try:
-            peaks = self._parent.peakPickRegion(selectedRegion)
+            peaks = self.strip.peakPickRegion(selectedRegion)
             # finally:
             #   self.project.unblankNotification()
 
@@ -5395,7 +5418,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             peaks = list(self.current.peaks)
 
-            for spectrumView in self._parent.spectrumViews:
+            for spectrumView in self.strip.spectrumViews:
                 for peakListView in spectrumView.peakListViews:
                     if not peakListView.isVisible() or not spectrumView.isVisible():
                         continue
@@ -5604,10 +5627,10 @@ class CcpnGLWidget(QOpenGLWidget):
                     return
 
     def exportToPDF(self, filename='default.pdf', params=None):
-        return GLExporter(self, self._parent, filename, params)
+        return GLExporter(self, self.strip, filename, params)
 
     def exportToSVG(self, filename='default.svg', params=None):
-        return GLExporter(self, self._parent, filename, params)
+        return GLExporter(self, self.strip, filename, params)
 
     def cohenSutherlandClip(self, x0, y0, x1, y1):
         """
@@ -5951,7 +5974,7 @@ class CcpnGLItem():
         self._id = CcpnGLItem._nextId
         CcpnGLItem._nextId += 1
 
-        self._parent = None
+        self.strip = None
         self._view = None
         self._children = set()
         self._transform = CcpnTransform3D()

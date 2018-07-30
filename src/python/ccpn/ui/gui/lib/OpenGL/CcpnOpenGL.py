@@ -1779,11 +1779,11 @@ class CcpnGLWidget(QOpenGLWidget):
     #                 index = 2 * drawList.pids[pp + 1]
     #                 drawList.vertices[index:index + 48] = drawList.attribs[index:index + 48] + offsets
 
-    def _isSelected(self, peak):
-        if self.current and self.current.peaks:
-            return peak in self.current.peaks
-        else:
-            return False
+    # def _isSelected(self, peak):
+    #     if self.current and self.current.peaks:
+    #         return peak in self.current.peaks
+    #     else:
+    #         return False
 
     def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
         self._GLSymbols[0]._updateHighlightedLabels(spectrumView, peakListView)

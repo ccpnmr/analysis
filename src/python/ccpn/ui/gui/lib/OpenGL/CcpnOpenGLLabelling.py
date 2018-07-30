@@ -1630,14 +1630,14 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                                                                 index, index + 3, index + 3, index + 1])
 
             drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
-                 p0[0] + r, p0[1] + w,
-                 p0[0] + r, p0[1] - w,
-                 p0[0] - r, p0[1] + w])
+                                                              p0[0] + r, p0[1] + w,
+                                                              p0[0] + r, p0[1] - w,
+                                                              p0[0] - r, p0[1] + w])
             drawList.colors = np.append(drawList.colors, [*cols, 1.0] * 4)
             drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1],
-                 p0[0], p0[1],
-                 p0[0], p0[1],
-                 p0[0], p0[1]])
+                                                            p0[0], p0[1],
+                                                            p0[0], p0[1],
+                                                            p0[0], p0[1]])
 
             # keep a pointer to the peak
             drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, 4,

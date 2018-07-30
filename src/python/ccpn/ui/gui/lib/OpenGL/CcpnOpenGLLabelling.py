@@ -79,22 +79,19 @@ except ImportError:
 class GLLabelling():
     """Class to handle symbol and symbol labelling
     """
-    def __init__(self, parent=None, strip=None, name=None, resizeGL=False,
-                 symbolDict=None, labelDict=None, objectList=None):
+    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+        """Initialise the class
+        """
         self._GLParent = parent
         self.strip = strip
         self.name = name
         self.resizeGL = resizeGL
-        # self.globalGL = parent.globalGL
-        # self.symbolDict = symbolDict
-        # self.labelict = labelDict
-        self.objectList = objectList
         self._threads = {}
         self._threadupdate = False
         self.current = self.strip.current
 
-        self._GLSymbolItems = {}        #symbolDict
-        self._GLSymbolLabels = {}       #labelDict
+        self._GLSymbolItems = {}
+        self._GLSymbolLabels = {}
 
     def _isSelected(self, peak):
         """return True if the obj in the defined object list
@@ -175,7 +172,7 @@ class GLLabelling():
                             self._rescalePeakListLabels(spectrumView, peakListView, drawList)
 
     def _processNotifier(self, data):
-        """process notifiers
+        """Process notifiers
         """
         triggers = data[Notifier.TRIGGER]
         peak = data[Notifier.OBJECT]

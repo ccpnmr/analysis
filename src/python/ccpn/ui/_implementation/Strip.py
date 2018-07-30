@@ -626,6 +626,8 @@ class Strip(AbstractWrapperObject):
       if displayIndex is not None:
         # If no axis matches the index may be None
         zPosition = peak.position[displayIndex]
+        if not zPosition:
+          return False
         zPlaneSize = 0.
         zRegion = orderedAxes[ii].region
         if zPosition < zRegion[0]-zPlaneSize or zPosition > zRegion[1]+zPlaneSize:
@@ -667,6 +669,8 @@ class Strip(AbstractWrapperObject):
       if displayIndex is not None:
         # If no axis matches the index may be None
         zPosition = peak.position[displayIndex]
+        if not zPosition:
+          return False
         zRegion = orderedAxes[ii].region
         zWidth = orderedAxes[ii].width
         if zRegion[0]-zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1]+zWidth:

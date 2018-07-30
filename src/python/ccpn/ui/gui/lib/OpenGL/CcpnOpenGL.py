@@ -307,10 +307,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # define a new class holding the entire peaklist symbols and labelling
         self._GLSymbols = [GLLabelling(parent=self, strip=self.strip,
-                                       name='peaks', resizeGL=True,
-                                       symbolDict=self._GLPeakLists,
-                                       labelDict=self._GLPeakListLabels,
-                                       objectList=self.current.peaks)]
+                                       name='peaks', resizeGL=True)]
 
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]

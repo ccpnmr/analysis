@@ -1450,6 +1450,13 @@ def _updateSelectedIntegrals(data):
   GLSignals = GLNotifier(parent=None)
   GLSignals.emitEvent(triggers=[GLNotifier.GLHIGHLIGHTINTEGRALS], targets=data[Notifier.OBJECT].integrals)
 
+def _updateSelectedMultiplets(data):
+  "Callback when peaks have changed"
+
+  from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+  GLSignals = GLNotifier(parent=None)
+  GLSignals.emitEvent(triggers=[GLNotifier.GLHIGHLIGHTMULTIPLETS], targets=data[Notifier.OBJECT].multiplets)
+
 def _axisRegionChanged(axis:'Axis'):
   """Notifier function: Update strips etc. for when axis position or width changes"""
 

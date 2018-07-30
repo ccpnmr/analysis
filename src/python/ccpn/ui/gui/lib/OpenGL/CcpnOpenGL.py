@@ -3716,6 +3716,9 @@ class CcpnGLWidget(QOpenGLWidget):
                     if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
                         self._GLSymbols[0].updateHighlightSymbols()
 
+                    if GLNotifier.GLHIGHLIGHTMULTIPLETS in triggers:
+                        self._GLSymbols[1].updateHighlightSymbols()
+
                     if GLNotifier.GLHIGHLIGHTINTEGRALS in triggers:
 
                         for spectrumView in self.strip.spectrumViews:

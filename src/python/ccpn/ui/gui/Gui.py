@@ -102,6 +102,7 @@ class Gui(Ui):
     # TODO:ED sorry - don't actually want _appBase
     self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
     self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
+    self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
 
     from ccpn.ui.gui.lib import GuiSpectrumDisplay
     project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)

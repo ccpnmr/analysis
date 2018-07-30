@@ -1052,6 +1052,7 @@ class Framework:
       # ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
       ("Integral Table", self.showIntegralTable, [('shortcut', 'it')]),
+      ("Multiplet Table", self.showMultipletTable, [('shortcut', 'mt')]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       (),
@@ -2081,7 +2082,6 @@ class Framework:
     from ccpn.ui.gui.modules.MultipletListTable import MultipletTableModule
 
     mainWindow = self.ui.mainWindow
-    #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
     self.multipletTableModule = MultipletTableModule(mainWindow, multipletList=multipletList)
@@ -2097,7 +2097,6 @@ class Framework:
     from ccpn.ui.gui.modules.IntegralTable import IntegralTableModule
 
     mainWindow = self.ui.mainWindow
-    #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
     self.integralTableModule = IntegralTableModule(mainWindow=mainWindow, integralList=integralList)

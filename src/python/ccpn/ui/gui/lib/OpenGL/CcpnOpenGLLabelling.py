@@ -63,6 +63,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDE
 #     GLRegion, REGION_COLOURS
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
+
+
 # from ccpn.util.Common import makeIterableList
 # from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
 
@@ -79,6 +81,7 @@ except ImportError:
 class GLLabelling():
     """Class to handle symbol and symbol labelling
     """
+
     def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
         """Initialise the class
         """
@@ -92,6 +95,16 @@ class GLLabelling():
 
         self._GLSymbolItems = {}
         self._GLSymbolLabels = {}
+
+
+class GLpeakNdLabelling(GLLabelling):
+    """Class to handle symbol and symbol labelling for Nd displays
+    """
+
+    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+        """Initialise the class
+        """
+        super(GLpeakNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
 
     def _isSelected(self, peak):
         """return True if the obj in the defined object list
@@ -190,8 +203,8 @@ class GLLabelling():
             self._changePeakListLabel(peak)
 
     def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
-        # get the correct coordinates based on the axisCodes
-
+        """Append a new label to the end of the list
+        """
         spectrum = spectrumView.spectrum
         spectrumFrequency = spectrum.spectrometerFrequencies
         pls = peakListView.peakList
@@ -244,7 +257,8 @@ class GLLabelling():
             if self._isSelected(peak):
                 listCol = self._GLParent.highlightColour[:3]
             else:
-                listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
+                listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
+                                                self._GLParent.SPECTRUMPOSCOLOUR,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
             if self.strip.peakLabelling == 0:
@@ -260,10 +274,13 @@ class GLLabelling():
                                        x=p0[0], y=p0[1],
                                        ox=r, oy=w,
                                        # x=self._screenZero[0], y=self._screenZero[1]
-                                       color=(*listCol, fade), GLContext=self._GLParent,
+                                       color=(*listCol, fade),
+                                       GLContext=self._GLParent,
                                        obj=peak))
 
     def _removePeakListItem(self, spectrumView, peakListView, delPeak):
+        """Remove a symbol from the list
+        """
         symbolType = self.strip.peakSymbolType
 
         drawList = self._GLSymbolItems[peakListView]
@@ -309,6 +326,8 @@ class GLLabelling():
             pp += GLDefs.LENPID
 
     def _appendPeakListItem(self, spectrumView, peakListView, peak):
+        """Append a new symbol to the end of the list
+        """
         spectrum = spectrumView.spectrum
         drawList = self._GLSymbolItems[peakListView]
 
@@ -379,7 +398,8 @@ class GLLabelling():
         if self._isSelected(peak):
             listCol = self._GLParent.highlightColour[:3]
         else:
-            listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
+            listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
+                                            self._GLParent.SPECTRUMPOSCOLOUR,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
 
         # get the correct coordinates based on the axisCodes
@@ -823,10 +843,8 @@ class GLLabelling():
                     drawList.vertices[index:index + 48] = drawList.attribs[index:index + 48] + offsets
 
     def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
-        # drawList = self._GLSymbolLabels[peakListView]
-        # strip = self._parent
-
-        # pls = peakListView.peakList
+        """Rescale all labels to the new dimensions of the screen
+        """
         symbolType = self.strip.peakSymbolType
         symbolWidth = self.strip.peakSymbolSize / 2.0
         x = abs(self._GLParent.pixelX)
@@ -866,8 +884,8 @@ class GLLabelling():
 
         if peakListView not in self._GLSymbolItems:
             self._GLSymbolItems[peakListView] = GLPeakListArray(GLContext=self,
-                                                              spectrumView=spectrumView,
-                                                              peakListView=peakListView)
+                                                                spectrumView=spectrumView,
+                                                                peakListView=peakListView)
 
         drawList = self._GLSymbolItems[peakListView]
 
@@ -924,14 +942,14 @@ class GLLabelling():
             indexPtr = 0
 
             pls = peakListView.peakList
-            listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
+            listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
+                                            self._GLParent.SPECTRUMPOSCOLOUR,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
 
             spectrumFrequency = spectrum.spectrometerFrequencies
 
             for peak in pls.peaks:
 
-                # TODO:ED display the required peaks - possibly build all then draw selected later
                 strip = spectrumView.strip
                 _isInPlane = strip.peakIsInPlane(peak)
                 if not _isInPlane:
@@ -1146,8 +1164,8 @@ class GLLabelling():
 
         if peakListView not in self._GLSymbolLabels.keys():
             self._GLSymbolLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
-                                                                     spectrumView=spectrumView,
-                                                                     peakListView=peakListView)
+                                                                   spectrumView=spectrumView,
+                                                                   peakListView=peakListView)
 
         drawList = self._GLSymbolLabels[peakListView]
         if drawList.renderMode == GLRENDERMODE_REBUILD:
@@ -1213,8 +1231,8 @@ class GLLabelling():
             peakListView = view[1]
             if peakListView not in self._GLSymbolLabels.keys():
                 self._GLSymbolLabels[peakListView] = GLPeakLabelsArray(GLContext=self,
-                                                                         spectrumView=spectrumView,
-                                                                         peakListView=peakListView)
+                                                                       spectrumView=spectrumView,
+                                                                       peakListView=peakListView)
                 drawList = self._GLSymbolLabels[peakListView]
                 drawList.stringList = []
 
@@ -1272,8 +1290,8 @@ class GLLabelling():
             spectrumView = view[0]
             peakListView = view[1]
             self._threadBuildLabels(spectrumView, peakListView,
-                                            _outList[peakListView],
-                                            glStrip)
+                                    _outList[peakListView],
+                                    glStrip)
 
         glStrip.GLSignals.emitPaintEvent(source=glStrip)
 
@@ -1319,3 +1337,432 @@ class GLLabelling():
 
                         for drawString in self._GLSymbolLabels[peakListView].stringList:
                             drawString.drawTextArray()
+
+
+class GLpeak1dLabelling(GLpeakNdLabelling):
+    """Class to handle symbol and symbol labelling for 1d displays
+    """
+
+    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+        """Initialise the class
+        """
+        super(GLpeak1dLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+
+    def _updateHighlightedSymbols(self, spectrumView, peakListView):
+        """update the highlighted symbols
+        """
+        spectrum = spectrumView.spectrum
+        strip = self.strip
+
+        symbolType = strip.peakSymbolType
+        symbolWidth = strip.peakSymbolSize / 2.0
+        lineThickness = strip.peakSymbolThickness / 2.0
+
+        drawList = self._GLSymbolItems[peakListView]
+        drawList.indices = np.empty(0, dtype=np.uint)
+
+        index = 0
+        indexPtr = 0
+
+        if symbolType is not None:
+            listCol = getAutoColourRgbRatio(peakListView.peakList.symbolColour,
+                                            peakListView.peakList.spectrum,
+                                            self._GLParent.SPECTRUMPOSCOLOUR,
+                                            getColours()[CCPNGLWIDGET_FOREGROUND])
+
+            for pp in range(0, len(drawList.pids), GLDefs.LENPID):
+
+                # check whether the peaks still exists
+                peak = drawList.pids[pp]
+                offset = drawList.pids[pp + 1]
+                numPoints = drawList.pids[pp + 2]
+
+                if not peak.isDeleted:
+                    _isSelected = False
+                    if self._isSelected(peak):
+                        # if hasattr(peak, '_isSelected') and peak._isSelected:
+                        _isSelected = True
+                        cols = self._GLParent.highlightColour[:3]
+                        drawList.indices = np.append(drawList.indices, np.array([index, index + 1, index + 2, index + 3,
+                                                                                 index, index + 2, index + 2, index + 1,
+                                                                                 index, index + 3, index + 3, index + 1], dtype=np.uint))
+                    else:
+                        cols = listCol
+
+                        drawList.indices = np.append(drawList.indices,
+                                                     np.array([index, index + 1, index + 2, index + 3], dtype=np.uint))
+                    drawList.colors[offset * 4:(offset + numPoints) * 4] = [*cols, 1.0] * numPoints
+
+                    drawList.pids[pp + 3:pp + 8] = [True, True, _isSelected,
+                                                    indexPtr, len(drawList.indices)]
+                    indexPtr = len(drawList.indices)
+
+                index += numPoints
+
+    def _buildSymbols(self, spectrumView, peakListView):
+        spectrum = spectrumView.spectrum
+
+        if peakListView not in self._GLSymbolItems:
+            self._GLSymbolItems[peakListView] = GLPeakListArray(GLContext=self,
+                                                                spectrumView=spectrumView,
+                                                                peakListView=peakListView)
+
+        drawList = self._GLSymbolItems[peakListView]
+
+        if drawList.renderMode == GLRENDERMODE_RESCALE:
+            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+            self._rescalePeakList(spectrumView=spectrumView, peakListView=peakListView)
+            self._rescalePeakListLabels(spectrumView=spectrumView,
+                                        peakListView=peakListView,
+                                        drawList=self._GLSymbolLabels[peakListView])
+
+        elif drawList.renderMode == GLRENDERMODE_REBUILD:
+            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+
+            # drawList.refreshMode = GLRENDERMODE_DRAW
+
+            drawList.clearArrays()
+
+            # find the correct scale to draw square pixels
+            # don't forget to change when the axes change
+
+            symbolType = self.strip.peakSymbolType
+            symbolWidth = self.strip.peakSymbolSize / 2.0
+            # lineThickness = self._preferences.peakSymbolThickness / 2.0
+
+            x = abs(self._GLParent.pixelX)
+            y = abs(self._GLParent.pixelY)
+            if x <= y:
+                r = symbolWidth
+                w = symbolWidth * y / x
+            else:
+                w = symbolWidth
+                r = symbolWidth * x / y
+
+            if symbolType is not None:  #== 0:  # a cross
+
+                # change the ratio on resize
+                drawList.refreshMode = GLREFRESHMODE_REBUILD
+                drawList.drawMode = GL.GL_LINES
+                drawList.fillMode = None
+
+            # build the peaks VBO
+            index = 0
+            indexPtr = 0
+
+            pls = peakListView.peakList
+            listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
+                                            self._GLParent.SPECTRUMPOSCOLOUR,
+                                            getColours()[CCPNGLWIDGET_FOREGROUND])
+
+            for peak in pls.peaks:
+
+                strip = spectrumView.strip
+                if self._isSelected(peak):
+                    cols = self._GLParent.highlightColour[:3]
+                else:
+                    cols = listCol
+
+                # get the correct coordinates based on the axisCodes
+                p0 = [0.0] * 2  #len(self.axisOrder)
+                for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+                    for pp, ppCode in enumerate(peak.axisCodes):
+
+                        if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+                            if ppCode[0] == psCode[0]:
+                                p0[ps] = peak.position[pp]
+                            else:
+                                p0[ps] = peak.height
+
+                        elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+                            if ppCode == psCode:
+                                p0[ps] = peak.position[pp]
+                            else:
+                                p0[ps] = peak.height
+
+                if symbolType is not None:  #== 0:
+
+                    # draw a cross
+                    # keep the cross square at 0.1ppm
+
+                    _isSelected = False
+                    if self._isSelected(peak):
+                        # if hasattr(peak, '_isSelected') and peak._isSelected:
+                        _isSelected = True
+                        drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3,
+                                                                        index, index + 2, index + 2, index + 1,
+                                                                        index, index + 3, index + 3, index + 1])
+                    else:
+                        drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
+
+                    drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+                                                                      p0[0] + r, p0[1] + w,
+                                                                      p0[0] + r, p0[1] - w,
+                                                                      p0[0] - r, p0[1] + w])
+                    drawList.colors = np.append(drawList.colors, [*cols, 1.0] * GLDefs.LENCOLORS)
+                    drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1],
+                                                                    p0[0], p0[1],
+                                                                    p0[0], p0[1],
+                                                                    p0[0], p0[1]])
+
+                    # keep a pointer to the peak
+                    drawList.pids = np.append(drawList.pids, [peak, index, 4,
+                                                              True, True, _isSelected,
+                                                              indexPtr, len(drawList.indices)])
+                    indexPtr = len(drawList.indices)
+
+                    index += 4
+                    drawList.numVertices += 4
+
+    def _rescalePeakList(self, spectrumView, peakListView):
+        """rescale symbols when the screen dimensions change
+        """
+        drawList = self._GLSymbolItems[peakListView]
+
+        # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
+
+        symbolType = self.strip.peakSymbolType
+        symbolWidth = self.strip.peakSymbolSize / 2.0
+        x = abs(self._GLParent.pixelX)
+        y = abs(self._GLParent.pixelY)
+
+        # fix the aspect ratio of the cross to match the screen
+        # minIndex = 0 if x <= y else 1
+        # pos = [symbolWidth, symbolWidth * y / x]
+        # w = r = pos[minIndex]
+
+        if x <= y:
+            r = symbolWidth
+            w = symbolWidth * y / x
+        else:
+            w = symbolWidth
+            r = symbolWidth * x / y
+
+        if symbolType is not None:  #== 0:  # a cross
+            # drawList.clearVertices()
+            # drawList.vertices.copy(drawList.attribs)
+            offsets = np.array([-r, -w, +r, +w, +r, -w, -r, +w], np.float32)
+            for pp in range(0, 2 * drawList.numVertices, 8):
+                drawList.vertices[pp:pp + 8] = drawList.attribs[pp:pp + 8] + offsets
+
+    def _appendPeakListItem(self, spectrumView, peakListView, peak):
+        """Append a new symbol to the end of the list
+        """
+        spectrum = spectrumView.spectrum
+        drawList = self._GLSymbolItems[peakListView]
+
+        # find the correct scale to draw square pixels
+        # don't forget to change when the axes change
+
+        symbolType = self.strip.peakSymbolType
+        symbolWidth = self.strip.peakSymbolSize / 2.0
+        lineThickness = self.strip.peakSymbolThickness / 2.0
+
+        x = abs(self._GLParent.pixelX)
+        y = abs(self._GLParent.pixelY)
+        if x <= y:
+            r = symbolWidth
+            w = symbolWidth * y / x
+        else:
+            w = symbolWidth
+            r = symbolWidth * x / y
+
+        if symbolType is not None:  #== 0:  # a cross
+
+            # change the ratio on resize
+            drawList.refreshMode = GLREFRESHMODE_REBUILD
+            drawList.drawMode = GL.GL_LINES
+            drawList.fillMode = None
+
+        # build the peaks VBO
+        index = 0
+        indexPtr = len(drawList.indices)
+
+        # for pls in spectrum.peakLists:
+
+        pls = peakListView.peakList
+        spectrumFrequency = spectrum.spectrometerFrequencies
+        listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
+                                        self._GLParent.SPECTRUMPOSCOLOUR,
+                                        getColours()[CCPNGLWIDGET_FOREGROUND])
+
+        strip = spectrumView.strip
+        _isInPlane = strip.peakIsInPlane(peak)
+        if not _isInPlane:
+            _isInFlankingPlane = strip.peakIsInFlankingPlane(peak)
+        else:
+            _isInFlankingPlane = None
+
+        if self._isSelected(peak):
+            cols = self._GLParent.highlightColour[:3]
+        else:
+            cols = listCol
+
+        # get the correct coordinates based on the axisCodes
+        p0 = [0.0] * 2  # len(self.axisOrder)
+        for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+            for pp, ppCode in enumerate(peak.axisCodes):
+
+                if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+                    if ppCode[0] == psCode[0]:
+                        p0[ps] = peak.position[pp]
+                    else:
+                        p0[ps] = peak.height
+
+                elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+                    if ppCode == psCode:
+                        p0[ps] = peak.position[pp]
+                    else:
+                        p0[ps] = peak.height
+
+        if symbolType is not None:  #== 0:
+
+            # draw a cross
+            # keep the cross square at 0.1ppm
+
+            _isSelected = False
+            drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
+
+            if self._isSelected(peak):
+                # if hasattr(peak, '_isSelected') and peak._isSelected:
+                _isSelected = True
+                drawList.indices = np.append(drawList.indices, [index, index + 2, index + 2, index + 1,
+                                                                index, index + 3, index + 3, index + 1])
+
+            drawList.vertices = np.append(drawList.vertices, [p0[0] - r, p0[1] - w,
+                 p0[0] + r, p0[1] + w,
+                 p0[0] + r, p0[1] - w,
+                 p0[0] - r, p0[1] + w])
+            drawList.colors = np.append(drawList.colors, [*cols, 1.0] * 4)
+            drawList.attribs = np.append(drawList.attribs, [p0[0], p0[1],
+                 p0[0], p0[1],
+                 p0[0], p0[1],
+                 p0[0], p0[1]])
+
+            # keep a pointer to the peak
+            drawList.pids = np.append(drawList.pids, [peak, drawList.numVertices, 4,
+                                                      True, True, _isSelected,
+                                                      indexPtr, len(drawList.indices)])
+
+            index += 4
+            drawList.numVertices += 4
+
+    def _removePeakListItem(self, spectrumView, peakListView, delPeak):
+        """Remove a symbol from the list
+        """
+        symbolType = self.strip.peakSymbolType
+
+        drawList = self._GLSymbolItems[peakListView]
+
+        index = 0
+        indexOffset = 0
+        numPoints = 0
+
+        pp = 0
+        while (pp < len(drawList.pids)):
+            # check whether the peaks still exists
+            peak = drawList.pids[pp]
+
+            if peak == delPeak:
+                offset = drawList.pids[pp + 1]
+                numPoints = drawList.pids[pp + 2]
+
+                # _isInPlane = drawList.pids[pp + 3]
+                # _isInFlankingPlane = drawList.pids[pp + 4]
+                # _isSelected = drawList.pids[pp + 5]
+                indexStart = drawList.pids[pp + 6]
+                indexEnd = drawList.pids[pp + 7]
+                indexOffset = indexEnd - indexStart
+
+                drawList.indices = np.delete(drawList.indices, np.s_[indexStart:indexEnd])
+                drawList.vertices = np.delete(drawList.vertices, np.s_[2 * offset:2 * (offset + numPoints)])
+                drawList.attribs = np.delete(drawList.attribs, np.s_[2 * offset:2 * (offset + numPoints)])
+                drawList.colors = np.delete(drawList.colors, np.s_[4 * offset:4 * (offset + numPoints)])
+                drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + GLDefs.LENPID])
+                drawList.numVertices -= numPoints
+                break
+            else:
+                pp += GLDefs.LENPID
+
+        # clean up the rest of the list
+        while (pp < len(drawList.pids)):
+            drawList.pids[pp + 1] -= numPoints
+            drawList.pids[pp + 6] -= indexOffset
+            drawList.pids[pp + 7] -= indexOffset
+            pp += GLDefs.LENPID
+
+    def _appendPeakListLabel(self, spectrumView, peakListView, stringList, peak):
+        """Append a new label to the end of the list
+        """
+        spectrum = spectrumView.spectrum
+        spectrumFrequency = spectrum.spectrometerFrequencies
+        pls = peakListView.peakList
+
+        symbolWidth = self.strip.peakSymbolSize / 2.0
+
+        # get the correct coordinates based on the axisCodes
+        p0 = [0.0] * 2  # len(self.axisOrder)
+        for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+            for pp, ppCode in enumerate(peak.axisCodes):
+
+                if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+                    if ppCode[0] == psCode[0]:
+                        p0[ps] = peak.position[pp]
+                    else:
+                        p0[ps] = peak.height
+
+                elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+                    if ppCode == psCode:
+                        p0[ps] = peak.position[pp]
+                    else:
+                        p0[ps] = peak.height
+
+        if self._isSelected(peak):
+            listCol = self._GLParent.highlightColour[:3]
+        else:
+            listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
+                                            self._GLParent.SPECTRUMPOSCOLOUR,
+                                            getColours()[CCPNGLWIDGET_FOREGROUND])
+
+        if self.strip.peakLabelling == 0:
+            text = _getScreenPeakAnnotation(peak, useShortCode=True)
+        elif self.strip.peakLabelling == 1:
+            text = _getScreenPeakAnnotation(peak, useShortCode=False)
+        else:
+            text = _getPeakAnnotation(peak)  # original 'pid'
+
+        # # TODO:ED check labelling
+        # text = peak.id
+
+        # TODO:ED check axisCodes and ordering
+        stringList.append(GLString(text=text,
+                                   font=self._GLParent.globalGL.glSmallFont,
+                                   x=p0[0], y=p0[1],
+                                   ox=symbolWidth, oy=symbolWidth,
+                                   # x=self._screenZero[0], y=self._screenZero[1]
+                                   color=(*listCol, 1.0),
+                                   GLContext=self._GLParent,
+                                   obj=peak))
+
+    def _rescalePeakListLabels(self, spectrumView=None, peakListView=None, drawList=None):
+        """Rescale all labels to the new dimensions of the screen
+        """
+        symbolType = self.strip.peakSymbolType
+        symbolWidth = self.strip.peakSymbolSize / 2.0
+        x = abs(self._GLParent.pixelX)
+        y = abs(self._GLParent.pixelY)
+
+        if symbolType is not None:  #== 0:  # a cross
+            # fix the aspect ratio of the cross to match the screen
+            # minIndex = 0 if x <= y else 1
+            # pos = [symbolWidth, symbolWidth * y / x]
+
+            if x <= y:
+                r = symbolWidth
+                w = symbolWidth * y / x
+            else:
+                w = symbolWidth
+                r = symbolWidth * x / y
+
+            for drawStr in drawList.stringList:
+                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))

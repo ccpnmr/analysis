@@ -102,7 +102,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDE
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
     GLRegion, REGION_COLOURS
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLLabelling
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak1dLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.util.Common import makeIterableList
@@ -288,8 +288,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self._buildTextFlag = True
 
         # define a new class holding the entire peaklist symbols and labelling
-        self._GLSymbols = [GLLabelling(parent=self, strip=self.strip,
-                                       name='peaks', resizeGL=True)]
+        if self.is1D:
+            self._GLSymbols = [GLpeak1dLabelling(parent=self, strip=self.strip,
+                                            name='peaks', resizeGL=True)]
+        else:
+            self._GLSymbols = [GLpeakNdLabelling(parent=self, strip=self.strip,
+                                            name='peaks', resizeGL=True)]
 
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]

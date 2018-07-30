@@ -125,8 +125,8 @@ class GuiStrip(Frame):
 
       self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
       self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)    # (3,0) if not hiding plotWidget
-      self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding
-                                               , QtWidgets.QSizePolicy.Expanding)
+      self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                               QtWidgets.QSizePolicy.Expanding)
 
       # set the ID label in the new widget
       self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))

@@ -193,12 +193,14 @@ class Gui1dWidget(CcpnGLWidget):
                 # flag the peaks for rebuilding
                 if not spectrumView.buildContoursOnly:
                     for peakListView in spectrumView.peakListViews:
-                        peakListView.buildPeakLists = True
-                        peakListView.buildPeakListLabels = True
-                        peakListView.buildIntegralLists = True
-                        peakListView.buildIntegralListLabels = True
-                        peakListView.buildMultipletLists = True
-                        peakListView.buildMultipletListLabels = True
+                        peakListView.buildSymbols = True
+                        peakListView.buildLabels = True
+                    for integralListView in spectrumView.integralListViews:
+                        integralListView.buildSymbols = True
+                        integralListView.buildLabels = True
+                    for multipletListView in spectrumView.multipletListViews:
+                        multipletListView.buildSymbols = True
+                        multipletListView.buildLabels = True
 
                 spectrumView.buildContours = False
                 spectrumView.buildContoursOnly = False

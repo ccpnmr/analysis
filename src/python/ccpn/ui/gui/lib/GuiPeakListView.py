@@ -283,9 +283,9 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
     # self.regionChanged()
 
     # ED - added to allow rebuilding of GLlists
-    self.buildPeakLists = True
-    self.buildPeakListLabels = True
-    # self.buildIntegralLists = True
+    self.buildSymbols = True
+    self.buildLabels = True
+    # self.buildSymbols = True
 
     # if isinstance(self.peakList, IntegralList):
     #   self.setVisible(False)

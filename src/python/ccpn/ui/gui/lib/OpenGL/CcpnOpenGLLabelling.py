@@ -96,6 +96,17 @@ class GLLabelling():
         self._GLSymbols = {}
         self._GLLabels = {}
 
+    def getLabelling(self, obj, labelType):
+        """get the object label based on the current labelling method
+        """
+        if labelType == 0:
+            text = _getScreenPeakAnnotation(obj, useShortCode=True)
+        elif labelType == 1:
+            text = _getScreenPeakAnnotation(obj, useShortCode=False)
+        else:
+            text = _getPeakAnnotation(obj)  # original 'pid'
+
+        return text
 
 class GLpeakNdLabelling(GLLabelling):
     """Class to handle symbol and symbol labelling for Nd displays
@@ -283,12 +294,13 @@ class GLpeakNdLabelling(GLLabelling):
                                                 self._GLParent.SPECTRUMPOSCOLOUR,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
-            if self.strip.peakLabelling == 0:
-                text = _getScreenPeakAnnotation(obj, useShortCode=True)
-            elif self.strip.peakLabelling == 1:
-                text = _getScreenPeakAnnotation(obj, useShortCode=False)
-            else:
-                text = _getPeakAnnotation(obj)  # original 'pid'
+            text = self.getLabelling(obj, self.strip.peakLabelling)
+            # if self.strip.peakLabelling == 0:
+            #     text = _getScreenPeakAnnotation(obj, useShortCode=True)
+            # elif self.strip.peakLabelling == 1:
+            #     text = _getScreenPeakAnnotation(obj, useShortCode=False)
+            # else:
+            #     text = _getPeakAnnotation(obj)  # original 'pid'
 
             # TODO:ED check axisCodes and ordering
             stringList.append(GLString(text=text,
@@ -643,8 +655,8 @@ class GLpeakNdLabelling(GLLabelling):
             for objListView in self.listViews(spectrumView):
 
                 if objListView in self._GLSymbols.keys():
-                    objListView.buildPeakLists = True
-                    objListView.buildPeakListLabels = True
+                    objListView.buildSymbols = True
+                    objListView.buildLabels = True
 
     def _updateHighlightedSymbols(self, spectrumView, objListView):
         """update the highlighted symbols
@@ -1179,8 +1191,8 @@ class GLpeakNdLabelling(GLLabelling):
                     if self._GLSymbols[objListView].renderMode == GLRENDERMODE_RESCALE:
                         self._buildSymbols(spectrumView, objListView)
 
-                if objListView.buildPeakLists:
-                    objListView.buildPeakLists = False
+                if objListView.buildSymbols:
+                    objListView.buildSymbols = False
 
                     # set the interior flags for rebuilding the GLdisplay
                     if objListView in self._GLSymbols.keys():
@@ -1242,8 +1254,8 @@ class GLpeakNdLabelling(GLLabelling):
                     if self._GLLabels[objListView].renderMode == GLRENDERMODE_RESCALE:
                         self._rescaleLabels(spectrumView, objListView, self._GLLabels[objListView])
 
-                if objListView.buildPeakListLabels:
-                    objListView.buildPeakListLabels = False
+                if objListView.buildLabels:
+                    objListView.buildLabels = False
 
                     if objListView in self._GLLabels.keys():
                         self._GLLabels[objListView].renderMode = GLRENDERMODE_REBUILD
@@ -1498,6 +1510,16 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                     cols = self._GLParent.highlightColour[:3]
                 else:
                     cols = listCol
+
+
+                # test axisCodes
+                try:
+                    ax = obj.axisCodes
+                except Exception as es:
+                    pass
+
+
+
 
                 # get the correct coordinates based on the axisCodes
                 p0 = [0.0] * 2  #len(self.axisOrder)
@@ -1764,12 +1786,13 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                                             self._GLParent.SPECTRUMPOSCOLOUR,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
 
-        if self.strip.peakLabelling == 0:
-            text = _getScreenPeakAnnotation(obj, useShortCode=True)
-        elif self.strip.peakLabelling == 1:
-            text = _getScreenPeakAnnotation(obj, useShortCode=False)
-        else:
-            text = _getPeakAnnotation(obj)  # original 'pid'
+        text = self.getLabelling(obj, self.strip.peakLabelling)
+        # if self.strip.peakLabelling == 0:
+        #     text = _getScreenPeakAnnotation(obj, useShortCode=True)
+        # elif self.strip.peakLabelling == 1:
+        #     text = _getScreenPeakAnnotation(obj, useShortCode=False)
+        # else:
+        #     text = _getPeakAnnotation(obj)  # original 'pid'
 
         # # TODO:ED check labelling
         # text = obj.id
@@ -1806,3 +1829,92 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
             for drawStr in drawList.stringList:
                 drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+
+
+class GLmultipletNdLabelling(GLpeakNdLabelling):
+    """Class to handle symbol and symbol labelling for Nd displays
+    """
+
+    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+        """Initialise the class
+        """
+        super(GLmultipletNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+
+    def rescale(self):
+        if self.resizeGL:
+            for pp in self._GLSymbols.values():
+                pp.renderMode = GLRENDERMODE_RESCALE
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List handlers
+    #   The routines that have to be changed when accessing different named
+    #   lists.
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _isSelected(self, multiplet):
+        """return True if the obj in the defined object list
+        """
+        if self.current.multiplets:
+            return multiplet in self.current.multiplets
+
+    def objects(self, obj):
+        """return the multiplets attached to the object
+        """
+        return obj.multiplets
+
+    def objectList(self, obj):
+        """return the multipletList attached to the multiplet
+        """
+        return obj.multipletList
+
+    def listViews(self, multipletList):
+        """Return the multipletListViews attached to the multipletList
+        """
+        return multipletList.multipletListViews
+
+
+class GLmultiplet1dLabelling(GLpeak1dLabelling):
+    """Class to handle symbol and symbol labelling for Nd displays
+    """
+
+    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+        """Initialise the class
+        """
+        super(GLmultiplet1dLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+
+    def rescale(self):
+        if self.resizeGL:
+            for pp in self._GLSymbols.values():
+                pp.renderMode = GLRENDERMODE_RESCALE
+
+    def getLabelling(self, obj, labelType):
+        """get the object label based on the current labelling method
+        """
+        return obj.pid
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List handlers
+    #   The routines that have to be changed when accessing different named
+    #   lists.
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _isSelected(self, multiplet):
+        """return True if the obj in the defined object list
+        """
+        if self.current.multiplets:
+            return multiplet in self.current.multiplets
+
+    def objects(self, obj):
+        """return the multiplets attached to the object
+        """
+        return obj.multiplets
+
+    def objectList(self, obj):
+        """return the multipletList attached to the multiplet
+        """
+        return obj.multipletList
+
+    def listViews(self, multipletList):
+        """Return the multipletListViews attached to the multipletList
+        """
+        return multipletList.multipletListViews

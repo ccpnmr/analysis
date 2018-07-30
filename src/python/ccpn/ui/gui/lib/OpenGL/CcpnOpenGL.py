@@ -102,7 +102,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDE
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
     GLRegion, REGION_COLOURS
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak1dLabelling
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak1dLabelling, \
+    GLmultiplet1dLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.util.Common import makeIterableList
@@ -290,10 +291,13 @@ class CcpnGLWidget(QOpenGLWidget):
         # define a new class holding the entire peaklist symbols and labelling
         if self.is1D:
             self._GLSymbols = [GLpeak1dLabelling(parent=self, strip=self.strip,
-                                            name='peaks', resizeGL=True)]
+                                                 name='peaks', resizeGL=True),
+                               GLmultiplet1dLabelling(parent=self, strip=self.strip,
+                                                      name='multiplets', resizeGL=True)
+                               ]
         else:
             self._GLSymbols = [GLpeakNdLabelling(parent=self, strip=self.strip,
-                                            name='peaks', resizeGL=True)]
+                                                 name='peaks', resizeGL=True)]
 
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
@@ -1655,7 +1659,6 @@ class CcpnGLWidget(QOpenGLWidget):
             for pp in range(0, 2 * vertices, 2):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
 
-
     def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
         self._GLSymbols[0]._updateHighlightedLabels(spectrumView, peakListView)
 
@@ -1819,12 +1822,14 @@ class CcpnGLWidget(QOpenGLWidget):
                 # flag the peaks for rebuilding
                 if not spectrumView.buildContoursOnly:
                     for peakListView in spectrumView.peakListViews:
-                        peakListView.buildPeakLists = True
-                        peakListView.buildPeakListLabels = True
-                        peakListView.buildIntegralLists = True
-                        peakListView.buildIntegralListLabels = True
-                        peakListView.buildMultipletLists = True
-                        peakListView.buildMultipletListLabels = True
+                        peakListView.buildSymbols = True
+                        peakListView.buildLabels = True
+                    for integralListView in spectrumView.integralListViews:
+                        integralListView.buildSymbols = True
+                        integralListView.buildLabels = True
+                    for multipletListView in spectrumView.multipletListViews:
+                        multipletListView.buildSymbols = True
+                        multipletListView.buildLabels = True
 
                 spectrumView.buildContours = False
                 spectrumView.buildContoursOnly = False
@@ -1879,8 +1884,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self._GLIntegralLists[integralListView].renderMode == GLRENDERMODE_RESCALE:
                         self._buildIntegralLists(spectrumView, integralListView)
 
-                if integralListView.buildIntegralLists:
-                    integralListView.buildIntegralLists = False
+                if integralListView.buildSymbols:
+                    integralListView.buildSymbols = False
 
                     if integralListView in self._GLIntegralLists.keys():
                         self._GLIntegralLists[integralListView].renderMode = GLRENDERMODE_REBUILD
@@ -3693,7 +3698,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             for peakListView in spectrumView.peakListViews:
                                 for peakList in targets:
                                     if peakList == peakListView.peakList:
-                                        peakListView.buildPeakLists = True
+                                        peakListView.buildSymbols = True
                         # self.buildPeakLists()
 
                     if GLNotifier.GLPEAKLISTLABELS in triggers:
@@ -3701,7 +3706,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             for peakListView in spectrumView.peakListViews:
                                 for peakList in targets:
                                     if peakList == peakListView.peakList:
-                                        peakListView.buildPeakListLabels = True
+                                        peakListView.buildLabels = True
                         # self.buildPeakListLabels()
 
                     if GLNotifier.GLMARKS in triggers:
@@ -3709,7 +3714,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     # TODO:ED test trigger for the minute
                     if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
-
                         self._GLSymbols[0].updateHighlightSymbols()
 
                     if GLNotifier.GLHIGHLIGHTINTEGRALS in triggers:
@@ -3721,14 +3725,12 @@ class CcpnGLWidget(QOpenGLWidget):
                                     self._updateHighlightedIntegrals(spectrumView, integralListView)
 
                     if GLNotifier.GLALLPEAKS in triggers:
-
                         self._GLSymbols[0].updateAllSymbols()
 
                     if GLNotifier.GLANY in targets:
                         self._rescaleXAxis(update=False)
 
                     if GLNotifier.GLPEAKNOTIFY in targets:
-
                         self._GLSymbols[0].updateHighlightSymbols()
 
                     if GLNotifier.GLINTEGRALLISTS in triggers:
@@ -3737,7 +3739,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             for integralListView in spectrumView.integralListViews:
 
                                 if integralListView in self._GLIntegralLists.keys():
-                                    integralListView.buildIntegralLists = True
+                                    integralListView.buildSymbols = True
 
                         # for ils in self._GLIntegralLists.values():
                         #   if ils.integralListView.peakList in targets:

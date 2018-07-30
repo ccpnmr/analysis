@@ -1037,8 +1037,8 @@ class GuiStrip(Frame):
       for sV in self.spectrumViews:
 
         for peakListView in sV.peakListViews:
-          # peakListView.buildPeakLists = True
-          peakListView.buildPeakListLabels = True
+          # peakListView.buildSymbols = True
+          peakListView.buildLabels = True
 
       # spawn a redraw of the GL windows
       from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -1055,8 +1055,8 @@ class GuiStrip(Frame):
       for sV in self.spectrumViews:
 
         for peakListView in sV.peakListViews:
-          peakListView.buildPeakLists = True
-          # peakListView.buildPeakListLabels = True
+          peakListView.buildSymbols = True
+          # peakListView.buildLabels = True
 
       # spawn a redraw of the GL windows
       from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

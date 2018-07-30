@@ -80,12 +80,12 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
     self.buildContours = True     # trigger the first build
     self.buildContoursOnly = False
-    self.buildPeakLists = True
-    self.buildPeakListLabels = True
-    self.buildIntegralLists = True
-    self.buildIntegralListLabels = True
-    self.buildMultipletLists = True
-    self.buildMultipletListLabels = True
+    # self.buildSymbols = True
+    # self.buildLabels = True
+    # self.buildSymbols = True
+    # self.buildLabels = True
+    # self.buildSymbols = True
+    # self.buildLabels = True
 
     # self.strip.viewBox.autoRange()
     # self.strip.zoomYAll()

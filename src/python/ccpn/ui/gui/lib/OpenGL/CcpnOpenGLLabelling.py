@@ -1337,7 +1337,7 @@ class GLpeakNdLabelling(GLLabelling):
 
         self.buildSymbols()
 
-        lineThickness = self.strip.objSymbolThickness
+        lineThickness = self.strip.peakSymbolThickness
         GL.glLineWidth(lineThickness)
 
         # loop through the attached objListViews to the strip

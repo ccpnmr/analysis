@@ -294,8 +294,14 @@ class Multiplet(AbstractWrapperObject):
         pksWidths = [pp.lineWidths for pp in pks]
         try:
             result = tuple(sum(item) for item in zip(*pksWidths))
-        except:
-            result = self._wrappedData.lineWidths
+        except Exception as es:
+            if pks:
+                result = list(pksWidths[0])
+                for otherPks in pksWidths[1:]:
+                    for ii in range(len(result)):
+                        result[ii] += otherPks[ii]
+            else:
+                result = self._wrappedData.lineWidths
         finally:
             return result
 

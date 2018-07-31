@@ -47,8 +47,8 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth, getMultipletPosition
 from ccpn.ui.gui.widgets.Splitter import Splitter
 
-logger = getLogger()
 
+logger = getLogger()
 
 MultipletPosUnits = ['ppm', 'Hz']
 
@@ -65,7 +65,6 @@ class MultipletTableModule(CcpnModule):
     className = 'MultipletTable'
 
     def __init__(self, mainWindow=None, name='MultipletList Table', multipletList=None):
-
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
@@ -76,7 +75,7 @@ class MultipletTableModule(CcpnModule):
         self.splitter = Splitter(QtCore.Qt.Horizontal)
         # mainWidget
         self.peaksFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 1))
-        self.peakListTableLabel = Label(self.peaksFrame, 'Peaks:', grid=(0,0), )
+        self.peakListTableLabel = Label(self.peaksFrame, 'Peaks:', grid=(0, 0), )
         self.peakListTableLabel.setFixedHeight(15)
 
         self.peakListTable = PeakListTableWidget(parent=self.peaksFrame,
@@ -86,20 +85,22 @@ class MultipletTableModule(CcpnModule):
                                                  grid=(1, 0))
 
         self.multipletListTable = MultipletListTableWidget(parent=self.mainWidget, mainWindow=self.mainWindow,
-                                                           moduleParent=self, setLayout=True
-                                                           , grid=(0, 0))
+                                                           moduleParent=self, setLayout=True,
+                                                           grid=(0, 0))
 
         if multipletList is not None:
             self.selectMultipletList(multipletList)
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
-
         self.peakListTable._widget.hide()
         self.splitter.addWidget(self.multipletListTable)
         self.splitter.addWidget(self.peaksFrame)
         self.mainWidget.getLayout().addWidget(self.splitter)
-        self.splitter.setStretchFactor(0, 1)
+
+        # it is beyond explanation how stretchFactor works
+        self.splitter.setStretchFactor(1, 1)
+        self.splitter.setStretchFactor(0, 5)
 
     def _maximise(self):
         """
@@ -112,7 +113,6 @@ class MultipletTableModule(CcpnModule):
         Manually select a multipletList from the pullDown
         """
         self.multipletListTable._selectMultipletList(multipletList)
-
 
     def _closeModule(self):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """
@@ -133,17 +133,16 @@ class MultipletListTableWidget(QuickTable):
     className = 'MultipletListTable'
     attributeName = 'multipletLists'
 
-    positionsUnit = MultipletPosUnits[0] #default
+    positionsUnit = MultipletPosUnits[0]  #default
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, multipletList=None, actionCallback=None, selectionCallback=None, **kwds):
         self.mainWindow = mainWindow
         self.application = mainWindow.application
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
-        self.moduleParent=moduleParent
+        self.moduleParent = moduleParent
         self.peakListTable = self.moduleParent.peakListTable
         MultipletListTableWidget.project = self.project
-
 
         self.settingWidgets = None
         self._selectedMultipletList = None
@@ -158,36 +157,35 @@ class MultipletListTableWidget(QuickTable):
 
         ## create Pulldown for selection of multipletList
         gridHPos = 0
-        self.mLwidget = MultipletListPulldown(parent=self._widget
-                                              , project=self.project
-                                              , grid=(0, gridHPos), gridSpan=(1, 1)
-                                              , showSelectName=True
-                                              , minimumWidths=(0, 100)
-                                              , sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents
-                                              , callback=self._pulldownPLcallback)
+        self.mLwidget = MultipletListPulldown(parent=self._widget,
+                                              project=self.project,
+                                              grid=(0, gridHPos), gridSpan=(1, 1),
+                                              showSelectName=True,
+                                              minimumWidths=(0, 100),
+                                              sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                              callback=self._pulldownPLcallback)
 
         ## create widgets for selection of position units
-        gridHPos+=1
-        self.posUnitPulldownLabel = Label(parent=self._widget, text= ' Position Unit', grid=(0, gridHPos))
+        gridHPos += 1
+        self.posUnitPulldownLabel = Label(parent=self._widget, text=' Position Unit', grid=(0, gridHPos))
         gridHPos += 1
         self.posUnitPulldown = PulldownList(parent=self._widget, texts=MultipletPosUnits, callback=self._pulldownUnitsCallback, grid=(0, gridHPos))
 
-        self._widget.setFixedHeight(30)       # needed for the correct sizing of the table
+        self._widget.setFixedHeight(30)  # needed for the correct sizing of the table
 
         self._hiddenColumns = ['Pid']
         self.dataFrameObject = None
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
 
-
-        QuickTable.__init__(self, parent=parent
-                            , mainWindow=self.mainWindow
-                            , dataFrameObject=None
-                            , setLayout=True
-                            , autoResize=True, multiSelect=True
-                            , actionCallback=actionCallback
-                            , selectionCallback=selectionCallback
-                            , grid=(3, 0), gridSpan=(1, 6))
+        QuickTable.__init__(self, parent=parent,
+                            mainWindow=self.mainWindow,
+                            dataFrameObject=None,
+                            setLayout=True,
+                            autoResize=True, multiSelect=True,
+                            actionCallback=actionCallback,
+                            selectionCallback=selectionCallback,
+                            grid=(3, 0), gridSpan=(1, 6))
 
         # self._selectOnTableCurrentMultipletsNotifier = None
         # self._multipletListDeleteNotifier = None
@@ -197,7 +195,7 @@ class MultipletListTableWidget(QuickTable):
         # self.tableMenu.addAction('Copy Multiplets...', self._copyMultiplets)
         self.tableMenu.insertSeparator(self.tableMenu.actions()[0])
         a = self.tableMenu.addAction('Edit Multiplet...', self._editMultiplets)
-        self.tableMenu.insertAction(self.tableMenu.actions()[0],a)
+        self.tableMenu.insertAction(self.tableMenu.actions()[0], a)
         ## populate the table if there are multipletlists in the project
         if multipletList is not None:
             self._selectMultipletList(multipletList)
@@ -218,16 +216,12 @@ class MultipletListTableWidget(QuickTable):
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)
 
-
-
     def _processDroppedItems(self, data):
         """
         CallBack for Drop events
         """
         pids = data.get('pids', [])
         self._handleDroppedItems(pids, MultipletList, self.mLwidget)
-
-
 
     def _getTableColumns(self, multipletList):
         '''Add default columns  plus the ones according with multipletList.spectrum dimension
@@ -284,7 +278,6 @@ class MultipletListTableWidget(QuickTable):
 
         return ColumnClass(columnDefs)
 
-
     ##################   Updates   ##################
 
     def _maximise(self):
@@ -305,27 +298,24 @@ class MultipletListTableWidget(QuickTable):
         # self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
         self._selectedMultipletList = self.project.getByPid(self.mLwidget.getText())
 
-
         if self._selectedMultipletList:
 
             self.project.blankNotification()
-            self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                              , buildList=self._selectedMultipletList.multiplets
-                                                              , colDefs=self._getTableColumns(self._selectedMultipletList)
-                                                              , hiddenColumns=self._hiddenColumns)
+            self._dataFrameObject = self.getDataFrameFromList(table=self,
+                                                              buildList=self._selectedMultipletList.multiplets,
+                                                              colDefs=self._getTableColumns(self._selectedMultipletList),
+                                                              hiddenColumns=self._hiddenColumns)
 
             # populate from the Pandas dataFrame inside the dataFrameObject
             self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
             self._highLightObjs(self.current.multiplets)
-            multiplet  = self.current.multiplet
+            multiplet = self.current.multiplet
             #
             self._updateMultipletPeaksOnTable()
             self.project.unblankNotification()
         else:
             self.clear()
             self.peakListTable.clear()
-
-
 
     def _selectMultipletList(self, multipletList=None):
         """
@@ -353,7 +343,6 @@ class MultipletListTableWidget(QuickTable):
         self.mLwidget.select(value)
         self._updateTable()
 
-
     def displayTableForMultipletList(self, multipletList):
         """
         Display the table for all NmrResidue's of nmrChain
@@ -366,11 +355,10 @@ class MultipletListTableWidget(QuickTable):
         from ccpn.core.PeakList import PeakList
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
-
         # TODO hack until we have multiplet views
         multiplet = self.current.multiplet
         if multiplet:
-            if len(multiplet.peaks)>0:
+            if len(multiplet.peaks) > 0:
                 peak = multiplet.peaks[-1]
 
                 if self.current.strip is not None:
@@ -415,16 +403,15 @@ class MultipletListTableWidget(QuickTable):
         multiplet = self.current.multiplet
         if multiplet:
             if len(multiplet.peaks) > 0:
-                self.peakListTable._dataFrameObject = self.getDataFrameFromList(table=self
-                                                                                , buildList=multiplet.peaks
-                                                                                ,
+                self.peakListTable._dataFrameObject = self.getDataFrameFromList(table=self,
+                                                                                buildList=multiplet.peaks,
+
                                                                                 colDefs=self.peakListTable._getTableColumns(
-                                                                                    multiplet.peaks[-1].peakList)
-                                                                                ,
+                                                                                        multiplet.peaks[-1].peakList),
+
                                                                                 hiddenColumns=self.peakListTable._hiddenColumns)
                 # populate from the Pandas dataFrame inside the dataFrameObject
                 self.peakListTable.setTableFromDataFrameObject(dataFrameObject=self.peakListTable._dataFrameObject)
-
 
     def _pulldownUnitsCallback(self, unit):
         # update the table with new units
@@ -453,7 +440,6 @@ class MultipletListTableWidget(QuickTable):
 
     ##################   Notifiers callbacks  ##################
 
-
     def _selectOnTableCurrentMultipletsNotifierCallback(self, data):
         """
         Callback from a notifier to highlight the multiplets on the multiplet table
@@ -467,7 +453,7 @@ class MultipletListTableWidget(QuickTable):
         Highlight the list of multiplets on the table
         :param currentMultiplets:
         """
-        if len(currentMultiplets)>0:
+        if len(currentMultiplets) > 0:
             self._highLightObjs(currentMultiplets)
             self._populateMultipletPeaksOnTable()
         else:
@@ -526,4 +512,3 @@ class MultipletListTableWidget(QuickTable):
     #     self._multipletNotifier.unRegister()
     #   if self._selectOnTableCurrentMultipletsNotifier is not None:
     #     self._selectOnTableCurrentMultipletsNotifier.unRegister()
-

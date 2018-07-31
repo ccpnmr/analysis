@@ -50,8 +50,7 @@ class MultipletListPropertiesPopup(CcpnDialog):
       self.close()
 
     else:
-      # FIXME hack to test the popup
-      self.multipletListViews = [multipletListView for multipletListView in multipletList.project.peakListViews]
+      self.multipletListViews = [multipletListView for multipletListView in multipletList.project.multipletListViews]
 
       # NOTE: below is not sorted in any way, but if we change that, we also have to change loop in _fillColourPulldown
       spectrumColourKeys = list(Colour.spectrumColours.keys())
@@ -74,6 +73,7 @@ class MultipletListPropertiesPopup(CcpnDialog):
         Colour.addNewColourString(c)
         Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
         Colour.selectPullDownColour(self.symbolColourPulldownList, c, allowAuto=True)
+
       self.symbolColourPulldownList.activated.connect(self._applyChanges)
 
       self.textColourLabel = Label(self, 'Multiplet Text Colour', grid=(4, 0))
@@ -92,6 +92,7 @@ class MultipletListPropertiesPopup(CcpnDialog):
         Colour.selectPullDownColour(self.textColourPulldownList, c, allowAuto=True)
 
       self.textColourPulldownList.activated.connect(self._applyChanges)
+
       self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self._accept)
 
     self.numUndos = 0
@@ -100,6 +101,10 @@ class MultipletListPropertiesPopup(CcpnDialog):
     value = self.symbolColourPulldownList.currentText()
     colour = Colour.getSpectrumColour(value, defaultReturn='#')
     self.multipletList.symbolColour = colour
+
+    value = self.textColourPulldownList.currentText()
+    colour = Colour.getSpectrumColour(value, defaultReturn='#')
+    self.multipletList.textColour = colour
 
   def _applyChanges(self):
     """
@@ -124,15 +129,13 @@ class MultipletListPropertiesPopup(CcpnDialog):
     try:
       self._changeColours()
 
-      applyAccept = True
-
       # repaint
-      GLSignals.emitEvent(targets=[self.multipletList], triggers=[GLNotifier.GLmultipletListS])
+      GLSignals.emitEvent(targets=[self.multipletList], triggers=[GLNotifier.GLMULTIPLETLISTS,
+                                                             GLNotifier.GLMULTIPLETLISTLABELS])
 
+      applyAccept = True
     except Exception as es:
-      # Fixme remove when multipletView are ready
-      showWarning(str(self.windowTitle()), str('Not implemented yet. Demo only'))
-      # showWarning(str(self.windowTitle()), str(es))
+      showWarning(str(self.windowTitle()), str(es))
     finally:
       self.project._endCommandEchoBlock()
 
@@ -158,5 +161,5 @@ class MultipletListPropertiesPopup(CcpnDialog):
 
   def _accept(self):
     self.symbolColourPulldownList.activated.disconnect(self._applyChanges)
-    # self.textColourPulldownList.activated.disconnect(self._applyChanges)
+    self.textColourPulldownList.activated.disconnect(self._applyChanges)
     self.accept()

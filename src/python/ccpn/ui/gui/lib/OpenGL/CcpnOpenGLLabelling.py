@@ -1,5 +1,6 @@
 """
-Module Documentation here
+Classes to handle drawing of symbols and symbol labelling to the openGL window
+Currently this is peaks and multiplets
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -79,7 +80,7 @@ except ImportError:
 
 
 class GLLabelling():
-    """Class to handle symbol and symbol labelling
+    """Base class to handle symbol and symbol labelling
     """
 
     def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
@@ -96,18 +97,6 @@ class GLLabelling():
         self._GLSymbols = {}
         self._GLLabels = {}
 
-    def getLabelling(self, obj, labelType):
-        """get the object label based on the current labelling method
-        """
-        if labelType == 0:
-            text = _getScreenPeakAnnotation(obj, useShortCode=True)
-        elif labelType == 1:
-            text = _getScreenPeakAnnotation(obj, useShortCode=False)
-        else:
-            text = _getPeakAnnotation(obj)  # original 'pid'
-
-        return text
-
     def rescale(self):
         if self.resizeGL:
             for pp in self._GLSymbols.values():
@@ -116,6 +105,7 @@ class GLLabelling():
 
 class GLpeakListMethods():
     """Class of methods common to 1d and Nd peaks
+    This is added to the Peak Classes below and doesn't require an __init__
     """
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -148,6 +138,22 @@ class GLpeakListMethods():
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # List specific routines
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def getLabelling(self, obj, labelType):
+        """Get the object label based on the current labelling method
+        For peaks, this is constructed from the pids of the attached nmrAtoms
+        """
+        if labelType == 0:
+            # return the short code form
+            text = _getScreenPeakAnnotation(obj, useShortCode=True)
+        elif labelType == 1:
+            # return the long form
+            text = _getScreenPeakAnnotation(obj, useShortCode=False)
+        else:
+            # return the original pid
+            text = _getPeakAnnotation(obj)
+
+        return text
 
     def objIsInPlane(self, strip, peak) -> bool:
         """is peak in currently displayed planes for strip?"""
@@ -1883,6 +1889,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
 class GLmultipletListMethods():
     """Class of methods common to 1d and Nd multiplets
+    This is added to the Multiplet Classes below and doesn't require an __init__
     """
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

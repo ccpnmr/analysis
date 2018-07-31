@@ -3744,11 +3744,27 @@ class CcpnGLWidget(QOpenGLWidget):
                                 if integralListView in self._GLIntegralLists.keys():
                                     integralListView.buildSymbols = True
 
+                    if GLNotifier.GLMULTIPLETLISTS in triggers:
+                        for spectrumView in self.strip.spectrumViews:
+                            for multipletListView in spectrumView.multipletListViews:
+                                for multipletList in targets:
+                                    if multipletList == multipletListView.multipletList:
+                                        multipletListView.buildSymbols = True
+                        # self.buildMultipletLists()
+
+                    if GLNotifier.GLMULTIPLETLISTLABELS in triggers:
+                        for spectrumView in self.strip.spectrumViews:
+                            for multipletListView in spectrumView.multipletListViews:
+                                for multipletList in targets:
+                                    if multipletList == multipletListView.multipletList:
+                                        multipletListView.buildLabels = True
+                            # self.buildMultipletListLabels()
+
                         # for ils in self._GLIntegralLists.values():
                         #   if ils.integralListView.peakList in targets:
                         #     # ils.renderMode = GLRENDERMODE_REBUILD
                         #     ils.integralListView.buildPeakLists = True
-
+    
                         # self._processPeakNotifier(targets)
 
                     if GLNotifier.GLCLEARPHASING in triggers:

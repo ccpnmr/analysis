@@ -578,7 +578,7 @@ def makeIterableList(inList=None):
   if isinstance(inList, Iterable) and not isinstance(inList, str):
     return [y for x in inList for y in makeIterableList(x) if inList]
   else:
-    if inList:
+    if inList is not None:
       return [inList]
     else:
       return []

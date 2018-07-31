@@ -1074,6 +1074,9 @@ class GuiStrip(Frame):
           peakListView.buildSymbols = True
           # peakListView.buildLabels = True
 
+        for multipletListView in sV.multipletListViews:
+          multipletListView.buildSymbols = True
+
       # spawn a redraw of the GL windows
       from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
       GLSignals = GLNotifier(parent=None)

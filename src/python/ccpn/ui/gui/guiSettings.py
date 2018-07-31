@@ -32,6 +32,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.util.decorators import singleton
 from ccpn.util.Logging import getLogger
+from ccpn.util.Colour import allColours, hexToRgbRatio
 
 # fonts
 monaco12              = Font('Monaco', 12)
@@ -132,6 +133,7 @@ CCPNGLWIDGET_GRID          = 'CCPNGLWIDGET_GRID'
 CCPNGLWIDGET_HIGHLIGHT     = 'CCPNGLWIDGET_HIGHLIGHT'
 CCPNGLWIDGET_LABELLING     = 'CCPNGLWIDGET_LABELLING'
 CCPNGLWIDGET_PHASETRACE    = 'CCPNGLWIDGET_PHASETRACE'
+CCPNGLWIDGET_MULTIPLETLINK = 'CCPNGLWIDGET_MULTIPLETLINK'
 
 GUICHAINLABEL_TEXT         = 'GUICHAINLABEL_TEXT'
 
@@ -177,6 +179,8 @@ MARISHINO   = '#004D81'  # rgb(0,77,129) ; red colour (from apple)
 MEDIUM_BLUE = '#7777FF'
 GREEN1      = '#009a00'
 WARNING_RED = '#e01010'
+FIREBRICK   = hexToRgbRatio([k for k, v in allColours.items() if v == 'firebrick'][0])
+LIGHTCORAL  = hexToRgbRatio([k for k, v in allColours.items() if v == 'lightcoral'][0])
 
 # Shades
 CCPNGLWIDGET_REGIONSHADE = 0.30
@@ -194,6 +198,7 @@ colourSchemes = {
     CCPNGLWIDGET_HIGHLIGHT     : (0.23, 0.23, 1.0, 1.0),  #'#3333ff'
     CCPNGLWIDGET_LABELLING     : (0.05, 0.05, 0.05, 1.0),
     CCPNGLWIDGET_PHASETRACE    : (0.2, 0.2, 0.2, 1.0),
+    CCPNGLWIDGET_MULTIPLETLINK : FIREBRICK,
 
     CCPNMODULELABEL_BACKGROUND : '#FFFFFF',
     CCPNMODULELABEL_FOREGROUND : TEXT_COLOUR,
@@ -237,13 +242,14 @@ colourSchemes = {
   # Overridden for dark colour scheme
   DARK: {
 
-    CCPNGLWIDGET_BACKGROUND: (0.1, 0.1, 0.1, 1.0),
-    CCPNGLWIDGET_FOREGROUND: (0.9, 1.0, 1.0, 1.0),      #'#f7ffff'
-    CCPNGLWIDGET_PICKCOLOUR: (0.2, 0.5, 0.9, 1.0),
-    CCPNGLWIDGET_GRID:       (0.9, 1.0, 1.0, 1.0),    #'#f7ffff'
-    CCPNGLWIDGET_HIGHLIGHT:  (0.2, 1.0, 0.3, 1.0),   #'#00ff00'
-    CCPNGLWIDGET_LABELLING:  (1.0, 1.0, 1.0, 1.0),
-    CCPNGLWIDGET_PHASETRACE: (0.8, 0.8, 0.8, 1.0)
+    CCPNGLWIDGET_BACKGROUND:    (0.1, 0.1, 0.1, 1.0),
+    CCPNGLWIDGET_FOREGROUND:    (0.9, 1.0, 1.0, 1.0),      #'#f7ffff'
+    CCPNGLWIDGET_PICKCOLOUR:    (0.2, 0.5, 0.9, 1.0),
+    CCPNGLWIDGET_GRID:          (0.9, 1.0, 1.0, 1.0),    #'#f7ffff'
+    CCPNGLWIDGET_HIGHLIGHT:     (0.2, 1.0, 0.3, 1.0),   #'#00ff00'
+    CCPNGLWIDGET_LABELLING:     (1.0, 1.0, 1.0, 1.0),
+    CCPNGLWIDGET_PHASETRACE:    (0.8, 0.8, 0.8, 1.0),
+    CCPNGLWIDGET_MULTIPLETLINK: LIGHTCORAL
 
   },
 

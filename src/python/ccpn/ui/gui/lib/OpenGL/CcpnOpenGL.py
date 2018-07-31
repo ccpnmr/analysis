@@ -3988,8 +3988,8 @@ class CcpnGLWidget(QOpenGLWidget):
             # Control-left-click; (de-)select peak and add/remove to selection
             event.accept()
             self._resetBoxes()
-            self._selectPeak(xPosition, yPosition)
             self._selectMultiplet(xPosition, yPosition)
+            self._selectPeak(xPosition, yPosition)
 
         elif leftMouse(event):
             # Left-click; select peak, deselecting others
@@ -3999,8 +3999,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self.current.clearIntegrals()
             self.current.clearMultiplets()
 
-            self._selectPeak(xPosition, yPosition)
             self._selectMultiplet(xPosition, yPosition)
+            self._selectPeak(xPosition, yPosition)
 
             for reg in self._GLIntegralLists.values():
                 if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
@@ -4333,8 +4333,8 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 zPositions = None
 
-            self._selectPeaksInRegion(xPositions, yPositions, zPositions)
             self._selectMultipletsInRegion(xPositions, yPositions, zPositions)
+            self._selectPeaksInRegion(xPositions, yPositions, zPositions)
 
             # peaks = list(self.current.peaks)
             #

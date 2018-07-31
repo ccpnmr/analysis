@@ -233,16 +233,25 @@ class GuiStrip(Frame):
 
     # notifier for highlighting the strip
     self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+
     # Notifier for updating the peaks
     self._peakNotifier = Notifier(self.project, [Notifier.CREATE,
                                                  Notifier.DELETE,
                                                  Notifier.CHANGE], 'Peak', self._updateDisplayedPeaks,
                                   onceOnly=True)
 
+    # Notifier for updating the integrals
     self._integralNotifier = Notifier(self.project, [Notifier.CREATE,
                                                  Notifier.DELETE,
                                                  Notifier.CHANGE], 'Integral', self._updateDisplayedIntegrals,
                                   onceOnly=True)
+
+    # Notifier for updating the multiplets
+    self._multipletNotifier = Notifier(self.project, [Notifier.CREATE,
+                                                 Notifier.DELETE,
+                                                 Notifier.CHANGE], 'Multiplet', self._updateDisplayedMultiplets,
+                                  onceOnly=True)
+
 
     # Notifier for change of stripLabel
     self._stripLabelNotifier = Notifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
@@ -450,6 +459,8 @@ class GuiStrip(Frame):
   def _unregisterStrip(self):
     self._stripNotifier.unRegister()
     self._peakNotifier.unRegister()
+    self._integralNotifier.unRegister()
+    self._multipletNotifier.unRegister()
     self._stripLabelNotifier.unRegister()
     self._droppedNotifier.unRegister()
 
@@ -465,6 +476,11 @@ class GuiStrip(Frame):
     self._CcpnGLWidget._processPeakNotifier(data)
     # except Exception as es:
     #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+
+  def _updateDisplayedMultiplets(self, data):
+    """Callback when multiplets have changed
+    """
+    self._CcpnGLWidget._processMultipletNotifier(data)
 
   def _addItemsToNavigateToPeakMenu(self):
     ''' Adds item to navigate to peak position from context menu'''

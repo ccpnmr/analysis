@@ -111,6 +111,36 @@ class Gui1dWidget(CcpnGLWidget):
 
         self.current.peaks = peaks
 
+    def _selectMultiplet(self, xPosition, yPosition):
+        """
+        (de-)Select first multiplet near cursor xPosition, yPosition
+        if multiplet already was selected, de-select it
+        """
+        xMultipletWidth = abs(self.pixelX) * self.peakWidthPixels
+        yMultipletWidth = abs(self.pixelY) * self.peakWidthPixels
+        xPositions = [xPosition - 0.5 * xMultipletWidth, xPosition + 0.5 * xMultipletWidth]
+        yPositions = [yPosition - 0.5 * yMultipletWidth, yPosition + 0.5 * yMultipletWidth]
+
+        multiplets = list(self.current.multiplets)
+        for spectrumView in self.strip.spectrumViews:
+
+            # TODO:ED could change this to actually use the pids in the drawList
+            for multipletListView in spectrumView.multipletListViews:
+                if spectrumView.isVisible() and multipletListView.isVisible():
+                    # for multipletList in spectrumView.spectrum.multipletLists:
+                    multipletList = multipletListView.multipletList
+
+                    for multiplet in multipletList.multiplets:
+                        if (xPositions[0] < float(multiplet.position[0]) < xPositions[1]
+                                and yPositions[0] < float(multiplet.height) < yPositions[1]):
+
+                            if multiplet in multiplets:
+                                multiplets.remove(multiplet)
+                            else:
+                                multiplets.append(multiplet)
+
+        self.current.multiplets = multiplets
+
     def _newStatic1DTraceData(self, spectrumView, tracesDict,
                               point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
                               ph0=None, ph1=None, pivot=None):

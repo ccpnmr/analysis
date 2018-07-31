@@ -1383,7 +1383,6 @@ class CcpnGLWidget(QOpenGLWidget):
     def mousePressEvent(self, ev):
         self.lastPos = ev.pos()
 
-        # TODO:ED take into account whether axis is visible
         mx = ev.pos().x()
         if self._drawBottomAxis:
             my = self.height() - ev.pos().y() - self.AXIS_MARGINBOTTOM
@@ -1671,6 +1670,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _processPeakNotifier(self, data):
         self._GLSymbols[0]._processNotifier(data)
+
+        self._clearKeys()
+        self.update()
+
+    def _processMultipletNotifier(self, data):
+        self._GLSymbols[1]._processNotifier(data)
 
         self._clearKeys()
         self.update()
@@ -3791,6 +3796,7 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         (de-)Select first peak near cursor xPosition, yPosition
         if peak already was selected, de-select it
+        This handles the Nd case, 1d _selectPeak is in the subclass GLWidgets
         """
         xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
         yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
@@ -3844,6 +3850,59 @@ class CcpnGLWidget(QOpenGLWidget):
                                     peaks.append(peak)
 
         self.current.peaks = peaks
+
+    def _selectMultiplet(self, xPosition, yPosition):
+        """
+        (de-)Select first multiplet near cursor xPosition, yPosition
+        if multiplet already was selected, de-select it
+        This handles the Nd case, 1d _selectMultiplet is in the subclass GLWidgets
+        """
+        xMultipletWidth = abs(self.pixelX) * self.peakWidthPixels
+        yMultipletWidth = abs(self.pixelY) * self.peakWidthPixels
+        xPositions = [xPosition - 0.5 * xMultipletWidth, xPosition + 0.5 * xMultipletWidth]
+        yPositions = [yPosition - 0.5 * yMultipletWidth, yPosition + 0.5 * yMultipletWidth]
+        if len(self._orderedAxes) > 2:
+            # NBNB TBD FIXME what about 4D multiplets?
+            zPositions = self._orderedAxes[2].region
+        else:
+            zPositions = None
+
+        multiplets = list(self.current.multiplets)
+        # now select (take first one within range)
+        for spectrumView in self.strip.spectrumViews:
+
+            for multipletListView in spectrumView.multipletListViews:
+                if spectrumView.isVisible() and multipletListView.isVisible():
+                    # for multipletList in spectrumView.spectrum.multipletLists:
+                    multipletList = multipletListView.multipletList
+
+                    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+                    xAxis = spectrumIndices[0]
+                    yAxis = spectrumIndices[1]
+
+                    for multiplet in multipletList.multiplets:
+                        if len(multiplet.axisCodes) > 2 and zPositions is not None:
+
+                            zAxis = spectrumIndices[2]
+                            # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+                            if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
+                                    and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
+
+                                if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+                                    if multiplet in multiplets:
+                                        multiplets.remove(multiplet)
+                                    else:
+                                        multiplets.append(multiplet)
+                        else:
+                            # 2d check
+                            if (xPositions[0] < float(multiplet.position[0]) < xPositions[1]
+                                    and yPositions[0] < float(multiplet.position[1]) < yPositions[1]):
+                                if multiplet in multiplets:
+                                    multiplets.remove(multiplet)
+                                else:
+                                    multiplets.append(multiplet)
+
+        self.current.multiplets = multiplets
 
     def _dragPeak(self, xPosition, yPosition):
         """
@@ -3930,6 +3989,7 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
             self._resetBoxes()
             self._selectPeak(xPosition, yPosition)
+            self._selectMultiplet(xPosition, yPosition)
 
         elif leftMouse(event):
             # Left-click; select peak, deselecting others
@@ -3937,10 +3997,10 @@ class CcpnGLWidget(QOpenGLWidget):
             self._resetBoxes()
             self.current.clearPeaks()
             self.current.clearIntegrals()
+            self.current.clearMultiplets()
 
-            # TODO:ED check integrals
-            # self._clearIntegralRegions()
             self._selectPeak(xPosition, yPosition)
+            self._selectMultiplet(xPosition, yPosition)
 
             for reg in self._GLIntegralLists.values():
                 if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
@@ -4098,6 +4158,110 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.strip.viewBox.menu = menu
 
+    def _selectPeaksInRegion(self, xPositions, yPositions, zPositions):
+        peaks = list(self.current.peaks)
+
+        for spectrumView in self.strip.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+                if not peakListView.isVisible() or not spectrumView.isVisible():
+                    continue
+
+                peakList = peakListView.peakList
+                if not isinstance(peakList, PeakList):  # it could be an IntegralList
+                    continue
+
+                if len(spectrumView.spectrum.axisCodes) == 1:
+
+                    y0 = self._startCoordinate[1]
+                    y1 = self._endCoordinate[1]
+                    y0, y1 = min(y0, y1), max(y0, y1)
+                    xAxis = 0
+                    # scale = peakList.spectrum.scale  # peak height now contains scale in it (so no scaling below)
+                    for peak in peakList.peaks:
+                        height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
+                        if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
+                            # peak.isSelected = True
+                            # self.current.addPeak(peak)
+                            peaks.append(peak)
+
+                else:
+                    # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
+                    # Fixed 13/3/2016 Rasmus Fogh
+                    # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
+                    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+                    xAxis = spectrumIndices[0]
+                    yAxis = spectrumIndices[1]
+                    # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
+                    # xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
+                    # yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
+                    for peak in peakList.peaks:
+                        if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                                and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+                            if len(peak.axisCodes) > 2 and zPositions is not None:
+                                zAxis = spectrumIndices[2]
+                                # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+                                if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                    # peak.isSelected = True
+                                    # self.current.addPeak(peak)
+                                    peaks.append(peak)
+                            else:
+                                # peak.isSelected = True
+                                # self.current.addPeak(peak)
+                                peaks.append(peak)
+
+        self.current.peaks = peaks
+
+    def _selectMultipletsInRegion(self, xPositions, yPositions, zPositions):
+        multiplets = list(self.current.multiplets)
+
+        for spectrumView in self.strip.spectrumViews:
+            for multipletListView in spectrumView.multipletListViews:
+                if not multipletListView.isVisible() or not spectrumView.isVisible():
+                    continue
+
+                multipletList = multipletListView.multipletList
+
+                if len(spectrumView.spectrum.axisCodes) == 1:
+
+                    y0 = self._startCoordinate[1]
+                    y1 = self._endCoordinate[1]
+                    y0, y1 = min(y0, y1), max(y0, y1)
+                    xAxis = 0
+                    # scale = multipletList.spectrum.scale  # multiplet height now contains scale in it (so no scaling below)
+                    for multiplet in multipletList.multiplets:
+                        height = multiplet.height  # * scale # TBD: is the scale already taken into account in multiplet.height???
+                        if xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1] and y0 < height < y1:
+                            # multiplet.isSelected = True
+                            # self.current.addMultiplet(multiplet)
+                            multiplets.append(multiplet)
+
+                else:
+                    # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
+                    # Fixed 13/3/2016 Rasmus Fogh
+                    # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
+                    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+                    xAxis = spectrumIndices[0]
+                    yAxis = spectrumIndices[1]
+                    # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
+                    # xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
+                    # yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
+                    for multiplet in multipletList.multiplets:
+                        if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
+                                and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
+                            if len(multiplet.axisCodes) > 2 and zPositions is not None:
+                                zAxis = spectrumIndices[2]
+                                # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+                                if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+                                    # multiplet.isSelected = True
+                                    # self.current.addMultiplet(multiplet)
+                                    multiplets.append(multiplet)
+                            else:
+                                # multiplet.isSelected = True
+                                # self.current.addMultiplet(multiplet)
+                                multiplets.append(multiplet)
+
+        self.current.multiplets = multiplets
+
     def _mouseDragEvent(self, event: QtGui.QMouseEvent, axis=None):
         if controlShiftLeftMouse(event):
             # Control(Cmd)+shift+left drag: Peak-picking
@@ -4136,7 +4300,7 @@ class CcpnGLWidget(QOpenGLWidget):
             #   self.project.unblankNotification()
 
             # hide all the messages from the peak annotation generation
-            self.project._startCommandEchoBlock('mousePeakPicking')
+            # self.project._startCommandEchoBlock('mousePeakPicking')
             # update strips which have the above peaks in them
             # (could check for visibility...)
 
@@ -4145,7 +4309,7 @@ class CcpnGLWidget(QOpenGLWidget):
             #   for peakListView in peakList.peakListViews:
             #     peakListView.spectrumView.strip.showPeaks(peakList)
 
-            self.project._endCommandEchoBlock()
+            # self.project._endCommandEchoBlock()
 
             # update peak table
             # limitation: this will only update the first peak table
@@ -4169,58 +4333,61 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 zPositions = None
 
-            peaks = list(self.current.peaks)
+            self._selectPeaksInRegion(xPositions, yPositions, zPositions)
+            self._selectMultipletsInRegion(xPositions, yPositions, zPositions)
 
-            for spectrumView in self.strip.spectrumViews:
-                for peakListView in spectrumView.peakListViews:
-                    if not peakListView.isVisible() or not spectrumView.isVisible():
-                        continue
-
-                    peakList = peakListView.peakList
-                    if not isinstance(peakList, PeakList):  # it could be an IntegralList
-                        continue
-
-                    # TODO: Special casing 1D here, seems like a hack.
-                    if len(spectrumView.spectrum.axisCodes) == 1:
-
-                        y0 = self._startCoordinate[1]
-                        y1 = self._endCoordinate[1]
-                        y0, y1 = min(y0, y1), max(y0, y1)
-                        xAxis = 0
-                        # scale = peakList.spectrum.scale  # peak height now contains scale in it (so no scaling below)
-                        for peak in peakList.peaks:
-                            height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
-                            if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
-                                # peak.isSelected = True
-                                # self.current.addPeak(peak)
-                                peaks.append(peak)
-
-                    else:
-                        # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
-                        # Fixed 13/3/2016 Rasmus Fogh
-                        # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
-                        spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
-                        xAxis = spectrumIndices[0]
-                        yAxis = spectrumIndices[1]
-                        # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
-                        # xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
-                        # yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
-                        for peak in peakList.peaks:
-                            if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                                    and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-                                if len(peak.axisCodes) > 2 and zPositions is not None:
-                                    zAxis = spectrumIndices[2]
-                                    # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
-                                    if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                        # peak.isSelected = True
-                                        # self.current.addPeak(peak)
-                                        peaks.append(peak)
-                                else:
-                                    # peak.isSelected = True
-                                    # self.current.addPeak(peak)
-                                    peaks.append(peak)
-
-            self.current.peaks = peaks
+            # peaks = list(self.current.peaks)
+            #
+            # for spectrumView in self.strip.spectrumViews:
+            #     for peakListView in spectrumView.peakListViews:
+            #         if not peakListView.isVisible() or not spectrumView.isVisible():
+            #             continue
+            #
+            #         peakList = peakListView.peakList
+            #         if not isinstance(peakList, PeakList):  # it could be an IntegralList
+            #             continue
+            #
+            #         # TODO: Special casing 1D here, seems like a hack.
+            #         if len(spectrumView.spectrum.axisCodes) == 1:
+            #
+            #             y0 = self._startCoordinate[1]
+            #             y1 = self._endCoordinate[1]
+            #             y0, y1 = min(y0, y1), max(y0, y1)
+            #             xAxis = 0
+            #             # scale = peakList.spectrum.scale  # peak height now contains scale in it (so no scaling below)
+            #             for peak in peakList.peaks:
+            #                 height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
+            #                 if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
+            #                     # peak.isSelected = True
+            #                     # self.current.addPeak(peak)
+            #                     peaks.append(peak)
+            #
+            #         else:
+            #             # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
+            #             # Fixed 13/3/2016 Rasmus Fogh
+            #             # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
+            #             spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+            #             xAxis = spectrumIndices[0]
+            #             yAxis = spectrumIndices[1]
+            #             # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
+            #             # xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
+            #             # yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
+            #             for peak in peakList.peaks:
+            #                 if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+            #                         and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+            #                     if len(peak.axisCodes) > 2 and zPositions is not None:
+            #                         zAxis = spectrumIndices[2]
+            #                         # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+            #                         if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+            #                             # peak.isSelected = True
+            #                             # self.current.addPeak(peak)
+            #                             peaks.append(peak)
+            #                     else:
+            #                         # peak.isSelected = True
+            #                         # self.current.addPeak(peak)
+            #                         peaks.append(peak)
+            #
+            # self.current.peaks = peaks
 
         elif middleMouse(event):
             # middle drag: moves a selected peak

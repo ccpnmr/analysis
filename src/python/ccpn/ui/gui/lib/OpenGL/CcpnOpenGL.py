@@ -103,7 +103,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
     GLRegion, REGION_COLOURS
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak1dLabelling, \
-    GLmultiplet1dLabelling
+    GLmultiplet1dLabelling, GLmultipletNdLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 from ccpn.util.Common import makeIterableList
@@ -276,12 +276,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._updateHTrace = False
         self._updateVTrace = False
 
-        self._GLPeakLists = {}
-        self._GLPeakListLabels = {}
         self._GLIntegralLists = {}
         self._GLIntegralLabels = {}
-        self._GLMultipletLists = {}
-        self._GLMultipletLabels = {}
 
         self._marksAxisCodes = []
         self._regions = []
@@ -290,14 +286,15 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # define a new class holding the entire peaklist symbols and labelling
         if self.is1D:
-            self._GLSymbols = [GLpeak1dLabelling(parent=self, strip=self.strip,
-                                                 name='peaks', resizeGL=True),
-                               GLmultiplet1dLabelling(parent=self, strip=self.strip,
+            self._GLPeaks = GLpeak1dLabelling(parent=self, strip=self.strip,
+                                                 name='peaks', resizeGL=True)
+            self._GLMultiplets = GLmultiplet1dLabelling(parent=self, strip=self.strip,
                                                       name='multiplets', resizeGL=True)
-                               ]
         else:
-            self._GLSymbols = [GLpeakNdLabelling(parent=self, strip=self.strip,
-                                                 name='peaks', resizeGL=True)]
+            self._GLPeaks = GLpeakNdLabelling(parent=self, strip=self.strip,
+                                                 name='peaks', resizeGL=True)
+            self._GLMultiplets = GLmultipletNdLabelling(parent=self, strip=self.strip,
+                                                      name='multiplets', resizeGL=True)
 
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
@@ -647,10 +644,8 @@ class CcpnGLWidget(QOpenGLWidget):
         # put stuff in here that will change on a resize
         for li in self.gridList:
             li.renderMode = GLRENDERMODE_REBUILD
-        # for pp in self._GLPeakLists.values():
-        #     pp.renderMode = GLRENDERMODE_RESCALE
-        for symbolLists in self._GLSymbols:
-            symbolLists.rescale()
+        self._GLPeaks.rescale()
+        self._GLMultiplets.rescale()
 
         self.update()
 
@@ -855,11 +850,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.gridList[0].renderMode = GLRENDERMODE_REBUILD
         self.gridList[2].renderMode = GLRENDERMODE_REBUILD
 
-        # ratios have changed so rescale the peaks symbols
-        # for pp in self._GLPeakLists.values():
-        #     pp.renderMode = GLRENDERMODE_RESCALE
-        for symbolLists in self._GLSymbols:
-            symbolLists.rescale()
+        # ratios have changed so rescale the peak/multiplet symbols
+        self._GLPeaks.rescale()
+        self._GLMultiplets.rescale()
 
         self._rescaleOverlayText()
 
@@ -880,11 +873,9 @@ class CcpnGLWidget(QOpenGLWidget):
             self.gridList[0].renderMode = GLRENDERMODE_REBUILD
             self.gridList[1].renderMode = GLRENDERMODE_REBUILD
 
-        # ratios have changed so rescale the peaks symbols
-        # for pp in self._GLPeakLists.values():
-        #     pp.renderMode = GLRENDERMODE_RESCALE
-        for symbolLists in self._GLSymbols:
-            symbolLists.rescale()
+        # ratios have changed so rescale the peak/multiplet symbols
+        self._GLPeaks.rescale()
+        self._GLMultiplets.rescale()
 
         self._rescaleOverlayText()
 
@@ -948,11 +939,9 @@ class CcpnGLWidget(QOpenGLWidget):
             li.renderMode = GLRENDERMODE_REBUILD
 
         if self._axisLocked:
-            # ratios have changed so rescale the peaks symbols
-            # for pp in self._GLPeakLists.values():
-            #     pp.renderMode = GLRENDERMODE_RESCALE
-            for symbolLists in self._GLSymbols:
-                symbolLists.rescale()
+            # ratios have changed so rescale the peak/multiplet symbols
+            self._GLPeaks.rescale()
+            self._GLMultiplets.rescale()
 
         self._rescaleOverlayText()
 
@@ -1659,23 +1648,23 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
 
     def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
-        self._GLSymbols[0]._updateHighlightedLabels(spectrumView, peakListView)
+        self._GLPeaks._updateHighlightedLabels(spectrumView, peakListView)
+
+    def _updateHighlightedPeaks(self, spectrumView, peakListView):
+        self._GLPeaks._updateHighlightedSymbols(spectrumView, peakListView)
 
     def _updateHighlightedIntegrals(self, spectrumView, integralListView):
         drawList = self._GLIntegralLists[integralListView]
         drawList._rebuild()
 
-    def _updateHighlightedPeaks(self, spectrumView, peakListView):
-        self._GLSymbols[0]._updateHighlightedSymbols(spectrumView, peakListView)
-
     def _processPeakNotifier(self, data):
-        self._GLSymbols[0]._processNotifier(data)
+        self._GLPeaks._processNotifier(data)
 
         self._clearKeys()
         self.update()
 
     def _processMultipletNotifier(self, data):
-        self._GLSymbols[1]._processNotifier(data)
+        self._GLMultiplets._processNotifier(data)
 
         self._clearKeys()
         self.update()
@@ -1712,9 +1701,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.viewports.setViewport(self._currentView)
         self.drawSpectra()
 
-        # self.drawPeakLists()
-        for symbolList in self._GLSymbols:
-            symbolList.drawSymbols()
+        self._GLPeaks.drawSymbols()
+        self._GLMultiplets.drawSymbols()
 
         self.drawMarksRulers()
         self.drawIntegralLists()
@@ -1733,9 +1721,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.enableTexture()
 
-        # self.drawPeakListLabels()
-        for symbolList in self._GLSymbols:
-            symbolList.drawLabels()
+        self._GLPeaks.drawLabels()
+        self._GLMultiplets.drawLabels()
 
         self.drawMarksAxisCodes()
 
@@ -3717,12 +3704,11 @@ class CcpnGLWidget(QOpenGLWidget):
                     if GLNotifier.GLMARKS in triggers:
                         self.buildMarks = True
 
-                    # TODO:ED test trigger for the minute
                     if GLNotifier.GLHIGHLIGHTPEAKS in triggers:
-                        self._GLSymbols[0].updateHighlightSymbols()
+                        self._GLPeaks.updateHighlightSymbols()
 
                     if GLNotifier.GLHIGHLIGHTMULTIPLETS in triggers:
-                        self._GLSymbols[1].updateHighlightSymbols()
+                        self._GLMultiplets.updateHighlightSymbols()
 
                     if GLNotifier.GLHIGHLIGHTINTEGRALS in triggers:
 
@@ -3733,13 +3719,13 @@ class CcpnGLWidget(QOpenGLWidget):
                                     self._updateHighlightedIntegrals(spectrumView, integralListView)
 
                     if GLNotifier.GLALLPEAKS in triggers:
-                        self._GLSymbols[0].updateAllSymbols()
+                        self._GLPeaks.updateAllSymbols()
 
                     if GLNotifier.GLANY in targets:
                         self._rescaleXAxis(update=False)
 
                     if GLNotifier.GLPEAKNOTIFY in targets:
-                        self._GLSymbols[0].updateHighlightSymbols()
+                        self._GLPeaks.updateHighlightSymbols()
 
                     if GLNotifier.GLINTEGRALLISTS in triggers:
 

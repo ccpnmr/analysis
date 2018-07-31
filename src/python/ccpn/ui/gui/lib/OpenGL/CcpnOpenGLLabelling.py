@@ -108,19 +108,15 @@ class GLLabelling():
 
         return text
 
-class GLpeakNdLabelling(GLLabelling):
-    """Class to handle symbol and symbol labelling for Nd displays
-    """
-
-    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
-        """Initialise the class
-        """
-        super(GLpeakNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
-
     def rescale(self):
         if self.resizeGL:
             for pp in self._GLSymbols.values():
                 pp.renderMode = GLRENDERMODE_RESCALE
+
+
+class GLpeakListMethods():
+    """Class of methods common to 1d and Nd peaks
+    """
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # List handlers
@@ -143,12 +139,70 @@ class GLpeakNdLabelling(GLLabelling):
         """return the peakList attached to the peak
         """
         return obj.peakList
- 
+
     def listViews(self, peakList):
         """Return the peakListViews attached to the peakList
         """
         return peakList.peakListViews
-    
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List specific routines
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def objIsInPlane(self, strip, peak) -> bool:
+        """is peak in currently displayed planes for strip?"""
+
+        spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
+        if spectrumView is None:
+            return False
+        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+        orderedAxes = strip.orderedAxes[2:]
+
+        for ii, displayIndex in enumerate(displayIndices[2:]):
+            if displayIndex is not None:
+                # If no axis matches the index may be None
+                zPosition = peak.position[displayIndex]
+                if not zPosition:
+                    return False
+                zPlaneSize = 0.
+                zRegion = orderedAxes[ii].region
+                if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
+                    return False
+
+        return True
+
+    def objIsInFlankingPlane(self, strip, peak) -> bool:
+        """is peak in planes flanking currently displayed planes for strip?"""
+
+        spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
+        if spectrumView is None:
+            return False
+        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+        orderedAxes = strip.orderedAxes[2:]
+
+        for ii, displayIndex in enumerate(displayIndices[2:]):
+            if displayIndex is not None:
+                # If no axis matches the index may be None
+                zPosition = peak.position[displayIndex]
+                if not zPosition:
+                    return False
+                zRegion = orderedAxes[ii].region
+                zWidth = orderedAxes[ii].width
+                if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
+                    return True
+
+        return False
+
+
+class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
+    """Class to handle symbol and symbol labelling for Nd displays
+    """
+
+    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+        """Initialise the class
+        """
+        super(GLpeakNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Handle notifiers
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -241,7 +295,7 @@ class GLpeakNdLabelling(GLLabelling):
         spectrumFrequency = spectrum.spectrometerFrequencies
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
-        
+
         symbolWidth = self.strip.peakSymbolSize / 2.0
 
         p0 = [0.0] * 2  # len(self.axisOrder)
@@ -276,7 +330,7 @@ class GLpeakNdLabelling(GLLabelling):
         if axisCount == 2:
             # TODO:ED display the required peaks
             strip = spectrumView.strip
-            _isInPlane = strip.peakIsInPlane(obj)
+            _isInPlane = self.objIsInPlane(strip, obj)
             if not _isInPlane:
                 _isInFlankingPlane = strip.peakIsInFlankingPlane(obj)
                 fade = GLDefs.FADE_FACTOR
@@ -415,13 +469,13 @@ class GLpeakNdLabelling(GLLabelling):
 
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
-        
+
         spectrumFrequency = spectrum.spectrometerFrequencies
 
         strip = spectrumView.strip
-        _isInPlane = strip.peakIsInPlane(obj)
+        _isInPlane = self.objIsInPlane(strip, obj)
         if not _isInPlane:
-            _isInFlankingPlane = strip.peakIsInFlankingPlane(obj)
+            _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
             fade = GLDefs.FADE_FACTOR
         else:
             _isInFlankingPlane = None
@@ -611,7 +665,7 @@ class GLpeakNdLabelling(GLLabelling):
 
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
-        
+
         listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
@@ -621,9 +675,9 @@ class GLpeakNdLabelling(GLLabelling):
 
             if obj and not obj.isDeleted:
                 # _isSelected = False
-                _isInPlane = strip.peakIsInPlane(obj)
+                _isInPlane = self.objIsInPlane(strip, obj)
                 if not _isInPlane:
-                    _isInFlankingPlane = strip.peakIsInFlankingPlane(obj)
+                    _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
                     fade = GLDefs.FADE_FACTOR
                 else:
                     _isInFlankingPlane = None
@@ -642,7 +696,7 @@ class GLpeakNdLabelling(GLLabelling):
         for spectrumView in self.strip.spectrumViews:
             # for peakListView in spectrumView.peakListViews:
             for objListView in self.listViews(spectrumView):
-                
+
                 if objListView in self._GLSymbols.keys():
                     self._updateHighlightedSymbols(spectrumView, objListView)
                     self._updateHighlightedLabels(spectrumView, objListView)
@@ -676,7 +730,7 @@ class GLpeakNdLabelling(GLLabelling):
 
         # pls = objListView.peakList
         pls = self.objectList(objListView)
-        
+
         listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
@@ -690,9 +744,9 @@ class GLpeakNdLabelling(GLLabelling):
 
                 if not obj.isDeleted:
                     _isSelected = False
-                    _isInPlane = strip.peakIsInPlane(obj)
+                    _isInPlane = self.objIsInPlane(strip, obj)
                     if not _isInPlane:
-                        _isInFlankingPlane = strip.peakIsInFlankingPlane(obj)
+                        _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
                         fade = GLDefs.FADE_FACTOR
                     else:
                         _isInFlankingPlane = None
@@ -736,9 +790,9 @@ class GLpeakNdLabelling(GLLabelling):
                     ang = list(range(numPoints))
 
                     _isSelected = False
-                    _isInPlane = strip.peakIsInPlane(obj)
+                    _isInPlane = self.objIsInPlane(strip, obj)
                     if not _isInPlane:
-                        _isInFlankingPlane = strip.peakIsInFlankingPlane(obj)
+                        _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
                         fade = GLDefs.FADE_FACTOR
                     else:
                         _isInFlankingPlane = None
@@ -779,9 +833,9 @@ class GLpeakNdLabelling(GLLabelling):
                     ang = list(range(numPoints))
 
                     _isSelected = False
-                    _isInPlane = strip.peakIsInPlane(obj)
+                    _isInPlane = self.objIsInPlane(strip, obj)
                     if not _isInPlane:
-                        _isInFlankingPlane = strip.peakIsInFlankingPlane(obj)
+                        _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
                         fade = GLDefs.FADE_FACTOR
                     else:
                         _isInFlankingPlane = None
@@ -991,9 +1045,9 @@ class GLpeakNdLabelling(GLLabelling):
             for obj in self.objects(pls):
 
                 strip = spectrumView.strip
-                _isInPlane = strip.peakIsInPlane(obj)
+                _isInPlane = self.objIsInPlane(strip, obj)
                 if not _isInPlane:
-                    _isInFlankingPlane = strip.peakIsInFlankingPlane(obj)
+                    _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
                     fade = GLDefs.FADE_FACTOR
                 else:
                     _isInFlankingPlane = None
@@ -1185,7 +1239,7 @@ class GLpeakNdLabelling(GLLabelling):
         # list through the valid peakListViews attached to the strip - including undeleted
         for spectrumView in self.strip.spectrumViews:
             # for peakListView in spectrumView.peakListViews:
-            for objListView in self.listViews(spectrumView):     # spectrumView.peakListViews:
+            for objListView in self.listViews(spectrumView):  # spectrumView.peakListViews:
 
                 if objListView in self._GLSymbols.keys():
                     if self._GLSymbols[objListView].renderMode == GLRENDERMODE_RESCALE:
@@ -1205,8 +1259,8 @@ class GLpeakNdLabelling(GLLabelling):
 
         if objListView not in self._GLLabels.keys():
             self._GLLabels[objListView] = GLLabelArray(GLContext=self,
-                                                                   spectrumView=spectrumView,
-                                                        objListView=objListView)
+                                                       spectrumView=spectrumView,
+                                                       objListView=objListView)
 
         drawList = self._GLLabels[objListView]
         if drawList.renderMode == GLRENDERMODE_REBUILD:
@@ -1273,8 +1327,8 @@ class GLpeakNdLabelling(GLLabelling):
             objListView = view[1]
             if objListView not in self._GLLabels.keys():
                 self._GLLabels[objListView] = GLLabelArray(GLContext=self,
-                                                                       spectrumView=spectrumView,
-                                                            objListView=objListView)
+                                                           spectrumView=spectrumView,
+                                                           objListView=objListView)
                 drawList = self._GLLabels[objListView]
                 drawList.stringList = []
 
@@ -1511,15 +1565,11 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                 else:
                     cols = listCol
 
-
                 # test axisCodes
                 try:
                     ax = obj.axisCodes
                 except Exception as es:
                     pass
-
-
-
 
                 # get the correct coordinates based on the axisCodes
                 p0 = [0.0] * 2  #len(self.axisOrder)
@@ -1647,9 +1697,9 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
         strip = spectrumView.strip
-        _isInPlane = strip.peakIsInPlane(obj)
+        _isInPlane = self.objIsInPlane(strip, obj)
         if not _isInPlane:
-            _isInFlankingPlane = strip.peakIsInFlankingPlane(obj)
+            _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
         else:
             _isInFlankingPlane = None
 
@@ -1831,7 +1881,102 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                 drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
 
 
-class GLmultipletNdLabelling(GLpeakNdLabelling):
+class GLmultipletListMethods():
+    """Class of methods common to 1d and Nd multiplets
+    """
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List handlers
+    #   The routines that have to be changed when accessing different named
+    #   lists.
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _isSelected(self, multiplet):
+        """return True if the obj in the defined object list
+        """
+        if self.current.multiplets:
+            return multiplet in self.current.multiplets
+
+    def objects(self, obj):
+        """return the multiplets attached to the object
+        """
+        return obj.multiplets
+
+    def objectList(self, obj):
+        """return the multipletList attached to the multiplet
+        """
+        return obj.multipletList
+
+    def listViews(self, multipletList):
+        """Return the multipletListViews attached to the multipletList
+        """
+        return multipletList.multipletListViews
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List specific routines
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def objIsInPlane(self, strip, multiplet) -> bool:
+        """is multiplet in currently displayed planes for strip?
+        Use the first peak to determine the spectrumView and the actual multiplet position
+        """
+        if not multiplet.peaks:
+            return False
+
+        peak = multiplet.peaks[0]
+        spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
+        if spectrumView is None:
+            return False
+        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+        orderedAxes = strip.orderedAxes[2:]
+
+        for ii, displayIndex in enumerate(displayIndices[2:]):
+            if displayIndex is not None:
+                # If no axis matches the index may be None
+                zPosition = multiplet.position[displayIndex]
+                if not zPosition:
+                    return False
+                zPlaneSize = 0.
+                zRegion = orderedAxes[ii].region
+                if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
+                    return False
+
+        return True
+
+    def objIsInFlankingPlane(self, strip, multiplet) -> bool:
+        """is peak in planes flanking currently displayed planes for strip?
+        Use the first peak to determine the spectrumView and the actual multiplet position
+        """
+        if not multiplet.peaks:
+            return False
+
+        peak = multiplet.peaks[0]
+        spectrumView = strip.findSpectrumView(peak.peakList.spectrum)
+        if spectrumView is None:
+            return False
+        displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
+        orderedAxes = strip.orderedAxes[2:]
+
+        for ii, displayIndex in enumerate(displayIndices[2:]):
+            if displayIndex is not None:
+                # If no axis matches the index may be None
+                zPosition = multiplet.position[displayIndex]
+                if not zPosition:
+                    return False
+                zRegion = orderedAxes[ii].region
+                zWidth = orderedAxes[ii].width
+                if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
+                    return True
+
+        return False
+
+    def getLabelling(self, obj, labelType):
+        """get the object label based on the current labelling method
+        """
+        return obj.pid
+
+
+class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
     """Class to handle symbol and symbol labelling for Nd displays
     """
 
@@ -1840,81 +1985,12 @@ class GLmultipletNdLabelling(GLpeakNdLabelling):
         """
         super(GLmultipletNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
 
-    def rescale(self):
-        if self.resizeGL:
-            for pp in self._GLSymbols.values():
-                pp.renderMode = GLRENDERMODE_RESCALE
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # List handlers
-    #   The routines that have to be changed when accessing different named
-    #   lists.
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def _isSelected(self, multiplet):
-        """return True if the obj in the defined object list
-        """
-        if self.current.multiplets:
-            return multiplet in self.current.multiplets
-
-    def objects(self, obj):
-        """return the multiplets attached to the object
-        """
-        return obj.multiplets
-
-    def objectList(self, obj):
-        """return the multipletList attached to the multiplet
-        """
-        return obj.multipletList
-
-    def listViews(self, multipletList):
-        """Return the multipletListViews attached to the multipletList
-        """
-        return multipletList.multipletListViews
-
-
-class GLmultiplet1dLabelling(GLpeak1dLabelling):
-    """Class to handle symbol and symbol labelling for Nd displays
+class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
+    """Class to handle symbol and symbol labelling for 1d displays
     """
 
     def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
         """Initialise the class
         """
         super(GLmultiplet1dLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
-
-    def rescale(self):
-        if self.resizeGL:
-            for pp in self._GLSymbols.values():
-                pp.renderMode = GLRENDERMODE_RESCALE
-
-    def getLabelling(self, obj, labelType):
-        """get the object label based on the current labelling method
-        """
-        return obj.pid
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # List handlers
-    #   The routines that have to be changed when accessing different named
-    #   lists.
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    def _isSelected(self, multiplet):
-        """return True if the obj in the defined object list
-        """
-        if self.current.multiplets:
-            return multiplet in self.current.multiplets
-
-    def objects(self, obj):
-        """return the multiplets attached to the object
-        """
-        return obj.multiplets
-
-    def objectList(self, obj):
-        """return the multipletList attached to the multiplet
-        """
-        return obj.multipletList
-
-    def listViews(self, multipletList):
-        """Return the multipletListViews attached to the multipletList
-        """
-        return multipletList.multipletListViews

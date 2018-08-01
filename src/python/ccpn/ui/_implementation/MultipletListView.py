@@ -214,8 +214,6 @@ def _multipletListAddMultipletListViews(project: Project, apiMultipletList: Nmr.
     """Add ApiMultipletListView when ApiMultipletList is created"""
     for apiSpectrumView in apiMultipletList.dataSource.spectrumViews:
         apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
-
-
 #
 Project._setupApiNotifier(_multipletListAddMultipletListViews, Nmr.MultipletList, 'postInit')
 
@@ -224,7 +222,6 @@ def _spectrumViewAddMultipletListViews(project: Project, apiSpectrumView: ApiSpe
     """Add ApiMultipletListView when ApiSpectrumView is created"""
     for apiMultipletList in apiSpectrumView.dataSource.multipletLists:
         apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
-
-
 #
 Project._setupApiNotifier(_spectrumViewAddMultipletListViews, ApiSpectrumView, 'postInit')
+

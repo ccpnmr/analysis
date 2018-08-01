@@ -1647,11 +1647,11 @@ class CcpnGLWidget(QOpenGLWidget):
             for pp in range(0, 2 * vertices, 2):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
 
-    def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
-        self._GLPeaks._updateHighlightedLabels(spectrumView, peakListView)
-
-    def _updateHighlightedPeaks(self, spectrumView, peakListView):
-        self._GLPeaks._updateHighlightedSymbols(spectrumView, peakListView)
+    # def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
+    #     self._GLPeaks._updateHighlightedLabels(spectrumView, peakListView)
+    #
+    # def _updateHighlightedPeaks(self, spectrumView, peakListView):
+    #     self._GLPeaks._updateHighlightedSymbols(spectrumView, peakListView)
 
     def _updateHighlightedIntegrals(self, spectrumView, integralListView):
         drawList = self._GLIntegralLists[integralListView]

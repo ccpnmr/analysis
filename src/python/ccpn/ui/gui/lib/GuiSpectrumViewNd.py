@@ -518,8 +518,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   #
   #   return size
 
-  def _newPeakListView(self, peakListView):
-    pass
+  # def _newPeakListView(self, peakListView):
+  #   pass
     
   def _printToFile(self, printer):
     """

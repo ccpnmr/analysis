@@ -43,7 +43,7 @@ class IntegralListView(AbstractWrapperObject):
     """Integral List View for 1D or nD IntegralList"""
 
     #: Short class name, for PID.
-    shortClassName = 'GM'
+    shortClassName = 'GI'
     # Attribute it necessary as subclasses must use superclass className
     className = 'IntegralListView'
 

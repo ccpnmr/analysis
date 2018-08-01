@@ -43,7 +43,7 @@ class MultipletListView(AbstractWrapperObject):
     """Multiplet List View for 1D or nD MultipletList"""
 
     #: Short class name, for PID.
-    shortClassName = 'GM'
+    shortClassName = 'GU'
     # Attribute it necessary as subclasses must use superclass className
     className = 'MultipletListView'
 

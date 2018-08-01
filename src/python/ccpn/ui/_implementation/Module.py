@@ -38,7 +38,7 @@ class Module(AbstractWrapperObject):
   """Generic GUI module (not a spectrum display"""
   
   #: Short class name, for PID.
-  shortClassName = 'GM'
+  shortClassName = 'GO'
   # Attribute it necessary as subclasses must use superclass className
   className = 'Module'
 

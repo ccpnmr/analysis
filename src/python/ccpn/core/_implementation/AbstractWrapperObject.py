@@ -371,8 +371,9 @@ class AbstractWrapperObject():
 
     tt = pidstring.split(Pid.PREFIXSEP, 1)
     if len(tt) == 2:
-      if tt[0] in ('GM', 'Mark', 'GA', 'Axis', 'GM', 'Module', 'GS', 'Strip',
-                   'GL', 'PeakListView', 'GD', 'SpectrumDisplay', 'GW', 'Window',
+      if tt[0] in ('GM', 'Mark', 'GA', 'Axis', 'GO', 'Module', 'GS', 'Strip',
+                   'GL', 'PeakListView', 'GI', 'IntegralListView', 'GU', 'MultipletListView',
+                   'GD', 'SpectrumDisplay', 'GW', 'Window',
                    'GV', 'SpectrumView', 'GT', 'Task'):
         from warnings import warn
         warn('ui.getByGid should be used for getting graphics ({})'.format(pidstring),

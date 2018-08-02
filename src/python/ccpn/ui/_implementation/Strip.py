@@ -281,7 +281,7 @@ class Strip(AbstractWrapperObject):
         layout.setColumnStretch(0, 1)
 
       # move to widget store
-      self.mainWindow._TESTFRAME.layout().addWidget(self)
+      self.mainWindow._UndoWidgetStorage.layout().addWidget(self)
 
       self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
@@ -332,7 +332,7 @@ class Strip(AbstractWrapperObject):
       currentParent = _stripDeleteDict['currentParent']
       currentWrapped = _stripDeleteDict['currentWrapped']
 
-      self.mainWindow._TESTFRAME.layout().removeWidget(self)
+      self.mainWindow._UndoWidgetStorage.layout().removeWidget(self)
       # self.setParent(currentParent)
       self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 

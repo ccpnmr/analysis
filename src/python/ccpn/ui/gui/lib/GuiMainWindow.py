@@ -267,35 +267,19 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 #
 # """ + self.pythonConsole.ipythonWidget.__doc__
 
+    # create the sidebar
     self.sideBar = SideBar(parent=self)
 
-    # A horizontal splitter runs vertical; ie. allows Widgets resize in a horizontal direction
+    # create a splitter to put the sidebar on the left
     self._horizontalSplitter = Splitter(QtCore.Qt.Horizontal)
-    # A vertical splitter runs horizontal; ie. allows Widgets resize in a vertical direction
-    # self._verticalSplitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
-
-    self._verticalTEMPSPLIT = Splitter(QtCore.Qt.Vertical)
-    self._TESTFRAME = Frame(setLayout=False)
-    self._tempLayout = QtWidgets.QVBoxLayout()
-    self._TESTFRAME.setLayout(self._tempLayout)
-    self._TESTFRAME.hide()
-
-    # GWV: do not understand this order
-    # self._verticalSplitter.addWidget(self.sideBar)
-    # self._horizontalSplitter.addWidget(self._verticalSplitter)
-    # self._horizontalSplitter.addWidget(self.moduleArea)
-    # self.setCentralWidget(self._horizontalSplitter)
-
-    # GWV: there is no need for the above as the moduleArea generates its splitter
-    # when required
-
-    self._horizontalSplitter.addWidget(self._verticalTEMPSPLIT)
-
-    self._verticalTEMPSPLIT.addWidget(self.sideBar)
-    self._verticalTEMPSPLIT.addWidget(self._TESTFRAME)
-
+    self._horizontalSplitter.addWidget(self.sideBar)
     self._horizontalSplitter.addWidget(self.moduleArea)
     self.setCentralWidget(self._horizontalSplitter)
+
+    # create a hidden widget to temporarily store strips after deletion
+    self._UndoWidgetStorage = Frame(setLayout=False)
+    self._UndoWidgetStorage.setLayout(QtWidgets.QVBoxLayout())
+
 
   def _setupMenus(self):
     """

@@ -1110,8 +1110,8 @@ class GuiStrip(Frame):
       colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
 
       positions = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
-      self._project.newMark(colourDict[guiSettings.DEFAULT], positions, self.axisCodes)  # the 'white' is overridden in PlotWidget._addRulerLine()
-      # self._project.newMark('#e0e0e0', self.current.cursorPosition[:2], self.axisCodes[:2])  # the 'white' is overridden in PlotWidget._addRulerLine()
+      defaultColour = self.application.preferences.general.defaultMarksColour
+      self._project.newMark(defaultColour, positions, self.axisCodes)
 
     except Exception as es:
       getLogger().warning('Error setting mark at current position')

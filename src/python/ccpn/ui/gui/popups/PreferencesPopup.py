@@ -49,6 +49,8 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.util.Logging import getLogger
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 
 
 # FIXME separate pure GUI to project/preferences properites
@@ -275,7 +277,7 @@ class PreferencesPopup(CcpnDialog):
 
         row = 0
         self.dataPathLabel = Label(parent, "User Data Path", grid=(row, 0), )
-        self.dataPathText = LineEdit(parent, grid=(row, 1), hAlign='l')
+        self.dataPathText = LineEdit(parent, grid=(row, 1), vAlign='t')
         self.dataPathText.setMinimumWidth(LineEditsMinimumWidth)
         self.dataPathText.editingFinished.connect(self._setDataPath)
         self.dataPathText.setText(self.preferences.general.dataPath)
@@ -490,6 +492,49 @@ class PreferencesPopup(CcpnDialog):
         symbolThickness = self.preferences.general.peakSymbolThickness
         self.peakSymbolThicknessData.setValue(int(symbolThickness))
         self.peakSymbolThicknessData.editingFinished.connect(self._setPeakSymbolThickness)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        self.marksDefaultColourLabel = Label(parent, text="Default Marks Colour:", grid=(row, 0))
+        self.marksDefaultColourBox = PulldownList(parent, grid=(row, 1), vAlign='t')
+
+        # populate colour pulldown and set to the current colour
+        spectrumColourKeys = list(spectrumColours.keys())
+        fillColourPulldown(self.marksDefaultColourBox, allowAuto=False)
+        c = self.preferences.general.defaultMarksColour
+        if c in spectrumColourKeys:
+            col = spectrumColours[c]
+            self.marksDefaultColourBox.setCurrentText(col)
+        else:
+            addNewColourString(c)
+            fillColourPulldown(self.marksDefaultColourBox, allowAuto=False)
+            col = spectrumColours[c]
+            self.marksDefaultColourBox.setCurrentText(col)
+        self.marksDefaultColourBox.currentIndexChanged.connect(self._changeMarksColour)
+
+        # add a colour dialog button
+        self.marksDefaultColourButton = Button(parent, grid=(row, 2), vAlign='t', hAlign='l',
+                                           icon='icons/colours', hPolicy='fixed')
+        self.marksDefaultColourButton.clicked.connect(self._changeMarksColourButton)
+
+    def _changeMarksColour(self):
+        """Change the default maerks colour in the preferences
+        """
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.marksDefaultColourBox.currentText())]
+        if newColour:
+            self.preferences.general.defaultMarksColour = newColour
+
+    def _changeMarksColourButton(self):
+        """set the default marks colour from the colour dialog
+        """
+        dialog = ColourDialog(self)
+        newColour = dialog.getColor()
+        if newColour is not None:
+            addNewColour(newColour)
+            fillColourPulldown(self.marksDefaultColourBox, allowAuto=False)
+            self.marksDefaultColourBox.setCurrentText(spectrumColours[newColour.name()])
 
     def _setExternalProgramsTabWidgets(self, parent):
         """

@@ -4470,9 +4470,12 @@ class CcpnGLWidget(QOpenGLWidget):
         #   deltaPosition.append([0.0] * len(p0-deltaPosition))
 
         # p0 = [p0[ii] + deltaPosition[ii] for ii in range(len(p0))]
-        peak.position = p0
+
+        # position is set AFTER height so that gl updates catch the new height
+        # - position triggers the notifiers
         if self.is1D:
             peak.height = peak.height + deltaPosition[1]
+        peak.position = p0
 
     def _processIntegralNotifier(self, data):
         triggers = data[Notifier.TRIGGER]

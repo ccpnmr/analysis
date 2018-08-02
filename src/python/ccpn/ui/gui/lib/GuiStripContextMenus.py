@@ -186,7 +186,7 @@ def _copyPeakItem(strip):
 
 def _deletePeakItem(strip):
     return _SCMitem(name='Delete Peak(s)',
-            typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project', callback=strip.mainWindow.deleteSelectedPeaks)
+            typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project', callback=strip.mainWindow.deleteSelectedItems)
 
 def _editPeakAssignmentItem(strip):
     return _SCMitem(name='Edit Peak',

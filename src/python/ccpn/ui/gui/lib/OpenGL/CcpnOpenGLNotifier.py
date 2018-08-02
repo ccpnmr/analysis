@@ -55,6 +55,8 @@ class GLNotifier(QtWidgets.QWidget):
     GLHIGHLIGHTINTEGRALS = 'glHighlightIntegrals'
     GLHIGHLIGHTMULTIPLETS = 'glHighlightMultiplets'
     GLALLPEAKS = 'glAllPeaks'
+    GLALLINTEGRALS = 'glAllIntegrals'
+    GLALLMULTIPLETS = 'glAllMultiplets'
     GLPEAKNOTIFY = 'glPeakNotify'
     GLPEAKLISTS = 'glUpdatePeakLists'
     GLPEAKLISTLABELS = 'glUpdatePeakListLabels'
@@ -72,6 +74,7 @@ class GLNotifier(QtWidgets.QWidget):
     GLVALUES = 'glValues'
     GLDATA = 'glData'
 
+    # not used yet
     _triggerKeywords = (GLHIGHLIGHTPEAKS, GLALLPEAKS,
                         GLPEAKNOTIFY, GLPEAKLISTS, GLPEAKLISTLABELS, GLGRID, GLAXES,
                         GLCURSOR, GLANY, GLMARKS, GLTARGETS, GLTRIGGERS, GLVALUES, GLDATA)

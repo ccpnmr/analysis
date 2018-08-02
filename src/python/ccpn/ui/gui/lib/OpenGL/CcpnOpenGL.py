@@ -2766,7 +2766,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.buildMouseCoords()
             # draw the mouse coordinates to the screen
             self.mouseString.drawTextArray()
-            if self._drawDeltaOffset:
+            if self._drawDeltaOffset and self.diffMouseString:
                 self.diffMouseString.drawTextArray()
 
     def drawSelectionBox(self):
@@ -3720,6 +3720,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if GLNotifier.GLALLPEAKS in triggers:
                         self._GLPeaks.updateAllSymbols()
+
+                    if GLNotifier.GLALLMULTIPLETS in triggers:
+                        self._GLMultiplets.updateAllSymbols()
 
                     if GLNotifier.GLANY in targets:
                         self._rescaleXAxis(update=False)

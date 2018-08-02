@@ -63,7 +63,7 @@ class GuiWindow():
     context = QtCore.Qt.WidgetWithChildrenShortcut
     addShortCut("c, h", self, self.toggleCrossHairAll, context=context)
     addShortCut("g, s", self, self.toggleGridAll, context=context)
-    addShortCut("Del", self, partial(self.deleteSelectedPeaks), context=context)
+    addShortCut("Del", self, partial(self.deleteSelectedItems), context=context)
     addShortCut("m, k", self, self.createMark, context=context)
     addShortCut("m, c", self, self.clearMarks, context=context)
     # addShortCut("f, n", self, partial(navigateToNmrResidue, self._parent.project), context=context)
@@ -133,19 +133,45 @@ class GuiWindow():
       #   except:
       #     getLogger().warning('Function cannot be found')
 
-  def deleteSelectedPeaks(self, parent=None):
+  def deleteSelectedItems(self, parent=None):
+    """Delete either peaks or multiplets from the project
+    """
+    # show simple delete items popup
+    from ccpn.ui.gui.popups.DeleteItems import DeleteItemsPopup
 
-    # NBNB Moved here from Current
-    # NBNB TODO: more general deletion
+    if self.current.peaks or self.current.multiplets:
+      deleteItems = {}
+      if self.current.peaks:
+        deleteItems['Peaks'] = self.current.peaks
+      if self.current.multiplets:
+        deleteItems['Multiplets'] = self.current.multiplets
 
-    current = self.application.current
-    peaks = current.peaks
-    if peaks:
-      n = len(peaks)
-      title = 'Delete Peak%s' % ('' if n == 1 else 's')
-      msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
-      if MessageDialog.showYesNo(title, msg, parent):
-        current.project.deleteObjects(*peaks)
+      popup = DeleteItemsPopup(parent=self, mainWindow=self, items=deleteItems)
+      popup.exec_()
+
+  # def deleteSelectedPeaks(self, parent=None):
+  #
+  #   # NBNB Moved here from Current
+  #   # NBNB TODO: more general deletion
+  #
+  #   current = self.application.current
+  #   peaks = current.peaks
+  #   if peaks:
+  #     n = len(peaks)
+  #     title = 'Delete Peak%s' % ('' if n == 1 else 's')
+  #     msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
+  #     if MessageDialog.showYesNo(title, msg, parent):
+  #       current.project.deleteObjects(*peaks)
+  #
+  # def deleteSelectedMultiplets(self, parent=None):
+  #   current = self.application.current
+  #   multiplets = current.multiplets
+  #   if multiplets:
+  #     n = len(multiplets)
+  #     title = 'Delete Multiplet%s' % ('' if n == 1 else 's')
+  #     msg ='Delete %sselected multiplet%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
+  #     if MessageDialog.showYesNo(title, msg, parent):
+  #       current.project.deleteObjects(*multiplets)
 
   def getCurrentPositionAndStrip(self):
     current = self.application.current

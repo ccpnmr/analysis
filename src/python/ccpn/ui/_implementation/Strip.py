@@ -221,210 +221,269 @@ class Strip(AbstractWrapperObject):
         """get wrappedData (ccpnmr.gui.Task.Strip) in serial number order"""
         return parent._wrappedData.sortedStrips()
 
-    def _getWidgetFromLayout(self):
+    def _delete(self):
+        """delete the wrappedData
+        """
+        self._wrappedData.delete()
+
+    def _storeStripDeleteDict(self, currentIndex):
+        """Store the current strip index in the wrappedData
+        CCPN Internal
+        """
+        _stripDeleteDict = {'currentIndex': currentIndex}
+        # ccpnStrip = self._wrappedData
+        # ccpnStrip.__dict__['_stripDeleteDict'] = _stripDeleteDict
+
+        self._ccpnInternalData['_stripDeleteDict'] = _stripDeleteDict
+
+    def _getStripDeleteDict(self):
+        """retrieve the old strip index from the wrappedData
+        CCPN Internal
+        """
+        # ccpnStrip = self._wrappedData
+        # _stripDeleteDict = ccpnStrip.__dict__['_stripDeleteDict']
+
+        _stripDeleteDict = self._ccpnInternalData['_stripDeleteDict']
+        return _stripDeleteDict['currentIndex']
+
+    def _setStripIndex(self, index):
+        """Set the index of the current strip in the wrapped data
+        CCPN Internal
+        """
         ccpnStrip = self._wrappedData
-        n = len(ccpnStrip.spectrumDisplay.strips)
-        if n > 1:
-            index = ccpnStrip.index
-            spectrumDisplay = self.spectrumDisplay
-            layout = spectrumDisplay.stripFrame.layout()
+        ccpnStrip.__dict__['index'] = index  # this is the api creation of orderedStrips
 
-            if layout:
-                lRows = layout.rowCount()
-                currentStripItem = None
-
-                for r in range(layout.rowCount()):
-                    items = []
-                    if spectrumDisplay.stripDirection == 'Y':
-                        currentStripItem = layout.itemAtPosition(r, index)
-                    elif spectrumDisplay.stripDirection == 'X':
-                        currentStripItem = layout.itemAtPosition(index, 0)
-
-                return currentStripItem
-        else:
-            raise ValueError("The last strip in a display cannot be deleted")
-
-    def _removeFromLayout(self):
-
+    def stripIndex(self):
+        """return the index of the current strip in the spectrumDisplay
+        """
+        # original api indexing
         ccpnStrip = self._wrappedData
-        # n = len(ccpnStrip.spectrumDisplay.orderedStrips)
         index = ccpnStrip.index
-        spectrumDisplay = self.spectrumDisplay
-        layout = spectrumDisplay.stripFrame.layout()
-        n = layout.count()
+        # spectrumDisplay = self.spectrumDisplay
+        # index = spectrumDisplay.strips.index(self)
+        return index
 
-        if n > 1 and layout:
-            _undo = self.project._undo
-            if _undo is not None:
-                _undo.increaseBlocking()
+    def _storeStripDelete(self):
+        """store the api delete info
+        CCPN Internal
+        """
+        self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(self)
 
-            currentStripItem = self
-            currentRow = 0
-            currentIndex = index
-            currentParent = self.parent()
-            currentStripDirection = spectrumDisplay.stripDirection
-            currentWrapped = ccpnStrip
+    def _storeStripUnDelete(self):
+        """retrieve the api deleted object
+        CCPN Internal
+        """
+        self._unDeleteCall(*self._unDeleteArgs)
 
-            self._widgets = []
-            while layout.count():  # clear the layout and store
-                self._widgets.append(layout.takeAt(0).widget())
-            self._widgets.remove(self)
-            # print ('>>> removeFromLayout', self, ' >>> ', self._widgets)
-
-            if spectrumDisplay.stripDirection == 'Y':
-                for m, widgStrip in enumerate(self._widgets):  # build layout again
-                    layout.addWidget(widgStrip, 0, m)
-                    layout.setColumnStretch(m, 1)
-                    layout.setColumnStretch(m + 1, 0)
-            elif spectrumDisplay.stripDirection == 'X':
-                for m, widgStrip in enumerate(self._widgets):  # build layout again
-                    layout.addWidget(widgStrip, m, 0)
-                layout.setColumnStretch(0, 1)
-
-            # move to widget store
-            self.mainWindow._UndoWidgetStorage.layout().addWidget(self)
-
-            self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
-
-            # # TODO:ED HACK HACK HACK HACK - put ccpnStrip back into strips - not sure if needed here
-            # if self not in ccpnStrip.spectrumDisplay.orderedStrips:
-            #   # childrenDict = ccpnStrip.spectrumDisplay.__dict__.get('strips')
-            #   # childrenDict[n] = ccpnStrip
-            #   for order, cStrip in enumerate(self._widgets):
-            #     cStrip._wrappedData.__dict__['index'] = order
-            #     # ccpnStrip.__dict__['index'] = currentIndex-1
-
-            # store the old information
-            _stripDeleteDict = {'currentRow': currentRow,
-                                'currentIndex': currentIndex,
-                                'currentStripDirection': currentStripDirection,
-                                'currentStripItem': currentStripItem,
-                                'currentParent': currentParent,
-                                'currentWrapped': currentWrapped}
-            ccpnStrip.__dict__['_stripDeleteDict'] = _stripDeleteDict
-
-            _undo = self.project._undo
-            if _undo is not None:
-                _undo.decreaseBlocking()
-            self.spectrumDisplay.showAxes()
-
-        else:
-            raise ValueError("The last strip in a display cannot be deleted")
-
-    def _restoreToLayout(self):
-        ccpnStrip = self._wrappedData
-        # n = len(ccpnStrip.spectrumDisplay.orderedStrips)
-
-        index = ccpnStrip.index
-        spectrumDisplay = self.spectrumDisplay
-        layout = spectrumDisplay.stripFrame.layout()
-        n = layout.count()
-
-        if layout:
-            _undo = self.project._undo
-            if _undo is not None:
-                _undo.increaseBlocking()
-
-            _stripDeleteDict = ccpnStrip.__dict__['_stripDeleteDict']
-            currentStripItem = _stripDeleteDict['currentStripItem']
-            currentStripDirection = _stripDeleteDict['currentStripDirection']
-            currentRow = _stripDeleteDict['currentRow']
-            currentIndex = _stripDeleteDict['currentIndex']
-            currentParent = _stripDeleteDict['currentParent']
-            currentWrapped = _stripDeleteDict['currentWrapped']
-
-            self.mainWindow._UndoWidgetStorage.layout().removeWidget(self)
-            # self.setParent(currentParent)
-            self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
-
-            self._widgets = []
-            while layout.count():  # clear the layout and store
-                self._widgets.append(layout.takeAt(0).widget())
-            self._widgets.insert(currentIndex, self)
-            # print ('>>> restoreToLayout', self, ' >>> ', self._widgets)
-
-            if spectrumDisplay.stripDirection == 'Y':
-                for m, widgStrip in enumerate(self._widgets):  # build layout again
-                    layout.addWidget(widgStrip, 0, m)
-                    layout.setColumnStretch(m, 1)
-            elif spectrumDisplay.stripDirection == 'X':
-                for m, widgStrip in enumerate(self._widgets):  # build layout again
-                    layout.addWidget(widgStrip, m, 0)
-                layout.setColumnStretch(0, 1)
-
-            count = ccpnStrip.spectrumDisplay.__dict__
-            field = ccpnStrip.spectrumDisplay._fieldNames
-            strippy = ccpnStrip.spectrumDisplay.getOrderedStrips()
-            # ccpnStrip.spectrumDisplay.newBoundStrip = [appWidg._wrappedData for appWidg in self._widgets]
-
-            # TODO:ED HACK HACK HACK HACK - put ccpnStrip back into strips
-            if self not in ccpnStrip.spectrumDisplay.orderedStrips:
-                # childrenDict = ccpnStrip.spectrumDisplay.__dict__.get('strips')
-                # childrenDict[n] = ccpnStrip
-                for order, cStrip in enumerate(self._widgets):
-                    cStrip._wrappedData.__dict__['index'] = order  # this is the api creation of orderedStrips
-                    # ccpnStrip.__dict__['index'] = currentIndex-1
-
-            _undo = self.project._undo
-            if _undo is not None:
-                _undo.decreaseBlocking()
-
-            self.spectrumDisplay.showAxes()
-
-    #TODO:RASMUS: most of this below belongs in the Gui class or even the GuiSpectrumDisplay class (like adding, removing strips)
-    #TODO:ED: confer with rasmus and me to refactor while writing tests
     def delete(self):
-        """Overrides normal delete"""
-        # currentStripItem = self._getWidgetFromLayout()
-        # self.setParent(None)
+        """trap this delete
+        """
+        raise RuntimeError('Please use spectrumDisplay.deleteStrip()')
 
-        ccpnStrip = self._wrappedData
-        n = len(ccpnStrip.spectrumDisplay.strips)
-        if n > 1:
-            spectrumDisplay = self.spectrumDisplay
-            layout = spectrumDisplay.stripFrame.layout()
+    # def _getWidgetFromLayout(self):
+    #     ccpnStrip = self._wrappedData
+    #     n = len(ccpnStrip.spectrumDisplay.strips)
+    #     if n > 1:
+    #         index = ccpnStrip.index
+    #         spectrumDisplay = self.spectrumDisplay
+    #         layout = spectrumDisplay.stripFrame.layout()
+    #
+    #         if layout:
+    #             lRows = layout.rowCount()
+    #             currentStripItem = None
+    #
+    #             for r in range(layout.rowCount()):
+    #                 items = []
+    #                 if spectrumDisplay.stripDirection == 'Y':
+    #                     currentStripItem = layout.itemAtPosition(r, index)
+    #                 elif spectrumDisplay.stripDirection == 'X':
+    #                     currentStripItem = layout.itemAtPosition(index, 0)
+    #
+    #             return currentStripItem
+    #     else:
+    #         raise ValueError("The last strip in a display cannot be deleted")
 
-            if layout:  # should always be the case but play safe
-
-                self._removeFromLayout()  # adds nothing to the undo stack, so add it below
-
-                _undo = self.project._undo
-                if _undo is not None:
-                    _undo.newItem(self._restoreToLayout, self._removeFromLayout)
-                self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(ccpnStrip)
-                ccpnStrip.delete()
-
-            self.current.strip = spectrumDisplay.strips[-1]
-        else:
-            raise ValueError("The last strip in a display cannot be deleted")
-
-    def _unDelete(self):
-        """Overrides normal delete"""
-        # currentStripItem = self._getWidgetFromLayout()
-        # self.setParent(None)
-
-        # TODO:ED check this cheeky code :)
-        self._unDeleteCall(*self._unDeleteArgs)  # recover the deleted apiStrip
-
-        ccpnStrip = self._wrappedData
-
-        n = len(ccpnStrip.spectrumDisplay.strips)
-        if n > 1:
-            spectrumDisplay = self.spectrumDisplay
-            layout = spectrumDisplay.stripFrame.layout()
-
-            if layout:  # should always be the case but play safe
-
-                self._restoreToLayout()  # adds nothing to the undo stack, so add it below
-
-                _undo = self.project._undo
-                if _undo is not None:
-                    _undo.newItem(self._removeFromLayout, self._restoreToLayout)
-
-            self.current.strip = spectrumDisplay.strips[-1]
-
-        else:
-            raise ValueError("The last strip in a display cannot be deleted")
+    # def _removeFromLayout(self):
+    #
+    #     ccpnStrip = self._wrappedData
+    #     # n = len(ccpnStrip.spectrumDisplay.orderedStrips)
+    #     index = ccpnStrip.index
+    #     spectrumDisplay = self.spectrumDisplay
+    #     layout = spectrumDisplay.stripFrame.layout()
+    #     n = layout.count()
+    #
+    #     if n > 1 and layout:
+    #         _undo = self.project._undo
+    #         if _undo is not None:
+    #             _undo.increaseBlocking()
+    #
+    #         currentStripItem = self
+    #         currentRow = 0
+    #         currentIndex = index
+    #         currentParent = self.parent()
+    #         currentStripDirection = spectrumDisplay.stripDirection
+    #         currentWrapped = ccpnStrip
+    #
+    #         self._widgets = []
+    #         while layout.count():  # clear the layout and store
+    #             self._widgets.append(layout.takeAt(0).widget())
+    #         self._widgets.remove(self)
+    #         # print ('>>> removeFromLayout', self, ' >>> ', self._widgets)
+    #
+    #         if spectrumDisplay.stripDirection == 'Y':
+    #             for m, widgStrip in enumerate(self._widgets):  # build layout again
+    #                 layout.addWidget(widgStrip, 0, m)
+    #                 layout.setColumnStretch(m, 1)
+    #                 layout.setColumnStretch(m + 1, 0)
+    #         elif spectrumDisplay.stripDirection == 'X':
+    #             for m, widgStrip in enumerate(self._widgets):  # build layout again
+    #                 layout.addWidget(widgStrip, m, 0)
+    #             layout.setColumnStretch(0, 1)
+    #
+    #         # move to widget store
+    #         self.mainWindow._UndoWidgetStorage.layout().addWidget(self)
+    #
+    #         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+    #
+    #         # # TODO:ED HACK HACK HACK HACK - put ccpnStrip back into strips - not sure if needed here
+    #         # if self not in ccpnStrip.spectrumDisplay.orderedStrips:
+    #         #   # childrenDict = ccpnStrip.spectrumDisplay.__dict__.get('strips')
+    #         #   # childrenDict[n] = ccpnStrip
+    #         #   for order, cStrip in enumerate(self._widgets):
+    #         #     cStrip._wrappedData.__dict__['index'] = order
+    #         #     # ccpnStrip.__dict__['index'] = currentIndex-1
+    #
+    #         # store the old information
+    #         _stripDeleteDict = {'currentRow': currentRow,
+    #                             'currentIndex': currentIndex,
+    #                             'currentStripDirection': currentStripDirection,
+    #                             'currentStripItem': currentStripItem,
+    #                             'currentParent': currentParent,
+    #                             'currentWrapped': currentWrapped}
+    #         ccpnStrip.__dict__['_stripDeleteDict'] = _stripDeleteDict
+    #
+    #         _undo = self.project._undo
+    #         if _undo is not None:
+    #             _undo.decreaseBlocking()
+    #         self.spectrumDisplay.showAxes()
+    #
+    #     else:
+    #         raise ValueError("The last strip in a display cannot be deleted")
+    #
+    # def _restoreToLayout(self):
+    #     ccpnStrip = self._wrappedData
+    #     # n = len(ccpnStrip.spectrumDisplay.orderedStrips)
+    #
+    #     index = ccpnStrip.index
+    #     spectrumDisplay = self.spectrumDisplay
+    #     layout = spectrumDisplay.stripFrame.layout()
+    #     n = layout.count()
+    #
+    #     if layout:
+    #         _undo = self.project._undo
+    #         if _undo is not None:
+    #             _undo.increaseBlocking()
+    #
+    #         _stripDeleteDict = ccpnStrip.__dict__['_stripDeleteDict']
+    #         currentStripItem = _stripDeleteDict['currentStripItem']
+    #         currentStripDirection = _stripDeleteDict['currentStripDirection']
+    #         currentRow = _stripDeleteDict['currentRow']
+    #         currentIndex = _stripDeleteDict['currentIndex']
+    #         currentParent = _stripDeleteDict['currentParent']
+    #         currentWrapped = _stripDeleteDict['currentWrapped']
+    #
+    #         self.mainWindow._UndoWidgetStorage.layout().removeWidget(self)
+    #         # self.setParent(currentParent)
+    #         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+    #
+    #         self._widgets = []
+    #         while layout.count():  # clear the layout and store
+    #             self._widgets.append(layout.takeAt(0).widget())
+    #         self._widgets.insert(currentIndex, self)
+    #         # print ('>>> restoreToLayout', self, ' >>> ', self._widgets)
+    #
+    #         if spectrumDisplay.stripDirection == 'Y':
+    #             for m, widgStrip in enumerate(self._widgets):  # build layout again
+    #                 layout.addWidget(widgStrip, 0, m)
+    #                 layout.setColumnStretch(m, 1)
+    #         elif spectrumDisplay.stripDirection == 'X':
+    #             for m, widgStrip in enumerate(self._widgets):  # build layout again
+    #                 layout.addWidget(widgStrip, m, 0)
+    #             layout.setColumnStretch(0, 1)
+    #
+    #         count = ccpnStrip.spectrumDisplay.__dict__
+    #         field = ccpnStrip.spectrumDisplay._fieldNames
+    #         strippy = ccpnStrip.spectrumDisplay.getOrderedStrips()
+    #         # ccpnStrip.spectrumDisplay.newBoundStrip = [appWidg._wrappedData for appWidg in self._widgets]
+    #
+    #         # TODO:ED HACK HACK HACK HACK - put ccpnStrip back into strips
+    #         if self not in ccpnStrip.spectrumDisplay.orderedStrips:
+    #             # childrenDict = ccpnStrip.spectrumDisplay.__dict__.get('strips')
+    #             # childrenDict[n] = ccpnStrip
+    #             for order, cStrip in enumerate(self._widgets):
+    #                 cStrip._wrappedData.__dict__['index'] = order  # this is the api creation of orderedStrips
+    #                 # ccpnStrip.__dict__['index'] = currentIndex-1
+    #
+    #         _undo = self.project._undo
+    #         if _undo is not None:
+    #             _undo.decreaseBlocking()
+    #
+    #         self.spectrumDisplay.showAxes()
+    #
+    # #TODO:RASMUS: most of this below belongs in the Gui class or even the GuiSpectrumDisplay class (like adding, removing strips)
+    # #TODO:ED: confer with rasmus and me to refactor while writing tests
+    # def delete(self):
+    #     """Overrides normal delete"""
+    #     # currentStripItem = self._getWidgetFromLayout()
+    #     # self.setParent(None)
+    #
+    #     ccpnStrip = self._wrappedData
+    #     n = len(ccpnStrip.spectrumDisplay.strips)
+    #     if n > 1:
+    #         spectrumDisplay = self.spectrumDisplay
+    #         layout = spectrumDisplay.stripFrame.layout()
+    #
+    #         if layout:  # should always be the case but play safe
+    #
+    #             self._removeFromLayout()  # adds nothing to the undo stack, so add it below
+    #
+    #             _undo = self.project._undo
+    #             if _undo is not None:
+    #                 _undo.newItem(self._restoreToLayout, self._removeFromLayout)
+    #             self._unDeleteCall, self._unDeleteArgs = self._recoverApiObject(ccpnStrip)
+    #             ccpnStrip.delete()
+    #
+    #         self.current.strip = spectrumDisplay.strips[-1]
+    #     else:
+    #         raise ValueError("The last strip in a display cannot be deleted")
+    #
+    # def _unDelete(self):
+    #     """Overrides normal delete"""
+    #     # currentStripItem = self._getWidgetFromLayout()
+    #     # self.setParent(None)
+    #
+    #     # TODO:ED check this cheeky code :)
+    #     self._unDeleteCall(*self._unDeleteArgs)  # recover the deleted apiStrip
+    #
+    #     ccpnStrip = self._wrappedData
+    #
+    #     n = len(ccpnStrip.spectrumDisplay.strips)
+    #     if n > 1:
+    #         spectrumDisplay = self.spectrumDisplay
+    #         layout = spectrumDisplay.stripFrame.layout()
+    #
+    #         if layout:  # should always be the case but play safe
+    #
+    #             self._restoreToLayout()  # adds nothing to the undo stack, so add it below
+    #
+    #             _undo = self.project._undo
+    #             if _undo is not None:
+    #                 _undo.newItem(self._removeFromLayout, self._restoreToLayout)
+    #
+    #         self.current.strip = spectrumDisplay.strips[-1]
+    #
+    #     else:
+    #         raise ValueError("The last strip in a display cannot be deleted")
 
     def _removeOrderedSpectrumViewIndex(self, index):
         self.spectrumDisplay.removeOrderedSpectrumView(index)
@@ -446,85 +505,105 @@ class Strip(AbstractWrapperObject):
         if _undo is not None:
             _undo.decreaseBlocking()
             # _undo.newItem(newStrip.delete, newStrip._unDelete)
-            _undo.newItem(self.spectrumDisplay.removeStrip, self.spectrumDisplay._unDelete
-                          , undoArgs=(newStrip,), redoArgs=(newStrip,))
+            _undo.newItem(self.spectrumDisplay.removeStrip, self.spectrumDisplay._unDelete,
+                          undoArgs=(newStrip,), redoArgs=(newStrip,))
 
         return newStrip
 
-    def moveTo(self, newIndex: int):
-        """Move strip to index newIndex in orderedStrips"""
-
+    def moveStrip(self, newIndex):
+        """Move strip to index newIndex in orderedStrips
+        """
         currentIndex = self._wrappedData.index
         if currentIndex == newIndex:
             return
 
+        # get the current order
         stripCount = self.spectrumDisplay.stripCount
 
         if newIndex >= stripCount:
             # Put strip at the right, which means newIndex should be stripCount - 1
             if newIndex > stripCount:
-                # warning
-                self._project._logger.warning(
-                        "Attempt to copy strip to position %s in display with only %s strips"
-                        % (newIndex, stripCount))
+                raise TypeError("Attempt to copy strip to position %s in display with only %s strips"
+                                % (newIndex, stripCount))
             newIndex = stripCount - 1
 
-        self._startCommandEchoBlock('moveTo', newIndex)
-        try:
-            # management of API objects
-            self._wrappedData.moveTo(newIndex)
-        finally:
-            self._endCommandEchoBlock()
+        # move the strip
+        self._wrappedData.moveTo(newIndex)
 
-        # NB - no echo blocking below, as none of the layout stuff is modeled (?)
-
-        # NBNB TODO - should the stuff below not be moved to the corresponding GUI class?
-        # Is there always a layout, regardless of application?
-
-        # management of Qt layout
-        # TBD: need to soup up below with extra loop when have tiles
-        spectrumDisplay = self.spectrumDisplay
-        layout = spectrumDisplay.stripFrame.layout()
-        if not layout:  # should always exist but play safe:
-            return
-
-        for r in range(layout.rowCount()):
-            items = []
-            if spectrumDisplay.stripDirection == 'Y':
-                if currentIndex < newIndex:
-                    for n in range(currentIndex, newIndex + 1):
-                        item = layout.itemAtPosition(r, n)
-                        items.append(item)
-                        layout.removeItem(item)
-                    items = items[1:] + [items[0]]
-                    for m, item in enumerate(items):
-                        layout.addItem(item, r, m + currentIndex, )
-                else:
-                    for n in range(newIndex, currentIndex + 1):
-                        item = layout.itemAtPosition(r, n)
-                        items.append(item)
-                        layout.removeItem(item)
-                    items = [items[-1]] + items[:-1]
-                    for m, item in enumerate(items):
-                        layout.addItem(item, r, m + newIndex, )
-
-            elif spectrumDisplay.stripDirection == 'X':
-                if currentIndex < newIndex:
-                    for n in range(currentIndex, newIndex + 1):
-                        item = layout.itemAtPosition(n, 0)
-                        items.append(item)
-                        layout.removeItem(item)
-                    items = items[1:] + [items[0]]
-                    for m, item in enumerate(items):
-                        layout.addItem(item, m + currentIndex, 0)
-                else:
-                    for n in range(newIndex, currentIndex + 1):
-                        item = layout.itemAtPosition(n, 0)
-                        items.append(item)
-                        layout.removeItem(item)
-                    items = [items[-1]] + items[:-1]
-                    for m, item in enumerate(items):
-                        layout.addItem(item, m + newIndex, 0)
+    # def moveTo(self, newIndex: int):
+    #     """Move strip to index newIndex in orderedStrips"""
+    #
+    #     currentIndex = self._wrappedData.index
+    #     if currentIndex == newIndex:
+    #         return
+    #
+    #     stripCount = self.spectrumDisplay.stripCount
+    #
+    #     if newIndex >= stripCount:
+    #         # Put strip at the right, which means newIndex should be stripCount - 1
+    #         if newIndex > stripCount:
+    #             # warning
+    #             self._project._logger.warning(
+    #                     "Attempt to copy strip to position %s in display with only %s strips"
+    #                     % (newIndex, stripCount))
+    #         newIndex = stripCount - 1
+    #
+    #     self._startCommandEchoBlock('moveTo', newIndex)
+    #     try:
+    #         # management of API objects
+    #         self._wrappedData.moveTo(newIndex)
+    #     finally:
+    #         self._endCommandEchoBlock()
+    #
+    #     # NB - no echo blocking below, as none of the layout stuff is modeled (?)
+    #
+    #     # NBNB TODO - should the stuff below not be moved to the corresponding GUI class?
+    #     # Is there always a layout, regardless of application?
+    #
+    #     # management of Qt layout
+    #     # TBD: need to soup up below with extra loop when have tiles
+    #     spectrumDisplay = self.spectrumDisplay
+    #     layout = spectrumDisplay.stripFrame.layout()
+    #     if not layout:  # should always exist but play safe:
+    #         return
+    #
+    #     for r in range(layout.rowCount()):
+    #         items = []
+    #         if spectrumDisplay.stripDirection == 'Y':
+    #             if currentIndex < newIndex:
+    #                 for n in range(currentIndex, newIndex + 1):
+    #                     item = layout.itemAtPosition(r, n)
+    #                     items.append(item)
+    #                     layout.removeItem(item)
+    #                 items = items[1:] + [items[0]]
+    #                 for m, item in enumerate(items):
+    #                     layout.addItem(item, r, m + currentIndex, )
+    #             else:
+    #                 for n in range(newIndex, currentIndex + 1):
+    #                     item = layout.itemAtPosition(r, n)
+    #                     items.append(item)
+    #                     layout.removeItem(item)
+    #                 items = [items[-1]] + items[:-1]
+    #                 for m, item in enumerate(items):
+    #                     layout.addItem(item, r, m + newIndex, )
+    #
+    #         elif spectrumDisplay.stripDirection == 'X':
+    #             if currentIndex < newIndex:
+    #                 for n in range(currentIndex, newIndex + 1):
+    #                     item = layout.itemAtPosition(n, 0)
+    #                     items.append(item)
+    #                     layout.removeItem(item)
+    #                 items = items[1:] + [items[0]]
+    #                 for m, item in enumerate(items):
+    #                     layout.addItem(item, m + currentIndex, 0)
+    #             else:
+    #                 for n in range(newIndex, currentIndex + 1):
+    #                     item = layout.itemAtPosition(n, 0)
+    #                     items.append(item)
+    #                     layout.removeItem(item)
+    #                 items = [items[-1]] + items[:-1]
+    #                 for m, item in enumerate(items):
+    #                     layout.addItem(item, m + newIndex, 0)
 
     def resetAxisOrder(self):
         """Reset display to original axis order"""
@@ -1058,9 +1137,11 @@ class Strip(AbstractWrapperObject):
     #   self.spectrumDisplay.removeSpectrumView(spectrumView)
 
     @staticmethod
-    def _recoverApiObject(self):
-        # TODO:ED This is a hack to recover a deleted object in reverse redo/undo
-
+    def _recoverApiObject(strip):
+        """recover the deleted api object by using the auto-generated code from the Model
+        CCPN Internal
+        """
+        self = strip._wrappedData
         dataDict = self.__dict__
         topObject = dataDict.get('topObject')
         notInConstructor = not (dataDict.get('inConstructor'))
@@ -1077,6 +1158,12 @@ class Strip(AbstractWrapperObject):
 
         objsToBeDeleted = OrderedSet()
         # objects still to be checked for cascading delete (each object to be deleted gets checked)
+        objsToBeChecked = list()
+        # counter keyed on (obj, roleName) for how many objects at other end of link are to be deleted
+        linkCounter = {}
+
+        # topObjects to check if modifiable
+        topObjectsToCheck = set()
         objsToBeChecked = list()
         # counter keyed on (obj, roleName) for how many objects at other end of link are to be deleted
         linkCounter = {}

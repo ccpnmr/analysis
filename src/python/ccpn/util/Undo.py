@@ -74,7 +74,7 @@ def no_op():
 
 
 def resetUndo(memopsRoot, maxWaypoints=20, maxOperations=10000,
-              debug: bool = False):
+              debug: bool = False, application=None):
     """Set or reset undo stack, using passed-in parameters.
     NB setting either parameter to 0 removes the undo stack."""
 
@@ -84,7 +84,7 @@ def resetUndo(memopsRoot, maxWaypoints=20, maxOperations=10000,
 
     if maxWaypoints and maxOperations:
         memopsRoot._undo = Undo(maxWaypoints=maxWaypoints, maxOperations=maxOperations,
-                                debug=debug)
+                                debug=debug, application=application)
     else:
         memopsRoot._undo = None
 
@@ -98,7 +98,7 @@ class Undo(deque):
     """
 
     # TODO: get rid of debug and use logging function instead
-    def __init__(self, maxWaypoints=20, maxOperations=10000, debug=False):
+    def __init__(self, maxWaypoints=20, maxOperations=10000, debug=False, application=None):
         """Create Undo object with maximum stack length maxUndoCount"""
 
         self.maxWaypoints = maxWaypoints
@@ -114,6 +114,7 @@ class Undo(deque):
 
         # Reset to True to unblank errors during undo/redo
         self._debug = debug
+        self.application = application
 
     @property
     def blocking(self):
@@ -366,17 +367,19 @@ class Undo(deque):
         # print('@~@~ undoTo', self.nextIndex-1, undoTo)
         # block addition of items while operating
         self._blocked = True
+        from ccpn.core.lib.ContextManagers import undoBlock
 
         try:
-            undoCall = redoCall = None
-            for n in range(self.nextIndex - 1, undoTo, -1):
-                undoCall, redoCall = self[n]
-                # if self._debug:
-                #   print ("undoing", undoCall)
+            with undoBlock(self.application):
+                undoCall = redoCall = None
+                for n in range(self.nextIndex - 1, undoTo, -1):
+                    undoCall, redoCall = self[n]
+                    # if self._debug:
+                    #   print ("undoing", undoCall)
 
-                if undoCall:
-                    undoCall()
-            self.nextIndex = undoTo + 1
+                    if undoCall:
+                        undoCall()
+                self.nextIndex = undoTo + 1
 
         except Exception as e:
             from ccpn.util.Logging import getLogger
@@ -414,19 +417,22 @@ class Undo(deque):
 
         # block addition of items while operating
         self._blocked = True
+        from ccpn.core.lib.ContextManagers import undoBlock
+
         try:
-            for n in range(self.nextIndex, redoTo + 1):
-                # undoMethod, undoData, redoMethod, redoData = self[n]
-                # if redoData is None:
-                #   redoMethod()
-                # else:, axis=1, inplace=True
-                #   redoMethod(redoData)
-                undoCall, redoCall = self[n]
-                # if self._debug:
-                #   print ("@~@~ redoing", redoCall)
-                if redoCall:
-                    redoCall()
-            self.nextIndex = redoTo + 1
+            with undoBlock(self.application):
+                for n in range(self.nextIndex, redoTo + 1):
+                    # undoMethod, undoData, redoMethod, redoData = self[n]
+                    # if redoData is None:
+                    #   redoMethod()
+                    # else:, axis=1, inplace=True
+                    #   redoMethod(redoData)
+                    undoCall, redoCall = self[n]
+                    # if self._debug:
+                    #   print ("@~@~ redoing", redoCall)
+                    if redoCall:
+                        redoCall()
+                self.nextIndex = redoTo + 1
 
         except Exception as e:
             from ccpn.util.Logging import getLogger

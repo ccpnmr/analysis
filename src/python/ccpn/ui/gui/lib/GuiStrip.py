@@ -1669,30 +1669,35 @@ class GuiStrip(Frame):
         n = layout.count()
 
         if n > 1 and layout:
-            from ccpn.core.lib.ContextManagers import undoBlock
+            _undo = self.project._undo
+            if _undo is not None:
+                _undo.increaseBlocking()
 
-            with undoBlock(self.application):
-                currentIndex = index
+            currentIndex = index
 
-                # clear the layout and rebuild
-                self._widgets = []
-                while layout.count():
-                    self._widgets.append(layout.takeAt(0).widget())
-                self._widgets.remove(self)
+            # clear the layout and rebuild
+            self._widgets = []
+            while layout.count():
+                self._widgets.append(layout.takeAt(0).widget())
+            self._widgets.remove(self)
 
-                if spectrumDisplay.stripDirection == 'Y':
-                    for m, widgStrip in enumerate(self._widgets):  # build layout again
-                        layout.addWidget(widgStrip, 0, m)
-                        layout.setColumnStretch(m, 1)
-                        layout.setColumnStretch(m + 1, 0)
-                elif spectrumDisplay.stripDirection == 'X':
-                    for m, widgStrip in enumerate(self._widgets):  # build layout again
-                        layout.addWidget(widgStrip, m, 0)
-                    layout.setColumnStretch(0, 1)
+            if spectrumDisplay.stripDirection == 'Y':
+                for m, widgStrip in enumerate(self._widgets):  # build layout again
+                    layout.addWidget(widgStrip, 0, m)
+                    layout.setColumnStretch(m, 1)
+                    layout.setColumnStretch(m + 1, 0)
+            elif spectrumDisplay.stripDirection == 'X':
+                for m, widgStrip in enumerate(self._widgets):  # build layout again
+                    layout.addWidget(widgStrip, m, 0)
+                layout.setColumnStretch(0, 1)
 
             # move to widget store
             self.mainWindow._UndoWidgetStorage.layout().addWidget(self)
             self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+
+            _undo = self.project._undo
+            if _undo is not None:
+                _undo.decreaseBlocking()
 
             # store the old information
             self._storeStripDeleteDict(currentIndex)

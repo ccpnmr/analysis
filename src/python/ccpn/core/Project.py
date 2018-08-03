@@ -358,11 +358,11 @@ class Project(AbstractWrapperObject):
     return self._wrappedData.root._undo
 
   def _resetUndo(self, maxWaypoints:int=20, maxOperations:int=10000,
-                 debug:bool=False):
+                 debug:bool=False, application=None):
     """Reset undo stack, using passed-in parameters.
     NB setting either parameter to 0 removes the undo stack."""
     Undo.resetUndo(self._wrappedData.root, maxWaypoints=maxWaypoints,
-                   maxOperations=maxOperations, debug=debug)
+                   maxOperations=maxOperations, debug=debug, application=application)
 
   def newUndoPoint(self):
     """Set a point in the undo stack, you can undo/redo to """

@@ -1169,7 +1169,7 @@ class Framework:
 
     self._initialiseProject(project)
 
-    project._resetUndo(debug=self.level <= Logging.DEBUG2)
+    project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
     return project
 
@@ -1201,10 +1201,10 @@ class Framework:
         return
 
     dataType, subType, usePath = ioFormats.analyseUrl(path)
-    if dataType == 'Project' and subType in (ioFormats.CCPN
-                                             , ioFormats.NEF
-                                             , ioFormats.NMRSTAR
-                                             , ioFormats.SPARKY):
+    if dataType == 'Project' and subType in (ioFormats.CCPN,
+                                             ioFormats.NEF,
+                                             ioFormats.NMRSTAR,
+                                             ioFormats.SPARKY):
 
       # if subType != ioFormats.NEF:    # ejb - only reset project for CCPN files
       #   if self.project is not None:
@@ -1216,23 +1216,23 @@ class Framework:
         if self.project is not None:    # always close for Ccpn
           self._closeProject()
         project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
-        project._resetUndo(debug=self.level <= Logging.DEBUG2)
+        project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
         self._initialiseProject(project)
         project._undo.clear()
       elif subType == ioFormats.NEF:
         sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
         project = self._loadNefFile(path, makeNewProject=True)   # RHF - new by default
-        project._resetUndo(debug=self.level <= Logging.DEBUG2)
+        project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
       elif subType == ioFormats.NMRSTAR:
         sys.stderr.write('==> Loading %s NMRStar project "%s"\n' % (subType, path))
         project = self._loadNMRStarFile(path, makeNewProject=True)   # RHF - new by default
-        project._resetUndo(debug=self.level <= Logging.DEBUG2)
+        project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
       elif subType == ioFormats.SPARKY:
         sys.stderr.write('==> Loading %s Sparky project "%s"\n' % (subType, path))
         project = self._loadSparkyProject(path, makeNewProject=True)   # RHF - new by default
-        project._resetUndo(debug=self.level <= Logging.DEBUG2)
+        project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
 
       return project
 

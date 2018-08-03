@@ -82,7 +82,7 @@ class WrapperTesting(unittest.TestCase):
       self.tearDown()
       raise RuntimeError("No project found for project path %s" % projectPath)
 
-    self.project._resetUndo(debug=True)
+    self.project._resetUndo(debug=True, application=self.framework)
     self.undo = self.project._undo
     self.undo.debug = True
     try:

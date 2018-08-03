@@ -57,7 +57,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from ccpn.util import Common as commonUtil
 from typing import Tuple, List, Any
-
+from functools import partial
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
 
@@ -1477,14 +1477,14 @@ class GuiStrip(Frame):
             # management of API objects
 
             if _undo is not None:
-                _undo.newItem(undo=self.spectrumDisplay.showAxes)
+                _undo._newItem(undoPartial=partial(self.spectrumDisplay.showAxes))
 
             self._wrappedData.moveTo(newIndex)
 
             if _undo is not None:
                 _undo.newItem(self._resetStripLayout, self._resetStripLayout,
                               undoArgs=(newIndex, currentIndex), redoArgs=(currentIndex, newIndex))
-                _undo.newItem(redo=self.spectrumDisplay.showAxes)
+                _undo._newItem(redoPartial=partial(self.spectrumDisplay.showAxes))
 
         finally:
             self._endCommandEchoBlock()

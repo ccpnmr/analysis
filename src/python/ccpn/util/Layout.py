@@ -45,7 +45,7 @@ ApplicationName = "applicationName"
 ApplicationVersion = "applicationVersion"
 GuiModules = "guiModules"
 FileNames = 'fileNames'
-ClassNameModuleName = "class_And_Module_Names"
+# ClassNameModuleName = "class_And_Module_Names"
 LayoutState =  "layoutState"
 
 DefaultLayoutFile = {
@@ -55,10 +55,10 @@ DefaultLayoutFile = {
                                 ApplicationName: "",
                                 ApplicationVersion: ""
                               },
-                    GuiModules:
-                              {
-                                ClassNameModuleName: [()]
-                              },
+                    GuiModules: [()],
+                              # {
+                              #   ClassNameModuleName: [()]
+                              # },
 
                     FileNames:
                               [
@@ -147,12 +147,13 @@ def _updateGuiModules(mainWindow, layout):
 
   classNames_ModuleNames = [] #list of tuples [(className, ModuleName), (className, ModuleName)]
   for module in guiModules:
-    if not isinstance(module, GuiSpectrumDisplay): # Displays are not stored here but in the DataModel
-      classNames_ModuleNames.append((module.className, module.name()))
+    # if not isinstance(module, GuiSpectrumDisplay): # Displays are not stored here but in the DataModel
+    classNames_ModuleNames.append((module.name(), module.className))
 
   if GuiModules in layout:
-    if ClassNameModuleName in layout.guiModules:
-        setattr(layout.guiModules, ClassNameModuleName, classNames_ModuleNames )
+    # if ClassNameModuleName in layout.guiModules:
+    #     setattr(layout.guiModules, ClassNameModuleName, classNames_ModuleNames )
+    setattr(layout, GuiModules, classNames_ModuleNames)
 
 def _updateLayoutState(mainWindow, layout):
   if LayoutState in layout:
@@ -339,8 +340,10 @@ def restoreLayout(mainWindow, layout):
     neededModules = getattr(layout, FileNames)
     if len(neededModules)>0:
       if GuiModules in layout:
-        if ClassNameModuleName in layout.guiModules:
-          classNameGuiModuleNameList = getattr(layout.guiModules, ClassNameModuleName)
+        # if ClassNameModuleName in layout.guiModules:
+        #   classNameGuiModuleNameList = getattr(layout.guiModules, ClassNameModuleName)
+
+          classNameGuiModuleNameList = getattr(layout, GuiModules)
           # Checks if  modules  are present in the layout file. If not stops it
           if not list(_traverse(classNameGuiModuleNameList)):
             return
@@ -349,7 +352,12 @@ def restoreLayout(mainWindow, layout):
             ccpnModules = _getAvailableModules(mainWindow, layout, neededModules)
             for classNameGuiModuleName in classNameGuiModuleNameList:
               if len(classNameGuiModuleName) == 2:
-                className, guiModuleName = classNameGuiModuleName
+                guiModuleName, className = classNameGuiModuleName
+
+                # move the 'skip' to here, instead of in the saveState
+                if className in ['SpectrumDisplay']:
+                    continue
+
                 neededModules.append(className)
                 _openCcpnModule(mainWindow, ccpnModules, className, moduleName=guiModuleName)
 

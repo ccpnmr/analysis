@@ -102,7 +102,7 @@ class Module(AbstractWrapperObject):
   @property
   def moduleType(self) ->  str:
     """Type of module, used to determine the graphics implementation used
-    (e.g. 'PeakTable', 'Assigner', ..."""
+    (e.g. 'PeakTableModule', 'Assigner', ..."""
     return self._wrappedData.moduleType
 
   @moduleType.setter

@@ -62,7 +62,7 @@ class MultipletTableModule(CcpnModule):
     maxSettingsState = 2
     settingsPosition = 'top'
 
-    className = 'MultipletTable'
+    className = 'MultipletTableModule'
 
     def __init__(self, mainWindow=None, name='MultipletList Table', multipletList=None):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)

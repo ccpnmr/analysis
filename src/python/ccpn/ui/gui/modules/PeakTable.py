@@ -56,7 +56,7 @@ class PeakTableModule(CcpnModule):
   maxSettingsState = 2
   settingsPosition = 'top'
 
-  className = 'PeakTable'
+  className = 'PeakTableModule'
 
   def __init__(self, mainWindow=None, name='PeakList Table', peakList=None):
 

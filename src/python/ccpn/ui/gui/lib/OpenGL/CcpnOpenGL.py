@@ -1350,7 +1350,10 @@ class CcpnGLWidget(QOpenGLWidget):
         return self._dragRegions
 
     def mousePressInIntegralLists(self):
-        for reg in self._GLIntegralLists.values():
+        """Check whether the mouse has been pressed in an integral
+        """
+        # for reg in self._GLIntegralLists.values():
+        for reg in self._GLIntegrals._GLSymbols.values():
             if not reg.integralListView.isVisible() or \
                     not reg.spectrumView.isVisible():
                 continue

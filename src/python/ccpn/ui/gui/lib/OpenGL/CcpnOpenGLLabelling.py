@@ -2107,7 +2107,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLLabelling):
         for ils in self._GLSymbols.values():
 
             # confusing as peakList and integralList share the same list :)
-            if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.peakList:
+            if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
 
                 for reg in ils._regions:
 
@@ -2184,6 +2184,33 @@ class GLintegralNdLabelling(GLintegralListMethods, GLLabelling):
                 if objListView in self._GLSymbols.keys():
                     self._updateHighlightedSymbols(spectrumView, objListView)
                     self._updateHighlightedLabels(spectrumView, objListView)
+
+    def _processNotifier(self, data):
+        """Process notifiers
+        """
+        triggers = data[Notifier.TRIGGER]
+        obj = data[Notifier.OBJECT]
+
+        if Notifier.DELETE in triggers:
+            self._deleteSymbol(obj)
+            self._deleteLabel(obj)
+
+        if Notifier.CREATE in triggers:
+            self._createSymbol(obj)
+            self._createLabel(obj)
+
+        if Notifier.CHANGE in triggers:
+            self._changeSymbol(obj)
+            self._changeLabel(obj)
+
+    def _deleteLabel(self, obj):
+        pass
+
+    def _createLabel(self, obj):
+        pass
+
+    def _changeLabel(self, obj):
+        pass
 
 class GLintegral1dLabelling(GLintegralNdLabelling):
     """Class to handle symbol and symbol labelling for 1d displays

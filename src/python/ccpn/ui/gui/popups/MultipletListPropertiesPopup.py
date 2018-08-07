@@ -57,13 +57,17 @@ class MultipletListPropertiesPopup(CcpnDialog):
       if not self.multipletList.symbolColour:
         self.multipletList.symbolColour = spectrumColourKeys[0]  # default
       if not self.multipletList.textColour:
-        self.multipletList.textColour = spectrumColourKeys[1]   # default*
+        self.multipletList.textColour = spectrumColourKeys[1]   # default
+      if not self.multipletList.textColour:
+        self.multipletList.textColour = spectrumColourKeys[2]   # default
 
-      self.multipletListLabel = Label(self, "Multiplet List Name ", grid=(0, 0))
-      self.multipletListLabel = Label(self, multipletList.id, grid=(0, 1))
+      row = 0
+      self.multipletListLabel = Label(self, "Multiplet List Name ", grid=(row, 0))
+      self.multipletListLabel = Label(self, multipletList.id, grid=(row, 1))
 
-      self.symbolColourLabel = Label(self, 'Multiplet Colour', grid=(3, 0))
-      self.symbolColourPulldownList = PulldownList(self, grid=(3, 1))
+      row += 1
+      self.symbolColourLabel = Label(self, 'Multiplet Colour', grid=(row, 0))
+      self.symbolColourPulldownList = PulldownList(self, grid=(row, 1))
       Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
 
       c = multipletList.symbolColour
@@ -76,8 +80,9 @@ class MultipletListPropertiesPopup(CcpnDialog):
 
       self.symbolColourPulldownList.activated.connect(self._applyChanges)
 
-      self.textColourLabel = Label(self, 'Multiplet Text Colour', grid=(4, 0))
-      self.textColourPulldownList = PulldownList(self, grid=(4, 1))
+      row += 1
+      self.textColourLabel = Label(self, 'Multiplet Text Colour', grid=(row, 0))
+      self.textColourPulldownList = PulldownList(self, grid=(row, 1))
       Colour.fillColourPulldown(self.textColourPulldownList, allowAuto=True)
 
       c = multipletList.textColour
@@ -93,7 +98,27 @@ class MultipletListPropertiesPopup(CcpnDialog):
 
       self.textColourPulldownList.activated.connect(self._applyChanges)
 
-      self.closeButton = Button(self, text='Close', grid=(6, 1), callback=self._accept)
+      row += 1
+      self.lineColourLabel = Label(self, 'Multiplet Line Colour', grid=(row, 0))
+      self.lineColourPulldownList = PulldownList(self, grid=(row, 1))
+      Colour.fillColourPulldown(self.lineColourPulldownList, allowAuto=True)
+
+      c = multipletList.lineColour
+      if c in spectrumColourKeys:
+        self.lineColourPulldownList.setCurrentText(Colour.spectrumColours[c])
+      else:
+        Colour.addNewColourString(c)
+
+        # repopulate all pulldowns
+        Colour.fillColourPulldown(self.symbolColourPulldownList, allowAuto=True)
+        Colour.fillColourPulldown(self.textColourPulldownList, allowAuto=True)
+        Colour.fillColourPulldown(self.lineColourPulldownList, allowAuto=True)
+        Colour.selectPullDownColour(self.lineColourPulldownList, c, allowAuto=True)
+
+      self.lineColourPulldownList.activated.connect(self._applyChanges)
+
+      row += 1
+      self.closeButton = Button(self, text='Close', grid=(row, 1), callback=self._accept)
 
     self.numUndos = 0
 
@@ -105,6 +130,10 @@ class MultipletListPropertiesPopup(CcpnDialog):
     value = self.textColourPulldownList.currentText()
     colour = Colour.getSpectrumColour(value, defaultReturn='#')
     self.multipletList.textColour = colour
+
+    value = self.lineColourPulldownList.currentText()
+    colour = Colour.getSpectrumColour(value, defaultReturn='#')
+    self.multipletList.lineColour = colour
 
   def _applyChanges(self):
     """
@@ -162,4 +191,5 @@ class MultipletListPropertiesPopup(CcpnDialog):
   def _accept(self):
     self.symbolColourPulldownList.activated.disconnect(self._applyChanges)
     self.textColourPulldownList.activated.disconnect(self._applyChanges)
+    self.lineColourPulldownList.activated.disconnect(self._applyChanges)
     self.accept()

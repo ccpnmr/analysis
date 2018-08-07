@@ -40,142 +40,171 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
 from typing import Optional, Tuple
 
 
+LINECOLOUR = 'lineColour'
+DEFAULTLINECOLOUR = '#000000'
+
+
 class MultipletList(AbstractWrapperObject):
-  """MultipletList object, holding position, intensity, and assignment information
+    """MultipletList object, holding position, intensity, and assignment information
 
-  Measurements that require more than one NmrAtom for an individual assignment
-  (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
-  experiments etc.) are not supported (yet). Assignments can be viewed and set
-  either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
-  list of all possible assignment combinations (assignedNmrAtoms)"""
+    Measurements that require more than one NmrAtom for an individual assignment
+    (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
+    experiments etc.) are not supported (yet). Assignments can be viewed and set
+    either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
+    list of all possible assignment combinations (assignedNmrAtoms)"""
 
-  #: Short class name, for PID.
-  shortClassName = 'ML'
-  # Attribute it necessary as subclasses must use superclass className
-  className = 'MultipletList'
+    #: Short class name, for PID.
+    shortClassName = 'ML'
+    # Attribute it necessary as subclasses must use superclass className
+    className = 'MultipletList'
 
-  _parentClass = Spectrum
+    _parentClass = Spectrum
 
-  #: Name of plural link to instances of class
-  _pluralLinkName = 'multipletLists'
+    #: Name of plural link to instances of class
+    _pluralLinkName = 'multipletLists'
 
-  #: List of child classes.
-  _childClasses = []
+    #: List of child classes.
+    _childClasses = []
 
-  # Qualified name of matching API class
-  _apiClassQualifiedName = ApiMultipletList._metaclass.qualifiedName()
+    # Qualified name of matching API class
+    _apiClassQualifiedName = ApiMultipletList._metaclass.qualifiedName()
 
-  # CCPN properties  
-  @property
-  def _apiMultipletList(self) -> ApiMultipletList:
-    """ API multipletLists matching MultipletList"""
-    return self._wrappedData
+    # CCPN properties
+    @property
+    def _apiMultipletList(self) -> ApiMultipletList:
+        """ API multipletLists matching MultipletList"""
+        return self._wrappedData
 
-  @property
-  def _key(self) -> str:
-    """id string - serial number converted to string"""
-    return str(self._wrappedData.serial)
+    @property
+    def _key(self) -> str:
+        """id string - serial number converted to string"""
+        return str(self._wrappedData.serial)
 
-  @property
-  def serial(self) -> int:
-    """serial number of MultipletList, used in Pid and to identify the MultipletList. """
-    return self._wrappedData.serial
+    @property
+    def serial(self) -> int:
+        """serial number of MultipletList, used in Pid and to identify the MultipletList. """
+        return self._wrappedData.serial
 
-  @property
-  def _parent(self) -> Optional[Spectrum]:
-    """parent containing multipletList."""
-    return self._project._data2Obj[self._wrappedData.dataSource]
+    @property
+    def _parent(self) -> Optional[Spectrum]:
+        """parent containing multipletList."""
+        return self._project._data2Obj[self._wrappedData.dataSource]
 
-  spectrum = _parent
+    spectrum = _parent
 
-  @property
-  def title(self) -> str:
-    """title of multiplet (not used in PID)."""
-    return self._wrappedData.name
+    @property
+    def title(self) -> str:
+        """title of multiplet (not used in PID)."""
+        return self._wrappedData.name
 
-  @title.setter
-  def title(self, value: str):
-    self._wrappedData.name = value
+    @title.setter
+    def title(self, value: str):
+        self._wrappedData.name = value
 
-  @property
-  def dataType(self) -> str:
-    """dataType of multipletList."""
-    return self._wrappedData.dataType
+    @property
+    def dataType(self) -> str:
+        """dataType of multipletList."""
+        return self._wrappedData.dataType
 
-  @dataType.setter
-  def title(self, value: str):
-    self._wrappedData.dataType = value
+    @dataType.setter
+    def dataType(self, value: str):
+        self._wrappedData.dataType = value
 
-  @property
-  def symbolColour(self) -> str:
-    """Symbol colour for multipletList annotation display"""
-    return self._wrappedData.symbolColour
+    @property
+    def symbolColour(self) -> str:
+        """Symbol colour for multipletList annotation display"""
+        return self._wrappedData.symbolColour
 
-  @symbolColour.setter
-  def symbolColour(self, value: str):
-    self._wrappedData.symbolColour = value
+    @symbolColour.setter
+    def symbolColour(self, value: str):
+        self._wrappedData.symbolColour = value
 
-  @property
-  def textColour(self) -> str:
-    """Text colour for multipletList annotation display"""
-    return self._wrappedData.textColour
+    @property
+    def textColour(self) -> str:
+        """Text colour for multipletList annotation display"""
+        return self._wrappedData.textColour
 
-  @textColour.setter
-  def textColour(self, value: str):
-    self._wrappedData.textColour = value
+    @textColour.setter
+    def textColour(self, value: str):
+        self._wrappedData.textColour = value
 
-  @property
-  def comment(self) -> str:
-    """Free-form text comment"""
-    return self._wrappedData.details
+    def _setLineColour(self, value):
+        """set the internal line colour
+        """
+        tempCcpn = self._ccpnInternalData.copy()
+        tempCcpn[LINECOLOUR] = value
+        self._ccpnInternalData = tempCcpn
 
-  @comment.setter
-  def comment(self, value: str):
-    self._wrappedData.details = value
+    @property
+    def lineColour(self) -> str:
+        """Line colour for multipletList annotation display"""
+        if self._ccpnInternalData:
+            if LINECOLOUR not in self._ccpnInternalData:
+                self._setLineColour(DEFAULTLINECOLOUR)
+        else:
+            self._ccpnInternalData = {LINECOLOUR: DEFAULTLINECOLOUR}
 
-  # Implementation functions
-  @classmethod
-  def _getAllWrappedData(cls, parent: Spectrum) -> Tuple[ApiMultipletList, ...]:
-    """get wrappedData (MultipletLists) for all MultipletList children of parent MultipletListList"""
-    return parent._wrappedData.sortedMultipletLists()
+        return self._ccpnInternalData[LINECOLOUR]
+
+    @lineColour.setter
+    def lineColour(self, value: str):
+        if not self._ccpnInternalData:
+            self._ccpnInternalData = {LINECOLOUR: value}
+        else:
+            self._setLineColour(value)
+
+    @property
+    def comment(self) -> str:
+        """Free-form text comment"""
+        return self._wrappedData.details
+
+    @comment.setter
+    def comment(self, value: str):
+        self._wrappedData.details = value
+
+    # Implementation functions
+    @classmethod
+    def _getAllWrappedData(cls, parent: Spectrum) -> Tuple[ApiMultipletList, ...]:
+        """get wrappedData (MultipletLists) for all MultipletList children of parent MultipletListList"""
+        return parent._wrappedData.sortedMultipletLists()
 
 
 # Connections to parents:
-def _newMultipletList(self:Spectrum, title:str=None, symbolColour:str=None,
-                     textColour:str=None, comment:str=None, multiplets:['Multiplet']=None) -> MultipletList:
-  """Create new MultipletList within Spectrum"""
+def _newMultipletList(self: Spectrum, title: str = None, symbolColour: str = None,
+                      textColour: str = None, comment: str = None, multiplets: ['Multiplet'] = None) -> MultipletList:
+    """Create new MultipletList within Spectrum"""
 
-  defaults = collections.OrderedDict(
-    (('title', None), ('symbolColour', None), ('textColour', None), ('comment', None), ('multiplets', None),
-     )
-  )
+    defaults = collections.OrderedDict(
+            (('title', None), ('symbolColour', None), ('textColour', None), ('comment', None), ('multiplets', None),
+             )
+            )
 
-  dd = {'name':title, 'details':comment}
-  if symbolColour:
-    dd['symbolColour'] = symbolColour
-  if textColour:
-    dd['textColour'] = textColour
-  if multiplets:
-    dd['multiplets'] = multiplets
+    dd = {'name': title, 'details': comment}
+    if symbolColour:
+        dd['symbolColour'] = symbolColour
+    if textColour:
+        dd['textColour'] = textColour
+    if multiplets:
+        dd['multiplets'] = multiplets
 
-  undo = self._project._undo
-  self._startCommandEchoBlock('newMultipletList', values=locals(), defaults=defaults,
-                              parName='newMultipletList')
-  try:
-    apiParent = self._wrappedData
-    # if multiplets:
-    #   apiMultipletList = apiParent.newMultipletList(multiplets=[mm._wrappedData for mm in multiplets])
-    # else:
-    #   apiMultipletList = apiParent.newMultipletList()
+    undo = self._project._undo
+    self._startCommandEchoBlock('newMultipletList', values=locals(), defaults=defaults,
+                                parName='newMultipletList')
+    try:
+        apiParent = self._wrappedData
+        # if multiplets:
+        #   apiMultipletList = apiParent.newMultipletList(multiplets=[mm._wrappedData for mm in multiplets])
+        # else:
+        #   apiMultipletList = apiParent.newMultipletList()
 
-    apiMultipletList = apiParent.newMultipletList(**dd)
+        apiMultipletList = apiParent.newMultipletList(**dd)
 
-    result = self._project._data2Obj.get(apiMultipletList)
+        result = self._project._data2Obj.get(apiMultipletList)
 
-  finally:
-    self._endCommandEchoBlock()
+    finally:
+        self._endCommandEchoBlock()
 
-  return result
+    return result
 
 
 MultipletList._parentClass.newMultipletList = _newMultipletList

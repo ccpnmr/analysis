@@ -65,8 +65,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDE
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 
-
 from ccpn.util.Common import makeIterableList
+
+
 # from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
 
 
@@ -77,6 +78,8 @@ except ImportError:
     QtWidgets.QMessageBox.critical(None, "OpenGL hellogl",
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
+
+POINTCOLOURS = 4
 
 
 class GLLabelling():
@@ -96,6 +99,8 @@ class GLLabelling():
 
         self._GLSymbols = {}
         self._GLLabels = {}
+
+        self.autoColour = self._GLParent.SPECTRUMPOSCOLOUR
 
     def rescale(self):
         if self.resizeGL:
@@ -209,6 +214,7 @@ class GLpeakListMethods():
         """
         return 0
 
+
 class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     """Class to handle symbol and symbol labelling for Nd displays
     """
@@ -311,7 +317,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        symbolWidth = self.strip.peakSymbolSize / 2.0
+        symbolWidth = self.strip.symbolSize / 2.0
 
         p0 = [0.0] * 2  # len(self.axisOrder)
         lineWidths = [None] * 2  # len(self.axisOrder)
@@ -360,7 +366,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 listCol = self._GLParent.highlightColour[:3]
             else:
                 listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
-                                                self._GLParent.SPECTRUMPOSCOLOUR,
+                                                self.autoColour,
                                                 getColours()[CCPNGLWIDGET_FOREGROUND])
 
             text = self.getLabelling(obj, self.strip.peakLabelling)
@@ -384,7 +390,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     def _removeSymbol(self, spectrumView, objListView, delObj):
         """Remove a symbol from the list
         """
-        symbolType = self.strip.peakSymbolType
+        symbolType = self.strip.symbolType
 
         drawList = self._GLSymbols[objListView]
 
@@ -552,7 +558,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                                                         index + np2 + 3, index + np2 + 1])
 
                 # add extra indices for the multiplet
-                extraIndices = 0            #self.appendExtraIndices(drawList, index + np2, obj)
+                extraIndices = 0  #self.appendExtraIndices(drawList, index + np2, obj)
 
                 # draw an ellipse at lineWidth
                 drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
@@ -572,7 +578,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 drawList.lineWidths = (r, w)
 
                 # add extra vertices for the multiplet
-                extraVertices = 0           #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
+                extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
 
                 # keep a pointer to the obj
                 drawList.pids = np.append(drawList.pids, [obj, drawList.numVertices, (numPoints + extraVertices),
@@ -611,7 +617,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                                   ang])
 
                 # add extra indices for the multiplet
-                extraIndices = 0                #self.appendExtraIndices(drawList, index + np2 + 4, obj)
+                extraIndices = 0  #self.appendExtraIndices(drawList, index + np2 + 4, obj)
 
                 # draw an ellipse at lineWidth
                 drawList.vertices = np.append(drawList.vertices, [[p0[0] - r * math.sin(skip * an * angPlus / numPoints),
@@ -631,7 +637,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 drawList.lineWidths = (r, w)
 
                 # add extra vertices for the multiplet
-                extraVertices = 0               #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
+                extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
 
                 # keep a pointer to the obj
                 drawList.pids = np.append(drawList.pids, [obj, drawList.numVertices, (numPoints + extraVertices),
@@ -652,9 +658,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
 
-        symbolType = self.strip.peakSymbolType
-        symbolWidth = self.strip.peakSymbolSize / 2.0
-        lineThickness = self.strip.peakSymbolThickness / 2.0
+        symbolType = self.strip.symbolType
+        symbolWidth = self.strip.symbolSize / 2.0
+        lineThickness = self.strip.symbolThickness / 2.0
 
         x = abs(self._GLParent.pixelX)
         y = abs(self._GLParent.pixelY)
@@ -702,7 +708,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         pls = self.objectList(objListView)
 
         listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
-                                        self._GLParent.SPECTRUMPOSCOLOUR,
+                                        self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
         spectrumFrequency = spectrum.spectrometerFrequencies
@@ -718,7 +724,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
+        listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum, self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
         for drawStr in drawList.stringList:
@@ -770,9 +776,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         spectrum = spectrumView.spectrum
         strip = self.strip
 
-        symbolType = strip.peakSymbolType
-        symbolWidth = strip.peakSymbolSize / 2.0
-        lineThickness = strip.peakSymbolThickness / 2.0
+        symbolType = strip.symbolType
+        symbolWidth = strip.symbolSize / 2.0
+        lineThickness = strip.symbolThickness / 2.0
 
         drawList = self._GLSymbols[objListView]
         drawList.indices = np.empty(0, dtype=np.uint)
@@ -783,7 +789,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # pls = objListView.peakList
         pls = self.objectList(objListView)
 
-        listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
+        listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum, self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
         if symbolType == 0:
@@ -822,7 +828,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                         # make sure that links for the multiplets are added
                         extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
-                        drawList.colors[offset * 4:(offset + numPoints) * 4] = [*cols, fade] * numPoints
+                        drawList.colors[offset * 4:(offset + POINTCOLOURS) * 4] = [*cols, fade] * POINTCOLOURS  #numPoints
 
                     # list MAY contain out of plane peaks
                     drawList.pids[pp + 3:pp + 8] = [_isInPlane, _isInFlankingPlane, _selected,
@@ -925,8 +931,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
-        symbolType = self.strip.peakSymbolType
-        symbolWidth = self.strip.peakSymbolSize / 2.0
+        symbolType = self.strip.symbolType
+        symbolWidth = self.strip.symbolSize / 2.0
         x = abs(self._GLParent.pixelX)
         y = abs(self._GLParent.pixelY)
 
@@ -998,8 +1004,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     def _rescaleLabels(self, spectrumView=None, objListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen
         """
-        symbolType = self.strip.peakSymbolType
-        symbolWidth = self.strip.peakSymbolSize / 2.0
+        symbolType = self.strip.symbolType
+        symbolWidth = self.strip.symbolSize / 2.0
         x = abs(self._GLParent.pixelX)
         y = abs(self._GLParent.pixelY)
 
@@ -1057,8 +1063,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            symbolType = self.strip.peakSymbolType
-            symbolWidth = self.strip.peakSymbolSize / 2.0
+            symbolType = self.strip.symbolType
+            symbolWidth = self.strip.symbolSize / 2.0
 
             x = abs(self._GLParent.pixelX)
             y = abs(self._GLParent.pixelY)
@@ -1098,7 +1104,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             pls = self.objectList(objListView)
 
             listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
-                                            self._GLParent.SPECTRUMPOSCOLOUR,
+                                            self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
 
             spectrumFrequency = spectrum.spectrometerFrequencies
@@ -1159,7 +1165,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             drawList.clearArrays()
             drawList.stringList = []
 
-            # symbolWidth = self._parent.peakSymbolSize / 2.0
+            # symbolWidth = self._parent.symbolSize / 2.0
 
             pls = peakListView.peakList
             # spectrumFrequency = spectrum.spectrometerFrequencies
@@ -1279,7 +1285,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         self.buildSymbols()
 
-        lineThickness = self.strip.peakSymbolThickness
+        lineThickness = self.strip.symbolThickness
         GL.glLineWidth(lineThickness)
 
         # loop through the attached objListViews to the strip
@@ -1328,9 +1334,9 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         spectrum = spectrumView.spectrum
         strip = self.strip
 
-        symbolType = strip.peakSymbolType
-        symbolWidth = strip.peakSymbolSize / 2.0
-        lineThickness = strip.peakSymbolThickness / 2.0
+        symbolType = strip.symbolType
+        symbolWidth = strip.symbolSize / 2.0
+        lineThickness = strip.symbolThickness / 2.0
 
         drawList = self._GLSymbols[objListView]
         drawList.indices = np.empty(0, dtype=np.uint)
@@ -1342,7 +1348,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             listView = self.objectList(objListView)
             listCol = getAutoColourRgbRatio(listView.symbolColour,
                                             listView.spectrum,
-                                            self._GLParent.SPECTRUMPOSCOLOUR,
+                                            self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
 
             for pp in range(0, len(drawList.pids), GLDefs.LENPID):
@@ -1369,7 +1375,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
                     # make sure that links for the multiplets are added
                     extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
-                    drawList.colors[offset * 4:(offset + numPoints) * 4] = [*cols, 1.0] * numPoints
+                    drawList.colors[offset * 4:(offset + POINTCOLOURS) * 4] = [*cols, 1.0] * POINTCOLOURS      # numPoints
 
                     drawList.pids[pp + 3:pp + 8] = [True, True, _selected,
                                                     indexPtr, len(drawList.indices)]
@@ -1404,9 +1410,9 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            symbolType = self.strip.peakSymbolType
-            symbolWidth = self.strip.peakSymbolSize / 2.0
-            # lineThickness = self._preferences.peakSymbolThickness / 2.0
+            symbolType = self.strip.symbolType
+            symbolWidth = self.strip.symbolSize / 2.0
+            # lineThickness = self._preferences.symbolThickness / 2.0
 
             x = abs(self._GLParent.pixelX)
             y = abs(self._GLParent.pixelY)
@@ -1432,7 +1438,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             pls = self.objectList(objListView)
 
             listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
-                                            self._GLParent.SPECTRUMPOSCOLOUR,
+                                            self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
 
             # for obj in pls.peaks:
@@ -1514,8 +1520,8 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
         # if drawList.refreshMode == GLREFRESHMODE_REBUILD:
 
-        symbolType = self.strip.peakSymbolType
-        symbolWidth = self.strip.peakSymbolSize / 2.0
+        symbolType = self.strip.symbolType
+        symbolWidth = self.strip.symbolSize / 2.0
         x = abs(self._GLParent.pixelX)
         y = abs(self._GLParent.pixelY)
 
@@ -1551,9 +1557,9 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         # find the correct scale to draw square pixels
         # don't forget to change when the axes change
 
-        symbolType = self.strip.peakSymbolType
-        symbolWidth = self.strip.peakSymbolSize / 2.0
-        lineThickness = self.strip.peakSymbolThickness / 2.0
+        symbolType = self.strip.symbolType
+        symbolWidth = self.strip.symbolSize / 2.0
+        lineThickness = self.strip.symbolThickness / 2.0
 
         x = abs(self._GLParent.pixelX)
         y = abs(self._GLParent.pixelY)
@@ -1582,7 +1588,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
         spectrumFrequency = spectrum.spectrometerFrequencies
         listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
-                                        self._GLParent.SPECTRUMPOSCOLOUR,
+                                        self.autoColour,
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
         strip = spectrumView.strip
@@ -1655,7 +1661,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
     def _removeSymbol(self, spectrumView, objListView, delObj):
         """Remove a symbol from the list
         """
-        symbolType = self.strip.peakSymbolType
+        symbolType = self.strip.symbolType
 
         drawList = self._GLSymbols[objListView]
 
@@ -1705,7 +1711,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
-        symbolWidth = self.strip.peakSymbolSize / 2.0
+        symbolWidth = self.strip.symbolSize / 2.0
 
         # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2  # len(self.axisOrder)
@@ -1728,21 +1734,11 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             listCol = self._GLParent.highlightColour[:3]
         else:
             listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
-                                            self._GLParent.SPECTRUMPOSCOLOUR,
+                                            self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
 
         text = self.getLabelling(obj, self.strip.peakLabelling)
-        # if self.strip.peakLabelling == 0:
-        #     text = _getScreenPeakAnnotation(obj, useShortCode=True)
-        # elif self.strip.peakLabelling == 1:
-        #     text = _getScreenPeakAnnotation(obj, useShortCode=False)
-        # else:
-        #     text = _getPeakAnnotation(obj)  # original 'pid'
 
-        # # TODO:ED check labelling
-        # text = obj.id
-
-        # TODO:ED check axisCodes and ordering
         stringList.append(GLString(text=text,
                                    font=self._GLParent.globalGL.glSmallFont,
                                    x=p0[0], y=p0[1],
@@ -1755,8 +1751,8 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
     def _rescaleLabels(self, spectrumView=None, objListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen
         """
-        symbolType = self.strip.peakSymbolType
-        symbolWidth = self.strip.peakSymbolSize / 2.0
+        symbolType = self.strip.symbolType
+        symbolWidth = self.strip.symbolSize / 2.0
         x = abs(self._GLParent.pixelX)
         y = abs(self._GLParent.pixelY)
 
@@ -1877,10 +1873,11 @@ class GLmultipletListMethods():
         if not multiplet.peaks:
             return 0
 
-        newIndices = [(index, 1+index+ii) for ii in range(len(multiplet.peaks))]
+        newIndices = [(index, 1 + index + ii) for ii in range(len(multiplet.peaks))]
         newIndices = makeIterableList(newIndices)
         drawList.indices = np.append(drawList.indices, newIndices)
-        return len(multiplet.peaks)+1
+        return len(multiplet.peaks) + 1
+
 
 class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
     """Class to handle symbol and symbol labelling for Nd displays
@@ -1891,6 +1888,8 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
         """
         super(GLmultipletNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
 
+        self.autoColour = self._GLParent.SPECTRUMNEGCOLOUR
+
     def appendExtraVertices(self, drawList, multiplet, p0, colour, fade):
         """Add extra vertices to the vertex list
         """
@@ -1898,6 +1897,8 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
             return 0
 
         # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
+        cols = getAutoColourRgbRatio(multiplet.multipletList.lineColour, multiplet.multipletList.spectrum, self.autoColour,
+                                        getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = [p0]
         for peak in multiplet.peaks:
@@ -1923,13 +1924,14 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
         numVertices = len(newVertices) // 2
         drawList.vertices = np.append(drawList.vertices, newVertices)
 
-        # drawList.colors = np.append(drawList.colors, [*cols, fade] * numVertices)
-        drawList.colors = np.append(drawList.colors, colour * numVertices)
+        drawList.colors = np.append(drawList.colors, [*cols, fade] * numVertices)
+        # drawList.colors = np.append(drawList.colors, colour * numVertices)
 
         attribs = makeIterableList([p0 * numVertices])
         drawList.attribs = np.append(drawList.attribs, attribs)
 
         return numVertices
+
 
 class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
     """Class to handle symbol and symbol labelling for 1d displays
@@ -1940,6 +1942,8 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
         """
         super(GLmultiplet1dLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
 
+        self.autoColour = self._GLParent.SPECTRUMNEGCOLOUR
+
     def appendExtraVertices(self, drawList, multiplet, p0, colour, fade):
         """Add extra vertices to the vertex list
         """
@@ -1947,6 +1951,8 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
             return 0
 
         # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
+        cols = getAutoColourRgbRatio(multiplet.multipletList.lineColour, multiplet.multipletList.spectrum, self.autoColour,
+                                        getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = [p0]
         for peak in multiplet.peaks:
@@ -1975,8 +1981,8 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
         numVertices = len(newVertices) // 2
         drawList.vertices = np.append(drawList.vertices, newVertices)
 
-        # drawList.colors = np.append(drawList.colors, [*cols, fade] * numVertices)
-        drawList.colors = np.append(drawList.colors, colour * numVertices)
+        drawList.colors = np.append(drawList.colors, [*cols, fade] * numVertices)
+        # drawList.colors = np.append(drawList.colors, colour * numVertices)
 
         attribs = makeIterableList([p0 * numVertices])
         drawList.attribs = np.append(drawList.attribs, attribs)

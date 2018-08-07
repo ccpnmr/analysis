@@ -146,6 +146,10 @@ class GuiWindow():
       if self.current.multiplets:
         deleteItems['Multiplets'] = self.current.multiplets
 
+        # add attached multiplets/integrals
+
+
+
       popup = DeleteItemsPopup(parent=self, mainWindow=self, items=deleteItems)
       popup.exec_()
 

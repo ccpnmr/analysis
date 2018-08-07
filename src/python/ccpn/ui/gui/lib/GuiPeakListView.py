@@ -957,6 +957,13 @@ class PeakNd(QtWidgets.QGraphicsItem):
 """
   #@profile
   def paint(self, painter, option, widget):
+
+
+
+    # SHOULD BE DEPRECATED
+
+
+
     if self.peakListView.isDeleted: # strip has been deleted
       return
 
@@ -968,12 +975,12 @@ class PeakNd(QtWidgets.QGraphicsItem):
       else:
         colour = self.peakListView.peakList.symbolColour
 
-      symbolType = self.application.preferences.general.peakSymbolType
+      symbolType = self.application.preferences.general.symbolType
 
       peakOkay = True
       if symbolType == 0:    # a cross
-        symbolWidth = self.application.preferences.general.peakSymbolSize / 2.0
-        lineThickness = self.application.preferences.general.peakSymbolThickness / 2.0
+        symbolWidth = self.application.preferences.general.symbolSizeNd / 2.0
+        lineThickness = self.application.preferences.general.symbolThickness / 2.0
 
         if self._isInPlane:
           # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
@@ -1076,7 +1083,7 @@ class PeakNd(QtWidgets.QGraphicsItem):
         if symbolWidths[0] and symbolWidths[1]:
           symbolWidths[0] = symbolWidths[0] / self.peak.peakList.spectrum.spectrometerFrequencies[0]
           symbolWidths[1] = symbolWidths[1] / self.peak.peakList.spectrum.spectrometerFrequencies[1]
-          lineThickness = self.application.preferences.general.peakSymbolThickness / 2.0
+          lineThickness = self.application.preferences.general.symbolThickness / 2.0
 
           if self._isInPlane:
             vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView
@@ -1119,8 +1126,8 @@ class PeakNd(QtWidgets.QGraphicsItem):
 
         else:
           # lineWidths undefined; draw a dotted circle
-          symbolWidth = self.application.preferences.general.peakSymbolSize / 2.0
-          lineThickness = self.application.preferences.general.peakSymbolThickness / 2.0
+          symbolWidth = self.application.preferences.general.symbolSizeNd / 2.0
+          lineThickness = self.application.preferences.general.symbolThickness / 2.0
 
           if self._isInPlane or self._isInFlankingPlane:
             vbMTS = self.peakListView.spectrumView.strip.viewBox.mapSceneToView

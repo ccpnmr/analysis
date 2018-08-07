@@ -268,9 +268,9 @@ class GuiStrip(Frame):
         # set peakLabelling to the default from preferences or strip to the left
         if len(spectrumDisplay.strips) > 1:
             self.peakLabelling = spectrumDisplay.strips[0].peakLabelling
-            self.peakSymbolType = spectrumDisplay.strips[0].peakSymbolType
-            self.peakSymbolSize = spectrumDisplay.strips[0].peakSymbolSize
-            self.peakSymbolThickness = spectrumDisplay.strips[0].peakSymbolThickness
+            self.symbolType = spectrumDisplay.strips[0].symbolType
+            self.symbolSize = spectrumDisplay.strips[0].symbolSize
+            self.symbolThickness = spectrumDisplay.strips[0].symbolThickness
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
             self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
 
@@ -287,9 +287,12 @@ class GuiStrip(Frame):
 
         else:
             self.peakLabelling = self.application.preferences.general.annotationType
-            self.peakSymbolType = self.application.preferences.general.peakSymbolType
-            self.peakSymbolSize = self.application.preferences.general.peakSymbolSize
-            self.peakSymbolThickness = self.application.preferences.general.peakSymbolThickness
+            self.symbolType = self.application.preferences.general.symbolType
+            if spectrumDisplay.is1D:
+                self.symbolSize = self.application.preferences.general.symbolSize1d
+            else:
+                self.symbolSize = self.application.preferences.general.symbolSizeNd
+            self.symbolThickness = self.application.preferences.general.symbolThickness
             self.gridVisible = self.application.preferences.general.showGrid
             self.crosshairVisible = self.application.preferences.general.showCrosshair
 
@@ -1059,9 +1062,9 @@ class GuiStrip(Frame):
 
     def cyclePeakSymbols(self):
         "Toggles whether peak labelling is minimal is visible in the strip."
-        self.peakSymbolType += 1
-        if self.peakSymbolType > 2:
-            self.peakSymbolType = 0
+        self.symbolType += 1
+        if self.symbolType > 2:
+            self.symbolType = 0
 
         if self.spectrumViews:
             for sV in self.spectrumViews:

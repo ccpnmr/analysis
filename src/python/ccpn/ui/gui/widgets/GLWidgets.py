@@ -67,6 +67,7 @@ class Gui1dWidget(CcpnGLWidget):
     AXISLOCKEDBUTTON = True
     is1D = True
     SPECTRUMPOSCOLOUR = 'sliceColour'
+    SPECTRUMNEGCOLOUR = 'sliceColour'
     SPECTRUMXZOOM = 1.0e2
     SPECTRUMYZOOM = 1.0e6
 

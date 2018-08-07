@@ -199,8 +199,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._devicePixelRatio = 1.0  # set in the initialiseGL routine
         self.peakWidthPixels = 16
-        self.boxWidth = 0.0
-        self.boxHeight = 0.0
+        # self.boxWidth = 0.0
+        # self.boxHeight = 0.0
 
         # set initial axis limits - should be changed by strip.display..
         self.axisL = 0.0
@@ -371,10 +371,6 @@ class CcpnGLWidget(QOpenGLWidget):
         w = self.w
         h = self.h
 
-        # symbolType = self.strip.peakSymbolType
-        symbolWidth = self.strip.peakSymbolSize / 2.0
-        # lineThickness = self.strip.peakSymbolThickness / 2.0
-
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
         # set projection to axis coordinates
@@ -420,18 +416,6 @@ class CcpnGLWidget(QOpenGLWidget):
             currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
             self.pixelX = (self.axisR - self.axisL) / w
             self.pixelY = (self.axisT - self.axisB) / h
-
-        # self.pixelX = max(1.0e-6, abs(self.pixelX)) * self.sign(self.pixelX)
-        # self.pixelY = max(1.0e-6, abs(self.pixelY)) * self.sign(self.pixelY)
-
-        x = abs(self.pixelX)
-        y = abs(self.pixelY)
-        if x <= y:
-            self.boxWidth = symbolWidth
-            self.boxHeight = symbolWidth * y / x
-        else:
-            self.boxHeight = symbolWidth
-            self.boxWidth = symbolWidth * x / y
 
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 

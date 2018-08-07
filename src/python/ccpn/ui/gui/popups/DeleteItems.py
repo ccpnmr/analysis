@@ -63,7 +63,7 @@ class DeleteItemsPopup(CcpnDialog):
                                                  grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                  orientation='right',
                                                  labelText=itemName,
-                                                 checked=False
+                                                 checked=True if 'peak' in itemName else False
                                                  )
             self.deleteList.append((itemName, values, newCheckBox))
 

@@ -42,32 +42,19 @@ WarningMessage = "Warning. Any changes in this file will be overwritten when sav
 General = "general"
 ApplicationName = "applicationName"
 ApplicationVersion = "applicationVersion"
-GuiModules = "modules"
+GuiModules = "guiModules"
 FileNames = 'fileNames'
-# ClassNameModuleName = "class_And_Module_Names"
 LayoutState = "layoutState"
 
 DefaultLayoutFile = {
     Warning: WarningMessage,
-    General:
-        {
-            ApplicationName: "",
-            ApplicationVersion: ""
-            },
-            GuiModules: [],
-                      # {
-                      #   ClassNameModuleName: [()]
-                      # },
-
-    FileNames:
-        [
-            ]
-    ,
-    LayoutState:
-        {
-
-            }
-
+    General: {
+        ApplicationName: "",
+        ApplicationVersion: ""
+        },
+    GuiModules: [],
+    FileNames: [],
+    LayoutState: {}
     }
 
 

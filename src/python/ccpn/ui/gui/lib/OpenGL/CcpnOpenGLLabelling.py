@@ -60,8 +60,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDE
     GLREFRESHMODE_REBUILD, GLVertexArray, \
     GLSymbolArray, GLLabelArray
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
-# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
-#     GLRegion, REGION_COLOURS
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
+    GLRegion, REGION_COLOURS
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 
@@ -2033,6 +2033,34 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         """Initialise the class
         """
         super(GLintegralNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+
+    def _buildSymbols(self, spectrumView, integralListView):
+
+        if integralListView not in self._GLSymbols:
+            self._GLSymbols[integralListView] = GLIntegralRegion(project=self.strip.project, GLContext=self._GLParent,
+                                                                       spectrumView=spectrumView,
+                                                                       integralListView=integralListView)
+
+        drawList = self._GLSymbols[integralListView]
+
+        if drawList.renderMode == GLRENDERMODE_REBUILD:
+            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+
+            drawList.clearArrays()
+            drawList._clearRegions()
+
+            ils = integralListView.integralList
+            listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.autoColour,
+                                            getColours()[CCPNGLWIDGET_FOREGROUND])
+
+            for integral in ils.integrals:
+                drawList.addIntegral(integral, integralListView, colour=None,
+                                     brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
+
+        elif drawList.renderMode == GLRENDERMODE_RESCALE:
+            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+            drawList._rebuildIntegralAreas()
+
 
 class GLintegral1dLabelling(GLintegralListMethods, GLpeak1dLabelling):
     """Class to handle symbol and symbol labelling for 1d displays

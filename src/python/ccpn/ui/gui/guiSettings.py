@@ -184,7 +184,7 @@ LIGHTCORAL  = hexToRgbRatio([k for k, v in allColours.items() if v == 'lightcora
 
 # Shades
 CCPNGLWIDGET_REGIONSHADE = 0.30
-CCPNGLWIDGET_INTEGRALSHADE = 0.125
+CCPNGLWIDGET_INTEGRALSHADE = 0.1
 
 # Colour schemes definitions
 colourSchemes = {

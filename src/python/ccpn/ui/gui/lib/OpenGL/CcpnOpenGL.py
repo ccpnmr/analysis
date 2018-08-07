@@ -1611,26 +1611,26 @@ class CcpnGLWidget(QOpenGLWidget):
     def sign(self, x):
         return 1.0 if x >= 0 else -1.0
 
-    def _drawMarks(self):
-
-        if not hasattr(self, 'GLMarkList'):
-            self.GLMarkList = [GL.glGenLists(1), GLRENDERMODE_REBUILD, None, None, 0, None]
-
-        if self.GLMarkList[1] == GLRENDERMODE_REBUILD:
-            # rebuild the mark list
-            self.GLMarkList[1] = False
-            GL.glNewList(self.GLMarkList[0], GL.GL_COMPILE)
-
-            # draw some marks in here
-
-            GL.glEnd()
-            GL.glEndList()
-
-        elif self.GLMarkList[1] == GLRENDERMODE_REBUILD:
-            # rescale the marks here
-            pass
-
-        GL.glCallList(self.GLMarkList[0])
+    # def _drawMarks(self):
+    #
+    #     if not hasattr(self, 'GLMarkList'):
+    #         self.GLMarkList = [GL.glGenLists(1), GLRENDERMODE_REBUILD, None, None, 0, None]
+    #
+    #     if self.GLMarkList[1] == GLRENDERMODE_REBUILD:
+    #         # rebuild the mark list
+    #         self.GLMarkList[1] = False
+    #         GL.glNewList(self.GLMarkList[0], GL.GL_COMPILE)
+    #
+    #         # draw some marks in here
+    #
+    #         GL.glEnd()
+    #         GL.glEndList()
+    #
+    #     elif self.GLMarkList[1] == GLRENDERMODE_REBUILD:
+    #         # rescale the marks here
+    #         pass
+    #
+    #     GL.glCallList(self.GLMarkList[0])
 
     def _rescaleOverlayText(self):
         if self.stripIDString:
@@ -1724,7 +1724,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._GLPeaks.drawLabels()
         self._GLMultiplets.drawLabels()
-        # self._GLIntegrals.drawLabels()
+        self._GLIntegrals.drawLabels()
 
         self.drawMarksAxisCodes()
 

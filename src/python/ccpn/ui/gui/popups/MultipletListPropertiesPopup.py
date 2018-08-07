@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 import ccpn.util.Colour as Colour
 from ccpn.ui.gui.widgets.MessageDialog import MessageDialog
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
@@ -118,11 +119,24 @@ class MultipletListPropertiesPopup(CcpnDialog):
       self.lineColourPulldownList.activated.connect(self._applyChanges)
 
       row += 1
+      self.multipletAveragingLabel = Label(self, text="Multiplet Averaging:", grid=(row, 0))
+      multipletAveraging = self.multipletList.multipletAveraging
+      self.multipletAveraging = RadioButtons(self, texts=['Average', 'Weighted Average'],
+                                             selectedInd=multipletAveraging,
+                                             callback=self._applyChanges,
+                                             direction='h',
+                                             grid=(row, 1), hAlign='l',
+                                             tipTexts=None,
+                                             )
+
+      row += 1
       self.closeButton = Button(self, text='Close', grid=(row, 1), callback=self._accept)
 
     self.numUndos = 0
 
   def _changeColours(self):
+    """set the colours from the pulldowns
+    """
     value = self.symbolColourPulldownList.currentText()
     colour = Colour.getSpectrumColour(value, defaultReturn='#')
     self.multipletList.symbolColour = colour
@@ -134,6 +148,12 @@ class MultipletListPropertiesPopup(CcpnDialog):
     value = self.lineColourPulldownList.currentText()
     colour = Colour.getSpectrumColour(value, defaultReturn='#')
     self.multipletList.lineColour = colour
+
+  def _setAttributes(self):
+    """set the attributes from the other widgets
+    """
+    index = self.multipletAveraging.getIndex()
+    self.multipletList.multipletAveraging = index
 
   def _applyChanges(self):
     """
@@ -157,6 +177,7 @@ class MultipletListPropertiesPopup(CcpnDialog):
     self.project._startCommandEchoBlock('_applyChanges', quiet=True)
     try:
       self._changeColours()
+      self._setAttributes()
 
       # repaint
       GLSignals.emitEvent(targets=[self.multipletList], triggers=[GLNotifier.GLMULTIPLETLISTS,

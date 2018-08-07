@@ -41,7 +41,9 @@ from typing import Optional, Tuple
 
 
 LINECOLOUR = 'lineColour'
-DEFAULTLINECOLOUR = '#000000'
+DEFAULTLINECOLOUR = '#7e7e7e'
+MULTIPLETAVERAGING = 'multipletAveraging'
+DEFAULTMULTIPLETAVERAGING = 0
 
 
 class MultipletList(AbstractWrapperObject):
@@ -153,6 +155,31 @@ class MultipletList(AbstractWrapperObject):
         else:
             self._setLineColour(value)
 
+    def _setMultipletAveraging(self, value):
+        """set the internal line colour
+        """
+        tempCcpn = self._ccpnInternalData.copy()
+        tempCcpn[MULTIPLETAVERAGING] = value
+        self._ccpnInternalData = tempCcpn
+
+    @property
+    def multipletAveraging(self) -> str:
+        """Line colour for multipletList annotation display"""
+        if self._ccpnInternalData:
+            if MULTIPLETAVERAGING not in self._ccpnInternalData:
+                self._setMultipletAveraging(DEFAULTMULTIPLETAVERAGING)
+        else:
+            self._ccpnInternalData = {MULTIPLETAVERAGING: DEFAULTMULTIPLETAVERAGING}
+
+        return self._ccpnInternalData[MULTIPLETAVERAGING]
+
+    @multipletAveraging.setter
+    def multipletAveraging(self, value: str):
+        if not self._ccpnInternalData:
+            self._ccpnInternalData = {MULTIPLETAVERAGING: value}
+        else:
+            self._setMultipletAveraging(value)
+
     @property
     def comment(self) -> str:
         """Free-form text comment"""
@@ -170,8 +197,10 @@ class MultipletList(AbstractWrapperObject):
 
 
 # Connections to parents:
-def _newMultipletList(self: Spectrum, title: str = None, symbolColour: str = None,
-                      textColour: str = None, comment: str = None, multiplets: ['Multiplet'] = None) -> MultipletList:
+def _newMultipletList(self: Spectrum, title: str = None,
+                      symbolColour: str = None, textColour: str = None, lineColour: str = None,
+                      multipletAveraging = 0,
+                      comment: str = None, multiplets: ['Multiplet'] = None) -> MultipletList:
     """Create new MultipletList within Spectrum"""
 
     defaults = collections.OrderedDict(
@@ -200,6 +229,10 @@ def _newMultipletList(self: Spectrum, title: str = None, symbolColour: str = Non
         apiMultipletList = apiParent.newMultipletList(**dd)
 
         result = self._project._data2Obj.get(apiMultipletList)
+
+        # set non-api attributes
+        result.lineColour = lineColour
+        result.multipletAveraging = multipletAveraging
 
     finally:
         self._endCommandEchoBlock()

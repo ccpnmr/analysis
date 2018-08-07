@@ -140,15 +140,33 @@ class GuiWindow():
     from ccpn.ui.gui.popups.DeleteItems import DeleteItemsPopup
 
     if self.current.peaks or self.current.multiplets:
-      deleteItems = {}
+      deleteItems = []
       if self.current.peaks:
-        deleteItems['Peaks'] = self.current.peaks
+        deleteItems.append(('Peaks', self.current.peaks))
+      if self.current.integrals:
+        deleteItems.append(('Integrals', self.current.integrals))
       if self.current.multiplets:
-        deleteItems['Multiplets'] = self.current.multiplets
+        deleteItems.append(('Multiplets', self.current.multiplets))
 
-        # add attached multiplets/integrals
+      # add integrals attached peaks
+      attachedIntegrals = set()
+      for peak in self.current.peaks:
+        if peak.integral:
+          attachedIntegrals.add(peak.integral)
+      attachedIntegrals = list(attachedIntegrals - set(self.current.integrals))
 
+      if attachedIntegrals:
+        deleteItems.append(('Integrals attached to Peaks', attachedIntegrals))
 
+      # add peaks attached multiplets
+      attachedPeaks = set()
+      for multiplet in self.current.multiplets:
+        for peak in multiplet.peaks:
+          attachedPeaks.add(peak)
+      attachedPeaks = list(attachedPeaks-set(self.current.peaks))
+
+      if attachedPeaks:
+        deleteItems.append(('Peaks attached to Multiplets', attachedPeaks))
 
       popup = DeleteItemsPopup(parent=self, mainWindow=self, items=deleteItems)
       popup.exec_()

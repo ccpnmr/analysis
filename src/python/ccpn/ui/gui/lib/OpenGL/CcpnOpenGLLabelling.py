@@ -1988,3 +1988,58 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
         drawList.attribs = np.append(drawList.attribs, attribs)
 
         return numVertices
+
+class GLintegralListMethods():
+    """Class of methods common to 1d and Nd integrals
+    This is added to the Integral Classes below and doesn't require an __init__
+    """
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List handlers
+    #   The routines that have to be changed when accessing different named
+    #   lists.
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _isSelected(self, integral):
+        """return True if the obj in the defined object list
+        """
+        if self.current.integrals:
+            return integral in self.current.integrals
+
+    def objects(self, obj):
+        """return the integrals attached to the object
+        """
+        return obj.integrals
+
+    def objectList(self, obj):
+        """return the integralList attached to the integral
+        """
+        return obj.integralList
+
+    def listViews(self, integralList):
+        """Return the integralListViews attached to the integralList
+        """
+        return integralList.integralListViews
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List specific routines
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
+    """Class to handle symbol and symbol labelling for Nd displays
+    """
+
+    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+        """Initialise the class
+        """
+        super(GLintegralNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+
+class GLintegral1dLabelling(GLintegralListMethods, GLpeak1dLabelling):
+    """Class to handle symbol and symbol labelling for 1d displays
+    """
+
+    def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
+        """Initialise the class
+        """
+        super(GLintegral1dLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+

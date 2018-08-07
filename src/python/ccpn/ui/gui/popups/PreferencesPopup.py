@@ -531,6 +531,20 @@ class PreferencesPopup(CcpnDialog):
                                            icon='icons/colours', hPolicy='fixed')
         self.marksDefaultColourButton.clicked.connect(self._changeMarksColourButton)
 
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging:", grid=(row, 0))
+        multipletAveraging = self.preferences.general.multipletAveraging
+        self.multipletAveraging = RadioButtons(parent, texts=['Average', 'Weighted Average'],
+                                          selectedInd=multipletAveraging,
+                                          callback=self._setMultipletAveraging,
+                                          direction='h',
+                                          grid=(row, 1), hAlign='l',
+                                          tipTexts=None,
+                                          )
+
     def _changeMarksColour(self):
         """Change the default maerks colour in the preferences
         """
@@ -831,3 +845,14 @@ class PreferencesPopup(CcpnDialog):
         except Exception as es:
             return
         self.preferences.general.aspectRatios[aspect] = aspectValue
+
+    def _setMultipletAveraging(self):
+        """
+        Set the multiplet averaging type - normal or weighted
+        """
+        try:
+            symbol = self.multipletAveraging.getIndex()
+        except:
+            return
+        self.preferences.general.multipletAveraging = symbol
+

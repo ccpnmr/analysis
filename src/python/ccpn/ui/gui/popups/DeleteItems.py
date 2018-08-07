@@ -37,8 +37,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 class DeleteItemsPopup(CcpnDialog):
     """
     Open a small popup to allow deletion of selected 'current' items
-    Items is a dict indexed by the name of the items, containing a list of the items for deletion
-    i.e. {'Peaks': peakList, 'Multiplets': multipletList}
+    Items is a tuple of tuples: indexed by the name of the items, containing a list of the items for deletion
+    i.e. (('Peaks', peakList), ('Multiplets',multipletList))
     """
 
     def __init__(self, parent=None, mainWindow=None, title='Delete Items', items=None, **kw):
@@ -56,14 +56,16 @@ class DeleteItemsPopup(CcpnDialog):
         self.noteLabel = Label(self, "Delete selected items: ", grid=(row, 0))
 
         self.deleteList = []
-        for itemName, values in items.items():
+        for item in items:
+            itemName, values = item
+
             row += 1
             # add a check box for each item
             newCheckBox = CheckBoxCompoundWidget(self,
                                                  grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                  orientation='right',
                                                  labelText=itemName,
-                                                 checked=True if 'peak' in itemName else False
+                                                 checked=True if itemName in ['peaks', 'Peaks'] else False
                                                  )
             self.deleteList.append((itemName, values, newCheckBox))
 

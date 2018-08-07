@@ -685,3 +685,25 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
     self.setMaximumWidth(16777215)
 
 
+def testGuiPipe(GuiPipe):
+  '''
+
+  :param GuiPipe:
+  :return:  Open the Gui pipe in a mock Gui pipeline
+  '''
+  from PyQt5 import QtGui, QtWidgets
+  from ccpn.ui.gui.widgets.Application import TestApplication
+
+  app = TestApplication()
+  win = QtWidgets.QMainWindow()
+
+  pipeline = PipelineDropArea()
+  demoGuiPipe = GuiPipe(parent=pipeline)
+  pipeline.addDock(demoGuiPipe)
+
+  win.setCentralWidget(pipeline)
+  win.resize(1000, 500)
+  win.show()
+
+  app.start()
+

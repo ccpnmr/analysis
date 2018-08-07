@@ -404,8 +404,9 @@ class GuiPipeline(CcpnModule, Pipeline):
     if count == 0:
       self.currentGuiPipesNames = []
     counter = collections.Counter(self.currentGuiPipesNames)
-    return str(guiPipeName) + '-' + str(counter[str(guiPipeName)])
+    # return str(guiPipeName) + '-' + str(counter[str(guiPipeName)])
 
+    return str(guiPipeName)
 
   ####################################_________ GUI CallBacks ____________###########################################
 

@@ -2025,7 +2025,7 @@ class GLintegralListMethods():
     # List specific routines
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
+class GLintegralNdLabelling(GLintegralListMethods, GLLabelling):
     """Class to handle symbol and symbol labelling for Nd displays
     """
 
@@ -2033,6 +2033,48 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         """Initialise the class
         """
         super(GLintegralNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+
+    def _updateHighlightedSymbols(self, spectrumView, integralListView):
+        drawList = self._GLSymbols[integralListView]
+        drawList._rebuild()
+
+    def _updateHighlightedLabels(self, spectrumView, integralListView):
+        pass
+
+    def drawSymbols(self):
+        if self.strip.isDeleted:
+            return
+
+        self.buildSymbols()
+
+        # loop through the attached integralListViews to the strip
+        for spectrumView in self._GLParent._ordering:  #self.strip.spectrumViews:
+            for integralListView in spectrumView.integralListViews:
+                if spectrumView.isVisible() and integralListView.isVisible():
+
+                    if integralListView in self._GLSymbols.keys():
+                        self._GLSymbols[integralListView].drawIndexArray()
+
+                        # draw the integralAreas if they exist
+                        for integralArea in self._GLSymbols[integralListView]._regions:
+                            if hasattr(integralArea, '_integralArea'):
+                                if self._GLParent._stackingValue:
+                                    # use the stacking matrix to offset the 1D spectra
+                                    self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
+                                                                                        1, GL.GL_FALSE,
+                                                                                        self._GLParent._spectrumSettings[
+                                                                                            spectrumView][
+                                                                                            GLDefs.SPECTRUM_STACKEDMATRIX])
+
+                                integralArea._integralArea.drawVertexColor()
+
+        self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._GLParent._IMatrix)
+
+    def rescaleIntegralLists(self):
+        for il in self._GLSymbols.values():
+            il._rescale()
+
+        # rescale labels here as well? - check peaks
 
     def _buildSymbols(self, spectrumView, integralListView):
 
@@ -2061,8 +2103,89 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             drawList._rebuildIntegralAreas()
 
+    def _deleteSymbol(self, integral):
+        for ils in self._GLSymbols.values():
 
-class GLintegral1dLabelling(GLintegralListMethods, GLpeak1dLabelling):
+            # confusing as peakList and integralList share the same list :)
+            if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.peakList:
+
+                for reg in ils._regions:
+
+                    if reg._object == integral:
+                        ils._regions.remove(reg)
+                        ils._rebuild()
+                        # self.update()
+                        return
+
+    def _createSymbol(self, integral):
+        for ils in self._GLSymbols.values():
+
+            if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
+                listCol = getAutoColourRgbRatio(ils.integralListView.integralList.symbolColour,
+                                                ils.integralListView.integralList.spectrum, self._GLParent.SPECTRUMPOSCOLOUR,
+                                                getColours()[CCPNGLWIDGET_FOREGROUND])
+
+                ils.addIntegral(integral, ils.integralListView, colour=None,
+                                brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
+
+        # self.update()
+        return
+
+    def _changeSymbol(self, integral):
+
+        # regions added by the pipeline module
+        # for region in self._externalRegions._regions:
+        #   if region._object == integral:
+        #     self._regionList.renderMode = GLRENDERMODE_REBUILD
+        #     self.update()
+        #     return
+        # if not integral._linkedPeakNotifier: #adds a notifier when changes the integral value, so the linked peaks value are updated
+        #   integral._linkedPeakNotifier = integral.project.registerNotifier(integral.className, 'change', integral._updateLinkedPeaks, onceOnly=True)
+        for ils in self._GLSymbols.values():
+            for reg in ils._regions:
+                if reg._object == integral:
+                    ils._resize()
+                    return
+
+    def _appendLabel(self, *args, **kwargs):
+        pass
+
+
+    # method below should be from the super class - testing
+    def buildSymbols(self):
+        if self.strip.isDeleted:
+            return
+
+        # list through the valid peakListViews attached to the strip - including undeleted
+        for spectrumView in self.strip.spectrumViews:
+            # for peakListView in spectrumView.peakListViews:
+            for objListView in self.listViews(spectrumView):  # spectrumView.peakListViews:
+
+                if objListView in self._GLSymbols.keys():
+                    if self._GLSymbols[objListView].renderMode == GLRENDERMODE_RESCALE:
+                        self._buildSymbols(spectrumView, objListView)
+
+                if objListView.buildSymbols:
+                    objListView.buildSymbols = False
+
+                    # set the interior flags for rebuilding the GLdisplay
+                    if objListView in self._GLSymbols.keys():
+                        self._GLSymbols[objListView].renderMode = GLRENDERMODE_REBUILD
+
+                    self._buildSymbols(spectrumView, objListView)
+
+    def updateHighlightSymbols(self):
+        """Respond to an update highlight notifier and update the highlighted symbols/labels
+        """
+        for spectrumView in self.strip.spectrumViews:
+            # for peakListView in spectrumView.peakListViews:
+            for objListView in self.listViews(spectrumView):
+
+                if objListView in self._GLSymbols.keys():
+                    self._updateHighlightedSymbols(spectrumView, objListView)
+                    self._updateHighlightedLabels(spectrumView, objListView)
+
+class GLintegral1dLabelling(GLintegralNdLabelling):
     """Class to handle symbol and symbol labelling for 1d displays
     """
 

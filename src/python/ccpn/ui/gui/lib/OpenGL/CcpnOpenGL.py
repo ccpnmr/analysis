@@ -103,6 +103,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
     GLRegion, REGION_COLOURS
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak1dLabelling, \
+    GLintegral1dLabelling, GLintegralNdLabelling, \
     GLmultiplet1dLabelling, GLmultipletNdLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
@@ -288,11 +289,15 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.is1D:
             self._GLPeaks = GLpeak1dLabelling(parent=self, strip=self.strip,
                                                  name='peaks', resizeGL=True)
+            self._GLIntegrals = GLintegral1dLabelling(parent=self, strip=self.strip,
+                                                      name='integrals', resizeGL=True)
             self._GLMultiplets = GLmultiplet1dLabelling(parent=self, strip=self.strip,
-                                                      name='multiplets', resizeGL=True)
+                                                        name='multiplets', resizeGL=True)
         else:
             self._GLPeaks = GLpeakNdLabelling(parent=self, strip=self.strip,
                                                  name='peaks', resizeGL=True)
+            self._GLIntegrals = GLintegralNdLabelling(parent=self, strip=self.strip,
+                                                      name='integrals', resizeGL=True)
             self._GLMultiplets = GLmultipletNdLabelling(parent=self, strip=self.strip,
                                                       name='multiplets', resizeGL=True)
 
@@ -449,7 +454,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._rescaleOverlayText()
         self.rescaleMarksRulers()
-        self.rescaleIntegralLists()
+        # self.rescaleIntegralLists()
+        self._GLIntegrals.rescaleIntegralLists()
         self._rescaleRegions()
         self.rescaleSpectra()
         self.rescaleStaticTraces()
@@ -1647,6 +1653,12 @@ class CcpnGLWidget(QOpenGLWidget):
         self._clearKeys()
         self.update()
 
+    def _processIntegralNotifier(self, data):
+        self._GLIntegrals._processNotifier(data)
+
+        self._clearKeys()
+        self.update()
+
     def _processMultipletNotifier(self, data):
         self._GLMultiplets._processNotifier(data)
 
@@ -1689,7 +1701,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._GLMultiplets.drawSymbols()
 
         self.drawMarksRulers()
-        self.drawIntegralLists()
+        # self.drawIntegralLists()
+        self._GLIntegrals.drawSymbols()
+
         self.drawRegions()
 
         # draw the phase plots of the mouse is in the current window
@@ -1707,6 +1721,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._GLPeaks.drawLabels()
         self._GLMultiplets.drawLabels()
+        # self._GLIntegrals.drawLabels()
 
         self.drawMarksAxisCodes()
 
@@ -1822,80 +1837,80 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 self._buildSpectrumSetting(spectrumView=spectrumView)
 
-    def _buildIntegralLists(self, spectrumView, integralListView):
+    # def _buildIntegralLists(self, spectrumView, integralListView):
+    #
+    #     if integralListView not in self._GLIntegralLists:
+    #         self._GLIntegralLists[integralListView] = GLIntegralRegion(project=self.project, GLContext=self,
+    #                                                                    spectrumView=spectrumView,
+    #                                                                    integralListView=integralListView)
+    #
+    #     drawList = self._GLIntegralLists[integralListView]
+    #
+    #     if drawList.renderMode == GLRENDERMODE_REBUILD:
+    #         drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+    #
+    #         drawList.clearArrays()
+    #         drawList._clearRegions()
+    #
+    #         ils = integralListView.integralList
+    #         listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.SPECTRUMPOSCOLOUR,
+    #                                         getColours()[CCPNGLWIDGET_FOREGROUND])
+    #
+    #         for integral in ils.integrals:
+    #             drawList.addIntegral(integral, integralListView, colour=None,
+    #                                  brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
+    #
+    #     elif drawList.renderMode == GLRENDERMODE_RESCALE:
+    #         drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+    #         drawList._rebuildIntegralAreas()
 
-        if integralListView not in self._GLIntegralLists:
-            self._GLIntegralLists[integralListView] = GLIntegralRegion(project=self.project, GLContext=self,
-                                                                       spectrumView=spectrumView,
-                                                                       integralListView=integralListView)
+    # def buildIntegralLists(self):
+    #     if self.strip.isDeleted:
+    #         return
+    #
+    #     for spectrumView in self.strip.spectrumViews:
+    #
+    #         for integralListView in spectrumView.integralListViews:
+    #             if integralListView in self._GLIntegralLists.keys():
+    #                 if self._GLIntegralLists[integralListView].renderMode == GLRENDERMODE_RESCALE:
+    #                     self._buildIntegralLists(spectrumView, integralListView)
+    #
+    #             if integralListView.buildSymbols:
+    #                 integralListView.buildSymbols = False
+    #
+    #                 if integralListView in self._GLIntegralLists.keys():
+    #                     self._GLIntegralLists[integralListView].renderMode = GLRENDERMODE_REBUILD
+    #
+    #                 self._buildIntegralLists(spectrumView, integralListView)
 
-        drawList = self._GLIntegralLists[integralListView]
-
-        if drawList.renderMode == GLRENDERMODE_REBUILD:
-            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-
-            drawList.clearArrays()
-            drawList._clearRegions()
-
-            ils = integralListView.integralList
-            listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.SPECTRUMPOSCOLOUR,
-                                            getColours()[CCPNGLWIDGET_FOREGROUND])
-
-            for integral in ils.integrals:
-                drawList.addIntegral(integral, integralListView, colour=None,
-                                     brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
-
-        elif drawList.renderMode == GLRENDERMODE_RESCALE:
-            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-            drawList._rebuildIntegralAreas()
-
-    def buildIntegralLists(self):
-        if self.strip.isDeleted:
-            return
-
-        for spectrumView in self.strip.spectrumViews:
-
-            for integralListView in spectrumView.integralListViews:
-                if integralListView in self._GLIntegralLists.keys():
-                    if self._GLIntegralLists[integralListView].renderMode == GLRENDERMODE_RESCALE:
-                        self._buildIntegralLists(spectrumView, integralListView)
-
-                if integralListView.buildSymbols:
-                    integralListView.buildSymbols = False
-
-                    if integralListView in self._GLIntegralLists.keys():
-                        self._GLIntegralLists[integralListView].renderMode = GLRENDERMODE_REBUILD
-
-                    self._buildIntegralLists(spectrumView, integralListView)
-
-    def drawIntegralLists(self):
-        if self.strip.isDeleted:
-            return
-
-        self.buildIntegralLists()
-
-        # loop through the attached integralListViews to the strip
-        for spectrumView in self._ordering:  #self.strip.spectrumViews:
-            for integralListView in spectrumView.integralListViews:
-                if spectrumView.isVisible() and integralListView.isVisible():
-
-                    if integralListView in self._GLIntegralLists.keys():
-                        self._GLIntegralLists[integralListView].drawIndexArray()
-
-                        # draw the integralAreas if they exist
-                        for integralArea in self._GLIntegralLists[integralListView]._regions:
-                            if hasattr(integralArea, '_integralArea'):
-                                if self._stackingValue:
-                                    # use the stacking matrix to offset the 1D spectra
-                                    self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-                                                                                        1, GL.GL_FALSE,
-                                                                                        self._spectrumSettings[
-                                                                                            spectrumView][
-                                                                                            GLDefs.SPECTRUM_STACKEDMATRIX])
-
-                                integralArea._integralArea.drawVertexColor()
-
-        self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
+    # def drawIntegralLists(self):
+    #     if self.strip.isDeleted:
+    #         return
+    #
+    #     self.buildIntegralLists()
+    #
+    #     # loop through the attached integralListViews to the strip
+    #     for spectrumView in self._ordering:  #self.strip.spectrumViews:
+    #         for integralListView in spectrumView.integralListViews:
+    #             if spectrumView.isVisible() and integralListView.isVisible():
+    #
+    #                 if integralListView in self._GLIntegralLists.keys():
+    #                     self._GLIntegralLists[integralListView].drawIndexArray()
+    #
+    #                     # draw the integralAreas if they exist
+    #                     for integralArea in self._GLIntegralLists[integralListView]._regions:
+    #                         if hasattr(integralArea, '_integralArea'):
+    #                             if self._stackingValue:
+    #                                 # use the stacking matrix to offset the 1D spectra
+    #                                 self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
+    #                                                                                     1, GL.GL_FALSE,
+    #                                                                                     self._spectrumSettings[
+    #                                                                                         spectrumView][
+    #                                                                                         GLDefs.SPECTRUM_STACKEDMATRIX])
+    #
+    #                             integralArea._integralArea.drawVertexColor()
+    #
+    #     self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
     def drawSpectra(self):
         if self.strip.isDeleted:
@@ -2608,9 +2623,9 @@ class CcpnGLWidget(QOpenGLWidget):
             for pp in range(0, 2 * vertices, 2):
                 mark.attribs[pp:pp + 2] = offsets
 
-    def rescaleIntegralLists(self):
-        for il in self._GLIntegralLists.values():
-            il._rescale()
+    # def rescaleIntegralLists(self):
+    #     for il in self._GLIntegralLists.values():
+    #         il._rescale()
 
     def rescaleMarksRulers(self):
         self._rescaleMarksRulers()
@@ -3695,12 +3710,13 @@ class CcpnGLWidget(QOpenGLWidget):
                         self._GLMultiplets.updateHighlightSymbols()
 
                     if GLNotifier.GLHIGHLIGHTINTEGRALS in triggers:
+                        self._GLIntegrals.updateHighlightSymbols()
 
-                        for spectrumView in self.strip.spectrumViews:
-                            for integralListView in spectrumView.integralListViews:
-
-                                if integralListView in self._GLIntegralLists.keys():
-                                    self._updateHighlightedIntegrals(spectrumView, integralListView)
+                        # for spectrumView in self.strip.spectrumViews:
+                        #     for integralListView in spectrumView.integralListViews:
+                        #
+                        #         if integralListView in self._GLIntegralLists.keys():
+                        #             self._updateHighlightedIntegrals(spectrumView, integralListView)
 
                     if GLNotifier.GLALLPEAKS in triggers:
                         self._GLPeaks.updateAllSymbols()
@@ -3721,6 +3737,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
                                 if integralListView in self._GLIntegralLists.keys():
                                     integralListView.buildSymbols = True
+
+                    if GLNotifier.GLINTEGRALLISTLABELS in triggers:
+
+                        for spectrumView in self.strip.spectrumViews:
+                            for integralListView in spectrumView.integralListViews:
+
+                                if integralListView in self._GLIntegralLists.keys():
+                                    integralListView.buildLabels = True
 
                     if GLNotifier.GLMULTIPLETLISTS in triggers:
                         for spectrumView in self.strip.spectrumViews:
@@ -3877,6 +3901,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.current.multiplets = multiplets
 
+    def _selectIntegrals(self):
+        # for reg in self._GLIntegralLists.values():
+        for reg in self._GLIntegrals._GLSymbols.values():
+            if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
+                continue
+            integralPressed = self.mousePressIn1DArea(reg._regions)
+            if integralPressed:
+                self.current.integrals = [ilp[0]._object for ilp in integralPressed]
+                break
+
     def _dragPeak(self, xPosition, yPosition):
         """
         (de-)Select first peak near cursor xPosition, yPosition
@@ -3974,14 +4008,15 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._selectMultiplet(xPosition, yPosition)
             self._selectPeak(xPosition, yPosition)
+            self._selectIntegrals()
 
-            for reg in self._GLIntegralLists.values():
-                if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
-                    continue
-                integralPressed = self.mousePressIn1DArea(reg._regions)
-                if integralPressed:
-                    self.current.integrals = [ilp[0]._object for ilp in integralPressed]
-                    break
+            # for reg in self._GLIntegralLists.values():
+            #     if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
+            #         continue
+            #     integralPressed = self.mousePressIn1DArea(reg._regions)
+            #     if integralPressed:
+            #         self.current.integrals = [ilp[0]._object for ilp in integralPressed]
+            #         break
 
         elif shiftRightMouse(event):
             # Two successive shift-right-clicks: define zoombox
@@ -4461,66 +4496,64 @@ class CcpnGLWidget(QOpenGLWidget):
             peak.height = peak.height + deltaPosition[1]
         peak.position = p0
 
-    def _processIntegralNotifier(self, data):
-        triggers = data[Notifier.TRIGGER]
-        integral = data[Notifier.OBJECT]
-
-        if Notifier.DELETE in triggers:
-            self._deleteIntegral(integral)
-
-        elif Notifier.CREATE in triggers:
-            self._createIntegral(integral)
-
-        elif Notifier.CHANGE in triggers:
-            self._changeIntegral(integral)
-
-        self._clearKeys()
-        self.update()
-
-    # TODO:ED these need to be special created from the pipeline widgets
-    def _deleteIntegral(self, integral):
-        for ils in self._GLIntegralLists.values():
-
-            # confusing as peakList and integralList share the same list :)
-            if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.peakList:
-
-                for reg in ils._regions:
-
-                    if reg._object == integral:
-                        ils._regions.remove(reg)
-                        ils._rebuild()
-                        self.update()
-                        return
-
-    def _createIntegral(self, integral):
-        for ils in self._GLIntegralLists.values():
-
-            if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
-                listCol = getAutoColourRgbRatio(ils.integralListView.integralList.symbolColour,
-                                                ils.integralListView.integralList.spectrum, self.SPECTRUMPOSCOLOUR,
-                                                getColours()[CCPNGLWIDGET_FOREGROUND])
-
-                ils.addIntegral(integral, ils.integralListView, colour=None,
-                                brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
-
-        self.update()
-        return
-
-    def _changeIntegral(self, integral):
-
-        # regions added by the pipeline module
-        # for region in self._externalRegions._regions:
-        #   if region._object == integral:
-        #     self._regionList.renderMode = GLRENDERMODE_REBUILD
-        #     self.update()
-        #     return
-        # if not integral._linkedPeakNotifier: #adds a notifier when changes the integral value, so the linked peaks value are updated
-        #   integral._linkedPeakNotifier = integral.project.registerNotifier(integral.className, 'change', integral._updateLinkedPeaks, onceOnly=True)
-        for ils in self._GLIntegralLists.values():
-            for reg in ils._regions:
-                if reg._object == integral:
-                    ils._resize()
-                    return
+    #     triggers = data[Notifier.TRIGGER]
+    #     integral = data[Notifier.OBJECT]
+    #
+    #     if Notifier.DELETE in triggers:
+    #         self._deleteIntegral(integral)
+    #
+    #     elif Notifier.CREATE in triggers:
+    #         self._createIntegral(integral)
+    #
+    #     elif Notifier.CHANGE in triggers:
+    #         self._changeIntegral(integral)
+    #
+    #     self._clearKeys()
+    #     self.update()
+    #
+    # def _deleteIntegral(self, integral):
+    #     for ils in self._GLIntegralLists.values():
+    #
+    #         # confusing as peakList and integralList share the same list :)
+    #         if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.peakList:
+    #
+    #             for reg in ils._regions:
+    #
+    #                 if reg._object == integral:
+    #                     ils._regions.remove(reg)
+    #                     ils._rebuild()
+    #                     self.update()
+    #                     return
+    #
+    # def _createIntegral(self, integral):
+    #     for ils in self._GLIntegralLists.values():
+    #
+    #         if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
+    #             listCol = getAutoColourRgbRatio(ils.integralListView.integralList.symbolColour,
+    #                                             ils.integralListView.integralList.spectrum, self.SPECTRUMPOSCOLOUR,
+    #                                             getColours()[CCPNGLWIDGET_FOREGROUND])
+    #
+    #             ils.addIntegral(integral, ils.integralListView, colour=None,
+    #                             brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
+    #
+    #     self.update()
+    #     return
+    #
+    # def _changeIntegral(self, integral):
+    #
+    #     # regions added by the pipeline module
+    #     # for region in self._externalRegions._regions:
+    #     #   if region._object == integral:
+    #     #     self._regionList.renderMode = GLRENDERMODE_REBUILD
+    #     #     self.update()
+    #     #     return
+    #     # if not integral._linkedPeakNotifier: #adds a notifier when changes the integral value, so the linked peaks value are updated
+    #     #   integral._linkedPeakNotifier = integral.project.registerNotifier(integral.className, 'change', integral._updateLinkedPeaks, onceOnly=True)
+    #     for ils in self._GLIntegralLists.values():
+    #         for reg in ils._regions:
+    #             if reg._object == integral:
+    #                 ils._resize()
+    #                 return
 
     def exportToPDF(self, filename='default.pdf', params=None):
         return GLExporter(self, self.strip, filename, params)

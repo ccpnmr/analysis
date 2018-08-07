@@ -93,11 +93,9 @@ def _updateGeneral(mainWindow, layout):
 
 def _updateFileNames(mainWindow, layout):
     """
-
     :param mainWindow:
     :param layout:
     :return: #updates the fileNames needed for importing the module. list of file name from the full path
-
     """
     guiModules = mainWindow.moduleArea.ccpnModules
     paths = []

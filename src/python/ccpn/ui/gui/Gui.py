@@ -385,7 +385,7 @@ class StripDisplay1d(coreClass, _SpectrumDisplay1d):
         self.application = project._appBase
 
         _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    name=self.longPid)
+                                    name=self._longName('Spectrum Display'))
         if not project._isNew:
             # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
             # This is a normal guiModule that should be opened in module area from the position
@@ -417,8 +417,7 @@ class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
         self._appBase = project._appBase
 
         _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    name=self.longPid
-                                    )
+                                    name=self._longName('Spectrum Display'))
 
         if not project._isNew:
             # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!

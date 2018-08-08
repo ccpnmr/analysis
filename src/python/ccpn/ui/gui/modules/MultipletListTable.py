@@ -64,7 +64,7 @@ class MultipletTableModule(CcpnModule):
 
     className = 'MultipletTableModule'
 
-    def __init__(self, mainWindow=None, name='MultipletList Table', multipletList=None):
+    def __init__(self, mainWindow=None, name='Multiplet Table', multipletList=None):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow

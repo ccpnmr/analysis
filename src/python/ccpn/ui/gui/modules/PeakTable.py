@@ -60,7 +60,7 @@ class PeakTableModule(CcpnModule):
 
     className = 'PeakTableModule'
 
-    def __init__(self, mainWindow=None, name='PeakTable', peakList=None):
+    def __init__(self, mainWindow=None, name='Peak Table', peakList=None):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow

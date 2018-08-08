@@ -247,6 +247,11 @@ class AbstractWrapperObject():
     E.g. 'NmrAtom:A.102.ALA.CA' """
     return Pid.Pid(Pid.PREFIXSEP.join((self.className, self._id)))
 
+  def _longName(self, name):
+    """long name generated form the name and the object id
+    """
+    return Pid.Pid(Pid.PREFIXSEP.join((name, self._id)))
+
   @property
   def isDeleted(self) -> bool:
     """True if this object is deleted."""

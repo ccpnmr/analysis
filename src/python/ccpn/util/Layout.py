@@ -327,6 +327,10 @@ def restoreLayout(mainWindow, layout):
     ## import all the ccpnModules classes specific for the application.
     # mainWindow.moduleArea._closeAll()
 
+    if not isinstance(layout, dict):
+        getLogger().warning('Layout is not the correct format; please delete layout file')
+        return
+
     if FileNames in layout:
         neededModules = getattr(layout, FileNames)
         if len(neededModules) > 0:

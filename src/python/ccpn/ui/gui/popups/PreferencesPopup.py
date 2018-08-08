@@ -51,7 +51,8 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 # FIXME separate pure GUI to project/preferences properites
 # The code sets Gui Parameters assuming that  Preference is not None and has a bunch of attributes.
@@ -90,6 +91,8 @@ class PreferencesPopup(CcpnDialog):
                                     callbacks=[self._accept, self._applyChanges],
                                     tipTexts=['Close and update preferences', 'Apply changes to all strips'],
                                     direction='h', hAlign='r', grid=(1, 2))
+
+        self.setFixedWidth(self.sizeHint().width()+24)
 
     def _applyChanges(self):
         for display in self.project.spectrumDisplays:
@@ -132,11 +135,27 @@ class PreferencesPopup(CcpnDialog):
 
         ## 2 Tab
         self.spectrumTabFrame = Frame(self, setLayout=True)
+
+        # make a new scroll area form the frame
+        self._spectrumTabScrollArea = ScrollArea(self, setLayout=True)
+        self._spectrumTabScrollArea.setWidgetResizable(True)
+        self._spectrumTabScrollArea.setWidget(self.spectrumTabFrame)
+        self.spectrumTabFrame.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self._spectrumTabScrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # these are required to make the background of the tabs the visible
+        self._spectrumTabScrollArea.setStyleSheet('ScrollArea { border: 0px; background: transparent; }')
+        self.spectrumTabFrame.setAutoFillBackground(False)
+
         self.spectrumTabFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
         self.spectrumTabFrame.setContentsMargins(1, 10, 1, 10)  # l,t,r,b
+
+        # populate the frame
         self._setspectrumTabWidgets(parent=self.spectrumTabFrame)
-        self.tabWidget.addTab(self.spectrumTabFrame, 'Spectrum')
-        # self.spectrumTabFrame.layout().setSpacing(2)
+        # self.tabWidget.addTab(self.spectrumTabFrame, 'Spectrum')
+
+        # add the scroll area to the tabs
+        self.tabWidget.addTab(self._spectrumTabScrollArea, 'Spectrum')
+
 
         # 3 Tab Disabled. # Keep the code for future additions
         self.externalProgramsTabFrame = Frame(self, setLayout=True)
@@ -544,6 +563,12 @@ class PreferencesPopup(CcpnDialog):
                                           grid=(row, 1), hAlign='l',
                                           tipTexts=None,
                                           )
+
+        # add spacer to stop columns changing width
+        row += 1
+        Spacer(parent, 2, 2,
+               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
+               grid=(row, 3), gridSpan=(1, 1))
 
     def _changeMarksColour(self):
         """Change the default maerks colour in the preferences

@@ -2183,14 +2183,20 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                     if ppCode[0] == psCode[0]:
                         
                         # need to put the position in here
-                        
-                        p0[ps] = pos = obj.limits[0][0]        #obj.position[pp]
+
+                        if self._GLParent.INVERTXAXIS:
+                            p0[ps] = pos = max(obj.limits[0])       # obj.position[pp]
+                        else:
+                            p0[ps] = pos = min(obj.limits[0])       # obj.position[pp]
                     else:
                         p0[ps] = 0.0        #obj.height
 
                 elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
                     if ppCode == psCode:
-                        p0[ps] = pos = obj.limits[0][0]        #obj.position[pp]
+                        if self._GLParent.INVERTXAXIS:
+                            p0[ps] = pos = max(obj.limits[0])       # obj.position[pp]
+                        else:
+                            p0[ps] = pos = min(obj.limits[0])       # obj.position[pp]
                     else:
                         p0[ps] = 0.0        #obj.height
 

@@ -68,7 +68,7 @@ __date__ = "$Date$"
 
 import sys
 import math
-from threading import Thread
+# from threading import Thread
 # from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
@@ -77,20 +77,20 @@ from ccpn.util.Logging import getLogger
 import numpy as np
 from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
-from ccpn.core.IntegralList import IntegralList
+# from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
 from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, MultipletMenu, PhasingMenu
 
-from ccpn.util.Colour import getAutoColourRgbRatio
+# from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \
     CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours
-from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
+# from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
-from ccpn.core.lib.Notifiers import Notifier
+# from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLGlobalData
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
@@ -107,7 +107,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak
     GLmultiplet1dLabelling, GLmultipletNdLabelling
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
-from ccpn.util.Common import makeIterableList
+# from ccpn.util.Common import makeIterableList
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
 
 
@@ -314,6 +314,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._staticHTraces = []
         self._staticVTraces = []
         self._stackingValue = None
+        self._stackingMode = False
         self._hTraceVisible = False
         self._vTraceVisible = False
         self.w = 0
@@ -462,6 +463,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def setStackingValue(self, val):
         self._stackingValue = val
+
+    def setStackingMode(self, value):
+        self._stackingMode = value
         self.rescaleSpectra()
         self.update()
 
@@ -485,7 +489,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             self._buildSpectrumSetting(spectrumView, stackCount)
-            if self._stackingValue:
+            if self._stackingMode:
                 stackCount += 1
 
     def _maximiseRegions(self):
@@ -551,7 +555,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self.SPECTRUMYZOOM)
             self._maxYRange = max(self._maxYRange, (fy0 - fy1))
 
-            if self._stackingValue:
+            if self._stackingMode:
                 st = stackCount * self._stackingValue
                 stackCount += 1
                 self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
@@ -1700,16 +1704,15 @@ class CcpnGLWidget(QOpenGLWidget):
         self.viewports.setViewport(self._currentView)
         self.drawSpectra()
 
-        self._GLPeaks.drawSymbols()
-        self._GLMultiplets.drawSymbols()
+        if not self._stackingMode:
+            self._GLPeaks.drawSymbols()
+            self._GLMultiplets.drawSymbols()
 
-        self.drawMarksRulers()
-        # self.drawIntegralLists()
-        self._GLIntegrals.drawSymbols()
+            self.drawMarksRulers()
+            # self.drawIntegralLists()
+            self._GLIntegrals.drawSymbols()
 
-        self.drawRegions()
-
-        # draw the phase plots of the mouse is in the current window
+            self.drawRegions()
 
         # change to the text shader
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
@@ -1722,11 +1725,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.enableTexture()
 
-        self._GLPeaks.drawLabels()
-        self._GLMultiplets.drawLabels()
-        self._GLIntegrals.drawLabels()
+        if not self._stackingMode:
+            self._GLPeaks.drawLabels()
+            self._GLMultiplets.drawLabels()
+            self._GLIntegrals.drawLabels()
 
-        self.drawMarksAxisCodes()
+            self.drawMarksAxisCodes()
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
@@ -1943,7 +1947,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         self._contourList[spectrumView].drawIndexArray()
                 else:
                     if spectrumView in self._contourList.keys():
-                        if self._stackingValue:
+                        if self._stackingMode:
                             # use the stacking matrix to offset the 1D spectra
                             self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                                                                                 1, GL.GL_FALSE,
@@ -3814,7 +3818,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # Nd peak selection - 1d is in the other class
 
-            # TODO:ED could change this to actually use the pids in the drawList
             for peakListView in spectrumView.peakListViews:
                 if spectrumView.isVisible() and peakListView.isVisible():
                     # for peakList in spectrumView.spectrum.peakLists:
@@ -3905,14 +3908,26 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.multiplets = multiplets
 
     def _selectIntegrals(self):
-        # for reg in self._GLIntegralLists.values():
+        """select all integrals under the mouse
+        """
+        currentIntegralList = set(self.current.integrals)
+        addList = set()
+        removeList = set()
         for reg in self._GLIntegrals._GLSymbols.values():
             if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
                 continue
             integralPressed = self.mousePressIn1DArea(reg._regions)
             if integralPressed:
-                self.current.integrals = [ilp[0]._object for ilp in integralPressed]
-                break
+                # self.current.integrals = [ilp[0]._object for ilp in integralPressed]
+                # break
+                for ilp in integralPressed:
+                    obj = ilp[0]._object
+                    if obj in currentIntegralList:
+                        removeList.add(obj)
+                    else:
+                        addList.add(obj)
+
+        self.current.integrals = list(currentIntegralList.union(addList)-removeList)
 
     def _dragPeak(self, xPosition, yPosition):
         """
@@ -3979,6 +3994,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def _mouseClickEvent(self, event: QtGui.QMouseEvent, axis=None):
+        """handle the mouse click event
+        """
         # self.current.strip = self.strip
         xPosition = self.cursorCoordinate[0]  # self.mapSceneToView(event.pos()).x()
         yPosition = self.cursorCoordinate[1]  # self.mapSceneToView(event.pos()).y()
@@ -4000,9 +4017,10 @@ class CcpnGLWidget(QOpenGLWidget):
             self._resetBoxes()
             self._selectMultiplet(xPosition, yPosition)
             self._selectPeak(xPosition, yPosition)
+            self._selectIntegrals()
 
         elif leftMouse(event):
-            # Left-click; select peak, deselecting others
+            # Left-click; select peak/integral/multiplet, deselecting others
             event.accept()
             self._resetBoxes()
             self.current.clearPeaks()
@@ -4012,14 +4030,6 @@ class CcpnGLWidget(QOpenGLWidget):
             self._selectMultiplet(xPosition, yPosition)
             self._selectPeak(xPosition, yPosition)
             self._selectIntegrals()
-
-            # for reg in self._GLIntegralLists.values():
-            #     if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
-            #         continue
-            #     integralPressed = self.mousePressIn1DArea(reg._regions)
-            #     if integralPressed:
-            #         self.current.integrals = [ilp[0]._object for ilp in integralPressed]
-            #         break
 
         elif shiftRightMouse(event):
             # Two successive shift-right-clicks: define zoombox

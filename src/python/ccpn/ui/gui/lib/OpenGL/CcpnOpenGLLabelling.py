@@ -2022,7 +2022,7 @@ class GLintegralListMethods():
     def getLabelling(self, obj, labelType):
         """get the object label based on the current labelling method
         """
-        return obj.pid
+        return obj.id + '\n' + str(obj.value)
 
     def appendExtraIndices(self, drawList, index, obj):
         """Add extra indices to the index list
@@ -2048,8 +2048,13 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         drawList = self._GLSymbols[integralListView]
         drawList._rebuild()
 
-    def _updateHighlightedLabels(self, spectrumView, integralListView):
-        pass
+    def objIsInPlane(self, strip, integral) -> bool:
+        """is integral in currently displayed planes for strip?"""
+        return True
+
+    def objIsInFlankingPlane(self, strip, integral) -> bool:
+        """is integral in planes flanking currently displayed planes for strip?"""
+        return True
 
     def drawSymbols(self):
         if self.strip.isDeleted:
@@ -2068,7 +2073,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                         # draw the integralAreas if they exist
                         for integralArea in self._GLSymbols[integralListView]._regions:
                             if hasattr(integralArea, '_integralArea'):
-                                if self._GLParent._stackingValue:
+                                if self._GLParent._stackingMode:
                                     # use the stacking matrix to offset the 1D spectra
                                     self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                                                                                                   1, GL.GL_FALSE,
@@ -2089,7 +2094,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
             if vertices:
                 if drawStr.axisIndex == 0:
                     offsets = [drawStr.axisPosition + (3.0 * self._GLParent.pixelX),
-                               self._GLParent.axisT - (15.0 * self._GLParent.pixelY)]
+                               self._GLParent.axisT - (30.0 * self._GLParent.pixelY)]
                 else:
                     offsets = [self._GLParent.axisL + (3.0 * self._GLParent.pixelX),
                                drawStr.axisPosition + (3.0 * self._GLParent.pixelY)]
@@ -2097,13 +2102,10 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                 for pp in range(0, 2 * vertices, 2):
                     drawStr.attribs[pp:pp + 2] = offsets
 
-
     def rescaleIntegralLists(self):
         for il in self._GLSymbols.values():
             il._rescale()
 
-        # rescale labels here as well? - check peaks
-        
     def _buildSymbols(self, spectrumView, integralListView):
 
         if integralListView not in self._GLSymbols:
@@ -2181,24 +2183,24 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
 
                 if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
                     if ppCode[0] == psCode[0]:
-                        
+
                         # need to put the position in here
 
                         if self._GLParent.INVERTXAXIS:
-                            p0[ps] = pos = max(obj.limits[0])       # obj.position[pp]
+                            p0[ps] = pos = max(obj.limits[0])  # obj.position[pp]
                         else:
-                            p0[ps] = pos = min(obj.limits[0])       # obj.position[pp]
+                            p0[ps] = pos = min(obj.limits[0])  # obj.position[pp]
                     else:
-                        p0[ps] = 0.0        #obj.height
+                        p0[ps] = 0.0  #obj.height
 
                 elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
                     if ppCode == psCode:
                         if self._GLParent.INVERTXAXIS:
-                            p0[ps] = pos = max(obj.limits[0])       # obj.position[pp]
+                            p0[ps] = pos = max(obj.limits[0])  # obj.position[pp]
                         else:
-                            p0[ps] = pos = min(obj.limits[0])       # obj.position[pp]
+                            p0[ps] = pos = min(obj.limits[0])  # obj.position[pp]
                     else:
-                        p0[ps] = 0.0        #obj.height
+                        p0[ps] = 0.0  #obj.height
 
         if self._isSelected(obj):
             listCol = self._GLParent.highlightColour[:3]
@@ -2210,7 +2212,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         text = self.getLabelling(obj, self.strip.peakLabelling)
 
         textX = pos or 0.0 + (3.0 * self._GLParent.pixelX)
-        textY = self._GLParent.axisT - (15.0 * self._GLParent.pixelY)
+        textY = self._GLParent.axisT - (30.0 * self._GLParent.pixelY)
 
         stringList.append(GLString(text=text,
                                    font=self._GLParent.globalGL.glSmallFont,
@@ -2226,67 +2228,6 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         # this is in the attribs
         stringList[-1].axisIndex = 0
         stringList[-1].axisPosition = pos or 0.0
-
-    # # method below should be from the super class - testing
-    # def buildSymbols(self):
-    #     if self.strip.isDeleted:
-    #         return
-    #
-    #     # list through the valid peakListViews attached to the strip - including undeleted
-    #     for spectrumView in self.strip.spectrumViews:
-    #         # for peakListView in spectrumView.peakListViews:
-    #         for objListView in self.listViews(spectrumView):  # spectrumView.peakListViews:
-    #
-    #             if objListView in self._GLSymbols.keys():
-    #                 if self._GLSymbols[objListView].renderMode == GLRENDERMODE_RESCALE:
-    #                     self._buildSymbols(spectrumView, objListView)
-    #
-    #             if objListView.buildSymbols:
-    #                 objListView.buildSymbols = False
-    #
-    #                 # set the interior flags for rebuilding the GLdisplay
-    #                 if objListView in self._GLSymbols.keys():
-    #                     self._GLSymbols[objListView].renderMode = GLRENDERMODE_REBUILD
-    #
-    #                 self._buildSymbols(spectrumView, objListView)
-    #
-    # def updateHighlightSymbols(self):
-    #     """Respond to an update highlight notifier and update the highlighted symbols/labels
-    #     """
-    #     for spectrumView in self.strip.spectrumViews:
-    #         # for peakListView in spectrumView.peakListViews:
-    #         for objListView in self.listViews(spectrumView):
-    #
-    #             if objListView in self._GLSymbols.keys():
-    #                 self._updateHighlightedSymbols(spectrumView, objListView)
-    #                 self._updateHighlightedLabels(spectrumView, objListView)
-    #
-    # def _processNotifier(self, data):
-    #     """Process notifiers
-    #     """
-    #     triggers = data[Notifier.TRIGGER]
-    #     obj = data[Notifier.OBJECT]
-    #
-    #     if Notifier.DELETE in triggers:
-    #         self._deleteSymbol(obj)
-    #         self._deleteLabel(obj)
-    #
-    #     if Notifier.CREATE in triggers:
-    #         self._createSymbol(obj)
-    #         self._createLabel(obj)
-    #
-    #     if Notifier.CHANGE in triggers:
-    #         self._changeSymbol(obj)
-    #         self._changeLabel(obj)
-    #
-    # def _deleteLabel(self, obj):
-    #     pass
-    #
-    # def _createLabel(self, obj):
-    #     pass
-    #
-    # def _changeLabel(self, obj):
-    #     pass
 
 
 class GLintegral1dLabelling(GLintegralNdLabelling):

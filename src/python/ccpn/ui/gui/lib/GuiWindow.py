@@ -229,11 +229,13 @@ class GuiWindow():
       peak.lineWidths = lineWidths
 
   def add1DIntegral(self, peak=None):
-    # TODO MAKE FOR ANY DIMENSIONS
-    ''' Peak: take self.currentPeak as default'''
+    """Peak: take self.currentPeak as default
+    """
     strip = self.current.strip
 
     if strip is not None:
+      currentIntegrals = list(self.current.integrals)
+
       if strip.spectrumDisplay.is1D:
         cursorPosition = self.current.cursorPosition
         if cursorPosition is not None:
@@ -261,7 +263,9 @@ class GuiWindow():
 
               for integralList in validIntegralLists:
                 integral = integralList.newIntegral(limits=[limits, ])
-                self.current.integral = integral
+
+                currentIntegrals.append(integral)
+
                 if peak:
                   integral.peak = peak
                 else:
@@ -270,6 +274,7 @@ class GuiWindow():
 
                       integral.peak = self.current.peak
           finally:
+            self.current.integrals = currentIntegrals
             strip._endCommandEchoBlock()
 
       else:

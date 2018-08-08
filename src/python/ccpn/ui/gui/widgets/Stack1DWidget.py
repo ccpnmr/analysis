@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -28,59 +28,54 @@ __date__ = "$Date: 2017-07-25 11:28:58 +0100 (Tue, July 25, 2017) $"
 
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 
 
 Offset = 'Offset Value: '
 
 
-
 class Offset1DWidget(Frame):
-  def __init__(self, parent=None, mainWindow=None, strip1D=None,  **kw):
-    Frame.__init__(self, parent, setLayout=True, **kw)
+    def __init__(self, parent=None, mainWindow=None, strip1D=None, **kw):
+        Frame.__init__(self, parent, setLayout=True, **kw)
 
-    if mainWindow is None:  # This allows opening the popup for graphical tests
-      self.mainWindow = None
-      self.project = None
-    else:
-      self.mainWindow = mainWindow
-      self.project = self.mainWindow.project
-      self.application = self.mainWindow.application
-      self.current = self.application.current
+        if mainWindow is None:  # This allows opening the popup for graphical tests
+            self.mainWindow = None
+            self.project = None
+        else:
+            self.mainWindow = mainWindow
+            self.project = self.mainWindow.project
+            self.application = self.mainWindow.application
+            self.current = self.application.current
 
-    self.offset = None
-    self.strip1D = strip1D
+        self.offset = None
+        self.strip1D = strip1D
 
-    i=0
-    self.labelOffset = Label(self, Offset ,grid=(0, i))
-    i += 1
-    self.boxOffset = DoubleSpinbox(self, step=1000, grid=(0, i))
+        i = 0
+        self.labelOffset = Label(self, Offset, grid=(0, i))
+        i += 1
+        self.boxOffset = ScientificDoubleSpinBox(self, step=1000, grid=(0, i))
 
+        if self.strip1D is not None:
+            self.boxOffset.setValue(self.strip1D.offsetValue)
+        self.boxOffset.valueChanged.connect(self._applyOffset)
 
-    if self.strip1D is not None:
-      self.boxOffset.setValue(self.strip1D.offsetValue)
-    self.boxOffset.valueChanged.connect(self._applyOffset)
+    def _applyOffset(self):
+        if self.strip1D is not None:
+            self.strip1D._stack1DSpectra(offSet=self.boxOffset.value())
 
-
-  def _applyOffset(self):
-    if self.strip1D is not None:
-      self.strip1D._stack1DSpectra(offSet=self.boxOffset.value())
-
-
-
-
+    def value(self):
+        return self.boxOffset.value()
 
 if __name__ == '__main__':
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
-  app = TestApplication()
-  popup = CcpnDialog()
-  f = Offset1DWidget(popup)
 
-  popup.show()
-  popup.raise_()
+    app = TestApplication()
+    popup = CcpnDialog()
+    f = Offset1DWidget(popup)
 
-  app.start()
+    popup.show()
+    popup.raise_()
 
+    app.start()

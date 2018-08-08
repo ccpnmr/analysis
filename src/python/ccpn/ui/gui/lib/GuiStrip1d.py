@@ -301,22 +301,23 @@ class GuiStrip1d(GuiStrip):
 
 
     if self.stackAction.isChecked():
-      self._stack1DSpectra()
       self.toggleOffsetWidget()
+      self._stack1DSpectra(self.offsetWidget.value())
 
     else:
-      self._restoreStacked1DSpectra()
       self.toggleOffsetWidget()
+      self._restoreStacked1DSpectra()
 
       try:
-        self._CcpnGLWidget.setStackingValue(None)
+        self._CcpnGLWidget.setStackingMode(False)
       except:
         getLogger().debugGL('OpenGL widget not instantiated')
 
-  def _stack1DSpectra(self, offSet=None):
+  def _stack1DSpectra(self, offSet=0.0):
 
     try:
       self._CcpnGLWidget.setStackingValue(offSet)
+      self._CcpnGLWidget.setStackingMode(True)
     except:
       getLogger().debugGL('OpenGL widget not instantiated')
 

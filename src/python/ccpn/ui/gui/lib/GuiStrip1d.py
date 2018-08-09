@@ -251,41 +251,68 @@ class GuiStrip1d(GuiStrip):
         return peakListView
 
   def _addCalibrate1DXSpectrumWidget(self):
+    """add a new widget for calibrateX
+    """
     from ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget import CalibrateX1DWidgets
+
     sdWid = self.spectrumDisplay.mainWidget
     self.widgetIndex+=1
     self.calibrateX1DWidgets = CalibrateX1DWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
                                                    grid=(self.widgetIndex, 0))
-    self.calibrateX1DWidgets.setVisible(True)
 
-  def _toggleCalibrateXSpectrum(self):
-    ''' calibrate the spectra in the strip to the new point '''
+  # def _toggleCalibrateXSpectrum(self):
+  #   ''' calibrate the spectra in the strip to the new point '''
+  #
+  #   if self.calibrateX1DWidgets is None:
+  #     self._addCalibrate1DXSpectrumWidget()
+  #   else:
+  #     self.calibrateX1DWidgets.setVisible(not self.calibrateX1DWidgets.isVisible())
+  #     self.calibrateX1DWidgets._toggleLines()
 
-    if self.calibrateX1DWidgets is None:
-      self._addCalibrate1DXSpectrumWidget()
+  def toggleCalibrateX(self):
+    if self.calibrateXAction.isChecked():
+      if self.calibrateX1DWidgets is None:
+        self._addCalibrate1DXSpectrumWidget()
+      self.calibrateX1DWidgets.setVisible(True)
+      self.calibrateX1DWidgets._toggleLines()
+      self.calibrateX1DWidgets.resetUndos()
+
     else:
-      self.calibrateX1DWidgets.setVisible(not self.calibrateX1DWidgets.isVisible())
+      self.calibrateX1DWidgets.setVisible(False)
       self.calibrateX1DWidgets._toggleLines()
 
-
-  def _addCalibrateYSpectrumWidget(self):
+  def _addCalibrate1DYSpectrumWidget(self):
+    """add a new widget for calibrateY
+    """
     from ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget import CalibrateY1DWidgets
+
     sdWid = self.spectrumDisplay.mainWidget
     self.widgetIndex += 1
     self.calibrateY1DWidgets = CalibrateY1DWidgets(sdWid, mainWindow=self.mainWindow,strip=self,
                                                    grid=(self.widgetIndex, 0))
-    self.calibrateY1DWidgets.setVisible(True)
 
-  def _toggleCalibrateYSpectrum(self):
-    ''' calibrate the spectra in the strip to the new point '''
+  # def _toggleCalibrateYSpectrum(self):
+  #   ''' calibrate the spectra in the strip to the new point '''
+  #
+  #   if self.calibrateY1DWidgets is None:
+  #     self._addCalibrateYSpectrumWidget()
+  #   else:
+  #     self.calibrateY1DWidgets.setVisible(not self.calibrateY1DWidgets.isVisible())
+  #     self.calibrateY1DWidgets._toggleLines()
 
-    if self.calibrateY1DWidgets is None:
-      self._addCalibrateYSpectrumWidget()
+  def toggleCalibrateY(self):
+    if self.calibrateYAction.isChecked():
+      if self.calibrateY1DWidgets is None:
+        self._addCalibrate1DYSpectrumWidget()
+      self.calibrateY1DWidgets.setVisible(True)
+      self.calibrateY1DWidgets._toggleLines()
+      self.calibrateY1DWidgets.resetUndos()
+
     else:
-      self.calibrateY1DWidgets.setVisible(not self.calibrateY1DWidgets.isVisible())
+      self.calibrateY1DWidgets.setVisible(False)
       self.calibrateY1DWidgets._toggleLines()
 
-  def toggleOffsetWidget(self):
+  def _toggleOffsetWidget(self):
     from ccpn.ui.gui.widgets.Stack1DWidget import Offset1DWidget
 
     if self.offsetWidget is None:
@@ -296,16 +323,15 @@ class GuiStrip1d(GuiStrip):
     else:
       self.offsetWidget.setVisible(not self.offsetWidget.isVisible())
 
-
   def toggleStack(self):
-
-
+    """Toggle stacking mode for 1d spectra
+    This vertically stacks the spectra for clarity
+    """
     if self.stackAction.isChecked():
-      self.toggleOffsetWidget()
+      self._toggleOffsetWidget()
       self._stack1DSpectra(self.offsetWidget.value())
-
     else:
-      self.toggleOffsetWidget()
+      self._toggleOffsetWidget()
       self._restoreStacked1DSpectra()
 
       try:

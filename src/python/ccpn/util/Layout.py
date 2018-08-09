@@ -57,6 +57,9 @@ DefaultLayoutFile = {
     LayoutState: {}
     }
 
+METADATA = '_metadata'
+MODULES = 'modules'
+
 
 def _createLayoutFile(application):
     try:
@@ -85,10 +88,11 @@ def _updateGeneral(mainWindow, layout):
     applicationName = application.applicationName
     applicationVersion = application.applicationVersion
     if General in layout:
-        if ApplicationName in layout.general:
-            setattr(layout.general, ApplicationName, applicationName)
-        if ApplicationVersion in layout.general:
-            setattr(layout.general, ApplicationVersion, applicationVersion)
+        general = getattr(layout, General)
+        if ApplicationName in general:
+            setattr(general, ApplicationName, applicationName)
+        if ApplicationVersion in general:
+            setattr(general, ApplicationVersion, applicationVersion)
 
 
 def _updateFileNames(mainWindow, layout):
@@ -148,6 +152,22 @@ def _updateWarning(mainWindow, layout):
         setattr(layout, Warning, WarningMessage)
 
 
+def _checkLayoutFormat(mainWindow, layout):
+    if not isinstance(layout, dict):
+        # assume that this is a 'future' format and remove metadata
+        getLogger().warning('Layout is not the correct format, converting to a dict')
+
+        newLayout = DefaultLayoutFile.copy()
+        if General in newLayout:
+            if ApplicationName in newLayout[General]:
+                newLayout[General][ApplicationName] = mainWindow.application.applicationName
+            if ApplicationVersion in newLayout[General]:
+                newLayout[General][ApplicationVersion] = mainWindow.application.applicationVersion
+
+        return newLayout
+
+    return layout
+
 def updateSavedLayout(mainWindow):
     """
     Updates the application.layout Dict
@@ -155,6 +175,7 @@ def updateSavedLayout(mainWindow):
     :return: an up to date layout dictionary with the current state of GuiModules
     """
     layout = mainWindow.application.layout
+    layout = _checkLayoutFormat(mainWindow, layout)
 
     _updateGeneral(mainWindow, layout)
     _updateFileNames(mainWindow, layout)
@@ -278,7 +299,7 @@ def _getAvailableModules(mainWindow, layout, neededModules):
             applicationName = getattr(layout.general, ApplicationName)
             modules = []
             if applicationName != mainWindow.application.applicationName:
-                getLogger().debug('The layout was saved in a different application. Same of the modules might not be loaded.'
+                getLogger().debug('The layout was saved in a different application. Some of the modules might not be loaded.'
                                   'If this happens,  start a new project with %s' % applicationName)
             else:
                 modules = _getApplicationSpecificModules(mainWindow, applicationName)
@@ -327,9 +348,7 @@ def restoreLayout(mainWindow, layout):
     ## import all the ccpnModules classes specific for the application.
     # mainWindow.moduleArea._closeAll()
 
-    if not isinstance(layout, dict):
-        getLogger().warning('Layout is not the correct format; please delete layout file')
-        return
+    layout = _checkLayoutFormat(mainWindow, layout)
 
     if FileNames in layout:
         neededModules = getattr(layout, FileNames)
@@ -363,6 +382,7 @@ def restoreLayout(mainWindow, layout):
         # Very important step:
         # Checks if the all the modules opened are present in the layout state. If not, will not restore the geometries
         state = getattr(layout, LayoutState)
+
         if not state:
             return
         namesFromState = _getModuleNamesFromState(state)

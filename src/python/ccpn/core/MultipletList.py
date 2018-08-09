@@ -41,7 +41,7 @@ from typing import Optional, Tuple
 
 
 LINECOLOUR = 'lineColour'
-DEFAULTLINECOLOUR = '#7e7e7e'
+DEFAULTLINECOLOUR = '#7a7a7a'
 MULTIPLETAVERAGING = 'multipletAveraging'
 DEFAULTMULTIPLETAVERAGING = 0
 

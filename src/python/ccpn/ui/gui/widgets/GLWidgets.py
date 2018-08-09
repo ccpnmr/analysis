@@ -26,14 +26,8 @@ __date__ = "$Date$"
 import sys
 import numpy as np
 from PyQt5 import QtWidgets
-from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_FOREGROUND, getColours
-from ccpn.util.Colour import getAutoColourRgbRatio
-from ccpn.core.PeakList import PeakList
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLSymbolArray, GLVertexArray, GLRENDERMODE_DRAW, GLRENDERMODE_RESCALE, \
-    GLRENDERMODE_REBUILD, GLREFRESHMODE_REBUILD
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import LENCOLORS, LENPID
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import GLString
-from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
+    GLRENDERMODE_REBUILD
 import ccpn.util.Phasing as Phasing
 
 
@@ -58,6 +52,106 @@ class GuiNdWidget(CcpnGLWidget):
                                           mainWindow=mainWindow,
                                           stripIDLabel=stripIDLabel)
 
+    def _mouseInPeak(self, xPosition, yPosition, firstOnly=False):
+        """Find the peaks under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
+        """
+        xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
+        yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
+        xPositions = [xPosition - 0.5 * xPeakWidth, xPosition + 0.5 * xPeakWidth]
+        yPositions = [yPosition - 0.5 * yPeakWidth, yPosition + 0.5 * yPeakWidth]
+        if len(self._orderedAxes) > 2:
+            zPositions = self._orderedAxes[2].region
+        else:
+            zPositions = None
+
+        peaks = []
+
+        for spectrumView in self.strip.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+                if spectrumView.isVisible() and peakListView.isVisible():
+
+                    peakList = peakListView.peakList
+
+                    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+                    xAxis = spectrumIndices[0]
+                    yAxis = spectrumIndices[1]
+
+                    for peak in peakList.peaks:
+                        if len(peak.axisCodes) > 2 and zPositions is not None:
+
+                            zAxis = spectrumIndices[2]
+
+                            if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                                    and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+
+                                if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                    peaks.append(peak)
+                                    if firstOnly:
+                                        return peaks
+                        else:
+                            if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                                    and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+                                peaks.append(peak)
+                                if firstOnly:
+                                    return peaks if peak in self.current.peaks else []
+
+        return peaks
+
+    def _mouseInMultiplet(self, xPosition, yPosition, firstOnly=False):
+        """Find the multiplets under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
+        """
+        xMultipletWidth = abs(self.pixelX) * self.peakWidthPixels
+        yMultipletWidth = abs(self.pixelY) * self.peakWidthPixels
+        xPositions = [xPosition - 0.5 * xMultipletWidth, xPosition + 0.5 * xMultipletWidth]
+        yPositions = [yPosition - 0.5 * yMultipletWidth, yPosition + 0.5 * yMultipletWidth]
+        if len(self._orderedAxes) > 2:
+            zPositions = self._orderedAxes[2].region
+        else:
+            zPositions = None
+
+        multiplets = []
+
+        for spectrumView in self.strip.spectrumViews:
+
+            for multipletListView in spectrumView.multipletListViews:
+                if spectrumView.isVisible() and multipletListView.isVisible():
+
+                    multipletList = multipletListView.multipletList
+
+                    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+                    xAxis = spectrumIndices[0]
+                    yAxis = spectrumIndices[1]
+
+                    for multiplet in multipletList.multiplets:
+                        if len(multiplet.axisCodes) > 2 and zPositions is not None:
+
+                            zAxis = spectrumIndices[2]
+
+                            if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
+                                    and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
+
+                                if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
+                                    multiplets.append(multiplet)
+                                    if firstOnly:
+                                        return multiplets
+                        else:
+                            if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
+                                    and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
+                                multiplets.append(multiplet)
+                                if firstOnly:
+                                    return multiplets if multiplet in self.current.multiplets else []
+
+        return multiplets
+
+    def _mouseInIntegral(self, xPosition, yPosition, firstOnly=False):
+        """Find the integrals under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
+        Currently not-defined for Nd integrals
+        """
+        return []
+
 
 class Gui1dWidget(CcpnGLWidget):
     AXIS_MARGINRIGHT = 65
@@ -76,76 +170,81 @@ class Gui1dWidget(CcpnGLWidget):
                                           mainWindow=mainWindow,
                                           stripIDLabel=stripIDLabel)
 
-    def _selectPeak(self, xPosition, yPosition):
-        """
-        (de-)Select first peak near cursor xPosition, yPosition
-        if peak already was selected, de-select it
+    def _mouseInPeak(self, xPosition, yPosition, firstOnly=False):
+        """Find the peaks under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
         """
         xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
         yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
         xPositions = [xPosition - 0.5 * xPeakWidth, xPosition + 0.5 * xPeakWidth]
         yPositions = [yPosition - 0.5 * yPeakWidth, yPosition + 0.5 * yPeakWidth]
 
-        peaks = list(self.current.peaks)
+        peaks = []
         for spectrumView in self.strip.spectrumViews:
-
-            # TODO:ED could change this to actually use the pids in the drawList
             for peakListView in spectrumView.peakListViews:
                 if spectrumView.isVisible() and peakListView.isVisible():
-                    # for peakList in spectrumView.spectrum.peakLists:
+
                     peakList = peakListView.peakList
-                    if not isinstance(peakList, PeakList):  # it could be an IntegralList
-                        continue
 
                     for peak in peakList.peaks:
                         if (xPositions[0] < float(peak.position[0]) < xPositions[1]
                                 and yPositions[0] < float(peak.height) < yPositions[1]):
 
-                            # if peak in self.current.peaks:
-                            #   self.current._peaks.remove(peak)
-                            # else:
-                            #   self.current.addPeak(peak)
-                            if peak in peaks:
-                                peaks.remove(peak)
-                            else:
-                                peaks.append(peak)
+                            peaks.append(peak)
+                            if firstOnly:
+                                return peaks if peak in self.current.peaks else []
 
-        self.current.peaks = peaks
+        return peaks
 
-    def _selectMultiplet(self, xPosition, yPosition):
+    def _mouseInIntegral(self, xPosition, yPosition, firstOnly=False):
+        """Find the integrals under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
         """
-        (de-)Select first multiplet near cursor xPosition, yPosition
-        if multiplet already was selected, de-select it
+        integrals = []
+        for reg in self._GLIntegrals._GLSymbols.values():
+            if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
+                continue
+            integralPressed = self.mousePressIn1DArea(reg._regions)
+            if integralPressed:
+                for ilp in integralPressed:
+                    obj = ilp[0]._object
+                    integrals.append(obj)
+                    if firstOnly:
+                        return integrals if obj in self.current.integrals else []
+
+        return integrals
+
+    def _mouseInMultiplet(self, xPosition, yPosition, firstOnly=False):
+        """Find the multiplets under the mouse.
+        If firstOnly is true, return only the first item, else an empty list
         """
         xMultipletWidth = abs(self.pixelX) * self.peakWidthPixels
         yMultipletWidth = abs(self.pixelY) * self.peakWidthPixels
         xPositions = [xPosition - 0.5 * xMultipletWidth, xPosition + 0.5 * xMultipletWidth]
         yPositions = [yPosition - 0.5 * yMultipletWidth, yPosition + 0.5 * yMultipletWidth]
 
-        multiplets = list(self.current.multiplets)
+        multiplets = []
         for spectrumView in self.strip.spectrumViews:
-
-            # TODO:ED could change this to actually use the pids in the drawList
             for multipletListView in spectrumView.multipletListViews:
                 if spectrumView.isVisible() and multipletListView.isVisible():
-                    # for multipletList in spectrumView.spectrum.multipletLists:
+
                     multipletList = multipletListView.multipletList
 
                     for multiplet in multipletList.multiplets:
                         if (xPositions[0] < float(multiplet.position[0]) < xPositions[1]
                                 and yPositions[0] < float(multiplet.height) < yPositions[1]):
 
-                            if multiplet in multiplets:
-                                multiplets.remove(multiplet)
-                            else:
-                                multiplets.append(multiplet)
+                            multiplets.append(multiplet)
+                            if firstOnly:
+                                return multiplets if multiplet in self.current.multiplets else []
 
-        self.current.multiplets = multiplets
+        return multiplets
 
     def _newStatic1DTraceData(self, spectrumView, tracesDict,
                               point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
                               ph0=None, ph1=None, pivot=None):
-
+        """Create a new static 1D phase trace
+        """
         try:
             # ignore for 1D if already in the traces list
             for thisTrace in tracesDict:
@@ -213,6 +312,8 @@ class Gui1dWidget(CcpnGLWidget):
             tracesDict = []
 
     def buildSpectra(self):
+        """set the GL flags to build spectrum contour lists
+        """
         if self.strip.isDeleted:
             return
 

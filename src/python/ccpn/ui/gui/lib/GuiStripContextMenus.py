@@ -171,9 +171,23 @@ def _separator():
 
 
 
+##############################  Common Integral menu items ##############################
+## These items are used to create both 1D and Nd integral menus
+
+def _deleteIntegralItem(strip):
+    return _SCMitem(name='Delete Integral(s)',
+            typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow.deleteSelectedItems)
 
 
-##############################  Common Peak  menu items ##############################
+##############################  Common Multiplet menu items ##############################
+## These items are used to create both 1D and Nd Multiplet menus
+
+def _deleteMultipletItem(strip):
+    return _SCMitem(name='Delete Multiplet(s)',
+            typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+
+
+##############################  Common Peak menu items ##############################
 ## These items are used to create both 1D and Nd Peak menus
 
 
@@ -361,6 +375,26 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
 
+def _get1dIntegralMenu(guiStrip1d) -> Menu:
+    """
+    Creates and returns the current integral 1d context menu. Opened when right clicked on selected integral/s
+    """
+    items = [
+            _deleteIntegralItem(guiStrip1d),
+            ]
+    items = [itm for itm in items if itm is not None]
+    return _createMenu(guiStrip1d, items)
+
+def _get1dMultipletMenu(guiStrip1d) -> Menu:
+    """
+    Creates and returns the current multiplet 1d context menu. Opened when right clicked on selected multiplet/s
+    """
+    items = [
+            _deleteMultipletItem(guiStrip1d),
+            ]
+    items = [itm for itm in items if itm is not None]
+    return _createMenu(guiStrip1d, items)
+
 
 ########################################################################################################################
 #########################################      Nd Menus     ############################################################
@@ -451,5 +485,25 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _separator(),
         _navigateToPeakPosItem(guiStripNd),
         ]
+    items = [itm for itm in items if itm is not None]
+    return _createMenu(guiStripNd, items)
+
+def _getNdIntegralMenu(guiStripNd) -> Menu:
+    """
+    Creates and returns the current integral Nd context menu. Opened when right clicked on selected integral/s
+    """
+    items = [
+            _deleteIntegralItem(guiStripNd),
+            ]
+    items = [itm for itm in items if itm is not None]
+    return _createMenu(guiStripNd, items)
+
+def _getNdMultipletMenu(guiStripNd) -> Menu:
+    """
+    Creates and returns the current multiplet Nd context menu. Opened when right clicked on selected multiplet/s
+    """
+    items = [
+            _deleteMultipletItem(guiStripNd),
+            ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)

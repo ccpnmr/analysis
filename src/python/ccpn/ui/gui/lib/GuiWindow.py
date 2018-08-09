@@ -134,12 +134,12 @@ class GuiWindow():
       #     getLogger().warning('Function cannot be found')
 
   def deleteSelectedItems(self, parent=None):
-    """Delete either peaks or multiplets from the project
+    """Delete peaks/integrals/multiplets from the project
     """
     # show simple delete items popup
     from ccpn.ui.gui.popups.DeleteItems import DeleteItemsPopup
 
-    if self.current.peaks or self.current.multiplets:
+    if self.current.peaks or self.current.multiplets or self.current.integrals:
       deleteItems = []
       if self.current.peaks:
         deleteItems.append(('Peaks', self.current.peaks))

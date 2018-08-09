@@ -63,8 +63,9 @@ from ccpn.ui.gui.widgets.PlaneToolbar import PlaneToolbar #, PlaneSelectorWidget
 # from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.util.Logging import getLogger
 
-from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu,MultipletMenu, PhasingMenu
-from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu
+from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu,\
+        _getNdIntegralMenu, _getNdMultipletMenu
 # from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
 
 
@@ -142,11 +143,18 @@ class GuiStripNd(GuiStrip):
 
     self.haveSetupZWidgets = False
     self.viewBox.menu = _getNdDefaultMenu(self)
-    self._defaultMenu = self.viewBox.menu
-    self._phasingMenu = _getNdPhasingMenu(self)
 
-    self._contextMenus.update({DefaultMenu:_getNdDefaultMenu(self),
-                               PhasingMenu:_getNdPhasingMenu(self), PeakMenu:_getNdPeakMenu(self)})
+    self._defaultMenu = _getNdDefaultMenu(self)
+    self._phasingMenu = _getNdPhasingMenu(self)
+    self._peakMenu = _getNdPeakMenu(self)
+    self._integralMenu = _getNdIntegralMenu(self)
+    self._multipletMenu = _getNdMultipletMenu(self)
+
+    self._contextMenus.update({DefaultMenu: self._defaultMenu,
+                               PhasingMenu: self._phasingMenu,
+                               PeakMenu: self._peakMenu,
+                               IntegralMenu: self._integralMenu,
+                               MultipletMenu: self._multipletMenu})
 
     self.viewBox.invertX()
     self.viewBox.invertY()

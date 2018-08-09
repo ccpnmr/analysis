@@ -131,10 +131,10 @@ class MultipletList(AbstractWrapperObject):
         self._wrappedData.textColour = value
 
     def _setLineColour(self, value):
-        """set the internal line colour
+        """set the internal line colour, default to '#7a7a7a'
         """
         tempCcpn = self._ccpnInternalData.copy()
-        tempCcpn[LINECOLOUR] = value
+        tempCcpn[LINECOLOUR] = value if value else DEFAULTLINECOLOUR
         self._ccpnInternalData = tempCcpn
 
     @property
@@ -146,7 +146,8 @@ class MultipletList(AbstractWrapperObject):
         else:
             self._ccpnInternalData = {LINECOLOUR: DEFAULTLINECOLOUR}
 
-        return self._ccpnInternalData[LINECOLOUR]
+        col = self._ccpnInternalData[LINECOLOUR]
+        return col if col else DEFAULTLINECOLOUR
 
     @lineColour.setter
     def lineColour(self, value: str):

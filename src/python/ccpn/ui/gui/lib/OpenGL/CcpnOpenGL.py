@@ -79,7 +79,8 @@ from pyqtgraph import functions as fn
 from ccpn.core.PeakList import PeakList
 # from ccpn.core.IntegralList import IntegralList
 from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode
-from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, MultipletMenu, PhasingMenu
+from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
+    MultipletMenu, PhasingMenu
 
 # from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
@@ -288,18 +289,18 @@ class CcpnGLWidget(QOpenGLWidget):
         # define a new class holding the entire peaklist symbols and labelling
         if self.is1D:
             self._GLPeaks = GLpeak1dLabelling(parent=self, strip=self.strip,
-                                                 name='peaks', resizeGL=True)
+                                              name='peaks', resizeGL=True)
             self._GLIntegrals = GLintegral1dLabelling(parent=self, strip=self.strip,
                                                       name='integrals', resizeGL=True)
             self._GLMultiplets = GLmultiplet1dLabelling(parent=self, strip=self.strip,
                                                         name='multiplets', resizeGL=True)
         else:
             self._GLPeaks = GLpeakNdLabelling(parent=self, strip=self.strip,
-                                                 name='peaks', resizeGL=True)
+                                              name='peaks', resizeGL=True)
             self._GLIntegrals = GLintegralNdLabelling(parent=self, strip=self.strip,
                                                       name='integrals', resizeGL=True)
             self._GLMultiplets = GLmultipletNdLabelling(parent=self, strip=self.strip,
-                                                      name='multiplets', resizeGL=True)
+                                                        name='multiplets', resizeGL=True)
 
         self._buildMouse = True
         self._mouseCoords = [-1.0, -1.0]
@@ -3773,7 +3774,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         #   if ils.integralListView.peakList in targets:
                         #     # ils.renderMode = GLRENDERMODE_REBUILD
                         #     ils.integralListView.buildPeakLists = True
-    
+
                         # self._processPeakNotifier(targets)
 
                     if GLNotifier.GLCLEARPHASING in triggers:
@@ -3789,181 +3790,36 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def _resetBoxes(self):
-        "Reset/Hide the boxes "
+        """Reset/Hide the boxes
+        """
         self._successiveClicks = None
-        # self.selectionBox.hide()
-        # self.pickBox.hide()
-        # self.rbScaleBox.hide()
-        # self.crossHair.hide()
 
     def _selectPeak(self, xPosition, yPosition):
-        """
-        (de-)Select first peak near cursor xPosition, yPosition
+        """(de-)Select first peak near cursor xPosition, yPosition
         if peak already was selected, de-select it
-        This handles the Nd case, 1d _selectPeak is in the subclass GLWidgets
         """
-        xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
-        yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
-        xPositions = [xPosition - 0.5 * xPeakWidth, xPosition + 0.5 * xPeakWidth]
-        yPositions = [yPosition - 0.5 * yPeakWidth, yPosition + 0.5 * yPeakWidth]
-        if len(self._orderedAxes) > 2:
-            # NBNB TBD FIXME what about 4D peaks?
-            zPositions = self._orderedAxes[2].region
-        else:
-            zPositions = None
+        peaks = set(self.current.peaks)
+        newPeaks = self._mouseInPeak(xPosition, yPosition)
 
-        peaks = list(self.current.peaks)
-        # now select (take first one within range)
-        for spectrumView in self.strip.spectrumViews:
+        self.current.peaks = list(peaks ^ set(newPeaks))  # symmetric difference
 
-            # Nd peak selection - 1d is in the other class
+    def _selectIntegral(self, xPosition, yPosition):
+        """(de-)Select first integral near cursor xPosition, yPosition
+        if integral already was selected, de-select it
+        """
+        integrals = set(self.current.integrals)
+        newIntegrals = self._mouseInIntegral(xPosition, yPosition)
 
-            for peakListView in spectrumView.peakListViews:
-                if spectrumView.isVisible() and peakListView.isVisible():
-                    # for peakList in spectrumView.spectrum.peakLists:
-                    peakList = peakListView.peakList
-
-                    if not isinstance(peakList, PeakList):
-                        continue
-
-                    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
-                    xAxis = spectrumIndices[0]
-                    yAxis = spectrumIndices[1]
-
-                    for peak in peakList.peaks:
-                        if len(peak.axisCodes) > 2 and zPositions is not None:
-
-                            zAxis = spectrumIndices[2]
-                            # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
-                            if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                                    and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-
-                                if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                    if peak in peaks:
-                                        peaks.remove(peak)
-                                    else:
-                                        peaks.append(peak)
-                        else:
-                            # 2d check
-                            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-                                    and yPositions[0] < float(peak.position[1]) < yPositions[1]):
-                                if peak in peaks:
-                                    peaks.remove(peak)
-                                else:
-                                    peaks.append(peak)
-
-        self.current.peaks = peaks
+        self.current.integrals = list(integrals ^ set(newIntegrals))  # symmetric difference
 
     def _selectMultiplet(self, xPosition, yPosition):
-        """
-        (de-)Select first multiplet near cursor xPosition, yPosition
+        """(de-)Select first multiplet near cursor xPosition, yPosition
         if multiplet already was selected, de-select it
-        This handles the Nd case, 1d _selectMultiplet is in the subclass GLWidgets
         """
-        xMultipletWidth = abs(self.pixelX) * self.peakWidthPixels
-        yMultipletWidth = abs(self.pixelY) * self.peakWidthPixels
-        xPositions = [xPosition - 0.5 * xMultipletWidth, xPosition + 0.5 * xMultipletWidth]
-        yPositions = [yPosition - 0.5 * yMultipletWidth, yPosition + 0.5 * yMultipletWidth]
-        if len(self._orderedAxes) > 2:
-            # NBNB TBD FIXME what about 4D multiplets?
-            zPositions = self._orderedAxes[2].region
-        else:
-            zPositions = None
+        multiplets = set(self.current.multiplets)
+        newMultiplets = self._mouseInMultiplet(xPosition, yPosition)
 
-        multiplets = list(self.current.multiplets)
-        # now select (take first one within range)
-        for spectrumView in self.strip.spectrumViews:
-
-            for multipletListView in spectrumView.multipletListViews:
-                if spectrumView.isVisible() and multipletListView.isVisible():
-                    # for multipletList in spectrumView.spectrum.multipletLists:
-                    multipletList = multipletListView.multipletList
-
-                    spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
-                    xAxis = spectrumIndices[0]
-                    yAxis = spectrumIndices[1]
-
-                    for multiplet in multipletList.multiplets:
-                        if len(multiplet.axisCodes) > 2 and zPositions is not None:
-
-                            zAxis = spectrumIndices[2]
-                            # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
-                            if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
-                                    and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
-
-                                if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                    if multiplet in multiplets:
-                                        multiplets.remove(multiplet)
-                                    else:
-                                        multiplets.append(multiplet)
-                        else:
-                            # 2d check
-                            if (xPositions[0] < float(multiplet.position[0]) < xPositions[1]
-                                    and yPositions[0] < float(multiplet.position[1]) < yPositions[1]):
-                                if multiplet in multiplets:
-                                    multiplets.remove(multiplet)
-                                else:
-                                    multiplets.append(multiplet)
-
-        self.current.multiplets = multiplets
-
-    def _selectIntegrals(self):
-        """select all integrals under the mouse
-        """
-        currentIntegralList = set(self.current.integrals)
-        addList = set()
-        removeList = set()
-        for reg in self._GLIntegrals._GLSymbols.values():
-            if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
-                continue
-            integralPressed = self.mousePressIn1DArea(reg._regions)
-            if integralPressed:
-                # self.current.integrals = [ilp[0]._object for ilp in integralPressed]
-                # break
-                for ilp in integralPressed:
-                    obj = ilp[0]._object
-                    if obj in currentIntegralList:
-                        removeList.add(obj)
-                    else:
-                        addList.add(obj)
-
-        self.current.integrals = list(currentIntegralList.union(addList)-removeList)
-
-    def _dragPeak(self, xPosition, yPosition):
-        """
-        (de-)Select first peak near cursor xPosition, yPosition
-        if peak already was selected, de-select it
-        """
-        xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
-        yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
-        xPositions = [xPosition - 0.5 * xPeakWidth, xPosition + 0.5 * xPeakWidth]
-        yPositions = [yPosition - 0.5 * yPeakWidth, yPosition + 0.5 * yPeakWidth]
-        if len(self._orderedAxes) > 2:
-            # NBNB TBD FIXME what about 4D peaks?
-            zPositions = self._orderedAxes[2].region
-        else:
-            zPositions = None
-
-        # now select (take first one within range)
-        for spectrumView in self.strip.spectrumViews:
-            if spectrumView.spectrum.dimensionCount == 1:
-                continue
-
-            # TODO:ED could change this to actually use the pids in the drawList
-            for peakListView in spectrumView.peakListViews:
-                if spectrumView.isVisible() and peakListView.isVisible():
-                    # for peakList in spectrumView.spectrum.peakLists:
-                    peakList = peakListView.peakList
-
-                    for peak in peakList.peaks:
-                        if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-                                and yPositions[0] < float(peak.position[1]) < yPositions[1]):
-                            if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
-
-                                if peak in self.current.peaks:
-                                    self.current._peaks.remove(peak)
-                                else:
-                                    self.current.addPeak(peak)
+        self.current.multiplets = list(multiplets ^ set(newMultiplets))  # symmetric difference
 
     def _pickAtMousePosition(self, event):
         """pick the peaks at the mouse position
@@ -4017,7 +3873,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._resetBoxes()
             self._selectMultiplet(xPosition, yPosition)
             self._selectPeak(xPosition, yPosition)
-            self._selectIntegrals()
+            self._selectIntegral(xPosition, yPosition)
 
         elif leftMouse(event):
             # Left-click; select peak/integral/multiplet, deselecting others
@@ -4029,7 +3885,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._selectMultiplet(xPosition, yPosition)
             self._selectPeak(xPosition, yPosition)
-            self._selectIntegrals()
+            self._selectIntegral(xPosition, yPosition)
 
         elif shiftRightMouse(event):
             # Two successive shift-right-clicks: define zoombox
@@ -4071,21 +3927,11 @@ class CcpnGLWidget(QOpenGLWidget):
             self._resetBoxes()
 
             # Search if the event is in a range of a selected peak.
-            # TODO make shorter way to get an object position from the gl
-            xPeakWidth = abs(self.pixelX) * self.peakWidthPixels
-            yPeakWidth = abs(self.pixelY) * self.peakWidthPixels
-            xPositions = [xPosition - 2 * xPeakWidth, xPosition + 2 * xPeakWidth]
-            yPositions = [yPosition - 2 * yPeakWidth, yPosition + 2 * yPeakWidth]
-            if len(self._orderedAxes) > 2:
-                # NBNB TBD FIXME what about 4D peaks?
-                zPositions = self._orderedAxes[2].region
-            else:
-                zPositions = None
-
             peaks = list(self.current.peaks)
             strip._addItemsToNavigateToCursorPosMenu()
 
             from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
+
             ii = strip._contextMenus.get(PeakMenu)
             if len(peaks) > 1:
                 _hidePeaksSingleActionItems(strip, ii)
@@ -4093,56 +3939,18 @@ class CcpnGLWidget(QOpenGLWidget):
                 _enableAllItems(ii)
                 strip._addItemsToNavigateToPeakMenu()
 
-            # now select (take first one within range)
-            for spectrumView in self.strip.spectrumViews:
+            # set the correct rightMouseMenu for the clicked object (must be selected)
+            if self._mouseInPeak(xPosition, yPosition, firstOnly=True):
+                strip.contextMenuMode = PeakMenu
+                menu = strip._contextMenus.get(strip.contextMenuMode)
 
-                # Nd peak selection - 1d is in the other class
+            elif self._mouseInIntegral(xPosition, yPosition, firstOnly=True):
+                strip.contextMenuMode = IntegralMenu
+                menu = strip._contextMenus.get(strip.contextMenuMode)
 
-                # TODO:ED could change this to actually use the pids in the drawList
-                for peakListView in spectrumView.peakListViews:
-                    if spectrumView.isVisible() and peakListView.isVisible():
-                        # for peakList in spectrumView.spectrum.peakLists:
-                        peakList = peakListView.peakList
-
-                        if not isinstance(peakList, PeakList):
-                            continue
-
-                        spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
-                        xAxis = spectrumIndices[0]
-                        yAxis = spectrumIndices[1]
-
-                        for peak in peaks:
-                            if len(peak.axisCodes) > 2 and zPositions is not None:
-
-                                zAxis = spectrumIndices[2]
-                                # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
-                                if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and yPositions[
-                                    0] < float(peak.position[yAxis]) < yPositions[1]):
-
-                                    if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                        if peak in peaks:
-                                            strip.contextMenuMode = PeakMenu
-                                            menu = strip._contextMenus.get(strip.contextMenuMode)
-                                            break
-
-
-                            elif len(peak.axisCodes) == 2:
-                                # 2d check
-                                if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-                                        and yPositions[0] < float(peak.position[1]) < yPositions[1]):
-                                    if peak in peaks:
-                                        strip.contextMenuMode = PeakMenu
-                                        menu = strip._contextMenus.get(strip.contextMenuMode)
-                                        break
-
-                            elif len(peak.axisCodes) == 1:
-                                # 1d check
-                                if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-                                        and yPositions[0] < float(peak.height) < yPositions[1]):
-                                    if peak in peaks:
-                                        strip.contextMenuMode = PeakMenu
-                                        menu = strip._contextMenus.get(strip.contextMenuMode)
-                                        break
+            elif self._mouseInMultiplet(xPosition, yPosition, firstOnly=True):
+                strip.contextMenuMode = MultipletMenu
+                menu = strip._contextMenus.get(strip.contextMenuMode)
 
             if menu is not None:
                 strip.viewBox.menu = menu
@@ -4169,6 +3977,8 @@ class CcpnGLWidget(QOpenGLWidget):
         ''' give  a needed menu based on strip mode  '''
         strip = self.strip
         menu = strip._contextMenus.get(DefaultMenu)
+
+        # set the checkboxes to the correct settings
         strip.toolbarAction.setChecked(strip.spectrumDisplay.spectrumUtilToolBar.isVisible())
         strip.crosshairAction.setChecked(self.crossHairVisible)
         strip.gridAction.setChecked(self.gridVisible)
@@ -4177,7 +3987,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if strip._isPhasingOn:
             menu = strip._contextMenus.get(PhasingMenu)
-
 
         return menu
 
@@ -4204,37 +4013,26 @@ class CcpnGLWidget(QOpenGLWidget):
                     y1 = self._endCoordinate[1]
                     y0, y1 = min(y0, y1), max(y0, y1)
                     xAxis = 0
-                    # scale = peakList.spectrum.scale  # peak height now contains scale in it (so no scaling below)
+
                     for peak in peakList.peaks:
                         height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
                         if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
-                            # peak.isSelected = True
-                            # self.current.addPeak(peak)
                             peaks.append(peak)
 
                 else:
-                    # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
-                    # Fixed 13/3/2016 Rasmus Fogh
-                    # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
                     spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
-                    # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
-                    # xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
-                    # yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
+
                     for peak in peakList.peaks:
                         if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
                                 and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
                             if len(peak.axisCodes) > 2 and zPositions is not None:
                                 zAxis = spectrumIndices[2]
-                                # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+
                                 if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                    # peak.isSelected = True
-                                    # self.current.addPeak(peak)
                                     peaks.append(peak)
                             else:
-                                # peak.isSelected = True
-                                # self.current.addPeak(peak)
                                 peaks.append(peak)
 
         self.current.peaks = peaks
@@ -4255,37 +4053,26 @@ class CcpnGLWidget(QOpenGLWidget):
                     y1 = self._endCoordinate[1]
                     y0, y1 = min(y0, y1), max(y0, y1)
                     xAxis = 0
-                    # scale = multipletList.spectrum.scale  # multiplet height now contains scale in it (so no scaling below)
+
                     for multiplet in multipletList.multiplets:
                         height = multiplet.height  # * scale # TBD: is the scale already taken into account in multiplet.height???
                         if xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1] and y0 < height < y1:
-                            # multiplet.isSelected = True
-                            # self.current.addMultiplet(multiplet)
                             multiplets.append(multiplet)
 
                 else:
-                    # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
-                    # Fixed 13/3/2016 Rasmus Fogh
-                    # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
                     spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
-                    # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
-                    # xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
-                    # yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
+
                     for multiplet in multipletList.multiplets:
                         if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
                                 and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
                             if len(multiplet.axisCodes) > 2 and zPositions is not None:
                                 zAxis = spectrumIndices[2]
-                                # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
+
                                 if zPositions[0] < float(multiplet.position[zAxis]) < zPositions[1]:
-                                    # multiplet.isSelected = True
-                                    # self.current.addMultiplet(multiplet)
                                     multiplets.append(multiplet)
                             else:
-                                # multiplet.isSelected = True
-                                # self.current.addMultiplet(multiplet)
                                 multiplets.append(multiplet)
 
         self.current.multiplets = multiplets
@@ -4295,55 +4082,14 @@ class CcpnGLWidget(QOpenGLWidget):
             # Control(Cmd)+shift+left drag: Peak-picking
             event.accept()
 
-            # if not event.isFinish():
-            #   # not isFinish() is not the same as isStart() in behavior; The latter will fire for every move, the former only
-            #   # at the end of the move
-            #   self._resetBoxes()
-            #   self._updatePickBox(event.buttonDownPos(), event.pos())
-            # else:
-
             self._resetBoxes()
-            # startPosition = self.mapSceneToView(event.buttonDownPos())
-            # endPosition = self.mapSceneToView(event.pos())
-            # orderedAxes = self.current.strip.orderedAxes
-
             selectedRegion = [[round(self._startCoordinate[0], 3), round(self._endCoordinate[0], 3)],
                               [round(self._startCoordinate[1], 3), round(self._endCoordinate[1], 3)]]
-            # if len(self._orderedAxes) > 2:
 
             for n in self._orderedAxes[2:]:
                 selectedRegion.append((n.region[0], n.region[1]))
 
-            # TBD: Should be using onceOnly=True notifiers and suspend/resumeNotification but that is not working.
-            # So instead turn off notifications (so that they all get ignored) with blankNotification, and then
-            # at the end turn them back on again. This means have to update the relevant parts of the code which
-            # needs to know about new peaks. This is not a good way to do it.
-
-            # project = self.current.strip.project
-            # self.project.blankNotification()
-
-            # try:
             peaks = self.strip.peakPickRegion(selectedRegion)
-            # finally:
-            #   self.project.unblankNotification()
-
-            # hide all the messages from the peak annotation generation
-            # self.project._startCommandEchoBlock('mousePeakPicking')
-            # update strips which have the above peaks in them
-            # (could check for visibility...)
-
-            # peakLists = set([peak.peakList for peak in peaks])
-            # for peakList in peakLists:
-            #   for peakListView in peakList.peakListViews:
-            #     peakListView.spectrumView.strip.showPeaks(peakList)
-
-            # self.project._endCommandEchoBlock()
-
-            # update peak table
-            # limitation: this will only update the first peak table
-            # if hasattr(self.current.strip.spectrumDisplay.mainWindow.application, 'peakTableModule'):
-            #   self.current.strip.spectrumDisplay.mainWindow.application.peakTableModule.peakListTable._updateTable()
-
             self.current.peaks = peaks
 
         elif controlLeftMouse(event):
@@ -4351,8 +4097,6 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
 
             self._resetBoxes()
-            # endPosition = self.mapSceneToView(event.pos())
-            # startPosition = self.mapSceneToView(event.buttonDownPos())
             xPositions = sorted([self._startCoordinate[0], self._endCoordinate[0]])
             yPositions = sorted([self._startCoordinate[1], self._endCoordinate[1]])
 
@@ -4364,64 +4108,9 @@ class CcpnGLWidget(QOpenGLWidget):
             self._selectMultipletsInRegion(xPositions, yPositions, zPositions)
             self._selectPeaksInRegion(xPositions, yPositions, zPositions)
 
-            # peaks = list(self.current.peaks)
-            #
-            # for spectrumView in self.strip.spectrumViews:
-            #     for peakListView in spectrumView.peakListViews:
-            #         if not peakListView.isVisible() or not spectrumView.isVisible():
-            #             continue
-            #
-            #         peakList = peakListView.peakList
-            #         if not isinstance(peakList, PeakList):  # it could be an IntegralList
-            #             continue
-            #
-            #         # TODO: Special casing 1D here, seems like a hack.
-            #         if len(spectrumView.spectrum.axisCodes) == 1:
-            #
-            #             y0 = self._startCoordinate[1]
-            #             y1 = self._endCoordinate[1]
-            #             y0, y1 = min(y0, y1), max(y0, y1)
-            #             xAxis = 0
-            #             # scale = peakList.spectrum.scale  # peak height now contains scale in it (so no scaling below)
-            #             for peak in peakList.peaks:
-            #                 height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
-            #                 if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
-            #                     # peak.isSelected = True
-            #                     # self.current.addPeak(peak)
-            #                     peaks.append(peak)
-            #
-            #         else:
-            #             # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
-            #             # Fixed 13/3/2016 Rasmus Fogh
-            #             # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
-            #             spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
-            #             xAxis = spectrumIndices[0]
-            #             yAxis = spectrumIndices[1]
-            #             # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
-            #             # xAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[0].code])
-            #             # yAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[1].code])
-            #             for peak in peakList.peaks:
-            #                 if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-            #                         and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-            #                     if len(peak.axisCodes) > 2 and zPositions is not None:
-            #                         zAxis = spectrumIndices[2]
-            #                         # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
-            #                         if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-            #                             # peak.isSelected = True
-            #                             # self.current.addPeak(peak)
-            #                             peaks.append(peak)
-            #                     else:
-            #                         # peak.isSelected = True
-            #                         # self.current.addPeak(peak)
-            #                         peaks.append(peak)
-            #
-            # self.current.peaks = peaks
-
         elif middleMouse(event):
             # middle drag: moves a selected peak
             event.accept()
-            # self.setMouseEnabled(False, False)
-            # refPosition = (self.mapSceneToView(event.buttonDownPos()).x(), self.mapSceneToView(event.buttonDownPos()).y())
 
             peaks = list(self.current.peaks)
             if not peaks:
@@ -4432,15 +4121,6 @@ class CcpnGLWidget(QOpenGLWidget):
             for peak in peaks:
                 peak.startPosition = peak.position
 
-            # # if event.isFinish():
-            # self.project.blankNotification()  # For speed issue: Blank the notifications until the penultimate residue
-            # for peak in peaks:
-            #   self._movePeak(peak, deltaPosition)
-            # self.project.unblankNotification()
-            # for peak in peaks:
-            #   peak._finaliseAction('change')
-            # # self.application.ui.echoCommands(("project.getByPid(%s).position = %s" % (peak.pid, peak.position),))
-
             self.project._startCommandEchoBlock('movePeaks')
             try:
                 for peak in peaks:
@@ -4449,11 +4129,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.project._endCommandEchoBlock()
 
             self.current.peaks = peaks
-            # else:  # this is when is being dragged
-            #   pass
-            # for peak in peaks:
-            #   # print(peak.position , deltaPosition)
-            #   peak.position =  (peak.position[0] + deltaPosition[0],peak.position[1] + deltaPosition[1] )
 
         elif shiftLeftMouse(event):
             # zoom into the region - yellow box
@@ -4499,81 +4174,9 @@ class CcpnGLWidget(QOpenGLWidget):
                     p0[pp] += deltaPosition[ps]
                     axisCount += 1
 
-                # WRONG way round :)
-
-                # elif self._preferences.matchAxisCode == 1:  # match full code
-                #   if ppCode == psCode:
-                #     p0[ps] = peak.position[pp]
-                #     axisCount += 1
-        # if len(p0) > len(deltaPosition):
-        #   deltaPosition.append([0.0] * len(p0-deltaPosition))
-
-        # p0 = [p0[ii] + deltaPosition[ii] for ii in range(len(p0))]
-
-        # position is set AFTER height so that gl updates catch the new height
-        # - position triggers the notifiers
         if self.is1D:
             peak.height = peak.height + deltaPosition[1]
         peak.position = p0
-
-    #     triggers = data[Notifier.TRIGGER]
-    #     integral = data[Notifier.OBJECT]
-    #
-    #     if Notifier.DELETE in triggers:
-    #         self._deleteIntegral(integral)
-    #
-    #     elif Notifier.CREATE in triggers:
-    #         self._createIntegral(integral)
-    #
-    #     elif Notifier.CHANGE in triggers:
-    #         self._changeIntegral(integral)
-    #
-    #     self._clearKeys()
-    #     self.update()
-    #
-    # def _deleteIntegral(self, integral):
-    #     for ils in self._GLIntegralLists.values():
-    #
-    #         # confusing as peakList and integralList share the same list :)
-    #         if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.peakList:
-    #
-    #             for reg in ils._regions:
-    #
-    #                 if reg._object == integral:
-    #                     ils._regions.remove(reg)
-    #                     ils._rebuild()
-    #                     self.update()
-    #                     return
-    #
-    # def _createIntegral(self, integral):
-    #     for ils in self._GLIntegralLists.values():
-    #
-    #         if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
-    #             listCol = getAutoColourRgbRatio(ils.integralListView.integralList.symbolColour,
-    #                                             ils.integralListView.integralList.spectrum, self.SPECTRUMPOSCOLOUR,
-    #                                             getColours()[CCPNGLWIDGET_FOREGROUND])
-    #
-    #             ils.addIntegral(integral, ils.integralListView, colour=None,
-    #                             brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
-    #
-    #     self.update()
-    #     return
-    #
-    # def _changeIntegral(self, integral):
-    #
-    #     # regions added by the pipeline module
-    #     # for region in self._externalRegions._regions:
-    #     #   if region._object == integral:
-    #     #     self._regionList.renderMode = GLRENDERMODE_REBUILD
-    #     #     self.update()
-    #     #     return
-    #     # if not integral._linkedPeakNotifier: #adds a notifier when changes the integral value, so the linked peaks value are updated
-    #     #   integral._linkedPeakNotifier = integral.project.registerNotifier(integral.className, 'change', integral._updateLinkedPeaks, onceOnly=True)
-    #     for ils in self._GLIntegralLists.values():
-    #         for reg in ils._regions:
-    #             if reg._object == integral:
-    #                 ils._resize()
-    #                 return
 
     def exportToPDF(self, filename='default.pdf', params=None):
         return GLExporter(self, self.strip, filename, params)
@@ -4582,12 +4185,11 @@ class CcpnGLWidget(QOpenGLWidget):
         return GLExporter(self, self.strip, filename, params)
 
     def cohenSutherlandClip(self, x0, y0, x1, y1):
+        """Implement Cohen-Sutherland clipping
+        :param x0, y0 - co-ordinates of first point:
+        :param x1, y1 - co-ordinates of second point:
+        :return None if not clipped else (xs, ys, xe, ye) - start, end of clipped line
         """
-    Implement Cohen-Sutherland clipping
-    :param x0, y0 - co-ordinates of first point:
-    :param x1, y1 - co-ordinates of second point:
-    :return None if not clipped else (xs, ys, xe, ye) - start, end of clipped line
-    """
         INSIDE, LEFT, RIGHT, BOTTOM, TOP = 0, 1, 2, 4, 8
 
         xMin = min([self.axisL, self.axisR])
@@ -4596,11 +4198,10 @@ class CcpnGLWidget(QOpenGLWidget):
         yMax = max([self.axisB, self.axisT])
 
         def computeCode(x, y):
+            """calculate region that point lies in
+            :param x, y - point:
+            :return code:
             """
-      calculate region that point lies in
-      :param x, y - point:
-      :return code:
-      """
             code = INSIDE
             if x < xMin:  # to the left of rectangle
                 code |= LEFT
@@ -4686,6 +4287,8 @@ class CcpnGLWidget(QOpenGLWidget):
         return [x0, y0, x1, y1]
 
     def pointVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
+        """return true if the line has visible endpoints
+        """
         if (self.between(lineList[0], self.axisL, self.axisR) and
                 (self.between(lineList[1], self.axisT, self.axisB))):
             lineList[0] = x + width * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
@@ -4693,30 +4296,8 @@ class CcpnGLWidget(QOpenGLWidget):
             return True
 
     def lineVisible(self, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
-        # for pp in range(0, len(lineList), 2):
-        #   if (self.between(lineList[pp], self.axisL, self.axisR) and
-        #           (self.between(lineList[pp+1], self.axisT, self.axisB) or checkIntegral)):
-        #     break
-        # else:
-        #   return False
-        #
-        # for pp in range(0, len(lineList), 2):
-        #   lineList[pp] = x + width * (lineList[pp] - self.axisL) / (self.axisR - self.axisL)
-        #   lineList[pp+1] = y + height * (lineList[pp+1] - self.axisB) / (self.axisT - self.axisB)
-        # return True
-
-        # newList = []
-        # for pp in range(0, len(lineList)-2, 2):
-        #   clippedList = self.cohenSutherlandClip(*lineList[pp:pp+4])
-        #   if clippedList:
-        #     if not newList:
-        #       newList = clippedList
-        #     else:
-        #       if clippedList[0] == newList[-2] and clippedList[1] == newList[-1]:
-        #         newList.extend(clippedList[2:])
-        #       else:
-        #         newList.extend(clippedList)
-
+        """return the list of visible lines
+        """
         newLine = [[lineList[ll], lineList[ll + 1]] for ll in range(0, len(lineList), 2)]
         if len(newLine) > 2:
             newList = self.clipPoly(newLine)
@@ -4733,8 +4314,8 @@ class CcpnGLWidget(QOpenGLWidget):
         return newList
 
     def clipPoly(self, subjectPolygon):
-        """Apply Sutherland-Hodgman algorithm for clipping polygons"""
-
+        """Apply Sutherland-Hodgman algorithm for clipping polygons
+        """
         if self.INVERTXAXIS != self.INVERTYAXIS:
             clipPolygon = [[self.axisL, self.axisB],
                            [self.axisL, self.axisT],
@@ -4844,18 +4425,6 @@ class CcpnGLWidget(QOpenGLWidget):
             lineList[pp + 1] = y + height * (lineList[pp + 1] - self.axisB) / (self.axisT - self.axisB)
         return fit
 
-        # if (self.between(lineList[0], self.axisL, self.axisR) and
-        #     self.between(lineList[1], self.axisT, self.axisB)) or \
-        #           (self.between(lineList[2], self.axisL, self.axisR) and
-        #             self.between(lineList[3], self.axisT, self.axisB)):
-        #
-        #   lineList[0] = x + width * (lineList[0] - self.axisL) / (self.axisR - self.axisL)
-        #   lineList[2] = x + width * (lineList[2] - self.axisL) / (self.axisR - self.axisL)
-        #   lineList[1] = y + height * (lineList[1] - self.axisB) / (self.axisT - self.axisB)
-        #   lineList[3] = y + height * (lineList[3] - self.axisB) / (self.axisT - self.axisB)
-        #
-        #   return True
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # need to use the class below to make everything more generic
@@ -4865,22 +4434,22 @@ GLOptions = {
         GL.GL_BLEND: False,
         GL.GL_ALPHA_TEST: False,
         GL.GL_CULL_FACE: False,
-    },
+        },
     'translucent': {
         GL.GL_DEPTH_TEST: True,
         GL.GL_BLEND: True,
         GL.GL_ALPHA_TEST: False,
         GL.GL_CULL_FACE: False,
         'glBlendFunc': (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA),
-    },
+        },
     'additive': {
         GL.GL_DEPTH_TEST: False,
         GL.GL_BLEND: True,
         GL.GL_ALPHA_TEST: False,
         GL.GL_CULL_FACE: False,
         'glBlendFunc': (GL.GL_SRC_ALPHA, GL.GL_ONE),
-    },
-}
+        },
+    }
 
 
 class CcpnTransform3D(QtGui.QMatrix4x4):

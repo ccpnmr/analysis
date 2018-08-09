@@ -63,6 +63,7 @@ STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
 
 DefaultMenu = 'DefaultMenu'
 PeakMenu = 'PeakMenu'
+IntegralMenu = 'IntegralMenu'
 MultipletMenu = 'MultipletMenu'
 PhasingMenu = 'PhasingMenu'
 
@@ -213,6 +214,7 @@ class GuiStrip(Frame):
                               PeakMenu: None,
                               PhasingMenu: None,
                               MultipletMenu: None,
+                              IntegralMenu: None
                               }
 
         self.navigateToPeakMenu = None  #set from context menu and in CcpnOpenGL rightClick

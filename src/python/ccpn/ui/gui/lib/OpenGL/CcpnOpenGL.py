@@ -4169,8 +4169,15 @@ class CcpnGLWidget(QOpenGLWidget):
         ''' give  a needed menu based on strip mode  '''
         strip = self.strip
         menu = strip._contextMenus.get(DefaultMenu)
+        strip.toolbarAction.setChecked(strip.spectrumDisplay.spectrumUtilToolBar.isVisible())
+        strip.crosshairAction.setChecked(self.crossHairVisible)
+        strip.gridAction.setChecked(self.gridVisible)
+        if hasattr(strip, 'lastAxisOnlyCheckBox'):
+            strip.lastAxisOnlyCheckBox.setChecked(strip.spectrumDisplay.lastAxisOnly)
+
         if strip._isPhasingOn:
             menu = strip._contextMenus.get(PhasingMenu)
+
 
         return menu
 

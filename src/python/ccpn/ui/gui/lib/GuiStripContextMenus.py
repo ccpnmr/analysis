@@ -95,7 +95,7 @@ def _crossHairItem(strip):
     return _SCMitem(name='Crosshair',
              typeItem=ItemTypes.get(ITEM), toolTip='CrossHair Action',
              checkable=True, checked=True, shortcut ='CH',
-             callback=strip.spectrumDisplay.toggleCrossHair)
+             callback=strip.spectrumDisplay.toggleCrossHair, stripMethodName='crosshairAction')
 
 def _gridItem(strip):
     return _SCMitem(name='Grid',

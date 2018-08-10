@@ -289,7 +289,8 @@ class GLExporter():
             if spectrumView.isDeleted:
                 continue
 
-            if spectrumView.isVisible():
+            # if spectrumView.isVisible():
+            if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS]:
 
                 if spectrumView.spectrum.dimensionCount > 1:
                     if spectrumView in self.parent._spectrumSettings.keys():
@@ -358,7 +359,8 @@ class GLExporter():
             if spectrumView.isDeleted:
                 continue
 
-            if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
+            # if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
+            if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS] and spectrumView.spectrum.dimensionCount > 1:
                 self._spectrumValues = spectrumView._getValues()
 
                 # get the bounding box of the spectra
@@ -400,7 +402,7 @@ class GLExporter():
         """
         colourGroups = OrderedDict()
         self._appendIndexLineGroupFill(indArray=self.parent._GLPeaks._GLSymbols,
-                                       listView='peakListViews',
+                                       listView='peakList',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                 PLOTBOTTOM: self.displayScale * self.mainB,
@@ -416,7 +418,7 @@ class GLExporter():
         """
         colourGroups = OrderedDict()
         self._appendIndexLineGroupFill(indArray=self.parent._GLMultiplets._GLSymbols,
-                                       listView='multipletListViews',
+                                       listView='multipletList',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                 PLOTBOTTOM: self.displayScale * self.mainB,
@@ -446,7 +448,7 @@ class GLExporter():
         """
         colourGroups = OrderedDict()
         self._appendIndexLineGroupFill(indArray=self.parent._GLIntegrals._GLSymbols,
-                                       listView='integralListViews',
+                                       listView='integralList',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                 PLOTBOTTOM: self.displayScale * self.mainB,
@@ -903,9 +905,12 @@ class GLExporter():
                                                     PLOTHEIGHT: self.displayScale * self.mainH},
                                            name='gridAxes',
                                            setColour=self.foregroundColour)
-                    # append because the first line is set above
+
+                    # if the rAxis is not visible then just set this line, otherwise append to the above line
+                    if not self.rAxis:
+                        list(colourGroups.values())[0][PDFLINES] = []
                     list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
-                                                                     self.displayScale * self.mainW, self.displayScale * self.bAxisH])
+                                                                 self.displayScale * self.mainW, self.displayScale * self.bAxisH])
 
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
@@ -1097,10 +1102,11 @@ class GLExporter():
             if spectrumView.isDeleted:
                 continue
 
-            attribList = getattr(spectrumView, listView)
+            attribList = getattr(spectrumView, listView+'Views')
             validListViews = [pp for pp in attribList
                               if pp.isVisible()
-                              and spectrumView.isVisible()]
+                              and spectrumView.isVisible()
+                              and getattr(pp, listView).pid in self.params[GLSELECTEDPIDS]]
 
             for thisListView in validListViews:
                 if thisListView in indArray.keys():

@@ -49,6 +49,7 @@ RESTRAINTLISTS = 'restraintLists'
 CCPNTAG = 'ccpn'
 SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
+SPECTRA = 'spectra'
 
 
 class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
@@ -71,7 +72,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         SpectrumGroup._pluralLinkName,
         Note._pluralLinkName,
         PeakCluster._pluralLinkName,
-    ]
+        ]
 
     # set which items can be selected/deselected, others are automatically set
     selectableItems = [
@@ -83,7 +84,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         IntegralList._pluralLinkName,
         MultipletList._pluralLinkName,
         PeakCluster._pluralLinkName,
-    ]
+        ]
 
     def __init__(self, parent=None, project=None, maxSize=(250, 300), **kw):
         """Initialise the widget
@@ -127,6 +128,17 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
                     selectedObjects += [obj]
         return selectedObjects
 
+    def getSelectedItems(self):
+        """Get selected objects from the check boxes
+        """
+        selectedItems = []
+        for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            if item.checkState(0) == QtCore.Qt.Checked:
+                obj = item.data(1, 0)
+                if not hasattr(obj, 'pid'):
+                    selectedItems += [item.text(0)]
+        return selectedItems
+
     def getSelectedObjectsPids(self):
         """Get the pids of the selected objects
         """
@@ -153,23 +165,26 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
             for i in range(itemTree.childCount()):
                 itemTree.child(i).setCheckState(0, QtCore.Qt.Unchecked)
 
+
 class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):
     """Class to handle exporting peaks/integrals/multiplets to PDF or SVG files
     """
 
     # set the items in the project that can be printed
     checkList = [
+        SPECTRA,
         PeakList._pluralLinkName,
         IntegralList._pluralLinkName,
         MultipletList._pluralLinkName,
-    ]
+        ]
 
     # all items can be selected
     selectableItems = [
+        SPECTRA,
         PeakList._pluralLinkName,
         IntegralList._pluralLinkName,
         MultipletList._pluralLinkName,
-    ]
+        ]
 
     def __init__(self, parent=None, project=None, maxSize=(250, 300), **kw):
         super(PrintTreeCheckBoxes, self).__init__(parent=parent, project=project, maxSize=maxSize, **kw)

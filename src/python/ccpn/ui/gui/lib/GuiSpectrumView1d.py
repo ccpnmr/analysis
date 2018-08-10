@@ -240,6 +240,13 @@ class GuiSpectrumView1d(GuiSpectrumView):
   #     apiDataSource = spectrum._apiDataSource
   #   return apiDataSource.get1dSpectrumData()
 
+  def _setBorderItemHidden(self, checked):
+    """
+    # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
+    """
+    pass
+    # self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
+
   def update(self):
     self.plot.curve.setData(self.data[0], self.data[1])
 

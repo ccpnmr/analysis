@@ -205,7 +205,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     """
     # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
     """
-    self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
+    pass
+    # self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
           
   def _setupTrace(self):
     

@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 # Start of code
 #=========================================================================================
 
+import os
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -131,10 +132,11 @@ class ExportStripToFilePopup(ExportDialog):
             pidList.extend(validPeakListViews)
             pidList.extend(validIntegralListViews)
             pidList.extend(validMultipletListViews)
+            if specView.isVisible():
+                pidList.append(specView.spectrum.pid)
 
         self.treeView.selectObjects(pidList)
 
-        self.printFrame = Frame(userFrame, grid=(row, 1), gridSpan=(1, 1), setLayout=True)
         printItems = (GLPEAKSYMBOLS,
                       GLPEAKLABELS,
                       GLINTEGRALSYMBOLS,
@@ -155,26 +157,26 @@ class ExportStripToFilePopup(ExportDialog):
                       GLPLOTBORDER
                       )
 
-        selectList = {GLSPECTRUMBORDERS: self.application.preferences.general.showSpectrumBorder,
-                      GLSPECTRUMCONTOURS: True,
-                      GLGRIDLINES: self.current.strip.gridVisible
+        selectList = {GLSPECTRUMBORDERS: QtCore.Qt.Checked if self.application.preferences.general.showSpectrumBorder else QtCore.Qt.Unchecked,
+                      GLSPECTRUMCONTOURS: QtCore.Qt.Checked,
+                      GLGRIDLINES: QtCore.Qt.Checked if self.current.strip.gridVisible else QtCore.Qt.Unchecked
                       }
-
         self.printList = []
-        itemRow = 0
+
+        # add Print Options to the treeView
+        item = QtWidgets.QTreeWidgetItem(self.treeView)
+        item.setText(0, 'Print Options')
+        item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+
         for itemName in printItems:
-            # add a check box for each item
-            newCheckBox = CheckBoxCompoundWidget(self.printFrame,
-                                                 grid=(itemRow, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                 orientation='right',
-                                                 labelText=itemName,
-                                                 checked=True if itemName not in selectList else selectList[itemName]
-                                                 )
-            self.printList.append((itemName, newCheckBox))
-            itemRow += 1
-        self.spacer = Spacer(self.printFrame, 5, 5,
-                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding,
-                             grid=(itemRow, 0), gridSpan=(1, 1))
+            child = QtWidgets.QTreeWidgetItem(item)
+            child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+            # child.setData(1, 0, obj)
+            child.setText(0, itemName)
+            child.setCheckState(0, QtCore.Qt.Checked if itemName not in selectList else selectList[itemName])
+
+        item.setExpanded(True)
+        self.setMinimumSize(self.sizeHint())
 
     def _changePrintType(self):
         selected = self.exportType.get()
@@ -208,15 +210,16 @@ class ExportStripToFilePopup(ExportDialog):
                       GLPRINTTYPE: prType,
                       GLSELECTEDPIDS: self.treeView.getSelectedObjectsPids()
                       }
+            selectedList = self.treeView.getSelectedItems()
             for itemName, itemCheckBox in self.printList:
-                params[itemName] = itemCheckBox.isChecked()
+                params[itemName] = True if itemName in selectedList else False
 
             return params
 
     def exportToFile(self, filename=None, params=None):
         """Export to file
         :param filename: filename to export
-        :param params: dict - user defined paramters for export
+        :param params: dict - user defined parameters for export
         """
 
         if params:
@@ -233,6 +236,32 @@ class ExportStripToFilePopup(ExportDialog):
                 if svgExport:
                     svgExport.writeSVGFile()
 
+    def _acceptDialog(self, exitSaveFileName=None):
+        """save button has been clicked
+        """
+        self.exitFilename = self.saveText.text().strip()  # strip the trailing whitespace
+
+        if self.pathEdited is False:
+            # user has not changed the path so we can accept()
+            pass            # self.accept()
+        else:
+            # have edited the path so check the new file
+            if os.path.isfile(self.exitFilename):
+                yes = showYesNoWarning('%s already exists.' % os.path.basename(self.exitFilename),
+                                       'Do you want to replace it?')
+                if yes:
+                    pass  # self.accept()
+            else:
+                if not self.exitFilename:
+                    showWarning('FileName Error:', 'Filename is empty.')
+                else:
+                    pass  # self.accept()
+
+        params = self.buildParameters()
+
+        # do the export
+        if params:
+            self.exportToFile(params=params)
 
 if __name__ == '__main__':
     from sandbox.Geerten.Refactored.framework import Framework

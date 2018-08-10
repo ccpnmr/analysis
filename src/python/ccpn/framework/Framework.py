@@ -2161,12 +2161,13 @@ class Framework:
     return self.notesEditorModule
 
   def showPrintSpectrumDisplayPopup(self):
-    from ccpn.ui.gui.popups.PrintSpectrumPopup import SelectSpectrumDisplayPopup #,PrintSpectrumDisplayPopup
+    # from ccpn.ui.gui.popups.PrintSpectrumPopup import SelectSpectrumDisplayPopup #,PrintSpectrumDisplayPopup
+
+    from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
     if len(self.project.spectrumDisplays) == 0:
       MessageDialog.showWarning('', 'No Spectrum Display found')
     else:
-      SelectSpectrumDisplayPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow).exec_()
-      # PrintSpectrumDisplayPopup(project=self.project).exec_()
+      ExportStripToFilePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, strips=[self.current.strip]).exec_()
 
   def toggleToolbar(self):
     if self.current.strip is not None:

@@ -233,19 +233,26 @@ class GLExporter():
 
         self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
+        # print the objects
         self._addGridLines()
+
+        # check parameters to decide what to print
         self._addSpectrumContours()
         self._addSpectrumBoundaries()
-        self._addPeakSymbols()
-        self._addMarkLines()
-        self._addIntegralLines()
         self._addIntegralAreas()
+        self._addIntegralLines()
+        self._addPeakSymbols()
+        self._addMultipletSymbols()
+        self._addMarkLines()
         self._addRegions()
         self._addPeakLabels()
+        self._addIntegralLabels()
+        self._addMultipletLabels()
         self._addMarkLabels()
         self._addTraces()
         self._addInfiniteLines()
         self._addOverlayText()
+
         self._addAxisMask()
         self._addGridTickMarks()
         self._addGridLabels()
@@ -317,7 +324,7 @@ class GLExporter():
 
                     # assume that the vertexArray is a GL_LINE_STRIP
                     if spectrumView in self.parent._contourList.keys():
-                        if self.parent._stackingValue:
+                        if self.parent._stackingMode:
                             mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
                         else:
                             mat = None
@@ -385,7 +392,7 @@ class GLExporter():
         Add the peak symbols to the main drawing area.
         """
         colourGroups = OrderedDict()
-        self._appendIndexLineGroupFill(indArray=self.parent._GLPeakLists,
+        self._appendIndexLineGroupFill(indArray=self.parent._GLPeaks._GLSymbols,
                                        listView='peakListViews',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -395,6 +402,22 @@ class GLExporter():
                                        name='peakSymbols',
                                        fillMode=None)
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='peakSymbols')
+
+    def _addMultipletSymbols(self):
+        """
+        Add the multiplet symbols to the main drawing area.
+        """
+        colourGroups = OrderedDict()
+        self._appendIndexLineGroupFill(indArray=self.parent._GLMultiplets._GLSymbols,
+                                       listView='multipletListViews',
+                                       colourGroups=colourGroups,
+                                       plotDim={PLOTLEFT: self.displayScale * self.mainL,
+                                                PLOTBOTTOM: self.displayScale * self.mainB,
+                                                PLOTWIDTH: self.displayScale * self.mainW,
+                                                PLOTHEIGHT: self.displayScale * self.mainH},
+                                       name='multipletSymbols',
+                                       fillMode=None)
+        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='multipletSymbols')
 
     def _addMarkLines(self):
         """
@@ -415,7 +438,7 @@ class GLExporter():
         Add the integral lines to the main drawing area.
         """
         colourGroups = OrderedDict()
-        self._appendIndexLineGroupFill(indArray=self.parent._GLIntegralLists,
+        self._appendIndexLineGroupFill(indArray=self.parent._GLIntegrals._GLSymbols,
                                        listView='integralListViews',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -439,7 +462,7 @@ class GLExporter():
             validIntegralListViews = [pp for pp in spectrumView.integralListViews
                                   if pp.isVisible()
                                   and spectrumView.isVisible()
-                                  and pp in self.parent._GLIntegralLists.keys()]
+                                      and pp in self.parent._GLIntegrals._GLSymbols.keys()]
 
             for integralListView in validIntegralListViews:  # spectrumView.integralListViews:
                 mat = None
@@ -453,13 +476,13 @@ class GLExporter():
 
                     # assume that the vertexArray is a GL_LINE_STRIP
                     if spectrumView in self.parent._contourList.keys():
-                        if self.parent._stackingValue:
+                        if self.parent._stackingMode:
                             mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
                         else:
                             mat = None
 
                 # draw the integralAreas if they exist
-                for integralArea in self.parent._GLIntegralLists[integralListView]._regions:
+                for integralArea in self.parent._GLIntegrals._GLSymbols[integralListView]._regions:
                     if hasattr(integralArea, '_integralArea'):
 
                         thisSpec = integralArea._integralArea
@@ -521,12 +544,11 @@ class GLExporter():
             validPeakListViews = [pp for pp in spectrumView.peakListViews
                                   if pp.isVisible()
                                   and spectrumView.isVisible()
-                                  and pp in self.parent._GLPeakListLabels.keys()]
+                                  and pp in self.parent._GLPeaks._GLLabels.keys()]
 
             for peakListView in validPeakListViews:  # spectrumView.peakListViews:
-                for drawString in self.parent._GLPeakListLabels[peakListView].stringList:
+                for drawString in self.parent._GLPeaks._GLLabels[peakListView].stringList:
 
-                    # TODO:ED check why this isn't always a list
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
                         col = drawString.colors[0:4]
@@ -542,11 +564,105 @@ class GLExporter():
                                                 height=self.displayScale * self.mainH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
-                        colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                    drawString.text,
+                        textGroup = drawString.text.split('\n')
+                        textLine = len(textGroup)-1
+                        for text in textGroup:
+                            colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
+                                                                text,
+                                                                fontSize=drawString.font.fontSize * self.fontScale,
+                                                                fontName=drawString.font.fontName,
+                                                                fillColor=colour))
+                            textLine -= 1
+
+        for colourGroup in colourGroups.values():
+            self._mainPlot.add(colourGroup)
+
+    def _addIntegralLabels(self):
+        """
+        Add the integral labels to the main drawing area.
+        """
+        colourGroups = OrderedDict()
+        for spectrumView in self._ordering:
+            if spectrumView.isDeleted:
+                continue
+
+            validIntegralListViews = [pp for pp in spectrumView.integralListViews
+                                      if pp.isVisible()
+                                      and spectrumView.isVisible()
+                                      and pp in self.parent._GLIntegrals._GLLabels.keys()]
+
+            for integralListView in validIntegralListViews:  # spectrumView.integralListViews:
+                for drawString in self.parent._GLIntegrals._GLLabels[integralListView].stringList:
+
+                    col = drawString.colors[0]
+                    if not isinstance(col, Iterable):
+                        col = drawString.colors[0:4]
+                    colour = colors.Color(*col[0:3], alpha=float(col[3]))
+                    colourPath = 'spectrumViewIntegralLabels%s%s%s%s%s' % (
+                        spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+
+                    newLine = [drawString.attribs[0], drawString.attribs[1]]
+                    if self.parent.pointVisible(newLine,
+                                                x=self.displayScale * self.mainL,
+                                                y=self.displayScale * self.mainB,
+                                                width=self.displayScale * self.mainW,
+                                                height=self.displayScale * self.mainH):
+                        if colourPath not in colourGroups:
+                            colourGroups[colourPath] = Group()
+                        textGroup = drawString.text.split('\n')
+                        textLine = len(textGroup)-1
+                        for text in textGroup:
+                            colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
+                                                                text,
+                                                                fontSize=drawString.font.fontSize * self.fontScale,
+                                                                fontName=drawString.font.fontName,
+                                                                fillColor=colour))
+                            textLine -= 1
+
+        for colourGroup in colourGroups.values():
+            self._mainPlot.add(colourGroup)
+
+    def _addMultipletLabels(self):
+        """
+        Add the multiplet labels to the main drawing area.
+        """
+        colourGroups = OrderedDict()
+        for spectrumView in self._ordering:
+            if spectrumView.isDeleted:
+                continue
+
+            validMultipletListViews = [pp for pp in spectrumView.multipletListViews
+                                       if pp.isVisible()
+                                       and spectrumView.isVisible()
+                                       and pp in self.parent._GLMultiplets._GLLabels.keys()]
+
+            for multipletListView in validMultipletListViews:  # spectrumView.multipletListViews:
+                for drawString in self.parent._GLMultiplets._GLLabels[multipletListView].stringList:
+
+                    col = drawString.colors[0]
+                    if not isinstance(col, Iterable):
+                        col = drawString.colors[0:4]
+                    colour = colors.Color(*col[0:3], alpha=float(col[3]))
+                    colourPath = 'spectrumViewMultipletLabels%s%s%s%s%s' % (
+                        spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+
+                    newLine = [drawString.attribs[0], drawString.attribs[1]]
+                    if self.parent.pointVisible(newLine,
+                                                x=self.displayScale * self.mainL,
+                                                y=self.displayScale * self.mainB,
+                                                width=self.displayScale * self.mainW,
+                                                height=self.displayScale * self.mainH):
+                        if colourPath not in colourGroups:
+                            colourGroups[colourPath] = Group()
+                        textGroup = drawString.text.split('\n')
+                        textLine = len(textGroup)-1
+                        for text in textGroup:
+                            colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
+                                                                text,
                                     fontSize=drawString.font.fontSize * self.fontScale,
                                     fontName=drawString.font.fontName,
                                     fillColor=colour))
+                            textLine -= 1
 
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)

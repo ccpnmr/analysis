@@ -1468,14 +1468,14 @@ class Framework:
     """
     from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
 
-    dialog = ExportNefPopup(self.ui.mainWindow
-                            , mainWindow=self.ui.mainWindow
-                            , fileMode=FileDialog.AnyFile
-                            , text="Export to Nef File"
-                            , acceptMode=FileDialog.AcceptSave
-                            , preferences=self.preferences.general
-                            , selectFile=self.project.name+'.nef'     # new flag to populate dialog
-                            , filter='*.nef')
+    dialog = ExportNefPopup(self.ui.mainWindow,
+                             mainWindow=self.ui.mainWindow,
+                             fileMode=FileDialog.AnyFile,
+                             text="Export to Nef File",
+                             acceptMode=FileDialog.AcceptSave,
+                             preferences=self.preferences.general,
+                             selectFile=self.project.name+'.nef',     # new flag to populate dialog,
+                             filter='*.nef')
 
     # an exclusion list comes out of the dialog as it
 
@@ -1488,11 +1488,11 @@ class Framework:
     skipPrefixes = flags['skipPrefixes']
     expandSelection = flags['expandSelection']
 
-    self.project.exportNef(nefPath
-                   , overwriteExisting=True
-                   , skipPrefixes=skipPrefixes
-                   , expandSelection=expandSelection
-                   , pidList=pidList)
+    self.project.exportNef(nefPath,
+                    overwriteExisting=True,
+                    skipPrefixes=skipPrefixes,
+                    expandSelection=expandSelection,
+                    pidList=pidList)
 
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""

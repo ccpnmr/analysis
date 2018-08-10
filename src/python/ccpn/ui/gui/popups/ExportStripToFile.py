@@ -116,6 +116,68 @@ class ExportStripToFilePopup(ExportDialog):
         row += 1
         self.treeView = PrintTreeCheckBoxes(userFrame, project=self.project, grid=(row, 0))
 
+        # add Spectra to the treeView
+        item = QtWidgets.QTreeWidgetItem(self.treeView)
+        if self.current.strip.spectrumViews:
+            item.setText(0, 'Spectra')
+            item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+
+            for specView in self.current.strip.spectrumViews:
+                child = QtWidgets.QTreeWidgetItem(item)
+                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                child.setData(1, 0, specView)
+                child.setText(0, specView.spectrum.pid)
+                child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+
+        # add PeakList to the treeView
+        item = QtWidgets.QTreeWidgetItem(self.treeView)
+        peakLists = []
+        integralLists = []
+        multipletLists = []
+        for specView in self.current.strip.spectrumViews:
+            validPeakListViews = [pp for pp in specView.peakListViews]
+            validIntegralListViews = [pp for pp in specView.integralListViews]
+            validMultipletListViews = [pp for pp in specView.multipletListViews]
+            peakLists.extend(validPeakListViews)
+            integralLists.extend(validIntegralListViews)
+            multipletLists.extend(validMultipletListViews)
+
+        if peakLists:
+            item = QtWidgets.QTreeWidgetItem(self.treeView)
+            item.setText(0, 'Peak Lists')
+            item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+
+            for pp in peakLists:
+                child = QtWidgets.QTreeWidgetItem(item)
+                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                child.setData(1, 0, pp)
+                child.setText(0, pp.peakList.pid)
+                child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+
+        if integralLists:
+            item = QtWidgets.QTreeWidgetItem(self.treeView)
+            item.setText(0, 'Integral Lists')
+            item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+
+            for pp in integralLists:
+                child = QtWidgets.QTreeWidgetItem(item)
+                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                child.setData(1, 0, pp)
+                child.setText(0, pp.integralList.pid)
+                child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+
+        if multipletLists:
+            item = QtWidgets.QTreeWidgetItem(self.treeView)
+            item.setText(0, 'Multiplet Lists')
+            item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+
+            for pp in multipletLists:
+                child = QtWidgets.QTreeWidgetItem(item)
+                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                child.setData(1, 0, pp)
+                child.setText(0, pp.multipletList.pid)
+                child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+
         # populate the treeview with the currently selected peak/integral/multiplet lists
         self.treeView._uncheckAll()
         pidList = []

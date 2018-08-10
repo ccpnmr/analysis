@@ -371,12 +371,12 @@ class GuiStripNd(GuiStrip):
   #   return self.contextMenu
 
   def showExportDialog(self):
-        """show the export strip to file dialog
-        """
-        from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
-        self.exportPdf = ExportStripToFilePopup(parent=self.mainWindow, mainWindow=self.mainWindow,
-                                                preferences=self.application.preferences, strips=[self])
-        self.exportPdf.exec_()
+    """show the export strip to file dialog
+    """
+    from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup as ExportDialog
+
+    self.exportPdf = ExportDialog(parent=self.mainWindow, mainWindow=self.mainWindow, strips=[self])
+    self.exportPdf.exec_()
 
   def copyStrip(self):
     """

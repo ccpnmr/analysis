@@ -52,6 +52,10 @@ EXPANDSELECTION = 'expandSelection'
 
 
 class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
+    """Class to handle exporting project to Nef file
+    """
+
+    # set the items in the project that can be exported
     checkList = [
         Chain._pluralLinkName,
         ChemicalShiftList._pluralLinkName,
@@ -69,6 +73,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         PeakCluster._pluralLinkName,
     ]
 
+    # set which items can be selected/deselected, others are automatically set
     selectableItems = [
         Chain._pluralLinkName,
         ChemicalShiftList._pluralLinkName,
@@ -81,7 +86,8 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     ]
 
     def __init__(self, parent=None, project=None, maxSize=(250, 300), **kw):
-
+        """Initialise the widget
+        """
         QtWidgets.QTreeWidget.__init__(self, parent)
         Base.__init__(self, setLayout=False, **kw)
 
@@ -91,7 +97,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self.project = project
         self.header().hide()
         if self.project is not None:
-            for name in ProjectTreeCheckBoxes.checkList:
+            for name in self.checkList:
                 if hasattr(self.project, name):  # just to be safe
                     item = QtWidgets.QTreeWidgetItem(self)
                     item.setText(0, name)
@@ -106,11 +112,13 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
                     item.setCheckState(0, QtCore.Qt.Checked)
                     item.setExpanded(False)
-                    item.setDisabled(name not in ProjectTreeCheckBoxes.selectableItems)
+                    item.setDisabled(name not in self.selectableItems)
 
         self.itemClicked.connect(self._clicked)
 
     def getSelectedObjects(self):
+        """Get selected objects from the check boxes
+        """
         selectedObjects = []
         for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
             if item.checkState(0) == QtCore.Qt.Checked:
@@ -120,21 +128,48 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         return selectedObjects
 
     def getSelectedObjectsPids(self):
+        """Get the pids of the selected objects
+        """
         pids = []
         for item in self.getSelectedObjects():
             pids += [item.pid]
         return pids
 
     def selectObjects(self, pids):
-        for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
-            for pid in pids:
-                if item.text(0) == pid:
-                    item.setCheckState(0, QtCore.Qt.Checked)
+        """handle changing the state of checkboxes
+        """
+        items = self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
+        for item in items:
+            if item.text(0) in pids:
+                item.setCheckState(0, QtCore.Qt.Checked)
 
     def _clicked(self, *args):
         pass
 
     def _uncheckAll(self):
+        """Clear all selection
+        """
         for itemTree in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
             for i in range(itemTree.childCount()):
                 itemTree.child(i).setCheckState(0, QtCore.Qt.Unchecked)
+
+class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):
+    """Class to handle exporting peaks/integrals/multiplets to PDF or SVG files
+    """
+
+    # set the items in the project that can be printed
+    checkList = [
+        PeakList._pluralLinkName,
+        IntegralList._pluralLinkName,
+        MultipletList._pluralLinkName,
+    ]
+
+    # all items can be selected
+    selectableItems = [
+        PeakList._pluralLinkName,
+        IntegralList._pluralLinkName,
+        MultipletList._pluralLinkName,
+    ]
+
+    def __init__(self, parent=None, project=None, maxSize=(250, 300), **kw):
+        super(PrintTreeCheckBoxes, self).__init__(parent=parent, project=project, maxSize=maxSize, **kw)

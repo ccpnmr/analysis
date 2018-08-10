@@ -1461,7 +1461,6 @@ class Framework:
         getLogger().warning('Error Importing Nef File: %s' % str(es))
 
   def _exportNEF(self):
-    #TODO:ED fix this temporary routine
     """
     Export the current project as a Nef file
     Temporary routine because I don't know how else to do it yet
@@ -1478,11 +1477,14 @@ class Framework:
                              filter='*.nef')
 
     # an exclusion list comes out of the dialog as it
+    result = dialog.exec_()
 
-    nefPath, flags, pidList = dialog.show()
-
-    if not nefPath:
+    if not result:
       return
+
+    nefPath = result['filename']
+    flags = result['flags']
+    pidList = result['pidList']
 
     # flags are skipPrefixes, expandSelection
     skipPrefixes = flags['skipPrefixes']

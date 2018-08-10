@@ -163,15 +163,15 @@ class NefFileDialog(QtWidgets.QFileDialog):
 
         if preferences:
             self.useNative = preferences.useNative
-            if preferences.colourScheme == 'dark':
-                self.setStyleSheet("""
-                           QFileDialog QWidget {
-                                               background-color: #2a3358;
-                                               color: #f7ffff;
-                                               }
-                          """)
-            elif preferences.colourScheme == 'light':
-                self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+            # if preferences.colourScheme == 'dark':
+            #     self.setStyleSheet("""
+            #                QFileDialog QWidget {
+            #                                    background-color: #2a3358;
+            #                                    color: #f7ffff;
+            #                                    }
+            #               """)
+            # elif preferences.colourScheme == 'light':
+            #     self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
 
     def selectedFiles(self):
         if self.useNative:

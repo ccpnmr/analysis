@@ -72,3 +72,27 @@ LENATTRIBS = 4
 LENOFFSETS = 4
 
 FADE_FACTOR = 0.25
+
+GLFILENAME = 'filename'
+GLSTRIP = 'strip'
+GLWIDGET = 'glWidget'
+GLPRINTTYPE = 'printType'
+GLSELECTEDPIDS = 'selectedPids'
+GLPEAKSYMBOLS = 'peakSymbols'
+GLPEAKLABELS = 'peakLabels'
+GLINTEGRALSYMBOLS = 'integralSymbols'
+GLINTEGRALLABELS = 'integralLabels'
+GLMULTIPLETSYMBOLS = 'multipletSymbols'
+GLMULTIPLETLABELS = 'multipletLabels'
+GLGRIDLINES = 'Grid Lines'
+GLGRIDTICKMARKS = 'Grid Tick Marks'
+GLGRIDTICKLABELS = 'Grid Tick Labels'
+GLSPECTRUMCONTOURS = 'Spectrum Contours'
+GLSPECTRUMBORDERS = 'Spectrum Borders'
+GLMARKLINES = 'Mark Lines'
+GLMARKLABELS = 'Mark Labels'
+GLTRACES = 'Traces'
+GLOTHERLINES = 'Other Lines'
+GLSTRIPLABELLING = 'Strip Labelling'
+GLREGIONS = 'regions'
+GLPLOTBORDER = 'plotBorder'

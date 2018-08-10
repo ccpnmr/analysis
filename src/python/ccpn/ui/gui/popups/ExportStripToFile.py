@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes, PrintTreeCheckBoxes
 from ccpn.ui.gui.popups.ExportDialog import ExportDialog
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
@@ -77,6 +78,25 @@ class ExportStripToFilePopup(ExportDialog):
             showWarning(str(self.windowTitle()), 'No strips selected')
             self.reject()
 
+        self.fullList = (GLPEAKSYMBOLS,
+                         GLPEAKLABELS,
+                         GLINTEGRALSYMBOLS,
+                         GLINTEGRALLABELS,
+                         GLMULTIPLETSYMBOLS,
+                         GLMULTIPLETLABELS,
+                         GLGRIDLINES,
+                         GLGRIDTICKMARKS,
+                         GLGRIDTICKLABELS,
+                         GLSPECTRUMCONTOURS,
+                         GLSPECTRUMBORDERS,
+                         GLMARKLINES,
+                         GLMARKLABELS,
+                         GLTRACES,
+                         GLOTHERLINES,
+                         GLSTRIPLABELLING,
+                         GLREGIONS,
+                         GLPLOTBORDER)
+
     def initialise(self, userFrame):
         self.stripIds = [sd.id for sd in self.strips]
         self.stripPids = [sd.pid for sd in self.strips]
@@ -85,13 +105,23 @@ class ExportStripToFilePopup(ExportDialog):
         row = 0
         if len(self.strips) > 1:
             Label(userFrame, text='Select Strip to Print', grid=(row, 0),
-                  hAlign='centre', vAlign='centre')
-            row += 1
+                  hAlign='left', vAlign='centre')
+        else:
+            Label(userFrame, text='Current selected strip', grid=(row, 0),
+                  hAlign='left', vAlign='centre')
 
+        row += 1
         self.stripToExport = RadioButtons(userFrame, self.stripIds,
-                                          grid=(row, 0), direction='v')
+                                          grid=(row, 0), direction='v',
+                                          callback=self._changeStrip)
+
         if self.current.strip:
             self.stripToExport.set(self.current.strip.id)
+            self.strip = self.current.strip
+        else:
+            self.stripToExport.set(self.strips[0].id)
+            self.strip = self.strips[0]
+
         self.stripToExport.setMinimumSize(self.stripToExport.sizeHint())
 
         # add a spacer to separate from the common save widgets
@@ -115,26 +145,39 @@ class ExportStripToFilePopup(ExportDialog):
 
         row += 1
         self.treeView = PrintTreeCheckBoxes(userFrame, project=self.project, grid=(row, 0))
+        self._populateTreeView()
+
+        self.setMinimumSize(self.sizeHint())
+
+    def _changeStrip(self):
+        selected = self.stripToExport.get()
+        if selected != self.strip.id:
+            self.strip = self.strips[self.stripIds.index(selected)]
+
+        selectedList = self.treeView.getItems()
+        self._populateTreeView(selectedList)
+
+    def _populateTreeView(self, selectList=None):
+        self.treeView.clear()
 
         # add Spectra to the treeView
-        item = QtWidgets.QTreeWidgetItem(self.treeView)
-        if self.current.strip.spectrumViews:
+        if self.strip.spectrumViews:
+            item = QtWidgets.QTreeWidgetItem(self.treeView)
             item.setText(0, 'Spectra')
             item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
-            for specView in self.current.strip.spectrumViews:
+            for specView in self.strip.spectrumViews:
                 child = QtWidgets.QTreeWidgetItem(item)
                 child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-                child.setData(1, 0, specView)
+                child.setData(1, 0, specView.spectrum)
                 child.setText(0, specView.spectrum.pid)
                 child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
 
-        # add PeakList to the treeView
-        item = QtWidgets.QTreeWidgetItem(self.treeView)
+        # find peak/integral/multiplets attached to the spectrumViews
         peakLists = []
         integralLists = []
         multipletLists = []
-        for specView in self.current.strip.spectrumViews:
+        for specView in self.strip.spectrumViews:
             validPeakListViews = [pp for pp in specView.peakListViews]
             validIntegralListViews = [pp for pp in specView.integralListViews]
             validMultipletListViews = [pp for pp in specView.multipletListViews]
@@ -142,6 +185,7 @@ class ExportStripToFilePopup(ExportDialog):
             integralLists.extend(validIntegralListViews)
             multipletLists.extend(validMultipletListViews)
 
+        printItems = []
         if peakLists:
             item = QtWidgets.QTreeWidgetItem(self.treeView)
             item.setText(0, 'Peak Lists')
@@ -150,9 +194,12 @@ class ExportStripToFilePopup(ExportDialog):
             for pp in peakLists:
                 child = QtWidgets.QTreeWidgetItem(item)
                 child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-                child.setData(1, 0, pp)
+                child.setData(1, 0, pp.peakList)
                 child.setText(0, pp.peakList.pid)
                 child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+
+            printItems.extend((GLPEAKSYMBOLS,
+                               GLPEAKLABELS))
 
         if integralLists:
             item = QtWidgets.QTreeWidgetItem(self.treeView)
@@ -162,9 +209,12 @@ class ExportStripToFilePopup(ExportDialog):
             for pp in integralLists:
                 child = QtWidgets.QTreeWidgetItem(item)
                 child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-                child.setData(1, 0, pp)
+                child.setData(1, 0, pp.integralList)
                 child.setText(0, pp.integralList.pid)
                 child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+
+            printItems.extend((GLINTEGRALSYMBOLS,
+                               GLINTEGRALLABELS))
 
         if multipletLists:
             item = QtWidgets.QTreeWidgetItem(self.treeView)
@@ -174,14 +224,17 @@ class ExportStripToFilePopup(ExportDialog):
             for pp in multipletLists:
                 child = QtWidgets.QTreeWidgetItem(item)
                 child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-                child.setData(1, 0, pp)
+                child.setData(1, 0, pp.multipletList)
                 child.setText(0, pp.multipletList.pid)
                 child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+
+            printItems.extend((GLMULTIPLETSYMBOLS,
+                               GLMULTIPLETLABELS))
 
         # populate the treeview with the currently selected peak/integral/multiplet lists
         self.treeView._uncheckAll()
         pidList = []
-        for specView in self.current.strip.spectrumViews:
+        for specView in self.strip.spectrumViews:
             validPeakListViews = [pp.peakList.pid for pp in specView.peakListViews
                                   if pp.isVisible()
                                   and specView.isVisible()]
@@ -199,30 +252,25 @@ class ExportStripToFilePopup(ExportDialog):
 
         self.treeView.selectObjects(pidList)
 
-        printItems = (GLPEAKSYMBOLS,
-                      GLPEAKLABELS,
-                      GLINTEGRALSYMBOLS,
-                      GLINTEGRALLABELS,
-                      GLMULTIPLETSYMBOLS,
-                      GLMULTIPLETLABELS,
-                      GLGRIDLINES,
-                      GLGRIDTICKMARKS,
-                      GLGRIDTICKLABELS,
-                      GLSPECTRUMCONTOURS,
-                      GLSPECTRUMBORDERS,
-                      GLMARKLINES,
-                      GLMARKLABELS,
-                      GLTRACES,
-                      GLOTHERLINES,
-                      GLSTRIPLABELLING,
-                      GLREGIONS,
-                      GLPLOTBORDER
-                      )
+        printItems.extend((GLGRIDLINES,
+                           GLGRIDTICKMARKS,
+                           GLGRIDTICKLABELS,
+                           GLSPECTRUMCONTOURS,
+                           GLSPECTRUMBORDERS,
+                           GLMARKLINES,
+                           GLMARKLABELS,
+                           GLTRACES,
+                           GLOTHERLINES,
+                           GLSTRIPLABELLING,
+                           GLREGIONS,
+                           GLPLOTBORDER)
+                          )
 
-        selectList = {GLSPECTRUMBORDERS: QtCore.Qt.Checked if self.application.preferences.general.showSpectrumBorder else QtCore.Qt.Unchecked,
-                      GLSPECTRUMCONTOURS: QtCore.Qt.Checked,
-                      GLGRIDLINES: QtCore.Qt.Checked if self.current.strip.gridVisible else QtCore.Qt.Unchecked
-                      }
+        if selectList is None:
+            selectList = {GLSPECTRUMBORDERS: QtCore.Qt.Checked if self.application.preferences.general.showSpectrumBorder else QtCore.Qt.Unchecked,
+                          GLSPECTRUMCONTOURS: QtCore.Qt.Checked,
+                          GLGRIDLINES: QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked
+                          }
         self.printList = []
 
         # add Print Options to the treeView
@@ -238,7 +286,6 @@ class ExportStripToFilePopup(ExportDialog):
             child.setCheckState(0, QtCore.Qt.Checked if itemName not in selectList else selectList[itemName])
 
         item.setExpanded(True)
-        self.setMinimumSize(self.sizeHint())
 
     def _changePrintType(self):
         selected = self.exportType.get()
@@ -273,7 +320,7 @@ class ExportStripToFilePopup(ExportDialog):
                       GLSELECTEDPIDS: self.treeView.getSelectedObjectsPids()
                       }
             selectedList = self.treeView.getSelectedItems()
-            for itemName, itemCheckBox in self.printList:
+            for itemName in self.fullList:
                 params[itemName] = True if itemName in selectedList else False
 
             return params
@@ -298,32 +345,34 @@ class ExportStripToFilePopup(ExportDialog):
                 if svgExport:
                     svgExport.writeSVGFile()
 
-    def _acceptDialog(self, exitSaveFileName=None):
+    def actionButtons(self):
+        self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Ok'], [self._rejectDialog, self._saveDialog, self._acceptDialog],
+                                  tipTexts=['Close the export dialog',
+                                            'Export the strip to a file, dialog will remain open',
+                                            'Export the strip and close the dialog'],
+                                  grid=(0, 1))
+
+    def _saveDialog(self, exitSaveFileName=None):
         """save button has been clicked
         """
         self.exitFilename = self.saveText.text().strip()  # strip the trailing whitespace
 
         if self.pathEdited is False:
             # user has not changed the path so we can accept()
-            pass            # self.accept()
+            self._exportToFile()
         else:
             # have edited the path so check the new file
             if os.path.isfile(self.exitFilename):
                 yes = showYesNoWarning('%s already exists.' % os.path.basename(self.exitFilename),
                                        'Do you want to replace it?')
                 if yes:
-                    pass  # self.accept()
+                    self._exportToFile()
             else:
                 if not self.exitFilename:
                     showWarning('FileName Error:', 'Filename is empty.')
                 else:
-                    pass  # self.accept()
+                    self._exportToFile()
 
-        params = self.buildParameters()
-
-        # do the export
-        if params:
-            self.exportToFile(params=params)
 
 if __name__ == '__main__':
     from sandbox.Geerten.Refactored.framework import Framework

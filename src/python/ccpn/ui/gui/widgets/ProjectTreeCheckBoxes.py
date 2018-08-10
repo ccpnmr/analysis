@@ -139,6 +139,16 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
                     selectedItems += [item.text(0)]
         return selectedItems
 
+    def getItems(self):
+        """Get checked state of objects
+        """
+        selectedItems = {}
+        for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            obj = item.data(1, 0)
+            if not hasattr(obj, 'pid'):
+                selectedItems[item.text(0)] = item.checkState(0)
+        return selectedItems
+
     def getSelectedObjectsPids(self):
         """Get the pids of the selected objects
         """

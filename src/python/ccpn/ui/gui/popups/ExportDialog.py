@@ -133,8 +133,8 @@ class ExportDialog(CcpnDialog):
         self.spacer = Spacer(self.buttonFrame, 3, 3,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0), gridSpan=(1, 1))
-        self.buttons = ButtonList(self.buttonFrame, ['Cancel', 'Save'], [self._rejectDialog, self._acceptDialog],
-                                  grid=(0, 1))
+
+        self.actionButtons()
 
         self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         # self.resize(300, 500)
@@ -154,6 +154,10 @@ class ExportDialog(CcpnDialog):
         self.oldFilePath = self.saveText.text()  # set to the same for the minute
 
         self._saveState = True
+
+    def actionButtons(self):
+        self.buttons = ButtonList(self.buttonFrame, ['Cancel', 'Save'], [self._rejectDialog, self._acceptDialog],
+                                  grid=(0, 1))
 
     def updateDialog(self):
         self.fileSaveDialog = NefFileDialog(self,
@@ -218,21 +222,24 @@ class ExportDialog(CcpnDialog):
     def closeEvent(self, QCloseEvent):
         self._rejectDialog()
 
+    def _exportToFile(self):
+        # build the export dict
+        params = self.buildParameters()
+
+        # do the export
+        if params:
+            self.exportToFile(params=params)
+
+        # return the filename
+        return params
+
     def exec_(self):
         """popup the dialog
         """
         value = super(ExportDialog, self).exec_()
 
         if value:
-            # build the export dict
-            params = self.buildParameters()
-
-            # do the export
-            if params:
-                self.exportToFile(params=params)
-
-            # return the filename
-            return params
+            return self._exportToFile()
 
     def _openFileDialog(self):
         """open the save dialog

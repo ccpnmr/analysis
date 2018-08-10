@@ -2169,7 +2169,8 @@ class Framework:
     if len(self.project.spectrumDisplays) == 0:
       MessageDialog.showWarning('', 'No Spectrum Display found')
     else:
-      ExportStripToFilePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, strips=[self.current.strip]).exec_()
+      exportDialog = ExportStripToFilePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, strips=self.project.strips)
+      exportDialog.exec_()
 
   def toggleToolbar(self):
     if self.current.strip is not None:

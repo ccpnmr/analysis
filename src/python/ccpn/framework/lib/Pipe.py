@@ -30,7 +30,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from abc import ABC
 from abc import abstractmethod
 from typing import List
-
+import numpy as np
+import pandas as pd
 
 class Pipe(ABC):
   """
@@ -102,26 +103,32 @@ class Pipe(ABC):
 
 
 
-try:
 
-  import pandas as pd
-  class PandasPipe(Pipe):
-    '''
-    A pipe where the run method accepts a pandas dataframe and returns a pandas dataframe
-    '''
-    @abstractmethod
-    def runPipe(self, dataframe:pd.DataFrame) -> pd.DataFrame:
-      return dataframe
 
-except ImportError:
-  pass
+class PandasPipe(Pipe):
+  '''
+  A pipe where the run method accepts a pandas dataframe and returns a pandas dataframe
+  '''
+  @abstractmethod
+  def runPipe(self, dataframe:pd.DataFrame) -> pd.DataFrame:
+    return dataframe
 
 
 class SpectraPipe(Pipe):
   '''
-      A pipe where the run method accepts a list of spectra and returns a list of spectra
+  A pipe where the run method accepts a list of spectra and returns a list of spectra
   '''
 
   @abstractmethod
   def runPipe(self, spectra) -> List['Spectrum']:
     return spectra
+
+
+class NumpyPipe(Pipe):
+  '''
+  A pipe where the run method accepts a numpy Array and returns a numpy Array
+  '''
+  @abstractmethod
+  def runPipe(self, npArray:np.array) -> np.array:
+    return npArray
+

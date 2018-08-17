@@ -217,7 +217,7 @@ class DataFrameObject(object):
           self._objects = [obj]
           self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
 
-          with self._table._quickTableUpdate(self):           # keep the column widths
+          with self._table._quickTableUpdate(self):
             self._table.setData(self._dataFrame.values)
 
         else:

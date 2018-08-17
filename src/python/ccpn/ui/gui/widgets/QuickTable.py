@@ -824,7 +824,7 @@ QuickTable::item::selected {
         self._rawData = data
 
     @contextmanager
-    def _quickTableUpdate(self, dataFrameObject):
+    def _quickTableUpdate(self, dataFrameObject, resize=True):
         # keep the original sorting method
         sortOrder = self.horizontalHeader().sortIndicatorOrder()
         sortColumn = self.horizontalHeader().sortIndicatorSection()
@@ -852,9 +852,12 @@ QuickTable::item::selected {
             if sortColumn < self.columnCount():
                 self.sortByColumn(sortColumn, sortOrder)
 
+            if resize:
+                self.resizeColumnsToContents()
+
             self.show()
             self._silenceCallback = False
-            self.resizeColumnsToContents()
+
             # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
     def setTableFromDataFrameObject(self, dataFrameObject):
@@ -905,6 +908,7 @@ QuickTable::item::selected {
         # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
         self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
         self.resizeColumnsToContents()
+
         self.show()
 
     def getDataFrameFromList(self, table=None,
@@ -1239,7 +1243,7 @@ QuickTable::item::selected {
 
         self.show()
         self._silenceCallback = False
-        self.resizeColumnsToContents()
+        # self.resizeColumnsToContents()
         # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
     def clearTableContents(self, dataFrameObject=None):
@@ -1519,7 +1523,8 @@ QuickTable::item::selected {
                 newData[Notifier.TRIGGER] = Notifier.CHANGE
 
                 # check whether we are the row object or still a cell object
-                if isinstance(rowObj, self._tableData['rowClass']):
+                cellType = self._tableData['rowClass']
+                if isinstance(rowObj, cellType):
                     self._updateRowCallback(newData)
                 else:
                     self._updateCellCallback(rowCallback, newData)

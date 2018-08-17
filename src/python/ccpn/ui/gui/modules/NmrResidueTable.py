@@ -546,10 +546,10 @@ class NmrResidueTable(QuickTable):
     self.project.blankNotification()
     objs = self.getSelectedObjects()
 
-    self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                , buildList=nmrChain.nmrResidues
-                                                , colDefs=self.NMRcolumns
-                                                , hiddenColumns=self._hiddenColumns)
+    self._dataFrameObject = self.getDataFrameFromList(table=self,
+                                                buildList=nmrChain.nmrResidues,
+                                                colDefs=self.NMRcolumns,
+                                                hiddenColumns=self._hiddenColumns)
 
     # populate from the Pandas dataFrame inside the dataFrameObject
     self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)

@@ -241,7 +241,7 @@ class Gui1dWidget(CcpnGLWidget):
         return multiplets
 
     def _newStatic1DTraceData(self, spectrumView, tracesDict,
-                              point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
+                              point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, position,
                               ph0=None, ph1=None, pivot=None):
         """Create a new static 1D phase trace
         """
@@ -304,7 +304,7 @@ class Gui1dWidget(CcpnGLWidget):
             hSpectrum.data = data
             hSpectrum.values = [spectrumView, point, xDataDim,
                                 xMinFrequency, xMaxFrequency,
-                                xNumPoints, positionPixel]
+                                xNumPoints, positionPixel, position]
             hSpectrum.spectrumView = spectrumView
 
         except Exception as es:

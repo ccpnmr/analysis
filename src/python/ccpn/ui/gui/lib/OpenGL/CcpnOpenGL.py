@@ -314,6 +314,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._vTraces = {}
         self._staticHTraces = []
         self._staticVTraces = []
+        self._currentTraces = []
+
         self._stackingValue = None
         self._stackingMode = False
         self._hTraceVisible = False
@@ -1814,6 +1816,7 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         # self._spectrumSettings = {}
+        rebuildFlag = False
         for spectrumView in self.strip.spectrumViews:
 
             if spectrumView.buildContours or spectrumView.buildContoursOnly:
@@ -1844,6 +1847,11 @@ class CcpnGLWidget(QOpenGLWidget):
                 spectrumView._buildGLContours(self._contourList[spectrumView])
 
                 self._buildSpectrumSetting(spectrumView=spectrumView)
+                rebuildFlag = True
+
+        # rebuild the traces as the spectrum/plane may have changed
+        if rebuildFlag:
+            self.rebuildTraces()
 
     # def _buildIntegralLists(self, spectrumView, integralListView):
     #
@@ -2823,7 +2831,7 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glEnd()
 
     def _newStaticHTraceData(self, spectrumView, tracesDict,
-                             point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel,
+                             point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, position,
                              ph0=None, ph1=None, pivot=None):
 
         try:
@@ -2872,14 +2880,14 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum.data = data
             hSpectrum.values = [spectrumView, point, xDataDim,
                                 xMinFrequency, xMaxFrequency,
-                                xNumPoints, positionPixel]
+                                xNumPoints, positionPixel, position]
             hSpectrum.spectrumView = spectrumView
 
         except Exception as es:
             tracesDict = []
 
     def _newStaticVTraceData(self, spectrumView, tracesDict,
-                             point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel,
+                             point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, position,
                              ph0=None, ph1=None, pivot=None):
 
         try:
@@ -2928,7 +2936,7 @@ class CcpnGLWidget(QOpenGLWidget):
             vSpectrum.data = data
             vSpectrum.values = [spectrumView, point, yDataDim,
                                 yMinFrequency, yMaxFrequency,
-                                yNumPoints, positionPixel]
+                                yNumPoints, positionPixel, position]
             vSpectrum.spectrumView = spectrumView
 
         except Exception as es:
@@ -3082,12 +3090,16 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency,
                                        yNumPoints, positionPixel, ph0, ph1, pivot)
 
-    def newTrace(self):
-        position = [self.cursorCoordinate[0], self.cursorCoordinate[1]]  #list(cursorPosition)
+    def newTrace(self, position=None):
+        position = position if position else [self.cursorCoordinate[0], self.cursorCoordinate[1]]  #list(cursorPosition)
+
+        # add to the list of traces
+        self._currentTraces.append(position)
+
         for axis in self._orderedAxes[2:]:
             position.append(axis.position)
 
-        positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
+        positionPixel = position    #(self.cursorCoordinate[0], self.cursorCoordinate[1])
 
         for spectrumView in self.strip.spectrumViews:
 
@@ -3110,21 +3122,22 @@ class CcpnGLWidget(QOpenGLWidget):
                             position)
                     self._newStatic1DTraceData(spectrumView, self._staticHTraces, point, xDataDim, xMinFrequency,
                                                xMaxFrequency,
-                                               xNumPoints, positionPixel, ph0, ph1, pivot)
+                                               xNumPoints, positionPixel, position, ph0, ph1, pivot)
                 else:
                     inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
                         = spectrumView._getTraceParams(position)
 
                     if direction == 0:
                         self._newStaticHTraceData(spectrumView, self._staticHTraces, point, xDataDim, xMinFrequency,
-                                                  xMaxFrequency, xNumPoints, positionPixel, ph0, ph1, pivot)
+                                                  xMaxFrequency, xNumPoints, positionPixel, position, ph0, ph1, pivot)
                     else:
                         self._newStaticVTraceData(spectrumView, self._staticVTraces, point, yDataDim, yMinFrequency,
-                                                  yMaxFrequency, yNumPoints, positionPixel, ph0, ph1, pivot)
+                                                  yMaxFrequency, yNumPoints, positionPixel, position, ph0, ph1, pivot)
 
     def clearStaticTraces(self):
         self._staticVTraces = []
         self._staticHTraces = []
+        self._currentTraces = []
         self.update()
 
     def rescaleStaticTraces(self):
@@ -3135,6 +3148,12 @@ class CcpnGLWidget(QOpenGLWidget):
             vTrace.renderMode = GLRENDERMODE_RESCALE
 
         self.update()
+
+    def rebuildTraces(self):
+        traces = self._currentTraces
+        self.clearStaticTraces()
+        for trace in traces:
+            self.newTrace(trace[:2])
 
     def buildStaticTraces(self):
 

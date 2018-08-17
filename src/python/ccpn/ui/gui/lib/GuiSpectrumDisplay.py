@@ -878,14 +878,17 @@ class GuiSpectrumDisplay(CcpnModule):
       thisLayout = self.stripFrame.layout()
       thisLayoutWidth = self.stripFrame.width()
 
+      AXIS_WIDTH = 1
+      AXIS_PADDING = 5
       if self.strips:
         # add 5% to account for any small borders
         firstStripWidth = thisLayoutWidth / (len(self.strips) * 1.05)
+        AXIS_WIDTH = self.strips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
       else:
         firstStripWidth = thisLayout.itemAt(0).widget().width()
 
       # TODO:ED doesn't update when resizing
-      if not self.lastAxisOnly or True:
+      if not self.lastAxisOnly:
         maxCol = 0
         for wid in widgets[1:]:
           index = thisLayout.indexOf(wid)
@@ -893,8 +896,8 @@ class GuiSpectrumDisplay(CcpnModule):
           maxCol = max(maxCol, column)
 
         for col in range(0, maxCol+1):
-          thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
           thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
+          thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
       else:
         maxCol = 0
         for wid in widgets[1:]:
@@ -902,14 +905,14 @@ class GuiSpectrumDisplay(CcpnModule):
           row, column, cols, rows = thisLayout.getItemPosition(index)
           maxCol = max(maxCol, column)
 
-        leftWidth = (thisLayoutWidth - AXIS_WIDTH) / (maxCol+1)
+        leftWidth = (thisLayoutWidth - AXIS_WIDTH - (maxCol*AXIS_PADDING)) / (maxCol+1)
         endWidth = leftWidth + AXIS_WIDTH
         for col in range(0, maxCol):
+          thisLayout.itemAt(col).widget().setMinimumWidth(leftWidth)
           thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
-          thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
 
+        thisLayout.itemAt(maxCol).widget().setMinimumWidth(endWidth)
         thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
-        thisLayout.itemAt(maxCol).widget().setMinimumWidth(firstStripWidth)
 
   def _maximiseRegions(self):
     """Zooms Y axis of current strip to show entire region"""

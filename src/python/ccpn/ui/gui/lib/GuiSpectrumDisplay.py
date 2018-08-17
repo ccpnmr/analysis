@@ -225,6 +225,7 @@ class GuiSpectrumDisplay(CcpnModule):
     self.hoverEvent = self._hoverEvent
     self.lastAxisOnly = True
     self._phasingTraceScale = 1.0e-7
+    self.stripScaleFactor = 1.0
 
     self._toolbarNotifier = Notifier(self.project,
                                      [Notifier.CHANGE],
@@ -778,21 +779,23 @@ class GuiSpectrumDisplay(CcpnModule):
 
   def increaseStripWidth(self):
     currentWidth = self.strips[0].width() * (100.0+self.application.preferences.general.stripWidthZoomPercent) / 100.0
-    for strip in self.strips:
-      strip.hide()
+    AXIS_WIDTH = self.strips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
+
+    self.stripFrame.hide()
+    for strip in self.strips[:-1]:
       strip.setMinimumWidth(currentWidth)
-      strip.show()
+    self.strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
+    self.stripFrame.show()
 
   def decreaseStripWidth(self):
     currentWidth = self.strips[0].width() * 100.0 / (100.0+self.application.preferences.general.stripWidthZoomPercent)
-    for strip in self.strips:
-      strip.hide()
-      strip.setMinimumWidth(currentWidth)
-      strip.show()
+    AXIS_WIDTH = self.strips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
 
-    # cols = self.stripFrame.layout().columnCount()
-    # for col in range(cols):
-    #   self.stripFrame.layout().setColumnMinimumWidth(col, 50)
+    self.stripFrame.hide()
+    for strip in self.strips[:-1]:
+      strip.setMinimumWidth(currentWidth)
+    self.strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
+    self.stripFrame.show()
 
   def _copyPreviousStripValues(self, fromStrip, toStrip):
     # try:
@@ -871,7 +874,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     return newStrip
 
-  def setColumnStretches(self, stretchValue=False):
+  def setColumnStretches(self, stretchValue=False, scaleFactor=1.0):
     # crude routine to set the stretch of all columns upto the last widget to stretchValue
     widgets = self.stripFrame.children()
     if widgets:
@@ -905,7 +908,7 @@ class GuiSpectrumDisplay(CcpnModule):
           row, column, cols, rows = thisLayout.getItemPosition(index)
           maxCol = max(maxCol, column)
 
-        leftWidth = (thisLayoutWidth - AXIS_WIDTH - (maxCol*AXIS_PADDING)) / (maxCol+1)
+        leftWidth = scaleFactor*(thisLayoutWidth - AXIS_WIDTH - (maxCol*AXIS_PADDING)) / (maxCol+1)
         endWidth = leftWidth + AXIS_WIDTH
         for col in range(0, maxCol):
           thisLayout.itemAt(col).widget().setMinimumWidth(leftWidth)

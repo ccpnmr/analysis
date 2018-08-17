@@ -1705,6 +1705,14 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         pls = self.objectList(objListView)
 
         symbolWidth = self.strip.symbolSize / 2.0
+        x = abs(self._GLParent.pixelX)
+        y = abs(self._GLParent.pixelY)
+        if x <= y:
+            r = symbolWidth
+            w = symbolWidth * y / x
+        else:
+            w = symbolWidth
+            r = symbolWidth * x / y
 
         # get the correct coordinates based on the axisCodes
         p0 = [0.0] * 2  # len(self.axisOrder)
@@ -1735,7 +1743,8 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         stringList.append(GLString(text=text,
                                    font=self._GLParent.globalGL.glSmallFont,
                                    x=p0[0], y=p0[1],
-                                   ox=symbolWidth, oy=symbolWidth,
+                                   ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
+                                   # ox=symbolWidth, oy=symbolWidth,
                                    # x=self._screenZero[0], y=self._screenZero[1]
                                    color=(*listCol, 1.0),
                                    GLContext=self._GLParent,

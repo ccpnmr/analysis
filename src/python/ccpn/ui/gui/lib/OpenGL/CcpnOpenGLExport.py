@@ -51,14 +51,18 @@ from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Gro
 from reportlab.graphics.shapes import definePath
 from reportlab.graphics.renderSVG import draw, renderScaledDrawing, SVGCanvas
 from reportlab.lib.units import mm
+from reportlab.lib.pagesizes import A4, portrait, landscape
+from reportlab.platypus.tables import Table
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from ccpn.util.Report import Report
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLGRIDTICKLABELS, GLGRIDTICKMARKS, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
-    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER
-
+    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
+    GLPAGETYPE
+from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES,\
+    PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 
 PLOTLEFT = 'plotLeft'
 PLOTBOTTOM = 'plotBottom'
@@ -93,9 +97,76 @@ class GLExporter():
         self.project = self.strip.project
         self.filename = filename
         self.params = params
-        self._report = Report(self, self.project, filename)
-        self._ordering = []
 
+        # set the page orientation
+        if self.params[GLPAGETYPE] == PAGEPORTRAIT:
+            pageType = portrait
+        else:
+            pageType = landscape
+        self._report = Report(self, self.project, filename, pagesize=pageType(A4))
+
+        self._ordering = []
+        self._importFonts()
+
+        # import matplotlib.font_manager
+        #
+        # foundFonts = matplotlib.font_manager.findSystemFonts()
+        #
+        # # load all fonts that are in the openGL font list
+        # for glFonts in self.parent.globalGL.fonts.values():
+        #     for ff in foundFonts:
+        #         if glFonts.fontName + '.ttf' in ff:
+        #             pdfmetrics.registerFont(TTFont(glFonts.fontName, ff))
+        #             break
+        #     else:
+        #         raise RuntimeError('Font %s not found.' % (glFonts.fontName + '.ttf'))
+        #
+        # # set a default fontName
+        # self.fontName = self.parent.globalGL.glSmallFont.fontName
+        #
+
+        # set default colours
+        self.backgroundColour = colors.Color(*self.parent.background[0:3],
+                                             alpha=self.parent.background[3])
+        self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
+                                             alpha=self.parent.foreground[3])
+
+        # build all the sections of the pdf
+        self._buildPage()
+        self._buildAll()
+        self._addDrawingToStory()
+
+        from reportlab.platypus.tables import Table
+        from reportlab.platypus.frames import ShowBoundaryValue
+
+        # F = [
+        #     list of flowables........
+        #     ]
+        # story.append(
+        #         Balanced(
+        #                 F,  #the flowables we are balancing
+        #                 nCols=2,  #the number of columns
+        #                 needed=72,  #the minimum space needed by the flowable
+        #                 spacBefore=0,
+        #                 spaceAfter=0,
+        #                 showBoundary=None,  #optional boundary showing
+        #                 leftPadding=None,  #these override the created frame
+        #                 rightPadding=None,  #paddings if specified else the
+        #                 topPadding=None,  #default frame paddings
+        #                 bottomPadding=None,  #are used
+        #                 innerPadding=None,  #the gap between frames if specified else
+        #                 #use max(leftPadding,rightPadding)
+        #                 name='',  #for identification purposes when stuff goes awry
+        #                 endSlack=0.1,  #height disparity allowance ie 10% of available height
+        #                 )
+        #         )
+
+
+
+        # this generates the buffer to write to the file
+        self._report.buildDocument()
+
+    def _importFonts(self):
         import matplotlib.font_manager
 
         foundFonts = matplotlib.font_manager.findSystemFonts()
@@ -112,19 +183,8 @@ class GLExporter():
         # set a default fontName
         self.fontName = self.parent.globalGL.glSmallFont.fontName
 
-        self.backgroundColour = colors.Color(*self.parent.background[0:3],
-                                             alpha=self.parent.background[3])
-        self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
-                                             alpha=self.parent.foreground[3])
 
-        # build all the sections of the pdf
-        self._buildAll()
-        self._addDrawingToStory()
-
-        # this generates the buffer to write to the file
-        self._report.buildDocument()
-
-    def _buildAll(self):
+    def _buildPage(self):
         """Build the main sections of the pdf file from a drawing object
         and add the drawing object to a reportlab document
         """
@@ -205,6 +265,7 @@ class GLExporter():
         pixBottom = pageHeight - self.pixHeight - self.margin
         pixLeft = self.margin
 
+    def _buildAll(self):
         # create an object that can be added to a report
         self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
 
@@ -992,7 +1053,10 @@ class GLExporter():
         """
         Add the current drawing the story of a document
         """
-        self._report.story.append(self.report())
+        report = self.report()
+        table = ((report, report, report, report),)
+        # self._report.story.append(self.report())
+        self._report.story.append(Table(table, None, None))
 
     def writeSVGFile(self):
         """

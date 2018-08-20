@@ -43,17 +43,20 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 
 
-exportPDF = 'PDF'
-exportSVG = 'SVG'
-exportPDFFilter = 'pdf files (*.pdf)'
-exportSVGFilter = 'svg files (*.svg)'
-exportTypes = [exportPDF, exportSVG]
-exportFilters = exportPDFFilter
+EXPORTPDF = 'PDF'
+EXPORTSVG = 'SVG'
+EXPORTPDFFILTER = 'pdf files (*.pdf)'
+EXPORTSVGFILTER = 'svg files (*.svg)'
+EXPORTTYPES = [EXPORTPDF, EXPORTSVG]
+EXPORTFILTERS = EXPORTPDFFILTER
+PAGEPORTRAIT = 'portrait'
+PAGELANDSCAPE = 'landscape'
+PAGETYPES = [PAGEPORTRAIT, PAGELANDSCAPE]
 
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLGRIDTICKLABELS, GLGRIDTICKMARKS, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
-    GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
-    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER
+    GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
+    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER
 
 
 class ExportStripToFilePopup(ExportDialog):
@@ -63,7 +66,7 @@ class ExportStripToFilePopup(ExportDialog):
                  acceptMode=FileDialog.AcceptSave,
                  preferences=None,
                  selectFile=None,
-                 filter=exportFilters,
+                 filter=EXPORTFILTERS,
                  strips=None,
                  includeSpectumDisplays=True,
                  **kw):
@@ -172,14 +175,23 @@ class ExportStripToFilePopup(ExportDialog):
         HLine(userFrame, grid=(row, 0), gridSpan=(1, 2), colour=getColours()[DIVIDER], height=20)
         row += 1
         topRow = row
-        Label(userFrame, text='Select Print Type', grid=(row, 0),
+        Label(userFrame, text='Print Type', grid=(row, 0),
               hAlign='left', vAlign='centre')
 
         row += 1
-        self.exportType = RadioButtons(userFrame, exportTypes,
-                                       grid=(row, 0), direction='v',
+        self.exportType = RadioButtons(userFrame, EXPORTTYPES,
+                                       grid=(row, 0), direction='h', hAlign='left', spacing=(20,0),
                                        callback=self._changePrintType)
-        self.exportType.set(exportPDF)
+        self.exportType.set(EXPORTPDF)
+
+        row += 1
+        Label(userFrame, text='Page Orientation', grid=(row, 0),
+              hAlign='left', vAlign='centre')
+
+        row += 1
+        self.pageType = RadioButtons(userFrame, PAGETYPES,
+                                       grid=(row, 0), direction='h', hAlign='left', spacing=(20,0))
+        self.pageType.set(PAGEPORTRAIT)
 
         row += 1
         self.spacer = Spacer(userFrame, 5, 5,
@@ -346,12 +358,12 @@ class ExportStripToFilePopup(ExportDialog):
 
     def _changePrintType(self):
         selected = self.exportType.get()
-        if selected == exportPDF:
-            self._dialogFilter = exportPDFFilter
+        if selected == EXPORTPDF:
+            self._dialogFilter = EXPORTPDFFILTER
             self.updateDialog()
 
-        elif selected == exportSVG:
-            self._dialogFilter = exportSVGFilter
+        elif selected == EXPORTSVG:
+            self._dialogFilter = EXPORTSVGFILTER
             self.updateDialog()
 
     def buildParameters(self):
@@ -361,19 +373,30 @@ class ExportStripToFilePopup(ExportDialog):
 
         # build the export dict and flags
 
-        pIndex = self.stripToExport.getIndex()
-        thisPid = self.stripPids[pIndex]
-        strip = self.project.getByPid(thisPid)
+        if self.specToExport and self.specToExport.isChecked:
+            selected = self.specToExport.get()
+            # thisPid = self.objects[pIndex][1]
+            spectrumDisplay = self.objects[selected][0]
+            strip = spectrumDisplay.strips[0]
+        else:
+            selected = self.stripToExport.get()
+            # thisPid = self.stripPids[pIndex]
+            spectrumDisplay = None
+            strip = self.objects[selected][0]     #self.project.getByPid(thisPid)
 
-        prIndex = self.exportType.getIndex()
-        prType = exportTypes[prIndex]
+        # prIndex = self.exportType.getIndex()
+        # prType = EXPORTTYPES[prIndex]
+        prType = self.exportType.get()
+        pageType = self.pageType.get()
 
         if strip:
             # return the parameters
             params = {GLFILENAME: self.exitFilename,
+                      GLSPECTRUMDISPLAY: spectrumDisplay,
                       GLSTRIP: strip,
                       GLWIDGET: strip._CcpnGLWidget,
                       GLPRINTTYPE: prType,
+                      GLPAGETYPE: pageType,
                       GLSELECTEDPIDS: self.treeView.getSelectedObjectsPids()
                       }
             selectedList = self.treeView.getSelectedItems()
@@ -393,11 +416,11 @@ class ExportStripToFilePopup(ExportDialog):
             glWidget = params[GLWIDGET]
             prType = params[GLPRINTTYPE]
 
-            if prType == exportPDF:
+            if prType == EXPORTPDF:
                 pdfExport = glWidget.exportToPDF(filename, params)
                 if pdfExport:
                     pdfExport.writePDFFile()
-            elif prType == exportSVG:
+            elif prType == EXPORTSVG:
                 svgExport = glWidget.exportToSVG(filename, params)
                 if svgExport:
                     svgExport.writeSVGFile()

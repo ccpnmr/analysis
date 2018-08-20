@@ -74,9 +74,11 @@ LENOFFSETS = 4
 FADE_FACTOR = 0.25
 
 GLFILENAME = 'filename'
+GLSPECTRUMDISPLAY = 'spectrumDisplay'
 GLSTRIP = 'strip'
 GLWIDGET = 'glWidget'
 GLPRINTTYPE = 'printType'
+GLPAGETYPE = 'pageType'
 GLSELECTEDPIDS = 'selectedPids'
 GLPEAKSYMBOLS = 'peakSymbols'
 GLPEAKLABELS = 'peakLabels'
@@ -96,3 +98,4 @@ GLOTHERLINES = 'Other Lines'
 GLSTRIPLABELLING = 'Strip Labelling'
 GLREGIONS = 'regions'
 GLPLOTBORDER = 'plotBorder'
+

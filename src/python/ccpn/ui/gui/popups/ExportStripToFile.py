@@ -37,6 +37,7 @@ from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes, Pri
 from ccpn.ui.gui.popups.ExportDialog import ExportDialog
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
@@ -145,6 +146,7 @@ class ExportStripToFilePopup(ExportDialog):
                 if specDisplays:
                     Label(userFrame, text='Select Item to Print', grid=(row, 0),
                           hAlign='left', vAlign='centre')
+                    pulldownLabel = 'Select Item:'
 
                     row += 1
                     self.specToExport = RadioButtons(userFrame, [ky for ky in self.objects.keys() if 'SpectrumDisplay' in ky],
@@ -153,10 +155,12 @@ class ExportStripToFilePopup(ExportDialog):
                 else:
                     Label(userFrame, text='Select Strip to Print', grid=(row, 0),
                           hAlign='left', vAlign='centre')
+                    pulldownLabel = 'Select Strip:'
 
         else:
             Label(userFrame, text='Current selected strip', grid=(row, 0),
                   hAlign='left', vAlign='centre')
+            pulldownLabel = 'Current Strip:'
 
         row += 1
         self.stripToExport = RadioButtons(userFrame, [ky for ky in self.objects.keys() if 'SpectrumDisplay' not in ky],
@@ -171,6 +175,21 @@ class ExportStripToFilePopup(ExportDialog):
             self.strip = self.strips[0]
 
         self.stripToExport.setMinimumSize(self.stripToExport.sizeHint())
+
+        row += 1
+        self.objectPulldown = PulldownListCompoundWidget(userFrame,
+                                          grid=(row, 0), vAlign='top', hAlign='left',
+                                          orientation='left',
+                                          labelText=pulldownLabel,
+                                          texts=[ky for ky in self.objects.keys()]
+                                          )
+        if self.current.strip:
+            self.objectPulldown.select(self.current.strip.id)
+            self.strip = self.current.strip
+        else:
+            self.objectPulldown.select(self.strips[0].id)
+            self.strip = self.strips[0]
+
 
         # add a spacer to separate from the common save widgets
         row += 1

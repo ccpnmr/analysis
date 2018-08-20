@@ -136,7 +136,7 @@ class PreferencesPopup(CcpnDialog):
         ## 2 Tab
         self.spectrumTabFrame = Frame(self, setLayout=True)
 
-        # make a new scroll area form the frame
+        # make a new scroll area for the frame
         self._spectrumTabScrollArea = ScrollArea(self, setLayout=True)
         self._spectrumTabScrollArea.setWidgetResizable(True)
         self._spectrumTabScrollArea.setWidget(self.spectrumTabFrame)

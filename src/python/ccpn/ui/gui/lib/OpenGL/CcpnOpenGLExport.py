@@ -56,11 +56,11 @@ from reportlab.platypus.tables import Table
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from ccpn.util.Report import Report
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLGRIDTICKLABELS, GLGRIDTICKMARKS, \
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
-    GLPAGETYPE, GLSPECTRUMDISPLAY
+    GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES,\
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 
@@ -324,7 +324,7 @@ class GLExporter():
 
         self._addAxisMask()
         self._addGridTickMarks()
-        if self.params[GLGRIDTICKLABELS]: self._addGridLabels()
+        if self.params[GLAXISLABELS]: self._addGridLabels()
 
     def _addGridLines(self):
         """
@@ -909,7 +909,7 @@ class GLExporter():
         if self.rAxis or self.bAxis:
             colourGroups = OrderedDict()
             if self.rAxis:
-                if self.params[GLGRIDTICKMARKS]:
+                if self.params[GLAXISMARKS]:
                     self._appendIndexLineGroup(indArray=self.parent.gridList[1],
                                            colourGroups=colourGroups,
                                            plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
@@ -918,10 +918,10 @@ class GLExporter():
                                                     PLOTHEIGHT: self.displayScale * self.mainH},
                                            name='gridAxes',
                                            setColour=self.foregroundColour)
-                    if self.params[GLPLOTBORDER]:
+                    if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                         list(colourGroups.values())[0][PDFLINES].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
                                                                      self.displayScale * self.mainW, self.pixHeight])
-                elif self.params[GLPLOTBORDER]:
+                elif self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 
                     tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)
@@ -940,7 +940,7 @@ class GLExporter():
                                                                      self.displayScale * self.mainW, self.pixHeight]]
 
             if self.bAxis:
-                if self.params[GLGRIDTICKMARKS]:
+                if self.params[GLAXISMARKS]:
                     self._appendIndexLineGroup(indArray=self.parent.gridList[2],
                                            colourGroups=colourGroups,
                                            plotDim={PLOTLEFT: 0.0,
@@ -949,10 +949,10 @@ class GLExporter():
                                                     PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
                                            name='gridAxes',
                                            setColour=self.foregroundColour)
-                    if self.params[GLPLOTBORDER]:
+                    if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                         list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
                                                                      self.displayScale * self.mainW, self.displayScale * self.bAxisH])
-                elif self.params[GLPLOTBORDER]:
+                elif self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 
                     tempVertexArray = GLVertexArray(numLists=1, drawMode=GL.GL_LINE, dimension=2)

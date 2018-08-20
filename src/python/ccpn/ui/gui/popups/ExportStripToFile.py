@@ -53,10 +53,11 @@ PAGEPORTRAIT = 'portrait'
 PAGELANDSCAPE = 'landscape'
 PAGETYPES = [PAGEPORTRAIT, PAGELANDSCAPE]
 
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLGRIDTICKLABELS, GLGRIDTICKMARKS, \
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
-    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER
+    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, \
+    GLWIDGET, GLPLOTBORDER, GLAXISLINES
 
 
 class ExportStripToFilePopup(ExportDialog):
@@ -96,8 +97,9 @@ class ExportStripToFilePopup(ExportDialog):
                          GLMULTIPLETSYMBOLS,
                          GLMULTIPLETLABELS,
                          GLGRIDLINES,
-                         GLGRIDTICKMARKS,
-                         GLGRIDTICKLABELS,
+                         GLAXISLINES,
+                         GLAXISMARKS,
+                         GLAXISLABELS,
                          GLSPECTRUMCONTOURS,
                          GLSPECTRUMBORDERS,
                          GLMARKLINES,
@@ -322,8 +324,9 @@ class ExportStripToFilePopup(ExportDialog):
         self.treeView.selectObjects(pidList)
 
         printItems.extend((GLGRIDLINES,
-                           GLGRIDTICKMARKS,
-                           GLGRIDTICKLABELS,
+                           GLAXISLINES,
+                           GLAXISMARKS,
+                           GLAXISLABELS,
                            GLSPECTRUMCONTOURS,
                            GLSPECTRUMBORDERS,
                            GLMARKLINES,

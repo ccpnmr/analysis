@@ -60,7 +60,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLGRI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
-    GLPAGETYPE
+    GLPAGETYPE, GLSPECTRUMDISPLAY
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES,\
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 
@@ -108,23 +108,6 @@ class GLExporter():
         self._ordering = []
         self._importFonts()
 
-        # import matplotlib.font_manager
-        #
-        # foundFonts = matplotlib.font_manager.findSystemFonts()
-        #
-        # # load all fonts that are in the openGL font list
-        # for glFonts in self.parent.globalGL.fonts.values():
-        #     for ff in foundFonts:
-        #         if glFonts.fontName + '.ttf' in ff:
-        #             pdfmetrics.registerFont(TTFont(glFonts.fontName, ff))
-        #             break
-        #     else:
-        #         raise RuntimeError('Font %s not found.' % (glFonts.fontName + '.ttf'))
-        #
-        # # set a default fontName
-        # self.fontName = self.parent.globalGL.glSmallFont.fontName
-        #
-
         # set default colours
         self.backgroundColour = colors.Color(*self.parent.background[0:3],
                                              alpha=self.parent.background[3])
@@ -132,36 +115,31 @@ class GLExporter():
                                              alpha=self.parent.foreground[3])
 
         # build all the sections of the pdf
-        self._buildPage()
-        self._buildAll()
-        self._addDrawingToStory()
+        self.stripReports = []
 
-        from reportlab.platypus.tables import Table
-        from reportlab.platypus.frames import ShowBoundaryValue
+        if self.params[GLSPECTRUMDISPLAY]:
+            spectrumDisplay = self.params[GLSPECTRUMDISPLAY]
 
-        # F = [
-        #     list of flowables........
-        #     ]
-        # story.append(
-        #         Balanced(
-        #                 F,  #the flowables we are balancing
-        #                 nCols=2,  #the number of columns
-        #                 needed=72,  #the minimum space needed by the flowable
-        #                 spacBefore=0,
-        #                 spaceAfter=0,
-        #                 showBoundary=None,  #optional boundary showing
-        #                 leftPadding=None,  #these override the created frame
-        #                 rightPadding=None,  #paddings if specified else the
-        #                 topPadding=None,  #default frame paddings
-        #                 bottomPadding=None,  #are used
-        #                 innerPadding=None,  #the gap between frames if specified else
-        #                 #use max(leftPadding,rightPadding)
-        #                 name='',  #for identification purposes when stuff goes awry
-        #                 endSlack=0.1,  #height disparity allowance ie 10% of available height
-        #                 )
-        #         )
+            self.numStrips = len(spectrumDisplay.strips)
+            for strip in spectrumDisplay.strips:
 
+                # point to the correct strip
+                self.strip = strip
+                self.parent = strip._CcpnGLWidget
 
+                self._buildPage()
+                self._buildStrip()
+                self._addDrawingToStory()
+        else:
+            self.numStrips = 1
+            self.strip = self.params[GLSTRIP]
+            self.parent = self.strip._CcpnGLWidget
+
+            self._buildPage()
+            self._buildStrip()
+            self._addDrawingToStory()
+
+        self._addTableToStory()
 
         # this generates the buffer to write to the file
         self._report.buildDocument()
@@ -247,7 +225,7 @@ class GLExporter():
         ratio = self.parent.h / self.parent.w
 
         # translate to size of drawing Flowable
-        self.pixWidth = self._report.doc.width
+        self.pixWidth = self._report.doc.width / self.numStrips
         self.pixHeight = self.pixWidth * ratio
 
         # scale fonts to appear the correct size
@@ -265,7 +243,7 @@ class GLExporter():
         pixBottom = pageHeight - self.pixHeight - self.margin
         pixLeft = self.margin
 
-    def _buildAll(self):
+    def _buildStrip(self):
         # create an object that can be added to a report
         self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
 
@@ -1053,9 +1031,13 @@ class GLExporter():
         """
         Add the current drawing the story of a document
         """
-        report = self.report()
-        table = ((report, report, report, report),)
+        self.stripReports.append(self.report())
+        # report = self.report()
+        # table = ((report, report, report, report),)
         # self._report.story.append(self.report())
+
+    def _addTableToStory(self):
+        table = (self.stripReports, )                               # tuple
         self._report.story.append(Table(table, None, None))
 
     def writeSVGFile(self):

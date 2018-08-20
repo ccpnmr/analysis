@@ -116,6 +116,8 @@ class GLExporter():
 
         # build all the sections of the pdf
         self.stripReports = []
+        self.stripWidths = []
+        self.stripSpacing = 0
 
         if self.params[GLSPECTRUMDISPLAY]:
             spectrumDisplay = self.params[GLSPECTRUMDISPLAY]
@@ -221,20 +223,36 @@ class GLExporter():
             self.mainL = 0
             self.mainB = self.parent.AXIS_MARGINBOTTOM
 
+        # stripFrame ratio
+        frame = self.strip.spectrumDisplay.stripFrame
+        fh = frame.height()
+        fw = frame.width()
+        frameRatio = fh / fw
+
+        self.pixHeight = self._report.doc.height - (2.0 * cm)
+        self.pixWidth = self.pixHeight / frameRatio
+        self.fontScale = 1.025 * self.pixHeight / self.parent.h
+
         # strip axis ratio
         ratio = self.parent.h / self.parent.w
 
+
         # translate to size of drawing Flowable
-        self.pixWidth = self._report.doc.width / self.numStrips
+        self.pixWidth = self._report.doc.width / (fw / self.parent.w)        #self.numStrips
         self.pixHeight = self.pixWidth * ratio
 
         # scale fonts to appear the correct size
         self.fontScale = 1.1 * self.pixWidth / self.parent.w
+
+        # if too tall then flip the scaling
         if self.pixHeight > (self._report.doc.height - 2 * cm):
             # TODO:ED check what else is stealing the height
             self.pixHeight = self._report.doc.height - (2 * cm)
             self.pixWidth = self.pixHeight / ratio
             self.fontScale = 1.025 * self.pixHeight / self.parent.h
+            print('>>>**', self.pixWidth, self.pixHeight, ratio, frameRatio)
+        else:
+            print('>>>  ', self.pixWidth, self.pixHeight, ratio, frameRatio)
 
         # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
         self.displayScale = self.pixHeight / self.parent.h
@@ -242,6 +260,9 @@ class GLExporter():
         # don't think these are needed
         pixBottom = pageHeight - self.pixHeight - self.margin
         pixLeft = self.margin
+
+        # assume that the spacing between strips is 5 pixels
+        self.stripSpacing = 5.0 * self.displayScale
 
     def _buildStrip(self):
         # create an object that can be added to a report
@@ -1031,14 +1052,16 @@ class GLExporter():
         """
         Add the current drawing the story of a document
         """
-        self.stripReports.append(self.report())
+        report = self.report()
+        self.stripReports.append(report)
+        self.stripWidths.append(report.width+self.stripSpacing)
         # report = self.report()
         # table = ((report, report, report, report),)
         # self._report.story.append(self.report())
 
     def _addTableToStory(self):
         table = (self.stripReports, )                               # tuple
-        self._report.story.append(Table(table, None, None))
+        self._report.story.append(Table(table, colWidths=self.stripWidths))
 
     def writeSVGFile(self):
         """

@@ -115,21 +115,10 @@ class ExportStripToFilePopup(ExportDialog):
         for strip in self.strips:
             self.objects[strip.id] = (strip, strip.pid)
 
-        # self.stripIds = [sd.id for sd in self.strips]
-        # self.stripPids = [sd.pid for sd in self.strips]
-
         # create radio buttons to choose the strip to print
-        row = 0
+        # row = 0
         if len(self.strips) > 1:
             if self.includeSpectumDisplays:
-                # row += 1
-                # self.spectrumDisplayCheckBox = CheckBoxCompoundWidget(userFrame,
-                #                                                       grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #                                                       orientation='left',
-                #                                                       labelText='Spectrum Display: %s' % self.spectumDisplay.id,
-                #                                                       checked=False,
-                #                                                       callback=self._changeSpectrumDisplay
-                #                                                       )
 
                 # get the list of spectrumDisplays containing the strips
                 specDisplays = set()
@@ -140,56 +129,47 @@ class ExportStripToFilePopup(ExportDialog):
                 for spec in specDisplays:
                     self.objects['SpectrumDisplay: %s' % spec.id] = (spec, spec.pid)
 
-                # self.specIds = ['SpectrumDisplay: %s' % sp.id for sp in self.spectrumDisplays]
-                # self.specPids = [sp.pid for sp in self.spectrumDisplays]
-
                 if specDisplays:
-                    Label(userFrame, text='Select Item to Print', grid=(row, 0),
-                          hAlign='left', vAlign='centre')
+                    # Label(userFrame, text='Select Item to Print', grid=(row, 0),
+                    #       hAlign='left', vAlign='centre')
                     pulldownLabel = 'Select Item:'
 
-                    row += 1
-                    self.specToExport = RadioButtons(userFrame, [ky for ky in self.objects.keys() if 'SpectrumDisplay' in ky],
-                                                      grid=(row, 0), direction='v',
-                                                      callback=self._changeSpectrumDisplay)
+                    # row += 1
+                    # self.specToExport = RadioButtons(userFrame, [ky for ky in self.objects.keys() if 'SpectrumDisplay' in ky],
+                    #                                  grid=(row, 0), direction='v',
+                    #                                  callback=self._changeSpectrumDisplay)
                 else:
-                    Label(userFrame, text='Select Strip to Print', grid=(row, 0),
-                          hAlign='left', vAlign='centre')
+                    # Label(userFrame, text='Select Strip to Print', grid=(row, 0),
+                    #       hAlign='left', vAlign='centre')
                     pulldownLabel = 'Select Strip:'
 
         else:
-            Label(userFrame, text='Current selected strip', grid=(row, 0),
-                  hAlign='left', vAlign='centre')
+            # Label(userFrame, text='Current selected strip', grid=(row, 0),
+            #       hAlign='left', vAlign='centre')
             pulldownLabel = 'Current Strip:'
 
-        row += 1
-        self.stripToExport = RadioButtons(userFrame, [ky for ky in self.objects.keys() if 'SpectrumDisplay' not in ky],
-                                          grid=(row, 0), direction='v',
-                                          callback=self._changeStrip)
+        # row += 1
+        # self.stripToExport = RadioButtons(userFrame, [ky for ky in self.objects.keys() if 'SpectrumDisplay' not in ky],
+        #                                   grid=(row, 0), direction='v',
+        #                                   callback=self._changeStrip)
 
-        if self.current.strip:
-            self.stripToExport.set(self.current.strip.id)
-            self.strip = self.current.strip
-        else:
-            self.stripToExport.set(self.strips[0].id)
-            self.strip = self.strips[0]
+        # if self.current.strip:
+        #     self.stripToExport.set(self.current.strip.id)
+        #     self.strip = self.current.strip
+        # else:
+        #     self.stripToExport.set(self.strips[0].id)
+        #     self.strip = self.strips[0]
+        #
+        # self.stripToExport.setMinimumSize(self.stripToExport.sizeHint())
 
-        self.stripToExport.setMinimumSize(self.stripToExport.sizeHint())
-
-        row += 1
+        row = 0
         self.objectPulldown = PulldownListCompoundWidget(userFrame,
-                                          grid=(row, 0), vAlign='top', hAlign='left',
-                                          orientation='left',
-                                          labelText=pulldownLabel,
-                                          texts=[ky for ky in self.objects.keys()]
-                                          )
-        if self.current.strip:
-            self.objectPulldown.select(self.current.strip.id)
-            self.strip = self.current.strip
-        else:
-            self.objectPulldown.select(self.strips[0].id)
-            self.strip = self.strips[0]
-
+                                                         grid=(row, 0), vAlign='top', hAlign='left',
+                                                         orientation='left',
+                                                         labelText=pulldownLabel,
+                                                         texts=sorted([ky for ky in self.objects.keys()]),
+                                                         callback=self._changePulldown
+                                                         )
 
         # add a spacer to separate from the common save widgets
         row += 1
@@ -201,7 +181,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         row += 1
         self.exportType = RadioButtons(userFrame, EXPORTTYPES,
-                                       grid=(row, 0), direction='h', hAlign='left', spacing=(20,0),
+                                       grid=(row, 0), direction='h', hAlign='left', spacing=(20, 0),
                                        callback=self._changePrintType)
         self.exportType.set(EXPORTPDF)
 
@@ -211,7 +191,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         row += 1
         self.pageType = RadioButtons(userFrame, PAGETYPES,
-                                       grid=(row, 0), direction='h', hAlign='left', spacing=(20,0))
+                                     grid=(row, 0), direction='h', hAlign='left', spacing=(20, 0))
         self.pageType.set(PAGEPORTRAIT)
 
         row += 1
@@ -221,31 +201,50 @@ class ExportStripToFilePopup(ExportDialog):
 
         row += 1
         self.treeView = PrintTreeCheckBoxes(userFrame, project=self.project, grid=(row, 0))
+        if self.current.strip:
+            self.objectPulldown.select(self.current.strip.id)
+            self.strip = self.current.strip
+        else:
+            self.objectPulldown.select(self.strips[0].id)
+            self.strip = self.strips[0]
+
         self._populateTreeView()
 
         self.setMinimumSize(self.sizeHint())
 
-    def _changeSpectrumDisplay(self):
-        selected = self.specToExport.get()
-        # if selected != self.strip.id:
-        #     self.strip = self.strips[self.stripIds.index(selected)]
-        self.spectrumDisplay = self.objects[selected][0]
-        self.strip = self.spectrumDisplay.strips[0]
+    def _changePulldown(self, int):
+        selected = self.objectPulldown.getText()
+        if 'SpectrumDisplay' in selected:
+            self.spectrumDisplay = self.objects[selected][0]
+            self.strip = self.spectrumDisplay.strips[0]
+        else:
+            self.spectrumDisplay = None
+            self.strip = self.objects[selected][0]
 
         selectedList = self.treeView.getItems()
         self._populateTreeView(selectedList)
-        self.stripToExport.deselectAll()
 
-    def _changeStrip(self):
-        selected = self.stripToExport.get()
-        # if selected != self.strip.id:
-            # self.strip = self.strips[self.stripIds.index(selected)]
-        self.strip = self.objects[selected][0]
-
-        selectedList = self.treeView.getItems()
-        self._populateTreeView(selectedList)
-        if self.specToExport:
-            self.specToExport.deselectAll()
+    # def _changeSpectrumDisplay(self):
+    #     selected = self.specToExport.get()
+    #     # if selected != self.strip.id:
+    #     #     self.strip = self.strips[self.stripIds.index(selected)]
+    #     self.spectrumDisplay = self.objects[selected][0]
+    #     self.strip = self.spectrumDisplay.strips[0]
+    #
+    #     selectedList = self.treeView.getItems()
+    #     self._populateTreeView(selectedList)
+    #     self.stripToExport.deselectAll()
+    #
+    # def _changeStrip(self):
+    #     selected = self.stripToExport.get()
+    #     # if selected != self.strip.id:
+    #     # self.strip = self.strips[self.stripIds.index(selected)]
+    #     self.strip = self.objects[selected][0]
+    #
+    #     selectedList = self.treeView.getItems()
+    #     self._populateTreeView(selectedList)
+    #     if self.specToExport:
+    #         self.specToExport.deselectAll()
 
     def _populateTreeView(self, selectList=None):
         self.treeView.clear()
@@ -394,17 +393,24 @@ class ExportStripToFilePopup(ExportDialog):
         """
 
         # build the export dict and flags
+        # if self.specToExport and self.specToExport.isChecked:
+        #     selected = self.specToExport.get()
+        #     # thisPid = self.objects[pIndex][1]
+        #     spectrumDisplay = self.objects[selected][0]
+        #     strip = spectrumDisplay.strips[0]
+        # else:
+        #     selected = self.stripToExport.get()
+        #     # thisPid = self.stripPids[pIndex]
+        #     spectrumDisplay = None
+        #     strip = self.objects[selected][0]     #self.project.getByPid(thisPid)
 
-        if self.specToExport and self.specToExport.isChecked:
-            selected = self.specToExport.get()
-            # thisPid = self.objects[pIndex][1]
+        selected = self.objectPulldown.getText()
+        if 'SpectrumDisplay' in selected:
             spectrumDisplay = self.objects[selected][0]
             strip = spectrumDisplay.strips[0]
         else:
-            selected = self.stripToExport.get()
-            # thisPid = self.stripPids[pIndex]
             spectrumDisplay = None
-            strip = self.objects[selected][0]     #self.project.getByPid(thisPid)
+            strip = self.objects[selected][0]
 
         # prIndex = self.exportType.getIndex()
         # prType = EXPORTTYPES[prIndex]

@@ -246,13 +246,10 @@ class GLExporter():
 
         # if too tall then flip the scaling
         if self.pixHeight > (self._report.doc.height - 2 * cm):
-            # TODO:ED check what else is stealing the height
+
             self.pixHeight = self._report.doc.height - (2 * cm)
             self.pixWidth = self.pixHeight / ratio
             self.fontScale = 1.025 * self.pixHeight / self.parent.h
-            print('>>>**', self.pixWidth, self.pixHeight, ratio, frameRatio)
-        else:
-            print('>>>  ', self.pixWidth, self.pixHeight, ratio, frameRatio)
 
         # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
         self.displayScale = self.pixHeight / self.parent.h

@@ -411,14 +411,15 @@ class SequenceModule():
       self._chainDeleteNotifier = None
 
   def _closeModule(self):
+    """
+    CCPN-INTERNAL: used to close the module
+    """
     self._unRegisterNotifiers()
-    SequenceModule._alreadyOpened = False
-    action = self.mainWindow.application._findMenuAction('View', 'Show Sequence')
-    if action: # should be True
-      action.setChecked(False)
-    CcpnModule._closeModule(self)
 
   def close(self):
+    """
+    Close the table from the commandline
+    """
     self._closeModule()     # ejb - needed when closing/opening project
 
   def _initialiseChainLabels(self):

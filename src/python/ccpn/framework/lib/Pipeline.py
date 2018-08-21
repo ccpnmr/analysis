@@ -38,7 +38,7 @@ class Pipeline(object):
   '''
   className = 'Pipeline'
 
-  def __init__(self, application=None, pipelineName=None, pipes=None ):
+  def __init__(self, application, pipelineName=None, pipes=None ):
 
     self.pipelineName = pipelineName
     self._kwargs = {}
@@ -48,17 +48,14 @@ class Pipeline(object):
     self.queue = [] # Pipes to be ran
     self.updateInputData = False
 
+    self.application = application
+    self.current = self.application.current
+    self.preferences = self.application.preferences
+    self.ui = self.application.ui
+    self.project = self.application.project
 
-    if application is not None:
-      self.application = application
-      self.current = self.application.current
-      self.preferences = self.application.preferences
-      self.ui = self.application.ui
-      self.project = self.application.project
-      try:
-        self.mainWindow = self.ui.mainWindow
-      except AttributeError:
-        pass
+    self.mainWindow = self.ui.mainWindow
+
 
     if pipes is not None:
       self.pipes = [cls(application=application) for cls in pipes]
@@ -97,6 +94,8 @@ class Pipeline(object):
             pipe.inputData = self.inputData
             pipe.spectrumGroups = self.spectrumGroups
             result = pipe.runPipe(self.inputData)
+            # if not result: # that means the ran pipe does not return a valid data to use as input for next pipes
+            #   break
             self.inputData = result or set()
 
     return self.inputData

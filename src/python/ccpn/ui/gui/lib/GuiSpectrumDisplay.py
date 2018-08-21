@@ -234,8 +234,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
   def resizeEvent(self, ev):
     # resize the contents of the stripFrame
-    self.setColumnStretches(stretchValue=True)
-
+    self.setColumnStretches(stretchValue=True, widths=False)
     super(GuiSpectrumDisplay, self).resizeEvent(ev)
 
   def _toolbarChange(self, data):
@@ -880,7 +879,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     return newStrip
 
-  def setColumnStretches(self, stretchValue=False, scaleFactor=1.0):
+  def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True):
     # crude routine to set the stretch of all columns upto the last widget to stretchValue
     widgets = self.stripFrame.children()
     if widgets:
@@ -904,7 +903,8 @@ class GuiSpectrumDisplay(CcpnModule):
           maxCol = max(maxCol, column)
 
         for col in range(0, maxCol+1):
-          thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
+          if widths:
+            thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
           thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
       else:
         maxCol = 0
@@ -916,10 +916,12 @@ class GuiSpectrumDisplay(CcpnModule):
         leftWidth = scaleFactor*(thisLayoutWidth - AXIS_WIDTH - (maxCol*AXIS_PADDING)) / (maxCol+1)
         endWidth = leftWidth + AXIS_WIDTH
         for col in range(0, maxCol):
-          thisLayout.itemAt(col).widget().setMinimumWidth(leftWidth)
+          if widths:
+            thisLayout.itemAt(col).widget().setMinimumWidth(leftWidth)
           thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
 
-        thisLayout.itemAt(maxCol).widget().setMinimumWidth(endWidth)
+        if widths:
+          thisLayout.itemAt(maxCol).widget().setMinimumWidth(endWidth)
         thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
 
   def _maximiseRegions(self):

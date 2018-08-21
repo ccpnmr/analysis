@@ -37,7 +37,8 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, STRIPHEADER_FOREGROUND
+from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
+    STRIPHEADER_FOREGROUND, GUINMRRESIDUE
 
 import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -107,8 +108,14 @@ class _StripLabel(Label):
     drag = QtGui.QDrag(self)
     drag.setMimeData(mimeData)
 
-    # pixmap = QtGui.QPixmap.grabWidget(self)     # ejb - set the pixmap to the image of the label
-    pixmap = self.grab()     # ejb - set the pixmap to the image of the label
+    dragLabel = QtWidgets.QLabel()
+    dragLabel.setText(self.text())
+    dragLabel.setFont(textFont)
+    dragLabel.setStyleSheet('color : %s' % (getColours()[GUINMRRESIDUE]))
+
+    pixmap = dragLabel.grab()     # ejb - set the pixmap to the image of the label
+    # pixmap = self.grab()     # ejb - set the pixmap to the image of the current widget
+
     painter = QtGui.QPainter(pixmap)            #       replaces the block text
     painter.setCompositionMode(painter.CompositionMode_DestinationIn)
 
@@ -116,7 +123,8 @@ class _StripLabel(Label):
     painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
     painter.end()
     drag.setPixmap(pixmap)
-    drag.setHotSpot(event.pos())
+    # drag.setHotSpot(event.pos())
+    drag.setHotSpot(QtCore.QPoint(dragLabel.width() / 2, dragLabel.height() / 2))
 
     # drag.start(QtCore.Qt.MoveAction)
     drag.exec_(QtCore.Qt.MoveAction)      # ejb - PytQ5
@@ -144,32 +152,38 @@ class _StripLabel(Label):
           dataItem = json.loads(mime)
           if 'text' in dataItem and dataItem['text'].startswith('NR'):
           # only test NmrResidues
-          # print('>>>DragEnterFilter %s' % dataItem['text'])
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.DragCopyCursor)
+          #   print('>>>DragEnterFilter %s' % dataItem['text'])
+          #   self.setCursor(QtCore.Qt.DragCopyCursor)
+            QtWidgets.QApplication.processEvents()
       finally:
         event.accept()
         return True
 
     if event.type() == QtCore.QEvent.DragLeave:
-      QtWidgets.QApplication.restoreOverrideCursor()
+      # QtWidgets.QApplication.restoreOverrideCursor()
+      # QtWidgets.QApplication.processEvents()
       # print('>>>DragLeaveFilter')
       event.accept()
       return True
 
     if event.type() == QtCore.QEvent.Leave:
-      QtWidgets.QApplication.restoreOverrideCursor()
+      # QtWidgets.QApplication.restoreOverrideCursor()
+      # QtWidgets.QApplication.processEvents()
       # print('>>>DragLeaveFilter')
       event.accept()
       return True
 
     if event.type() == QtCore.QEvent.MouseMove:
       if not isinstance(obj,_StripLabel):
-        QtWidgets.QApplication.restoreOverrideCursor()
+        # QtWidgets.QApplication.restoreOverrideCursor()
+        # QtWidgets.QApplication.processEvents()
+        # print(">>>MoveFilter")
         event.accept()
         return True
 
     if event.type() == QtCore.QEvent.Drop:
-      QtWidgets.QApplication.restoreOverrideCursor()
+      # QtWidgets.QApplication.restoreOverrideCursor()
+      # QtWidgets.QApplication.processEvents()
       # print(">>>DropFilter")
       event.ignore()
       # no return True needed, so BackboneAssignment._processDroppedItem still fires

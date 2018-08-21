@@ -375,7 +375,7 @@ class GuiStripNd(GuiStrip):
     """
     from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup as ExportDialog
 
-    self.exportPdf = ExportDialog(parent=self.mainWindow, mainWindow=self.mainWindow, strips=[self])
+    self.exportPdf = ExportDialog(parent=self.mainWindow, mainWindow=self.mainWindow, strips=self.spectrumDisplay.strips)
     self.exportPdf.exec_()
 
   def copyStrip(self):

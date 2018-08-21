@@ -195,7 +195,7 @@ class GuiStrip1d(GuiStrip):
         """show the export strip to file dialog
         """
         from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup as ExportDialog
-        self.exportPdf = ExportDialog(parent=self.mainWindow, mainWindow=self.mainWindow, strips=[self])
+        self.exportPdf = ExportDialog(parent=self.mainWindow, mainWindow=self.mainWindow, strips=self.spectrumDisplay.strips)
         self.exportPdf.exec_()
 
     def _maximiseRegions(self):

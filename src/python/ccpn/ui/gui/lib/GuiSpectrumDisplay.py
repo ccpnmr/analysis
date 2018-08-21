@@ -232,6 +232,12 @@ class GuiSpectrumDisplay(CcpnModule):
                                      'SpectrumDisplay',
                                      self._toolbarChange)
 
+  def resizeEvent(self, ev):
+    # resize the contents of the stripFrame
+    self.setColumnStretches(stretchValue=True)
+
+    super(GuiSpectrumDisplay, self).resizeEvent(ev)
+
   def _toolbarChange(self, data):
     trigger = data[Notifier.TRIGGER]
     if trigger == Notifier.CHANGE:
@@ -890,7 +896,6 @@ class GuiSpectrumDisplay(CcpnModule):
       else:
         firstStripWidth = thisLayout.itemAt(0).widget().width()
 
-      # TODO:ED doesn't update when resizing
       if not self.lastAxisOnly:
         maxCol = 0
         for wid in widgets[1:]:

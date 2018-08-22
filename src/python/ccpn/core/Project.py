@@ -1019,6 +1019,28 @@ class Project(AbstractWrapperObject):
       if undo is not None:
         undo.decreaseBlocking()
 
+  def recurseAnalyseUrl(self, filePath):
+    validList = set()
+
+    if os.path.isdir(filePath):
+      dirs = [os.path.join(filePath, dirpath) for dirpath, dirs, files in os.walk(filePath, topdown=False)
+              if os.path.isdir(os.path.join(filePath, dirpath))]
+      # dirs = [dI for dI in os.listdir(filePath) if os.path.isdir(os.path.join(filePath, dI))]
+      for dI in dirs:
+        dataType, subType, usePath = ioFormats.analyseUrl(dI)
+
+        # only add the valid types to the set
+        if os.path.isdir(usePath) and dataType is not None and subType is not None:
+
+          # only add if not a subset of an existing path
+          for inList in validList:
+            if inList[2].startswith(usePath):
+              break
+          else:
+            validList.add((dataType, subType, usePath))
+
+    return validList
+
   def loadData(self, path:str) -> typing.Optional[typing.List]:
     """
     Load data from path, determining type first.
@@ -1050,6 +1072,9 @@ class Project(AbstractWrapperObject):
 
     # urlInfo is list of triplets of (type, subType, modifiedUrl),
     # e.g. ('Spectrum', 'Bruker', newUrl)
+
+    validList = self.recurseAnalyseUrl(path)
+
     dataType, subType, usePath = ioFormats.analyseUrl(path)
 
     #TODO:RASMUS: Replace prints by logger calls

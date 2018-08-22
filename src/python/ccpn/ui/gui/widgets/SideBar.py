@@ -412,10 +412,10 @@ class SideBar(QtWidgets.QTreeWidget, Base):
       getLogger().debug('>>> dropped: '+str(url))
 
       dataType, subType, usePath = ioFormats.analyseUrl(url)
-      if dataType == 'Project' and subType in (ioFormats.CCPN
-                                               , ioFormats.NEF
-                                               , ioFormats.NMRSTAR
-                                               , ioFormats.SPARKY):
+      if dataType == 'Project' and subType in (ioFormats.CCPN,
+                                               ioFormats.NEF,
+                                               ioFormats.NMRSTAR,
+                                               ioFormats.SPARKY):
 
         okToContinue = self.mainWindow._queryCloseProject(title='Load %s project' % subType,
                                                           phrase='create a new')

@@ -1253,6 +1253,8 @@ class Framework:
   def _loadNefFile(self, path:str, makeNewProject=True) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
 
+    from ccpn.core.lib.ContextManagers import undoBlock
+
     dataBlock = self.nefReader.getNefData(path)
 
     if makeNewProject:
@@ -1260,23 +1262,27 @@ class Framework:
         self._closeProject()
       self.project = self.newProject(dataBlock.name)
 
-    self._echoBlocking += 1
-    self.project._undo.increaseBlocking()
+    # self._echoBlocking += 1
+    # self.project._undo.increaseBlocking()
     self.project._wrappedData.shiftAveraging = False
 
-    # try:
-    self.nefReader.importNewProject(self.project, dataBlock)
-    # except Exception as es:
-    #   getLogger().warning('Error loading Nef file: %s' % str(es))
-    # finally:
+    with undoBlock(self):
+      try:
+        self.nefReader.importNewProject(self.project, dataBlock)
+      except Exception as es:
+        getLogger().warning('Error loading Nef file: %s' % str(es))
+      # finally:
+
     self.project._wrappedData.shiftAveraging = True
-    self._echoBlocking -= 1
-    self.project._undo.decreaseBlocking()
+    # self._echoBlocking -= 1
+    # self.project._undo.decreaseBlocking()
 
     return self.project
 
   def _loadNMRStarFile(self, path:str, makeNewProject=True) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
+
+    from ccpn.core.lib.ContextManagers import undoBlock
 
     dataBlock = self.nefReader.getNMRStarData(path)
 
@@ -1285,23 +1291,26 @@ class Framework:
         self._closeProject()
       self.project = self.newProject(dataBlock.name)
 
-    self._echoBlocking += 1
-    self.project._undo.increaseBlocking()
+    # self._echoBlocking += 1
+    # self.project._undo.increaseBlocking()
     self.project._wrappedData.shiftAveraging = False
 
-    try:
-      self.nefReader.importNewNMRStarProject(self.project, dataBlock)
-    except Exception as es:
-      getLogger().warning('Error loading NMRStar file: %s' % str(es))
-    finally:
-      self.project._wrappedData.shiftAveraging = True
-      self._echoBlocking -= 1
-      self.project._undo.decreaseBlocking()
+    with undoBlock(self):
+      try:
+        self.nefReader.importNewNMRStarProject(self.project, dataBlock)
+      except Exception as es:
+        getLogger().warning('Error loading NMRStar file: %s' % str(es))
+
+    self.project._wrappedData.shiftAveraging = True
+    # self._echoBlocking -= 1
+    # self.project._undo.decreaseBlocking()
 
     return self.project
 
   def _loadSparkyProject(self, path:str, makeNewProject=True) -> Project:
     """Load Project from Sparky file at path, and do necessary setup"""
+
+    from ccpn.core.lib.ContextManagers import undoBlock
 
     # read data files
     from ccpn.core.lib.CcpnSparkyIo import SPARKY_NAME
@@ -1314,19 +1323,21 @@ class Framework:
         self._closeProject()
       self.project = self.newProject(sparkyName)
 
-    self._echoBlocking += 1
-    self.project._undo.increaseBlocking()
+    # self._echoBlocking += 1
+    # self.project._undo.increaseBlocking()
 
-    try:
-      # insert file into project
+    with undoBlock(self):
+      try:
+        # insert file into project
 
-      self.sparkyReader.importSparkyProject(self.project, dataBlock)
-      sys.stderr.write('==> Loaded Sparky project files: "%s", building project\n' % (path,))
+        self.sparkyReader.importSparkyProject(self.project, dataBlock)
+        sys.stderr.write('==> Loaded Sparky project files: "%s", building project\n' % (path,))
+      except Exception as es:
+        getLogger().warning('Error loading Sparky file: %s' % str(es))
 
-    finally:
-      self.project._wrappedData.shiftAveraging = True
-      self._echoBlocking -= 1
-      self.project._undo.decreaseBlocking()
+    self.project._wrappedData.shiftAveraging = True
+    # self._echoBlocking -= 1
+    # self.project._undo.decreaseBlocking()
 
     return self.project
 

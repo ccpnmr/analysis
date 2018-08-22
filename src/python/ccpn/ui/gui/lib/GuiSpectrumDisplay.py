@@ -886,6 +886,9 @@ class GuiSpectrumDisplay(CcpnModule):
       thisLayout = self.stripFrame.layout()
       thisLayoutWidth = self.stripFrame.width()
 
+      if not thisLayout.itemAt(0):
+        return
+
       AXIS_WIDTH = 1
       AXIS_PADDING = 5
       if self.strips:

@@ -421,11 +421,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                                                           phrase='create a new')
         if okToContinue:
           with progressManager(self.mainWindow, 'Loading project... ' + url):
-            try:
-              obj = self.application.loadProject(url)
-            except Exception as es:
-              getLogger().warning('loadProject Error: %s' % str(es))
-              obj = None
+            # try:
+            obj = self.application.loadProject(url)
+            # except Exception as es:
+            #   getLogger().warning('loadProject Error: %s' % str(es))
+            #   obj = None
 
             if isinstance(obj, Project):
               try:

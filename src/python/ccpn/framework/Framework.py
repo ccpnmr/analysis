@@ -1264,14 +1264,14 @@ class Framework:
     self.project._undo.increaseBlocking()
     self.project._wrappedData.shiftAveraging = False
 
-    try:
-      self.nefReader.importNewProject(self.project, dataBlock)
-    except Exception as es:
-      getLogger().warning('Error loading Nef file: %s' % str(es))
-    finally:
-      self.project._wrappedData.shiftAveraging = True
-      self._echoBlocking -= 1
-      self.project._undo.decreaseBlocking()
+    # try:
+    self.nefReader.importNewProject(self.project, dataBlock)
+    # except Exception as es:
+    #   getLogger().warning('Error loading Nef file: %s' % str(es))
+    # finally:
+    self.project._wrappedData.shiftAveraging = True
+    self._echoBlocking -= 1
+    self.project._undo.decreaseBlocking()
 
     return self.project
 

@@ -738,7 +738,7 @@ class AbstractWrapperObject():
       else:
         for dd in iterator:
           for notifier in dd:
-            # GWV: Maybe only at the higest debug level
+            # GWV: Maybe only at the highest debug level
             self._project._logger.debug('Notifier: %s; %s; %s'
                                         % (action, self, notifier))
             notifier(self)

@@ -1019,25 +1019,43 @@ class Project(AbstractWrapperObject):
       if undo is not None:
         undo.decreaseBlocking()
 
-  def recurseAnalyseUrl(self, filePath):
-    validList = set()
+  def recurseAnalyseUrl(self, filePath, includeUndefined=False):
+    """Recurse through the given path to find valid data that can be loaded
+    This list will contain loadable files and loadable folders which may load the same data
+    if includeUndefined is True, will include ('Text', None, ...) results
+    which may not be useful
+    """
+    from ccpn.util.OrderedSet import OrderedSet
+
+    validList = OrderedSet()
 
     if os.path.isdir(filePath):
-      dirs = [os.path.join(filePath, dirpath) for dirpath, dirs, files in os.walk(filePath, topdown=False)
-              if os.path.isdir(os.path.join(filePath, dirpath))]
-      # dirs = [dI for dI in os.listdir(filePath) if os.path.isdir(os.path.join(filePath, dI))]
+      # list the folders
+      dirs = [os.path.join(filePath, dirpath) for dirpath, dirs, files in os.walk(filePath, topdown=False)]
+
+      # list the files
+      dirs += [os.path.join(filePath, dirpath, file)
+               for dirpath, dirs, files in os.walk(filePath, topdown=False)
+               for file in files]
+
+      # search the folders and files the valid data
       for dI in dirs:
         dataType, subType, usePath = ioFormats.analyseUrl(dI)
 
         # only add the valid types to the set
-        if os.path.isdir(usePath) and dataType is not None and subType is not None:
+        if usePath:
 
-          # only add if not a subset of an existing path
-          for inList in validList:
-            if inList[2].startswith(usePath):
-              break
-          else:
-            validList.add((dataType, subType, usePath))
+          # include if both defined or either is None IF includeUndefined is True
+          if (dataType and subType) or (includeUndefined and ((dataType and not subType) or (subType and not dataType))):
+
+            # only add if not a subset of an existing path
+            for inList in validList:
+              if inList[2].startswith(usePath):
+                break
+            else:
+
+              # flag whether the usePath is a folder
+              validList.add((dataType, subType, usePath, os.path.isdir(usePath)))
 
     return validList
 
@@ -1073,6 +1091,7 @@ class Project(AbstractWrapperObject):
     # urlInfo is list of triplets of (type, subType, modifiedUrl),
     # e.g. ('Spectrum', 'Bruker', newUrl)
 
+    # scan the folder for valid data
     validList = self.recurseAnalyseUrl(path)
 
     dataType, subType, usePath = ioFormats.analyseUrl(path)

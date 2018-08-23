@@ -125,11 +125,11 @@ class ChemicalShiftTableModule(CcpnModule):
                                               )
 
     # main window
-    self.chemicalShiftTable = ChemicalShiftTable(parent=self.mainWidget
-                                                 , mainWindow=self.mainWindow
-                                                 , moduleParent=self
-                                                 , setLayout=True
-                                                 , grid=(0,0))
+    self.chemicalShiftTable = ChemicalShiftTable(parent=self.mainWidget,
+                                                 mainWindow=self.mainWindow,
+                                                 moduleParent=self,
+                                                 setLayout=True,
+                                                 grid=(0,0))
     # settingsWidget
 
     if chemicalShiftList is not None:
@@ -401,7 +401,6 @@ class ChemicalShiftTable(QuickTable):
     getLogger().debug('ChemicalShiftTable>>> selection', obj)
     return
 
-    # TODO:ED not worked out correct behaviour yet
     selected = data[CallBack.OBJECT]
 
     if selected:
@@ -416,7 +415,6 @@ class ChemicalShiftTable(QuickTable):
     self.current.chemicalShift = obj
     ChemicalShiftTableModule.currentCallback = {'object':self.chemicalShiftList, 'table':self}
 
-    #FIXME:ED - this is copied from the original version below
     if obj: # should presumably always be the case
       chemicalShift = obj
       self.current.nmrAtom = chemicalShift.nmrAtom

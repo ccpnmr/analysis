@@ -259,6 +259,19 @@ class Chain(AbstractWrapperObject):
                                       % (len(changedResidues), start, stop))
 
 
+  @property
+  def sequence(self):
+    """
+    :return: the full sequence as a single string of one letter codes
+    """
+    sequence = ''
+    for residue in self.residues:
+      if residue is not None:
+        c = residue.shortName
+        if c:
+          sequence+=c
+    return sequence
+
   def _toNmrChain(self):
     ''' Makes an Nmr Chain from the chain '''
     try:

@@ -1092,7 +1092,7 @@ class Project(AbstractWrapperObject):
     # e.g. ('Spectrum', 'Bruker', newUrl)
 
     # scan the folder for valid data
-    validList = self.recurseAnalyseUrl(path)
+    # validList = self.recurseAnalyseUrl(path)
 
     dataType, subType, usePath = ioFormats.analyseUrl(path)
 

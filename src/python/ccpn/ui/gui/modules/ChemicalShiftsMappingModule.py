@@ -79,15 +79,18 @@ def chemicalShiftMappingPymolTemplate(filePath, pdbPath, aboveThresholdResidues,
       f.write('''\ncmd.hide('lines')''')
       f.write('''\ncmd.show('cartoon')''')
       f.write('''\ncmd.color('white')''')
-      f.write('''\ncmd.select('aboveThreshold', 'res  ''' + aboveThresholdResidues + ''' ')''')
-      f.write('''\ncmd.set_color("AboveColour", " ''' + str(colourAboveThreshold) + ''' ")''')
-      f.write('''\ncmd.color('AboveColour', 'aboveThreshold')''')
-      f.write('''\ncmd.select('belowThreshold', 'res  ''' + belowThresholdResidues + ''' ')''')
-      f.write('''\ncmd.set_color("BelowColour", " ''' + str(colourBelowThreshold) + ''' ")''')
-      f.write('''\ncmd.color('BelowColour', 'belowThreshold')''')
-      f.write('''\ncmd.select('missing', 'res  ''' + missingdResidues + ''' ')''')
-      f.write('''\ncmd.set_color("MissingColour", " ''' + str(colourMissing) + ''' ")''')
-      f.write('''\ncmd.color('MissingColour', 'missing')''')
+      if len(aboveThresholdResidues)>0:
+        f.write('''\ncmd.select('aboveThreshold', 'res  ''' + aboveThresholdResidues + ''' ')''')
+        f.write('''\ncmd.set_color("AboveColour", " ''' + str(colourAboveThreshold) + ''' ")''')
+        f.write('''\ncmd.color('AboveColour', 'aboveThreshold')''')
+      if len(belowThresholdResidues) > 0:
+        f.write('''\ncmd.select('belowThreshold', 'res  ''' + belowThresholdResidues + ''' ')''')
+        f.write('''\ncmd.set_color("BelowColour", " ''' + str(colourBelowThreshold) + ''' ")''')
+        f.write('''\ncmd.color('BelowColour', 'belowThreshold')''')
+      if len(missingdResidues) > 0:
+        f.write('''\ncmd.select('missing', 'res  ''' + missingdResidues + ''' ')''')
+        f.write('''\ncmd.set_color("MissingColour", " ''' + str(colourMissing) + ''' ")''')
+        f.write('''\ncmd.color('MissingColour', 'missing')''')
       if len(selection)>0:
         f.write('''\ncmd.select('Selected', 'res  ''' + selection + ''' ')''')
       else:

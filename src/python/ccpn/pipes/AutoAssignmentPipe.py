@@ -133,9 +133,9 @@ class AutomatedAssignmentPipe(SpectraPipe):
 
 
 
-AutomatedAssignmentPipe.register() # Registers the pipe in the pipeline
-
-
-if __name__ == '__main__': # Gui Test
-  from ccpn.ui.gui.widgets.PipelineWidgets import testGuiPipe
-  testGuiPipe(AutomatedAssignmentGuiPipe)
+# AutomatedAssignmentPipe.register() # Registers the pipe in the pipeline
+#
+#
+# if __name__ == '__main__': # Gui Test
+#   from ccpn.ui.gui.widgets.PipelineWidgets import testGuiPipe
+#   testGuiPipe(AutomatedAssignmentGuiPipe)

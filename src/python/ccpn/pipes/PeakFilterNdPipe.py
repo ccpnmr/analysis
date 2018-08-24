@@ -108,6 +108,6 @@ class PeakFilterNdPipe(SpectraPipe):
 
 
 
-PeakFilterNdPipe.register() # Registers the pipe in the pipeline
+# PeakFilterNdPipe.register() # Registers the pipe in the pipeline
 
 

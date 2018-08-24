@@ -40,7 +40,7 @@ DefaultLayoutFileName = 'Layout.json'
 Warning = "warning"
 WarningMessage = "Warning. Any changes in this file will be overwritten when saving a new layout."
 General = "general"
-ApplicationName = "applicationName"
+ApplicationName = "applicationName"  # type: str
 ApplicationVersion = "applicationVersion"
 GuiModules = "guiModules"
 FileNames = 'fileNames'
@@ -88,12 +88,13 @@ def _updateGeneral(mainWindow, layout):
     applicationName = application.applicationName
     applicationVersion = application.applicationVersion
     if General in layout:
-        general = getattr(layout, General)
+        general = layout.get(General)                   #getattr(layout, General)
         if ApplicationName in general:
-            setattr(general, ApplicationName, applicationName)
+            # setattr(general, ApplicationName, applicationName)
+            general[ApplicationName] = applicationName
         if ApplicationVersion in general:
-            setattr(general, ApplicationVersion, applicationVersion)
-
+            # setattr(general, ApplicationVersion, applicationVersion)
+            general[ApplicationVersion] = applicationVersion
 
 def _updateFileNames(mainWindow, layout):
     """
@@ -118,8 +119,8 @@ def _updateFileNames(mainWindow, layout):
 
     if len(names) > 0:
         if FileNames in layout:
-            setattr(layout, FileNames, list(names))
-
+            # setattr(layout, FileNames, list(names))
+            layout[FileNames] = list(names)
 
 def _updateGuiModules(mainWindow, layout):
     """
@@ -139,18 +140,18 @@ def _updateGuiModules(mainWindow, layout):
     if GuiModules in layout:
         # if ClassNameModuleName in layout.guiModules:
         #     setattr(layout.guiModules, ClassNameModuleName, classNames_ModuleNames )
-        setattr(layout, GuiModules, classNames_ModuleNames)
-
+        layout[GuiModules] = classNames_ModuleNames
+        # setattr(layout, GuiModules, classNames_ModuleNames)
 
 def _updateLayoutState(mainWindow, layout):
     if LayoutState in layout:
-        setattr(layout, LayoutState, mainWindow.moduleArea.saveState())
-
+        # setattr(layout, LayoutState, mainWindow.moduleArea.saveState())
+        layout[LayoutState] = mainWindow.moduleArea.saveState()
 
 def _updateWarning(mainWindow, layout):
     if Warning in layout:
-        setattr(layout, Warning, WarningMessage)
-
+        # setattr(layout, Warning, WarningMessage)
+        layout[Warning] = WarningMessage
 
 def _checkLayoutFormat(mainWindow, layout):
     if not isinstance(layout, dict):
@@ -164,9 +165,9 @@ def _checkLayoutFormat(mainWindow, layout):
             if ApplicationVersion in newLayout[General]:
                 newLayout[General][ApplicationVersion] = mainWindow.application.applicationVersion
 
-        return newLayout
+        mainWindow.application.layout = newLayout
 
-    return layout
+    return mainWindow.application.layout
 
 def updateSavedLayout(mainWindow):
     """
@@ -296,7 +297,7 @@ def _getAvailableModules(mainWindow, layout, neededModules):
     if General in layout:
         if ApplicationName in layout.general:
 
-            applicationName = getattr(layout.general, ApplicationName)
+            applicationName = layout.general.get(ApplicationName)                   # getattr(layout.general, ApplicationName)
             modules = []
             if applicationName != mainWindow.application.applicationName:
                 getLogger().debug('The layout was saved in a different application. Some of the modules might not be loaded.'
@@ -351,13 +352,13 @@ def restoreLayout(mainWindow, layout):
     layout = _checkLayoutFormat(mainWindow, layout)
 
     if FileNames in layout:
-        neededModules = getattr(layout, FileNames)
+        neededModules = layout.get(FileNames)               # getattr(layout, FileNames)
         if len(neededModules) > 0:
             if GuiModules in layout:
                 # if ClassNameModuleName in layout.guiModules:
                 #   classNameGuiModuleNameList = getattr(layout.guiModules, ClassNameModuleName)
 
-                classNameGuiModuleNameList = getattr(layout, GuiModules)
+                classNameGuiModuleNameList = layout.get(GuiModules)               # getattr(layout, GuiModules)
                 # Checks if  modules  are present in the layout file. If not stops it
                 if not list(_traverse(classNameGuiModuleNameList)):
                     return
@@ -381,7 +382,7 @@ def restoreLayout(mainWindow, layout):
     if LayoutState in layout:
         # Very important step:
         # Checks if the all the modules opened are present in the layout state. If not, will not restore the geometries
-        state = getattr(layout, LayoutState)
+        state = layout.get(LayoutState)                 # getattr(layout, LayoutState)
 
         if not state:
             return

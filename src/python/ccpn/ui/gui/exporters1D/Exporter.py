@@ -32,7 +32,7 @@ class Exporter(object):
         """Return the parameters used to configure this exporter."""
         raise Exception("Abstract method must be overridden in subclass.")
         
-    def export(self, filename=None, toBytes=False, copy=False):
+    def export(self, fileName=None, toBytes=False, copy=False):
         """
         If *filename* is None, pop-up a file dialog.
         If *toBytes* is True, return a bytes object rather than writing to file.
@@ -74,7 +74,7 @@ class Exporter(object):
             if ext != selectedExt:
                 filename = filename + '.' + selectedExt.lstrip('.')
         
-        self.export(filename=filename, **self.fileDialog.opts)
+        self.export(fileName=filename, **self.fileDialog.opts)
         
     def getScene(self):
         if isinstance(self.item, pg.GraphicsScene):

@@ -477,8 +477,6 @@ class GuiStripNd(GuiStrip):
   #   return zoomXArray, zoomYArray
 
   def resetAxisRange(self, axis):
-    # if not axis:
-    # TODO:ED check why this was here
     if axis is None:
       return
 
@@ -500,8 +498,6 @@ class GuiStripNd(GuiStrip):
       self.zoomY(*zoomArray)
 
   def getAxisRange(self, axis):
-    # if not axis:
-    # TODO:ED check why this was here
     if axis is None:
       return
 
@@ -691,15 +687,25 @@ class GuiStripNd(GuiStrip):
     if planeCount:
       delta = planeSize * planeCount
       position = zAxis.position + delta
-      if planeLabel.minimum() <= position <= planeLabel.maximum():
-        zAxis.position = position
-      #planeLabel.setValue(zAxis.position)
+
+      # if planeLabel.minimum() <= position <= planeLabel.maximum():
+      #   zAxis.position = position
+      # #planeLabel.setValue(zAxis.position)
+
+      # wrap the zAxis position when incremented/decremented beyond limits
+      if position > planeLabel.maximum():
+        zAxis.position = planeLabel.minimum()
+      elif position < planeLabel.minimum():
+        zAxis.position = planeLabel.maximum()
+      self.axisRegionChanged(zAxis)
+
     elif position is not None: # should always be the case
       if planeLabel.minimum() <= position <= planeLabel.maximum():
         zAxis.position = position
         self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
         getLogger().info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
         #planeLabel.setValue(zAxis.position)
+        self.axisRegionChanged(zAxis)
 
       # else:
       #   print('position is outside spectrum bounds')
@@ -756,12 +762,6 @@ class GuiStripNd(GuiStrip):
   #   planeCount.oldValue = value
 
   def _findPeakListView(self, peakList:PeakList):
-    
-    #peakListView = self.peakListViewDict.get(peakList)
-    #if peakListView:
-    #  return peakListView
-      
-    # TODO:ED temporary test because spectrumViews have been deleted at this point
     if hasattr(self, 'spectrumViews'):
       for spectrumView in self.spectrumViews:
         for peakListView in spectrumView.peakListViews:
@@ -774,7 +774,6 @@ class GuiStripNd(GuiStrip):
   def resizeEvent(self, event):
     super(GuiStripNd, self).resizeEvent(event)
 
-    # TODO:ED temporary test because spectrumViews have been deleted at this point
     if hasattr(self, 'spectrumViews'):
       for spectrumView in self.spectrumViews:
         spectrumView.updateGeometryChange()

@@ -1075,7 +1075,7 @@ class Framework:
       ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
                    (),
-                   # ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
+                   ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
                    ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
                    (),
                    ("New SpectrumDisplay with strip",    self.copyStrip,  []),

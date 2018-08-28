@@ -52,7 +52,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
     defaultMinimumSizes = (0, 20)
 
-    def __init__(self, parent, value=None, min=None, max=None, step=None, prefix=None, showButtons=True,
+    def __init__(self, parent, value=None, min=None, max=None, step=None, prefix=None, suffix=None, showButtons=True,
                  decimals=None, callback=None, **kwds):
         """
         From the QTdocumentation
@@ -94,6 +94,9 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
         if prefix:
             self.setPrefix(prefix + ' ')
+
+        if suffix:
+            self.setSuffix(' '+suffix)
 
         self._callback = None
         self.setCallback(callback)
@@ -137,30 +140,30 @@ _float_re = re.compile(r'(([+-]?\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?)')
 def fexp(f):
     return int(floor(log10(abs(f)))) if f != 0 else 0
 
-def valid_float_string(string):
-    match = _float_re.search(string)
-    return match.groups()[0] == string if match else False
+# def valid_float_string(string):
+#     match = _float_re.search(string)
+#     return match.groups()[0] == string if match else False
 
-
-class FloatValidator(QtGui.QValidator):
-
-    def validate(self, string, position):
-        if valid_float_string(string):
-            return (QtGui.QValidator.Acceptable, string, position)
-        if string == "" or string[position - 1] in 'e.-+':
-            return (QtGui.QValidator.Intermediate, string, position)
-        return (QtGui.QValidator.Invalid, string, position)
-
-    def fixup(self, text):
-        match = _float_re.search(text)
-        return match.groups()[0] if match else ""
+# class FloatValidator(QtGui.QValidator):
+#
+#     def validate(self, string, position):
+#         if valid_float_string(string):
+#             return (QtGui.QValidator.Acceptable, string, position)
+#         if string == "" or string[position - 1] in 'e.-+':
+#             return (QtGui.QValidator.Intermediate, string, position)
+#         return (QtGui.QValidator.Invalid, string, position)
+#
+#     def fixup(self, text):
+#         match = _float_re.search(text)
+#         return match.groups()[0] if match else ""
 
 
 class ScientificDoubleSpinBox(DoubleSpinbox):
     """Constructs a spinbox in which the values can be set using Sci notation
     """
     def __init__(self, *args, **kwargs):
-        self.validator = FloatValidator()
+        self.validator = QtGui.QDoubleValidator()       #                   FloatValidator()
+        self.validator.Notation = 1
         super(ScientificDoubleSpinBox, self).__init__(*args, **kwargs)
         self.setDecimals(1000)
 

@@ -43,6 +43,14 @@ from ccpn.ui.gui.widgets import MessageDialog
 
 from ccpn.util.floatUtils import fRound
 
+
+# default steps sizes of the DoubleSpinBox, ..
+# used in ZoomPopup
+spinBoxStepsByAxisCode = {'H': 0.05,
+                               'C': 0.5,
+                               'N': 0.5,
+                               'intensity': 1e4, }
+
 class ZoomPopup(CcpnDialog):
     """
     Set Zoom for for current.strip; works for 1D and nD
@@ -68,7 +76,7 @@ class ZoomPopup(CcpnDialog):
                 # axisCode2dimension = dict([aCode, i] for i, aCode in enumerate(self.current.strip.spectra[0].axisCodes))
                 axisCode2dimension = dict([aCode, i] for i, aCode in enumerate(self.current.strip.axisCodes))
 
-            steps = self.mainWindow.mainWindowSettings.spinBoxStepsByAxisCode
+            steps = spinBoxStepsByAxisCode
 
             for ii, axisCode in enumerate(self.current.strip.axisCodes):
                 dim = axisCode2dimension[axisCode]
@@ -117,9 +125,10 @@ class ZoomPopup(CcpnDialog):
             self.close()
 
     def _zoom(self):
-        from ccpn.core.lib.ContextManagers import undoBlockManager
+        from ccpn.core.lib.ContextManagers import undoBlock
 
-        with undoBlockManager():
+        with undoBlock(self.application):  # testing -> _appBase will disappear with the new framework
+
             positions = [(minVal.value(), maxVal.value()) for minVal, maxVal in zip(self.minPositionBoxes, self.maxPositionBoxes)]
             self.current.strip.zoom(positions[0], positions[1])
 

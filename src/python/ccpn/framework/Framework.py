@@ -1075,7 +1075,7 @@ class Framework:
       ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
                    (),
-                   ("Set Zoom...", self.setZoom, [('shortcut', 'sz')]),
+                   # ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
                    ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
                    (),
                    ("New SpectrumDisplay with strip",    self.copyStrip,  []),
@@ -2211,6 +2211,12 @@ class Framework:
   def togglePhaseConsole(self):
     if self.current.strip is not None:
       self.current.strip.spectrumDisplay.togglePhaseConsole()
+    else:
+      getLogger().warning('No strip selected')
+
+  def _setZoomPopup(self):
+    if self.current.strip is not None:
+      self.current.strip._setZoomPopup()
     else:
       getLogger().warning('No strip selected')
 

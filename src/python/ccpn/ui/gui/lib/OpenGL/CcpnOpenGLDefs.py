@@ -99,4 +99,5 @@ GLOTHERLINES = 'Other Lines'
 GLSTRIPLABELLING = 'Strip Labelling'
 GLREGIONS = 'regions'
 GLPLOTBORDER = 'plotBorder'
+GLBACKGROUND = 'backgroundColour'
 

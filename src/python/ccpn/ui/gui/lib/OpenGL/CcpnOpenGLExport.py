@@ -60,7 +60,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
-    GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES
+    GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES,\
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 
@@ -109,8 +109,9 @@ class GLExporter():
         self._importFonts()
 
         # set default colours
-        self.backgroundColour = colors.Color(*self.parent.background[0:3],
-                                             alpha=self.parent.background[3])
+        # self.backgroundColour = colors.Color(*self.parent.background[0:3],
+        #                                      alpha=self.parent.background[3])
+        self.backgroundColour = colors.Color(*self.params[GLBACKGROUND], alpha=1.0)
         self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
                                              alpha=self.parent.foreground[3])
 

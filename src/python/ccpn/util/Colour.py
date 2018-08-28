@@ -38,6 +38,19 @@ def rgbToHex(r, g, b):
     return '#' + ''.join([hex(x)[2:] for x in (r, g, b)])
 
 
+def rgbaRatioToHex(r, g, b, a=1.0):
+    return '#' + ''.join([hex(x)[2:] for x in (int(255.0 * r),
+                                               int(255.0 * g),
+                                               int(255.0 * b),
+                                               int(255.0 * a))])
+
+
+def rgbRatioToHex(r, g, b):
+    return '#' + ''.join([hex(x)[2:] for x in (int(255.0 * r),
+                                               int(255.0 * g),
+                                               int(255.0 * b))])
+
+
 def hexToRgb(hex):
     hex = hex.lstrip('#')
     lv = len(hex)
@@ -64,7 +77,7 @@ colourNameToHexDict = {
     'yellow': '#ffff00',
     'magenta': '#ff00ff',
     'cyan': '#ffff00',
-}
+    }
 
 spectrumColours = OrderedDict([('#cb1400', 'red'),
                                ('#860700', 'dark red'),

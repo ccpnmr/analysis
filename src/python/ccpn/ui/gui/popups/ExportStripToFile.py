@@ -37,6 +37,11 @@ from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes, Pri
 from ccpn.ui.gui.popups.ExportDialog import ExportDialog
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
+from ccpn.util.Colour import rgbRatioToHex, hexToRgbRatio
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -58,7 +63,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, \
-    GLWIDGET, GLPLOTBORDER, GLAXISLINES
+    GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND
 
 
 class ExportStripToFilePopup(ExportDialog):
@@ -195,6 +200,32 @@ class ExportStripToFilePopup(ExportDialog):
         self.pageType.set(PAGEPORTRAIT)
 
         row += 1
+        colourFrame = Frame(userFrame, grid=(row, 0), setLayout=True, showBorder=False)
+        Label(colourFrame, text="Background Colour", vAlign='c', hAlign='l', grid=(0, 0))
+        self.colourBox = PulldownList(colourFrame, vAlign='t', grid=(0, 1))
+        self.colourButton = Button(colourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
+                              callback=self._changeBackgroundButton, icon='icons/colours')
+
+        # populate initial pulldown from background colour
+        spectrumColourKeys = list(spectrumColours.keys())
+        fillColourPulldown(self.colourBox, allowAuto=False)
+        if self.current.strip:
+            self.backgroundColour = rgbRatioToHex(*self.current.strip._CcpnGLWidget.background[:3])
+        else:
+            print('>>>NOSTRIP')
+            self.backgroundColour = spectrumColours[0]
+
+        if self.backgroundColour in spectrumColourKeys:
+            self.colourBox.setCurrentText(spectrumColours[self.backgroundColour])
+        else:
+            addNewColourString(self.backgroundColour)
+            fillColourPulldown(self.colourBox, allowAuto=False)
+            spectrumColourKeys = list(spectrumColours.keys())
+            self.colourBox.setCurrentText(spectrumColours[self.backgroundColour])
+
+        self.colourBox.activated.connect(self._changeBackgroundPulldown)
+
+        row += 1
         self.spacer = Spacer(userFrame, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, 0), gridSpan=(1, 1))
@@ -211,6 +242,21 @@ class ExportStripToFilePopup(ExportDialog):
         self._populateTreeView()
 
         self.setMinimumSize(self.sizeHint())
+
+    def _changeBackgroundPulldown(self, int):
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.colourBox.currentText())]
+        if newColour:
+            self.backgroundColour = newColour
+
+    def _changeBackgroundButton(self, int):
+        dialog = ColourDialog(self)
+
+        newColour = dialog.getColor()
+        if newColour:
+            addNewColour(newColour)
+            fillColourPulldown(self.colourBox, allowAuto=False)
+            self.colourBox.setCurrentText(spectrumColours[newColour.name()])
+            self.backgroundColour = newColour.name()
 
     def _changePulldown(self, int):
         selected = self.objectPulldown.getText()
@@ -416,6 +462,7 @@ class ExportStripToFilePopup(ExportDialog):
         # prType = EXPORTTYPES[prIndex]
         prType = self.exportType.get()
         pageType = self.pageType.get()
+        backgroundColour = hexToRgbRatio(self.backgroundColour)
 
         if strip:
             # return the parameters
@@ -425,6 +472,7 @@ class ExportStripToFilePopup(ExportDialog):
                       GLWIDGET: strip._CcpnGLWidget,
                       GLPRINTTYPE: prType,
                       GLPAGETYPE: pageType,
+                      GLBACKGROUND: backgroundColour,
                       GLSELECTEDPIDS: self.treeView.getSelectedObjectsPids()
                       }
             selectedList = self.treeView.getSelectedItems()

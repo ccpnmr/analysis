@@ -707,7 +707,7 @@ class GuiStripNd(GuiStrip):
         self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
         getLogger().info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
         #planeLabel.setValue(zAxis.position)
-        self.axisRegionChanged(zAxis)
+        # self.axisRegionChanged(zAxis)
 
       # else:
       #   print('position is outside spectrum bounds')

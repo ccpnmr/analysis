@@ -340,6 +340,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                         frequency[ps] = spectrumFrequency[pp]
                         axisCount += 1
 
+        if None in p0:
+            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+            return
+
         if lineWidths[0] and lineWidths[1]:
             # draw 24 connected segments
             r = 0.5 * lineWidths[0] / frequency[0]
@@ -472,6 +476,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                         lineWidths[ps] = obj.lineWidths[pp]
                         frequency[ps] = spectrumFrequency[pp]
                         axisCount += 1
+
+        if None in p0:
+            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+            return
 
         if axisCount != 2:
             getLogger().debug('Bad axisCodes: %s - %s' % (obj.pid, obj.axisCodes))
@@ -1466,6 +1474,10 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                             else:
                                 p0[ps] = obj.height
 
+                if None in p0:
+                    getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+                    continue
+
                 if symbolType is not None:  #== 0:
 
                     # draw a cross
@@ -1613,6 +1625,10 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                     else:
                         p0[ps] = obj.height
 
+        if None in p0:
+            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+            return
+
         if symbolType is not None:  #== 0:
 
             # draw a cross
@@ -1730,6 +1746,10 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                         p0[ps] = obj.position[pp]
                     else:
                         p0[ps] = obj.height
+
+        if None in p0:
+            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+            return
 
         if self._isSelected(obj):
             listCol = self._GLParent.highlightColour[:3]
@@ -1919,6 +1939,11 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
                         if ppCode == psCode:
                             p1[ps] = peak.position[pp]
                             axisCount += 1
+
+            if None in p1:
+                getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
+                continue
+
             posList.append(p1)
 
         newVertices = makeIterableList(posList)
@@ -1975,6 +2000,10 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
                             p1[ps] = peak.position[pp]
                         else:
                             p1[ps] = peak.height
+
+            if None in p1:
+                getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
+                continue
 
             posList.append(p1)
 
@@ -2210,6 +2239,10 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
                             p0[ps] = pos = min(obj.limits[0])  # obj.position[pp]
                     else:
                         p0[ps] = 0.0  #obj.height
+
+        if None in p0:
+            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+            return
 
         if self._isSelected(obj):
             listCol = self._GLParent.highlightColour[:3]

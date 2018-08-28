@@ -290,7 +290,6 @@ class GeneralTab(QtWidgets.QWidget, Base):
       if c in spectrumColourKeys:
         self.colourBox.setCurrentText(spectrumColours[c])
       else:
-        # TODO:ED may have to populate the other tab colour pulldowns
         addNewColourString(c)
         fillColourPulldown(self.colourBox, allowAuto=False)
         spectrumColourKeys = list(spectrumColours.keys())
@@ -805,7 +804,6 @@ class ContoursTab(QtWidgets.QWidget, Base):
       col = spectrumColours[c]
       self.positiveColourBox.setCurrentText(col)
     else:
-      # TODO:ED may have to populate the other tab colour pulldowns
       addNewColourString(c)
       fillColourPulldown(self.positiveColourBox, allowAuto=False)
       fillColourPulldown(self.negativeColourBox, allowAuto=False)
@@ -855,7 +853,6 @@ class ContoursTab(QtWidgets.QWidget, Base):
     if c in spectrumColourKeys:
       self.negativeColourBox.setCurrentText(spectrumColours[c])
     else:
-      # TODO:ED may have to populate the other tab colour pulldowns
       addNewColourString(c)
       fillColourPulldown(self.positiveColourBox, allowAuto=False)
       fillColourPulldown(self.negativeColourBox, allowAuto=False)

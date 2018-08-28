@@ -1275,6 +1275,11 @@ class GuiStrip(Frame):
     #   padding = self.application.preferences.general.stripRegionPadding
     #   self.viewBox.autoRange(padding=padding)
 
+    def _setZoomPopup(self):
+        from ccpn.ui.gui.popups.ZoomPopup import ZoomPopup
+        popup = ZoomPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
+        popup.exec_()
+
     def resetZoom(self):
         try:
             self._CcpnGLWidget.resetZoom()

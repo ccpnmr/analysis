@@ -1137,6 +1137,14 @@ class GuiStrip(Frame):
         self.plotWidget.mouseLabel.setPos(position.x(), position.y())
         self.plotWidget.mouseLabel.show()
 
+    def zoom(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
+        """Zooms strip to the specified region
+        """
+        try:
+            self._CcpnGLWidget.zoom(xRegion, yRegion)
+        except:
+            getLogger().debugGL('OpenGL widget not instantiated')
+
     def zoomToRegion(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
         """
         Zooms strip to the specified region

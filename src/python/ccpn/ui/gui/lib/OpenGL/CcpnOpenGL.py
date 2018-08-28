@@ -109,6 +109,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLExport import GLExporter
 import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 # from ccpn.util.Common import makeIterableList
+from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
 
 
@@ -1022,6 +1023,46 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisB = min(axis.region[0], axis.region[1])
             self.axisT = max(axis.region[0], axis.region[1])
         self.update()
+
+    def zoom(self, xRegion: Tuple[float, float], yRegion: Tuple[float, float]):
+        """Zooms strip to the specified region
+        """
+        if self.INVERTXAXIS:
+            self.axisL = max(xRegion[0], xRegion[1])
+            self.axisR = min(xRegion[0], xRegion[1])
+        else:
+            self.axisL = min(xRegion[0], xRegion[1])
+            self.axisR = max(xRegion[0], xRegion[1])
+
+        if self.INVERTYAXIS:
+            self.axisB = max(yRegion[0], yRegion[1])
+            self.axisT = min(yRegion[0], yRegion[1])
+        else:
+            self.axisB = min(yRegion[0], yRegion[1])
+            self.axisT = max(yRegion[0], yRegion[1])
+        self._rescaleAllAxes()
+
+    def zoomX(self, x1: float, x2: float):
+        """Zooms x axis of strip to the specified region
+        """
+        if self.INVERTXAXIS:
+            self.axisL = max(x1, x2)
+            self.axisR = min(x1, x2)
+        else:
+            self.axisL = min(x1, x2)
+            self.axisR = max(x1, x2)
+        self._rescaleXAxis()
+
+    def zoomY(self, y1: float, y2: float):
+        """Zooms y axis of strip to the specified region
+        """
+        if self.INVERTYAXIS:
+            self.axisB = max(y1, y2)
+            self.axisT = min(y1, y2)
+        else:
+            self.axisB = min(y1, y2)
+            self.axisT = max(y1, y2)
+        self._rescaleYAxis()
 
     def storeZoom(self):
         self.storedZooms.append((self.axisL, self.axisR, self.axisB, self.axisT))

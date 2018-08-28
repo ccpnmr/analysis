@@ -72,7 +72,7 @@ class DeleteItemsPopup(CcpnDialog):
         row += 1
         # add close buttons at the bottom
         self.buttonList = ButtonList(self, ['Cancel', 'OK'], [self.reject, self._okButton], grid=(row, 1))
-        self.buttonList.buttons[0].setFocus()
+        self.buttonList.buttons[1].setFocus()
 
         self.GLSignals = GLNotifier(parent=self)
 

@@ -692,12 +692,14 @@ class GuiStripNd(GuiStrip):
       #   zAxis.position = position
       # #planeLabel.setValue(zAxis.position)
 
-      # wrap the zAxis position when incremented/decremented beyond limits
+      # # wrap the zAxis position when incremented/decremented beyond limits
       if position > planeLabel.maximum():
         zAxis.position = planeLabel.minimum()
       elif position < planeLabel.minimum():
         zAxis.position = planeLabel.maximum()
-      self.axisRegionChanged(zAxis)
+      else:
+        zAxis.position = position
+      # self.axisRegionChanged(zAxis)
 
     elif position is not None: # should always be the case
       if planeLabel.minimum() <= position <= planeLabel.maximum():

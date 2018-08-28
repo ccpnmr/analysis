@@ -1013,7 +1013,7 @@ class Framework:
       (),
       ("Preferences...", self.showApplicationPreferences),
       (),
-      ("Close Program", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+      ("Quit", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
     ]
                ))
 
@@ -1042,6 +1042,8 @@ class Framework:
       ("Generate Chain...", self.showCreateChainPopup),
       ("Inspect...", self.inspectMolecule, [('enabled', False)]),
       (),
+      ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),
+      (),
       ("Reference Chemical Shifts", self.showRefChemicalShifts,[('shortcut', 'rc')]),
     ]
                ))
@@ -1057,6 +1059,7 @@ class Framework:
       ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
       (),
       ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
+      ("Notes Editor", self.showNotesEditor, [('shortcut', 'no')]),
       (),
       # (),
       ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
@@ -1069,11 +1072,6 @@ class Framework:
       #                                               ('checked', False)
       #                                               ]),
       (),
-      ("Show/hide Modules", ([
-                              ("None", None, [('checkable', True),
-                                               ('checked', False)])
-                            ])),
-      (),
       ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
                    ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
@@ -1084,8 +1082,10 @@ class Framework:
                    ("Flip Y-Z Axis", self.flipYZAxis, [('shortcut', 'yz')])
                    )),
       (),
-      ("Notes Table", self.showNotesEditor, [('shortcut', 'no')]),
-      (),
+      ("Show/hide Modules", ([
+                              ("None", None, [('checkable', True),
+                                               ('checked', False)])
+                            ])),
       ("Python Console", self._toggleConsole, [('shortcut', '  '),
                                               ('checkable', True),
                                               ('checked', False)])
@@ -2012,6 +2012,23 @@ class Framework:
   def inspectMolecule(self):
     pass
 
+  def showResidueInformation(self, position: str='bottom', relativeTo:CcpnModule=None):
+    """Displays Residue Information module.
+    """
+    from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
+    if not self.project.residues:
+      getLogger().warning('No Residues in project. Residue Information Module requires Residues in the project to launch.')
+      MessageDialog.showWarning('No Residues in project.',
+                                'Residue Information Module requires Residues in the project to launch.')
+      return
+
+    mainWindow = self.ui.mainWindow
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea    # ejb
+    self.residueModule = ResidueInformation(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.residueModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
+    getLogger().info("application.showResidueInformation()")
 
   def showRefChemicalShifts(self):
     """Displays Reference Chemical Shifts module."""
@@ -2023,10 +2040,10 @@ class Framework:
   ## MENU callbacks:  VIEW
   ###################################################################################################################
 
-  def showChemicalShiftTable(self
-                             , position:str='bottom'
-                             , relativeTo:CcpnModule=None
-                             , chemicalShiftList=None):
+  def showChemicalShiftTable(self,
+                              position:str='bottom',
+                              relativeTo:CcpnModule=None,
+                              chemicalShiftList=None):
     """
     Displays Chemical Shift table.
     """

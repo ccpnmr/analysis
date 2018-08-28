@@ -333,7 +333,8 @@ class GeneralTab(QtWidgets.QWidget, Base):
                         callback=partial(self._raiseExperimentFilterPopup, spectrum),
                         hPolicy='fixed', icon='icons/applications-system')
       experimentTypes = _getExperimentTypes(spectrum.project, spectrum)
-      self.spectrumType.setData(texts = list(experimentTypes.keys()), objects=list(experimentTypes.values()))
+      if experimentTypes:
+        self.spectrumType.setData(texts = list(experimentTypes.keys()), objects=list(experimentTypes.values()))
 
 
       # axisCodes = []

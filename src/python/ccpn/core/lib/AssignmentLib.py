@@ -32,11 +32,17 @@ CCP_CODES = ('Ala', 'Cys', 'Asp', 'Glu', 'Phe', 'Gly', 'His', 'Ile', 'Lys', 'Leu
              'Pro', 'Gln', 'Arg', 'Ser', 'Thr', 'Val', 'Trp', 'Tyr')
 
 ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3',
-              'CG', 'CG1', 'CG2', 'CH2', 'CZ', 'CZ2', 'CZ3'], '1H': ['H', 'HA', 'HA2', 'HA3', 'HB',
-              'HB*', 'HB2', 'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD3', 'HE', 'HE*', 'HE1',
-              'HE22', 'HE3', 'HG', 'HG1', 'HG1*', 'HG12', 'HG13', 'HG2', 'HG2*', 'HG3', 'HH', 'HH11',
-              'HE2', 'HE21', 'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3'],'15N': ['N',
-              'ND1', 'NE', 'NE1', 'NE2', 'NH1', 'NH2', 'NZ']}
+                      'CG', 'CG1', 'CG2', 'CH2', 'CZ', 'CZ2', 'CZ3'
+                     ],
+
+              '1H': ['H', 'HA', 'HA2', 'HA3', 'HB',
+                     'HB*', 'HB2', 'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD3', 'HE', 'HE*', 'HE1',
+                     'HE22', 'HE3', 'HG', 'HG1', 'HG1*', 'HG12', 'HG13', 'HG2', 'HG2*', 'HG3', 'HH', 'HH11',
+                     'HE2', 'HE21', 'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3'
+                    ],
+
+              '15N': ['N', 'ND1', 'NE', 'NE1', 'NE2', 'NH1', 'NH2', 'NZ']
+}
 
 from ccpn.util import Common as commonUtil, Constants
 from typing import Sequence
@@ -755,11 +761,11 @@ def _assignNmrAtomsToPeaks(peaks, nmrAtoms):
                 matchingNmrAtoms.append(nmrAtom)
 
         if len(matchingNmrAtoms)>0:
-          for aC in (axisCode, *axisCode): # Try to assign based on the crazy names of AxesCodes
+          for aC in (axisCode, *axisCode): # Try to assign based on the crazy names of AxisCodes
             try:
               peak.assignDimension(aC, list(set(matchingNmrAtoms)))
               break
             except: # carry on with an other axis Combination (Eg. sometime works H, others Hn)
               continue
-          else: # give up
+          else: # give up. Should report feedback
             pass

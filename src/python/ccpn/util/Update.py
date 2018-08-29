@@ -39,7 +39,7 @@ from urllib.request import urlopen
 
 from datetime import datetime
 
-ccpn2Url = 'http://www2.ccpn.ac.uk'
+ccpn2Url = 'http://www.ccpn.ac.uk'
 
 from ccpn.util import Path
 

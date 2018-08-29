@@ -70,7 +70,7 @@ class PythonConsoleModule(CcpnModule):
 
 
   def _closeModule(self):
-    self.pythonConsoleWidget._stopChannels()
+    # self.pythonConsoleWidget._stopChannels()
     self.mainWindow.pythonConsoleModule = None
     if self._menuAction:
       self._menuAction.setChecked(False)

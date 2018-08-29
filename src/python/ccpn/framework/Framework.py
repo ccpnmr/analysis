@@ -62,7 +62,7 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.ui.gui.guiSettings import getColourScheme
-
+from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 # from functools import partial
 
 _DEBUG = False
@@ -79,6 +79,7 @@ DataDirName = 'data'
 SpectraDirName = 'spectra'
 PluginDataDirName = 'pluginData'
 ScriptsDirName = 'scripts'
+MacrosDirName = 'macros'
 
 def _ccpnExceptionhook(type, value, tback):
   '''This because PyQT raises and catches exceptions,
@@ -853,6 +854,17 @@ class Framework:
   def pluginDataPath(self, path):
     self._pluginDataPath = path
 
+  @property
+  def tempMacrosPath(self):
+    return self._tempMacrosPath
+
+  @tempMacrosPath.getter
+  def tempMacrosPath(self):
+    return Path.fetchDir(userPreferencesDirectory, MacrosDirName)
+
+  @tempMacrosPath.setter
+  def tempMacrosPath(self, path):
+    self._tempMacrosPath = path
 
 
   @property
@@ -1095,11 +1107,11 @@ class Framework:
                ))
 
     ms.append(('Macro',     [
-      ("Edit...", self.showMacroEditor),
-      ("New from Console...", self.newMacroFromConsole),
-      ("New from Log...", self.newMacroFromLog),
+      ("New", self.showMacroEditor),
+      ("New from Console", self.newMacroFromConsole),
+      # ("New from Log", self.newMacroFromLog), #Broken
       (),
-      ("Record Macro...", self.startMacroRecord),
+      ("Open...", self.openMacroOnEditor),
       ("Run...", self.runMacro),
       ("Run Recent", ()),
       (),
@@ -2301,6 +2313,17 @@ class Framework:
     # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
     # getLogger().info("application.showMacroEditor()")
 
+  def openMacroOnEditor(self):
+    """
+    Displays macro editor.
+    """
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
+    self.editor._openMacroFile()
+    # mainWindow.pythonConsole.writeConsoleCommand("application.showMacroEditor()")
+    # getLogger().info("application.showMacroEditor()")
+
   def newMacroFromConsole(self):
     """
     Displays macro editor with contents of python console inside.
@@ -2312,29 +2335,31 @@ class Framework:
     self.editor.textBox.setText(mainWindow.pythonConsole.textEditor.toPlainText())
     mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
 
-  def newMacroFromLog(self):
-    """
-    Displays macro editor with contents of the log.
-    """
-    # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
-    #FIXME:ED - haven't checked this properly
-    mainWindow = self.ui.mainWindow
-    self.editor = MacroEditor(mainWindow=mainWindow)
+  # FIXME:ED - haven't checked this properly. Broken
+  # def newMacroFromLog(self):
+  #   """
+  #   Displays macro editor with contents of the log.
+  #   """
+  #   # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+  #   #FIXME:ED - haven't checked this properly
+  #   mainWindow = self.ui.mainWindow
+  #   self.editor = MacroEditor(mainWindow=mainWindow)
+  #
+  #   l = open(getLogger().logPath, 'r').readlines()
+  #   text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
+  #   self.editor.textBox.setText(text)
+  #   mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
 
-    l = open(getLogger().logPath, 'r').readlines()
-    text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
-    self.editor.textBox.setText(text)
-    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-
-  def startMacroRecord(self):
-    """
-    Displays macro editor with additional buttons for recording a macro.
-    """
-    mainWindow = self.ui.mainWindow
-    self.editor = MacroEditor(mainWindow=mainWindow, showRecordButtons=True)
-    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
-    getLogger().info("application.startMacroRecord()")
+  # This has never worked. Removed from menus
+  # def startMacroRecord(self):
+  #   """
+  #   Displays macro editor with additional buttons for recording a macro.
+  #   """
+  #   mainWindow = self.ui.mainWindow
+  #   self.editor = MacroEditor(mainWindow=mainWindow, showRecordButtons=True)
+  #   mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
+  #   self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
+  #   getLogger().info("application.startMacroRecord()")
 
 
   def defineUserShortcuts(self):

@@ -53,6 +53,9 @@ class IpythonConsole(Widget, Base):
         km.kernel.gui = 'qt4'
 
         self.mainWindow = mainWindow
+        self.mainWindow.pythonConsole = self
+
+
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
         #TODO:GEERTEN: Sort Stylesheet issues
         self.setStyleSheet(self.mainWindow.styleSheet())
@@ -93,11 +96,13 @@ class IpythonConsole(Widget, Base):
         # historyButton.setText('Show History')
         # buttonLayout.addWidget(historyButton, 0, 1)
 
-        self.buttons = ButtonList(self.consoleFrame,
-                                texts=['Run Macro', 'Show History'],
-                                callbacks=[self._runMacro, self._showHistory],
-                                direction='H', hAlign='c',
-                                grid=(1,0))
+        # THIS Buttons are broken. There is actually no reason to have a run macro here.
+        # We have the full menu menu item for macros!
+        # self.buttons = ButtonList(self.consoleFrame,
+        #                         texts=['Open Macro', 'Show History'],
+        #                         callbacks=[self._runMacro, self._showHistory],
+        #                         direction='H', hAlign='c',
+        #                         grid=(1,0))
 
         self.splitter.setStretchFactor(1,8)
         self.splitter.setChildrenCollapsible(False)
@@ -106,6 +111,8 @@ class IpythonConsole(Widget, Base):
 
         namespace['runMacro'] = self._runMacro
         km.kernel.shell.push(namespace)
+
+        self._startChannels()  # this is important, otherwise the console does't run anything
 
 
     def setProject(self, project):

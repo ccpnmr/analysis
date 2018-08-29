@@ -657,7 +657,6 @@ class Spectrum(AbstractWrapperObject):
   def measurementTypes(self, value):
     self._setExpDimRefAttribute('measurementType', value)
 
-
   @property
   def isotopeCodes(self) -> Tuple[Optional[str], ...]:
     """isotopeCode of isotope being measured, per dimension - None if no unique code"""
@@ -679,8 +678,9 @@ class Spectrum(AbstractWrapperObject):
   def isotopeCodes(self, value:Sequence):
     apiDataSource = self._wrappedData
     if len(value) == apiDataSource.numDim:
-      if value != self.isotopeCodes and self.peaks:
-        raise ValueError("Cannot reset isotopeCodes in a Spectrum that contains peaks")
+      #GWV 28/8/18: commented as cannot see the reason for this, while prevented correction of errors
+      # if value != self.isotopeCodes and self.peaks:
+      #   raise ValueError("Cannot reset isotopeCodes in a Spectrum that contains peaks")
       for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
         val = value[ii]

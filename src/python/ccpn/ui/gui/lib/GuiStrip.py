@@ -52,7 +52,6 @@ from ccpn.ui.gui import guiSettings
 
 from ccpn.util import Ticks
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
-
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from ccpn.util import Common as commonUtil
@@ -1725,6 +1724,21 @@ class GuiStrip(Frame):
 
         else:
             raise ValueError("The last strip in a display cannot be deleted")
+
+    def navigateToPosition(self, positions: typing.List[float],
+                           axisCodes: typing.List[str] = None,
+                           widths: typing.List[float] = None):
+        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+
+        navigateToPositionInStrip(self, positions, axisCodes, widths)
+
+    def navigateToPeak(self, peak, widths: typing.List[float] = None):
+
+        if peak:
+            self.navigateToPosition(peak.position, peak.axisCodes)
+        else:
+            MessageDialog.showMessage('No Peak', 'Select a peak first')
+
 
     def _restoreToLayout(self):
         """Restore the current strip to the layout from the temporary undo area

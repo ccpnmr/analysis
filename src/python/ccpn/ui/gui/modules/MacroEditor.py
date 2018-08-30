@@ -81,7 +81,6 @@ class MacroEditor(CcpnModule):
     # macro editing area
     self.textBox = TextEditor(self.mainWidget, grid=(hGrid,0), acceptDrops=True, gridSpan=(1,2))
 
-
     hGrid +=1
     self.buttonBox = ButtonList(self, texts=['Open', 'Save As', 'Run'],
                                 callbacks=[self._openMacroFile, self._saveMacroAs, self._runMacro], grid = (hGrid,1))
@@ -97,8 +96,22 @@ class MacroEditor(CcpnModule):
     # self.textBox.editingFinished.connect(self._saveMacro)  # automatic saving
     # self.nameLineEdit.editingFinished.connect(self._macroNameChanged)  # automatic renaming the fileName
 
+    self.droppedNotifier = GuiNotifier(self.textBox,
+                                     [GuiNotifier.DROPEVENT], [DropBase.URLS],
+                                     self._processDroppedItems)
 
+  def _processDroppedItems(self, data):
+    """
+    CallBack for Drop events
+    """
+    urls = data.get('urls', [])
 
+    if len(urls) == 1:
+      filePath = urls[0]
+      self._openPath(filePath)
+      self._setFileName(filePath)
+    else:
+      MessageDialog.showMessage('', 'Drop only a file at the time')
 
 
   def _createTemporaryFile(self, name=None):

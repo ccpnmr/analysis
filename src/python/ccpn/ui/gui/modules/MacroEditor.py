@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.util.Logging import getLogger
-
+from ccpn.ui.gui.widgets.PythonEditor import PythonHighlighter
 import datetime
 import os
 
@@ -81,7 +81,7 @@ class MacroEditor(CcpnModule):
     hGrid +=1
     # macro editing area
     self.textBox = TextEditor(self.mainWidget, grid=(hGrid,0), acceptDrops=True, gridSpan=(1,2))
-
+    self._pythonHighlighter = PythonHighlighter(self.textBox.document())
     hGrid +=1
     self.buttonBox = ButtonList(self, texts=['Open', 'Save As', 'Run'],
                                 callbacks=[self._openMacroFile, self._saveMacroAs, self._runMacro], grid = (hGrid,1))
@@ -177,6 +177,8 @@ class MacroEditor(CcpnModule):
     else:
       getLogger().debug("Trying to remove a temporary Macro file which does not exist")
 
+  def saveToPdf(self):
+    self.textBox.saveToPDF()
 
   def _saveMacroAs(self):
     """

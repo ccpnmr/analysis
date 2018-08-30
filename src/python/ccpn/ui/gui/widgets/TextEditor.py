@@ -28,7 +28,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 import sys
 import os
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore, QtPrintSupport
+from ccpn.ui.gui.widgets.FileDialog import FileDialog
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Action import Action
@@ -106,7 +107,19 @@ class TextEditor(QtWidgets.QTextEdit, Base):
     elif delta > 0:
       self.zoomIn(5)
 
+  def saveToPDF(self, fileName=None):
 
+    dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
+                        acceptMode=FileDialog.AcceptSave, selectFile=fileName,
+                         filter='*.pdf')
+    filename = dialog.selectedFile()
+    if filename:
+      printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
+      printer.setPageSize(QtPrintSupport.QPrinter.A4)
+      printer.setColorMode(QtPrintSupport.QPrinter.Color)
+      printer.setOutputFormat(QtPrintSupport.QPrinter.PdfFormat)
+      printer.setOutputFileName(filename)
+      self.document().print_(printer)
 
 
 if __name__ == '__main__':

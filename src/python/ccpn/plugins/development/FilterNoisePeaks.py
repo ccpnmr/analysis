@@ -452,5 +452,5 @@ class FilterNoisePeaksPlugin(Plugin):
         print('Filtering noise peaks', kwargs)
 
 
-FilterNoisePeaksPlugin.register()  # Registers the pipe in the pluginList
+# FilterNoisePeaksPlugin.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

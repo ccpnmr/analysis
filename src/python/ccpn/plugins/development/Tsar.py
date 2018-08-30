@@ -700,5 +700,5 @@ class TsarPlugin(Plugin):
         print('Running TSAR', kwargs)
 
 
-TsarPlugin.register()  # Registers the pipe in the pluginList
+# TsarPlugin.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

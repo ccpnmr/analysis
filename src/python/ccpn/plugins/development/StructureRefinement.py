@@ -581,5 +581,5 @@ class StructureRefinementPlugin(Plugin):
         print('Running calculation', kwargs)
 
 
-StructureRefinementPlugin.register()  # Registers the pipe in the pluginList
+# StructureRefinementPlugin.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

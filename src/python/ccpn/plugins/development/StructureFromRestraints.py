@@ -611,5 +611,5 @@ class StructureFromRestraintsPlugin(Plugin):
         print('Running calculation', kwargs)
 
 
-StructureFromRestraintsPlugin.register()  # Registers the pipe in the pluginList
+# StructureFromRestraintsPlugin.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

@@ -315,5 +315,5 @@ class FindClosePeaksPlugin(Plugin):
         print('Finding close peaks', kwargs)
 
 
-FindClosePeaksPlugin.register()  # Registers the pipe in the pluginList
+# FindClosePeaksPlugin.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

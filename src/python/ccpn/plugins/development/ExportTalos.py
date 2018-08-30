@@ -414,5 +414,5 @@ class TalosPlugin(Plugin):
         print('Running Talos', kwargs)
 
 
-TalosPlugin.register()  # Registers the pipe in the pluginList
+# TalosPlugin.register()  # Registers the pipe in the pluginList
 # Set tolerances from project.spectrum.tolerances by default

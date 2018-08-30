@@ -460,10 +460,21 @@ class CcpnModule(Dock, DropBase):
     return collections.OrderedDict(sorted(widgetsState.items()))
 
   def restoreWidgetsState(self, **widgetsState):
-    'Restore the gui params. To Call it: _setParams(**{"variableName":"value"})  '
+    """
 
-    nestedWidgtes = self._setNestedWidgetsAttrToModule()
+    :param widgetsState:
+    :return: 'Restore the gui params. To Call it: _setParams(**{"variableName":"value"})'
+    This is automatically called after every restoration and after the module has been initialised.
+    Subclass this for a custom behaviour. for example custom callback after the widgets have been restored.
+    Subclass like this:
+           def restoreWidgetsState(self, **widgetsState):
+              super(TheModule, self).restoreWidgetsState(**widgetsState) #First restore as default
+              #  do some stuff
 
+
+    """
+
+    self._setNestedWidgetsAttrToModule()
     widgetsState = collections.OrderedDict(sorted(widgetsState.items()))
     for variableName, value in widgetsState.items():
       try:
@@ -474,9 +485,6 @@ class CcpnModule(Dock, DropBase):
         if widget.__class__.__name__ in CommonWidgets.keys():
           setWidget = getattr(widget, CommonWidgets[widget.__class__.__name__][1].__name__)
           setWidget(value)
-        # if widget in nestedWidgtes:
-        #   print(variableName, widget)
-          # delattr(widget, str(variableName))
 
       except Exception as e:
         getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))

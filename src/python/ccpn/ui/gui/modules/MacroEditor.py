@@ -33,26 +33,22 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.util.Logging import getLogger
 
 import datetime
 import os
 
 class MacroEditor(CcpnModule):
   """
-  This module will create a python file which can be run from a console.
+  This module will create a temp python file when you press the run button and will execute it from the console.
   A file will be created in the temporary  macro directory .ccpn/macros
-  and will be automatically saved every changes on the text editor.
-  The user can decide to save as a new file location.
+  and will be automatically deleted after the macro is ran.
+  The user can decide to save as a in a new file location.
 
-
-
-  If a file is specified when open the module, than only that file will be opened.
-
-  Saving is automatically done every changes on the text editor.
   The macro name is the file name on the disk (without the .py extension).
-  If the name is changed from the module, also the file name is automatically changed.
-
-  When opening a restored module, the saved macro will be re-opened .
+.
 
   """
   includeSettingsWidget = False
@@ -71,7 +67,7 @@ class MacroEditor(CcpnModule):
     self._pythonConsole = self.mainWindow.pythonConsole
     if self._pythonConsole is None:
       self._pythonConsole = IpythonConsole(self.mainWindow )
-    self.macroPath = None #self.preferences.general.userMacroPath
+    self.macroPath =self.preferences.general.userMacroPath
 
     self.mainWidget.layout().setSpacing(5)
     self.mainWidget.layout().setContentsMargins(10,10,10,10)
@@ -83,42 +79,34 @@ class MacroEditor(CcpnModule):
 
     hGrid +=1
     # macro editing area
-    self.textBox = TextEditor(self.mainWidget, grid=(hGrid,0), gridSpan=(1,2))
+    self.textBox = TextEditor(self.mainWidget, grid=(hGrid,0), acceptDrops=True, gridSpan=(1,2))
 
 
     hGrid +=1
     self.buttonBox = ButtonList(self, texts=['Open', 'Save As', 'Run'],
                                 callbacks=[self._openMacroFile, self._saveMacroAs, self._runMacro], grid = (hGrid,1))
 
-    # ghost Widget to restore a macro when opening a saved project  which had the macroEditor opened
-    self._pathLineEdit = LineEdit(self.mainWidget, grid=(hGrid, 0))
-    self._pathLineEdit.hide()
-
-
 
     self.filePath = filePath
     if self.filePath: # if  a path is specified then opens it
       self._openPath(self.filePath)
 
-    else: # otherwise it creates a temp file.
-      self._createTemporaryFile()
-
     self._setFileName(self.filePath)
 
 
-    self.textBox.editingFinished.connect(self._saveMacro)  # automatic saving
-    self.nameLineEdit.editingFinished.connect(self._macroNameChanged)  # automatic renaming the fileName
-
-  def restoreWidgetsState(self, **widgetsState):
-    super(MacroEditor, self).restoreWidgetsState(**widgetsState)
-    if self._pathLineEdit.get() is not '' or None:
-      self._openPath(self._pathLineEdit.get())
+    # self.textBox.editingFinished.connect(self._saveMacro)  # automatic saving
+    # self.nameLineEdit.editingFinished.connect(self._macroNameChanged)  # automatic renaming the fileName
 
 
-  def _createTemporaryFile(self):
-    dateTime = datetime.datetime.now().strftime("%y-%m-%d-%H:%M:%S")
-    fileName = 'Macro'+dateTime
-    filePath = self.application.tempMacrosPath + '/'+ fileName
+
+
+
+  def _createTemporaryFile(self, name=None):
+    if name is None:
+      dateTime = datetime.datetime.now().strftime("%y-%m-%d-%H:%M:%S")
+      tempName = 'Macro'+dateTime
+      name = tempName
+    filePath = self.application.tempMacrosPath + '/'+ name
     if filePath:
       if not filePath.endswith('.py'):
         filePath+='.py'
@@ -126,7 +114,7 @@ class MacroEditor(CcpnModule):
         f.write('')
         f.close()
     self.filePath = filePath
-    self._pathLineEdit.setText(self.filePath)
+    return filePath
 
 
   def _runMacro(self):
@@ -134,7 +122,17 @@ class MacroEditor(CcpnModule):
       if self.filePath:
         self._pythonConsole._runMacro(self.filePath)
       else:
-        MessageDialog.showWarning('', 'No file found. Save the macro first')
+        self._runTempMacro()
+    else:
+      MessageDialog.showWarning('', 'No Console available')
+
+
+  def _runTempMacro(self):
+    ''' Run a temp file. First create it, save it, run it, then delete it!'''
+    filePath = self._createTemporaryFile()
+    self._saveMacro()
+    self._runMacro()
+    self._deleteTempMacro(filePath)
 
   def _saveMacro(self):
     """
@@ -142,21 +140,25 @@ class MacroEditor(CcpnModule):
     appears for specification of the file path.
     """
 
-    if self._pathLineEdit.get():
-      self.filePath = self._pathLineEdit.get()
-      if  self.filePath:
-        with open(self.filePath, 'w') as f:
-          f.write(self.textBox.toPlainText())
-          f.close()
+    if self.filePath:
+      with open(self.filePath, 'w') as f:
+        f.write(self.textBox.toPlainText())
+        f.close()
 
   def _macroNameChanged(self):
     if self.filePath:
       if self.nameLineEdit.get() is not '':
         self.filePath = self.filePath.replace(self._getFileNameFromPath(self.filePath), self.nameLineEdit.get())
-        self._pathLineEdit.setText(self.filePath )
         self._saveMacro()
 
 
+
+  def _deleteTempMacro(self, filePath):
+    if os.path.exists(filePath):
+      os.remove(filePath)
+      self.filePath = None
+    else:
+      getLogger().debug("Trying to remove a temporary Macro file which does not exist")
 
 
   def _saveMacroAs(self):
@@ -164,12 +166,10 @@ class MacroEditor(CcpnModule):
     Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
     """
 
-    # macroPath = self.preferences.general.userMacroPath or None
-    # colourScheme = self.preferences.general.colourScheme
     newText = self.textBox.toPlainText()
     dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                         acceptMode=FileDialog.AcceptSave,selectFile=self.nameLineEdit.text(),
-                        directory=None, filter='*.py')
+                        directory=self.macroPath, filter='*.py')
     filePath = dialog.selectedFile()
 
     if filePath:
@@ -179,7 +179,6 @@ class MacroEditor(CcpnModule):
         f.write(newText)
         f.close()
     self.filePath = filePath
-    self._pathLineEdit.setText(self.filePath)
     self.nameLineEdit.set(self._getFileNameFromPath(filePath))
 
   def _openMacroFile(self):
@@ -205,7 +204,7 @@ class MacroEditor(CcpnModule):
           self.textBox.insertPlainText(line)
         self.macroFile = f
         self.filePath = filePath
-        self._pathLineEdit.setText(self.filePath)
+        self.isTemporaryFile = False
 
   def _setFileName(self, filePath):
 
@@ -218,30 +217,6 @@ class MacroEditor(CcpnModule):
         path = filePath.split('/')
         fileName = path[-1].split('.')[0]
         return fileName
-
-
-
-
-
-
-  # def _startMacroRecord(self):
-  #   """
-  #   Starts recording of a macro from commands performed in the software and output to the console.
-  #   """
-  #   self.mainWindow.recordingMacro = True
-  #   self.buttonBox.buttons[1].setEnabled(True)
-  #   self.buttonBox.buttons[0].setDisabled(True)
-  #   self.mainWindow.editor = self
-  #
-  #
-  # def _stopMacroRecord(self):
-  #   """
-  #   Stops macro recording.
-  #   """
-  #   self.mainWindow.recordingMacro = False
-  #   self.buttonBox.buttons[1].setDisabled(True)
-  #   self.buttonBox.buttons[0].setEnabled(True)
-  #   del self.mainWindow.editor
 
 
 

@@ -79,12 +79,6 @@ if __name__ == '__main__':
   cb.setChecked(True)
   module.restoreWidgetsState(**state)
 
-  # module._findChildren(module)
-  # for w in module._allChildren:
-  #   if w.__class__.__name__ in CommonWidgets:
-  #     if w not in module.widgetsState:
-  #       print('@@', w)
-
   moduleArea.addModule(module)
 
   win.setCentralWidget(moduleArea)

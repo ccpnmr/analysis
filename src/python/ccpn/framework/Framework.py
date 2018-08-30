@@ -1463,8 +1463,8 @@ class Framework:
   def _importNef(self):
     #TODO:ED add import routine here, dangerous so add warnings
 
-    ok = MessageDialog.showOkCancelWarning('WARNING'
-                                           , 'Importing Nef file will merge the Nef file with'
+    ok = MessageDialog.showOkCancelWarning('WARNING',
+                                           'Importing Nef file will merge the Nef file with'
                                           ' the current project. This can cause conflicts with'
                                           ' existing objects. USE WITH CAUTION')
 
@@ -1472,8 +1472,8 @@ class Framework:
       text='Import Nef File into Project'
       filter = '*.nef'
       dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
-                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general
-                          , filter=filter)
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
+                          filter=filter)
       path = dialog.selectedFile()
       if not path:
         return
@@ -1579,6 +1579,7 @@ class Framework:
     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
     oldPath = self.project.path
     newPath = getSaveDirectory(self.ui.mainWindow, self.preferences.general)
+
     if newPath:
       # Next line unnecessary, but does not hurt
       newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
@@ -2499,6 +2500,23 @@ class Framework:
   #       return
   #     spectrumDisplay.printToFile(path)
 
+def isValidPath(projectName, stripFullPath=True, stripExtension=True):
+  """Check whether the project name is valid after stripping fullpath and extension
+  Can only contain alphanumeric characters and underscores
+
+  :param projectName: name of project to check
+  :param stripFullPath: set to true to remove leading directory
+  :param stripExtension: set to true to remove extension
+  :return: True if valid else False
+  """
+  name = os.path.basename(projectName) if stripFullPath else projectName
+  name = os.path.splitext(name)[0] if stripExtension else name
+
+  STRIPCHARS = '_'
+
+  if isinstance(name, str) and name.strip(STRIPCHARS).isalnum():
+    return True
+
 def getSaveDirectory(parent, preferences=None):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
 
@@ -2506,6 +2524,13 @@ def getSaveDirectory(parent, preferences=None):
                       acceptMode=FileDialog.AcceptSave, preferences=preferences,
                       restrictDirToFilter=False)
   newPath = dialog.selectedFile()
+
+  # check validity of the newPath
+  if not isValidPath(newPath, stripFullPath=True, stripExtension=False):
+    getLogger().warning('Filename can only contain alphanumeric characters and underscores')
+    MessageDialog.showWarning('Save Project', 'Filename can only contain alphanumeric characters and underscores')
+    return
+
   if not newPath:
     return
   if newPath:

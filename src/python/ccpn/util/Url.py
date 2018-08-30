@@ -28,9 +28,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 def fetchUrl(url, data=None, headers=None, timeout=None):
 
+  import sys
   import urllib
   import urllib.parse
   import urllib.request
+  import ssl
+
+  # This restores the same behavior as before.
+  context = ssl._create_unverified_context()
 
   if not headers:
     headers = {}
@@ -40,10 +45,14 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
     data = data.encode('utf-8')
   else:
     data = None
-    
+
   request = urllib.request.Request(url, data, headers)
-  response = urllib.request.urlopen(request, timeout=timeout)
+  response = urllib.request.urlopen(request, timeout=timeout, context=context)
   result = response.read().decode('utf-8')
+
+  # TESTING
+  print('>>>REGISTER', result)
+  sys.exit()
 
   return result
 

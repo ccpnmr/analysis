@@ -421,11 +421,11 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                                                           phrase='create a new')
         if okToContinue:
           with progressManager(self.mainWindow, 'Loading project... ' + url):
-            # try:
-            obj = self.application.loadProject(url)
-            # except Exception as es:
-            #   getLogger().warning('loadProject Error: %s' % str(es))
-            #   obj = None
+            try:
+              obj = self.application.loadProject(url)
+            except Exception as es:
+              getLogger().warning('loadProject Error: %s' % str(es))
+              obj = None
 
             if isinstance(obj, Project):
               try:
@@ -438,17 +438,10 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
       else:
         # with progressManager(self.mainWindow, 'Loading data... ' + url):
-        #   try:
+          try:
             self.project.loadData(url)
-          # except Exception as es:
-          #   getLogger().warning('loadData Error: %s' % str(es))
-
-      # if objects is not None:
-      #   # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner
-      #   for obj in objects:
-
-      # if objects is None or len(objects) == 0:
-      #   showWarning('Invalid File', 'Cannot handle "%s"' % url)
+          except Exception as es:
+            getLogger().warning('loadData Error: %s' % str(es))
 
   def setProject(self, project:Project):
     """
@@ -460,21 +453,21 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     # TODO:ED use return to disable sidebar notifiers
     return
 
-    # Register notifiers to maintain sidebar
-    for cls in classesInSideBar.values():
-      className = cls.className
-      project.registerNotifier(className, 'delete', self._removeItem, onceOnly=True)
-      if className != 'NmrResidue':
-        project.registerNotifier(className, 'create', self._createItem, )
-        project.registerNotifier(className, 'rename', self._renameItem, onceOnly=True)
-    project.registerNotifier('NmrResidue', 'create', self._refreshParentNmrChain, onceOnly=True)
-    project.registerNotifier('NmrResidue', 'rename', self._renameNmrResidueItem, onceOnly=True)
-
-    notifier = project.registerNotifier('SpectrumGroup', 'Spectrum', self._refreshSidebarSpectra,
-                                        onceOnly=True)
-    project.duplicateNotifier('SpectrumGroup', 'create', notifier)
-    project.duplicateNotifier('SpectrumGroup', 'delete', notifier)
-    # TODO:RASMUS Add similar set of notifiers, and similar function for Complex/Chain
+    # # Register notifiers to maintain sidebar
+    # for cls in classesInSideBar.values():
+    #   className = cls.className
+    #   project.registerNotifier(className, 'delete', self._removeItem, onceOnly=True)
+    #   if className != 'NmrResidue':
+    #     project.registerNotifier(className, 'create', self._createItem, )
+    #     project.registerNotifier(className, 'rename', self._renameItem, onceOnly=True)
+    # project.registerNotifier('NmrResidue', 'create', self._refreshParentNmrChain, onceOnly=True)
+    # project.registerNotifier('NmrResidue', 'rename', self._renameNmrResidueItem, onceOnly=True)
+    #
+    # notifier = project.registerNotifier('SpectrumGroup', 'Spectrum', self._refreshSidebarSpectra,
+    #                                     onceOnly=True)
+    # project.duplicateNotifier('SpectrumGroup', 'create', notifier)
+    # project.duplicateNotifier('SpectrumGroup', 'delete', notifier)
+    # # TODO:RASMUS Add similar set of notifiers, and similar function for Complex/Chain
 
   def _registerNotifiers(self):
     self._notifierList = []

@@ -48,7 +48,8 @@ class MacroEditor(CcpnModule):
   The user can decide to save as a in a new file location.
 
   The macro name is the file name on the disk (without the .py extension).
-.
+  NB. If you open an existing file.py and modify it, the changes are not automatically re-written on the disk.
+   All changes WILL BE LOST if not save them. Automatic saving of a .py file can be dangerous for the users.
 
   """
   includeSettingsWidget = False
@@ -69,6 +70,7 @@ class MacroEditor(CcpnModule):
       self._pythonConsole = IpythonConsole(self.mainWindow )
     self.macroPath =self.preferences.general.userMacroPath
     self._isTempMacro = True
+    self._originalOpenedFile = None
 
     self.mainWidget.layout().setSpacing(5)
     self.mainWidget.layout().setContentsMargins(10,10,10,10)
@@ -83,8 +85,8 @@ class MacroEditor(CcpnModule):
     self.textBox = TextEditor(self.mainWidget, grid=(hGrid,0), acceptDrops=True, gridSpan=(1,2))
     self._pythonHighlighter = PythonHighlighter(self.textBox.document())
     hGrid +=1
-    self.buttonBox = ButtonList(self, texts=['Open', 'Save As', 'Run'],
-                                callbacks=[self._openMacroFile, self._saveMacroAs, self._runMacro], grid = (hGrid,1))
+    self.buttonBox = ButtonList(self, texts=['Open', 'save','Save As', 'Run'],
+                                callbacks=[self._openMacroFile,self._saveMacro, self._saveMacroAs, self._runMacro], grid = (hGrid,1))
 
 
     self.filePath = filePath
@@ -106,11 +108,18 @@ class MacroEditor(CcpnModule):
     CallBack for Drop events
     """
     urls = data.get('urls', [])
-
     if len(urls) == 1:
       filePath = urls[0]
-      self._openPath(filePath)
-      self._setFileName(filePath)
+      if len(self.textBox.get())>0:
+        ok= MessageDialog.showYesNoWarning('Open new macro', 'Replace the current macro?')
+        if ok:
+          self._openPath(filePath)
+          self._setFileName(filePath)
+        else:
+          return
+      else:
+        self._openPath(filePath)
+        self._setFileName(filePath)
     else:
       MessageDialog.showMessage('', 'Drop only a file at the time')
 
@@ -134,22 +143,17 @@ class MacroEditor(CcpnModule):
   def _runMacro(self):
     if self._pythonConsole is not None:
       if self.filePath:
-        self._pythonConsole._runMacro(self.filePath)
+        # self._pythonConsole._runMacro(self.filePath)
         if not self.filePath in self.preferences.recentMacros and not self._isTempMacro:
           self.preferences.recentMacros.append(self.filePath)
-      else:
-        self._runTempMacro()
+
+      self.filePath = self._createTemporaryFile()
+      self._saveTextToFile(self.filePath)
+      self._pythonConsole._runMacro(self.filePath)
+      self._deleteTempMacro(self.filePath)
     else:
       MessageDialog.showWarning('', 'No Console available')
 
-
-  def _runTempMacro(self):
-    ''' Run a temp file. First create it, save it, run it, then delete it!'''
-    filePath = self._createTemporaryFile()
-    self._saveMacro()
-    self._runMacro()
-    self._deleteTempMacro(filePath)
-    self._isTempMacro = True
 
   def _saveMacro(self):
     """
@@ -157,10 +161,16 @@ class MacroEditor(CcpnModule):
     appears for specification of the file path.
     """
 
-    if self.filePath:
-      with open(self.filePath, 'w') as f:
-        f.write(self.textBox.toPlainText())
-        f.close()
+    if not self.filePath:
+      print('No Path, This was a temp macro ')
+      self._saveMacroAs()
+
+    if self._originalOpenedFile:
+      if self._getFileNameFromPath(self._originalOpenedFile) != self.nameLineEdit.get():
+        print('Same file but different name',self._originalOpenedFile, self.nameLineEdit.get())
+        self._saveMacroAs()
+      else:
+        self._saveTextToFile(self._originalOpenedFile)
 
   def _macroNameChanged(self):
     if self.filePath:
@@ -180,6 +190,12 @@ class MacroEditor(CcpnModule):
   def saveToPdf(self):
     self.textBox.saveToPDF()
 
+  def _saveTextToFile(self, filePath):
+    if filePath:
+      with open(filePath, 'w') as f:
+        f.write(self.textBox.toPlainText())
+        f.close()
+
   def _saveMacroAs(self):
     """
     Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
@@ -197,8 +213,10 @@ class MacroEditor(CcpnModule):
       with open(filePath, 'w') as f:
         f.write(newText)
         f.close()
-    self.filePath = filePath
-    self.nameLineEdit.set(self._getFileNameFromPath(filePath))
+
+    if filePath:
+      self.nameLineEdit.set(self._getFileNameFromPath(filePath))
+      self.filePath = filePath
 
   def _openMacroFile(self):
     """
@@ -214,16 +232,21 @@ class MacroEditor(CcpnModule):
     self._openPath(filePath)
     self._setFileName(filePath)
 
+
   def _openPath(self, filePath):
 
     if filePath:
-      with open(filePath, 'r') as f:
-        self.textBox.clear()
-        for line in f.readlines():
-          self.textBox.insertPlainText(line)
-        self.macroFile = f
-        self.filePath = filePath
-        self._isTempMacro = False
+      if filePath.endswith('.py'):
+        with open(filePath, 'r') as f:
+          self.textBox.clear()
+          for line in f.readlines():
+            self.textBox.insertPlainText(line)
+          self.macroFile = f
+          self.filePath = filePath
+          self._originalOpenedFile = filePath
+          self._isTempMacro = False
+      else:
+        MessageDialog.showMessage('Format Not Recognised', 'On MacroEditor you can drop only a *.py file type')
 
   def _setFileName(self, filePath):
 

@@ -405,8 +405,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     """
     #TODO: make sure that running a macro adds it to the prefs and calls this function
 
-    runMacrosMenu = self.getMenuAction('Macro->Run Recent')
-    runMacrosMenu.clear()
+    recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
+    recentMacrosMenu.clear()
 
     from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
 
@@ -419,55 +419,43 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
       ccpnMacros = [f for f in ccpnMacros if not f.startswith('_')]
       ccpnMacros = sorted(ccpnMacros)
 
+      recentMacrosMenu.clear()
       for macro in ccpnMacros:
         action = Action(self, text=macro, translate=False,
                         callback=partial(self.runMacro,
                                          macroFile=os.path.join(ccpnMacroPath, macro)))
-        runMacrosMenu.addAction(action)
+        recentMacrosMenu.addAction(action)
       if len(ccpnMacros) > 0:
-        runMacrosMenu.addSeparator()
+        recentMacrosMenu.addSeparator()
     except FileNotFoundError:
       pass
 
-    try:
-      userMacroPath = os.path.expanduser(self.application.preferences.general.userMacroPath)
-      userMacros = os.listdir(userMacroPath)
-      userMacros = [f for f in userMacros if
-                    os.path.isfile(os.path.join(userMacroPath, f))]
-      userMacros = [f for f in userMacros if f.split('.')[-1] == 'py']
-      userMacros = [f for f in userMacros if not f.startswith('.')]
-      userMacros = [f for f in userMacros if not f.startswith('_')]
-      userMacros = sorted(userMacros)
 
-      for macro in userMacros:
-          action = Action(self, text=macro, translate=False,
-                          callback=partial(self.runMacro,
-                                           macroFile=os.path.join(userMacroPath, macro)))
-          runMacrosMenu.addAction(action)
-      if len(userMacros) > 0:
-        runMacrosMenu.addSeparator()
-    except FileNotFoundError:
-      pass
-
-    runMacrosMenu.addAction(Action(runMacrosMenu, text='Refresh',
-                                    callback=self._fillMacrosMenu))
-    runMacrosMenu.addAction(Action(runMacrosMenu, text='Browse...',
-                                    callback=self.runMacro))
 
   def _fillRecentMacrosMenu(self):
     """
     Populates recent macros menu with last ten macros ran.
     TODO: make sure that running a macro adds it to the prefs and calls this function
     """
-
-    recentMacros = uniquify(self.application.preferences.recentMacros)
     recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
-    recentMacrosMenu.clear()
-    for recentMacro in recentMacros:
-      action = Action(self, text=recentMacro, translate=False,
-                      callback=partial(self.runMacro, macroFile=recentMacro))
-      recentMacrosMenu.addAction(action)
-    recentMacrosMenu.addSeparator()
+    recentMacros = self.application.preferences.recentMacros
+    if len(recentMacros) < 0:
+      self._fillMacrosMenu() #uses the default Macros
+
+    else:
+      recentMacros = recentMacros[-10:]
+      recentMacrosMenu.clear()
+      for recentMacro in sorted(recentMacros, reverse=True):
+        action = Action(self, text=recentMacro, translate=False,
+                        callback=partial(self.application.runMacro, macroFile=recentMacro))
+        recentMacrosMenu.addAction(action)
+      recentMacrosMenu.addSeparator()
+
+
+    recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Refresh',
+                                 callback=self._fillRecentMacrosMenu))
+    recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Browse...',
+                                 callback=self.application.runMacro))
     recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
                                       callback=self.application.clearRecentMacros))
 
@@ -676,24 +664,25 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
   #TODO:TJ the below is in Framework (slightly different implementation) so presumably does not belong here???
   #Framework owns the command, this part juts get the file to run
-  def runMacro(self, macroFile:str=None):
-    """
-    Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
-    runs the selected macro.
-    """
-    if macroFile is None:
-      dialog = FileDialog(self, fileMode=FileDialog.ExistingFile, text="Run Macro",
-                          acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general)
-      if os.path.exists(self.application.preferences.general.userMacroPath):
-        dialog.setDirectory(self.application.preferences.general.userMacroPath)
-      macroFile = dialog.selectedFile()
-      if not macroFile:
-        return
-
-    if os.path.isfile(macroFile):
-      self.application.preferences.recentMacros.append(macroFile)
-      self._fillRecentMacrosMenu()
-      self.pythonConsole._runMacro(macroFile)
+  # def runMacro(self, macroFile:str=None):
+  #   """
+  #   Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
+  #   runs the selected macro.
+  #   """
+  #   if macroFile is None:
+  #     dialog = FileDialog(self, fileMode=FileDialog.ExistingFile, text="Run Macro",
+  #                         acceptMode=FileDialog.AcceptOpen, preferences=self.application.preferences.general)
+  #     if os.path.exists(self.application.preferences.general.userMacroPath):
+  #       dialog.setDirectory(self.application.preferences.general.userMacroPath)
+  #     macroFile = dialog.selectedFile()
+  #     if not macroFile:
+  #       return
+  #
+  #   # Don't do this here
+  #   # if os.path.isfile(macroFile):
+  #   #   self.application.preferences.recentMacros.append(macroFile)
+  #     # self._fillRecentMacrosMenu()
+  #     self.pythonConsole._runMacro(macroFile)
 
   def _resetRemoveStripAction(self, strips):
     for spectrumDisplay in self.spectrumDisplays:

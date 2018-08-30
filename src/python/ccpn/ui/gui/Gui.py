@@ -190,7 +190,7 @@ class Gui(Ui):
         SequenceModule._alreadyOpened = False
 
     def start(self):
-        self.mainWindow._fillMacrosMenu()
+        self.mainWindow._fillRecentMacrosMenu()
         self.mainWindow._updateRestoreArchiveMenu()
         # self.mainWindow._setUserShortcuts(self.application.preferences, mainWindow=self.mainWindow)
         project = self.application.project

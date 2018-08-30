@@ -126,6 +126,11 @@ class IpythonConsole(Widget, Base):
       if macroFile:
         self.ipythonWidget.execute('%run -i {}'.format(macroFile))
 
+      try:
+        self.mainWindow._fillRecentMacrosMenu()
+      except Exception as e:
+        getLogger().debug('Impossible to fill the menus with recent macros %s'%e)
+
     def _startChannels(self):
       """
       # CCPN INTERNAL - called in constructor of PythonConsoleModule.

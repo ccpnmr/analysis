@@ -68,6 +68,7 @@ class MacroEditor(CcpnModule):
     if self._pythonConsole is None:
       self._pythonConsole = IpythonConsole(self.mainWindow )
     self.macroPath =self.preferences.general.userMacroPath
+    self._isTempMacro = True
 
     self.mainWidget.layout().setSpacing(5)
     self.mainWidget.layout().setContentsMargins(10,10,10,10)
@@ -134,6 +135,8 @@ class MacroEditor(CcpnModule):
     if self._pythonConsole is not None:
       if self.filePath:
         self._pythonConsole._runMacro(self.filePath)
+        if not self.filePath in self.preferences.recentMacros and not self._isTempMacro:
+          self.preferences.recentMacros.append(self.filePath)
       else:
         self._runTempMacro()
     else:
@@ -146,6 +149,7 @@ class MacroEditor(CcpnModule):
     self._saveMacro()
     self._runMacro()
     self._deleteTempMacro(filePath)
+    self._isTempMacro = True
 
   def _saveMacro(self):
     """
@@ -217,7 +221,7 @@ class MacroEditor(CcpnModule):
           self.textBox.insertPlainText(line)
         self.macroFile = f
         self.filePath = filePath
-        self.isTemporaryFile = False
+        self._isTempMacro = False
 
   def _setFileName(self, filePath):
 

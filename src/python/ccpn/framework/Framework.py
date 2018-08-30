@@ -2382,7 +2382,6 @@ class Framework:
 
     if not macroFile in self.preferences.recentMacros:
       self.preferences.recentMacros.append(macroFile)
-    # self._fillRecentMacrosMenu()
     self.ui.mainWindow.pythonConsole._runMacro(macroFile)
 
 

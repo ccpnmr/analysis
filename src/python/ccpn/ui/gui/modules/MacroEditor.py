@@ -162,12 +162,10 @@ class MacroEditor(CcpnModule):
     """
 
     if not self.filePath:
-      print('No Path, This was a temp macro ')
       self._saveMacroAs()
 
     if self._originalOpenedFile:
       if self._getFileNameFromPath(self._originalOpenedFile) != self.nameLineEdit.get():
-        print('Same file but different name',self._originalOpenedFile, self.nameLineEdit.get())
         self._saveMacroAs()
       else:
         self._saveTextToFile(self._originalOpenedFile)

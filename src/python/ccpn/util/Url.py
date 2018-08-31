@@ -65,7 +65,8 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
     # This restores the same behavior as before.
     context = ssl._create_unverified_context()
 
-    request = urllib.request.Request(url, data, headers)
+    # edit - added data to url as server not passing through POST data
+    request = urllib.request.Request(url+'?'+str(data), data, headers)
     response = urllib.request.urlopen(request, timeout=timeout, context=context)
     result = response.read().decode('utf-8')
 

@@ -78,9 +78,8 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
     buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row,0), gridSpan=(1,2))
     row += 1
 
-    self.resize(600,150)
+    # self.resize(600,150)
     self.resetFromServer()
-    self.setFixedSize(self.size())
 
   def resetFromServer(self):
 

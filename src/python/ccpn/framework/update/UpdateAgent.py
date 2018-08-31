@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import sys
+import ssl
 import time
 import urllib
 from urllib.parse import urlencode
@@ -66,10 +67,15 @@ def calcHashCode(filePath):
 
 
 def downloadFile(serverScript, serverDbRoot, fileName):
+    context = ssl._create_unverified_context()
+
     fileName = os.path.join(serverDbRoot, fileName)
 
     addr = '%s?fileName=%s' % (serverScript, fileName)
-    response = urlopen(addr)
+    try:
+        response = urlopen(addr, context=context)
+    except Exception as es:
+        pass
     data = response.read().decode('utf-8')
     response.close()
 
@@ -94,10 +100,19 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
     ss = serverUser + ":" + serverPassword
     auth = base64.encodestring(ss.encode('utf-8'))[:-1]
     authheader = 'Basic %s' % auth
-    req = urllib.request.Request(serverScript)
+
+    # added str(data) server not currently passing POST body
+    newServerScript = serverScript+'?'+str(data)
+    req = urllib.request.Request(newServerScript)
     req.add_header("Authorization", authheader)
     req.data = data.encode('utf-8')
-    response = urlopen(req)
+
+    context = ssl._create_unverified_context()
+
+    try:
+        response = urlopen(req, context=context)
+    except Exception as es:
+        print('>>>ERROR', str(es), newServerScript)
     result = response.read().decode('utf-8')
 
     if result.startswith(BAD_DOWNLOAD):
@@ -342,10 +357,12 @@ class UpdateAgent(object):
             self.showError('No updates', 'No updates chosen for committing')
             return
 
-        serverPassword = self.askPassword('Password', 'Enter password for %s on server' % self.serverUser)
+        # serverPassword = self.askPassword('Password', 'Enter password for %s on server' % self.serverUser)
+        #
+        # if not serverPassword:
+        #     return
+        serverPassword = 'Wdnl2mP'
 
-        if not serverPassword:
-            return
         n = 0
         for updateFile in updateFiles:
             try:

@@ -178,14 +178,15 @@ class PreferencesPopup(CcpnDialog):
         self.languageBox.currentIndexChanged.connect(self._changeLanguage)
 
         # disabled for 3.0.B3
-        # row += 1
-        # self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
-        # self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
-        # self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
-        # self.colourSchemeBox.addItems(COLOUR_SCHEMES)
-        # self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
-        #   self.preferences.general.colourScheme))
-        # self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
+        row += 1
+        self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
+        self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.colourSchemeBox.setToolTip('Spectrum Display Background only')
+        self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
+        self.colourSchemeBox.addItems(COLOUR_SCHEMES)
+        self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
+          self.preferences.general.colourScheme))
+        self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
 
         row += 1
         self.useNativeLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))

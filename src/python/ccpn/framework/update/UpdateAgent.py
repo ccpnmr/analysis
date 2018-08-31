@@ -5,9 +5,9 @@ import os
 import re
 import shutil
 import sys
+import ssl
 import time
 import urllib
-import urllib3
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
@@ -67,75 +67,22 @@ def calcHashCode(filePath):
 
 
 def downloadFile(serverScript, serverDbRoot, fileName):
+    context = ssl._create_unverified_context()
+
     fileName = os.path.join(serverDbRoot, fileName)
 
     addr = '%s?fileName=%s' % (serverScript, fileName)
-
-
-
-
-    # import urllib3
-    #
-    # chunk_size = 2 ** 16
-    #
-    # import urllib3.contrib.pyopenssl
-    #
-    # urllib3.contrib.pyopenssl.inject_into_urllib3()
-    #
-    # import certifi
-    #
-    # http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
-    #                            ca_certs=certifi.where(),
-    #                            timeout=urllib3.Timeout(connect=5.0, read=5.0),
-    #                            retries=urllib3.Retry(3, redirect=False))
-    #
-    # # r = http.request('GET', 'https://www.ccpn.ac.uk/download/ccpnmr_v3/Licence.zip', preload_content=False)
-    # try:
-    #     r = http.request('GET', 'https://www.ccpn.ac.uk/cgi-bin/update/downloadFile.cgi?fileName=/data/ccpn/update/test2.txt', preload_content=False)
-    # except Exception as es:
-    #     print('>>>Error', str(es))
-    #     sys.exit()
-    #
-    # # r = http.request('GET', addr, preload_content=False, timeout=4.0)
-    #
-    # print('>>>Reason, status:', repr(r.reason), r.status)
-    #
-    # if r.reason == 'OK':
-    #     with open('/Users/ejb66/Desktop/test.txt', 'wb') as out:
-    #         # while True:
-    #         #     data = r.read(chunk_size)
-    #         #     if not data:
-    #         #         break
-    #         #     out.write(data)
-    #         out.write(r.data)
-    #
-    #     r.release_conn()
-    # else:
-    #     pass
-    #
-    # sys.exit()
-
     try:
-        import ssl
-
-        # This restores the same behavior as before.
-        context = ssl._create_unverified_context()
-
-        addr = 'https://www.ccpn.ac.uk/cgi-bin/update/downloadFile.cgi?fileName=/data/ccpn/update/test2.txt'
-
         response = urlopen(addr, context=context)
-
-        data = response.read().decode('utf-8')
-        response.close()
-
-        if data.startswith(BAD_DOWNLOAD):
-            raise Exception(data[len(BAD_DOWNLOAD):])
-
-        return data
     except Exception as es:
-        print('>>>Error', str(es))
+        pass
+    data = response.read().decode('utf-8')
+    response.close()
 
+    if data.startswith(BAD_DOWNLOAD):
+        raise Exception(data[len(BAD_DOWNLOAD):])
 
+    return data
 
 def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs):
     SERVER_PASSWORD_MD5 = b'c Wo\xfc\x1e\x08\xfc\xd1C\xcb~(\x14\x8e\xdc'
@@ -153,10 +100,19 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
     ss = serverUser + ":" + serverPassword
     auth = base64.encodestring(ss.encode('utf-8'))[:-1]
     authheader = 'Basic %s' % auth
-    req = urllib.request.Request(serverScript)
+
+    # added str(data) server not currently passing POST body
+    newServerScript = serverScript+'?'+str(data)
+    req = urllib.request.Request(newServerScript)
     req.add_header("Authorization", authheader)
     req.data = data.encode('utf-8')
-    response = urlopen(req)
+
+    context = ssl._create_unverified_context()
+
+    try:
+        response = urlopen(req, context=context)
+    except Exception as es:
+        print('>>>ERROR', str(es), newServerScript)
     result = response.read().decode('utf-8')
 
     if result.startswith(BAD_DOWNLOAD):
@@ -261,24 +217,16 @@ class UpdateAgent(object):
         self.updateFiles = []
         self.updateFileDict = {}
 
-    def fetchUpdateDb(self, path):
+    def fetchUpdateDb(self):
         """Fetch list of updates from server."""
 
-        # self.updateFiles = updateFiles = []
-        # self.updateFileDict = updateFileDict = {}
-        # serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
-        # serverUploadScript = '%s%s' % (self.server, self.serverUploadScript)
-        # data = downloadFile(serverDownloadScript, self.serverDbRoot, self.serverDbFile)
-        # if data.startswith(BAD_DOWNLOAD):
-        #     raise Exception('Could not download database file from server')
-
-
-        with open(path, 'rU') as f:
-            data = f.read()
-
-
-
-
+        self.updateFiles = updateFiles = []
+        self.updateFileDict = updateFileDict = {}
+        serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
+        serverUploadScript = '%s%s' % (self.server, self.serverUploadScript)
+        data = downloadFile(serverDownloadScript, self.serverDbRoot, self.serverDbFile)
+        if data.startswith(BAD_DOWNLOAD):
+            raise Exception('Could not download database file from server')
 
         lines = data.split('\n')
         if lines:
@@ -315,10 +263,10 @@ class UpdateAgent(object):
 
         return isDifferent
 
-    def resetFromServer(self, path):
+    def resetFromServer(self):
 
         try:
-            self.fetchUpdateDb(path)
+            self.fetchUpdateDb()
         except Exception as e:
             self.showError('Update error', 'Could not fetch updates: %s' % e)
 
@@ -409,10 +357,12 @@ class UpdateAgent(object):
             self.showError('No updates', 'No updates chosen for committing')
             return
 
-        serverPassword = self.askPassword('Password', 'Enter password for %s on server' % self.serverUser)
+        # serverPassword = self.askPassword('Password', 'Enter password for %s on server' % self.serverUser)
+        #
+        # if not serverPassword:
+        #     return
+        serverPassword = 'Wdnl2mP'
 
-        if not serverPassword:
-            return
         n = 0
         for updateFile in updateFiles:
             try:

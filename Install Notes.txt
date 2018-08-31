@@ -1,0 +1,43 @@
+
+CCPN Analysis v3
+Bitbucket/Git setup
+
+    Instructions for installing CCPN as a developer
+
+    The development files are downloaded and installed by downloading and executing an install-script 'installDevelopment'
+    contained in a separate repository on bitbucket.
+
+    If you would like to be a developer please email ccpnmr3@gmail.com
+    and we will either send you or give you access to the install script and to the development repository.
+    Once you have the script, please follow the instructions below.
+
+
+    Step 1:
+    Make sure you're setup on bitbucket with an ssh key; if you don't have one yet the script will prompt you at
+    the appropriate point.
+
+    Step 2:
+    Make sure you've configured git correctly:
+
+    git config --global user.name "My Name"
+    git config --global user.email "email@address.ac.uk"
+
+    Step 3:
+    run ./installDevelopment
+
+    Step 4:
+    Now add the following to version control in Pycharm>Preferences>Version Control:
+
+      data
+      internal
+      src/python/ccpnmodel
+      src/python/ccpn/AnalysisAssign
+      src/python/ccpn/AnalysisStructure
+      src/python/ccpn/AnalysisScreen
+      src/python/ccpn/AnalysisMetabolomics
+      src/python/ccpn/util/nef
+
+    Finally make sure to turn off the Control repositories synchronously option in Pycharm>Preferences>Version Control>Git
+
+    See the SOP's
+

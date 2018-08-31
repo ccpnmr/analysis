@@ -66,6 +66,8 @@ from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.ui.gui.widgets.SideBar import SideBar
+from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
+
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget,\
                                                 DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
@@ -95,8 +97,8 @@ CommonWidgets =            {
                             SelectorWidget.__name__:             (SelectorWidget.getText,              SelectorWidget.select), #PulldownList
                             InputPulldown.__name__:              (InputPulldown.currentText,          InputPulldown.set), #PulldownList
                             ColourSelectionWidget.__name__:      (ColourSelectionWidget.currentText,          ColourSelectionWidget.setColour), #PulldownList
-                            LineEditPopup.__name__:              (LineEditPopup.get,                  LineEditPopup.set)
-
+                            LineEditPopup.__name__:              (LineEditPopup.get,                  LineEditPopup.set),
+                            QCodeEditor.__name__:                (QCodeEditor.get,                  QCodeEditor.set)
 
                             # ADD TABLES
                             # ADD Others

@@ -1,9 +1,18 @@
 # from https://wiki.python.org/moin/PyQt/Python%20syntax%20highlighting. Example was based on existing work by Carson Farmer and Christophe Kibleur, and an example on the SciPres wiki.
 
 
-
 from PyQt5.QtCore import QRegExp
 from PyQt5.QtGui import QColor, QTextCharFormat, QFont, QSyntaxHighlighter
+from PyQt5.QtCore import Qt, QRect, QSize
+from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QTextEdit
+from PyQt5.QtGui import QColor, QPainter, QTextFormat
+from PyQt5 import QtPrintSupport
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.FileDialog import FileDialog
+
+
+VerticalLineCountColour = Qt.lightGray
+HighlightLineColor = QColor(Qt.yellow).lighter(190)
 
 def format(color, style=''):
     """Return a QTextCharFormat with the given attributes.
@@ -35,7 +44,7 @@ STYLES = {
 }
 
 
-class PythonHighlighter (QSyntaxHighlighter):
+class PythonHighlighter(QSyntaxHighlighter):
     """Syntax highlighter for the Python language.
     """
     # Python keywords
@@ -177,7 +186,115 @@ class PythonHighlighter (QSyntaxHighlighter):
             return False
 
 
-from PyQt5 import QtGui
+class QLineNumberArea(QWidget):
+    def __init__(self, editor,):
+        super().__init__(editor)
+
+        self.codeEditor = editor
+
+    def sizeHint(self):
+        return QSize(self.editor.lineNumberAreaWidth(), 0)
+
+    def paintEvent(self, event):
+        self.codeEditor.lineNumberAreaPaintEvent(event)
+
+
+
+#########################################################################################
+################################  Editor Widget  ########################################
+#########################################################################################
+
+class QCodeEditor(QPlainTextEdit,Base):
+    def __init__(self, parent=None, **kw):
+        super().__init__(parent)
+        Base.__init__(self, **kw)
+        self.lineNumberArea = QLineNumberArea(self)
+        self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
+        self.updateRequest.connect(self.updateLineNumberArea)
+        self.cursorPositionChanged.connect(self.highlightCurrentLine)
+        self.updateLineNumberAreaWidth(0)
+        self.pythonHighlighter = PythonHighlighter(self.document())
+        self.setTabStopWidth(8)
+
+    def lineNumberAreaWidth(self):
+        digits = 1
+        max_value = max(1, self.blockCount())
+        while max_value >= 10:
+            max_value /= 10
+            digits += 1
+        space = 3 + self.fontMetrics().width('9') * digits
+        return space
+
+    def updateLineNumberAreaWidth(self, _):
+        self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
+
+    def updateLineNumberArea(self, rect, dy):
+        if dy:
+            self.lineNumberArea.scroll(0, dy)
+        else:
+            self.lineNumberArea.update(0, rect.y(), self.lineNumberArea.width(), rect.height())
+        if rect.contains(self.viewport().rect()):
+            self.updateLineNumberAreaWidth(0)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        cr = self.contentsRect()
+        self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
+
+    def highlightCurrentLine(self):
+        extraSelections = []
+        if not self.isReadOnly():
+            selection = QTextEdit.ExtraSelection()
+            selection.format.setBackground(HighlightLineColor)
+            selection.format.setProperty(QTextFormat.FullWidthSelection, True)
+            selection.cursor = self.textCursor()
+            selection.cursor.clearSelection()
+            extraSelections.append(selection)
+        self.setExtraSelections(extraSelections)
+
+    def lineNumberAreaPaintEvent(self, event):
+        painter = QPainter(self.lineNumberArea)
+
+        painter.fillRect(event.rect(), VerticalLineCountColour)
+
+        block = self.firstVisibleBlock()
+        blockNumber = block.blockNumber()
+        top = self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
+        bottom = top + self.blockBoundingRect(block).height()
+
+        # Just to make sure I use the right font
+        height = self.fontMetrics().height()
+        while block.isValid() and (top <= event.rect().bottom()):
+            if block.isVisible() and (bottom >= event.rect().top()):
+                number = str(blockNumber + 1)
+                painter.setPen(Qt.black)
+                painter.drawText(0, top, self.lineNumberArea.width(), height, Qt.AlignRight, number)
+
+            block = block.next()
+            top = bottom
+            bottom = top + self.blockBoundingRect(block).height()
+            blockNumber += 1
+
+    def get(self):
+        return self.toPlainText()
+
+    def set(self, value):
+        self.setPlainText(value)
+
+    def saveToPDF(self, fileName=None):
+
+        dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
+                            acceptMode=FileDialog.AcceptSave, selectFile=fileName,
+                            filter='*.pdf')
+        filename = dialog.selectedFile()
+        if filename:
+            printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
+            printer.setPageSize(QtPrintSupport.QPrinter.A4)
+            printer.setColorMode(QtPrintSupport.QPrinter.Color)
+            printer.setOutputFormat(QtPrintSupport.QPrinter.PdfFormat)
+            printer.setOutputFileName(filename)
+            self.document().print_(printer)
+
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication
@@ -185,19 +302,11 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
   app = TestApplication()
-
-  texts = ['Int', 'Float', 'String', '']
-  objects = [int, float, str, 'Green']
-
   popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
+  editor = QCodeEditor(popup, grid=[0,0])
 
-
-
-
-  editor = TextEditor(popup, grid=[0,0])
-  highlight = PythonHighlighter(editor.document())
-  infile = open('/Users/luca/Desktop/o.py', 'r')
-  editor.setPlainText(infile.read())
+  # infile = open('/Users/luca/Desktop/o.py', 'r')
+  # editor.setPlainText(infile.read())
   popup.show()
   popup.raise_()
   app.start()

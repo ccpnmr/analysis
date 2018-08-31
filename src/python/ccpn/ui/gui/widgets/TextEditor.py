@@ -122,6 +122,8 @@ class TextEditor(QtWidgets.QTextEdit, Base):
       self.document().print_(printer)
 
 
+
+
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog

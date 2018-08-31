@@ -124,6 +124,18 @@ def _contoursItem(strip):
             typeItem=ItemTypes.get(ITEM), icon='icons/contours', toolTip='Change Contour Settings',
             callback=strip.spectrumDisplay.adjustContours)
 
+
+def _raiseContoursItem(strip):
+  return _SCMitem(name='Raise Base Level',
+                  typeItem=ItemTypes.get(ITEM), icon='icons/contour-base-up', toolTip='Raise Contour Base Level',
+                  callback=strip.spectrumDisplay.raiseContourBase)
+
+def _lowerContoursItem(strip):
+  return _SCMitem(name='Lower Base Level',
+                  typeItem=ItemTypes.get(ITEM), icon='icons/contour-base-down', toolTip='Lower Contour Base Level',
+                  callback=strip.spectrumDisplay.lowerContourBase)
+
+
 def _resetZoom(strip):
     return _SCMitem(name='Reset Zoom',
              typeItem=ItemTypes.get(ITEM), icon='icons/zoom-full', toolTip='Reset Zoom',
@@ -414,6 +426,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
             _cyclePeakSymbolsItem(guiStripNd),
             _separator(),
             _contoursItem(guiStripNd),
+            _raiseContoursItem(guiStripNd),
+            _lowerContoursItem(guiStripNd),
             _separator(),
 
             # _SCMitem(name='Add Contour Level',

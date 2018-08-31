@@ -58,7 +58,7 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
 
     if data:
         data = urllib.parse.urlencode(data)
-        data = data.encode('utf-8')
+        # data = data.encode('utf-8')
     else:
         data = None
 
@@ -66,7 +66,7 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
     context = ssl._create_unverified_context()
 
     # edit - added data to url as server not passing through POST data
-    request = urllib.request.Request(url+'?'+str(data), data, headers)
+    request = urllib.request.Request(url+'?'+str(data))                          #)   , data, headers)
     response = urllib.request.urlopen(request, timeout=timeout, context=context)
     result = response.read().decode('utf-8')
 

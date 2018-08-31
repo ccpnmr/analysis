@@ -1108,8 +1108,8 @@ class Framework:
 
     ms.append(('Macro',     [
       ("New", self.showMacroEditor),
-      ("New from Console", self.newMacroFromConsole),
-      # ("New from Log", self.newMacroFromLog), #Broken
+      ("New from Console", self.newMacroFromConsole,[('enabled', False)]),#Not available yet
+      ("New from Log", None, [('enabled', False)]), #Not available yet
       (),
       ("Open...", self.openMacroOnEditor),
       ("Run...", self.runMacro),
@@ -2332,35 +2332,22 @@ class Framework:
     #FIXME:ED - haven't checked this properly
     mainWindow = self.ui.mainWindow
     self.editor = MacroEditor(mainWindow=mainWindow)
-    self.editor.textBox.setText(mainWindow.pythonConsole.textEditor.toPlainText())
+    self.editor.textBox.set(mainWindow.pythonConsole.textEditor.toPlainText())
     mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
 
   # FIXME:ED - haven't checked this properly. Broken
-  # def newMacroFromLog(self):
-  #   """
-  #   Displays macro editor with contents of the log.
-  #   """
-  #   # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
-  #   #FIXME:ED - haven't checked this properly
-  #   mainWindow = self.ui.mainWindow
-  #   self.editor = MacroEditor(mainWindow=mainWindow)
-  #
-  #   l = open(getLogger().logPath, 'r').readlines()
-  #   text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
-  #   self.editor.textBox.setText(text)
-  #   mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-
-  # This has never worked. Removed from menus
-  # def startMacroRecord(self):
-  #   """
-  #   Displays macro editor with additional buttons for recording a macro.
-  #   """
-  #   mainWindow = self.ui.mainWindow
-  #   self.editor = MacroEditor(mainWindow=mainWindow, showRecordButtons=True)
-  #   mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
-  #   self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
-  #   getLogger().info("application.startMacroRecord()")
-
+  def newMacroFromLog(self):
+    """
+    Displays macro editor with contents of the log.
+    """
+    # editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
+    #FIXME:ED - haven't checked this properly
+    mainWindow = self.ui.mainWindow
+    self.editor = MacroEditor(mainWindow=mainWindow)
+    l = open(getLogger().logPath, 'r').readlines()
+    text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
+    self.editor.textBox.setText(text)
+    mainWindow.moduleArea.addModule(self.editor, position='top', relativeTo=mainWindow.moduleArea)
 
   def defineUserShortcuts(self):
 

@@ -230,7 +230,6 @@ class MacroEditor(CcpnModule):
     self._openPath(filePath)
     self._setFileName(filePath)
 
-
   def _openPath(self, filePath):
 
     if filePath:
@@ -258,7 +257,14 @@ class MacroEditor(CcpnModule):
         fileName = path[-1].split('.')[0]
         return fileName
 
-
+  def _closeModule(self):
+    """Re-implementation of closeModule  """
+    ok = MessageDialog.showYesNoWarning('Close Macro', 'Do you want save?')
+    if ok:
+      self._saveMacro()
+    else:
+      return
+    super(MacroEditor, self)._closeModule()
 
 if __name__ == '__main__':
   from PyQt5 import QtGui, QtWidgets

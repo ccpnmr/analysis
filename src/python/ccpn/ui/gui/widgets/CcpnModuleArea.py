@@ -23,7 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtCore
-
+from ccpn.core.Spectrum import Spectrum
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.DockArea import DockArea, DockDrop
 from pyqtgraph.dockarea.Container import Container
@@ -118,8 +118,9 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       self.overlay.setDropArea(self.dropArea)
 
     elif DropBase.URLS in data:
-      self.mainWindow.sideBar._processDroppedItems(data)
-
+      objs = self.mainWindow.sideBar._processDroppedItems(data)
+      spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
+      _openItemObject(self.mainWindow, spectra, position=self.dropArea)
       # reset the dock area
       self.dropArea = None
       self.overlay.setDropArea(self.dropArea)

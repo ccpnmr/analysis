@@ -407,7 +407,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
   def _processDroppedItems(self, data):
     "Handle the dropped urls"
     # CCPN INTERNAL. Called also from module area and GuiStrip. They should have same behaviours
-
+    objs = []
     for url in data.get('urls',[]):
       getLogger().debug('>>> dropped: '+str(url))
 
@@ -442,6 +442,20 @@ class SideBar(QtWidgets.QTreeWidget, Base):
             self.project.loadData(url)
           except Exception as es:
             getLogger().warning('loadData Error: %s' % str(es))
+        #   try:
+            data = self.project.loadData(url)
+            objs.extend(data)
+
+          # except Exception as es:
+          #   getLogger().warning('loadData Error: %s' % str(es))
+
+      # if objects is not None:
+      #   # TODO:ED added here to make new instances of project visible, they are created hidden to look cleaner
+      #   for obj in objects:
+
+      # if objects is None or len(objects) == 0:
+      #   showWarning('Invalid File', 'Cannot handle "%s"' % url)
+    return objs
 
   def setProject(self, project:Project):
     """

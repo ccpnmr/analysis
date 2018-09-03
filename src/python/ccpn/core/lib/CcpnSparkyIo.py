@@ -109,9 +109,13 @@ PEAK_PEAK = 'peak'
 PEAK_MAXSEARCH = 10
 PEAK_POS = 'pos'
 PEAK_RESONANCE = 'rs'
+PEAK_HEIGHT = 'height'
+PEAK_LINEWIDTH = 'linewidth'
 PEAK_POSNUM = 1
 PEAK_RESONANCENUM = 2
-PEAK_ALLFOUND = PEAK_POSNUM | PEAK_RESONANCENUM
+PEAK_HEIGHTNUM = 4
+PEAK_LINEWIDTHNUM = 8
+PEAK_ALLFOUND = PEAK_POSNUM | PEAK_RESONANCENUM | PEAK_HEIGHTNUM | PEAK_LINEWIDTHNUM
 
 class UnquotedValue(str):
   """A plain string - the only difference is the type: 'UnquotedValue'.
@@ -885,37 +889,76 @@ class CcpnSparkyReader:
                   # TODO:ED put some more error checking in here - need to parse properly
 
                   found = 0
+                  # find the peak position
                   line = thisPeak.getData(PEAK_POS)
                   if line:
                     found = found | PEAK_POSNUM
                     posList = [float(val) for val in line]
 
+                  # find the resonance numbering
                   line = thisPeak.getData(PEAK_RESONANCE)
                   if line:
                     found = found | PEAK_RESONANCENUM
                     resList = line
 
+                  # find the peak height
+                  line = thisPeak.getData(PEAK_HEIGHT)
+                  if line:
+                    found = found | PEAK_HEIGHTNUM
+                    heightList = line
+
+                  # find the peak linewidth
+                  line = thisPeak.getData(PEAK_LINEWIDTH)
+                  if line:
+                    found = found | PEAK_LINEWIDTHNUM
+                    linewidthList = line
+
                   peakPos = [posList[i] for i in peakPatternAxes]
 
-                  if found == PEAK_POSNUM:    # test without residue
-                    peak = newPeakList.newPeak(position=peakPos)
+                  if found :
+                    # make a new peak
+                    peak = newPeakList.newPeak()
 
-                  elif found == PEAK_ALLFOUND:
-                    # TODO:ED check with specta other than N-H, multidimensional etc.
+                    if found & PEAK_POSNUM:
+                      peak.position = peakPos
 
-                    peak = newPeakList.newPeak(position=peakPos)
+                    if found & PEAK_HEIGHTNUM and len(heightList) > 1:
+                      peak.height = float(heightList[1])
 
-                    # TODO:ED check that the molName matches molecule/condition
-                    nmrChain = project.fetchNmrChain(nmrChainName)
+                    if found & PEAK_LINEWIDTHNUM and len(linewidthList) > 2:
+                      peak.lineWidths = tuple(float(lw) for lw in linewidthList[:2])
 
-                    ri=0
-                    while ri < len(resList):
-                      resType = resList[ri][0]
-                      resName = resList[ri][1:]     # clip the chain type from the head
-                      axisCode = resList[ri+1]
-                      nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
-                      self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
-                      ri += 2
+                    if found & PEAK_RESONANCENUM:
+                      nmrChain = project.fetchNmrChain(nmrChainName)
+
+                      ri=0
+                      while ri < len(resList):
+                        resType = resList[ri][0]
+                        resName = resList[ri][1:]     # clip the chain type from the head
+                        axisCode = resList[ri+1]
+                        nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
+                        self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
+                        ri += 2
+
+                  # if found & (PEAK_POSNUM | PEAK_RESONANCENUM):    # test without residue
+                  #   peak = newPeakList.newPeak(position=peakPos)
+                  #
+                  # elif found == PEAK_ALLFOUND:
+                  #   # TODO:ED check with specta other than N-H, multidimensional etc.
+                  #
+                  #   peak = newPeakList.newPeak(position=peakPos)
+                  #
+                  #   # TODO:ED check that the molName matches molecule/condition
+                  #   nmrChain = project.fetchNmrChain(nmrChainName)
+                  #
+                  #   ri=0
+                  #   while ri < len(resList):
+                  #     resType = resList[ri][0]
+                  #     resName = resList[ri][1:]     # clip the chain type from the head
+                  #     axisCode = resList[ri+1]
+                  #     nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=resName, residueType=resType)
+                  #     self._fetchAndAssignNmrAtom(peak, nmrResidue, axisCode)
+                  #     ri += 2
 
       except Exception as es:
         getLogger().warning('Error importing peakList: %s %i' % (saveBlock.name, errorLine))

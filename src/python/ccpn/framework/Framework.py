@@ -634,12 +634,12 @@ class Framework:
     # Initialise SpectrumViews
     for spectrumDisplay in project.spectrumDisplays:
 
-      strips = spectrumDisplay.strips
-      for strip in strips:
+      strips = spectrumDisplay.orderedStrips
+      for si, strip in enumerate(strips):
 
         # move to the correct place in the widget
         stripIndex = strips.index(strip)
-        spectrumDisplay.stripFrame.layout().addWidget(strip, 0, stripIndex)
+        spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)   #stripIndex)
 
         specViews = strip.spectrumViews
         # for iSV, spectrumView in enumerate(strip.orderedSpectrumViews(includeDeleted=False)):

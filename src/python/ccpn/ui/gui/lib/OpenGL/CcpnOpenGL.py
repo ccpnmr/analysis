@@ -89,7 +89,7 @@ from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGR
 # from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
-    leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
+    leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, controlShiftRightMouse, \
     middleMouse, shiftMiddleMouse, rightMouse, shiftRightMouse, controlRightMouse, PICK
 # from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
@@ -678,8 +678,8 @@ class CcpnGLWidget(QOpenGLWidget):
         elif numDegrees:
 
             # this may work when using Linux
-            scrollDirection = numDegrees.y() / 8
-            zoomscale = 8.0
+            scrollDirection = numDegrees.y() / 4
+            zoomScale = 8.0
 
             # stop the very sensitive movements
             if abs(scrollDirection) < 2:
@@ -1143,9 +1143,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisT, self.axisB = axisLimits[2:4]
 
     def initializeGL(self):
-        GL = self.context().versionFunctions()
-        GL.initializeOpenGLFunctions()
-        self._GLVersion = GL.glGetString(GL.GL_VERSION)
+        # GL = self.context().versionFunctions()
+        # GL.initializeOpenGLFunctions()
+        # self._GLVersion = GL.glGetString(GL.GL_VERSION)
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, strip=self.strip)
@@ -1570,7 +1570,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.cursorPosition = (xPos, yPos)  # TODO: is there a better place for this to be set?
         self.current.mouseMovedDict = mouseMovedDict
 
-        if event.buttons() & Qt.LeftButton:
+        # print('>>>be', Qt.LeftButton, int(buttons))
+        if event.buttons() & (Qt.LeftButton | Qt.RightButton):
             # do the complicated keypresses first
             # other keys are: Key_Alt, Key_Meta, and _isALT, _isMETA
 
@@ -1582,14 +1583,14 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
-            elif self._key == Qt.Key_Shift:
+            elif (self._key == Qt.Key_Shift) and (event.buttons() & Qt.LeftButton):
 
                 self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 1
                 self._drawSelectionBox = True
                 self._drawDeltaOffset = True
 
-            elif self._key == Qt.Key_Control:
+            elif (self._key == Qt.Key_Control) and (event.buttons() & Qt.LeftButton):
 
                 self._endCoordinate = self.cursorCoordinate  #[event.pos().x(), self.height() - event.pos().y()]
                 self._selectionMode = 2
@@ -3923,7 +3924,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if getCurrentMouseMode() == PICK:
             self._pickAtMousePosition(event)
 
-        if controlShiftLeftMouse(event):
+        if controlShiftLeftMouse(event) or controlShiftRightMouse(event):
             # Control-Shift-left-click: pick peak
             self._pickAtMousePosition(event)
 
@@ -4138,7 +4139,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.multiplets = multiplets
 
     def _mouseDragEvent(self, event: QtGui.QMouseEvent, axis=None):
-        if controlShiftLeftMouse(event):
+        if controlShiftLeftMouse(event) or controlShiftRightMouse(event):
             # Control(Cmd)+shift+left drag: Peak-picking
             event.accept()
 

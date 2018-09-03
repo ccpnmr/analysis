@@ -1107,7 +1107,7 @@ class Framework:
                ))
 
     ms.append(('Macro',     [
-      ("New", self.showMacroEditor),
+      ("New Macro Editor", self.showMacroEditor),
       ("New from Console", self.newMacroFromConsole,[('enabled', False)]),#Not available yet
       ("New from Log", None, [('enabled', False)]), #Not available yet
       (),

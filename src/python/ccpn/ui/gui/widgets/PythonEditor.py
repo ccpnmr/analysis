@@ -13,6 +13,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 
 VerticalLineCountColour = Qt.lightGray
 HighlightLineColor = QColor(Qt.yellow).lighter(190)
+Indentation = 4
 
 def format(color, style=''):
     """Return a QTextCharFormat with the given attributes.
@@ -214,7 +215,7 @@ class QCodeEditor(QPlainTextEdit,Base):
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
         self.updateLineNumberAreaWidth(0)
         self.pythonHighlighter = PythonHighlighter(self.document())
-        self.setTabStopWidth(8)
+        self.setTabStopWidth(int(Indentation*2)) #indentation: multiple of 2 . for a 4 space indentation use 16
 
     def lineNumberAreaWidth(self):
         digits = 1

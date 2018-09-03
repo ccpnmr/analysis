@@ -55,11 +55,11 @@ PYTHON_VERSION = 3.5
 
 # for Unix do not seem to need PYTHON_LIB
 # for Windows seem to need below (or similar)
-PYTHON_LIB = -lpython$(PYTHON_VERSION)m
+#PYTHON_LIB = -lpython$(PYTHON_VERSION)m
 PYTHON_INCLUDE_FLAGS = -I$(PYTHON_DIR)/include/python$(PYTHON_VERSION)m -I$(PYTHON_DIR)/lib/python$(PYTHON_VERSION)/site-packages/numpy/core/include/numpy
 
 # for Unix do not seem to need PYTHON_LIB_FLAGS
-PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/python$(PYTHON_VERSION)/config-$(PYTHON_VERSION)m
+#PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/lib/python$(PYTHON_VERSION)/config-$(PYTHON_VERSION)m
 
 # for Windows seem to need below (or similar)
 #PYTHON_LIB_FLAGS = -L$(PYTHON_DIR)/libs

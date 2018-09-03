@@ -925,7 +925,7 @@ class CcpnSparkyReader:
                     if found & PEAK_HEIGHTNUM and len(heightList) > 1:
                       peak.height = float(heightList[1])
 
-                    if found & PEAK_LINEWIDTHNUM and len(linewidthList) > 2:
+                    if found & PEAK_LINEWIDTHNUM and len(linewidthList) > 1:
                       peak.lineWidths = tuple(float(lw) for lw in linewidthList[:2])
 
                     if found & PEAK_RESONANCENUM:

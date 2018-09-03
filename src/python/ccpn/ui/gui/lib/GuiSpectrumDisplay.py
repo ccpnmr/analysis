@@ -735,22 +735,26 @@ class GuiSpectrumDisplay(CcpnModule):
   def setLastAxisOnly(self, lastAxisOnly:bool=True):
     self.lastAxisOnly = lastAxisOnly
 
-  def showAxes(self):
-    if self.strips:
+  def showAxes(self, strips=None):
+    # use the strips as they are ordered in the model
+    currentStrips = self.orderedStrips
+    # currentStrips = strips if strips else self.strips
+
+    if currentStrips:
       if self.lastAxisOnly:
-        for ss in self.strips[:-1]:
-          ss.plotWidget.plotItem.axes['right']['item'].hide()
+        for ss in currentStrips[:-1]:
+          # ss.plotWidget.plotItem.axes['right']['item'].hide()
           try:
             ss._CcpnGLWidget.setRightAxisVisible(axisVisible=False)
           except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated', strip=ss, error=es)
 
-        self.strips[-1].plotWidget.plotItem.axes['right']['item'].show()
+            # currentStrips[-1].plotWidget.plotItem.axes['right']['item'].show()
 
         try:
-          self.strips[-1]._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
+          currentStrips[-1]._CcpnGLWidget.setRightAxisVisible(axisVisible=True)
         except Exception as es:
-          getLogger().debugGL('OpenGL widget not instantiated', strip=self.strips[-1], error=es)
+          getLogger().debugGL('OpenGL widget not instantiated', strip=currentStrips[-1], error=es)
 
       else:
         for ss in self.strips:
@@ -894,7 +898,7 @@ class GuiSpectrumDisplay(CcpnModule):
       if self.strips:
         # add 5% to account for any small borders
         firstStripWidth = thisLayoutWidth / (len(self.strips) * 1.05)
-        AXIS_WIDTH = self.strips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
+        AXIS_WIDTH = self.orderedStrips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
       else:
         firstStripWidth = thisLayout.itemAt(0).widget().width()
 
@@ -902,18 +906,20 @@ class GuiSpectrumDisplay(CcpnModule):
         maxCol = 0
         for wid in widgets[1:]:
           index = thisLayout.indexOf(wid)
-          row, column, cols, rows = thisLayout.getItemPosition(index)
+          if index >= 0:
+            row, column, cols, rows = thisLayout.getItemPosition(index)
           maxCol = max(maxCol, column)
 
         for col in range(0, maxCol+1):
-          if widths:
+          if widths and thisLayout.itemAt(col):
             thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
           thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
       else:
         maxCol = 0
         for wid in widgets[1:]:
           index = thisLayout.indexOf(wid)
-          row, column, cols, rows = thisLayout.getItemPosition(index)
+          if index >= 0:
+            row, column, cols, rows = thisLayout.getItemPosition(index)
           maxCol = max(maxCol, column)
 
         leftWidth = scaleFactor*(thisLayoutWidth - AXIS_WIDTH - (maxCol*AXIS_PADDING)) / (maxCol+1)
@@ -923,7 +929,7 @@ class GuiSpectrumDisplay(CcpnModule):
             thisLayout.itemAt(col).widget().setMinimumWidth(leftWidth)
           thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
 
-        if widths:
+        if widths and thisLayout.itemAt(maxCol):
           thisLayout.itemAt(maxCol).widget().setMinimumWidth(endWidth)
         thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
 

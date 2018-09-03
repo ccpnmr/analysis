@@ -1126,7 +1126,7 @@ class Framework:
         # Submenu
         ("Beginners Tutorial", self.showBeginnersTutorial),
         ("Backbone Tutorial", self.showBackboneTutorial),
-        ("Screen Tutorial", self.showScreenTutorial)
+        ("More...", self.showTutorials)
       ])),
       ("Show Shortcuts", self.showShortcuts),
       ("Show CcpNmr V3 Documentation", self.showVersion3Documentation),
@@ -2451,6 +2451,10 @@ class Framework:
     import webbrowser
     webbrowser.open(ccpnIssuesUrl)
 
+  def showTutorials(self):
+    from ccpn.framework.PathsAndUrls import tutorials
+    import webbrowser
+    webbrowser.open(tutorials)
 
   def showUpdatePopup(self):
     from ccpn.framework.update.UpdatePopup import UpdatePopup

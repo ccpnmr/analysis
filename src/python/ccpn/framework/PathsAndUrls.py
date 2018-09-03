@@ -32,6 +32,7 @@ from ccpn.util import Path
 ccpnUrl                         = 'http://www.ccpn.ac.uk'
 ccpn2Url                        = 'http://www.ccpn.ac.uk'
 ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/v3-software/downloads/license'
+tutorials                       = 'https://www.ccpn.ac.uk/v3-software/tutorials'
 oldCcpnIssuesUrl                = 'https://sourceforge.net/p/ccpn/bugs/'
 ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/issues?status=new&status=open'
 

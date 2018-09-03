@@ -262,8 +262,7 @@ class MacroEditor(CcpnModule):
     ok = MessageDialog.showYesNoWarning('Close Macro', 'Do you want save?')
     if ok:
       self._saveMacro()
-    else:
-      return
+
     super(MacroEditor, self)._closeModule()
 
 if __name__ == '__main__':

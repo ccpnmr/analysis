@@ -124,7 +124,7 @@ class GLExporter():
             spectrumDisplay = self.params[GLSPECTRUMDISPLAY]
 
             self.numStrips = len(spectrumDisplay.strips)
-            for strip in spectrumDisplay.strips:
+            for strip in spectrumDisplay.orderedStrips:
 
                 # point to the correct strip
                 self.strip = strip

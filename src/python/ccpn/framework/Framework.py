@@ -2513,6 +2513,9 @@ def isValidPath(projectName, stripFullPath=True, stripExtension=True):
   :param stripExtension: set to true to remove extension
   :return: True if valid else False
   """
+  if not projectName:
+    return
+
   name = os.path.basename(projectName) if stripFullPath else projectName
   name = os.path.splitext(name)[0] if stripExtension else name
 
@@ -2529,14 +2532,20 @@ def getSaveDirectory(parent, preferences=None):
                       restrictDirToFilter=False)
   newPath = dialog.selectedFile()
 
+  # if not iterable then ignore - dialog may return string or tuple(<path>, <fileOptions>)
+  if isinstance(newPath, tuple) and len(newPath) > 0:
+    newPath = newPath[0]
+
+  # ignore if empty
+  if not newPath:
+    return
+
   # check validity of the newPath
-  if not isValidPath(newPath, stripFullPath=True, stripExtension=False):
+  if not isValidPath(newPath, stripFullPath=True, stripExtension=True):
     getLogger().warning('Filename can only contain alphanumeric characters and underscores')
     MessageDialog.showWarning('Save Project', 'Filename can only contain alphanumeric characters and underscores')
     return
 
-  if not newPath:
-    return
   if newPath:
 
     # native dialog returns a tuple: (path, ''); ccpn returns a string

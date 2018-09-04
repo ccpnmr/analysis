@@ -34,10 +34,10 @@ def _create1DSpectrum(project, name, intensities, positions, expType, axisCodes)
   spectrum.positions = positions
   spectrum.intensities = intensities
   spectrum.totalPointCounts = (len(intensities),)
-  lims = (float(min(positions[0], positions[-1])),
-          float(max(positions[0], positions[-1])))
-  spectrum.aliasingLimits = (lims,)
-  spectrum.referenceValues = [lims[0]]
+  # lims = (float(min(positions[0], positions[-1])),
+  #         float(max(positions[0], positions[-1])))
+  # spectrum.aliasingLimits = (lims,)
+  # spectrum.referenceValues = [lims[0]]
 
   if expType is not None:
     spectrum.experimentType = expType

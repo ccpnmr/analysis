@@ -73,6 +73,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.dropSource = None
         self.sortOnDrop = sortOnDrop
         self.copyDrop = copyDrop
+        if not self.copyDrop:
+            self.setDefaultDropAction(QtCore.Qt.MoveAction)
 
         self.rightMouseCallback = rightMouseCallback
         if callback is not None:

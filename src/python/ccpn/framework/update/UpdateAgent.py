@@ -57,7 +57,11 @@ def calcHashCode(filePath):
         return 0
 
     fp = open(filePath, 'rU', encoding='utf-8')
-    data = fp.read()
+    try:
+        data = fp.read()
+    except:
+        getLogger().warning('error reading data, not Unicode')
+        data = ''
     fp.close()
 
     h = hashlib.md5()
@@ -128,7 +132,11 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
 
 def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot, fileStoredAs):
     fp = open(fileName, 'rU')
-    fileData = fp.read()
+    try:
+        fileData = fp.read()
+    except:
+        getLogger().warning('error reading file, not unicode')
+        fileData = ''
     fp.close()
 
     uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)

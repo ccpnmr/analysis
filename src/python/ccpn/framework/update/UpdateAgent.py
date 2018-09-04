@@ -8,7 +8,7 @@ import sys
 import ssl
 import time
 import urllib
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 from urllib.request import urlopen
 
 from datetime import datetime
@@ -18,7 +18,7 @@ from ccpn.framework.PathsAndUrls import ccpn2Url
 from ccpn.util import Path
 from ccpn.ui.gui.widgets import InputDialog
 from ccpn.ui.gui.widgets import MessageDialog
-
+from ccpn.util.Logging import getLogger
 
 SERVER = ccpn2Url + '/'
 SERVER_DB_ROOT = 'ccpNmrUpdate'
@@ -95,7 +95,14 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
     if m.digest() != SERVER_PASSWORD_MD5:
         raise Exception('incorrect password')
 
-    data = urlencode({'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot})
+    FILEDATA_LIMIT = 2048
+    # # server not passing through POST data - update manually
+    if len(fileData) > FILEDATA_LIMIT:
+        fileData = fileData[:FILEDATA_LIMIT]
+        getLogger().warning('error: clipping filedata')
+
+    data = urlencode({'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot},
+                     quote_via=quote)
 
     ss = serverUser + ":" + serverPassword
     auth = base64.encodestring(ss.encode('utf-8'))[:-1]
@@ -111,13 +118,13 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
 
     try:
         response = urlopen(req, context=context)
+        result = response.read().decode('utf-8')
+
+        if result.startswith(BAD_DOWNLOAD):
+            raise Exception(result[len(BAD_DOWNLOAD):])
+
     except Exception as es:
-        print('>>>ERROR', str(es), newServerScript)
-    result = response.read().decode('utf-8')
-
-    if result.startswith(BAD_DOWNLOAD):
-        raise Exception(result[len(BAD_DOWNLOAD):])
-
+        getLogger().warning('>>>ERROR %s %s' % (str(es), newServerScript))
 
 def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot, fileStoredAs):
     fp = open(fileName, 'rU')
@@ -357,11 +364,10 @@ class UpdateAgent(object):
             self.showError('No updates', 'No updates chosen for committing')
             return
 
-        # serverPassword = self.askPassword('Password', 'Enter password for %s on server' % self.serverUser)
-        #
-        # if not serverPassword:
-        #     return
-        serverPassword = 'Wdnl2mP'
+        serverPassword = self.askPassword('Password', 'Enter password for %s on server' % self.serverUser)
+
+        if not serverPassword:
+            return
 
         n = 0
         for updateFile in updateFiles:

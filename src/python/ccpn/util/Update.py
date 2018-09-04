@@ -90,10 +90,14 @@ def calcHashCode(filePath):
 
 def downloadFile(serverScript, serverDbRoot, fileName):
 
+  import ssl
+  context = ssl._create_unverified_context()
+
   fileName = os.path.join(serverDbRoot, fileName)
 
   addr = '%s?fileName=%s' % (serverScript, fileName)
-  response = urlopen(addr)
+  response = urlopen(addr, context=context)
+
   data = response.read().decode('utf-8')
   response.close()
 

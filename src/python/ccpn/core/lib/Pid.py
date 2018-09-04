@@ -41,7 +41,7 @@ PREFIXSEP = ':'
 IDSEP = '.'
 
 # Set translation between IDSEP and alternative character
-altCharacter = '_'
+altCharacter = '^'
 backupAltCharacter = '`'
 remapSeparators = str.maketrans(IDSEP,altCharacter)
 unmapSeparators = str.maketrans(altCharacter, IDSEP)

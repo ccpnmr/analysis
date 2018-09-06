@@ -220,7 +220,10 @@ def navigateToNmrAtomsInStrip(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom], wid
       if len(atomPos) < 2:
         positions.append(atomPos[0])
       else:
-        positions.append(max(atomPos)-min(atomPos)/2)
+        # positions.append(max(atomPos)-min(atomPos)/2)
+
+        # get the midpoint of each axis
+        positions.append((max(atomPos)+min(atomPos))/2)
     else:
       positions.append('')
   navigateToPositionInStrip(strip, positions, widths=widths)

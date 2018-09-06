@@ -36,8 +36,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 class SetupNmrResiduesPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None
-               , title='Setup nmrResidues', **kw):
+  def __init__(self, parent=None, mainWindow=None,
+               title='Setup nmrResidues', **kw):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     self.parent = parent
@@ -50,8 +50,9 @@ class SetupNmrResiduesPopup(CcpnDialog):
     label1a = Label(self, text="NmrChain ", grid=(0, 2))
     self.nmrChainPulldown = PulldownList(self, grid=(0, 3))
     self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
-    self.assignmentCheckBox = CheckBox(self,text= "Keep existing assignments", checked=False, grid=(1,0))
-    self.assignmentCheckBox.setEnabled(False) #This option is broken.
+    self.assignmentCheckBox = CheckBox(self,text= "Keep existing assignments", checked=True, grid=(1,0))
+
+    # self.assignmentCheckBox.setEnabled(False) #This option is broken.
     self.buttonBox = ButtonList(self, grid=(1, 3), texts=['Cancel', 'Ok'],
                                 callbacks=[self.reject, self._setupNmrResidues])
 
@@ -61,14 +62,14 @@ class SetupNmrResiduesPopup(CcpnDialog):
     try:
       peakList = self.project.getByPid(self.peakListPulldown.currentText())
       nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
-      keepAssignments = self.assignmentCheckBox.checkState() #This option is broken.
+      keepAssignments = self.assignmentCheckBox.isChecked() #This option is broken.
 
       for peak in peakList.peaks:
         nmrResidue = nmrChain.newNmrResidue()
         for i, axisCode in enumerate(peak.axisCodes):
-        # if not keepAssignments or not any(len(dimensionNmrAtoms) > 0 for dimensionNmrAtoms in peak.dimensionNmrAtoms)
-          nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
-          peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
+          if not keepAssignments or not any(len(dimensionNmrAtoms) > 0 for dimensionNmrAtoms in peak.dimensionNmrAtoms):
+            nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
+            peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
 
     finally:
       self.accept()

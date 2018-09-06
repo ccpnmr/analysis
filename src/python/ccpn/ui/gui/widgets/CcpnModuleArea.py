@@ -40,11 +40,14 @@ from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 from ccpn.util.Colour import  hexToRgb
 from ccpn.ui.gui.lib.mouseEvents import SELECT
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+
 
 ModuleArea = DockArea
 Module = Dock
 DropAreaLabel = 'Drop Area'
 Failed = 'Failed'
+MODULEAREA_IGNORELIST = (ToolBar, _StripLabel)
 
 
 class TempAreaWindow(GuiWindow, MainWindow):
@@ -138,7 +141,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       DockArea.dragEnterEvent(self, *args)
       event.accept()
     else:
-      if isinstance(data['source'], ToolBar):
+      if isinstance(data['source'], MODULEAREA_IGNORELIST):
         event.ignore()
       else:
         DockDrop.dragEnterEvent(self, *args)

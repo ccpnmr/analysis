@@ -86,7 +86,7 @@ class _StripLabel(Label):
         connectDir = self._connectDir if hasattr(self, STRIPLABEL_CONNECTDIR) else STRIPLABEL_CONNECTNONE
         dataDict[STRIPLABEL_CONNECTDIR] = connectDir
 
-        # update the dataDict with all mouseEvents
+        # update the dataDict with all mouseEvents﻿{"controlRightMouse": false, "text": "NR:@-.@27.", "leftMouse": true, "controlShiftMiddleMouse": false, "middleMouse": false, "controlMiddleMouse": false, "controlShiftLeftMouse": false, "controlShiftRightMouse": false, "shiftMiddleMouse": false, "_connectDir": "isRight", "controlLeftMouse": false, "rightMouse": false, "shiftLeftMouse": false, "shiftRightMouse": false}
         dataDict.update(getMouseEventDict(event))
         # convert into json
         itemData = json.dumps(dataDict)

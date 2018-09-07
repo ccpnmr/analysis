@@ -106,6 +106,19 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
         if isinstance(i, Container):
           self._container = i
 
+    # self.label.sigDragEntered.connect(self._dragEntered)
+
+  def _dragEntered(self, module, ev):
+    print('>>>sigDragEntered from:', module)
+    for mod in self.modules.values():
+      mod.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+    self.update()
+
+  def _dragFinished(self, ev):
+    print('>>>sigDragFinished', self)
+    for mod in self.modules.values():
+      mod.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+
   def dropEvent(self, event, *args):
     data = self.parseEvent(event)
     source = event.source()
@@ -321,6 +334,8 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     # self.movePythonConsole()
     if self.mainWindow is not None:
       self.mainWindow.application.ccpnModules = self.ccpnModules
+
+    module.label.sigDragEntered.connect(self._dragEntered)
     return module
 
   def getContainer(self, obj):

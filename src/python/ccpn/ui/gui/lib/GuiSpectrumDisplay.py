@@ -787,23 +787,33 @@ class GuiSpectrumDisplay(CcpnModule):
         strip._updatePivot()
 
   def increaseStripWidth(self):
-    currentWidth = self.strips[0].width() * (100.0+self.application.preferences.general.stripWidthZoomPercent) / 100.0
-    AXIS_WIDTH = self.strips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
+    strips = self.orderedStrips
+    currentWidth = strips[0].width() * (100.0+self.application.preferences.general.stripWidthZoomPercent) / 100.0
+    AXIS_WIDTH = strips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
 
     self.stripFrame.hide()
-    for strip in self.strips[:-1]:
-      strip.setMinimumWidth(currentWidth)
-    self.strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
+    if len(strips) > 1:
+      for strip in strips[:-1]:
+        strip.setMinimumWidth(currentWidth)
+      strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
+    else:
+      strips[0].setMinimumWidth(currentWidth)
+
     self.stripFrame.show()
 
   def decreaseStripWidth(self):
-    currentWidth = self.strips[0].width() * 100.0 / (100.0+self.application.preferences.general.stripWidthZoomPercent)
-    AXIS_WIDTH = self.strips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
+    strips = self.orderedStrips
+    currentWidth = strips[0].width() * 100.0 / (100.0+self.application.preferences.general.stripWidthZoomPercent)
+    AXIS_WIDTH = strips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
 
     self.stripFrame.hide()
-    for strip in self.strips[:-1]:
-      strip.setMinimumWidth(currentWidth)
-    self.strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
+    if len(strips) > 1:
+      for strip in strips[:-1]:
+        strip.setMinimumWidth(currentWidth)
+      strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
+    else:
+      strips[0].setMinimumWidth(currentWidth)
+
     self.stripFrame.show()
 
   def _copyPreviousStripValues(self, fromStrip, toStrip):

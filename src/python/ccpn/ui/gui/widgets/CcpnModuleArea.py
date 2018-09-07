@@ -41,7 +41,7 @@ from ccpn.util.Colour import  hexToRgb
 from ccpn.ui.gui.lib.mouseEvents import SELECT
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
-
+from functools import partial
 
 ModuleArea = DockArea
 Module = Dock
@@ -108,14 +108,15 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
     # self.label.sigDragEntered.connect(self._dragEntered)
 
-  def _dragEntered(self, module, ev):
+  def _dragEntered(self, module):
     print('>>>sigDragEntered from:', module)
     for mod in self.modules.values():
       mod.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+
     self.update()
 
   def _dragFinished(self, ev):
-    print('>>>sigDragFinished', self)
+    # print('>>>sigDragFinished', self)
     for mod in self.modules.values():
       mod.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 

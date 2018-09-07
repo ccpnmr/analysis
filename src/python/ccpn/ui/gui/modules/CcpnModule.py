@@ -330,8 +330,8 @@ class CcpnModule(Dock, DropBase):
     # that fires when the window has been maximised
     self._maximiseFunc = None
     self._closeFunc = None
-    # self.eventFilter = self._eventFilter
-    # self.installEventFilter(self)
+    self.eventFilter = self._eventFilter
+    self.installEventFilter(self)
     CcpnModule._lastActionWasDrop = False
 
     # attach the mouse events to the widget
@@ -802,7 +802,7 @@ class CcpnModule(Dock, DropBase):
     self.setStyleSheet(tempStyle)
 
   def startDrag(self):
-    print('>>>startDrag')
+    # print('>>>startDrag')
     self.drag = QtGui.QDrag(self)
     mime = QtCore.QMimeData()
     #mime.setPlainText("asd")
@@ -815,7 +815,7 @@ class CcpnModule(Dock, DropBase):
     self.updateStyle()
 
   def _destroyed(self, ev):
-    print('>>>_destroyed')
+    # print('>>>_destroyed')
     self.mainWindow.moduleArea._dragFinished(ev)
 
 class CcpnModuleLabel(DockLabel):

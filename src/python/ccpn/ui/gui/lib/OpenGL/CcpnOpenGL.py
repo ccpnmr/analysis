@@ -962,9 +962,9 @@ class CcpnGLWidget(QOpenGLWidget):
             return True
         return super(CcpnGLWidget, self).eventFilter(obj, event)
 
-    def _singleKeyAction(self, event):
+    def _panSpectrum(self, event,  movePercent = 20):
         """Implements Arrows up,down, left, right to pan the spectrum """
-        movePercent = 20  # percentage of the view to set as single step
+         # percentage of the view to set as single step
 
         if type(event) == QtGui.QKeyEvent:
             moveFactor = movePercent / 100.0
@@ -999,6 +999,31 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.zoomOut()
 
             self._rescaleAllAxes()
+
+    def _movePeakFromKeys(self, event):
+
+        if len(self.current.peaks)<1:
+            return
+
+        moveFactor =  5
+        moveDict = {
+                    QtCore.Qt.Key_Left: (-self.pixelX *moveFactor, 0),
+                    QtCore.Qt.Key_Right:(self.pixelX *moveFactor, 0),
+                    QtCore.Qt.Key_Up:   (0, self.pixelX *moveFactor),
+                    QtCore.Qt.Key_Down: (0, -self.pixelX *moveFactor)
+                    }
+
+        if type(event) == QtGui.QKeyEvent:
+            if event.key() in moveDict:
+                for peak in self.current.peaks:
+                    self._movePeak(peak, moveDict[event.key()])
+
+
+    def _singleKeyAction(self, event):
+        if not self.current.peak:
+            self._panSpectrum(event)
+        else:
+            self._movePeakFromKeys(event)
 
     def initialiseAxes(self, strip=None):
         """

@@ -476,7 +476,7 @@ class GLExporter():
                                                 PLOTHEIGHT: self.displayScale * self.mainH},
                                        name='peakSymbols',
                                        fillMode=None,
-                                       lineWidth=0.5 * self.baseThickness * self.params[GLSYMBOLTHICKNESS])
+                                       lineWidth=0.5 * self.baseThickness * self.symbolThickness)
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='peakSymbols')
 
     def _addMultipletSymbols(self):
@@ -493,7 +493,7 @@ class GLExporter():
                                                 PLOTHEIGHT: self.displayScale * self.mainH},
                                        name='multipletSymbols',
                                        fillMode=None,
-                                       lineWidth=0.5 * self.baseThickness * self.params[GLSYMBOLTHICKNESS])
+                                       lineWidth=0.5 * self.baseThickness * self.symbolThickness)
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='multipletSymbols')
 
     def _addMarkLines(self):

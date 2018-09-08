@@ -1016,14 +1016,18 @@ class CcpnGLWidget(QOpenGLWidget):
         if type(event) == QtGui.QKeyEvent:
             if event.key() in moveDict:
                 for peak in self.current.peaks:
-                    self._movePeak(peak, moveDict[event.key()])
+                    self._movePeak(peak, moveDict.get(event.key()))
 
 
     def _singleKeyAction(self, event):
-        if not self.current.peak:
-            self._panSpectrum(event)
-        else:
-            self._movePeakFromKeys(event)
+      """
+      :return: Actions for single key press. If current peaks, moves the peaks when using
+      directional arrow otherwise pans the spectrum.
+      """
+      if not self.current.peak:
+          self._panSpectrum(event)
+      else:
+          self._movePeakFromKeys(event)
 
     def initialiseAxes(self, strip=None):
         """

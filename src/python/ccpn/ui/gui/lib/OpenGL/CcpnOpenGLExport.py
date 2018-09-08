@@ -60,7 +60,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
-    GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND
+    GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES,\
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 
@@ -114,6 +114,8 @@ class GLExporter():
         self.backgroundColour = colors.Color(*self.params[GLBACKGROUND], alpha=1.0)
         self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
                                              alpha=self.parent.foreground[3])
+        self.baseThickness = self.params[GLBASETHICKNESS]
+        self.symbolThickness = self.params[GLSYMBOLTHICKNESS]
 
         # build all the sections of the pdf
         self.stripReports = []
@@ -385,7 +387,9 @@ class GLExporter():
                                                               height=self.displayScale * self.mainH)
                             if newLine:
                                 if colourPath not in colourGroups:
-                                    colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour, PDFSTROKELINECAP: 1}
+                                    colourGroups[colourPath] = {PDFLINES: [],
+                                                                PDFSTROKEWIDTH: 0.5 * self.baseThickness,
+                                                                PDFSTROKECOLOR: colour, PDFSTROKELINECAP: 1}
                                 colourGroups[colourPath][PDFLINES].append(newLine)
 
                 else:
@@ -450,7 +454,9 @@ class GLExporter():
                                                   height=self.displayScale * self.mainH)
                 if newLine:
                     if colourPath not in colourGroups:
-                        colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
+                        colourGroups[colourPath] = {PDFLINES: [],
+                                                    PDFSTROKEWIDTH: 0.5 * self.baseThickness,
+                                                    PDFSTROKECOLOR: colour,
                                                     PDFSTROKELINECAP: 1, PDFCLOSEPATH: False}
                     colourGroups[colourPath][PDFLINES].append(newLine)
 
@@ -469,7 +475,8 @@ class GLExporter():
                                                 PLOTWIDTH: self.displayScale * self.mainW,
                                                 PLOTHEIGHT: self.displayScale * self.mainH},
                                        name='peakSymbols',
-                                       fillMode=None)
+                                       fillMode=None,
+                                       lineWidth=0.5 * self.baseThickness * self.params[GLSYMBOLTHICKNESS])
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='peakSymbols')
 
     def _addMultipletSymbols(self):
@@ -485,7 +492,8 @@ class GLExporter():
                                                 PLOTWIDTH: self.displayScale * self.mainW,
                                                 PLOTHEIGHT: self.displayScale * self.mainH},
                                        name='multipletSymbols',
-                                       fillMode=None)
+                                       fillMode=None,
+                                       lineWidth=0.5 * self.baseThickness * self.params[GLSYMBOLTHICKNESS])
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='multipletSymbols')
 
     def _addMarkLines(self):
@@ -1073,7 +1081,8 @@ class GLExporter():
         """
         self._report.writeDocument()
 
-    def _appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None, includeLastVertex=False):
+    def _appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None,
+                               includeLastVertex=False, lineWidth=0.5):
         for vv in range(0, len(indArray.vertices) - 2, 2):
 
             if mat is not None:
@@ -1092,7 +1101,7 @@ class GLExporter():
                 cc = colourGroups[colourPath] = {}
                 if (indArray.fillMode or GL.GL_LINE) == GL.GL_LINE:
                     cc[PDFLINES] = []
-                    cc[PDFSTROKEWIDTH] = 0.5
+                    cc[PDFSTROKEWIDTH] = lineWidth
                     cc[PDFSTROKECOLOR] = colour
                     cc[PDFSTROKELINECAP] = 1
                 else:
@@ -1112,7 +1121,7 @@ class GLExporter():
 
     def _appendIndexLineGroup(self, indArray, colourGroups, plotDim, name,
                               fillMode=None, splitGroups=False,
-                              setColour=None):
+                              setColour=None, lineWidth=0.5):
         if indArray.drawMode == GL.GL_TRIANGLES:
             indexLen = 3
         elif indArray.drawMode == GL.GL_QUADS:
@@ -1143,7 +1152,7 @@ class GLExporter():
                 cc = colourGroups[colourPath] = {}
                 if (fillMode or indArray.fillMode or GL.GL_LINE) == GL.GL_LINE:
                     cc[PDFLINES] = []
-                    cc[PDFSTROKEWIDTH] = 0.5
+                    cc[PDFSTROKEWIDTH] = lineWidth
                     cc[PDFSTROKECOLOR] = colour
                     cc[PDFSTROKELINECAP] = 1
                 else:
@@ -1166,7 +1175,7 @@ class GLExporter():
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name=name)
 
     def _appendIndexLineGroupFill(self, indArray=None, listView=None, colourGroups=None, plotDim=None, name=None,
-                                  fillMode=None, splitGroups=False):
+                                  fillMode=None, splitGroups=False, lineWidth=0.5):
         for spectrumView in self._ordering:
             if spectrumView.isDeleted:
                 continue
@@ -1185,7 +1194,8 @@ class GLExporter():
                                                plotDim=plotDim,
                                                name='spectrumView%s%s' % (name, spectrumView.pid),
                                                fillMode=fillMode,
-                                               splitGroups=splitGroups)
+                                               splitGroups=splitGroups,
+                                               lineWidth=lineWidth)
 
     def _appendGroup(self, drawing: Drawing = None, colourGroups: dict = None, name: str = None):
         """

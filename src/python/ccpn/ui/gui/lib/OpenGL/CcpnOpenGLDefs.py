@@ -100,4 +100,5 @@ GLSTRIPLABELLING = 'Strip Labelling'
 GLREGIONS = 'regions'
 GLPLOTBORDER = 'plotBorder'
 GLBACKGROUND = 'backgroundColour'
-
+GLBASETHICKNESS = 'baseThickness'
+GLSYMBOLTHICKNESS = 'symbolThickness'

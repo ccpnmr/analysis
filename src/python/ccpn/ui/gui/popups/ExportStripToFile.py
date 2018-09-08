@@ -47,6 +47,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
+from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget
 
 
 EXPORTPDF = 'PDF'
@@ -63,7 +64,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, \
-    GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND
+    GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS
 
 
 class ExportStripToFilePopup(ExportDialog):
@@ -204,7 +205,7 @@ class ExportStripToFilePopup(ExportDialog):
         Label(colourFrame, text="Background Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.colourBox = PulldownList(colourFrame, vAlign='t', grid=(0, 1))
         self.colourButton = Button(colourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
-                              callback=self._changeBackgroundButton, icon='icons/colours')
+                                   callback=self._changeBackgroundButton, icon='icons/colours')
 
         # populate initial pulldown from background colour
         spectrumColourKeys = list(spectrumColours.keys())
@@ -224,6 +225,14 @@ class ExportStripToFilePopup(ExportDialog):
             self.colourBox.setCurrentText(spectrumColours[self.backgroundColour])
 
         self.colourBox.activated.connect(self._changeBackgroundPulldown)
+
+        row += 1
+        self.baseThicknessBox = DoubleSpinBoxCompoundWidget(
+                userFrame, grid=(row, 0), gridSpan=(1, 1), hAlign='left',
+                labelText='Base Line Thickness',
+                value=1.0,
+                decimals=1, step=0.1, range=(0.1, 10))
+        self.baseThicknessBox.setFixedHeight(25)
 
         row += 1
         self.spacer = Spacer(userFrame, 5, 5,
@@ -463,6 +472,8 @@ class ExportStripToFilePopup(ExportDialog):
         prType = self.exportType.get()
         pageType = self.pageType.get()
         backgroundColour = hexToRgbRatio(self.backgroundColour)
+        baseThickness = self.baseThicknessBox.getValue()
+        symbolThickness = self.application.preferences.general.symbolThickness
 
         if strip:
             # return the parameters
@@ -473,6 +484,8 @@ class ExportStripToFilePopup(ExportDialog):
                       GLPRINTTYPE: prType,
                       GLPAGETYPE: pageType,
                       GLBACKGROUND: backgroundColour,
+                      GLBASETHICKNESS: baseThickness,
+                      GLSYMBOLTHICKNESS: symbolThickness,
                       GLSELECTEDPIDS: self.treeView.getSelectedObjectsPids()
                       }
             selectedList = self.treeView.getSelectedItems()

@@ -235,6 +235,7 @@ class GuiSpectrumDisplay(CcpnModule):
   def resizeEvent(self, ev):
     # resize the contents of the stripFrame
     self.setColumnStretches(stretchValue=True, widths=False)
+    print('>>>resizeSpectrumDisplay')
     super(GuiSpectrumDisplay, self).resizeEvent(ev)
 
   def _toolbarChange(self, data):
@@ -896,9 +897,12 @@ class GuiSpectrumDisplay(CcpnModule):
   def setColumnStretches(self, stretchValue=False, scaleFactor=1.0, widths=True):
     # crude routine to set the stretch of all columns upto the last widget to stretchValue
     widgets = self.stripFrame.children()
+
     if widgets:
       thisLayout = self.stripFrame.layout()
       thisLayoutWidth = self.stripFrame.width()
+      # thisLayout = self.layout
+      # thisLayoutWidth = self.width()-2
 
       if not thisLayout.itemAt(0):
         return
@@ -918,7 +922,7 @@ class GuiSpectrumDisplay(CcpnModule):
           index = thisLayout.indexOf(wid)
           if index >= 0:
             row, column, cols, rows = thisLayout.getItemPosition(index)
-          maxCol = max(maxCol, column)
+            maxCol = max(maxCol, column)
 
         for col in range(0, maxCol+1):
           if widths and thisLayout.itemAt(col):
@@ -930,18 +934,24 @@ class GuiSpectrumDisplay(CcpnModule):
           index = thisLayout.indexOf(wid)
           if index >= 0:
             row, column, cols, rows = thisLayout.getItemPosition(index)
-          maxCol = max(maxCol, column)
+            maxCol = max(maxCol, column)
 
         leftWidth = scaleFactor*(thisLayoutWidth - AXIS_WIDTH - (maxCol*AXIS_PADDING)) / (maxCol+1)
         endWidth = leftWidth + AXIS_WIDTH
         for col in range(0, maxCol):
           if widths:
             thisLayout.itemAt(col).widget().setMinimumWidth(leftWidth)
+            # self.orderedStrips[col].setMinimumWidth(leftWidth)
           thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
 
         if widths and thisLayout.itemAt(maxCol):
           thisLayout.itemAt(maxCol).widget().setMinimumWidth(endWidth)
+          # self.orderedStrips[maxCol].setMinimumWidth(leftWidth)
         thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
+
+      # printWidths = [thisLayout.itemAt(col).widget().width() for col in list(range(maxCol+1))]
+      printWidths = [ss.width() for ss in self.orderedStrips]
+      print('>>>', self, self.width(), thisLayoutWidth, firstStripWidth, leftWidth, printWidths)
 
   def _maximiseRegions(self):
     """Zooms Y axis of current strip to show entire region"""

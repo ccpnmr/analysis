@@ -181,7 +181,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     msg = path + (' created' if isNew else ' opened')
     self.statusBar().showMessage(msg)
     msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
-    self.pythonConsole.writeConsoleCommand(msg2)
+
+    # write first console message to the console - not required
+    # self.pythonConsole.writeConsoleCommand(msg2)
 
     self._fillRecentProjectsMenu()
     self.pythonConsole.setProject(project)

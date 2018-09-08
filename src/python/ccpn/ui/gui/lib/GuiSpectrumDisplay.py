@@ -235,7 +235,6 @@ class GuiSpectrumDisplay(CcpnModule):
   def resizeEvent(self, ev):
     # resize the contents of the stripFrame
     self.setColumnStretches(stretchValue=True, widths=False)
-    print('>>>resizeSpectrumDisplay')
     super(GuiSpectrumDisplay, self).resizeEvent(ev)
 
   def _toolbarChange(self, data):
@@ -911,7 +910,7 @@ class GuiSpectrumDisplay(CcpnModule):
       AXIS_PADDING = 5
       if self.strips:
         # add 5% to account for any small borders
-        firstStripWidth = thisLayoutWidth / (len(self.strips) * 1.05)
+        firstStripWidth = thisLayoutWidth / (len(self.strips))# * 1.025)
         AXIS_WIDTH = self.orderedStrips[0]._CcpnGLWidget.AXIS_MARGINRIGHT
       else:
         firstStripWidth = thisLayout.itemAt(0).widget().width()
@@ -950,8 +949,8 @@ class GuiSpectrumDisplay(CcpnModule):
         thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
 
       # printWidths = [thisLayout.itemAt(col).widget().width() for col in list(range(maxCol+1))]
-      printWidths = [ss.width() for ss in self.orderedStrips]
-      print('>>>', self, self.width(), thisLayoutWidth, firstStripWidth, leftWidth, printWidths)
+      # printWidths = [ss.width() for ss in self.orderedStrips]
+      # print('>>>', self, self.width(), thisLayoutWidth, firstStripWidth, leftWidth, printWidths)
 
   def _maximiseRegions(self):
     """Zooms Y axis of current strip to show entire region"""

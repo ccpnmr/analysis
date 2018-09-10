@@ -109,7 +109,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     # self.label.sigDragEntered.connect(self._dragEntered)
 
   def _dragEntered(self, module):
-    print('>>>sigDragEntered from:', module)
+    # print('>>>sigDragEntered from:', module)
     for mod in self.modules.values():
       mod.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 

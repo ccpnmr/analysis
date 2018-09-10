@@ -317,6 +317,8 @@ class Project(AbstractWrapperObject):
               peakList.delete()
             for integralList in obj.integralLists:
               integralList.delete()
+            for multipletList in obj.multipletLists:
+              multipletList.delete()
           obj.delete()
 
     finally:

@@ -627,36 +627,29 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     """Removes the specified item from the sidebar and deletes it from the project.
     NB, the clean-up of the side bar is done through notifiers
     """
-    ll = self._saveExpandedState()
 
-    for obj in objs:
-      if obj:
-        # try:
+    self.project._startCommandEchoBlock('deleteObjects', [obj.pid for obj in objs])
+    try:
+
+      for obj in objs:
+        if obj:
           if isinstance(obj, Spectrum):
 
-            # need to delete all peakLists and integralLists first, treat as single undo
-            self.project._startCommandEchoBlock('deleteObjects', str(obj.pid))
-            try:
-              for peakList in obj.peakLists:
-                peakList.delete()
-              for integralList in obj.integralLists:
-                integralList.delete()
-              obj.delete()
-            except Exception as es:
-              showWarning('Delete Objects', str(es))
-            finally:
-              self.project._endCommandEchoBlock()
+            # need to delete all peakLists/integralLists/multipletLists first
+            for peakList in obj.peakLists:
+              peakList.delete()
+            for integralList in obj.integralLists:
+              integralList.delete()
+            for multipletList in obj.multipletLists:
+              multipletList.delete()
 
-          else:
-            self.project._startCommandEchoBlock('deleteObjects', str(obj.pid))
-            try:
+          # delete the object
+          obj.delete()
 
-              # delete the object
-              obj.delete()
-            except Exception as es:
-              showWarning('Delete Object', str(es))
-            finally:
-              self.project._endCommandEchoBlock()
+    except Exception as es:
+      showWarning('Delete Object', str(es))
+    finally:
+      self.project._endCommandEchoBlock()
 
             # # try:
             # ll = self._getChildren(obj)
@@ -867,7 +860,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     return sideBarState
 
   def _restoreExpandedState(self, list):
-    # TODO:ED see if this is feasible
+
     self.fillSideBar(self.project)
     self._registerNotifiers()
 

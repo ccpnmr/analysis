@@ -1163,16 +1163,16 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             buildPeaks.start()
             return
 
-            drawList.clearArrays()
-            drawList.stringList = []
-
-            # symbolWidth = self._parent.symbolSize / 2.0
-
-            pls = peakListView.peakList
-            # spectrumFrequency = spectrum.spectrometerFrequencies
-
-            for obj in self.objects(pls):
-                self._appendLabel(spectrumView, peakListView, drawList.stringList, obj)
+            # drawList.clearArrays()
+            # drawList.stringList = []
+            #
+            # # symbolWidth = self._parent.symbolSize / 2.0
+            #
+            # pls = peakListView.peakList
+            # # spectrumFrequency = spectrum.spectrometerFrequencies
+            #
+            # for obj in self.objects(pls):
+            #     self._appendLabel(spectrumView, peakListView, drawList.stringList, obj)
 
         elif drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode

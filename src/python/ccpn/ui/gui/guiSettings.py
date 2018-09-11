@@ -276,6 +276,18 @@ def getColourScheme():
   else:
     return DEFAULT
 
+def setColourScheme(colourScheme):
+  """set the current colourScheme
+  """
+  app = QtCore.QCoreApplication.instance()
+  if hasattr(app,'_ccpnApplication'):
+    application = getattr(app,'_ccpnApplication')
+    # colourScheme = application.colourScheme
+    if colourScheme not in COLOUR_SCHEMES:
+      raise RuntimeError('Undefined colour scheme')
+
+    application.colourScheme = colourScheme
+    ColourDict(colourScheme).setColourScheme(colourScheme)
 
 @singleton
 class ColourDict(dict):
@@ -293,6 +305,7 @@ class ColourDict(dict):
 
   def setColourScheme(self, colourScheme):
     if colourScheme in COLOUR_SCHEMES:
+      self.update(colourSchemes[DEFAULT])
       self.update(colourSchemes[colourScheme])
       self.colourScheme = colourScheme
     else:

@@ -78,6 +78,16 @@ def _calibrateY1D(spectrum, currentPosition, newPosition):
   shift = newPosition - currentPosition
   spectrum.intensities = spectrum.intensities+shift
 
+def _calibrateXND(spectrum, currentPosition, newPosition):
+  spectrumReferencing = list(spectrum.referenceValues)
+  spectrumReferencing[0] = float(spectrumReferencing[0]+(newPosition-currentPosition))
+  spectrum.referenceValues = spectrumReferencing
+
+def _calibrateYND(spectrum, currentPosition, newPosition):
+  spectrumReferencing = list(spectrum.referenceValues)
+  spectrumReferencing[1] = float(spectrumReferencing[1]+(newPosition-currentPosition))
+  spectrum.referenceValues = spectrumReferencing
+
 def _set1DRawDataFromCcpnInternal(spectrum):
      if not spectrum._ccpnInternalData['positions'] and not spectrum._ccpnInternalData['intensities']:
          return

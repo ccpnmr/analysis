@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme
 from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets import MessageDialog
@@ -106,6 +106,8 @@ class PreferencesPopup(CcpnDialog):
                 strip.symbolThickness = self.preferences.general.symbolThickness
                 strip.gridVisible = self.preferences.general.showGrid
                 strip.crosshairVisible = self.preferences.general.showCrosshair
+        setColourScheme(self.preferences.general.colourScheme)
+
         self._accept()
 
     def _accept(self):
@@ -115,7 +117,9 @@ class PreferencesPopup(CcpnDialog):
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         GLSignals = GLNotifier(parent=self)
-        GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])
+        GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS,
+                                      GLNotifier.GLALLMULTIPLETS,
+                                      GLNotifier.GLPREFERENCES])
 
     def _setTabs(self):
 

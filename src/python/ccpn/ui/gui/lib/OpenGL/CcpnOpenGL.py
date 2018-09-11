@@ -1200,8 +1200,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self._devicePixelRatio = self._screenChanged()
         self.viewports.setDevicePixelRatio(self._devicePixelRatio)
 
-        # TODO:ED error here when calculating the top offset, FOUND
-
         # define the main viewports
         self.viewports.addViewport(GLDefs.MAINVIEW, self, (0, 'a'), (self.AXIS_MARGINBOTTOM, 'a'),
                                    (-self.AXIS_MARGINRIGHT, 'w'), (-self.AXIS_MARGINBOTTOM, 'h'))
@@ -1257,6 +1255,21 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if self.strip:
             self.initialiseAxes(self.strip)
+
+    def _preferencesUpdate(self):
+        """update GL values after the preferences have changed
+        """
+        # colours
+        self.colours = getColours()
+        self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
+        self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
+        self.mousePickColour = self.colours[CCPNGLWIDGET_PICKCOLOUR]
+        self.gridColour = self.colours[CCPNGLWIDGET_GRID]
+        self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
+        self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
+        self._phasingTraceColour = self.colours[CCPNGLWIDGET_PHASETRACE]
+
+        self.setBackgroundColour(self.background)
 
     def setBackgroundColour(self, col, silent=False):
         """
@@ -3753,6 +3766,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 targets = aDict[GLNotifier.GLTARGETS]
 
                 if triggers or targets:
+
+                    if GLNotifier.GLPREFERENCES in triggers:
+                        self._preferencesUpdate()
+                        self._rescaleXAxis(update=False)
+                        self.stripIDString.renderMode = GLRENDERMODE_REBUILD
+
                     if GLNotifier.GLPEAKLISTS in triggers:
                         for spectrumView in self.strip.spectrumViews:
                             for peakListView in spectrumView.peakListViews:

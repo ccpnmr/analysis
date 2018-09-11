@@ -13,7 +13,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -34,20 +34,20 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
 
 
-MENU =      'Menu'
-ITEM =      'Item'
+MENU = 'Menu'
+ITEM = 'Item'
 SEPARATOR = 'Separator'
 
-ItemTypes =  {
-             MENU:      Menu.addMenu.__name__,
-             ITEM:      Menu.addItem.__name__,
-             SEPARATOR: Menu._addSeparator.__name__
-             }
-
+ItemTypes = {
+    MENU: Menu.addMenu.__name__,
+    ITEM: Menu.addItem.__name__,
+    SEPARATOR: Menu._addSeparator.__name__
+    }
 
 
 class _SCMitem(object):
     '''Strip context menu item base class. Used to autogenerate the context menu items in a Gui strip '''
+
     def __init__(self, typeItem, **kwargs):
         '''
         :param typeItem: any value of ItemTypes: (menu,item,separator)
@@ -55,11 +55,12 @@ class _SCMitem(object):
         or any other accepted by Base or Action widgets
         '''
         self._kwrgs = {'name': '', 'icon': None, 'tooltip': '', 'shortcut': None, 'checkable': False,
-                       'checked': False, 'callback': None, 'stripMethodName': '', 'obj':self}
+                       'checked': False, 'callback': None, 'stripMethodName': '', 'obj': self}
         self._kwrgs.update(kwargs)
-        for k,v in  self._kwrgs.items():
-            setattr(self, k,v)
+        for k, v in self._kwrgs.items():
+            setattr(self, k, v)
         self.typeItem = typeItem
+
 
 def _createMenu(strip, items):
     """
@@ -77,7 +78,7 @@ def _createMenu(strip, items):
                 setattr(strip, i.stripMethodName, action)
                 strip._spectrumUtilActions[i.name] = action
         except Exception as e:
-            getLogger().warning('Menu error:' % e)
+            getLogger().warning('Menu error: %s' % str(e))
     return menu
 
 
@@ -87,100 +88,121 @@ def _createMenu(strip, items):
 
 def _toolBarItem(strip):
     return _SCMitem(name='ToolBar',
-             typeItem=ItemTypes.get(ITEM), toolTip='toolbarAction',
-             callback=strip.spectrumDisplay.toggleToolbar,
-             checkable=True, checked=True, shortcut='TB', stripMethodName='toolbarAction')
+                    typeItem=ItemTypes.get(ITEM), toolTip='toolbarAction',
+                    callback=strip.spectrumDisplay.toggleToolbar,
+                    checkable=True, checked=True, shortcut='TB', stripMethodName='toolbarAction')
+
 
 def _crossHairItem(strip):
     return _SCMitem(name='Crosshair',
-             typeItem=ItemTypes.get(ITEM), toolTip='CrossHair Action',
-             checkable=True, checked=True, shortcut ='CH',
-             callback=strip.spectrumDisplay.toggleCrossHair, stripMethodName='crosshairAction')
+                    typeItem=ItemTypes.get(ITEM), toolTip='CrossHair Action',
+                    checkable=True, checked=True, shortcut='CH',
+                    callback=strip.spectrumDisplay.toggleCrossHair, stripMethodName='crosshairAction')
+
 
 def _gridItem(strip):
     return _SCMitem(name='Grid',
-             typeItem=ItemTypes.get(ITEM), toolTip='gridAction', callback=strip.spectrumDisplay.toggleGrid,
-             checkable=True, checked=True, shortcut='GS', stripMethodName='gridAction')
+                    typeItem=ItemTypes.get(ITEM), toolTip='gridAction', callback=strip.spectrumDisplay.toggleGrid,
+                    checkable=True, checked=True, shortcut='GS', stripMethodName='gridAction')
+
 
 def _cyclePeakLabelsItem(strip):
     return _SCMitem(name='Cycle Peak Labels',
-             typeItem=ItemTypes.get(ITEM), icon='icons/preferences-desktop-font',
-             toolTip='Cycle Peak Labelling Types',
-             callback=strip.cyclePeakLabelling, shortcut='PL', stripMethodName='')
+                    typeItem=ItemTypes.get(ITEM), icon='icons/preferences-desktop-font',
+                    toolTip='Cycle Peak Labelling Types',
+                    callback=strip.cyclePeakLabelling, shortcut='PL', stripMethodName='')
+
 
 def _cyclePeakSymbolsItem(strip):
     return _SCMitem(name='Cycle Peak Symbols',
-            typeItem=ItemTypes.get(ITEM), icon='icons/peak-symbols',
-            toolTip='Cycle Peak Labelling Types',
-            callback=strip.cyclePeakSymbols, shortcut='PS', stripMethodName='')
+                    typeItem=ItemTypes.get(ITEM), icon='icons/peak-symbols',
+                    toolTip='Cycle Peak Labelling Types',
+                    callback=strip.cyclePeakSymbols, shortcut='PS', stripMethodName='')
+
 
 def _shareYAxisItem(strip):
     return _SCMitem(name='Share Y Axis',
-            typeItem=ItemTypes.get(ITEM), toolTip='Share Y axis among strips',checkable=True, checked=True,
-            callback=strip._toggleLastAxisOnly,shortcut='TA', stripMethodName='lastAxisOnlyCheckBox')
+                    typeItem=ItemTypes.get(ITEM), toolTip='Share Y axis among strips', checkable=True, checked=True,
+                    callback=strip._toggleLastAxisOnly, shortcut='TA', stripMethodName='lastAxisOnlyCheckBox')
+
 
 def _contoursItem(strip):
     return _SCMitem(name='Contours...',
-            typeItem=ItemTypes.get(ITEM), icon='icons/contours', toolTip='Change Contour Settings',
-            callback=strip.spectrumDisplay.adjustContours)
+                    typeItem=ItemTypes.get(ITEM), icon='icons/contours', toolTip='Change Contour Settings',
+                    callback=strip.spectrumDisplay.adjustContours)
 
 
 def _raiseContoursItem(strip):
-  return _SCMitem(name='Raise Base Level',
-                  typeItem=ItemTypes.get(ITEM), icon='icons/contour-base-up', toolTip='Raise Contour Base Level',
-                  callback=strip.spectrumDisplay.raiseContourBase)
+    return _SCMitem(name='Raise Base Level',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/contour-base-up', toolTip='Raise Contour Base Level',
+                    callback=strip.spectrumDisplay.raiseContourBase)
+
 
 def _lowerContoursItem(strip):
-  return _SCMitem(name='Lower Base Level',
-                  typeItem=ItemTypes.get(ITEM), icon='icons/contour-base-down', toolTip='Lower Contour Base Level',
-                  callback=strip.spectrumDisplay.lowerContourBase)
+    return _SCMitem(name='Lower Base Level',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/contour-base-down', toolTip='Lower Contour Base Level',
+                    callback=strip.spectrumDisplay.lowerContourBase)
 
 
 def _resetZoom(strip):
     return _SCMitem(name='Reset Zoom',
-             typeItem=ItemTypes.get(ITEM), icon='icons/zoom-full', toolTip='Reset Zoom',
-             callback=strip.resetZoom)
+                    typeItem=ItemTypes.get(ITEM), icon='icons/zoom-full', toolTip='Reset Zoom',
+                    callback=strip.resetZoom)
 
 
+def _calibrateX(strip):
+    return _SCMitem(name='Calibrate X',
+                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate X points', checkable=True, checked=False,
+                    callback=strip.toggleCalibrateX, stripMethodName='calibrateXAction')
+
+
+def _calibrateY(strip):
+    return _SCMitem(name='Calibrate Y',
+                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate Y points',
+                    checkable=True, checked=False,
+                    callback=strip.toggleCalibrateY, stripMethodName='calibrateYAction')
 
 
 def _toggleHorizontalTraceItem(strip):
     return _SCMitem(name='Horizontal Trace',
-             typeItem=ItemTypes.get(ITEM), toolTip='Toggle horizontal trace on/off',
-             checkable=True, checked=False, shortcut='TH', stripMethodName='hTraceAction',
-             callback=strip.toggleHorizontalTrace)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle horizontal trace on/off',
+                    checkable=True, checked=False, shortcut='TH', stripMethodName='hTraceAction',
+                    callback=strip.toggleHorizontalTrace)
+
 
 def _toggleVerticalTraceItem(strip):
     return _SCMitem(name='Vertical Trace',
-             typeItem=ItemTypes.get(ITEM), toolTip='Toggle vertical trace on/off',
-             checkable=True, checked=False, shortcut='TV', stripMethodName='vTraceAction',
-             callback=strip.toggleVerticalTrace)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle vertical trace on/off',
+                    checkable=True, checked=False, shortcut='TV', stripMethodName='vTraceAction',
+                    callback=strip.toggleVerticalTrace)
 
 
 def _phasingConsoleItem(strip):
     return _SCMitem(name='Enter Phasing Console',
-            typeItem=ItemTypes.get(ITEM),icon= 'icons/phase-console', toolTip='Enter Phasing Console',
-            shortcut='PC',callback=strip.spectrumDisplay.togglePhaseConsole)
+                    typeItem=ItemTypes.get(ITEM), icon='icons/phase-console', toolTip='Enter Phasing Console',
+                    shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole)
+
 
 def _marksItem(strip):
     return _SCMitem(name='Mark Positions',
-            typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of all axes', shortcut='MK',
-            callback=strip.createMark)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of all axes', shortcut='MK',
+                    callback=strip.createMark)
+
 
 def _clearMarksItem(strip):
     return _SCMitem(name='Clear Marks',
-            typeItem=ItemTypes.get(ITEM), toolTip='Clear all Marks from', shortcut='MC',
-            callback=strip.clearMarks)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Clear all Marks from', shortcut='MC',
+                    callback=strip.clearMarks)
+
 
 def _printItem(strip):
     return _SCMitem(name='Print to File...',
-            typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Print Spectrum Display to File',
-            shortcut='PT', callback=strip.showExportDialog)
+                    typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Print Spectrum Display to File',
+                    shortcut='PT', callback=strip.showExportDialog)
 
 
 def _separator():
     return _SCMitem(typeItem=ItemTypes.get(SEPARATOR))
-
 
 
 ##############################  Common Integral menu items ##############################
@@ -188,7 +210,7 @@ def _separator():
 
 def _deleteIntegralItem(strip):
     return _SCMitem(name='Delete Integral(s)',
-            typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Integral(s) from project', callback=strip.mainWindow.deleteSelectedItems)
 
 
 ##############################  Common Multiplet menu items ##############################
@@ -196,49 +218,53 @@ def _deleteIntegralItem(strip):
 
 def _deleteMultipletItem(strip):
     return _SCMitem(name='Delete Multiplet(s)',
-            typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Multiplet(s) from project', callback=strip.mainWindow.deleteSelectedItems)
 
 
 ##############################  Common Peak menu items ##############################
 ## These items are used to create both 1D and Nd Peak menus
 
 
-
 def _copyPeakItem(strip):
     return _SCMitem(name='Copy Peak(s)',
-            typeItem=ItemTypes.get(ITEM), toolTip='Copy Peak(s) to a PeakList', shortcut='CP',
-            callback=strip._openCopySelectedPeaks)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Copy Peak(s) to a PeakList', shortcut='CP',
+                    callback=strip._openCopySelectedPeaks)
 
 
 def _deletePeakItem(strip):
     return _SCMitem(name='Delete Peak(s)',
-            typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+
 
 def _editPeakAssignmentItem(strip):
     return _SCMitem(name='Edit Peak',
-            typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
+
 
 def _newMultipletItem(strip):
     return _SCMitem(name='New Multiplet',
-            typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
                     callback=strip.mainWindow.addMultiplet)
+
 
 def _integrate1DItem(strip):
     return _SCMitem(name='Integrate Peak',
                     typeItem=ItemTypes.get(ITEM), toolTip='Add integral and link to peak',
                     callback=strip.mainWindow.add1DIntegral)
 
+
 def _navigateToCursorPosItem(strip):
-    return  _SCMitem(name='Navigate to:',
-             typeItem=ItemTypes.get(MENU), toolTip='Show this position in the selected strip ',
-             stripMethodName='navigateCursorMenu',
-             callback=None)
+    return _SCMitem(name='Navigate to:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Show this position in the selected strip ',
+                    stripMethodName='navigateCursorMenu',
+                    callback=None)
+
 
 def _navigateToPeakPosItem(strip):
-    return  _SCMitem(name='Navigate to:',
-             typeItem=ItemTypes.get(MENU), toolTip='Show this position in the selected strip ',
-             stripMethodName='navigateToPeakMenu',
-             callback=None)
+    return _SCMitem(name='Navigate to:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Show this position in the selected strip ',
+                    stripMethodName='navigateToPeakMenu',
+                    callback=None)
 
 
 # def _propagateAssignmentItem(strip):
@@ -249,12 +275,13 @@ def _enableAllItems(menu):
     for action in menu.actions():
         action.setEnabled(True)
 
+
 def _hidePeaksSingleActionItems(strip, menu):
     """ Greys out items that should appear only if one single peak is selected"""
     hideItems = [
-                _editPeakAssignmentItem(strip).name if _editPeakAssignmentItem(strip) else None,
-                _integrate1DItem(strip).name if _integrate1DItem(strip) else None
-                ]
+        _editPeakAssignmentItem(strip).name if _editPeakAssignmentItem(strip) else None,
+        _integrate1DItem(strip).name if _integrate1DItem(strip) else None
+        ]
     hideItems = [itm for itm in hideItems if itm is not None]
 
     for action in menu.actions():
@@ -268,35 +295,38 @@ def _hidePeaksSingleActionItems(strip, menu):
 
 def _addTraceItem(strip):
     return _SCMitem(name='Add Trace',
-             typeItem=ItemTypes.get(ITEM), toolTip='Add new trace',
-             shortcut='PT', callback=strip._newPhasingTrace)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Add new trace',
+                    shortcut='PT', callback=strip._newPhasingTrace)
+
 
 def _removeAllTracesItem(strip):
     return _SCMitem(name='Remove All Traces',
-                         typeItem=ItemTypes.get(ITEM), toolTip='Remove all traces',
-                         shortcut='TR', callback=strip.removePhasingTraces)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Remove all traces',
+                    shortcut='TR', callback=strip.removePhasingTraces)
+
 
 def _increaseTraceScaleItem(strip):
     return _SCMitem(name='Increase Trace Scale',
-                         typeItem=ItemTypes.get(ITEM), toolTip='Increase Trace Scale',
-                         shortcut='TU',icon='icons/tracescale-up', callback=strip.spectrumDisplay.increaseTraceScale)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Increase Trace Scale',
+                    shortcut='TU', icon='icons/tracescale-up', callback=strip.spectrumDisplay.increaseTraceScale)
+
 
 def _decreaseTraceScaleItem(strip):
     return _SCMitem(name='Decrease Trace Scale',
-                         typeItem=ItemTypes.get(ITEM), toolTip='Decrease Trace Scale',
-                         shortcut='TD', icon='icons/tracescale-down', callback=strip.spectrumDisplay.decreaseTraceScale)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Decrease Trace Scale',
+                    shortcut='TD', icon='icons/tracescale-down', callback=strip.spectrumDisplay.decreaseTraceScale)
+
 
 def _setPivotItem(strip):
     return _SCMitem(name='Set Pivot',
-                         typeItem=ItemTypes.get(ITEM), toolTip='Set pivot value',
-                         shortcut='PV', callback=strip._setPhasingPivot)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Set pivot value',
+                    shortcut='PV', callback=strip._setPhasingPivot)
+
 
 def _exitPhasingConsoleItem(strip):
     return _SCMitem(name='Exit Phasing Console',
-                         typeItem=ItemTypes.get(ITEM), toolTip='Exit phasing console',
-                         shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole, icon='icons/phase-console',)
-
-
+                    typeItem=ItemTypes.get(ITEM), toolTip='Exit phasing console',
+                    shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole, icon='icons/phase-console', )
 
 
 ########################################################################################################################
@@ -309,46 +339,46 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
     Creates and returns the 1d default context menu. Opened when right clicked on the background canvas
     """
     items = [
-            _toolBarItem(guiStrip1d),
-            _crossHairItem(guiStrip1d),
-            _gridItem(guiStrip1d),
-            _cyclePeakLabelsItem(guiStrip1d),
-            _separator(),
-            _SCMitem(name='Colours...',
-                        typeItem=ItemTypes.get(ITEM), icon='icons/contour-pos-neg', toolTip='Change colours',
-                        callback=guiStrip1d.spectrumDisplay.adjustContours),
+        _toolBarItem(guiStrip1d),
+        _crossHairItem(guiStrip1d),
+        _gridItem(guiStrip1d),
+        _cyclePeakLabelsItem(guiStrip1d),
+        _separator(),
+        _SCMitem(name='Colours...',
+                 typeItem=ItemTypes.get(ITEM), icon='icons/contour-pos-neg', toolTip='Change colours',
+                 callback=guiStrip1d.spectrumDisplay.adjustContours),
 
-            _SCMitem(name='Zoom best Y fit',
-                        typeItem=ItemTypes.get(ITEM), icon='icons/zoom-best-fit-1d', toolTip='Y Auto Scale',
-                        callback=guiStrip1d.resetYZoom),
+        _SCMitem(name='Zoom best Y fit',
+                 typeItem=ItemTypes.get(ITEM), icon='icons/zoom-best-fit-1d', toolTip='Y Auto Scale',
+                 callback=guiStrip1d.resetYZoom),
 
-            _SCMitem(name='Zoom best X fit',
-                        typeItem=ItemTypes.get(ITEM),  icon='icons/zoom-full-1d', toolTip='X Auto Scale',
-                        callback=guiStrip1d.resetXZoom),
-            _separator(),
-            _SCMitem(name='Calibrate X',
-                        typeItem=ItemTypes.get(ITEM), toolTip='calibrate X points', checkable=True, checked=False,
-                        callback=guiStrip1d.toggleCalibrateX, stripMethodName='calibrateXAction'),
+        _SCMitem(name='Zoom best X fit',
+                 typeItem=ItemTypes.get(ITEM), icon='icons/zoom-full-1d', toolTip='X Auto Scale',
+                 callback=guiStrip1d.resetXZoom),
+        _separator(),
+        _SCMitem(name='Calibrate X',
+                 typeItem=ItemTypes.get(ITEM), toolTip='calibrate X points', checkable=True, checked=False,
+                 callback=guiStrip1d.toggleCalibrateX, stripMethodName='calibrateXAction'),
 
-            _SCMitem(name='Calibrate Y',
-                        typeItem=ItemTypes.get(ITEM),toolTip='calibrate Y points',
-                        checkable=True, checked=False,
-                        callback=guiStrip1d.toggleCalibrateY, stripMethodName='calibrateYAction'),
+        _SCMitem(name='Calibrate Y',
+                 typeItem=ItemTypes.get(ITEM), toolTip='calibrate Y points',
+                 checkable=True, checked=False,
+                 callback=guiStrip1d.toggleCalibrateY, stripMethodName='calibrateYAction'),
 
-            _SCMitem(name='Stack Spectra',
-                        typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
-                        checkable=True, checked=False,
-                        callback=guiStrip1d.toggleStack, stripMethodName='stackAction'),
-            _separator(),
-            _phasingConsoleItem(guiStrip1d),
-            _separator(),
-            _marksItem(guiStrip1d),
-            _clearMarksItem(guiStrip1d),
-            _separator(),
-            _navigateToCursorPosItem(guiStrip1d),
-            _separator(),
-            _printItem(guiStrip1d),
-            ]
+        _SCMitem(name='Stack Spectra',
+                 typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
+                 checkable=True, checked=False,
+                 callback=guiStrip1d.toggleStack, stripMethodName='stackAction'),
+        _separator(),
+        _phasingConsoleItem(guiStrip1d),
+        _separator(),
+        _marksItem(guiStrip1d),
+        _clearMarksItem(guiStrip1d),
+        _separator(),
+        _navigateToCursorPosItem(guiStrip1d),
+        _separator(),
+        _printItem(guiStrip1d),
+        ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
 
@@ -358,14 +388,14 @@ def _get1dPhasingMenu(guiStrip1d) -> Menu:
     Creates and returns the phasing 1d context menu. Opened when right clicked on the background canvas in "phasing State mode"
     """
     items = [
-            _addTraceItem(guiStrip1d),
-            _removeAllTracesItem(guiStrip1d),        
-            _setPivotItem(guiStrip1d),
-            _separator(),
-            _exitPhasingConsoleItem(guiStrip1d),
-            _separator(),
-            _printItem(guiStrip1d),
-            ]
+        _addTraceItem(guiStrip1d),
+        _removeAllTracesItem(guiStrip1d),
+        _setPivotItem(guiStrip1d),
+        _separator(),
+        _exitPhasingConsoleItem(guiStrip1d),
+        _separator(),
+        _printItem(guiStrip1d),
+        ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
 
@@ -375,35 +405,37 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
     Creates and returns the current peak 1d context menu. Opened when right clicked on selected peak/s
     """
     items = [
-            _deletePeakItem(guiStrip1d),
-            _copyPeakItem(guiStrip1d),
-            _editPeakAssignmentItem(guiStrip1d),
-            _separator(),
-            _newMultipletItem(guiStrip1d),
-            _integrate1DItem(guiStrip1d),
-            _separator(),
-            _navigateToPeakPosItem(guiStrip1d),
-            ]
+        _deletePeakItem(guiStrip1d),
+        _copyPeakItem(guiStrip1d),
+        _editPeakAssignmentItem(guiStrip1d),
+        _separator(),
+        _newMultipletItem(guiStrip1d),
+        _integrate1DItem(guiStrip1d),
+        _separator(),
+        _navigateToPeakPosItem(guiStrip1d),
+        ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
+
 
 def _get1dIntegralMenu(guiStrip1d) -> Menu:
     """
     Creates and returns the current integral 1d context menu. Opened when right clicked on selected integral/s
     """
     items = [
-            _deleteIntegralItem(guiStrip1d),
-            ]
+        _deleteIntegralItem(guiStrip1d),
+        ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
+
 
 def _get1dMultipletMenu(guiStrip1d) -> Menu:
     """
     Creates and returns the current multiplet 1d context menu. Opened when right clicked on selected multiplet/s
     """
     items = [
-            _deleteMultipletItem(guiStrip1d),
-            ]
+        _deleteMultipletItem(guiStrip1d),
+        ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
 
@@ -418,44 +450,48 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
     Creates and returns the Nd default context menu. Opened when right clicked on the background canvas.
     """
     items = [
-            _toolBarItem(guiStripNd),
-            _crossHairItem(guiStripNd),
-            _gridItem(guiStripNd),
-            _shareYAxisItem(guiStripNd),
-            _cyclePeakLabelsItem(guiStripNd),
-            _cyclePeakSymbolsItem(guiStripNd),
-            _separator(),
-            _contoursItem(guiStripNd),
-            # _raiseContoursItem(guiStripNd),
-            # _lowerContoursItem(guiStripNd),
-            _separator(),
+        _toolBarItem(guiStripNd),
+        _crossHairItem(guiStripNd),
+        _gridItem(guiStripNd),
+        _shareYAxisItem(guiStripNd),
+        _cyclePeakLabelsItem(guiStripNd),
+        _cyclePeakSymbolsItem(guiStripNd),
+        _separator(),
+        _contoursItem(guiStripNd),
+        # _raiseContoursItem(guiStripNd),
+        # _lowerContoursItem(guiStripNd),
+        _separator(),
 
-            # _SCMitem(name='Add Contour Level',
-            #          typeItem=ItemTypes.get(ITEM), icon='icons/contour-add', toolTip='Add One Level',
-            #          callback=guiStripNd.spectrumDisplay.addContourLevel),
-            # _SCMitem(name='Remove Contour Level',
-            #          typeItem=ItemTypes.get(ITEM), icon='icons/contour-remove', toolTip='Remove One Level',
-            #          callback=guiStripNd.spectrumDisplay.removeContourLevel),
-            # _SCMitem(name='Store Zoom',
-            #          typeItem=ItemTypes.get(ITEM), icon='icons/zoom-store', toolTip='Store Zoom',
-            #          callback=guiStripNd.spectrumDisplay._storeZoom),
-            # _SCMitem(name='Restore Zoom',
-            #          typeItem=ItemTypes.get(ITEM), icon='icons/zoom-restore', toolTip='Restore Zoom',
-            #          callback=guiStripNd.spectrumDisplay._restoreZoom),
-            _resetZoom(guiStripNd),
+        # _SCMitem(name='Add Contour Level',
+        #          typeItem=ItemTypes.get(ITEM), icon='icons/contour-add', toolTip='Add One Level',
+        #          callback=guiStripNd.spectrumDisplay.addContourLevel),
+        # _SCMitem(name='Remove Contour Level',
+        #          typeItem=ItemTypes.get(ITEM), icon='icons/contour-remove', toolTip='Remove One Level',
+        #          callback=guiStripNd.spectrumDisplay.removeContourLevel),
+        # _SCMitem(name='Store Zoom',
+        #          typeItem=ItemTypes.get(ITEM), icon='icons/zoom-store', toolTip='Store Zoom',
+        #          callback=guiStripNd.spectrumDisplay._storeZoom),
+        # _SCMitem(name='Restore Zoom',
+        #          typeItem=ItemTypes.get(ITEM), icon='icons/zoom-restore', toolTip='Restore Zoom',
+        #          callback=guiStripNd.spectrumDisplay._restoreZoom),
+        _resetZoom(guiStripNd),
 
-            _separator(),
-            _toggleHorizontalTraceItem(guiStripNd),
-            _toggleVerticalTraceItem(guiStripNd),
-            _phasingConsoleItem(guiStripNd),
-            _separator(),
-            _marksItem(guiStripNd),
-            _clearMarksItem(guiStripNd),
-            _separator(),
-            _navigateToCursorPosItem(guiStripNd),
-            _separator(),
-            _printItem(guiStripNd),
-            ]
+        _separator(),
+        _calibrateX(guiStripNd),
+        _calibrateY(guiStripNd),
+
+        _separator(),
+        _toggleHorizontalTraceItem(guiStripNd),
+        _toggleVerticalTraceItem(guiStripNd),
+        _phasingConsoleItem(guiStripNd),
+        _separator(),
+        _marksItem(guiStripNd),
+        _clearMarksItem(guiStripNd),
+        _separator(),
+        _navigateToCursorPosItem(guiStripNd),
+        _separator(),
+        _printItem(guiStripNd),
+        ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
 
@@ -465,16 +501,16 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
     Creates and returns the phasing Nd context menu.  Opened when right clicked on the background canvas in "phasing State mode"
     """
     items = [
-            _addTraceItem(guiStripNd),
-            _removeAllTracesItem(guiStripNd),
-            _increaseTraceScaleItem(guiStripNd),
-            _decreaseTraceScaleItem(guiStripNd),
-            _setPivotItem(guiStripNd),
-            _separator(),
-            _exitPhasingConsoleItem(guiStripNd),
-            _separator(),
-            _printItem(guiStripNd),
-            ]
+        _addTraceItem(guiStripNd),
+        _removeAllTracesItem(guiStripNd),
+        _increaseTraceScaleItem(guiStripNd),
+        _decreaseTraceScaleItem(guiStripNd),
+        _setPivotItem(guiStripNd),
+        _separator(),
+        _exitPhasingConsoleItem(guiStripNd),
+        _separator(),
+        _printItem(guiStripNd),
+        ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
 
@@ -496,22 +532,24 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
 
+
 def _getNdIntegralMenu(guiStripNd) -> Menu:
     """
     Creates and returns the current integral Nd context menu. Opened when right clicked on selected integral/s
     """
     items = [
-            _deleteIntegralItem(guiStripNd),
-            ]
+        _deleteIntegralItem(guiStripNd),
+        ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)
+
 
 def _getNdMultipletMenu(guiStripNd) -> Menu:
     """
     Creates and returns the current multiplet Nd context menu. Opened when right clicked on selected multiplet/s
     """
     items = [
-            _deleteMultipletItem(guiStripNd),
-            ]
+        _deleteMultipletItem(guiStripNd),
+        ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)

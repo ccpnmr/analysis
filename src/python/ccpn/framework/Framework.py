@@ -289,6 +289,13 @@ class Framework:
 
     # NBNB TODO The following block should maybe be moved into _getUi
     self._getUserPrefs()
+
+    # set the preferences if added from the commandline
+    if self.args.darkColourScheme:
+      self.preferences.general.colourScheme = 'dark'
+    elif self.args.lightColourScheme:
+      self.preferences.general.colourScheme = 'light'
+
     self._registrationDict = {}
     self._setLanguage()
     self.styleSheet = None

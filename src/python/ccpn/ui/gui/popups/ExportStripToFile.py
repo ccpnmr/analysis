@@ -571,5 +571,8 @@ if __name__ == '__main__':
         ui.mainWindow.show()
         QtWidgets.QApplication.setActiveWindow(ui.mainWindow)
 
-    dialog = ExportStripToFilePopup(parent=application.mainWindow, mainWindow=application.mainWindow, strips=[])
+    dialog = ExportStripToFilePopup(parent=application.mainWindow,
+                                    mainWindow=application.mainWindow,
+                                    strips=[],
+                                    preferences=application.preferences.general)
     result = dialog.exec_()

@@ -202,7 +202,7 @@ class MacroEditor(CcpnModule):
     newText = self.textBox.toPlainText()
     dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
                         acceptMode=FileDialog.AcceptSave,selectFile=self.nameLineEdit.text(),
-                        directory=self.macroPath, filter='*.py')
+                        directory=self.macroPath, filter='*.py', preferences=self.preferences.general)
     filePath = dialog.selectedFile()
 
     if filePath:
@@ -224,7 +224,7 @@ class MacroEditor(CcpnModule):
 
     dialog = FileDialog(self, text='Open Macro', fileMode=FileDialog.ExistingFile,
                         acceptMode=FileDialog.AcceptOpen, directory=self.macroPath,
-                        filter='*.py')
+                        filter='*.py', preferences=self.preferences.general)
 
     filePath = dialog.selectedFile()
     self._openPath(filePath)

@@ -1015,8 +1015,15 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if type(event) == QtGui.QKeyEvent:
             if event.key() in moveDict:
-                for peak in self.current.peaks:
-                    self._movePeak(peak, moveDict.get(event.key()))
+
+                self.project._startCommandEchoBlock('_movePeakFromKeys')
+                try:
+                    for peak in self.current.peaks:
+                        self._movePeak(peak, moveDict.get(event.key()))
+                finally:
+                    self.project._endCommandEchoBlock()
+
+
 
 
     def _singleKeyAction(self, event):
@@ -1024,10 +1031,12 @@ class CcpnGLWidget(QOpenGLWidget):
       :return: Actions for single key press. If current peaks, moves the peaks when using
       directional arrow otherwise pans the spectrum.
       """
-      if not self.current.peak:
-          self._panSpectrum(event)
-      else:
-          self._movePeakFromKeys(event)
+      # if not self.current.peak:
+      if not self._isSHIFT:
+        self._panSpectrum(event)
+
+      if self._isSHIFT:
+        self._movePeakFromKeys(event)
 
     def initialiseAxes(self, strip=None):
         """
@@ -1517,9 +1526,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _checkKeys(self, ev):
         keyMod = QApplication.keyboardModifiers()
+        key = ev.key()
 
-        if keyMod == Qt.ShiftModifier:
+        if keyMod == Qt.ShiftModifier or key == QtCore.Qt.Key_Shift:
             self._isSHIFT = 'S'
+            self.shift = True
         if keyMod == Qt.ControlModifier:
             self._isCTRL = 'C'
         if keyMod == Qt.AltModifier:
@@ -1532,9 +1543,15 @@ class CcpnGLWidget(QOpenGLWidget):
         self._checkKeys(event)
         self._singleKeyAction(event)
 
+    def _clearAfterRelease(self, ev):
+        key = ev.key()
+        if key == QtCore.Qt.Key_Shift:
+            self._isSHIFT = ''
+
+
     def _clearKeys(self):
         self._key = ''
-        self._isSHIFT = ''
+        # self._isSHIFT = ''
         self._isCTRL = ''
         self._isALT = ''
         self._isMETA = ''
@@ -1550,6 +1567,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def keyReleaseEvent(self, ev: QtGui.QKeyEvent):
         super(CcpnGLWidget, self).keyReleaseEvent(ev)
         self._clearAndUpdate()
+        self._clearAfterRelease(ev)
 
     def enterEvent(self, ev: QtCore.QEvent):
         super(CcpnGLWidget, self).enterEvent(ev)

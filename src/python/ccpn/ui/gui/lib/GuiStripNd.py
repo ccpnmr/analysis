@@ -382,7 +382,10 @@ class GuiStripNd(GuiStrip):
         """
         from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup as ExportDialog
 
-        self.exportPdf = ExportDialog(parent=self.mainWindow, mainWindow=self.mainWindow, strips=self.spectrumDisplay.strips)
+        self.exportPdf = ExportDialog(parent=self.mainWindow,
+                                      mainWindow=self.mainWindow,
+                                      strips=self.spectrumDisplay.strips,
+                                      preferences=self.mainWindow.application.preferences.general)
         self.exportPdf.exec_()
 
     def copyStrip(self):
@@ -791,7 +794,7 @@ class GuiStripNd(GuiStrip):
         sdWid = self.spectrumDisplay.mainWidget
         self.widgetIndex += 1
         self.calibrateXNDWidgets = CalibrateXNDWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
-                                                       grid=(self.widgetIndex, 0))
+                                                       grid=(self.widgetIndex, 0), gridSpan=(1,7))
 
     def toggleCalibrateX(self):
         if self.calibrateXAction.isChecked():
@@ -813,7 +816,7 @@ class GuiStripNd(GuiStrip):
         sdWid = self.spectrumDisplay.mainWidget
         self.widgetIndex += 1
         self.calibrateYNDWidgets = CalibrateYNDWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
-                                                       grid=(self.widgetIndex, 0))
+                                                       grid=(self.widgetIndex, 0), gridSpan=(1,7))
 
     def toggleCalibrateY(self):
         if self.calibrateYAction.isChecked():

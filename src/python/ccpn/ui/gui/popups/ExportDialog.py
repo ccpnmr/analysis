@@ -148,7 +148,7 @@ class ExportDialog(CcpnDialog):
                                             filter=self._dialogFilter)
 
         if selectFile is not None:  # and self.application.preferences.general.useNative is False:
-            self.saveText.setText(self.fileSaveDialog.selectedFile())
+            self.saveText.setText(self._dialogSelectFile)           #.fileSaveDialog.selectedFile())
         else:
             self.saveText.setText('')
         self.oldFilePath = self.saveText.text()  # set to the same for the minute

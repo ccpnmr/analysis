@@ -195,7 +195,10 @@ class GuiStrip1d(GuiStrip):
         """show the export strip to file dialog
         """
         from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup as ExportDialog
-        self.exportPdf = ExportDialog(parent=self.mainWindow, mainWindow=self.mainWindow, strips=self.spectrumDisplay.strips)
+        self.exportPdf = ExportDialog(parent=self.mainWindow,
+                                      mainWindow=self.mainWindow,
+                                      strips=self.spectrumDisplay.strips,
+                                      preferences=self.mainWindow.application.preferences.general)
         self.exportPdf.exec_()
 
     def _maximiseRegions(self):
@@ -268,7 +271,7 @@ class GuiStrip1d(GuiStrip):
         sdWid = self.spectrumDisplay.mainWidget
         self.widgetIndex += 1
         self.calibrateX1DWidgets = CalibrateX1DWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
-                                                       grid=(self.widgetIndex, 0))
+                                                       grid=(self.widgetIndex, 0), gridSpan=(1,7))
 
     # def _toggleCalibrateXSpectrum(self):
     #   ''' calibrate the spectra in the strip to the new point '''
@@ -299,7 +302,7 @@ class GuiStrip1d(GuiStrip):
         sdWid = self.spectrumDisplay.mainWidget
         self.widgetIndex += 1
         self.calibrateY1DWidgets = CalibrateY1DWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
-                                                       grid=(self.widgetIndex, 0))
+                                                       grid=(self.widgetIndex, 0), gridSpan=(1,7))
 
     # def _toggleCalibrateYSpectrum(self):
     #   ''' calibrate the spectra in the strip to the new point '''

@@ -132,7 +132,7 @@ class NefFileDialog(QtWidgets.QFileDialog):
 
         QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kw)
 
-        staticFunctionDict = {
+        self.staticFunctionDict = {
             (0, 0): 'getOpenFileName',
             (0, 1): 'getOpenFileName',
             (0, 2): 'getExistingDirectory',
@@ -150,6 +150,11 @@ class NefFileDialog(QtWidgets.QFileDialog):
             (self.AcceptSave, self.Directory): 'getSaveFileName',
             (self.AcceptSave, self.ExistingFiles): 'getSaveFileName',
             }
+
+        self._fileMode = fileMode
+        self._acceptMode = acceptMode
+        self._kw = kw
+        self._text = text
 
         self.setFileMode(fileMode)
         self.setAcceptMode(acceptMode)
@@ -174,17 +179,18 @@ class NefFileDialog(QtWidgets.QFileDialog):
             #     self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
 
     def selectedFiles(self):
-        if self.useNative:
-            # return empty list if the native dialog
-            return None
+        # if self.useNative:
+        #     # return empty list if the native dialog
+        #     return None
+        # else:
+
+        # the selectFile works and returns the file in the current directory
+        if self.result and not self.useNative:
+            return QtWidgets.QFileDialog.selectedFiles(self)
+        elif self.result and self.useNative:
+            return self.result
         else:
-            # the selectFile works and returns the file in the current directory
-            if self.result and not self.useNative:
-                return QtWidgets.QFileDialog.selectedFiles(self)
-            elif self.result and self.useNative:
-                return [self.result]
-            else:
-                return []
+            return []
 
     def selectedFile(self):
         files = self.selectedFiles()
@@ -215,7 +221,8 @@ class NefFileDialog(QtWidgets.QFileDialog):
 
     def _show(self):
         if self.useNative and not sys.platform.lower() == 'linux':
-            self.result = self.exec_()
+            funcName = self.staticFunctionDict[(self._acceptMode, self._fileMode)]
+            self.result = getattr(self, funcName)(caption=self._text, **self._kw)
         else:
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
             self.result = self.exec_()

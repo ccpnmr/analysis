@@ -224,6 +224,8 @@ class ExportStripToFilePopup(ExportDialog):
             spectrumColourKeys = list(spectrumColours.keys())
             self.colourBox.setCurrentText(spectrumColours[self.backgroundColour])
 
+        self.colourBox.setCurrentText(spectrumColours['#ffffff'])
+
         self.colourBox.activated.connect(self._changeBackgroundPulldown)
 
         row += 1

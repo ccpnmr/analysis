@@ -61,8 +61,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS
-from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES,\
+from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
+
 
 PLOTLEFT = 'plotLeft'
 PLOTBOTTOM = 'plotBottom'
@@ -127,7 +128,6 @@ class GLExporter():
 
             self.numStrips = len(spectrumDisplay.strips)
             for strip in spectrumDisplay.orderedStrips:
-
                 # point to the correct strip
                 self.strip = strip
                 self.parent = strip._CcpnGLWidget
@@ -165,7 +165,6 @@ class GLExporter():
 
         # set a default fontName
         self.fontName = self.parent.globalGL.glSmallFont.fontName
-
 
     def _buildPage(self):
         """Build the main sections of the pdf file from a drawing object
@@ -239,9 +238,8 @@ class GLExporter():
         # strip axis ratio
         ratio = self.parent.h / self.parent.w
 
-
         # translate to size of drawing Flowable
-        self.pixWidth = self._report.doc.width / (fw / self.parent.w)        #self.numStrips
+        self.pixWidth = self._report.doc.width / (fw / self.parent.w)  #self.numStrips
         self.pixHeight = self.pixWidth * ratio
 
         # scale fonts to appear the correct size
@@ -249,7 +247,6 @@ class GLExporter():
 
         # if too tall then flip the scaling
         if self.pixHeight > (self._report.doc.height - 2 * cm):
-
             self.pixHeight = self._report.doc.height - (2 * cm)
             self.pixWidth = self.pixHeight / ratio
             self.fontScale = 1.025 * self.pixHeight / self.parent.h
@@ -917,16 +914,16 @@ class GLExporter():
             if self.rAxis:
                 if self.params[GLAXISMARKS]:
                     self._appendIndexLineGroup(indArray=self.parent.gridList[1],
-                                           colourGroups=colourGroups,
-                                           plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
-                                                    PLOTBOTTOM: self.displayScale * self.mainB,
-                                                    PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
-                                                    PLOTHEIGHT: self.displayScale * self.mainH},
-                                           name='gridAxes',
-                                           setColour=self.foregroundColour)
+                                               colourGroups=colourGroups,
+                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
+                                                        PLOTBOTTOM: self.displayScale * self.mainB,
+                                                        PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
+                                                        PLOTHEIGHT: self.displayScale * self.mainH},
+                                               name='gridAxes',
+                                               setColour=self.foregroundColour)
                     if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                         list(colourGroups.values())[0][PDFLINES].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
-                                                                     self.displayScale * self.mainW, self.pixHeight])
+                                                                         self.displayScale * self.mainW, self.pixHeight])
                 elif self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 
@@ -935,29 +932,29 @@ class GLExporter():
                     tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
 
                     self._appendIndexLineGroup(indArray=tempVertexArray,
-                                           colourGroups=colourGroups,
-                                           plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
-                                                    PLOTBOTTOM: self.displayScale * self.mainB,
-                                                    PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
-                                                    PLOTHEIGHT: self.displayScale * self.mainH},
-                                           name='gridAxes',
-                                           setColour=self.foregroundColour)
+                                               colourGroups=colourGroups,
+                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
+                                                        PLOTBOTTOM: self.displayScale * self.mainB,
+                                                        PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
+                                                        PLOTHEIGHT: self.displayScale * self.mainH},
+                                               name='gridAxes',
+                                               setColour=self.foregroundColour)
                     list(colourGroups.values())[0][PDFLINES] = [[self.displayScale * self.mainW, self.displayScale * self.mainB,
-                                                                     self.displayScale * self.mainW, self.pixHeight]]
+                                                                 self.displayScale * self.mainW, self.pixHeight]]
 
             if self.bAxis:
                 if self.params[GLAXISMARKS]:
                     self._appendIndexLineGroup(indArray=self.parent.gridList[2],
-                                           colourGroups=colourGroups,
-                                           plotDim={PLOTLEFT: 0.0,
-                                                    PLOTBOTTOM: self.displayScale * self.mainB,
-                                                    PLOTWIDTH: self.displayScale * self.mainW,
-                                                    PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
-                                           name='gridAxes',
-                                           setColour=self.foregroundColour)
+                                               colourGroups=colourGroups,
+                                               plotDim={PLOTLEFT: 0.0,
+                                                        PLOTBOTTOM: self.displayScale * self.mainB,
+                                                        PLOTWIDTH: self.displayScale * self.mainW,
+                                                        PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
+                                               name='gridAxes',
+                                               setColour=self.foregroundColour)
                     if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                         list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
-                                                                     self.displayScale * self.mainW, self.displayScale * self.bAxisH])
+                                                                         self.displayScale * self.mainW, self.displayScale * self.bAxisH])
                 elif self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 
@@ -966,19 +963,19 @@ class GLExporter():
                     tempVertexArray.vertices = [0.0, 0.0, 0.0, 0.0]
 
                     self._appendIndexLineGroup(indArray=tempVertexArray,
-                                           colourGroups=colourGroups,
-                                           plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
-                                                    PLOTBOTTOM: self.displayScale * self.mainB,
-                                                    PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
-                                                    PLOTHEIGHT: self.displayScale * self.mainH},
-                                           name='gridAxes',
-                                           setColour=self.foregroundColour)
+                                               colourGroups=colourGroups,
+                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
+                                                        PLOTBOTTOM: self.displayScale * self.mainB,
+                                                        PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
+                                                        PLOTHEIGHT: self.displayScale * self.mainH},
+                                               name='gridAxes',
+                                               setColour=self.foregroundColour)
 
                     # if the rAxis is not visible then just set this line, otherwise append to the above line
                     if not self.rAxis:
                         list(colourGroups.values())[0][PDFLINES] = []
                     list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
-                                                                 self.displayScale * self.mainW, self.displayScale * self.bAxisH])
+                                                                     self.displayScale * self.mainW, self.displayScale * self.bAxisH])
 
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
@@ -1005,11 +1002,25 @@ class GLExporter():
                                                 height=self.displayScale * self.rAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
-                        colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                            drawString.text,
-                                                            fontSize=drawString.font.fontSize * self.fontScale,
-                                                            fontName=drawString.font.fontName,
-                                                            fillColor=colour))
+                        ss = String(newLine[0], newLine[1],
+                                    drawString.text,
+                                    fontSize=drawString.font.fontSize * self.fontScale,
+                                    fontName=drawString.font.fontName,
+                                    fillColor=colour)
+                        bounds = ss.getBounds()
+                        colourGroups[colourPath].add(Rect(bounds[0], bounds[1],
+                                                          (bounds[2] - bounds[0]), (bounds[3] - bounds[1]),
+                                                          # newLine[0], newLine[1],
+                                                          # drawString.font.fontSize * self.fontScale * len(newLine),
+                                                          # drawString.font.fontSize * self.fontScale,
+                                                          strokeColor=None,
+                                                          fillColor=colors.yellowgreen))
+                        # colourGroups[colourPath].add(String(newLine[0], newLine[1],
+                        #                                     drawString.text,
+                        #                                     fontSize=drawString.font.fontSize * self.fontScale,
+                        #                                     fontName=drawString.font.fontName,
+                        #                                     fillColor=colour))
+                        colourGroups[colourPath].add(ss)
 
             if self.bAxis:
                 for drawString in self.parent._axisXLabelling:
@@ -1028,11 +1039,25 @@ class GLExporter():
                                                 height=self.displayScale * self.bAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
-                        colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                            drawString.text,
-                                                            fontSize=drawString.font.fontSize * self.fontScale,
-                                                            fontName=drawString.font.fontName,
-                                                            fillColor=colour))
+                        ss = String(newLine[0], newLine[1],
+                                    drawString.text,
+                                    fontSize=drawString.font.fontSize * self.fontScale,
+                                    fontName=drawString.font.fontName,
+                                    fillColor=colour)
+                        bounds = ss.getBounds()
+                        colourGroups[colourPath].add(Rect(bounds[0], bounds[1],
+                                                          (bounds[2] - bounds[0]), (bounds[3] - bounds[1]),
+                                                          # newLine[0], newLine[1],
+                                                          # drawString.font.fontSize * self.fontScale * len(newLine),
+                                                          # drawString.font.fontSize * self.fontScale,
+                                                          strokeColor=None,
+                                                          fillColor=colors.yellowgreen))
+                        # colourGroups[colourPath].add(String(newLine[0], newLine[1],
+                        #                                     drawString.text,
+                        #                                     fontSize=drawString.font.fontSize * self.fontScale,
+                        #                                     fontName=drawString.font.fontName,
+                        #                                     fillColor=colour))
+                        colourGroups[colourPath].add(ss)
 
             for colourGroup in colourGroups.values():
                 self._mainPlot.add(colourGroup)
@@ -1060,13 +1085,13 @@ class GLExporter():
         """
         report = self.report()
         self.stripReports.append(report)
-        self.stripWidths.append(report.width+self.stripSpacing)
+        self.stripWidths.append(report.width + self.stripSpacing)
         # report = self.report()
         # table = ((report, report, report, report),)
         # self._report.story.append(self.report())
 
     def _addTableToStory(self):
-        table = (self.stripReports, )                               # tuple
+        table = (self.stripReports,)  # tuple
         self._report.story.append(Table(table, colWidths=self.stripWidths))
 
     def writeSVGFile(self):
@@ -1180,7 +1205,7 @@ class GLExporter():
             if spectrumView.isDeleted:
                 continue
 
-            attribList = getattr(spectrumView, listView+'Views')
+            attribList = getattr(spectrumView, listView + 'Views')
             validListViews = [pp for pp in attribList
                               if pp.isVisible()
                               and spectrumView.isVisible()
@@ -1220,7 +1245,7 @@ class GLExporter():
             newColour = dict((k, colourItem[k]) for k in wanted_keys if k in colourItem)
 
             pl = Path(
-                **newColour)  #  strokeWidth=colourItem[PDFSTROKEWIDTH], strokeColor=colourItem[PDFSTROKECOLOR], strokeLineCap=colourItem[PDFSTROKELINECAP])
+                    **newColour)  #  strokeWidth=colourItem[PDFSTROKEWIDTH], strokeColor=colourItem[PDFSTROKECOLOR], strokeLineCap=colourItem[PDFSTROKELINECAP])
             for ll in colourItem[PDFLINES]:
                 if len(ll) == 4:
                     pl.moveTo(ll[0], ll[1])

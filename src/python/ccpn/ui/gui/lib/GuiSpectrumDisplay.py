@@ -148,7 +148,7 @@ class GuiSpectrumDisplay(CcpnModule):
     super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
                                              size=(1100, 1300), autoOrientation=False
                                              )
-    # print('GuiSpectrumDisplay>> self.layout:', self.layout)
+    self.setMinimumWidth(150)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application
@@ -162,21 +162,25 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # GWV: Not sure what the widget argument is for
     # LM: is the spectrumDisplay, used in the widget to set actions/callbacks to the buttons
+    spectrumRow = 0
+    toolBarRow = 0
+    stripRow = 2
+    phasingRow = 3
+
     self.spectrumToolBar = SpectrumToolBar(parent=self.qtParent, widget=self,
-                                           grid=(0, 0), gridSpan=(1, 6))
+                                               grid=(spectrumRow, 0), gridSpan=(1, 6))
     self.spectrumToolBar.setFixedHeight(30)
 
     # spectrumGroupsToolBar
     self.spectrumGroupToolBar = SpectrumGroupToolBar(parent=self.qtParent, spectrumDisplay=self,
-                                                  grid=(0, 0), gridSpan=(1, 6))
+                                                         grid=(spectrumRow, 0), gridSpan=(1, 6))
     self.spectrumGroupToolBar.setFixedHeight(30)
     self.spectrumGroupToolBar.hide()
 
     # Utilities Toolbar; filled in Nd/1d classes
     self.spectrumUtilToolBar = ToolBar(parent=self.qtParent, iconSizes=(24,24),
-                                       grid=(0, 6), gridSpan=(1, 1),
-                                       hPolicy='minimal', hAlign='right')
-    #self.spectrumUtilToolBar.setFixedWidth(150)
+                                           grid=(toolBarRow, 6), gridSpan=(1, 1),
+                                           hPolicy='minimal', hAlign='left')
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     if self.application.preferences.general.showToolbar:
       self.spectrumUtilToolBar.show()
@@ -197,11 +201,11 @@ class GuiSpectrumDisplay(CcpnModule):
       self._stripFrameScrollArea.setWidgetResizable(True)
       self._stripFrameScrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
       self._stripFrameScrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-      self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, 1, 0, 1, 7)
+      self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, stripRow, 0, 1, 7)
       self.stripFrame.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                     QtWidgets.QSizePolicy.Expanding)
     else:
-      self.qtParent.getLayout().addWidget(self.stripFrame, 1, 0, 1, 7)
+      self.qtParent.getLayout().addWidget(self.stripFrame, stripRow, 0, 1, 7)
 
     includeDirection = not self.is1D
     self.phasingFrame = PhasingFrame(parent=self.qtParent,
@@ -211,7 +215,7 @@ class GuiSpectrumDisplay(CcpnModule):
                                      returnCallback=self._updatePivot,
                                      directionCallback=self._changedPhasingDirection,
                                      applyCallback=self._applyPhasing,
-                                     grid=(2, 0), gridSpan=(1, 7), hAlign='top',
+                                     grid=(phasingRow, 0), gridSpan=(1, 7), hAlign='top',
                                      margins=(0,0,0,0), spacing=(0,0))
     self.phasingFrame.setVisible(False)
 
@@ -223,7 +227,7 @@ class GuiSpectrumDisplay(CcpnModule):
     # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
     # the module to another location
     self.hoverEvent = self._hoverEvent
-    self.lastAxisOnly = True
+    self.lastAxisOnly = mainWindow.application.preferences.general.lastAxisOnly
     self._phasingTraceScale = 1.0e-7
     self.stripScaleFactor = 1.0
 

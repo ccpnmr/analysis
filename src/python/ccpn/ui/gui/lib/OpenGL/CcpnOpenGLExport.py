@@ -766,11 +766,7 @@ class GLExporter():
                                         height=self.displayScale * self.mainH):
                 if colourPath not in colourGroups:
                     colourGroups[colourPath] = Group()
-                colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                    drawString.text,
-                                                    fontSize=drawString.font.fontSize * self.fontScale,
-                                                    fontName=drawString.font.fontName,
-                                                    fillColor=colour))
+                self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=False)
 
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)
@@ -853,11 +849,7 @@ class GLExporter():
                                     height=self.displayScale * self.mainH):
             if colourPath not in colourGroups:
                 colourGroups[colourPath] = Group()
-            colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                                                drawString.text,
-                                                fontSize=drawString.font.fontSize * self.fontScale,
-                                                fontName=drawString.font.fontName,
-                                                fillColor=colour))
+            self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
 
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)
@@ -979,6 +971,25 @@ class GLExporter():
 
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
+    def _addString(self, colourGroups, colourPath, drawString, position, colour, boxed=False):
+        newStr = String(position[0], position[1],
+                        drawString.text,
+                        fontSize=drawString.font.fontSize * self.fontScale,
+                        fontName=drawString.font.fontName,
+                        fillColor=colour)
+        if boxed:
+            bounds = newStr.getBounds()
+            dx = drawString.font.fontSize * self.fontScale * 0.1        #bounds[0] - position[0]
+            dy = (position[1] - bounds[1]) / 2.0
+            colourGroups[colourPath].add(Rect(bounds[0], bounds[1] + dy,
+                                              (bounds[2] - bounds[0]) + dx, (bounds[3] - bounds[1]) - 2.0 * dy,
+                                              # newLine[0], newLine[1],
+                                              # drawString.font.fontSize * self.fontScale * len(newLine),
+                                              # drawString.font.fontSize * self.fontScale,
+                                              strokeColor=None,
+                                              fillColor=self.backgroundColour))
+        colourGroups[colourPath].add(newStr)
+
     def _addGridLabels(self):
         """
         Add marks to the right/bottom axis areas.
@@ -1002,25 +1013,7 @@ class GLExporter():
                                                 height=self.displayScale * self.rAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
-                        ss = String(newLine[0], newLine[1],
-                                    drawString.text,
-                                    fontSize=drawString.font.fontSize * self.fontScale,
-                                    fontName=drawString.font.fontName,
-                                    fillColor=colour)
-                        bounds = ss.getBounds()
-                        colourGroups[colourPath].add(Rect(bounds[0], bounds[1],
-                                                          (bounds[2] - bounds[0]), (bounds[3] - bounds[1]),
-                                                          # newLine[0], newLine[1],
-                                                          # drawString.font.fontSize * self.fontScale * len(newLine),
-                                                          # drawString.font.fontSize * self.fontScale,
-                                                          strokeColor=None,
-                                                          fillColor=colors.yellowgreen))
-                        # colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                        #                                     drawString.text,
-                        #                                     fontSize=drawString.font.fontSize * self.fontScale,
-                        #                                     fontName=drawString.font.fontName,
-                        #                                     fillColor=colour))
-                        colourGroups[colourPath].add(ss)
+                        self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
 
             if self.bAxis:
                 for drawString in self.parent._axisXLabelling:
@@ -1039,25 +1032,7 @@ class GLExporter():
                                                 height=self.displayScale * self.bAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
-                        ss = String(newLine[0], newLine[1],
-                                    drawString.text,
-                                    fontSize=drawString.font.fontSize * self.fontScale,
-                                    fontName=drawString.font.fontName,
-                                    fillColor=colour)
-                        bounds = ss.getBounds()
-                        colourGroups[colourPath].add(Rect(bounds[0], bounds[1],
-                                                          (bounds[2] - bounds[0]), (bounds[3] - bounds[1]),
-                                                          # newLine[0], newLine[1],
-                                                          # drawString.font.fontSize * self.fontScale * len(newLine),
-                                                          # drawString.font.fontSize * self.fontScale,
-                                                          strokeColor=None,
-                                                          fillColor=colors.yellowgreen))
-                        # colourGroups[colourPath].add(String(newLine[0], newLine[1],
-                        #                                     drawString.text,
-                        #                                     fontSize=drawString.font.fontSize * self.fontScale,
-                        #                                     fontName=drawString.font.fontName,
-                        #                                     fillColor=colour))
-                        colourGroups[colourPath].add(ss)
+                        self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
 
             for colourGroup in colourGroups.values():
                 self._mainPlot.add(colourGroup)

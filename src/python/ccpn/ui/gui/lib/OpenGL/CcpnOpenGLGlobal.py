@@ -155,7 +155,7 @@ class GLGlobalData(QtWidgets.QWidget):
     {
       filter = texture2D(texture, varyingTexCoord.xy);
       // colour for blending enabled
-      if (blendEnabled > 0)
+      if (blendEnabled != 0)
         gl_FragColor = vec4(FC.xyz, filter.w);
       else
         gl_FragColor = vec4((FC.xyz * filter.w) + (1-filter.w)*background.xyz, 1.0);

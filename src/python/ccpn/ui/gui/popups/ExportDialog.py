@@ -54,6 +54,9 @@ from ccpn.ui.gui.widgets.Base import Base
 
 
 class ExportDialog(CcpnDialog):
+
+    _pathHistory = {}
+
     def __init__(self, parent=None, mainWindow=None, title='Export to File',
                  fileMode=FileDialog.AnyFile,
                  text='Export File',
@@ -78,6 +81,11 @@ class ExportDialog(CcpnDialog):
         self._dialogFilter = filter
         self.params = {}
         self.preferences = preferences
+        self.title = title
+
+        # set the last path
+        if self._dialogSelectFile:
+            self._dialogSelectFile = self.updatePathHistory(self._dialogSelectFile)
 
         # B = {'fileMode': None,
         #      'text': None,
@@ -100,8 +108,8 @@ class ExportDialog(CcpnDialog):
         self.options = Frame(self, setLayout=True, grid=(0, 0))
         self.options.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        # initialise the frame
-        self.initialise(self.options)
+        # # initialise the frame
+        # self.initialise(self.options)
 
         # add a spacer to separate from the common save widgets
         HLine(self, grid=(2, 0), gridSpan=(1, 1), colour=getColours()[DIVIDER], height=20)
@@ -139,19 +147,15 @@ class ExportDialog(CcpnDialog):
         self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         # self.resize(300, 500)
 
-        self.fileSaveDialog = NefFileDialog(self,
-                                            fileMode=self._dialogFileMode,
-                                            text=self._dialogText,
-                                            acceptMode=self._dialogAcceptMode,
-                                            preferences=self._dialogPreferences,
-                                            selectFile=self._dialogSelectFile,
-                                            filter=self._dialogFilter)
+        self.updateDialog()
 
-        if selectFile is not None:  # and self.application.preferences.general.useNative is False:
-            self.saveText.setText(self._dialogSelectFile)           #.fileSaveDialog.selectedFile())
+        if self._dialogSelectFile is not None:  # and self.application.preferences.general.useNative is False:
+            self.saveText.setText(self._dialogSelectFile)  #.fileSaveDialog.selectedFile())
         else:
             self.saveText.setText('')
-        self.oldFilePath = self.saveText.text()  # set to the same for the minute
+
+        # initialise the frame
+        self.initialise(self.options)
 
         self._saveState = True
 
@@ -252,11 +256,16 @@ class ExportDialog(CcpnDialog):
         #                                 selectFile=self.saveText.text(),
         #                                 filter=self._dialogFilter)
 
+        # set the path, it may have been edited
+        self.fileSaveDialog._selectFile = self._dialogSelectFile
+
         self.fileSaveDialog._show()
         selectedFile = self.fileSaveDialog.selectedFile()
+        selectedFile = self.updatePathHistory(selectedFile)
+
         if selectedFile:
             self.saveText.setText(str(selectedFile))
-            self.oldFilePath = str(selectedFile)
+            self._dialogSelectFile = str(selectedFile)
             self.pathEdited = False  # path has been reset
 
     def _save(self):
@@ -264,7 +273,28 @@ class ExportDialog(CcpnDialog):
 
     def _editPath(self):
         self.pathEdited = True
+        self._dialogSelectFile = self.saveText.text()
+        self._dialogSelectFile = self.updatePathHistory(self._dialogSelectFile)
 
+    def updateFilename(self, filename):
+        self._dialogSelectFile = self.updatePathHistory(filename)
+        if hasattr(self, 'saveText'):
+            self.saveText.setText(str(self._dialogSelectFile))
+
+    def updatePathHistory(self, filename):
+        if filename:
+            if os.path.dirname(filename):
+                ExportDialog._pathHistory[self.title] = os.path.dirname(filename)
+            else:
+                if self.title in ExportDialog._pathHistory:
+                    filename = os.path.join(ExportDialog._pathHistory[self.title], filename)
+                else:
+                    ExportDialog._pathHistory[self.title] = ''
+        else:
+            if self.title not in ExportDialog._pathHistory:
+                ExportDialog._pathHistory[self.title] = ''
+
+        return filename
 
 if __name__ == '__main__':
     from sandbox.Geerten.Refactored.framework import Framework

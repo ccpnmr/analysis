@@ -251,6 +251,7 @@ class ExportStripToFilePopup(ExportDialog):
             self.strip = self.strips[0]
 
         self._populateTreeView()
+        self.updateFilename(self.objectPulldown.getText())
 
         self.setMinimumSize(self.sizeHint())
 
@@ -274,9 +275,13 @@ class ExportStripToFilePopup(ExportDialog):
         if 'SpectrumDisplay' in selected:
             self.spectrumDisplay = self.objects[selected][0]
             self.strip = self.spectrumDisplay.strips[0]
+
+            self.updateFilename(self.spectrumDisplay.id)
         else:
             self.spectrumDisplay = None
             self.strip = self.objects[selected][0]
+
+            self.updateFilename(self.strip.id)
 
         selectedList = self.treeView.getItems()
         self._populateTreeView(selectedList)

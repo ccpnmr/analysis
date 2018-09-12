@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets
 
 import sys
+import os
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import Frame
 
@@ -88,6 +89,8 @@ class FileDialog(QtWidgets.QFileDialog):
         if self.useNative and not sys.platform.lower() == 'linux':
             funcName = staticFunctionDict[(acceptMode, fileMode)]
             self.result = getattr(self, funcName)(caption=text, **kw)
+            if isinstance(self.result, tuple):
+                self.result = self.result[0]
         else:
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
             self.result = self.exec_()
@@ -124,6 +127,8 @@ class FileDialog(QtWidgets.QFileDialog):
 
 class NefFileDialog(QtWidgets.QFileDialog):
 
+    _selectPath = os.path.expanduser('~')
+
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
                  acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kw):
 
@@ -155,6 +160,7 @@ class NefFileDialog(QtWidgets.QFileDialog):
         self._acceptMode = acceptMode
         self._kw = kw
         self._text = text
+        self._selectFile = selectFile
 
         self.setFileMode(fileMode)
         self.setAcceptMode(acceptMode)
@@ -188,7 +194,7 @@ class NefFileDialog(QtWidgets.QFileDialog):
         if self.result and not self.useNative:
             return QtWidgets.QFileDialog.selectedFiles(self)
         elif self.result and self.useNative:
-            return self.result
+            return [self.result]
         else:
             return []
 
@@ -222,7 +228,10 @@ class NefFileDialog(QtWidgets.QFileDialog):
     def _show(self):
         if self.useNative and not sys.platform.lower() == 'linux':
             funcName = self.staticFunctionDict[(self._acceptMode, self._fileMode)]
-            self.result = getattr(self, funcName)(caption=self._text, **self._kw)
+            self.result = getattr(self, funcName)(caption=self._text, directory=self._selectFile, **self._kw)
+            # self.result = getattr(self, funcName)(caption=self._text, **self._kw)
+            if isinstance(self.result, tuple):
+                self.result = self.result[0]
         else:
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
             self.result = self.exec_()

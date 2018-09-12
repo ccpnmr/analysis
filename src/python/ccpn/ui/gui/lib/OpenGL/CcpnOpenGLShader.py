@@ -72,6 +72,9 @@ class ShaderProgram(object):
   def setBackground(self, col):
     self.setGLUniform4fv('background', 1, col)
 
+  def setBlendEnabled(self, col):
+    self.setGLUniform1i('blendEnabled', col)
+
   # def setParameterList(self, params):
   #   self.setGLUniform4iv('parameterList', 1, params)
 

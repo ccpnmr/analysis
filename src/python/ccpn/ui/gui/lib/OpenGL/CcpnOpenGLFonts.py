@@ -270,8 +270,8 @@ class GLString(GLVertexArray):
     def __init__(self, text=None, font=None, obj=None, color=(1.0, 1.0, 1.0, 1.0),
                  x=0.0, y=0.0,
                  ox=0.0, oy=0.0,
-                 angle=0.0, width=None, height=None, GLContext=None):
-        super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=True,
+                 angle=0.0, width=None, height=None, GLContext=None, blendMode=True):
+        super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
                                        GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
                                        dimension=2)
         if text is None:

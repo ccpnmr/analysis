@@ -1252,6 +1252,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # This is the correct blend function to ignore stray surface blending functions
         GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
         self.setBackgroundColour(self.background)
+        self.globalGL._shaderProgramTex.setBlendEnabled(0)
 
         if self.strip:
             self.initialiseAxes(self.strip)
@@ -1810,8 +1811,20 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.crosshairVisible:
             self.drawMouseCoords()
 
+        # # GL.glBlendColor(1.0, 0.15, 0.15, 0.0)
+        # # # GL.glBlendColor(*self.background[:3], 0.0)
+        # # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_CONSTANT_COLOR, GL.GL_ONE, GL.GL_ONE)
+        #
+        # GL.glBlendColor(1.0, 0.15, 0.15, 0.0)
+        # # GL.glBlendColor(*self.background[:3], 0.0)
+        # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_CONSTANT_COLOR, GL.GL_ONE, GL.GL_ZERO)
+
+        self.globalGL._shaderProgramTex.setBlendEnabled(0)
         self.drawOverlayText()
         self.drawAxisLabels()
+        self.globalGL._shaderProgramTex.setBlendEnabled(1)
+        # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
+
         self.disableTexture()
 
         # use the current viewport matrix to display the last bit of the axes
@@ -2624,7 +2637,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                           x=self.axisL + (10.0 * self.pixelX),
                                           y=self.axisT - (1.5 * self.globalGL.glSmallFont.height * self.pixelY),
                                           color=colour, GLContext=self,
-                                          obj=None)
+                                          obj=None, blendMode=False)
 
             self._oldStripIDLabel = self.stripIDLabel
 

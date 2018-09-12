@@ -33,16 +33,17 @@ from ccpn.framework.PathsAndUrls import fontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 
-FONTLIST = (('glTahoma13.fnt','Tahoma', 13),
-            ('glTahoma14.fnt','Tahoma', 14),
-            ('glTahoma15.fnt','Tahoma', 15),
-            ('glTahoma16.fnt','Tahoma', 16),
-            ('glTahoma18.fnt','Tahoma', 18),
-            ('glTahoma20.fnt','Tahoma', 20),
-            ('glTahoma22.fnt','Tahoma', 22),
-            ('glTahoma25.fnt','Tahoma', 25),
-            ('glTahoma28.fnt','Tahoma', 28),
-            ('glTahoma32.fnt','Tahoma', 32))
+
+FONTLIST = (('glTahoma13.fnt', 'Tahoma', 13),
+            ('glTahoma14.fnt', 'Tahoma', 14),
+            ('glTahoma15.fnt', 'Tahoma', 15),
+            ('glTahoma16.fnt', 'Tahoma', 16),
+            ('glTahoma18.fnt', 'Tahoma', 18),
+            ('glTahoma20.fnt', 'Tahoma', 20),
+            ('glTahoma22.fnt', 'Tahoma', 22),
+            ('glTahoma25.fnt', 'Tahoma', 25),
+            ('glTahoma28.fnt', 'Tahoma', 28),
+            ('glTahoma32.fnt', 'Tahoma', 32))
 FONTTRANSPARENT = 'Transparent'
 FONTPATH = 'Fonts'
 
@@ -61,17 +62,16 @@ class GLGlobalData(QtWidgets.QWidget):
 
     def loadFonts(self):
         for fontFile in FONTLIST:
-            normalName = fontFile[1]+str(fontFile[2])
-            transparentName = fontFile[1]+FONTTRANSPARENT+str(fontFile[2])
+            normalName = fontFile[1] + str(fontFile[2])
+            transparentName = fontFile[1] + FONTTRANSPARENT + str(fontFile[2])
 
             self.fonts[normalName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
                                                 activeTexture=0)
             self.fonts[transparentName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
-                                                    fontTransparency=0.5, activeTexture=1)
+                                                     fontTransparency=0.5, activeTexture=1)
 
         self.glSmallFont = self.fonts['Tahoma13']
-        self.glSmallTransparentFont = self.fonts['Tahoma'+FONTTRANSPARENT+'13']
-
+        self.glSmallTransparentFont = self.fonts['Tahoma' + FONTTRANSPARENT + '13']
 
     def initialiseShaders(self):
         # simple shader for standard plotting of contours
@@ -146,7 +146,8 @@ class GLGlobalData(QtWidgets.QWidget):
     uniform sampler2D texture;
     varying vec4 FC;
     vec4    filter;
-    uniform vec4    background;
+    uniform vec4 background;
+    uniform int  blendEnabled;
     varying vec4 FO;
     varying vec4 varyingTexCoord;
 
@@ -154,11 +155,32 @@ class GLGlobalData(QtWidgets.QWidget):
     {
       filter = texture2D(texture, varyingTexCoord.xy);
       // colour for blending enabled
-      gl_FragColor = vec4(FC.xyz, filter.w);
+      if (blendEnabled > 0)
+        gl_FragColor = vec4(FC.xyz, filter.w);
+      else
+        gl_FragColor = vec4((FC.xyz * filter.w) + (1-filter.w)*background.xyz, 1.0);
+        
+      // if (filter.w < 0.01)
+      //   discard;
+      // gl_FragColor = vec4(FC.xyz, filter.w);
+    }
+    """
 
-    //  if (filter.w < 0.01)
-    //    discard;
-    //  gl_FragColor = vec4(FC.xyz * filter.w, 1.0);
+        self._fragmentShaderTexNoBlend = """
+    #version 120
+
+    uniform sampler2D texture;
+    varying vec4 FC;
+    vec4    filter;
+    uniform vec4 background;
+    uniform uint blendEnabled;
+    varying vec4 FO;
+    varying vec4 varyingTexCoord;
+
+    void main()
+    {
+      filter = texture2D(texture, varyingTexCoord.xy);
+      gl_FragColor = vec4((FC.xyz * filter.w) + (1-filter.w)*background.xyz, 1.0);
     }
     """
 
@@ -326,4 +348,5 @@ class GLGlobalData(QtWidgets.QWidget):
                                                            'axisScale': (4, np.float32),
                                                            'background': (4, np.float32),
                                                            'viewport': (4, np.float32),
-                                                           'texture': (1, np.uint)})
+                                                           'texture': (1, np.uint),
+                                                           'blendEnabled': (1, np.uint)})

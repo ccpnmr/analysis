@@ -52,6 +52,38 @@ class RadioButtons(QtWidgets.QWidget, Base):
       tipTexts = [None] * len(texts)
 
     self.radioButtons = []
+    self.setButtons(texts, selectedInd, direction, tipTexts)
+    # for i, text in enumerate(texts):
+    #   if 'h' in direction:
+    #     grid = (0, i)
+    #   else:
+    #     grid = (i, 0)
+    #   button = RadioButton(self, text, tipText=tipTexts[i], grid=grid, hAlign='l')
+    #   self.radioButtons.append(button)
+    #
+    #   buttonGroup.addButton(button)
+    #   buttonGroup.setId(button, i)
+    #
+    # if selectedInd is not None:
+    #   self.radioButtons[selectedInd].setChecked(True)
+
+    # buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
+    buttonGroup.buttonClicked.connect(self._callback)
+
+    self.setCallback(callback)
+
+  def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None):
+    """Change the buttons in the button group
+    """
+    # clear the original buttons
+    selected = self.getSelectedText()
+
+    for btn in self.radioButtons:
+      self.buttonGroup.removeButton(btn)
+      btn.deleteLater()
+    self.radioButtons = []
+
+    # rebuild the button list
     for i, text in enumerate(texts):
       if 'h' in direction:
         grid = (0, i)
@@ -60,16 +92,16 @@ class RadioButtons(QtWidgets.QWidget, Base):
       button = RadioButton(self, text, tipText=tipTexts[i], grid=grid, hAlign='l')
       self.radioButtons.append(button)
 
-      buttonGroup.addButton(button)
-      buttonGroup.setId(button, i)
+      self.buttonGroup.addButton(button)
+      self.buttonGroup.setId(button, i)
 
+    self.texts = texts
     if selectedInd is not None:
       self.radioButtons[selectedInd].setChecked(True)
-
-    # buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
-    buttonGroup.buttonClicked.connect(self._callback)
-
-    self.setCallback(callback)
+    elif selected and selected in self.texts:
+      self.set(selected)
+    else:
+      self.radioButtons[0].setChecked(True)
 
   def getRadioButton(self, text):
     for rb in self.radioButtons:

@@ -649,6 +649,9 @@ class DimensionsTab(QtWidgets.QWidget, Base):
         Label(self, text="Spectral Width (Hz) ", grid=(row, 0), vAlign='t', hAlign='l')
 
         row += 1
+        Label(self, text="Spectrometer Frequency (Hz) ", grid=(row, 0), vAlign='t', hAlign='l')
+
+        row += 1
         Label(self, text="Referencing (ppm) ", grid=(row, 0), vAlign='t', hAlign='l')
 
         row += 1
@@ -686,6 +689,10 @@ class DimensionsTab(QtWidgets.QWidget, Base):
 
             row += 1
             Label(self, text=str("%.3f" % (spectrum.spectralWidthsHz[i] or 0.0)), grid=(row, i + 1),
+                  vAlign='t', hAlign='l')
+
+            row += 1
+            Label(self, text=str("%.3f" % (spectrum.spectrometerFrequencies[i] or 0.0)), grid=(row, i + 1),
                   vAlign='t', hAlign='l')
 
             row += 1

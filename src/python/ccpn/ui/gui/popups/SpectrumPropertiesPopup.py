@@ -625,57 +625,106 @@ class DimensionsTab(QtWidgets.QWidget, Base):
     for i in range(dimensions):
       dimLabel = Label(self, text='%s' % str(i+1), grid =(1, i+1), vAlign='t', hAlign='l')
 
-    self.spectralReferencingData = [i for i in range(dimensions)]           # ejb - not sure how else to get the lineEdits
+    self.axisCodes = [i for i in range(dimensions)]
+    self.isotopeCodes = [i for i in range(dimensions)]
+    self.spectralReferencingData = [i for i in range(dimensions)]
     self.spectralReferencingDataPoints = [i for i in range(dimensions)]
     self.spectralAssignmentToleranceData = [i for i in range(dimensions)]
     self.spectralDoubleCursorOffset = [i for i in range(dimensions)]
 
+    row = 2
+    Label(self, text="Axis Code ", grid=(row, 0), vAlign='t', hAlign='l')
+
+    row += 1
+    Label(self, text="Isotope Code ", grid=(row, 0), vAlign='t', hAlign='l')
+
+    row += 1
+    Label(self, text="Point Counts ", grid=(row, 0), vAlign='t', hAlign='l')
+
+    row += 1
+    Label(self, text="Dimension Type ", grid=(row, 0), vAlign='t', hAlign='l')
+
+    row += 1
+    Label(self, text="Spectrum Width (ppm) ", grid=(row, 0), vAlign='t', hAlign='l')
+
+    row += 1
+    Label(self, text="Spectral Width (Hz) ", grid=(row, 0), vAlign='t', hAlign='l')
+
+    row += 1
+    Label(self, text="Referencing (ppm) ", grid=(row, 0), vAlign='t', hAlign='l')
+
+    row += 1
+    Label(self, text="Referencing (points)", grid=(row, 0), vAlign='t', hAlign='l')
+
+    row += 1
+    Label(self, text="Assignment Tolerance ", grid=(row, 0), hAlign='l')
+
+    row += 1
+    Label(self, text="Second cursor offset (Hz) ", grid=(row, 0), hAlign='l')
+
     for i in range(dimensions):
-      Label(self, text="Axis Code ", grid=(2, 0), vAlign='t', hAlign='l')
-      Label(self, text=str(spectrum.axisCodes[i]), grid=(2, i+1),  hAlign='l', vAlign='t',)
-      Label(self, text="Point Counts ", grid=(3, 0), vAlign='t', hAlign='l')
-      Label(self, text=str(spectrum.pointCounts[i]), grid=(3, i+1), vAlign='t', hAlign='l')
-      Label(self, text="Dimension Type ", grid=(4, 0), vAlign='t', hAlign='l')
-      Label(self, text=spectrum.dimensionTypes[i], grid=(4, i+1), vAlign='t', hAlign='l')
-      Label(self, text="Spectrum Width (ppm) ", grid=(5, 0), vAlign='t', hAlign='l')
-      Label(self, text=str("%.3f" % (spectrum.spectralWidths[i] or 0.0)), grid=(5, i+1),
-            vAlign='t', hAlign='l')
-      Label(self, text="Spectral Width (Hz) ", grid=(6, 0), vAlign='t', hAlign='l')
-      Label(self, text=str("%.3f" % (spectrum.spectralWidthsHz[i] or 0.0)), grid=(6, i+1),
+      row = 2
+      # Label(self, text=str(spectrum.axisCodes[i]), grid=(row, i+1),  hAlign='l', vAlign='t',)
+
+      value = spectrum.axisCodes[i]
+      self.axisCodes[i] = LineEdit(self,
+                                         text='<None>' if value is None else str(value),
+                                         grid=(row, i+1), vAlign='t', hAlign='l')
+      self.axisCodes[i].textChanged.connect(partial(self._queueSetAxisCodes,
+                                                              self.axisCodes[i].text, i))
+
+      row += 1
+      Label(self, text=str(spectrum.isotopeCodes[i]), grid=(row, i+1),  hAlign='l', vAlign='t',)
+
+      row += 1
+      Label(self, text=str(spectrum.pointCounts[i]), grid=(row, i+1), vAlign='t', hAlign='l')
+
+      row += 1
+      Label(self, text=spectrum.dimensionTypes[i], grid=(row, i+1), vAlign='t', hAlign='l')
+
+      row += 1
+      Label(self, text=str("%.3f" % (spectrum.spectralWidths[i] or 0.0)), grid=(row, i+1),
             vAlign='t', hAlign='l')
 
-      Label(self, text="Referencing (ppm) ", grid=(7, 0), vAlign='t', hAlign='l')
+      row += 1
+      Label(self, text=str("%.3f" % (spectrum.spectralWidthsHz[i] or 0.0)), grid=(row, i+1),
+            vAlign='t', hAlign='l')
+
+      row += 1
       value = spectrum.referenceValues[i]
       self.spectralReferencingData[i] = LineEdit(self,
                                          text='<None>' if value is None else str("%.3f" % value),
-                                         grid=(7, i+1), vAlign='t', hAlign='l')
+                                         grid=(row, i+1), vAlign='t', hAlign='l')
       self.spectralReferencingData[i].textChanged.connect(partial(self._queueSetDimensionReferencing,
                                                               self.spectralReferencingData[i].text, i))
       # self.spectralReferencingDataList.append(spectralReferencingData)
 
-      Label(self, text="Referencing (points)", grid=(8, 0), vAlign='t', hAlign='l')
+      row += 1
+      # Label(self, text="Referencing (points)", grid=(8, 0), vAlign='t', hAlign='l')
       value = spectrum.referencePoints[i]
       self.spectralReferencingDataPoints[i] = LineEdit(self,
                                                text='<None>' if value is None else str("%.3f" % value),
                                                # text=str("%.3f" % (spectrum.referencePoints[i] or 0.0)),
-                                               grid=(8, i+1), vAlign='t', hAlign='l')
+                                               grid=(row, i+1), vAlign='t', hAlign='l')
       self.spectralReferencingDataPoints[i].textChanged.connect(partial(self._queueSetPointDimensionReferencing,
                                                                     self.spectralReferencingDataPoints[i].text, i))
       # self.spectralReferencingDataPointsList.append(spectralReferencingDataPoints)
 
-      Label(self, text="Assignment Tolerance ", grid=(9, 0),  hAlign='l')
+      row += 1
+      # Label(self, text="Assignment Tolerance ", grid=(row, 0),  hAlign='l')
       value = spectrum.assignmentTolerances[i]
       self.spectralAssignmentToleranceData[i] = LineEdit(self,
                                                   text='<None>' if value is None else str("%.3f" % value),
-                                                  grid=(9, i+1), hAlign='l')
+                                                  grid=(row, i+1), hAlign='l')
       self.spectralAssignmentToleranceData[i].textChanged.connect(partial(self._queueSetAssignmentTolerances,
                                                                       self.spectralAssignmentToleranceData[i].text, i))
 
-      Label(self, text="Second cursor offset (Hz) ", grid=(10, 0), hAlign='l')
+      row += 1
+      # Label(self, text="Second cursor offset (Hz) ", grid=(10, 0), hAlign='l')
       value = spectrum.doubleCrosshairOffsets[i]
       self.spectralDoubleCursorOffset[i] = LineEdit(self,
                                                      text='0' if value is None else str("%.3f" % value),
-                                                     grid=(10, i + 1), hAlign='l')
+                                                     grid=(row, i + 1), hAlign='l')
       self.spectralDoubleCursorOffset[i].textChanged.connect(partial(self._queueSetDoubleCursorOffset,
                                                                       self.spectralDoubleCursorOffset[i].text, i))
 
@@ -718,6 +767,17 @@ class DimensionsTab(QtWidgets.QWidget, Base):
     self.pythonConsole.writeConsoleCommand("spectrum.doubleCrosshairOffsets = {0}".format(doubleCrosshairOffsets), spectrum=spectrum)
     self._writeLoggingMessage("spectrum.doubleCrosshairOffsets = {0}".format(doubleCrosshairOffsets))
 
+
+  def _queueSetAxisCodes(self, valueGetter, dim):
+    self._changes['AxisCodes{}'.format(dim)] = partial(self._setAxisCodes,
+                                                                  self.spectrum, dim, valueGetter())
+
+  def _setAxisCodes(self, spectrum, dim, value):
+    axisCodes = list(spectrum.axisCodes)
+    axisCodes[dim] = str(value)
+    spectrum.axisCodes = axisCodes
+    self.pythonConsole.writeConsoleCommand("spectrum.referenceValues = {0}".format(axisCodes), spectrum=spectrum)
+    self._writeLoggingMessage("spectrum.referenceValues = {0}".format(axisCodes))
 
   def _queueSetDimensionReferencing(self, valueGetter, dim):
     self._changes['dimensionReferencing{}'.format(dim)] = partial(self._setDimensionReferencing,

@@ -85,7 +85,7 @@ class ExportDialog(CcpnDialog):
 
         # set the last path
         if self._dialogSelectFile:
-            self._dialogSelectFile = self.updatePathHistory(self._dialogSelectFile)
+            self._dialogSelectFile = self.setPathHistory(self._dialogSelectFile)
 
         # B = {'fileMode': None,
         #      'text': None,
@@ -261,7 +261,7 @@ class ExportDialog(CcpnDialog):
 
         self.fileSaveDialog._show()
         selectedFile = self.fileSaveDialog.selectedFile()
-        selectedFile = self.updatePathHistory(selectedFile)
+        selectedFile = self.setPathHistory(selectedFile)
 
         if selectedFile:
             self.saveText.setText(str(selectedFile))
@@ -274,14 +274,20 @@ class ExportDialog(CcpnDialog):
     def _editPath(self):
         self.pathEdited = True
         self._dialogSelectFile = self.saveText.text()
-        self._dialogSelectFile = self.updatePathHistory(self._dialogSelectFile)
+        self._dialogSelectFile = self.setPathHistory(self._dialogSelectFile)
 
     def updateFilename(self, filename):
-        self._dialogSelectFile = self.updatePathHistory(filename)
+        self._dialogSelectFile = self.setPathHistory(filename)
         if hasattr(self, 'saveText'):
             self.saveText.setText(str(self._dialogSelectFile))
 
-    def updatePathHistory(self, filename):
+    def getPathHistory(self):
+        if self.title in ExportDialog._pathHistory:
+            return ExportDialog._pathHistory[self.title]
+
+        return ''
+
+    def setPathHistory(self, filename):
         if filename:
             if os.path.dirname(filename):
                 ExportDialog._pathHistory[self.title] = os.path.dirname(filename)

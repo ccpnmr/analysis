@@ -251,7 +251,11 @@ class ExportStripToFilePopup(ExportDialog):
             self.strip = self.strips[0]
 
         self._populateTreeView()
-        self.updateFilename(self.objectPulldown.getText())
+        # currentPath = self.getPathHistory()
+        # currentPath = currentPath if currentPath else os.path.expanduser(self.project.path)
+
+        currentPath = os.path.expanduser(self.project.path)
+        self.updateFilename(os.path.join(currentPath, self.objectPulldown.getText()))
 
         self.setMinimumSize(self.sizeHint())
 

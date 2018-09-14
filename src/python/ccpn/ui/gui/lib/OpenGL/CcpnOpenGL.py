@@ -690,7 +690,6 @@ class CcpnGLWidget(QOpenGLWidget):
             event.ignore()
             return
 
-        # TODO:ED quick fix to lock the maximum and minimum zooms
         if (scrollDirection > 0 and self._minReached) or (scrollDirection < 0 and self._maxReached):
             event.accept()
             return
@@ -899,6 +898,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self.update()
 
     def _testAxisLimits(self):
+        return
+
         xRange = abs(self.axisL - self.axisR) / 2.0
         self._minReached = False
         self._maxReached = False

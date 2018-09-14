@@ -113,13 +113,14 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
     authheader = 'Basic %s' % auth
 
     # added str(data) server not currently passing POST body
-    newServerScript = serverScript+'?'+str(data)
+    newServerScript = serverScript                  #+'?'+str(data)
     req = urllib.request.Request(newServerScript)
     req.add_header("Authorization", authheader)
     req.data = data.encode('utf-8')
 
-    context = ssl._create_unverified_context()
-
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
     try:
         response = urlopen(req, context=context)
         result = response.read().decode('utf-8')

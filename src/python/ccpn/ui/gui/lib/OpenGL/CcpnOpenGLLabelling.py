@@ -1056,6 +1056,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                 objListView=objListView,
                                 drawList=self._GLLabels[objListView])
 
+            self._GLSymbols[objListView].defineIndexVBO()
+
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
 
@@ -1114,6 +1116,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             for obj in self.objects(pls):
                 self._appendSymbolItem(strip, obj, listCol, indexing, r, w,
                                        spectrumFrequency, symbolType, drawList)
+
+            self._GLSymbols[objListView].defineIndexVBO()
 
     def buildSymbols(self):
         if self.strip.isDeleted:
@@ -1296,8 +1300,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if spectrumView.isVisible() and objListView.isVisible():
 
                     if objListView in self._GLSymbols.keys():
-                        self._GLSymbols[objListView].drawIndexArray()
-                        # self._GLSymbols[objListView].defineIndexArray()
+                        # self._GLSymbols[objListView].drawIndexArray()
+                        self._GLSymbols[objListView].drawIndexVBO()
 
         GL.glLineWidth(1.0)
 

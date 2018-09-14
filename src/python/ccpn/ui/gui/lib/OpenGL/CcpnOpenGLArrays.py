@@ -28,6 +28,7 @@ __date__ = "$Date$"
 import sys
 from PyQt5 import QtWidgets
 import numpy as np
+import ctypes
 
 
 try:
@@ -110,6 +111,27 @@ class GLVertexArray():
         self.vertices = np.empty(0, dtype=np.float32)
         self.numVertices = 0
 
+    def defineIndexArray(self):
+        self.VBOs = GL.glGenBuffers(2)
+
+        # GL.glBindVertexArray(self.VAOs)                # define VAOs
+
+        # GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+        # GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+
+        # bind to the buffers
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER,
+                        GL.arrays.ArrayDatatype.arrayByteCount(self.vertices),
+                        self.vertices, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER,
+                        GL.arrays.ArrayDatatype.arrayByteCount(self.colors),
+                        self.colors, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
     def drawIndexArray(self):
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -119,8 +141,13 @@ class GLVertexArray():
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)        #self.vertices)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)        #self.colors)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
         GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
 
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
@@ -179,6 +206,43 @@ class GLVertexArray():
 
         if self.blendMode:
             GL.glDisable(GL.GL_BLEND)
+
+    # def defineTextArray(self):
+    #     # Generate buffers to hold our vertices
+    #     # self.VAOs = GL.glGenVertexArrays(1)
+    #     self.VBOs = GL.glGenBuffers(3)
+    #
+    #     # GL.glBindVertexArray(self.VAOs)                # define VAOs
+    #
+    #     # bind to the buffers
+    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
+    #
+    #     GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, self.VBOs[2])
+    #     GL.glBindTexture(GL.GL_TEXTURE_2D, self._texture_id)
+    #
+    #     # GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+    #     # GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+    #     # GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, self.texcoords)
+    #
+    #     GL.glBufferData(GL.GL_ARRAY_BUFFER,
+    #                     len(self.vertices) * 4,  # byte size
+    #                     self.vertices,
+    #                     GL.GL_STATIC_DRAW)
+    #
+    #     GL.glBufferData(GL.GL_ARRAY_BUFFER,
+    #                     len(self.colors) * 4,  # byte size
+    #                     self.color,
+    #                     GL.GL_STATIC_DRAW)
+    #
+    #     GL.glBufferData(GL.GL_ARRAY_BUFFER,
+    #                     len(colors) * 4,  # byte size
+    #                     (ctypes.c_float * len(colors))(*colors),
+    #                     GL.GL_STATIC_DRAW)
+
+        # unbind the VAO
+        # GL.glBindVertexArray(0)
 
     def drawTextArray(self):
         if self.blendMode:

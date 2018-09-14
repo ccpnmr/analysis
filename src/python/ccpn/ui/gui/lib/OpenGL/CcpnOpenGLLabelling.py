@@ -1296,7 +1296,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if spectrumView.isVisible() and objListView.isVisible():
 
                     if objListView in self._GLSymbols.keys():
-                        self._GLSymbols[objListView].drawIndexArray()
+                        # self._GLSymbols[objListView].drawIndexArray()
+                        self._GLSymbols[objListView].defineIndexArray()
 
         GL.glLineWidth(1.0)
 
@@ -1318,6 +1319,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                         for drawString in self._GLLabels[objListView].stringList:
                             drawString.drawTextArray()
+                            # drawString.defineTextArray()
 
 
 class GLpeak1dLabelling(GLpeakNdLabelling):

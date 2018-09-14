@@ -141,13 +141,15 @@ class GLVertexArray():
         GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)        #self.vertices)
+        # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+        # GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)        #self.vertices)
+        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)        #self.colors)
+        # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+        # GL.glColorPointer(4, GL.GL_FLOAT, 0, None)        #self.colors)
+        GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
+        # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
         GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, self.indices)
 
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)

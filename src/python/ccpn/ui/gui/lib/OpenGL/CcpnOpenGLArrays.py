@@ -134,7 +134,7 @@ class GLVertexArray():
             GL.glDisable(GL.GL_BLEND)
 
     def defineIndexVBO(self):
-
+        return
         # if not hasattr(self, 'VAOs'):
         #     self.VAOs = GL.glGenVertexArrays(1)
 
@@ -239,6 +239,9 @@ class GLVertexArray():
         print('>>>defineIndexVBO', self.VBOs, sizeVertices, sizeColors, sizeIndices)
 
     def drawIndexVBO(self):
+        self.drawIndexArray()
+        return
+
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
         if self.fillMode is not None:
@@ -303,6 +306,9 @@ class GLVertexArray():
             GL.glDisable(GL.GL_BLEND)
 
     def drawVertexColorVBO(self):
+        self.drawVertexColor()
+        return
+
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
         if self.fillMode is not None:

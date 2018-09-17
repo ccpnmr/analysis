@@ -1144,9 +1144,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisT, self.axisB = axisLimits[2:4]
 
     def initializeGL(self):
-        # GL = self.context().versionFunctions()
-        # GL.initializeOpenGLFunctions()
-        # self._GLVersion = GL.glGetString(GL.GL_VERSION)
+        GLversionFunctions = self.context().versionFunctions()
+        GLversionFunctions.initializeOpenGLFunctions()
+        self._GLVersion = GLversionFunctions.glGetString(GL.GL_VERSION)
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, strip=self.strip)
@@ -1918,6 +1918,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._buildSpectrumSetting(spectrumView=spectrumView)
                 rebuildFlag = True
 
+                # define the VBOs to pass to the graphics card
+                self._contourList[spectrumView].defineIndexVBO()
+
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:
             self.rebuildTraces()
@@ -2022,7 +2025,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         # draw the spectrum - call the existing glCallList
                         # spectrumView._paintContoursNoClip()
-                        self._contourList[spectrumView].drawIndexArray()
+
+                        # self._contourList[spectrumView].drawIndexArray()
+                        self._contourList[spectrumView].drawIndexVBO()
                 else:
                     if spectrumView in self._contourList.keys():
                         if self._stackingMode:
@@ -2032,7 +2037,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                                 self._spectrumSettings[spectrumView][
                                                                                     GLDefs.SPECTRUM_STACKEDMATRIX])
 
-                        self._contourList[spectrumView].drawVertexColor()
+                        # self._contourList[spectrumView].drawVertexColor()
+                        self._contourList[spectrumView].drawVertexColorVBO()
                     else:
                         pass
 

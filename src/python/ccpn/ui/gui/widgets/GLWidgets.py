@@ -318,6 +318,7 @@ class Gui1dWidget(CcpnGLWidget):
             return
 
         # self._spectrumSettings = {}
+        rebuildFlag = False
         for spectrumView in self.strip.spectrumViews:
 
             if spectrumView.buildContours or spectrumView.buildContoursOnly:
@@ -348,3 +349,11 @@ class Gui1dWidget(CcpnGLWidget):
                 spectrumView._buildGLContours(self._contourList[spectrumView])
 
                 self._buildSpectrumSetting(spectrumView=spectrumView)
+                rebuildFlag = True
+
+                # define the VBOs to pass to the graphics card
+                self._contourList[spectrumView].defineIndexVBO()
+
+        # rebuild the traces as the spectrum/plane may have changed
+        if rebuildFlag:
+            self.rebuildTraces()

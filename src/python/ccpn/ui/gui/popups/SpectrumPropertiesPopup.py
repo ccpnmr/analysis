@@ -779,7 +779,7 @@ class DimensionsTab(QtWidgets.QWidget, Base):
         axisCodes[dim] = str(value)
         spectrum.axisCodes = axisCodes
         showWarning('Change Axis Code', 'Caution is advised when changing axis codes\n'
-                                        'It can adversely affect spectrumdisplays and peak/integral/multiplet lists.')
+                                        'It can adversely affect spectrumDisplays and peak/integral/multiplet lists.')
 
         self.pythonConsole.writeConsoleCommand("spectrum.axisCodes = {0}".format(axisCodes), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(axisCodes))

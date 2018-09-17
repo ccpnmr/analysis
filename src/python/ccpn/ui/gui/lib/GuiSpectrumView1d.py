@@ -265,7 +265,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     numVertices = len(self.spectrum.positions)
     # glList.indices = numVertices
     glList.numVertices = numVertices
-    # glList.indices = np.arange(numVertices, dtype=np.uint)
+    # glList.indices = np.arange(numVertices, dtype=np.uint32)
 
     colour = self._getColour('sliceColour', '#aaaaaa')
     colR = int(colour.strip('# ')[0:2], 16) / 255.0

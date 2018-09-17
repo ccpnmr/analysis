@@ -348,5 +348,5 @@ class GLGlobalData(QtWidgets.QWidget):
                                                            'axisScale': (4, np.float32),
                                                            'background': (4, np.float32),
                                                            'viewport': (4, np.float32),
-                                                           'texture': (1, np.uint),
-                                                           'blendEnabled': (1, np.uint)})
+                                                           'texture': (1, np.uint32),
+                                                           'blendEnabled': (1, np.uint32)})

@@ -282,7 +282,7 @@ class GLString(GLVertexArray):
         self.object = obj
         self.pid = obj.pid if hasattr(obj, 'pid') else None
         self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
-        self.indices = np.zeros((len(text) * 6,), dtype=np.uint)
+        self.indices = np.zeros((len(text) * 6,), dtype=np.uint32)
         self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
         self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
         # self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)

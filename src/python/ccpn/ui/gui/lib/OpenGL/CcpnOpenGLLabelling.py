@@ -782,7 +782,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         lineThickness = strip.symbolThickness / 2.0
 
         drawList = self._GLSymbols[objListView]
-        drawList.indices = np.empty(0, dtype=np.uint)
+        drawList.indices = np.empty(0, dtype=np.uint32)
 
         index = 0
         indexPtr = 0
@@ -819,13 +819,13 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                                          np.array([index, index + 1, index + 2, index + 3,
                                                                    index, index + 2, index + 2, index + 1,
                                                                    index, index + 3, index + 3, index + 1],
-                                                                  dtype=np.uint))
+                                                                  dtype=np.uint32))
                         else:
                             cols = listCol
 
                             drawList.indices = np.append(drawList.indices,
                                                          np.array([index, index + 1, index + 2, index + 3],
-                                                                  dtype=np.uint))
+                                                                  dtype=np.uint32))
 
                         # make sure that links for the multiplets are added
                         extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
@@ -1056,7 +1056,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                 objListView=objListView,
                                 drawList=self._GLLabels[objListView])
 
-            self._GLSymbols[objListView].defineIndexVBO()
+            # drawList.defineIndexVBO()
 
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
@@ -1117,7 +1117,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 self._appendSymbolItem(strip, obj, listCol, indexing, r, w,
                                        spectrumFrequency, symbolType, drawList)
 
-            self._GLSymbols[objListView].defineIndexVBO()
+            # drawList.defineIndexVBO()
 
     def buildSymbols(self):
         if self.strip.isDeleted:
@@ -1300,8 +1300,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if spectrumView.isVisible() and objListView.isVisible():
 
                     if objListView in self._GLSymbols.keys():
-                        # self._GLSymbols[objListView].drawIndexArray()
-                        self._GLSymbols[objListView].drawIndexVBO()
+                        self._GLSymbols[objListView].drawIndexArray()
+                        # self._GLSymbols[objListView].drawIndexVBO()
 
         GL.glLineWidth(1.0)
 
@@ -1346,7 +1346,7 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         lineThickness = strip.symbolThickness / 2.0
 
         drawList = self._GLSymbols[objListView]
-        drawList.indices = np.empty(0, dtype=np.uint)
+        drawList.indices = np.empty(0, dtype=np.uint32)
 
         index = 0
         indexPtr = 0
@@ -1373,12 +1373,12 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                         cols = self._GLParent.highlightColour[:3]
                         drawList.indices = np.append(drawList.indices, np.array([index, index + 1, index + 2, index + 3,
                                                                                  index, index + 2, index + 2, index + 1,
-                                                                                 index, index + 3, index + 3, index + 1], dtype=np.uint))
+                                                                                 index, index + 3, index + 3, index + 1], dtype=np.uint32))
                     else:
                         cols = listCol
 
                         drawList.indices = np.append(drawList.indices,
-                                                     np.array([index, index + 1, index + 2, index + 3], dtype=np.uint))
+                                                     np.array([index, index + 1, index + 2, index + 3], dtype=np.uint32))
 
                     # make sure that links for the multiplets are added
                     extraIndices = self.appendExtraIndices(drawList, index + 4, obj)

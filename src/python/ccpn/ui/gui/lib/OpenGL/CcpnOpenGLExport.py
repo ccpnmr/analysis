@@ -979,15 +979,16 @@ class GLExporter():
                         fillColor=colour)
         if boxed:
             bounds = newStr.getBounds()
-            dx = drawString.font.fontSize * self.fontScale * 0.1        #bounds[0] - position[0]
-            dy = (position[1] - bounds[1]) / 2.0
-            colourGroups[colourPath].add(Rect(bounds[0], bounds[1] + dy,
-                                              (bounds[2] - bounds[0]) + dx, (bounds[3] - bounds[1]) - 2.0 * dy,
+            dx = drawString.font.fontSize * self.fontScale * 0.11       #bounds[0] - position[0]
+            dy = drawString.font.fontSize * self.fontScale * 0.125      #(position[1] - bounds[1]) / 2.0
+            colourGroups[colourPath].add(Rect(bounds[0] - dx, bounds[1] - dy,
+                                              (bounds[2] - bounds[0]) + 5 * dx, (bounds[3] - bounds[1]) + 2.0 * dy,
                                               # newLine[0], newLine[1],
                                               # drawString.font.fontSize * self.fontScale * len(newLine),
                                               # drawString.font.fontSize * self.fontScale,
                                               strokeColor=None,
                                               fillColor=self.backgroundColour))
+                                                # fillColor = colors.lightgreen))
         colourGroups[colourPath].add(newStr)
 
     def _addGridLabels(self):
@@ -997,7 +998,7 @@ class GLExporter():
         if self.rAxis or self.bAxis:
             colourGroups = OrderedDict()
             if self.rAxis:
-                for drawString in self.parent._axisYLabelling:
+                for strNum, drawString in enumerate(self.parent._axisYLabelling):
 
                     # drawTextArray
                     colour = self.foregroundColour
@@ -1013,10 +1014,11 @@ class GLExporter():
                                                 height=self.displayScale * self.rAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
-                        self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
+                        self._addString(colourGroups, colourPath, drawString, newLine, colour,
+                                        boxed=False if strNum < len(self.parent._axisYLabelling)-1 else True)
 
             if self.bAxis:
-                for drawString in self.parent._axisXLabelling:
+                for strNum, drawString in enumerate(self.parent._axisXLabelling):
 
                     # drawTextArray
                     colour = self.foregroundColour
@@ -1032,7 +1034,8 @@ class GLExporter():
                                                 height=self.displayScale * self.bAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
-                        self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
+                        self._addString(colourGroups, colourPath, drawString, newLine, colour,
+                                        boxed=False if strNum < len(self.parent._axisXLabelling)-1 else True)
 
             for colourGroup in colourGroups.values():
                 self._mainPlot.add(colourGroup)

@@ -2168,7 +2168,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._axisXLabelling.append(GLString(text=self.axisCodes[0],
                                                  font=self.globalGL.glSmallFont,
                                                  x=self.axisL + (5 * self.pixelX),
-                                                 y=self.AXIS_LINE,
+                                                 y=self.AXIS_MARGINBOTTOM - self.AXIS_LINE - self.globalGL.glSmallFont.height,
                                                  color=labelColour, GLContext=self,
                                                  obj=None))
 
@@ -2932,7 +2932,7 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum = tracesDict[-1]
             hSpectrum.indices = numVertices
             hSpectrum.numVertices = numVertices + 2
-            hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+            hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             hSpectrum.colors = np.array((self._phasingTraceColour) * numVertices, dtype=np.float32)
             hSpectrum.vertices = np.zeros((hSpectrum.numVertices * 2), dtype=np.float32)
 
@@ -2988,7 +2988,7 @@ class CcpnGLWidget(QOpenGLWidget):
             vSpectrum = tracesDict[-1]
             vSpectrum.indices = numVertices
             vSpectrum.numVertices = numVertices + 2
-            vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+            vSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             vSpectrum.colors = np.array((self._phasingTraceColour) * numVertices, dtype=np.float32)
             vSpectrum.vertices = np.zeros((vSpectrum.numVertices * 2), dtype=np.float32)
 
@@ -3054,7 +3054,7 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum = tracesDict[spectrumView]
             hSpectrum.indices = numVertices
             hSpectrum.numVertices = numVertices
-            hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+            hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
             hSpectrum.vertices[::2] = x
             hSpectrum.vertices[1::2] = y
@@ -3106,7 +3106,7 @@ class CcpnGLWidget(QOpenGLWidget):
             vSpectrum = tracesDict[spectrumView]
             vSpectrum.indices = numVertices
             vSpectrum.numVertices = numVertices
-            vSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+            vSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             vSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
             vSpectrum.vertices[::2] = x
             vSpectrum.vertices[1::2] = y
@@ -3399,7 +3399,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             indexing = (npX - 1) * (npY - 1)
             elements = npX * npY
-            drawList.indices = np.zeros(int(indexing * 6), dtype=np.uint)
+            drawList.indices = np.zeros(int(indexing * 6), dtype=np.uint32)
             drawList.vertices = np.zeros(int(elements * 4), dtype=np.float32)
             drawList.colors = np.zeros(int(elements * 4), dtype=np.float32)
 

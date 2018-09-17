@@ -79,7 +79,7 @@ __date__ = "$Date$"
   #   step = 0.05
   #   ii=0
   #   elements = (2.0/step)**2
-  #   self._contourList.indices = np.zeros(int(elements*6), dtype=np.uint)
+  #   self._contourList.indices = np.zeros(int(elements*6), dtype=np.uint32)
   #   self._contourList.vertices = np.zeros(int(elements*12), dtype=np.float32)
   #   self._contourList.colors = np.zeros(int(elements*16), dtype=np.float32)
   #

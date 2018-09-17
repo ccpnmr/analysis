@@ -287,7 +287,7 @@ class Gui1dWidget(CcpnGLWidget):
             hSpectrum = tracesDict[-1]
             hSpectrum.indices = numVertices
             hSpectrum.numVertices = numVertices
-            hSpectrum.indices = np.arange(numVertices, dtype=np.uint)
+            hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             hSpectrum.colors = np.array((self._phasingTraceColour) * numVertices, dtype=np.float32)
             hSpectrum.vertices = np.zeros((hSpectrum.numVertices * 2), dtype=np.float32)
 

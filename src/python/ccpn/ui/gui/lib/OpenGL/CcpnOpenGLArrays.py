@@ -158,7 +158,7 @@ class GLVertexArray():
             GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
             ca = np.array(self.colors, dtype=np.float32)
             print('>>>defineIndexVBO colors0')
-            GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_STATIC_DRAW)
+            GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, GL.arrays.ArrayDatatype.voidDataPointer(self.colors), GL.GL_STATIC_DRAW)
             print('>>>defineIndexVBO colors')
 
             # why is this not GL_ELEMENT_ARRAY_BUFFER?

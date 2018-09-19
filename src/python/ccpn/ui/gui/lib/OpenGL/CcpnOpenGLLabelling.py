@@ -2138,7 +2138,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
             if vertices:
                 if drawStr.axisIndex == 0:
                     offsets = [drawStr.axisPosition + (3.0 * self._GLParent.pixelX),
-                               self._GLParent.axisT - (30.0 * self._GLParent.pixelY)]
+                               self._GLParent.axisT - (36.0 * self._GLParent.pixelY)]
                 else:
                     offsets = [self._GLParent.axisL + (3.0 * self._GLParent.pixelX),
                                drawStr.axisPosition + (3.0 * self._GLParent.pixelY)]
@@ -2260,7 +2260,7 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         text = self.getLabelling(obj, self.strip.peakLabelling)
 
         textX = pos or 0.0 + (3.0 * self._GLParent.pixelX)
-        textY = self._GLParent.axisT - (30.0 * self._GLParent.pixelY)
+        textY = self._GLParent.axisT - (36.0 * self._GLParent.pixelY)
 
         stringList.append(GLString(text=text,
                                    font=self._GLParent.globalGL.glSmallFont,

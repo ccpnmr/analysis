@@ -160,14 +160,7 @@ class GLExporter():
 
         # load all system fonts to find matches with OpenGl fonts
         for glFonts in self.parent.globalGL.fonts.values():
-        #     for ff in foundFonts:
-        #         if glFonts.fontName + '.ttf' in ff:
-        #             pdfmetrics.registerFont(TTFont(glFonts.fontName, ff))
-        #             break
-        #     else:
-        #         getLogger().warning('Font %s not found.' % (glFonts.fontName + '.ttf'))
             pdfmetrics.registerFont(TTFont(glFonts.fontName, os.path.join(fontsPath, 'open-sans', SUBSTITUTEFONT+'.ttf')))
-            break
 
         # set a default fontName
         self.fontName = self.parent.globalGL.glSmallFont.fontName

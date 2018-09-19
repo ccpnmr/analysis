@@ -283,11 +283,15 @@ class Integral(AbstractWrapperObject):
     baseline =  self._baseline
     for i in self.limits:
       x = self.integralList.spectrum.positions
-      y =  self.integralList.spectrum.intensities
+      y = self.integralList.spectrum.intensities
       xRegions = np.where((x <= max(i)) & (x >= min(i)))
       for xRegion in xRegions:
         if not baseline:
-          baseline = min(y[xRegion])
+          try:
+            baseline = min(y[xRegion])
+          except Exception as es:
+            # TODO:Luca check empty list error
+            pass
         # should be just one for 1D
         return (baseline, x[xRegion], y[xRegion])
 # Connections to parents:

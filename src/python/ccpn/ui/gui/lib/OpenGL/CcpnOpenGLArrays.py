@@ -136,45 +136,32 @@ class GLVertexArray():
             GL.glDisable(GL.GL_BLEND)
 
     def defineIndexVBO(self):
-        return
+        if not ENABLE_VBOS:
+            return
+
         # if not hasattr(self, 'VAOs'):
         #     self.VAOs = GL.glGenVertexArrays(1)
-
         # GL.glBindVertexArray(self.VAOs)                # define VAOs
 
-        try:
-            print('>>>defineIndexVBO entry:', self)
-            if not hasattr(self, 'VBOs'):
-                self.VBOs = GL.glGenBuffers(3)
+        if not hasattr(self, 'VBOs'):
+            self.VBOs = GL.glGenBuffers(3)
 
-            sizeVertices = GL.arrays.ArrayDatatype.arrayByteCount(self.vertices)
-            sizeColors = GL.arrays.ArrayDatatype.arrayByteCount(self.colors)
-            sizeIndices = GL.arrays.ArrayDatatype.arrayByteCount(self.indices)
+        sizeVertices = GL.arrays.ArrayDatatype.arrayByteCount(self.vertices)
+        sizeColors = GL.arrays.ArrayDatatype.arrayByteCount(self.colors)
+        sizeIndices = GL.arrays.ArrayDatatype.arrayByteCount(self.indices)
 
-            print('>>>defineIndexVBO', self.VBOs, sizeVertices, sizeColors, sizeIndices)
-            # bind to the buffers
-            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
-            GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, np.array(self.vertices, dtype=np.float32), GL.GL_STATIC_DRAW)
-            print('>>>defineIndexVBO vertices')
+        # bind to the buffers
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, np.array(self.vertices, dtype=np.float32), GL.GL_STATIC_DRAW)
 
-            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
-            ca = np.array(self.colors, dtype=np.float32)
-            print('>>>defineIndexVBO colors0')
-            GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, GL.arrays.ArrayDatatype.voidDataPointer(self.colors), GL.GL_STATIC_DRAW)
-            print('>>>defineIndexVBO colors')
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_STATIC_DRAW)
 
-            # why is this not GL_ELEMENT_ARRAY_BUFFER?
-            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
-            print('>>>defineIndexVBO indices0')
-            GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_STATIC_DRAW)
-            print('>>>defineIndexVBO indices')
+        # why is this not GL_ELEMENT_ARRAY_BUFFER?
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_STATIC_DRAW)
 
-            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-            print('>>>defineIndexVBO exit')
-
-        except Exception as es:
-            pass
-
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
         return
 
         self.TESTvertices = np.array([5, 110, 10, 110, 10, 120, 5, 120,
@@ -214,13 +201,6 @@ class GLVertexArray():
         memColors = GL.arrays.ArrayDatatype.voidDataPointer(self.TESTcolors)
         memIndices = GL.arrays.ArrayDatatype.voidDataPointer(self.TESTindices)
 
-        # # bind to the buffers
-        # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs)
-        # GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices + sizeColors, None, GL.GL_STATIC_DRAW)
-        #
-        # GL.glBufferSubData(GL.GL_ARRAY_BUFFER, 0, sizeVertices, self.TESTvertices)
-        # GL.glBufferSubData(GL.GL_ARRAY_BUFFER, sizeVertices, sizeColors, self.colors)
-
         # bind to the buffers
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
         GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, memVertices, GL.GL_STATIC_DRAW)
@@ -233,41 +213,37 @@ class GLVertexArray():
         GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeIndices, memIndices, GL.GL_STATIC_DRAW)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-        # GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
-
-        print('>>>defineIndexVBO', self.VBOs, sizeVertices, sizeColors, sizeIndices)
 
     def drawIndexVBO(self):
-        self.drawIndexArray()
-        return
+        if not ENABLE_VBOS:
+            self.drawIndexArray()
+        else:
 
-        if self.blendMode:
-            GL.glEnable(GL.GL_BLEND)
-        if self.fillMode is not None:
-            GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
+            if self.blendMode:
+                GL.glEnable(GL.GL_BLEND)
+            if self.fillMode is not None:
+                GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
 
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+            GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+            GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+            GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
 
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[2])
-        GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, None)
-        # GL.glDrawElements(self.drawMode, 32, GL.GL_UNSIGNED_INT, None)
-        # GL.glDrawArrays(GL.GL_LINES, 0, self.numVertices)          # num vertices
+            GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.VBOs[2])
+            GL.glDrawElements(self.drawMode, len(self.indices), GL.GL_UNSIGNED_INT, None)
 
-        GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+            GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+            GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
 
-        if self.blendMode:
-            GL.glDisable(GL.GL_BLEND)
+            if self.blendMode:
+                GL.glDisable(GL.GL_BLEND)
 
     def drawIndexArrayNoColor(self):
         if self.blendMode:
@@ -305,33 +281,34 @@ class GLVertexArray():
             GL.glDisable(GL.GL_BLEND)
 
     def drawVertexColorVBO(self):
-        self.drawVertexColor()
-        return
+        if not ENABLE_VBOS:
+            self.drawVertexColor()
+        else:
 
-        if self.blendMode:
-            GL.glEnable(GL.GL_BLEND)
-        if self.fillMode is not None:
-            GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
+            if self.blendMode:
+                GL.glEnable(GL.GL_BLEND)
+            if self.fillMode is not None:
+                GL.glPolygonMode(GL.GL_FRONT_AND_BACK, self.fillMode)
 
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+            GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glEnableClientState(GL.GL_COLOR_ARRAY)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
-        GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
-        GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+            GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, None)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+            GL.glColorPointer(4, GL.GL_FLOAT, 0, None)
 
-        # GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
-        # GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
-        GL.glDrawArrays(self.drawMode, 0, self.numVertices)
+            # GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
+            # GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
+            GL.glDrawArrays(self.drawMode, 0, self.numVertices)
 
-        GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-        GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+            GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+            GL.glDisableClientState(GL.GL_COLOR_ARRAY)
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+            GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
-        if self.blendMode:
-            GL.glDisable(GL.GL_BLEND)
+            if self.blendMode:
+                GL.glDisable(GL.GL_BLEND)
 
     def drawVertexNoColor(self):
         if self.blendMode:
@@ -348,43 +325,6 @@ class GLVertexArray():
 
         if self.blendMode:
             GL.glDisable(GL.GL_BLEND)
-
-    # def defineTextArray(self):
-    #     # Generate buffers to hold our vertices
-    #     # self.VAOs = GL.glGenVertexArrays(1)
-    #     self.VBOs = GL.glGenBuffers(3)
-    #
-    #     # GL.glBindVertexArray(self.VAOs)                # define VAOs
-    #
-    #     # bind to the buffers
-    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
-    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
-    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
-    #
-    #     GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, self.VBOs[2])
-    #     GL.glBindTexture(GL.GL_TEXTURE_2D, self._texture_id)
-    #
-    #     # GL.glVertexPointer(self.dimension, GL.GL_FLOAT, 0, self.vertices)
-    #     # GL.glColorPointer(4, GL.GL_FLOAT, 0, self.colors)
-    #     # GL.glTexCoordPointer(2, GL.GL_FLOAT, 0, self.texcoords)
-    #
-    #     GL.glBufferData(GL.GL_ARRAY_BUFFER,
-    #                     len(self.vertices) * 4,  # byte size
-    #                     self.vertices,
-    #                     GL.GL_STATIC_DRAW)
-    #
-    #     GL.glBufferData(GL.GL_ARRAY_BUFFER,
-    #                     len(self.colors) * 4,  # byte size
-    #                     self.color,
-    #                     GL.GL_STATIC_DRAW)
-    #
-    #     GL.glBufferData(GL.GL_ARRAY_BUFFER,
-    #                     len(colors) * 4,  # byte size
-    #                     (ctypes.c_float * len(colors))(*colors),
-    #                     GL.GL_STATIC_DRAW)
-
-    # unbind the VAO
-    # GL.glBindVertexArray(0)
 
     def drawTextArray(self):
         if self.blendMode:

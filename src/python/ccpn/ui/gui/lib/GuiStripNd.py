@@ -633,6 +633,9 @@ class GuiStripNd(GuiStrip):
                 #   spectrumView._getSpectrumViewParams(n+2))
                 viewParams = spectrumView._getSpectrumViewParams(n + 2)
 
+                if not viewParams:
+                    return
+
                 minFrequency = viewParams.minAliasedFrequency
                 if minFrequency is not None:
                     if minAliasedFrequency is None or minFrequency < minAliasedFrequency:

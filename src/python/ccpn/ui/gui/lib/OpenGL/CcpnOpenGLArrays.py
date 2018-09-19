@@ -50,6 +50,8 @@ GLREFRESHMODE_NEVER = 0
 GLREFRESHMODE_ALWAYS = 1
 GLREFRESHMODE_REBUILD = 2
 
+ENABLE_VBOS = False
+
 
 class GLVertexArray():
     def __init__(self, numLists=1,
@@ -147,7 +149,7 @@ class GLVertexArray():
 
             sizeVertices = GL.arrays.ArrayDatatype.arrayByteCount(self.vertices)
             sizeColors = GL.arrays.ArrayDatatype.arrayByteCount(self.colors)
-            sizeIndices= GL.arrays.ArrayDatatype.arrayByteCount(self.indices)
+            sizeIndices = GL.arrays.ArrayDatatype.arrayByteCount(self.indices)
 
             print('>>>defineIndexVBO', self.VBOs, sizeVertices, sizeColors, sizeIndices)
             # bind to the buffers
@@ -175,9 +177,6 @@ class GLVertexArray():
 
         return
 
-
-
-
         self.TESTvertices = np.array([5, 110, 10, 110, 10, 120, 5, 120,
                                       6, 112, 11, 107, 9, 122, 7, 127,
                                       7, 113, 15, 128, 11, 116, 7, 126,
@@ -186,7 +185,7 @@ class GLVertexArray():
                                       8, 119, 15, 114, 15, 121, 6, 112,
                                       7, 120, 15, 121, 12, 103, 8, 108,
                                       5, 120, 15, 121, 12, 106, 8, 115],
-                               dtype=np.float32)
+                                     dtype=np.float32)
         self.TESTcolors = np.array([1.0, 0.2, 0.1, 1.0,
                                     0.3, 1.0, 0.1, 1.0,
                                     0.1, 0.2, 1.0, 1.0,
@@ -204,16 +203,16 @@ class GLVertexArray():
                                     0.1, 0.2, 1.0, 1.0,
                                     1.0, 0.8, 0.1, 1.0
                                     ],
-                               dtype=np.float32)
+                                   dtype=np.float32)
         self.TESTindices = np.array([0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 0],
-                               dtype=np.uint32)
+                                    dtype=np.uint32)
 
         sizeVertices = GL.arrays.ArrayDatatype.arrayByteCount(self.TESTvertices)
         sizeColors = GL.arrays.ArrayDatatype.arrayByteCount(self.TESTcolors)
-        sizeIndices= GL.arrays.ArrayDatatype.arrayByteCount(self.TESTindices)
+        sizeIndices = GL.arrays.ArrayDatatype.arrayByteCount(self.TESTindices)
         memVertices = GL.arrays.ArrayDatatype.voidDataPointer(self.TESTvertices)
         memColors = GL.arrays.ArrayDatatype.voidDataPointer(self.TESTcolors)
-        memIndices= GL.arrays.ArrayDatatype.voidDataPointer(self.TESTindices)
+        memIndices = GL.arrays.ArrayDatatype.voidDataPointer(self.TESTindices)
 
         # # bind to the buffers
         # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs)
@@ -384,8 +383,8 @@ class GLVertexArray():
     #                     (ctypes.c_float * len(colors))(*colors),
     #                     GL.GL_STATIC_DRAW)
 
-        # unbind the VAO
-        # GL.glBindVertexArray(0)
+    # unbind the VAO
+    # GL.glBindVertexArray(0)
 
     def drawTextArray(self):
         if self.blendMode:

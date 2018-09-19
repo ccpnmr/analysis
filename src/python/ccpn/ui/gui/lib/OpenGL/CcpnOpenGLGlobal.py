@@ -33,17 +33,13 @@ from ccpn.framework.PathsAndUrls import fontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 
-
-FONTLIST = (('glTahoma13.fnt', 'Tahoma', 13),
-            ('glTahoma14.fnt', 'Tahoma', 14),
-            ('glTahoma15.fnt', 'Tahoma', 15),
-            ('glTahoma16.fnt', 'Tahoma', 16),
-            ('glTahoma18.fnt', 'Tahoma', 18),
-            ('glTahoma20.fnt', 'Tahoma', 20),
-            ('glTahoma22.fnt', 'Tahoma', 22),
-            ('glTahoma25.fnt', 'Tahoma', 25),
-            ('glTahoma28.fnt', 'Tahoma', 28),
-            ('glTahoma32.fnt', 'Tahoma', 32))
+MAINFONT = 'OpenSans-Regular'
+SUBSTITUTEFONT = 'OpenSans-Regular'
+FONTLIST = (('glFont13.fnt', MAINFONT, 13),
+            ('glFont14.fnt', MAINFONT, 14),
+            ('glFont16.fnt', MAINFONT, 16),
+            ('glFont20.fnt', MAINFONT, 20),
+            ('glFont32.fnt', MAINFONT, 32))
 FONTTRANSPARENT = 'Transparent'
 FONTPATH = 'Fonts'
 
@@ -70,8 +66,8 @@ class GLGlobalData(QtWidgets.QWidget):
             self.fonts[transparentName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
                                                      fontTransparency=0.5, activeTexture=1)
 
-        self.glSmallFont = self.fonts['Tahoma13']
-        self.glSmallTransparentFont = self.fonts['Tahoma' + FONTTRANSPARENT + '13']
+        self.glSmallFont = self.fonts[MAINFONT+'13']
+        self.glSmallTransparentFont = self.fonts[MAINFONT + FONTTRANSPARENT + '13']
 
     def initialiseShaders(self):
         # simple shader for standard plotting of contours

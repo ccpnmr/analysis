@@ -161,6 +161,10 @@ class GuiSpectrumView(QtWidgets.QGraphicsItem):
 
     # axis = self.strip.orderedAxes[axisDim]
     dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
+
+    if not dataDim:
+      return
+
     totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, "numPointsOrig")
                        else dataDim.numPoints)
     for ii,dd in enumerate(dataDim.dataSource.sortedDataDims()):

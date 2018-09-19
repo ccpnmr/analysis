@@ -63,6 +63,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
+from ccpn.util.Logging import getLogger
 
 
 PLOTLEFT = 'plotLeft'
@@ -150,18 +151,23 @@ class GLExporter():
         self._report.buildDocument()
 
     def _importFonts(self):
+        import os
         import matplotlib.font_manager
+        from ccpn.framework.PathsAndUrls import fontsPath
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import FONTPATH, SUBSTITUTEFONT
 
         foundFonts = matplotlib.font_manager.findSystemFonts()
 
-        # load all fonts that are in the openGL font list
+        # load all system fonts to find matches with OpenGl fonts
         for glFonts in self.parent.globalGL.fonts.values():
-            for ff in foundFonts:
-                if glFonts.fontName + '.ttf' in ff:
-                    pdfmetrics.registerFont(TTFont(glFonts.fontName, ff))
-                    break
-            else:
-                raise RuntimeError('Font %s not found.' % (glFonts.fontName + '.ttf'))
+        #     for ff in foundFonts:
+        #         if glFonts.fontName + '.ttf' in ff:
+        #             pdfmetrics.registerFont(TTFont(glFonts.fontName, ff))
+        #             break
+        #     else:
+        #         getLogger().warning('Font %s not found.' % (glFonts.fontName + '.ttf'))
+            pdfmetrics.registerFont(TTFont(glFonts.fontName, os.path.join(fontsPath, 'open-sans', SUBSTITUTEFONT+'.ttf')))
+            break
 
         # set a default fontName
         self.fontName = self.parent.globalGL.glSmallFont.fontName

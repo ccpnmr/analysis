@@ -72,7 +72,7 @@ class CcpnGLFont():
         self.fontPNG = imread(os.path.join(os.path.dirname(fileName), self.fontFile))
         self.fontName = self.fontInfo[1].split()[0]
 
-        fontSize = self.fontInfo[1].split()[1]
+        fontSize = self.fontInfo[1].split()[-1]
         self.fontSize = int(fontSize[:-2])
 
         self.width = 0

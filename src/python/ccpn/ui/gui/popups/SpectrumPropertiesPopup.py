@@ -826,11 +826,13 @@ class ContoursTab(QtWidgets.QWidget, Base):
 
         positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(1, 0), vAlign='t', hAlign='l')
         positiveContoursCheckBox = CheckBox(self, grid=(1, 1), checked=True, vAlign='t', hAlign='l')
-        for spectrumView in self.spectrum.spectrumViews:
-            if spectrumView.displayPositiveContours:
-                positiveContoursCheckBox.setChecked(True)
-            else:
-                positiveContoursCheckBox.setChecked(False)
+        # for spectrumView in self.spectrum.spectrumViews:
+        #     if spectrumView.displayPositiveContours:
+        #         positiveContoursCheckBox.setChecked(True)
+        #     else:
+        #         positiveContoursCheckBox.setChecked(False)
+        positiveContoursCheckBox.setChecked(self.spectrum.includePositiveContours)
+
         self.layout().addItem(QtWidgets.QSpacerItem(0, 10), 0, 0)
         positiveContoursCheckBox.stateChanged.connect(self._queueChangePositiveContourDisplay)
 
@@ -884,11 +886,13 @@ class ContoursTab(QtWidgets.QWidget, Base):
 
         negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6, 0), vAlign='c', hAlign='l')
         negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True, vAlign='t', hAlign='l')
-        for spectrumView in self.spectrum.spectrumViews:
-            if spectrumView.displayNegativeContours:
-                negativeContoursCheckBox.setChecked(True)
-            else:
-                negativeContoursCheckBox.setChecked(False)
+        # for spectrumView in self.spectrum.spectrumViews:
+        #     if spectrumView.displayNegativeContours:
+        #         negativeContoursCheckBox.setChecked(True)
+        #     else:
+        #         negativeContoursCheckBox.setChecked(False)
+        negativeContoursCheckBox.setChecked(self.spectrum.includeNegativeContours)
+
         negativeContoursCheckBox.stateChanged.connect(self._queueChangeNegativeContourDisplay)
 
         negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='c', hAlign='l')
@@ -944,11 +948,13 @@ class ContoursTab(QtWidgets.QWidget, Base):
 
     def _changePositiveContourDisplay(self, state):
         if state == QtCore.Qt.Checked:
+            self.spectrum.includePositiveContours = True
             for spectrumView in self.spectrum.spectrumViews:
                 spectrumView.displayPositiveContours = True
                 self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
                 self.logger.info("spectrumView.displayPositiveContours = True")
         else:
+            self.spectrum.includePositiveContours = False
             for spectrumView in self.spectrum.spectrumViews:
                 spectrumView.displayPositiveContours = False
                 self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
@@ -959,11 +965,13 @@ class ContoursTab(QtWidgets.QWidget, Base):
 
     def _changeNegativeContourDisplay(self, state):
         if state == QtCore.Qt.Checked:
+            self.spectrum.includeNegativeContours = True
             for spectrumView in self.spectrum.spectrumViews:
                 spectrumView.displayNegativeContours = True
                 self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
                 self.logger.info("spectrumView.displayNegativeContours = True")
         else:
+            self.spectrum.includeNegativeContours = False
             for spectrumView in self.spectrum.spectrumViews:
                 spectrumView.displayNegativeContours = False
                 self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)

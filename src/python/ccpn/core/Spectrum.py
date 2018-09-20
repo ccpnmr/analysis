@@ -78,6 +78,10 @@ from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple
 from ccpnmodel.ccpncore.lib.Io import Formats
 
 
+INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
+INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
+
+
 class Spectrum(AbstractWrapperObject):
   """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
   path to the stored NMR data file."""
@@ -193,6 +197,29 @@ class Spectrum(AbstractWrapperObject):
     self._wrappedData.positiveContourColour  = value
 
   @property
+  def includePositiveContours(self):
+    """Include flag for the positive contours
+    """
+    result = self._ccpnInternalData.get(INCLUDEPOSITIVECONTOURS)
+    if result is None:
+      tempCcpn = self._ccpnInternalData.copy()
+      result = tempCcpn[INCLUDEPOSITIVECONTOURS] = True
+      self._ccpnInternalData = tempCcpn
+    return result
+
+  @includePositiveContours.setter
+  def includePositiveContours(self, value:bool):
+    """Include flag for the positive contours
+    """
+    if not isinstance(self._ccpnInternalData, dict):
+      raise ValueError("Spectrum.includePositiveContours: CCPN internal must be a dictionary")
+
+    # copy needed to ensure that the v2 registers the change, and marks instance for save.
+    tempCcpn = self._ccpnInternalData.copy()
+    tempCcpn[INCLUDEPOSITIVECONTOURS] = value
+    self._ccpnInternalData = tempCcpn
+
+  @property
   def negativeContourCount(self) -> int:
     """number of negative contours to draw"""
     return self._wrappedData.negativeContourCount
@@ -227,6 +254,29 @@ class Spectrum(AbstractWrapperObject):
   @negativeContourColour.setter
   def negativeContourColour(self, value):
     self._wrappedData.negativeContourColour  = value
+
+  @property
+  def includeNegativeContours(self):
+    """Include flag for the negative contours
+    """
+    result = self._ccpnInternalData.get(INCLUDENEGATIVECONTOURS)
+    if result is None:
+      tempCcpn = self._ccpnInternalData.copy()
+      result = tempCcpn[INCLUDENEGATIVECONTOURS] = True
+      self._ccpnInternalData = tempCcpn
+    return result
+
+  @includeNegativeContours.setter
+  def includeNegativeContours(self, value:bool):
+    """Include flag for the negative contours
+    """
+    if not isinstance(self._ccpnInternalData, dict):
+      raise ValueError("Spectrum.includeNegativeContours: CCPN internal must be a dictionary")
+
+    # copy needed to ensure that the v2 registers the change, and marks instance for save.
+    tempCcpn = self._ccpnInternalData.copy()
+    tempCcpn[INCLUDENEGATIVECONTOURS] = value
+    self._ccpnInternalData = tempCcpn
 
   @property
   def sliceColour(self) -> str:

@@ -674,19 +674,19 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.spectrum.positiveContourBase = self.spectrum.estimateNoise()
       self.spectrum.negativeContourBase = - self.spectrum.positiveContourBase
 
-    if self.displayPositiveContours:
+    if self.spectrum.includePositiveContours:           # .displayPositiveContours:
       self.posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
                                   self.positiveContourFactor)
     else:
       self.posLevels = []
 
-    if self.displayNegativeContours:
+    if self.spectrum.includeNegativeContours:           # .displayNegativeContours:
       self.negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
                                   self.negativeContourFactor)
     else:
       self.negLevels = []
-    if not self.posLevels and not self.negLevels:
-      return
+    # if not self.posLevels and not self.negLevels:
+    #   return
 
     self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
     self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
@@ -713,13 +713,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.spectrum.positiveContourBase = self.spectrum.estimateNoise()
       self.spectrum.negativeContourBase = - self.spectrum.positiveContourBase
 
-    if self.displayPositiveContours:
+    if self.spectrum.includePositiveContours:         # .displayPositiveContours:
       self.posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
                              self.positiveContourFactor)
     else:
       self.posLevels = []
 
-    if self.displayNegativeContours:
+    if self.spectrum.includeNegativeContours:         # .displayNegativeContours:
       self.negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
                              self.negativeContourFactor)
     else:
@@ -1184,18 +1184,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   def refreshData(self):
 
-    if self.displayPositiveContours:
+    if self.spectrum.includePositiveContours:           # .displayPositiveContours:
       posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
     else:
       posLevels = []
 
-    if self.displayNegativeContours:
+    if self.spectrum.includeNegativeContours:           # .displayNegativeContours:
       negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
     else:
       negLevels = []
 
-    if not posLevels and not negLevels:
-      return
+    # if not posLevels and not negLevels:
+    #   return
 
     # the makeCurrent() happens automatically when Qt itself calls paint() but here we need to do it
     self.strip.plotWidget.viewport().makeCurrent()

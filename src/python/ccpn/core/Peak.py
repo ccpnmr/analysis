@@ -388,6 +388,8 @@ class Peak(AbstractWrapperObject):
         tempCcpn = self._ccpnInternalData.copy()
         tempCcpn[self._linkedPeaksName] = pids
         self._ccpnInternalData = tempCcpn
+      else:
+        raise ValueError("Peak.linkPeaks: CCPN internal must be a dictionary")
 
   @property
   def _linkedPeaks(self):

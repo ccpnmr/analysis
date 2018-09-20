@@ -898,8 +898,6 @@ class CcpnGLWidget(QOpenGLWidget):
             self.update()
 
     def _testAxisLimits(self):
-        return
-
         xRange = abs(self.axisL - self.axisR) / 2.0
         self._minReached = False
         self._maxReached = False
@@ -1585,7 +1583,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self.current.cursorPosition = (xPos, yPos)  # TODO: is there a better place for this to be set?
         self.current.mouseMovedDict = mouseMovedDict
 
-        # print('>>>be', Qt.LeftButton, int(buttons))
         if event.buttons() & (Qt.LeftButton | Qt.RightButton):
             # do the complicated keypresses first
             # other keys are: Key_Alt, Key_Meta, and _isALT, _isMETA
@@ -1665,50 +1662,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
-    @pyqtSlot(bool)
-    def paintGLsignal(self, bool):
-        # TODO:ED is this needed?
-        # my signal to update the screen after the spectra have changed
-        if bool:
-            self.update()
-
     def sign(self, x):
         return 1.0 if x >= 0 else -1.0
-
-    # def _drawMarks(self):
-    #
-    #     if not hasattr(self, 'GLMarkList'):
-    #         self.GLMarkList = [GL.glGenLists(1), GLRENDERMODE_REBUILD, None, None, 0, None]
-    #
-    #     if self.GLMarkList[1] == GLRENDERMODE_REBUILD:
-    #         # rebuild the mark list
-    #         self.GLMarkList[1] = False
-    #         GL.glNewList(self.GLMarkList[0], GL.GL_COMPILE)
-    #
-    #         # draw some marks in here
-    #
-    #         GL.glEnd()
-    #         GL.glEndList()
-    #
-    #     elif self.GLMarkList[1] == GLRENDERMODE_REBUILD:
-    #         # rescale the marks here
-    #         pass
-    #
-    #     GL.glCallList(self.GLMarkList[0])
 
     def _rescaleOverlayText(self):
         if self.stripIDString:
             vertices = self.stripIDString.numVertices
-            offsets = [self.axisL + (10.0 * self.pixelX),
-                       self.axisT - (1.5 * self.globalGL.glSmallFont.height * self.pixelY)]
+            offsets = [self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
+                       self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY)]
             for pp in range(0, 2 * vertices, 2):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
-
-    # def _updateHighlightedPeakLabels(self, spectrumView, peakListView):
-    #     self._GLPeaks._updateHighlightedLabels(spectrumView, peakListView)
-    #
-    # def _updateHighlightedPeaks(self, spectrumView, peakListView):
-    #     self._GLPeaks._updateHighlightedSymbols(spectrumView, peakListView)
 
     def _updateHighlightedIntegrals(self, spectrumView, integralListView):
         drawList = self._GLIntegralLists[integralListView]
@@ -2165,7 +2128,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      x=axisX - (
                                                              0.4 * self.globalGL.glSmallFont.width * self.pixelX * len(
                                                              axisXText)),  #*len(str(axisX))),
-                                                     y=self.AXIS_MARGINBOTTOM - self.AXIS_LINE - self.globalGL.glSmallFont.height,
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
 
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
@@ -2173,8 +2136,8 @@ class CcpnGLWidget(QOpenGLWidget):
             # append the axisCode to the end
             self._axisXLabelling.append(GLString(text=self.axisCodes[0],
                                                  font=self.globalGL.glSmallFont,
-                                                 x=self.axisL + (5 * self.pixelX),
-                                                 y=self.AXIS_MARGINBOTTOM - self.AXIS_LINE - self.globalGL.glSmallFont.height,
+                                                 x=self.axisL + (GLDefs.AXISTEXTXOFFSET * self.pixelX),
+                                                 y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
                                                  color=labelColour, GLContext=self,
                                                  obj=None))
 
@@ -2191,7 +2154,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._axisYLabelling.append(GLString(text=axisYText,
                                                      font=self.globalGL.glSmallFont,
                                                      x=self.AXIS_OFFSET,
-                                                     y=axisY - (10.0 * self.pixelY),
+                                                     y=axisY - (GLDefs.AXISTEXTYOFFSET * self.pixelY),
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
 
@@ -2199,7 +2162,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._axisYLabelling.append(GLString(text=self.axisCodes[1],
                                                  font=self.globalGL.glSmallFont,
                                                  x=self.AXIS_OFFSET,
-                                                 y=self.axisT - (1.5 * self.globalGL.glSmallFont.height * self.pixelY),
+                                                 y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
                                                  color=labelColour, GLContext=self,
                                                  obj=None))
 
@@ -2638,11 +2601,10 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 colour = self.foreground
 
-            # if refresh or self.stripIDLabel != self._oldStripIDLabel:
             self.stripIDString = GLString(text=self.stripIDLabel,
                                           font=self.globalGL.glSmallFont,
-                                          x=self.axisL + (10.0 * self.pixelX),
-                                          y=self.axisT - (1.5 * self.globalGL.glSmallFont.height * self.pixelY),
+                                          x=self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
+                                          y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
                                           color=colour, GLContext=self,
                                           obj=None, blendMode=False)
 
@@ -2705,18 +2667,14 @@ class CcpnGLWidget(QOpenGLWidget):
         # mark.attribs[0][1] = axisPosition
         if vertices:
             if mark.axisIndex == 0:
-                offsets = [mark.axisPosition + (3.0 * self.pixelX),
-                           self.axisB + (3.0 * self.pixelY)]
+                offsets = [mark.axisPosition + (GLDefs.MARKTEXTXOFFSET * self.pixelX),
+                           self.axisB + (GLDefs.MARKTEXTYOFFSET * self.pixelY)]
             else:
-                offsets = [self.axisL + (3.0 * self.pixelX),
-                           mark.axisPosition + (3.0 * self.pixelY)]
+                offsets = [self.axisL + (GLDefs.MARKTEXTXOFFSET * self.pixelX),
+                           mark.axisPosition + (GLDefs.MARKTEXTYOFFSET * self.pixelY)]
 
             for pp in range(0, 2 * vertices, 2):
                 mark.attribs[pp:pp + 2] = offsets
-
-    # def rescaleIntegralLists(self):
-    #     for il in self._GLIntegralLists.values():
-    #         il._rescale()
 
     def rescaleMarksRulers(self):
         self._rescaleMarksRulers()
@@ -3492,7 +3450,6 @@ class CcpnGLWidget(QOpenGLWidget):
         labelsChanged = False
 
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
-            # print ('>>>', gridGLList)
             dim = [self.width(), self.height()]
 
             ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])

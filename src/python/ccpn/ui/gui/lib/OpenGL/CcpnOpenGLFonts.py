@@ -30,6 +30,7 @@ from imageio import imread
 from PyQt5 import QtWidgets
 import numpy as np
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray, GLRENDERMODE_DRAW
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import LEFTBORDER, RIGHTBORDER, TOPBORDER, BOTTOMBORDER
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -56,7 +57,6 @@ GlyphPX0 = 'px0'
 GlyphPY0 = 'py0'
 GlyphPX1 = 'px1'
 GlyphPY1 = 'py1'
-
 
 class CcpnGLFont():
     def __init__(self, fileName=None, base=0, fontTransparency=None, activeTexture=0):
@@ -120,14 +120,14 @@ class CcpnGLFont():
                             # TODO:ED okay for now, but need to check for rounding errors
 
                             # calculate the coordinated within the texture
-                            x = a0  # +0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
-                            y = b0  # -0.005           # self.fontGlyph[chrNum][GlyphYpos])
-                            px = e0  # self.fontGlyph[chrNum][GlyphXoffset]
-                            py = f0  # self.fontGlyph[chrNum][GlyphYoffset]
-                            w = c0  # -1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
-                            h = d0 + 0.5  # self.fontGlyph[chrNum][GlyphHeight]+1
-                            gw = g0  # self.fontGlyph[chrNum][GlyphOrigW]
-                            gh = h0  # self.fontGlyph[chrNum][GlyphOrigH]
+                            x = a0                                  # +0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
+                            y = b0                                  # -0.005           # self.fontGlyph[chrNum][GlyphYpos])
+                            px = e0                                 # self.fontGlyph[chrNum][GlyphXoffset]
+                            py = f0                                 # self.fontGlyph[chrNum][GlyphYoffset]
+                            w = c0 + LEFTBORDER + RIGHTBORDER       # -1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
+                            h = d0 + TOPBORDER + BOTTOMBORDER       # + 0.5  # self.fontGlyph[chrNum][GlyphHeight]+1
+                            gw = g0                                 # self.fontGlyph[chrNum][GlyphOrigW]
+                            gh = h0                                 # self.fontGlyph[chrNum][GlyphOrigH]
 
                             # coordinates in the texture
                             self.fontGlyph[chrNum][GlyphTX0] = x * dx
@@ -140,12 +140,6 @@ class CcpnGLFont():
                             self.fontGlyph[chrNum][GlyphPY0] = gh - (py + h)
                             self.fontGlyph[chrNum][GlyphPX1] = px + (w)
                             self.fontGlyph[chrNum][GlyphPY1] = gh - py
-
-                            # draw the quad
-                            # GL.glTexCoord2f( tx0, ty0);         GL.glVertex(px0, py0)
-                            # GL.glTexCoord2f( tx0, ty1);         GL.glVertex(px0, py1)
-                            # GL.glTexCoord2f( tx1, ty1);         GL.glVertex(px1, py1)
-                            # GL.glTexCoord2f( tx1, ty0);         GL.glVertex(px1, py0)
 
                             if chrNum == 65:
                                 # use 'A' for the referencing the tab size
@@ -205,58 +199,6 @@ class CcpnGLFont():
         # GL.glTexParameteri( GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR )
         # GL.glGenerateMipmap( GL.GL_TEXTURE_2D )
         GL.glDisable(GL.GL_TEXTURE_2D)
-
-        # create a list of GLdisplayLists to handle each character - deprecated, changing to VBOs
-        self.base = GL.glGenLists(256)
-        dx = 1.0 / float(self.fontPNG.shape[1])
-        dy = 1.0 / float(self.fontPNG.shape[0])
-        for i in range(256):
-            if self.fontGlyph[i] or i == 10 or i == 9:  # newline and tab
-                # c = chr(i)
-
-                GL.glNewList(self.base + i, GL.GL_COMPILE)
-                if (i == 10):  # newline
-                    GL.glPopMatrix()
-                    GL.glTranslatef(0.0, -height, 0.0)
-                    GL.glPushMatrix()
-                elif (i == 9):  # tab
-                    GL.glTranslatef(4.0 * width, 0.0, 0.0)
-                elif (i >= 32):
-                    x = float(self.fontGlyph[i][GlyphXpos])  # try +0.5 for centre of texel
-                    y = float(self.fontGlyph[i][GlyphYpos])
-                    px = self.fontGlyph[i][GlyphXoffset]
-                    py = self.fontGlyph[i][GlyphYoffset]
-                    w = self.fontGlyph[i][GlyphWidth] + 1  # if 0.5 above, remove the +1
-                    h = self.fontGlyph[i][GlyphHeight] + 1
-                    gw = self.fontGlyph[i][GlyphOrigW]
-                    gh = self.fontGlyph[i][GlyphOrigH]
-
-                    GL.glBegin(GL.GL_QUADS)
-
-                    # coordinates in the texture
-                    tx0 = x * dx
-                    ty0 = (y + h) * dy
-                    tx1 = (x + w) * dx
-                    ty1 = y * dy
-                    # coordinates mapped to the quad
-                    px0 = px
-                    py0 = gh - (py + h)
-                    px1 = px + w
-                    py1 = gh - py
-
-                    # draw the quad
-                    GL.glTexCoord2f(tx0, ty0);
-                    GL.glVertex(px0, py0)
-                    GL.glTexCoord2f(tx0, ty1);
-                    GL.glVertex(px0, py1)
-                    GL.glTexCoord2f(tx1, ty1);
-                    GL.glVertex(px1, py1)
-                    GL.glTexCoord2f(tx1, ty0);
-                    GL.glVertex(px1, py0)
-
-                    GL.glEnd()
-                    GL.glTranslatef(gw, 0.0, 0.0)
-                GL.glEndList()
 
     def get_kerning(self, fromChar, prevChar):
         if self.fontGlyph[ord(fromChar)]:

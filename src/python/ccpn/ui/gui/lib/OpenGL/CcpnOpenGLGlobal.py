@@ -33,13 +33,12 @@ from ccpn.framework.PathsAndUrls import fontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgram
 
-MAINFONT = 'OpenSans-Regular'
+DEFAULTFONT = 'OpenSans-Regular'
 SUBSTITUTEFONT = 'OpenSans-Regular'
-FONTLIST = (('glFont13.fnt', MAINFONT, 13),
-            ('glFont14.fnt', MAINFONT, 14),
-            ('glFont16.fnt', MAINFONT, 16),
-            ('glFont20.fnt', MAINFONT, 20),
-            ('glFont32.fnt', MAINFONT, 32))
+DEFAULTFONTSIZE = '13'
+FONTLIST = (('glFont13.fnt', DEFAULTFONT, 13),
+            ('glFont14.fnt', DEFAULTFONT, 14),
+            ('glFont16.fnt', DEFAULTFONT, 16))
 FONTTRANSPARENT = 'Transparent'
 FONTPATH = 'Fonts'
 
@@ -66,8 +65,8 @@ class GLGlobalData(QtWidgets.QWidget):
             self.fonts[transparentName] = CcpnGLFont(os.path.join(fontsPath, FONTPATH, fontFile[0]),
                                                      fontTransparency=0.5, activeTexture=1)
 
-        self.glSmallFont = self.fonts[MAINFONT+'13']
-        self.glSmallTransparentFont = self.fonts[MAINFONT + FONTTRANSPARENT + '13']
+        self.glSmallFont = self.fonts[DEFAULTFONT + DEFAULTFONTSIZE]
+        self.glSmallTransparentFont = self.fonts[DEFAULTFONT + FONTTRANSPARENT + DEFAULTFONTSIZE]
 
     def initialiseShaders(self):
         # simple shader for standard plotting of contours

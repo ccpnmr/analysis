@@ -750,6 +750,7 @@ class PreferencesPopup(CcpnDialog):
         file = dialog.selectedFile()
         if file:
             self.pymolPath.setText(file)
+            self._setPymolPath()
 
     def _setAutoBackupFrequency(self):
         try:

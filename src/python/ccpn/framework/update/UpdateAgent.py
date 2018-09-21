@@ -71,15 +71,54 @@ def calcHashCode(filePath):
 
 
 def downloadFile(serverScript, serverDbRoot, fileName):
-    context = ssl._create_unverified_context()
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
 
     fileName = os.path.join(serverDbRoot, fileName)
 
+
+
+
+    # testing urllib3 - not needed yet as server is not passing through POST body
+    import sys
+    import urllib3
+
+    import urllib3.contrib.pyopenssl
+    import certifi
+    import json
+
+    urllib3.contrib.pyopenssl.inject_into_urllib3()
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
+                               ca_certs=certifi.where(),
+                               timeout=urllib3.Timeout(connect=5.0, read=5.0),
+                               retries=urllib3.Retry(3, redirect=False))
+    data = urlencode({'fileName': fileName}, quote_via=quote).encode('utf-8')
+    response = http.request('POST', serverScript,
+                            # headers={'Content-Type': 'application/json'},
+                            body=data,
+                            preload_content=False)
+    dataOut = response.read().decode('utf-8')
+    print('>>>REGISTERurllib3', dataOut)
+
+
+
+
+
+
+
     addr = '%s?fileName=%s' % (serverScript, fileName)
+
+    data = urlencode({'fileName': fileName}, quote_via=quote).encode()
+    req = urllib.request.Request(serverScript)
+    req.data = data
+
     try:
-        response = urlopen(addr, context=context)
+        # response = urlopen(addr, context=context)
+        response = urlopen(req, context=context)
     except Exception as es:
         pass
+
     data = response.read().decode('utf-8')
     response.close()
 

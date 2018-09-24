@@ -10,6 +10,8 @@ import time
 import urllib
 from urllib.parse import urlencode, quote
 from urllib.request import urlopen
+import urllib3.contrib.pyopenssl
+import certifi
 
 from datetime import datetime
 
@@ -19,6 +21,7 @@ from ccpn.util import Path
 from ccpn.ui.gui.widgets import InputDialog
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.util.Logging import getLogger
+
 
 SERVER = ccpn2Url + '/'
 SERVER_DB_ROOT = 'ccpNmrUpdate'
@@ -71,106 +74,80 @@ def calcHashCode(filePath):
 
 
 def downloadFile(serverScript, serverDbRoot, fileName):
+    """Download a file from the server
+    """
+    fileName = os.path.join(serverDbRoot, fileName)
+
     context = ssl.create_default_context()
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
 
-    fileName = os.path.join(serverDbRoot, fileName)
-
-
-
-
-    # testing urllib3 - not needed yet as server is not passing through POST body
-    import sys
-    import urllib3
-
-    import urllib3.contrib.pyopenssl
-    import certifi
-    import json
+    headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
+    body = urlencode({'fileName': fileName}, quote_via=quote).encode('utf-8')
 
     urllib3.contrib.pyopenssl.inject_into_urllib3()
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
                                ca_certs=certifi.where(),
                                timeout=urllib3.Timeout(connect=5.0, read=5.0),
                                retries=urllib3.Retry(3, redirect=False))
-    data = urlencode({'fileName': fileName}, quote_via=quote).encode('utf-8')
+
     response = http.request('POST', serverScript,
-                            # headers={'Content-Type': 'application/json'},
-                            body=data,
+                            headers=headers,
+                            body=body,
                             preload_content=False)
-    dataOut = response.read().decode('utf-8')
-    print('>>>REGISTERurllib3', dataOut)
+    result = response.read().decode('utf-8')
 
+    if result.startswith(BAD_DOWNLOAD):
+        raise Exception(result[len(BAD_DOWNLOAD):])
 
+    return result
 
-
-
-
-
-    addr = '%s?fileName=%s' % (serverScript, fileName)
-
-    data = urlencode({'fileName': fileName}, quote_via=quote).encode()
-    req = urllib.request.Request(serverScript)
-    req.data = data
-
-    try:
-        # response = urlopen(addr, context=context)
-        response = urlopen(req, context=context)
-    except Exception as es:
-        pass
-
-    data = response.read().decode('utf-8')
-    response.close()
-
-    if data.startswith(BAD_DOWNLOAD):
-        raise Exception(data[len(BAD_DOWNLOAD):])
-
-    return data
 
 def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs):
+    """Upload a file to the server
+    """
     SERVER_PASSWORD_MD5 = b'c Wo\xfc\x1e\x08\xfc\xd1C\xcb~(\x14\x8e\xdc'
 
     # early check on password
-    import hashlib
-
     m = hashlib.md5()
     m.update(serverPassword.encode('utf-8'))
     if m.digest() != SERVER_PASSWORD_MD5:
         raise Exception('incorrect password')
 
-    FILEDATA_LIMIT = 2048
-    # # server not passing through POST data - update manually
-    if len(fileData) > FILEDATA_LIMIT:
-        fileData = fileData[:FILEDATA_LIMIT]
-        getLogger().warning('error: clipping filedata')
-
-    data = urlencode({'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot},
-                     quote_via=quote)
-
     ss = serverUser + ":" + serverPassword
-    auth = base64.encodestring(ss.encode('utf-8'))[:-1]
+    auth = base64.encodebytes(ss.encode('utf-8'))[:-1]
     authheader = 'Basic %s' % auth
-
-    # added str(data) server not currently passing POST body
-    newServerScript = serverScript                  #+'?'+str(data)
-    req = urllib.request.Request(newServerScript)
-    req.add_header("Authorization", authheader)
-    req.data = data.encode('utf-8')
 
     context = ssl.create_default_context()
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
-    try:
-        response = urlopen(req, context=context)
-        result = response.read().decode('utf-8')
 
-        if result.startswith(BAD_DOWNLOAD):
-            raise Exception(result[len(BAD_DOWNLOAD):])
+    headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+               'Authorization': authheader}
+    body = urlencode({'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot},
+                     quote_via=quote).encode('utf-8')
 
-    except Exception as es:
-        getLogger().warning('>>>ERROR %s %s' % (str(es), newServerScript))
+    urllib3.contrib.pyopenssl.inject_into_urllib3()
+    http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
+                               ca_certs=certifi.where(),
+                               timeout=urllib3.Timeout(connect=5.0, read=5.0),
+                               retries=urllib3.Retry(3, redirect=False))
+
+    response = http.request('POST', serverScript,
+                            headers=headers,
+                            body=body,
+                            preload_content=False)
+    result = response.read().decode('utf-8')
+
+    if result.startswith(BAD_DOWNLOAD):
+        raise Exception(result[len(BAD_DOWNLOAD):])
+
+    return result
+
 
 def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot, fileStoredAs):
+    """Upload a file to the server
+    """
     fp = open(fileName, 'rU')
     try:
         fileData = fp.read()
@@ -458,6 +435,15 @@ class UpdateAgent(object):
 
         serverUploadScript = '%s%s' % (self.server, self.serverUploadScript)
         uploadData(self.serverUser, serverPassword, serverUploadScript, fileData, self.serverDbRoot, self.serverDbFile)
+
+    def _actionUpdateDb(self, serverPassword, serverScript, actionFile):
+
+        # in theory this could be done at the server end, only that would mean looking
+        # through the existing db file to see which file timestamps needed updating
+        # and then appending new files, so much more complicated (but less bandwidth)
+
+        serverUploadScript = '%s%s' % (self.server, serverScript)
+        uploadData(self.serverUser, serverPassword, serverUploadScript, actionFile, self.serverDbRoot, '')
 
     def diffUpdates(self, updateFiles=None, write=sys.stdout.write):
 

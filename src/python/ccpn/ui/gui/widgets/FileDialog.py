@@ -40,7 +40,8 @@ class FileDialog(QtWidgets.QFileDialog):
 
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
                  acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, filter=None,
-                 restrictDirToFilter=False, **kw):
+                 restrictDirToFilter=False, multiSelection=False,
+                 **kw):
 
         # ejb - added selectFile to suggest a filename in the file box
         #       this is not passed to the super class
@@ -93,6 +94,13 @@ class FileDialog(QtWidgets.QFileDialog):
                 self.result = self.result[0]
         else:
             self.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+
+            # add a multiselection option - only for non-native dialogs
+            if multiSelection:
+                for view in self.findChildren((QtWidgets.QListView, QtWidgets.QTreeView)):
+                    if isinstance(view.model(), QtWidgets.QFileSystemModel):
+                        view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+
             self.result = self.exec_()
 
     def _predir(self, file: str):

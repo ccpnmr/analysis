@@ -91,16 +91,19 @@ def downloadFile(serverScript, serverDbRoot, fileName):
                                timeout=urllib3.Timeout(connect=5.0, read=5.0),
                                retries=urllib3.Retry(3, redirect=False))
 
-    response = http.request('POST', serverScript,
-                            headers=headers,
-                            body=body,
-                            preload_content=False)
-    result = response.read().decode('utf-8')
+    try:
+        response = http.request('POST', serverScript,
+                                headers=headers,
+                                body=body,
+                                preload_content=False)
+        result = response.read().decode('utf-8')
 
-    if result.startswith(BAD_DOWNLOAD):
-        raise Exception(result[len(BAD_DOWNLOAD):])
-
-    return result
+        if result.startswith(BAD_DOWNLOAD):
+            getLogger().warning(Exception(result[len(BAD_DOWNLOAD):]))
+        else:
+            return result
+    except Exception as es:
+        getLogger().warning('Download error: %s' % str(es))
 
 
 def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs):
@@ -133,16 +136,20 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
                                timeout=urllib3.Timeout(connect=5.0, read=5.0),
                                retries=urllib3.Retry(3, redirect=False))
 
-    response = http.request('POST', serverScript,
-                            headers=headers,
-                            body=body,
-                            preload_content=False)
-    result = response.read().decode('utf-8')
+    try:
+        response = http.request('POST', serverScript,
+                                headers=headers,
+                                body=body,
+                                preload_content=False)
+        result = response.read().decode('utf-8')
 
-    if result.startswith(BAD_DOWNLOAD):
-        raise Exception(result[len(BAD_DOWNLOAD):])
+        if result.startswith(BAD_DOWNLOAD):
+            getLogger().warning(Exception(result[len(BAD_DOWNLOAD):]))
+        else:
+            return result
 
-    return result
+    except Exception as es:
+        getLogger().warning('Upload error: %s' % str(es))
 
 
 def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot, fileStoredAs):
@@ -156,7 +163,7 @@ def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot,
         fileData = ''
     fp.close()
 
-    uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
+    return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
 
 
 class UpdateFile:
@@ -198,6 +205,9 @@ class UpdateFile:
     def installUpdate(self):
 
         data = downloadFile(self.serverDownloadScript, self.serverDbRoot, self.fileStoredAs)
+
+        if not data:
+            return
 
         fullFilePath = self.fullFilePath
         if os.path.isfile(fullFilePath):
@@ -257,8 +267,11 @@ class UpdateAgent(object):
         serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
         serverUploadScript = '%s%s' % (self.server, self.serverUploadScript)
         data = downloadFile(serverDownloadScript, self.serverDbRoot, self.serverDbFile)
-        if data.startswith(BAD_DOWNLOAD):
-            raise Exception('Could not download database file from server')
+
+        # if data.startswith(BAD_DOWNLOAD):
+        #     raise Exception('Could not download database file from server')
+        if not data:
+            return
 
         lines = data.split('\n')
         if lines:
@@ -434,7 +447,7 @@ class UpdateAgent(object):
         fileData = '\n'.join(xx) + '\n'
 
         serverUploadScript = '%s%s' % (self.server, self.serverUploadScript)
-        uploadData(self.serverUser, serverPassword, serverUploadScript, fileData, self.serverDbRoot, self.serverDbFile)
+        return uploadData(self.serverUser, serverPassword, serverUploadScript, fileData, self.serverDbRoot, self.serverDbFile)
 
     def _actionUpdateDb(self, serverPassword, serverScript, actionFile):
 
@@ -443,7 +456,7 @@ class UpdateAgent(object):
         # and then appending new files, so much more complicated (but less bandwidth)
 
         serverUploadScript = '%s%s' % (self.server, serverScript)
-        uploadData(self.serverUser, serverPassword, serverUploadScript, actionFile, self.serverDbRoot, '')
+        return uploadData(self.serverUser, serverPassword, serverUploadScript, actionFile, self.serverDbRoot, '')
 
     def diffUpdates(self, updateFiles=None, write=sys.stdout.write):
 

@@ -130,7 +130,8 @@ class SubmitMacroPopup(CcpnDialog):
             response = Url.uploadFile(SCRIPT_URL, filePath, data)
         except urllib.error.HTTPError as e:
             response = str(e)
-        if 'Macro successfully uploaded' in response:
+
+        if response and 'Macro successfully uploaded' in response:
             title = 'Success'
             msg = loggerMsg = 'Macro successfully submitted'
         else:

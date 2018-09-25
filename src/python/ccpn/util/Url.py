@@ -114,4 +114,7 @@ def uploadFile(url, fileName, data=None):
     data['fileName'] = os.path.basename(fileName)
     data['fileData'] = fileData
 
-    return fetchUrl(url, data)
+    try:
+        return fetchUrl(url, data)
+    except:
+        return None

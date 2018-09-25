@@ -134,7 +134,10 @@ class FeedbackPopup(CcpnDialog):
                 if includeProject:
                     os.remove(fileName)
         else:
-            response = Url.fetchUrl(SCRIPT_URL, data)
+            try:
+                response = Url.fetchUrl(SCRIPT_URL, data)
+            except:
+                response = []
 
         if 'Data successfully uploaded' in response:
             title = 'Success'

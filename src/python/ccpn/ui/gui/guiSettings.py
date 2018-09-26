@@ -270,6 +270,8 @@ MARK_LINE_COLOUR_DICT_DARK = dict([(k, autoCorrectHexColour(v,
                                                             colourSchemes[DARK][CCPNGLWIDGET_HEXBACKGROUND],
                                                             addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
 
+# colourSchemes[DEFAULT].update(MARK_LINE_COLOUR_DICT)
+# colourSchemes[LIGHT].update(MARK_LINE_COLOUR_DICT_LIGHT)
 
 def getColourScheme():
     """

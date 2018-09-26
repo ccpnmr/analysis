@@ -463,6 +463,7 @@ class GuiWindow():
         # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
 
         colour = colourDict.get(atomName[:min(2,len(atomName))])
+        # colour = guiSettings.getColours().get(atomName[:min(2,len(atomName))])
 
         # exit if mark exists
         found = False

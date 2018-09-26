@@ -1260,7 +1260,16 @@ class Project(AbstractWrapperObject):
       spectrum = self._data2Obj[apiDataSource]
       spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
-      # TODO:ED check spectrum colours here, and autocorrect if necessary
+      if self._appBase.preferences and self._appBase.preferences.general.autoCorrectColours:
+
+        from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
+
+        spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
+                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+        spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
+                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+        spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
+                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
       return [spectrum]
 
   def _loadLookupFile(self, path:str, subType:str, ):

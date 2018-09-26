@@ -60,7 +60,10 @@ def rgbRatioToHex(r, g, b):
 def hexToRgb(hx):
     hx = hx.lstrip('#')
     lv = len(hx)
-    return tuple(int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+    try:
+        return tuple(int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+    except Exception as es:
+        pass
 
 
 def hexToRgbRatio(hx):
@@ -485,24 +488,27 @@ def addNewColour(newColour):
 
 
 def addNewColourString(colourString):
+    """Add a new Hex colour to the colourlist
+    New colour has the name 'Colour <n>' where n is the next free number
+    """
     # '#' is reserved for auto colour so shouldn't ever be added
-    if colourString != '#':
+    if colourString != '#' and colourString not in spectrumColours:
         newIndex = str(len(spectrumColours.items()) + 1)
         spectrumColours[colourString] = 'Colour %s' % newIndex
 
 
 def autoCorrectHexColour(colour, referenceHexColour='#ffffff'):
-    """Autocorrect colours if too close to the reference value"""
+    """Autocorrect colours if too close to the reference value
+    """
+    if colour == '#':
+        return colour
+
     g = gray(*hexToRgb(colour))
 
-    backgroundrgba = referenceHexColour
-    rgb = hexToRgb(backgroundrgba)      # [255*col for col in backgroundrgba[:3]]
+    rgb = hexToRgb(referenceHexColour)
     gRef = gray(*rgb)
 
     if abs(g-gRef) < COLOUR_THRESHOLD:
-        # h, s, v = rgb_to_hsv(*hexToRgbRatio(colour))
-        # newCol = hsv_to_rgb(h, s, 1.0-min(max(v, 0.1), 0.9))
-
         newCol = invertRGB(*hexToRgb(colour))
         hx = rgbToHex(*newCol)
         # addNewColourString(hx)

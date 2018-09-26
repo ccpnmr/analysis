@@ -614,6 +614,47 @@ class Framework:
     dataUrl.url = Implementation.Url(path=dataPath)
 
 
+  def initColours(self):
+    """Autocorrect all colours that are too close to the background colour
+    """
+    from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
+
+    if self.preferences.general.autoCorrectColours:
+      project = self.project
+
+      # change spectrum colours
+      for spectrum in project.spectra:
+        if len(spectrum.axisCodes) > 1:
+          spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
+                                                                getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+          spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
+                                                                getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+        else:
+          spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
+                                                      getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+
+      # change peakList colours
+      for objList in project.peakLists:
+        objList.textColour = autoCorrectHexColour(objList.textColour,
+                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+        objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+
+      # change integralList colours
+      for objList in project.integralLists:
+        objList.textColour = autoCorrectHexColour(objList.textColour,
+                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+        objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+
+      # change multipletList colours
+      for objList in project.multipletLists:
+        objList.textColour = autoCorrectHexColour(objList.textColour,
+                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+        objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
+                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+
+
   def initGraphics(self):
     """Set up graphics system after loading"""
     from ccpn.ui.gui.lib import GuiStrip
@@ -630,6 +671,9 @@ class Framework:
     # Initialise displays
     for spectrumDisplay in project.windows[0].spectrumDisplays: # there is exactly one window
       pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
+
+    # initialise any colour changes before generating gui strips
+    self.initColours()
 
     # Initialise strips
     for strip in project.strips:

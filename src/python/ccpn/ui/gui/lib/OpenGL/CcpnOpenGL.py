@@ -85,7 +85,8 @@ from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
 # from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \
-    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours
+    CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
+    CCPNGLWIDGET_HEXBACKGROUND
 # from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
@@ -267,6 +268,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # colours
         self.colours = getColours()
+        self.hexBackground = self.colours[CCPNGLWIDGET_HEXBACKGROUND]
         self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
         self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
         self.mousePickColour = self.colours[CCPNGLWIDGET_PICKCOLOUR]
@@ -1261,6 +1263,7 @@ class CcpnGLWidget(QOpenGLWidget):
         """
         # colours
         self.colours = getColours()
+        self.hexBackground = self.colours[CCPNGLWIDGET_HEXBACKGROUND]
         self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
         self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
         self.mousePickColour = self.colours[CCPNGLWIDGET_PICKCOLOUR]

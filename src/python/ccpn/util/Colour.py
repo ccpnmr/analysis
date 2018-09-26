@@ -70,6 +70,56 @@ def hexToRgba(hex):
     return tuple(cols.append(1.0))
 
 
+# sRGB luminance(Y) values
+rY = 0.212655
+gY = 0.715158
+bY = 0.072187
+COLOUR_LIGHT_THRESHOLD = 100
+COLOUR_DARK_THRESHOLD = 160
+
+
+# Inverse of sRGB "gamma" function. (approx 2.2)
+def inv_gam_sRGB(ic):
+    c = ic / 255.0
+    if (c <= 0.04045):
+        return c / 12.92
+    else:
+        return pow(((c + 0.055) / (1.055)), 2.4)
+
+
+# sRGB "gamma" function (approx 2.2)
+def gam_sRGB(v):
+    if (v <= 0.0031308):
+        v *= 12.92
+    else:
+        v = 1.055 * pow(v, 1.0 / 2.4) - 0.055
+    return int(v * 255)
+
+
+# GRAY VALUE ("brightness")
+def gray(r, g, b):
+    return gam_sRGB(
+            rY * inv_gam_sRGB(r) +
+            gY * inv_gam_sRGB(g) +
+            bY * inv_gam_sRGB(b)
+            )
+
+
+COLORMATRIX256CONST = [16.0, 128.0, 128.0]
+COLORMATRIX256 = [[65.738, 129.057, 25.064],
+                  [37.945, 74.494, 112.439],
+                  [112.439, 94.154, 18.285]]
+
+COLORMATRIX256INVCONST = [-222.921, 135.576, -276.836]
+COLORMATRIX256INV = [[298.082, 0.0, 408.583],
+                     [298.082, 100.291, 208.120],
+                     [298.082, 516.412, 0.0]]
+
+
+def invertRGB(r, g, b):
+    gr = gray(r, g, b)
+
+
 colourNameToHexDict = {
     'red': '#ff0000',
     'green': '#00ff00',
@@ -273,6 +323,34 @@ allColours = OrderedDict([('#000000', 'black'),
                           ])
 
 spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != '#')
+
+# split the colour palettes into light and dark for different colour schemes
+spectrumDarkColours = OrderedDict()
+spectrumLightColours = OrderedDict()
+
+import colorsys
+
+
+for k, v in spectrumColours.items():
+    h = hexToRgb(k)
+
+    # colour can belong to both sets
+    if gray(*h) > COLOUR_LIGHT_THRESHOLD:
+        spectrumLightColours[k] = v
+    if gray(*h) < COLOUR_DARK_THRESHOLD:
+        spectrumDarkColours[k] = v
+
+allDarkColours = OrderedDict()
+allLightColours = OrderedDict()
+
+for k, v in allColours.items():
+    h = hexToRgb(k)
+
+    # colour can belong to both sets
+    if gray(*h) > COLOUR_LIGHT_THRESHOLD:
+        allLightColours[k] = v
+    if gray(*h) < COLOUR_DARK_THRESHOLD:
+        allDarkColours[k] = v
 
 
 # Note that Colour strings are not re-used

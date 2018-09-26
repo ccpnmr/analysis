@@ -34,7 +34,7 @@ import numpy as np
 def _ccpnHex(val):
     """Generate hex value with padded leading zeroes
     """
-    return "{0:#0{1}x}".format(val, 4)
+    return "{0:#0{1}x}".format(int(val), 4)
 
 def rgbaToHex(r, g, b, a=255):
     return '#' + ''.join([_ccpnHex(x)[2:] for x in (r, g, b, a)])
@@ -122,10 +122,18 @@ COLORMATRIX256INV = [[298.082, 0.0, 408.583],
                      [298.082, -100.291, -208.120],
                      [298.082, 516.412, 0.0]]
 
+# Y  = 0.299 R    + 0.587 G  + 0.114 B
+# Cb = - 0.1687 R - 0.3313 G + 0.5 B     + 128
+# Cr = 0.5 R      - 0.4187 G - 0.0813 B  + 128
+
 COLORMATRIXJPEGCONST = [0, 128, 128]
 COLORMATRIXJPEG = [[0.299, 0.587, 0.114],
                    [-0.168736, -0.331264, 0.5],
                    [0.5, -0.418688, -0.081312]]
+
+# R = Y                    + 1.402 (Cr-128)
+# G = Y - 0.34414 (Cb-128) - 0.71414 (Cr-128)
+# B = Y + 1.772 (Cb-128)
 
 COLORMATRIXJPEGINVCONST = [0, 0, 0]
 COLORMATRIXJPEGINVOFFSET = [0, -128, -128]
@@ -144,6 +152,7 @@ def invertRGB(r, g, b):
     # rgbprimeIn r, g, b in range 0-255
     cie = np.dot(COLORMATRIXJPEG, rgbprimeIn)
     ycbcr = np.add(cie, COLORMATRIXJPEGCONST)
+    ycbcr = np.clip(ycbcr, [0,0,0], [255,255,255])
 
     # invert the luma
     ycbcr[0] = 256-ycbcr[0]
@@ -155,8 +164,8 @@ def invertRGB(r, g, b):
     # return tuple([255*inv_gam_sRGB(col) for col in rgbprimeOut])
 
     # clip the colours
-    rgbprimeOut = [min(max(int(col), 0), 255) for col in rgbprimeOut]
-    return tuple(rgbprimeOut)
+    rgbprimeOut = np.clip(rgbprimeOut, [0,0,0], [255,255,255])
+    return tuple([float(col) for col in rgbprimeOut])
 
 
 colourNameToHexDict = {

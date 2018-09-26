@@ -654,6 +654,10 @@ class Framework:
         objList.symbolColour = autoCorrectHexColour(objList.symbolColour,
                                                     getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
+      for mark in project.marks:
+        mark.colour = autoCorrectHexColour(mark.colour,
+                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+
 
   def initGraphics(self):
     """Set up graphics system after loading"""
@@ -1607,7 +1611,7 @@ class Framework:
     """Get and return a list of recent files, setting reference to
        self as first element, unless it is a temp project
        update the preferences with the new list
-       
+
        CCPN INTERNAL: called by MainWindow
     """
     project = self.project

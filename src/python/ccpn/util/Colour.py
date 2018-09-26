@@ -497,7 +497,7 @@ def addNewColourString(colourString):
         spectrumColours[colourString] = 'Colour %s' % newIndex
 
 
-def autoCorrectHexColour(colour, referenceHexColour='#ffffff'):
+def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True):
     """Autocorrect colours if too close to the reference value
     """
     if colour == '#':
@@ -511,7 +511,8 @@ def autoCorrectHexColour(colour, referenceHexColour='#ffffff'):
     if abs(g-gRef) < COLOUR_THRESHOLD:
         newCol = invertRGB(*hexToRgb(colour))
         hx = rgbToHex(*newCol)
-        # addNewColourString(hx)
+        if addNewColour:
+            addNewColourString(hx)
         return hx
 
     return colour

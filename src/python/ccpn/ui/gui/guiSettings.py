@@ -121,7 +121,6 @@ MARK_LINE_COLOUR_DICT = {
     DEFAULT: '#e0e0e0'
     }
 
-
 # Widget definitions
 CCPNMODULELABEL_FOREGROUND = 'CCPNMODULELABEL_FOREGROUND'
 CCPNMODULELABEL_BACKGROUND = 'CCPNMODULELABEL_BACKGROUND'
@@ -264,9 +263,13 @@ colourSchemes = {
 
     }
 
+MARK_LINE_COLOUR_DICT_LIGHT = dict([(k, autoCorrectHexColour(v,
+                                                             colourSchemes[DEFAULT][CCPNGLWIDGET_HEXBACKGROUND],
+                                                             addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
+MARK_LINE_COLOUR_DICT_DARK = dict([(k, autoCorrectHexColour(v,
+                                                            colourSchemes[DARK][CCPNGLWIDGET_HEXBACKGROUND],
+                                                            addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
 
-MARK_LINE_COLOUR_DICT_LIGHT = dict([(k, autoCorrectHexColour(v, colourSchemes[DEFAULT][CCPNGLWIDGET_HEXBACKGROUND])) for k, v in MARK_LINE_COLOUR_DICT.items()])
-MARK_LINE_COLOUR_DICT_DARK = dict([(k, autoCorrectHexColour(v, colourSchemes[DARK][CCPNGLWIDGET_HEXBACKGROUND])) for k, v in MARK_LINE_COLOUR_DICT.items()])
 
 def getColourScheme():
     """

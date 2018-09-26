@@ -533,6 +533,11 @@ class PreferencesPopup(CcpnDialog):
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
+        self.autoCorrectLabel = Label(parent, text="Autocorrect Colours: ", grid=(row, 0))
+        self.autoCorrectBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.autoCorrectColours)
+        self.autoCorrectBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoCorrectColours'))
+
+        row += 1
         self.marksDefaultColourLabel = Label(parent, text="Default Marks Colour:", grid=(row, 0))
         self.marksDefaultColourBox = PulldownList(parent, grid=(row, 1), vAlign='t')
 

@@ -1259,6 +1259,8 @@ class Project(AbstractWrapperObject):
     else:
       spectrum = self._data2Obj[apiDataSource]
       spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
+
+      # TODO:ED check spectrum colours here, and autocorrect if necessary
       return [spectrum]
 
   def _loadLookupFile(self, path:str, subType:str, ):

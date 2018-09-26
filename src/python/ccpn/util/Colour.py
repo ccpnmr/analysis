@@ -28,45 +28,51 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from collections import OrderedDict
 from PyQt5 import QtGui, QtCore
+import numpy as np
 
+
+def _ccpnHex(val):
+    """Generate hex value with padded leading zeroes
+    """
+    return "{0:#0{1}x}".format(val, 4)
 
 def rgbaToHex(r, g, b, a=255):
-    return '#' + ''.join([hex(x)[2:] for x in (r, g, b, a)])
+    return '#' + ''.join([_ccpnHex(x)[2:] for x in (r, g, b, a)])
 
 
 def rgbToHex(r, g, b):
-    return '#' + ''.join([hex(x)[2:] for x in (r, g, b)])
+    return '#' + ''.join([_ccpnHex(x)[2:] for x in (r, g, b)])
 
 
 def rgbaRatioToHex(r, g, b, a=1.0):
-    return '#' + ''.join([hex(x)[2:] for x in (int(255.0 * r),
+    return '#' + ''.join([_ccpnHex(x)[2:] for x in (int(255.0 * r),
                                                int(255.0 * g),
                                                int(255.0 * b),
                                                int(255.0 * a))])
 
 
 def rgbRatioToHex(r, g, b):
-    return '#' + ''.join([hex(x)[2:] for x in (int(255.0 * r),
+    return '#' + ''.join([_ccpnHex(x)[2:] for x in (int(255.0 * r),
                                                int(255.0 * g),
                                                int(255.0 * b))])
 
 
-def hexToRgb(hex):
-    hex = hex.lstrip('#')
-    lv = len(hex)
-    return tuple(int(hex[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+def hexToRgb(hx):
+    hx = hx.lstrip('#')
+    lv = len(hx)
+    return tuple(int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
-def hexToRgbRatio(hex):
-    hex = hex.lstrip('#')
-    lv = len(hex)
-    return tuple(float(int(hex[i:i + lv // 3], 16)) / 255 for i in range(0, lv, lv // 3))
+def hexToRgbRatio(hx):
+    hx = hx.lstrip('#')
+    lv = len(hx)
+    return tuple(float(int(hx[i:i + lv // 3], 16)) / 255 for i in range(0, lv, lv // 3))
 
 
-def hexToRgba(hex):
-    hex = hex.lstrip('#')
-    lv = len(hex)
-    cols = [int(hex[i:i + lv // 3], 16) for i in range(0, lv, lv // 3)]
+def hexToRgba(hx):
+    hx = hx.lstrip('#')
+    lv = len(hx)
+    cols = [int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3)]
     return tuple(cols.append(1.0))
 
 
@@ -76,6 +82,7 @@ gY = 0.715158
 bY = 0.072187
 COLOUR_LIGHT_THRESHOLD = 100
 COLOUR_DARK_THRESHOLD = 160
+COLOUR_THRESHOLD = 100
 
 
 # Inverse of sRGB "gamma" function. (approx 2.2)
@@ -84,7 +91,7 @@ def inv_gam_sRGB(ic):
     if (c <= 0.04045):
         return c / 12.92
     else:
-        return pow(((c + 0.055) / (1.055)), 2.4)
+        return pow(((c + 0.055) / (1.055)), 2.0)
 
 
 # sRGB "gamma" function (approx 2.2)
@@ -92,7 +99,7 @@ def gam_sRGB(v):
     if (v <= 0.0031308):
         v *= 12.92
     else:
-        v = 1.055 * pow(v, 1.0 / 2.4) - 0.055
+        v = 1.055 * pow(v, 0.5) - 0.055
     return int(v * 255)
 
 
@@ -107,17 +114,49 @@ def gray(r, g, b):
 
 COLORMATRIX256CONST = [16.0, 128.0, 128.0]
 COLORMATRIX256 = [[65.738, 129.057, 25.064],
-                  [37.945, 74.494, 112.439],
-                  [112.439, 94.154, 18.285]]
+                  [-37.945, -74.494, 112.439],
+                  [112.439, -94.154, -18.285]]
 
 COLORMATRIX256INVCONST = [-222.921, 135.576, -276.836]
 COLORMATRIX256INV = [[298.082, 0.0, 408.583],
-                     [298.082, 100.291, 208.120],
+                     [298.082, -100.291, -208.120],
                      [298.082, 516.412, 0.0]]
+
+COLORMATRIXJPEGCONST = [0, 128, 128]
+COLORMATRIXJPEG = [[0.299, 0.587, 0.114],
+                   [-0.168736, -0.331264, 0.5],
+                   [0.5, -0.418688, -0.081312]]
+
+COLORMATRIXJPEGINVCONST = [0, 0, 0]
+COLORMATRIXJPEGINVOFFSET = [0, -128, -128]
+COLORMATRIXJPEGINV = [[1.0, 0.0, 1.402],
+                      [1.0, -0.344136, -0.714136],
+                      [1.0, 1.772, 0.0]]
 
 
 def invertRGB(r, g, b):
-    gr = gray(r, g, b)
+    """Invert the rgb colour using the ycbcr method by inverting the luma
+    rgb input r, g, b in range 0-255
+    """
+    # rgbprimeIn = [gam_sRGB(r/255.0),gam_sRGB(g/255.0),gam_sRGB(b/255.0)]
+    rgbprimeIn = [r, g, b]
+
+    # rgbprimeIn r, g, b in range 0-255
+    cie = np.dot(COLORMATRIXJPEG, rgbprimeIn)
+    ycbcr = np.add(cie, COLORMATRIXJPEGCONST)
+
+    # invert the luma
+    ycbcr[0] = 256-ycbcr[0]
+    ycbcr = np.add(ycbcr, COLORMATRIXJPEGINVOFFSET)
+
+    rgbprimeOut = np.dot(COLORMATRIXJPEGINV, ycbcr)
+    # rgbprimeOut = np.add(rgbprimeOut, COLORMATRIXJPEGINVCONST) / 256
+
+    # return tuple([255*inv_gam_sRGB(col) for col in rgbprimeOut])
+
+    # clip the colours
+    rgbprimeOut = [min(max(int(col), 0), 255) for col in rgbprimeOut]
+    return tuple(rgbprimeOut)
 
 
 colourNameToHexDict = {
@@ -328,9 +367,6 @@ spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != '#')
 spectrumDarkColours = OrderedDict()
 spectrumLightColours = OrderedDict()
 
-import colorsys
-
-
 for k, v in spectrumColours.items():
     h = hexToRgb(k)
 
@@ -414,7 +450,7 @@ class Colour(str):
 
     def hex(self):
 
-        return '#' + ''.join([hex(x)[2:] for x in (self.r, self.g, self.b)])
+        return '#' + ''.join([_ccpnHex(x)[2:] for x in (self.r, self.g, self.b)])
 
     def __repr__(self):
 
@@ -445,6 +481,25 @@ def addNewColourString(colourString):
         newIndex = str(len(spectrumColours.items()) + 1)
         spectrumColours[colourString] = 'Colour %s' % newIndex
 
+
+def autoCorrectHexColour(colour, referenceHexColour='#ffffff'):
+    """Autocorrect colours if too close to the reference value"""
+    g = gray(*hexToRgb(colour))
+
+    backgroundrgba = referenceHexColour
+    rgb = hexToRgb(backgroundrgba)      # [255*col for col in backgroundrgba[:3]]
+    gRef = gray(*rgb)
+
+    if abs(g-gRef) < COLOUR_THRESHOLD:
+        # h, s, v = rgb_to_hsv(*hexToRgbRatio(colour))
+        # newCol = hsv_to_rgb(h, s, 1.0-min(max(v, 0.1), 0.9))
+
+        newCol = invertRGB(*hexToRgb(colour))
+        hx = rgbToHex(*newCol)
+        # addNewColourString(hx)
+        return hx
+
+    return colour
 
 # def _setNewColour(colList, newCol:str):
 #

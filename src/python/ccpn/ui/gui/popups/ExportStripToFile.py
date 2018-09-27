@@ -527,7 +527,7 @@ class ExportStripToFilePopup(ExportDialog):
                     svgExport.writeSVGFile()
 
     def actionButtons(self):
-        self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Ok'], [self._rejectDialog, self._saveDialog, self._acceptDialog],
+        self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save & Close'], [self._rejectDialog, self._saveDialog, self._acceptDialog],
                                   tipTexts=['Close the export dialog',
                                             'Export the strip to a file, dialog will remain open',
                                             'Export the strip and close the dialog'],
@@ -540,7 +540,7 @@ class ExportStripToFilePopup(ExportDialog):
 
         if self.pathEdited is False:
             # user has not changed the path so we can accept()
-            with progressManager(self, 'writing image to file:\n%s' % self.exitFilename):
+            with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
                 self._exportToFile()
         else:
             # have edited the path so check the new file
@@ -548,13 +548,13 @@ class ExportStripToFilePopup(ExportDialog):
                 yes = showYesNoWarning('%s already exists.' % os.path.basename(self.exitFilename),
                                        'Do you want to replace it?')
                 if yes:
-                    with progressManager(self, 'writing image to file:\n%s' % self.exitFilename):
+                    with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
                         self._exportToFile()
             else:
                 if not self.exitFilename:
                     showWarning('FileName Error:', 'Filename is empty.')
                 else:
-                    with progressManager(self, 'writing image to file:\n%s' % self.exitFilename):
+                    with progressManager(self, 'Saving to file:\n%s' % self.exitFilename):
                         self._exportToFile()
 
 

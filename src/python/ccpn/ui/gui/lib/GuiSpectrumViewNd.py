@@ -868,7 +868,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       return
       
     ###GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-    
+
+    from time import process_time
+
     #for position, dataArray in self.getPlaneData(guiStrip):
     posContoursAll = negContoursAll = None
     for position, dataArray in self._getPlaneData():
@@ -876,8 +878,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       #print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray), dataArray)
       
       if doPosLevels:
+        start_time = process_time()
         posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-        #print("posContours", posContours)
+        # print("posContours", posContours)
+
+        print('>>>posContours', self, process_time()-start_time)
+
         if posContoursAll is None:
           posContoursAll = posContours
         else:
@@ -901,17 +907,22 @@ class GuiSpectrumViewNd(GuiSpectrumView):
               negContoursAll[n].extend(contourData)
             # print(contourData)
 
+    start_time = process_time()
     glList.clearArrays()
     if posContoursAll:
       for n, contourData in enumerate(posContoursAll):
+        print('  >>>contourLevel', n)
         # self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
         self._addContoursToGLList(contourData, glList=glList, colour=self.posColour)
+    print('>>>_addContoursToGLList pos', self, process_time()-start_time)
 
+    start_time = process_time()
     if negContoursAll:
       for n, contourData in enumerate(negContoursAll):
         # self._addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
         self._addContoursToGLList(contourData, glList=glList, colour=self.negColour)
-      
+    print('>>>_addContoursToGLList neg', self, process_time()-start_time)
+
     ###GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
 
   def _releaseDisplayLists(self, displayLists):

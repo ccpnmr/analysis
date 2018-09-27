@@ -243,7 +243,7 @@ colourSchemes = {
         STRIPHEADER_BACKGROUND: '#ebebeb',
 
         MARKS_COLOURS: MARK_LINE_COLOUR_DICT,
-        SPECTRUMHEXCOLOURS: spectrumHexLightColours
+        SPECTRUMHEXCOLOURS: spectrumHexDarkColours
         },
 
     # Overridden for dark colour scheme
@@ -259,7 +259,7 @@ colourSchemes = {
         CCPNGLWIDGET_PHASETRACE: (0.8, 0.8, 0.8, 1.0),
         CCPNGLWIDGET_MULTIPLETLINK: LIGHTCORAL,
 
-        SPECTRUMHEXCOLOURS: spectrumHexDarkColours
+        SPECTRUMHEXCOLOURS: spectrumHexLightColours
         },
 
     # Overridden for light colour scheme

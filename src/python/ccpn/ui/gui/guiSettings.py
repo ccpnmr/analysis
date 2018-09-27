@@ -97,7 +97,7 @@ DEFAULT = 'default'
 MARKS_COLOURS = 'marksColours'
 COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
 
-SPECTRUMHEXCOLOURS = 'spectrumHexColours'
+SPECTRUM_HEXCOLOURS = 'spectrumHexColours'
 
 MARK_LINE_COLOUR_DICT = {
     'CA': '#0080FF',  # aqua
@@ -243,7 +243,7 @@ colourSchemes = {
         STRIPHEADER_BACKGROUND: '#ebebeb',
 
         MARKS_COLOURS: MARK_LINE_COLOUR_DICT,
-        SPECTRUMHEXCOLOURS: spectrumHexDarkColours
+        SPECTRUM_HEXCOLOURS: spectrumHexDarkColours
         },
 
     # Overridden for dark colour scheme
@@ -259,22 +259,19 @@ colourSchemes = {
         CCPNGLWIDGET_PHASETRACE: (0.8, 0.8, 0.8, 1.0),
         CCPNGLWIDGET_MULTIPLETLINK: LIGHTCORAL,
 
-        SPECTRUMHEXCOLOURS: spectrumHexLightColours
+        SPECTRUM_HEXCOLOURS: spectrumHexLightColours
         },
 
     # Overridden for light colour scheme
     LIGHT: {
 
         }
-
     }
 
 # adjust the default marks for the light/dark colour schemes
-MARK_LINE_COLOUR_DICT_LIGHT = dict([(k, autoCorrectHexColour(v,
-                                                             colourSchemes[DEFAULT][CCPNGLWIDGET_HEXBACKGROUND],
+MARK_LINE_COLOUR_DICT_LIGHT = dict([(k, autoCorrectHexColour(v, colourSchemes[DEFAULT][CCPNGLWIDGET_HEXBACKGROUND],
                                                              addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
-MARK_LINE_COLOUR_DICT_DARK = dict([(k, autoCorrectHexColour(v,
-                                                            colourSchemes[DARK][CCPNGLWIDGET_HEXBACKGROUND],
+MARK_LINE_COLOUR_DICT_DARK = dict([(k, autoCorrectHexColour(v, colourSchemes[DARK][CCPNGLWIDGET_HEXBACKGROUND],
                                                             addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
 
 # insert the marks colours into colourScheme

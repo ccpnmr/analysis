@@ -105,6 +105,15 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
 
     # Why does asking for the icon size fix it?  I don't know, but it does!
 
+    # ('Increase Strip Width', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripWidth),
+    # ('Decrease Strip Width', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripWidth),
+    increaseStripWidthAction = spectrumUtilToolBar.addAction("Increase Strip Width", self.increaseStripWidth)
+    increaseStripWidthIcon = Icon('icons/range-expand')
+    increaseStripWidthAction.setIcon(increaseStripWidthIcon)
+    decreaseStripWidthAction = spectrumUtilToolBar.addAction("Decrease Strip Width", self.decreaseStripWidth)
+    decreaseStripWidthIcon = Icon('icons/range-contract')
+    decreaseStripWidthAction.setIcon(decreaseStripWidthIcon)
+
     autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self.resetYZooms)
     autoScaleActionIcon = Icon('icons/zoom-best-fit-1d')
     # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))

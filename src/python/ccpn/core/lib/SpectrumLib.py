@@ -486,9 +486,9 @@ def getDefaultSpectrumColours(self:'DataSource') -> Tuple[str,str]:
   """
 
   # from ccpn.util.Colour import spectrumHexColours
-  from ccpn.ui.gui.guiSettings import getColours, getColourScheme, SPECTRUMHEXCOLOURS
+  from ccpn.ui.gui.guiSettings import getColours, getColourScheme, SPECTRUM_HEXCOLOURS
 
-  spectrumHexColours = getColours().get(SPECTRUMHEXCOLOURS)
+  spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
   colorCount = len(spectrumHexColours)
   step = ((colorCount//2 -1) //2)
   index = self.experiment.serial - 1 + step * (self._serial -1)

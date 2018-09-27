@@ -60,10 +60,7 @@ def rgbRatioToHex(r, g, b):
 def hexToRgb(hx):
     hx = hx.lstrip('#')
     lv = len(hx)
-    try:
-        return tuple(int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
-    except Exception as es:
-        pass
+    return tuple(int(hx[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
 def hexToRgbRatio(hx):
@@ -373,8 +370,6 @@ allColours = OrderedDict([('#000000', 'black'),
                           ('#FFB6C1', 'lightpink')
                           ])
 
-spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != '#')
-
 # split the colour palettes into light and dark for different colour schemes
 spectrumDarkColours = OrderedDict()
 spectrumLightColours = OrderedDict()
@@ -399,6 +394,12 @@ for k, v in allColours.items():
         allLightColours[k] = v
     if gray(*h) < COLOUR_DARK_THRESHOLD:
         allDarkColours[k] = v
+
+spectrumHexLightColours = tuple(ky for ky in spectrumLightColours.keys() if ky != '#')
+spectrumHexDarkColours = tuple(ky for ky in spectrumDarkColours.keys() if ky != '#')
+
+# override this with spectrumLight/DarkColours when colourScheme is changed
+spectrumHexColours = tuple(ky for ky in spectrumColours.keys() if ky != '#')
 
 
 # Note that Colour strings are not re-used

@@ -351,6 +351,26 @@ class Spectrum(AbstractWrapperObject):
         raise ValueError("No reference experiment matches name '%s'" % value)
 
     @property
+    def _serial(self):
+        """Return the _wrappedData serial
+        CCPN Internal
+        """
+        return self._wrappedData.serial
+
+    @property
+    def _numDim(self):
+        """Return the _wrappedData numDim
+        CCPN Internal
+        """
+        return self._wrappedData.numDim
+
+    @property
+    def experiment(self):
+        """Return the experiment assigned to the spectrum
+        """
+        return self._wrappedData.experiment
+
+    @property
     def experimentName(self) -> str:
         """Common experiment type descriptor (May not be unique)."""
         return self._wrappedData.experiment.name

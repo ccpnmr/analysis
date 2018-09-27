@@ -474,3 +474,28 @@ def lowess(x,y):
   # and if the value is out of the range, use f(min(lowess_x)) or f(max(lowess_x))
   ynew = f(x)
   return ynew
+
+
+from typing import Tuple
+
+
+def getDefaultSpectrumColours(self:'DataSource') -> Tuple[str,str]:
+  """Get default positivecontourcolour, negativecontourcolour for Spectrum
+  (calculated by hashing spectrum properties to avoid always getting the same colours
+  Currently matches getDefaultColours in dataSource that is set through the api
+  """
+
+  # from ccpn.util.Colour import spectrumHexColours
+  from ccpn.ui.gui.guiSettings import getColours, getColourScheme, SPECTRUMHEXCOLOURS
+
+  spectrumHexColours = getColours().get(SPECTRUMHEXCOLOURS)
+  colorCount = len(spectrumHexColours)
+  step = ((colorCount//2 -1) //2)
+  index = self.experiment.serial - 1 + step * (self._serial -1)
+
+  if self._numDim == 1:
+    ii = (2 * index) % colorCount
+  else:
+    ii = (2 * index) % colorCount
+  #
+  return (spectrumHexColours[ii], spectrumHexColours[ii+1])

@@ -440,6 +440,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         # with progressManager(self.mainWindow, 'Loading data... ' + url):
           try:
             data = self.project.loadData(url)
+
             objs.extend(data)
           except Exception as es:
             getLogger().warning('loadData Error: %s' % str(es))

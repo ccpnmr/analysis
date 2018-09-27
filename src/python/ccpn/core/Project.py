@@ -1260,16 +1260,27 @@ class Project(AbstractWrapperObject):
       spectrum = self._data2Obj[apiDataSource]
       spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
-      if self._appBase.preferences and self._appBase.preferences.general.autoCorrectColours:
+      # make sure the colour brightness is not too close to the colourScheme background
+      # TODO:ED another nasty _appBase
 
-        from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
+      # if there is a gui then check the colours
+      if self._appBase.ui:
+        if self._appBase.preferences and self._appBase.preferences.general.autoCorrectColours:
 
-        spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
-                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-        spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
-                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-        spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
-                                                              getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+          from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
+          from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
+
+          print('>>>spectrumColour override')
+          (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+          spectrum.sliceColour = spectrum.positiveContourColour
+
+          # spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
+          #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+          # spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
+          #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+          # spectrum.sliceColour = autoCorrectHexColour(spectrum.sliceColour,
+          #                                                       getColours()[CCPNGLWIDGET_HEXBACKGROUND])
+
       return [spectrum]
 
   def _loadLookupFile(self, path:str, subType:str, ):

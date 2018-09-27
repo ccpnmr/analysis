@@ -1244,9 +1244,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.viewports.addViewport(GLDefs.FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
 
         self._lockStringFalse = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
-                                         color=(0.4, 0.4, 0.4, 1.0), GLContext=self)
+                                         color=(0.5, 0.5, 0.5, 1.0), GLContext=self)
         self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
-                                        color=(0.2, 1.0, 0.3, 1.0), GLContext=self)
+                                        color=self.highlightColour, GLContext=self)
 
         self.stripIDString = GLString(text='', font=self.globalGL.glSmallFont, x=0, y=0, GLContext=self, obj=None)
 
@@ -1271,6 +1271,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
         self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
         self._phasingTraceColour = self.colours[CCPNGLWIDGET_PHASETRACE]
+
+        # change the colour of the selected 'Lock' string
+        self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
+                                        color=self.highlightColour, GLContext=self)
 
         self.setBackgroundColour(self.background)
 

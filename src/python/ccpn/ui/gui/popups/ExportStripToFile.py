@@ -48,6 +48,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.MessageDialog import progressManager
 
 
 EXPORTPDF = 'PDF'
@@ -539,19 +540,22 @@ class ExportStripToFilePopup(ExportDialog):
 
         if self.pathEdited is False:
             # user has not changed the path so we can accept()
-            self._exportToFile()
+            with progressManager(self, 'writing image to file:\n%s' % self.exitFilename):
+                self._exportToFile()
         else:
             # have edited the path so check the new file
             if os.path.isfile(self.exitFilename):
                 yes = showYesNoWarning('%s already exists.' % os.path.basename(self.exitFilename),
                                        'Do you want to replace it?')
                 if yes:
-                    self._exportToFile()
+                    with progressManager(self, 'writing image to file:\n%s' % self.exitFilename):
+                        self._exportToFile()
             else:
                 if not self.exitFilename:
                     showWarning('FileName Error:', 'Filename is empty.')
                 else:
-                    self._exportToFile()
+                    with progressManager(self, 'writing image to file:\n%s' % self.exitFilename):
+                        self._exportToFile()
 
 
 if __name__ == '__main__':

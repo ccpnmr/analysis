@@ -1270,7 +1270,6 @@ class Project(AbstractWrapperObject):
           from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
           from ccpn.core.lib.SpectrumLib import getDefaultSpectrumColours
 
-          print('>>>spectrumColour override')
           (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
           spectrum.sliceColour = spectrum.positiveContourColour
 

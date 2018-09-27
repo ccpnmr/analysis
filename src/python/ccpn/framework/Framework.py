@@ -614,7 +614,7 @@ class Framework:
     dataUrl.url = Implementation.Url(path=dataPath)
 
 
-  def initColours(self):
+  def correctColours(self):
     """Autocorrect all colours that are too close to the background colour
     """
     from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
@@ -677,7 +677,7 @@ class Framework:
       pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
 
     # initialise any colour changes before generating gui strips
-    self.initColours()
+    self.correctColours()
 
     # Initialise strips
     for strip in project.strips:

@@ -243,7 +243,6 @@ class GeneralTab(QtWidgets.QWidget, Base):
         self.pathButton = Button(self, grid=(2, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
 
         self.pythonConsole = mainWindow.pythonConsole
-        #TODO: change this
         self.logger = getLogger()  # self.spectrum.project._logger
 
         self.setWindowTitle("Spectrum Properties")
@@ -1350,7 +1349,6 @@ class ColourTab(QtWidgets.QWidget, Base):
         if c in spectrumColourKeys:
             self.colourBox.setCurrentText(spectrumColours[c])
         else:
-            # TODO:ED may have to populate the other tab colour pulldowns
             addNewColourString(c)
             fillColourPulldown(self.colourBox, allowAuto=False)
             spectrumColourKeys = list(spectrumColours.keys())

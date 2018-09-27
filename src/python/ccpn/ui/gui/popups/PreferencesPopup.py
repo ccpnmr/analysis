@@ -54,6 +54,7 @@ from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spacer import Spacer
 
+
 # FIXME separate pure GUI to project/preferences properites
 # The code sets Gui Parameters assuming that  Preference is not None and has a bunch of attributes.
 
@@ -92,7 +93,7 @@ class PreferencesPopup(CcpnDialog):
                                     tipTexts=['Close and update preferences', 'Apply changes to all strips'],
                                     direction='h', hAlign='r', grid=(1, 2))
 
-        self.setFixedWidth(self.sizeHint().width()+24)
+        self.setFixedWidth(self.sizeHint().width() + 24)
 
     def _applyChanges(self):
         for display in self.project.spectrumDisplays:
@@ -106,7 +107,10 @@ class PreferencesPopup(CcpnDialog):
                 strip.symbolThickness = self.preferences.general.symbolThickness
                 strip.gridVisible = self.preferences.general.showGrid
                 strip.crosshairVisible = self.preferences.general.showCrosshair
-        setColourScheme(self.preferences.general.colourScheme)
+
+        if self.preferences.general.colourScheme != self._oldColourScheme:
+            setColourScheme(self.preferences.general.colourScheme)
+            self.application.correctColours()
 
         self._accept()
 
@@ -117,7 +121,8 @@ class PreferencesPopup(CcpnDialog):
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         GLSignals = GLNotifier(parent=self)
-        GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS,
+        GLSignals.emitEvent(triggers=[GLNotifier.GLCONTOURS,
+                                      GLNotifier.GLALLPEAKS,
                                       GLNotifier.GLALLMULTIPLETS,
                                       GLNotifier.GLPREFERENCES])
 
@@ -160,7 +165,6 @@ class PreferencesPopup(CcpnDialog):
         # add the scroll area to the tabs
         self.tabWidget.addTab(self._spectrumTabScrollArea, 'Spectrum')
 
-
         # 3 Tab Disabled. # Keep the code for future additions
         self.externalProgramsTabFrame = Frame(self, setLayout=True)
         self.externalProgramsTabFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
@@ -181,7 +185,7 @@ class PreferencesPopup(CcpnDialog):
         self.languageBox.setCurrentIndex(self.languageBox.findText(self.preferences.general.language))
         self.languageBox.currentIndexChanged.connect(self._changeLanguage)
 
-        # disabled for 3.0.B3
+        # disabled for 3.0.b3
         row += 1
         self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
         self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
@@ -189,8 +193,9 @@ class PreferencesPopup(CcpnDialog):
         self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
         self.colourSchemeBox.addItems(COLOUR_SCHEMES)
         self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
-          self.preferences.general.colourScheme))
+                self.preferences.general.colourScheme))
         self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
+        self._oldColourScheme = self.preferences.general.colourScheme
 
         row += 1
         self.useNativeLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
@@ -468,7 +473,7 @@ class PreferencesPopup(CcpnDialog):
         for aspect in sorted(self.preferences.general.aspectRatios.keys()):
             aspectValue = self.preferences.general.aspectRatios[aspect]
             self.aspectLabel[aspect] = Label(parent, text=aspect, grid=(row, 0), hAlign='r')
-            self.aspectData[aspect] = ScientificDoubleSpinBox(parent, #step=1,
+            self.aspectData[aspect] = ScientificDoubleSpinBox(parent,  #step=1,
                                                               min=1, grid=(row, 1), hAlign='l')
             self.aspectData[aspect].setValue(aspectValue)
             self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
@@ -496,16 +501,16 @@ class PreferencesPopup(CcpnDialog):
         self.symbolsLabel = Label(parent, text="Symbols", grid=(row, 0))
         symbol = self.preferences.general.symbolType
         self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths'],
-                                       selectedInd=symbol,
-                                       callback=self._setSymbol,
-                                       direction='h',
-                                       grid=(row, 1), hAlign='l',
-                                       tipTexts=None,
-                                       )
+                                   selectedInd=symbol,
+                                   callback=self._setSymbol,
+                                   direction='h',
+                                   grid=(row, 1), hAlign='l',
+                                   tipTexts=None,
+                                   )
         row += 1
         self.symbolSize1dLabel = Label(parent, text="Symbol Size 1d (ppm)", grid=(row, 0))
         self.symbolSize1dData = DoubleSpinbox(parent, decimals=3, step=0.001,
-                                                min=0.001, max=1.0, grid=(row, 1), hAlign='l')
+                                              min=0.001, max=1.0, grid=(row, 1), hAlign='l')
         self.symbolSize1dData.setMinimumWidth(LineEditsMinimumWidth)
         symbolSize1d = self.preferences.general.symbolSize1d
         self.symbolSize1dData.setValue(float('%.3f' % symbolSize1d))
@@ -514,7 +519,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.symbolSizeNdLabel = Label(parent, text="Symbol Size Nd (ppm)", grid=(row, 0))
         self.symbolSizeNdData = DoubleSpinbox(parent, decimals=2, step=0.01,
-                                                min=0.01, max=10.0, grid=(row, 1), hAlign='l')
+                                              min=0.01, max=10.0, grid=(row, 1), hAlign='l')
         self.symbolSizeNdData.setMinimumWidth(LineEditsMinimumWidth)
         symbolSizeNd = self.preferences.general.symbolSizeNd
         self.symbolSizeNdData.setValue(float('%.2f' % symbolSizeNd))
@@ -523,7 +528,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (point)", grid=(row, 0))
         self.symbolThicknessData = Spinbox(parent, step=1,
-                                               min=1, max=20, grid=(row, 1), hAlign='l')
+                                           min=1, max=20, grid=(row, 1), hAlign='l')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         symbolThickness = self.preferences.general.symbolThickness
         self.symbolThicknessData.setValue(int(symbolThickness))
@@ -557,7 +562,7 @@ class PreferencesPopup(CcpnDialog):
 
         # add a colour dialog button
         self.marksDefaultColourButton = Button(parent, grid=(row, 2), vAlign='t', hAlign='l',
-                                           icon='icons/colours', hPolicy='fixed')
+                                               icon='icons/colours', hPolicy='fixed')
         self.marksDefaultColourButton.clicked.connect(self._changeMarksColourButton)
 
         row += 1
@@ -567,12 +572,12 @@ class PreferencesPopup(CcpnDialog):
         self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging:", grid=(row, 0))
         multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging = RadioButtons(parent, texts=['Average', 'Weighted Average'],
-                                          selectedInd=multipletAveraging,
-                                          callback=self._setMultipletAveraging,
-                                          direction='h',
-                                          grid=(row, 1), hAlign='l',
-                                          tipTexts=None,
-                                          )
+                                               selectedInd=multipletAveraging,
+                                               callback=self._setMultipletAveraging,
+                                               direction='h',
+                                               grid=(row, 1), hAlign='l',
+                                               tipTexts=None,
+                                               )
 
         # add spacer to stop columns changing width
         row += 1
@@ -624,6 +629,7 @@ class PreferencesPopup(CcpnDialog):
 
     def _testExternalProgram(self, program):
         import subprocess
+
         try:
             # TODO:ED check whether relative or absolute path and test
             # import ccpn.framework.PathsAndUrls as PAU
@@ -891,4 +897,3 @@ class PreferencesPopup(CcpnDialog):
         except:
             return
         self.preferences.general.multipletAveraging = symbol
-

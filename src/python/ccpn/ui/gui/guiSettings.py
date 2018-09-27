@@ -94,30 +94,32 @@ messageFontBold = helveticaBold14  # used in popup messages;
 LIGHT = 'light'
 DARK = 'dark'
 DEFAULT = 'default'
+MARKS_PREFIX = 'marks_'
 COLOUR_SCHEMES = (LIGHT, DARK, DEFAULT)
 
+
 MARK_LINE_COLOUR_DICT = {
-    'CA': '#0080FF',  # aqua
-    'CB': '#6666FF',  # orchid
-    'CG': '#0048FF',
-    'CD': '#006DFF',
-    'CE': '#0091FF',
-    'CZ': '#00B6FF',
-    'CH': '#00DAFF',
-    'C': '#00FFFF',
-    'HA': '#FF0000',
-    'HB': '#FF0024',
-    'HG': '#FF0048',
-    'HD': '#FF006D',
-    'HE': '#FF0091',
-    'HZ': '#FF00B6',
-    'HH': '#FF00DA',
-    'H': '#FF00FF',
-    'N': '#00FF00',
-    'ND': '#3FFF00',
-    'NE': '#7FFF00',
-    'NZ': '#BFFF00',
-    'NH': '#FFFF00',
+    MARKS_PREFIX+'CA': '#0080FF',  # aqua
+    MARKS_PREFIX+'CB': '#6666FF',  # orchid
+    MARKS_PREFIX+'CG': '#0048FF',
+    MARKS_PREFIX+'CD': '#006DFF',
+    MARKS_PREFIX+'CE': '#0091FF',
+    MARKS_PREFIX+'CZ': '#00B6FF',
+    MARKS_PREFIX+'CH': '#00DAFF',
+    MARKS_PREFIX+'C': '#00FFFF',
+    MARKS_PREFIX+'HA': '#FF0000',
+    MARKS_PREFIX+'HB': '#FF0024',
+    MARKS_PREFIX+'HG': '#FF0048',
+    MARKS_PREFIX+'HD': '#FF006D',
+    MARKS_PREFIX+'HE': '#FF0091',
+    MARKS_PREFIX+'HZ': '#FF00B6',
+    MARKS_PREFIX+'HH': '#FF00DA',
+    MARKS_PREFIX+'H': '#FF00FF',
+    MARKS_PREFIX+'N': '#00FF00',
+    MARKS_PREFIX+'ND': '#3FFF00',
+    MARKS_PREFIX+'NE': '#7FFF00',
+    MARKS_PREFIX+'NZ': '#BFFF00',
+    MARKS_PREFIX+'NH': '#FFFF00',
     DEFAULT: '#e0e0e0'
     }
 
@@ -263,6 +265,7 @@ colourSchemes = {
 
     }
 
+# adjust the default marks for the light/dark colour schemes
 MARK_LINE_COLOUR_DICT_LIGHT = dict([(k, autoCorrectHexColour(v,
                                                              colourSchemes[DEFAULT][CCPNGLWIDGET_HEXBACKGROUND],
                                                              addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
@@ -270,8 +273,9 @@ MARK_LINE_COLOUR_DICT_DARK = dict([(k, autoCorrectHexColour(v,
                                                             colourSchemes[DARK][CCPNGLWIDGET_HEXBACKGROUND],
                                                             addNewColour=False)) for k, v in MARK_LINE_COLOUR_DICT.items()])
 
-# colourSchemes[DEFAULT].update(MARK_LINE_COLOUR_DICT)
-# colourSchemes[LIGHT].update(MARK_LINE_COLOUR_DICT_LIGHT)
+# insert the marks colours into colourScheme
+colourSchemes[DEFAULT].update(MARK_LINE_COLOUR_DICT)
+colourSchemes[LIGHT].update(MARK_LINE_COLOUR_DICT_LIGHT)
 
 def getColourScheme():
     """

@@ -456,14 +456,14 @@ class GuiWindow():
     # project._startCommandEchoBlock('markPositions', project, axisCodes, chemicalShifts)
     # try:
 
-    colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
+    # colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
     for ii, axisCode in enumerate(axisCodes):
       for chemicalShift in chemicalShifts[ii]:
         atomName = chemicalShift.nmrAtom.name
         # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
 
-        colour = colourDict.get(atomName[:min(2,len(atomName))])
-        # colour = guiSettings.getColours().get(atomName[:min(2,len(atomName))])
+        # colour = colourDict.get(atomName[:min(2,len(atomName))])
+        colour = guiSettings.getColours().get(guiSettings.MARKS_PREFIX+atomName[:min(2,len(atomName))])
 
         # exit if mark exists
         found = False

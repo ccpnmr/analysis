@@ -61,6 +61,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
+from ccpn.core.lib.ContextManagers import undoBlock
+
 
 AXIS_WIDTH = 30
 
@@ -345,13 +347,19 @@ class GuiSpectrumDisplay(CcpnModule):
         showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, PeakList,'
                                                    ' NmrChain, NmrResidue or NmrAtom')
     if nmrChains:
-      with suspendSideBarNotifications(self.project):
+      # with suspendSideBarNotifications(self.project):
+
+      with undoBlock(self.application):
         self._handleNmrChains(nmrChains)
     if nmrResidues:
-      with suspendSideBarNotifications(self.project):
+      # with suspendSideBarNotifications(self.project):
+
+      with undoBlock(self.application):
         self._handleNmrResidues(nmrResidues)
     if nmrAtoms:
-      with suspendSideBarNotifications(self.project):
+      # with suspendSideBarNotifications(self.project):
+
+      with undoBlock(self.application):
         self._handleNmrAtoms(nmrAtoms)
 
     return success

@@ -94,7 +94,7 @@ def inv_gam_sRGB(ic):
     if (c <= 0.04045):
         return c / 12.92
     else:
-        return pow(((c + 0.055) / (1.055)), 2.0)
+        return pow(((c + 0.055) / (1.055)), 1.6)
 
 
 # sRGB "gamma" function (approx 2.2)
@@ -102,7 +102,7 @@ def gam_sRGB(v):
     if (v <= 0.0031308):
         v *= 12.92
     else:
-        v = 1.055 * pow(v, 0.5) - 0.055
+        v = 1.055 * pow(v, 0.625) - 0.055
     return int(v * 255)
 
 

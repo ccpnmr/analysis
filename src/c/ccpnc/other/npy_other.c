@@ -80,7 +80,7 @@ static appendFloatList(PyObject *list, double value)
 
 static PyObject *otherEntry(PyObject *self, PyObject *args)
 {
-    PyArrayObject *data_obj, *levels_obj;
+    PyArrayObject *data_obj, *levels_obj, *indices, *vertices, *colours;
     PyObject *returnObject;
 
     // create a new list
@@ -94,6 +94,10 @@ static PyObject *otherEntry(PyObject *self, PyObject *args)
     appendFloatList(returnObject, 126.45);
     appendFloatList(returnObject, 54.27);
     appendFloatList(returnObject, -2.6);
+
+    appendFloatList(colours, -2.6);
+    appendFloatList(colours, 52.6);
+
 
 /*    if (PyList_Append(returnObject, PyFloat_FromDouble((double) 126.45)) != 0)
     {

@@ -16,7 +16,7 @@ Contourer2d.$(DYLIB_SUFFIX): $(NPY_CONTOURER2D_OBJS)
 	$(LINK) $(LINK_FLAGS) $(SHARED_FLAGS) $(OUT_NAME) $(ALL_LIB_FLAGS) \
 		$(NPY_CONTOURER2D_OBJS) $(ALL_LIB)
 
-npy_contourer2d.$(OBJ_SUFFIX): npy_contourer2d.c 
+npy_contourer2d.$(OBJ_SUFFIX): npy_contourer2d.c
 	$(CC) $(CC_FLAGS) $(ALL_INCLUDE_FLAGS) $(CO_NAME)
 
 .c.$(OBJ_SUFFIX):;  $(CC) $(CC_FLAGS) $(CO_NAME)

@@ -29,6 +29,7 @@ import math
 import numpy
 import os
 import numpy as np
+from time import process_time
 
 from OpenGL import GL
 from OpenGL.error import GLError
@@ -41,6 +42,7 @@ from ccpn.util import Colour
 from ccpn.util import Phasing
 
 from ccpnc.contour import Contourer2d
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLContours import _addContoursToGLList
 
 #from ccpn.ui.gui.modules import SpectrumDisplayNd
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
@@ -71,7 +73,7 @@ def _getLevels(count:int, base:float, factor:float)->list:
 class GuiSpectrumViewNd(GuiSpectrumView):
 
   ###PeakListItemClass = PeakListNdItem
-  
+
   #sigClicked = QtCore.Signal(object, object)
 
   #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None, region=None, **kw):
@@ -98,11 +100,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.negDisplayLists = []
 
     self._traceScale = 1.0e-7 # TBD: need a better way of setting this
-            
+
     self.okDataFile = True  # used to keep track of warning message that data file does not exist
-    
+
     # self.spectralData = self.getSlices()
-    
+
     ###xDim, yDim = apiSpectrumView.dimensionOrdering[:2]
     ###xDim -= 1  # dimensionOrdering starts at 1
     ###yDim -= 1
@@ -142,7 +144,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     for func in ('setPositiveContourColour', 'setSliceColour'):
       Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
-"""        
+"""
     self.strip.viewBox.addItem(self)
 
     self._setupTrace()
@@ -207,18 +209,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     """
     pass
     # self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
-          
+
   def _setupTrace(self):
-    
+
     self.hTrace = pg.PlotDataItem()
     self.strip.plotWidget.scene().addItem(self.hTrace)
-    
+
     self.vTrace = pg.PlotDataItem()
-    self.strip.plotWidget.scene().addItem(self.vTrace) 
-    
+    self.strip.plotWidget.scene().addItem(self.vTrace)
+
     self.hPhaseTraces = []
     self.vPhaseTraces = []
-    
+
   def _turnOnPhasing(self):
     """
     # CCPN INTERNAL - called by turnOnPhasing method of GuiStrip.
@@ -230,7 +232,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       for trace, line in traces:
         trace.setVisible(True)
         line.setVisible(True)
-      
+
   def _turnOffPhasing(self):
     """
     # CCPN INTERNAL - called by turnOffPhasing method of GuiStrip.
@@ -239,9 +241,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       for trace, line in traces:
         trace.setVisible(False)
         line.setVisible(False)
-      
+
   def _newPhasingTrace(self):
-    
+
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible():
       trace = pg.PlotDataItem()
@@ -268,7 +270,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                viewParams.maxAliasedFrequency))
           self.strip.vPhasingPivot.setVisible(True)
           self.strip.haveSetVPhasingPivot = True
-        
+
       line = pg.InfiniteLine(angle=angle, pos=position, movable=True)
       line.sigPositionChanged.connect(lambda phasingLine: self._updatePhasing())
       self.strip.plotWidget.scene().addItem(trace)
@@ -277,9 +279,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       line.setVisible(True)
       phaseTraces.append((trace, line))
       self._updatePhasing()
-  
+
   def removePhasingTraces(self):
-    
+
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible():
       direction = phasingFrame.getDirection()
@@ -293,9 +295,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           self.strip.plotWidget.scene().removeItem(trace)
           self.strip.plotWidget.removeItem(line)
         self.vPhaseTraces = []
-    
+
   def _changedPhasingDirection(self):
-    
+
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     direction = phasingFrame.getDirection()
     if direction == 0:
@@ -312,18 +314,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       for trace, line in self.vPhaseTraces:
         trace.setVisible(True)
         line.setVisible(True)
-      
+
     self._updatePhasing()
-    
+
   def _updatePhasing(self):
     """
     # CCPN INTERNAL - called in _updatePhasing method of GuiStrip
     """
     if not self.isVisible():
       return
-      
+
     position = [axis.position for axis in self.strip.orderedAxes]
-    
+
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible():
       ph0 = phasingFrame.slider0.value()
@@ -337,14 +339,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     else:
       ph0 = ph1 = direction = 0
       pivot = 1
-      
+
     #hPhasingPivot = self.strip.hPhasingPivot
     #if hPhasingPivot.isVisible():
     #  dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]
     #  pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())
     #else:
     #  pivot = 1
-      
+
     if direction == 0:
       phaseTraces = self.hPhaseTraces
     else:
@@ -358,16 +360,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       positionPoint = QtCore.QPointF(position[0], position[1])
       positionPixel = self.strip.viewBox.mapViewToScene(positionPoint)
       positionPixel = (positionPixel.x(), positionPixel.y())
-      inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints = self._getTraceParams(position)        
+      inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints = self._getTraceParams(position)
       if inRange:
         if direction == 0:
           self._updateHTraceData(point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, trace, ph0, ph1, pivot)
         else:
           self._updateVTraceData(point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, trace, ph0, ph1, pivot)
-            
+
   def _getTraceParams(self, position):
     # position is in ppm
-    
+
     inRange = True
     point = len(position) * [0]
     for n, pos in enumerate(position): # n = 0 is x, n = 1 is y, etc.
@@ -394,16 +396,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         point[dataDim.dim-1] = pnt
 
     return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints
-    
+
   def _updateHTraceData(self, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, hTrace, ph0=None, ph1=None, pivot=None):
-    
+
     # unfortunately it looks like we have to work in pixels, not ppm, yuck
     strip = self.strip
     plotWidget = strip.plotWidget
     plotItem = plotWidget.plotItem
     viewBox = strip.viewBox
     viewRegion = plotWidget.viewRange()
-    
+
     pointInt = [1+int(pnt+0.5) for pnt in point]
     data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
     if ph0 is not None and ph1 is not None and pivot is not None:
@@ -416,24 +418,24 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     x -= region0
     x *= (pixelViewBox1-pixelViewBox0) / (region1-region0)
     x += pixelViewBox0
-  
+
     pixelViewBox0 = plotItem.getAxis('bottom').height()
     pixelViewBox1 = pixelViewBox0 + viewBox.height()
     # - sign below because ppm scale is backwards
     v = positionPixel[1] - self._traceScale * (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
-  
+
     hTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
     hTrace.setData(x, v)
-  
+
   def _updateVTraceData(self, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, vTrace, ph0=None, ph1=None, pivot=None):
-    
+
     # unfortunately it looks like we have to work in pixels, not ppm, yuck
     strip = self.strip
     plotWidget = strip.plotWidget
     plotItem = plotWidget.plotItem
     viewBox = strip.viewBox
     viewRegion = plotWidget.viewRange()
-    
+
     pointInt = [1+int(pnt+0.5) for pnt in point]
     data = self.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
     if ph0 is not None and ph1 is not None and pivot is not None:
@@ -446,31 +448,31 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     y -= region0
     y *= (pixelViewBox1-pixelViewBox0) / (region1-region0)
     ###y += pixelViewBox0  # not sure why this should be commented out...
-    
+
     pixelViewBox0 = plotItem.getAxis('left').width()
     pixelViewBox1 = pixelViewBox0 + viewBox.width()
     # no - sign below because ppm scale is backwards and pixel y scale is also backwards
     # (assuming that we want positive signal to point towards the right)
     v = positionPixel[0] + self._traceScale * (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency+1)])
-    
+
     vTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
     vTrace.setData(v, y)
 
   def _updateTrace(self, position, positionPixel, updateHTrace=True, updateVTrace=True):
-        
+
     if not (updateHTrace or updateVTrace) or not self.isVisible():
       self.hTrace.setData([], [])
       self.vTrace.setData([], [])
       return
-          
-    inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints = self._getTraceParams(position)        
+
+    inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints = self._getTraceParams(position)
     # xDataDim and yDataDim should always be set here, because all spectra in strip should at least match in x, y
-    
+
     if inRange and updateHTrace:
       self._updateHTraceData(point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, self.hTrace)
     else:
       self.hTrace.setData([], [])
-      
+
     if inRange and updateVTrace:
       self._updateVTraceData(point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, self.vTrace)
     else:
@@ -521,7 +523,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   # def _newPeakListView(self, peakListView):
   #   pass
-    
+
   def _printToFile(self, printer):
     """
     # CCPN INTERNAL - called in _printToFile method of GuiStrip
@@ -529,7 +531,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     if not self.isVisible():
       return
-  
+
     # assume that already done on screen
     #if apiDataSource.positiveContourBase == 10000.0: # horrid
     #  # base has not yet been set, so guess a sensible value
@@ -541,7 +543,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                              self.positiveContourFactor)
     else:
       posLevels = []
-    
+
     if self.displayNegativeContours is True:
       negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
                              self.negativeContourFactor)
@@ -553,7 +555,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     posColour = self._getColour('positiveContourColour')
     negColour = self._getColour('negativeContourColour')
-  
+
     xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(
         0, pixelViewBox0=printer.x0, pixelViewBox1=printer.x1 )
     yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(
@@ -563,7 +565,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
     yTile0 = yClipPoint0 // yTotalPointCount
     yTile1 = 1 + (yClipPoint1 // yTotalPointCount)
-      
+
     for position, dataArray in self._getPlaneData():
 
       if posLevels:
@@ -573,7 +575,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           self._printContourData(printer, contourData, posColour, xTile0, xTile1, yTile0, yTile1,
                                  xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
                                  yTotalPointCount)
-      
+
       if negLevels:
         negLevelsArray = numpy.array(negLevels, numpy.float32)
         negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
@@ -581,30 +583,30 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           self._printContourData(printer, contourData, negColour, xTile0, xTile1, yTile0, yTile1,
                                  xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
                                  yTotalPointCount)
-                
+
     for peakListView in self.peakListViews:
       peakListView._printToFile(printer)
-      
+
   def _printContourData(self, printer, contourData, colour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale, yTotalPointCount):
-    
+
     for xTile in range(xTile0, xTile1):
       for yTile in range(yTile0, yTile1):
-        
+
         # the below is because the y axis goes from top to bottom
         #GL.glScale(1.0, -1.0, 1.0)
         #GL.glTranslate(0.0, -self.strip.plotWidget.height(), 0.0)
-    
+
         # the below makes sure that spectrum points get mapped to screen pixels correctly
         #GL.glTranslate(xTranslate, yTranslate, 0.0)
         #GL.glScale(xScale, yScale, 1.0)
-    
+
         #GL.glTranslate(xTotalPointCount*xTile, yTotalPointCount*yTile, 0.0)
         #GL.glClipPlane(GL.GL_CLIP_PLANE0, (1.0, 0.0, 0.0, - (xClipPoint0 - xTotalPointCount*xTile)))
         #GL.glClipPlane(GL.GL_CLIP_PLANE1, (-1.0, 0.0, 0.0, xClipPoint1 - xTotalPointCount*xTile))
         #GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
         #GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
-        
-        
+
+
         for contour in contourData:
           n = len(contour) // 2
           contour = contour.copy()
@@ -650,7 +652,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   # def boundingRect(self):  # seems necessary to have
   #
   #   return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TODO: remove hardwiring
-  
+
   ##### functions not to be used externally #####
   # NBNB TBD internal functions should start with UNDERSCORE!
   # REFACTOR
@@ -826,10 +828,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     """ Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level needs to call this function.
     """
-    
+
     xDataDim, yDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[:2]
 
-    if (doRefresh or xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev 
+    if (doRefresh or xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev
       or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])):
       # self._releaseDisplayLists(self.posDisplayLists)
       # self._releaseDisplayLists(self.negDisplayLists)
@@ -845,15 +847,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       else:
         # self._releaseDisplayLists(self.negDisplayLists)
         doNegLevels = negLevels and True
-      
+
     ###self.previousRegion = self.guiSpectrumDisplay.region[:]  # TBD: not quite right, should be looking at the strip(s)
-    
+
     # do the contouring and store results in display list
     if doPosLevels:
       posLevelsArray = numpy.array(posLevels, numpy.float32)
       # print(posLevelsArray)
       # self._createDisplayLists(posLevelsArray, self.posDisplayLists)
-      
+
     if doNegLevels:
       negLevelsArray = numpy.array(negLevels, numpy.float32)
       # self._createDisplayLists(negLevelsArray, self.negDisplayLists)
@@ -866,23 +868,25 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     if not doPosLevels and not doNegLevels:
       return
-      
-    ###GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
 
-    from time import process_time
+    ###GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
 
     #for position, dataArray in self.getPlaneData(guiStrip):
     posContoursAll = negContoursAll = None
+
     for position, dataArray in self._getPlaneData():
 
       #print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray), dataArray)
-      
+
       if doPosLevels:
         start_time = process_time()
-        posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-        # print("posContours", posContours)
 
-        print('>>>posContours', self, process_time()-start_time)
+        posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
+        test = Contourer2d.contourerGLList(dataArray,
+                                                  np.array(self.posColour, dtype=np.float32))
+
+        # print("posContours", posContours)
+        print('>>>_addContoursToGLList pos', self, process_time() - start_time)
 
         if posContoursAll is None:
           posContoursAll = posContours
@@ -893,7 +897,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             else:
               posContoursAll[n].extend(contourData)
             # print(contourData)
-        
+
       if doNegLevels:
         negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
         #print("negContours", len(negContours))
@@ -907,21 +911,22 @@ class GuiSpectrumViewNd(GuiSpectrumView):
               negContoursAll[n].extend(contourData)
             # print(contourData)
 
-    start_time = process_time()
     glList.clearArrays()
     if posContoursAll:
-      for n, contourData in enumerate(posContoursAll):
-        print('  >>>contourLevel', n)
-        # self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
-        self._addContoursToGLList(contourData, glList=glList, colour=self.posColour)
-    print('>>>_addContoursToGLList pos', self, process_time()-start_time)
 
-    start_time = process_time()
-    if negContoursAll:
-      for n, contourData in enumerate(negContoursAll):
-        # self._addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
-        self._addContoursToGLList(contourData, glList=glList, colour=self.negColour)
-    print('>>>_addContoursToGLList neg', self, process_time()-start_time)
+      start_time = process_time()
+
+      for n, contourData in enumerate(posContoursAll):
+        # self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
+        _addContoursToGLList(contourData, glList=glList, colour=self.posColour)
+
+      print('>>>_addContoursToGLList pos', self, process_time()-start_time)
+
+
+    # if negContoursAll:
+    #   for n, contourData in enumerate(negContoursAll):
+    #     # self._addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
+    #     _addContoursToGLList(contourData, glList=glList, colour=self.negColour)
 
     ###GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
 
@@ -948,7 +953,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     xDim = dimIndices[0]
     yDim = dimIndices[1]
     orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
-    
+
     # apiSpectrumView = self._apiStripSpectrumView.spectrumView
     # orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
     # dataDims = apiSpectrumView.orderedDataDims
@@ -961,7 +966,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # # yDim = dataDims[1].dim - 1
     # spectrum = self.spectrum
     # dimensionCount = spectrum.dimensionCount
-        
+
     if dimensionCount == 2:
       planeData = spectrum.getPlaneData(xDim=xDim+1, yDim=yDim+1)
       position = [1, 1]
@@ -976,21 +981,21 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
       if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
         return
-        
+
       zRegionValue = (zPosition+0.5*width, zPosition-0.5*width) # Note + and - (axis backwards)
       # zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
       valueToPoint = zDataDim.primaryDataDimRef.valueToPoint
       # -1 below because points start at 1 in data model
       zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
       zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
-      
+
       zPoint0, zPoint1 = (int(zPointFloat0+1), int(zPointFloat1+1)) # this gives first and 1+last integer in range
       if zPoint0 == zPoint1:
         if zPointFloat0-(zPoint0-1) < zPoint1-zPointFloat1: # which is closest to an integer
           zPoint0 -= 1
         else:
           zPoint1 += 1
-      
+
       if (zPoint1 - zPoint0) >= zTotalPointCount:
         zPoint0 = 0
         zPoint1 = zTotalPointCount
@@ -1004,7 +1009,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       # zPointCount = spectrum.pointCounts[zDim]
       zPointOffset = zDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
       zPointCount = zDataDim.numPoints
-            
+
       position = dimensionCount * [1]
       for z in range(zPoint0, zPoint1):
         zPosition = z % zTotalPointCount
@@ -1021,24 +1026,24 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       valuePerPoint, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, zDataDim = self._getSpectrumViewParams(2)
       zPosition = orderedAxes[2].position
       width =  orderedAxes[2].width
-        
+
       if not (minAliasedFrequency <= zPosition <= maxAliasedFrequency):
         return
-        
+
       zRegionValue = (zPosition+0.5*width, zPosition-0.5*width) # Note + and - (axis backwards)
       # zPoint0, zPoint1 = spectrum.getDimPointFromValue(zDim, zRegionValue)
       valueToPoint = zDataDim.primaryDataDimRef.valueToPoint
       # -1 below because points start at 1 in data model
       zPointFloat0 = valueToPoint(zRegionValue[0]) - 1
       zPointFloat1 = valueToPoint(zRegionValue[1]) - 1
-      
+
       zPoint0, zPoint1 = (int(zPointFloat0+1), int(zPointFloat1+1)) # this gives first and 1+last integer in range
       if zPoint0 == zPoint1:
         if zPointFloat0-(zPoint0-1) < zPoint1-zPointFloat1: # which is closest to an integer
           zPoint0 -= 1
         else:
           zPoint1 += 1
-      
+
       if (zPoint1 - zPoint0) >= zTotalPointCount:
         zPoint0 = 0
         zPoint1 = zTotalPointCount
@@ -1047,36 +1052,36 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         zPoint1 %= zTotalPointCount
         if zPoint1 < zPoint0:
           zPoint1 += zTotalPointCount
-          
+
       # zPointOffset = spectrum.pointOffsets[zDim]
       # zPointCount = spectrum.pointCounts[zDim]
       zPointOffset = zDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
       zPointCount = zDataDim.numPoints
-            
+
       # wDim = dataDims[3].dim - 1
       # wDataDim = dataDims[3]
       # wPosition, width, wTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(3)
       valuePerPoint, wTotalPointCount, minAliasedFrequency, maxAliasedFrequency, wDataDim = self._getSpectrumViewParams(3)
       wPosition = orderedAxes[3].position
       width =  orderedAxes[3].width
-        
+
       if not (minAliasedFrequency <= wPosition <= maxAliasedFrequency):
         return
-        
+
       wRegionValue = (wPosition+0.5*width, wPosition-0.5*width) # Note + and - (axis backwards)
       # wPoint0, wPoint1 = spectrum.getDimPointFromValue(wDim, wRegionValue)
       valueToPoint = wDataDim.primaryDataDimRef.valueToPoint
       # -1 below because points start at 1 in data model
       wPointFloat0 = valueToPoint(wRegionValue[0]) - 1
       wPointFloat1 = valueToPoint(wRegionValue[1]) - 1
-      
+
       wPoint0, wPoint1 = (int(wPointFloat0+1), int(wPointFloat1+1)) # this gives first and 1+last integer in range
       if wPoint0 == wPoint1:
         if wPointFloat0-(wPoint0-1) < wPoint1-wPointFloat1: # which is closest to an integer
           wPoint0 -= 1
         else:
           wPoint1 += 1
-          
+
       if (wPoint1 - wPoint0) >= wTotalPointCount:
         wPoint0 = 0
         wPoint1 = wTotalPointCount
@@ -1085,12 +1090,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         wPoint1 %= wTotalPointCount
         if wPoint1 < wPoint0:
           wPoint1 += wTotalPointCount
-          
+
       # wPointOffset = spectrum.pointOffsets[wDim]
       # wPointCount = spectrum.pointCounts[wDim]
       wPointOffset = wDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
       wPointCount = wDataDim.numPoints
-            
+
       position = dimensionCount * [1]
       for z in range(zPoint0, zPoint1):
         zPosition = z % zTotalPointCount
@@ -1104,7 +1109,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
               position[dimIndices[3]] = wPosition + 1
               planeData = spectrum.getPlaneData(position, xDim=xDim+1, yDim=yDim+1)
               yield position, planeData
-          
+
   def _addContoursToDisplayList(self, displayList, contourData, level):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
 
@@ -1126,7 +1131,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     GL.glEndList()
 
-  def _addContoursToGLList(self, contourData, glList=None, colour=None):
+  def _OLDaddContoursToGLList(self, contourData, glList=None, colour=None):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
 
     for contour in contourData:
@@ -1149,7 +1154,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     axisIndex = self._displayOrderSpectrumDimensionIndices[ind]
     valueToPoint = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint
-        
+
     strip = self.strip
     plotWidget = strip.plotWidget
     if plotWidget:

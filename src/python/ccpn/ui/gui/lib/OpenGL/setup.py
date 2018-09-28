@@ -39,8 +39,8 @@ ext = '.pyx' if USE_CYTHON else '.c'
 # make a list of Extensions in here, or use '*', '*'+ext to catch all,
 # but puts .so files into a subdirectory /python
 # ignore 'does not match fully qualified name' warnings
-extensions = [Extension('CcpnOpenGLLabelling',
-                        ['CcpnOpenGLLabelling'+ext],
+extensions = [Extension('CcpnOpenGLContours',
+                        ['CcpnOpenGLContours'+ext],
                         language='c',
                         include_dirs=['c/']),]
 

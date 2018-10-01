@@ -64,6 +64,23 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
       the second index is 0 for x and 1 for y
 */
 
+// define a global object(cheating for the minute)
+static PyArrayObject *glObject;
+static int numIndices = 0;
+static int numVertices = 0;
+static int numColours = 0;
+static int indexCount = 0;
+static int vertexCount = 0;
+static int colourCount = 0;
+static int lastIndex = 0;
+static int lastVertex = 0;
+static PyArrayObject *indexing;
+static PyArrayObject *vertices;
+static PyArrayObject *colours;
+static unsigned int *indexPTR;
+static float32 *vertexPTR;
+static float32 *colourPTR;
+
 #define  CONTOUR_NALLOC  50  /* allocate vertices in this size bunch */
 
 static PyObject *ErrorObject;   /* locally-raised exception */
@@ -883,6 +900,10 @@ static CcpnStatus process_chain(PyObject *contours, Contour_vertex v)
         *((float *) (PyArray_GETPTR1(polyline, k++))) = v->x[1];
     }
 
+    // ejb - keep a count of the number of indices/vertices
+    numIndices += i;
+    numVertices += i;
+
     return CCPN_OK;
 }
 
@@ -911,6 +932,50 @@ static CcpnStatus process_chains(PyObject *contours, Contour_vertices contour_ve
     }
 
     return CCPN_OK;
+}
+
+static fillContours(PyArrayObject *contours, PyArrayObject *lineColour)
+{
+    int i, col, z, k, l, contCount = PyList_GET_SIZE(contours);
+    int lineCount, fromSize, endIndex;
+    PyObject *thisContour, *thisLine;
+    float32 *fromArray;
+    float32 *fromColour = PyArray_DATA(lineColour);
+
+    for (l = 0; l < contCount; l++)
+    {
+        thisContour = (PyObject *) PyList_GET_ITEM(contours, l);
+
+        lineCount = PyList_GET_SIZE(thisContour);
+
+        for (k=0; k < lineCount; k++)
+        {
+            thisLine = (PyObject *) PyList_GET_ITEM(thisContour, k);
+            lineCount = (unsigned int *) PyArray_Size(thisLine);
+
+            // point to the first element in this contour line
+            fromArray = (float32 *) PyArray_DATA(thisLine);
+
+            indexPTR[indexCount++] = lineCount;
+
+//            endIndex = lastIndex;
+//            for (i=0, z=0; i < (int) (lineCount / 2); i++)
+//            {
+//                indexPTR[indexCount++] = lastIndex++;
+//                indexPTR[indexCount++] = lastIndex;
+//                vertexPTR[vertexCount++] = fromArray[z++];
+//                vertexPTR[vertexCount++] = fromArray[z++];
+//
+//                // copy the colour across
+//                for (col=0; col<4; col++)
+//                {
+//                    colourPTR[colourCount+col] = fromColour[col];
+//                }
+//                colourCount += 4;
+//            }
+//            indexPTR[indexCount-1] = endIndex;
+        }
+    }
 }
 
 static PyObject *calculate_contours(PyArrayObject *data, PyArrayObject *levels)
@@ -1053,40 +1118,129 @@ static appendFloatList(PyObject *list, double value)
 
 static PyObject *contourerGLList(PyObject *self, PyObject *args)
 {
-    PyArrayObject *data_obj, *contourColours;
+    PyArrayObject *dataArray, *posLevels, *posColour;
+    PyArrayObject *negLevels, *negColour;
     PyObject *contours;
-    PyArrayObject *colours;
+    PyObject *posContours, *negContours;
+
+//    PyArrayObject *colours;
 
     // define an empty array to pass out
     contours = newList(1);
 
     // assumes that the parameters are all numpy arrays
-    if (!PyArg_ParseTuple(args, "O!O!", &PyArray_Type, &data_obj,
-                                        &PyArray_Type, &contourColours))
+    if (!PyArg_ParseTuple(args, "O!O!O!O!O!", &PyArray_Type, &dataArray,
+                                            &PyArray_Type, &posLevels,
+                                            &PyArray_Type, &negLevels,
+                                            &PyArray_Type, &posColour,
+                                            &PyArray_Type, &negColour))
 
-        RETURN_OBJ_ERROR("need arguments: dataArray, colours");
+        RETURN_OBJ_ERROR("need arguments: dataArray, posLevels, negLevels, posColour, negColour");
 
-    if (PyArray_TYPE(data_obj) != NPY_FLOAT)
+    if (PyArray_TYPE(dataArray) != NPY_FLOAT)
         RETURN_OBJ_ERROR("dataArray needs to be array of floats");
 
-    if (PyArray_NDIM(data_obj) != 2)
+    if (PyArray_NDIM(dataArray) != 2)
         RETURN_OBJ_ERROR("dataArray needs to be NumPy array with ndim 2");
 
-    if (PyArray_TYPE(contourColours) != NPY_FLOAT32)
-        RETURN_OBJ_ERROR("contourColours needs to be array of floats");
+    if (PyArray_TYPE(posLevels) != NPY_FLOAT)
+        RETURN_OBJ_ERROR("posLevels needs to be array of floats");
 
-    if (PyArray_NDIM(contourColours) != 1)
-        RETURN_OBJ_ERROR("contourColours needs to be NumPy array with ndim 1");
+    if (PyArray_NDIM(posLevels) != 1)
+        RETURN_OBJ_ERROR("posLevels needs to be NumPy array with ndim 1");
 
-    npy_intp dims[1];
-    dims[0] = 4;
+    if (PyArray_TYPE(negLevels) != NPY_FLOAT)
+        RETURN_OBJ_ERROR("negLevels needs to be array of floats");
+
+    if (PyArray_NDIM(negLevels) != 1)
+        RETURN_OBJ_ERROR("negLevels needs to be NumPy array with ndim 1");
+
+    if (PyArray_TYPE(posColour) != NPY_FLOAT32)
+        RETURN_OBJ_ERROR("posColour needs to be array of floats");
+
+    if (PyArray_NDIM(posColour) != 1)
+        RETURN_OBJ_ERROR("posColour needs to be NumPy array with ndim 1");
+
+    if (PyArray_TYPE(negColour) != NPY_FLOAT32)
+        RETURN_OBJ_ERROR("negColour needs to be array of floats");
+
+    if (PyArray_NDIM(negColour) != 1)
+        RETURN_OBJ_ERROR("negColour needs to be NumPy array with ndim 1");
+
+//    npy_intp dims[1] = {24};
+//    colours = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+//    if (!colours)
+//    	return CCPN_ERROR;
+
+    // initialise the index/vertex count
+    numIndices = 0;
+    numVertices = 0;
+    numColours = 0;
+
+    indexCount = 0;
+    vertexCount = 0;
+    colourCount = 0;
+
+    // get the positive contours
+    posContours = calculate_contours(dataArray, posLevels);
+    negContours = calculate_contours(dataArray, negLevels);
+
+    npy_intp dims[1] = {numIndices};
+    indexing = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_UINT32);
+    if (!indexing)
+    	return CCPN_ERROR;
+
+    dims[0] = 2*numVertices;
+    vertices = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+    if (!vertices)
+    	return CCPN_ERROR;
+
+    dims[0] = 4*numVertices;
     colours = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_FLOAT32);
     if (!colours)
     	return CCPN_ERROR;
 
-    PyList_SET_ITEM(contours, 0, colours);
+    indexPTR = PyArray_GETPTR1(indexing,0);
+    vertexPTR = PyArray_GETPTR1(vertices,0);
+    colourPTR = PyArray_GETPTR1(colours,0);
+    lastIndex = 0;
+    lastVertex = 0;
 
-    return contours;
+    // fill the new arrays
+    fillContours(posContours, posColour);
+    //fillContours(negContours, negColour);
+
+    PyObject *ind = PyLong_FromDouble(numIndices);
+    PyObject *vect = PyLong_FromDouble(numVertices);
+
+    glObject = newList(5);
+    PyList_SET_ITEM(glObject, 0, ind);
+    PyList_SET_ITEM(glObject, 1, vect);
+    PyList_SET_ITEM(glObject, 2, indexing);
+    PyList_SET_ITEM(glObject, 3, vertices);
+    PyList_SET_ITEM(glObject, 4, colours);
+
+    return glObject;
+
+//    // get the start/size of the numpy array
+//    float32 *levelPTR = PyArray_GETPTR1(colours,0);
+//    int sizeColours = (float32 *) PyArray_SIZE(colours);
+//
+////    for (int i=0; i < sizeColours; i++, levelPTR++)
+////    {
+////        // fast memory accessing :)
+////        *levelPTR = i+32;
+////    }
+//
+//    for (int i=0; i < sizeColours; i++)
+//    {
+//        // fast memory accessing :)
+//        levelPTR[i] = i+15.765;
+//    }
+//
+//    PyList_SET_ITEM(contours, 0, colours);
+//
+//    return contours;
 }
 
 static char contourer_doc[] = "Create 2D contours for spectral data";

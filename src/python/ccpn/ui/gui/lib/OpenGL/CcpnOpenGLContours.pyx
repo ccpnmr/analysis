@@ -83,7 +83,6 @@ def _addContoursToGLList(contourData, glList=None, colour=None):
         # glList.colors = np.append(glList.colors, colour * thisNumVertices)
 
         glList.numVertices = len(verticesVIEW) // 2
-        print('>>>glList.numVertices')
 
     glList.colors = pynp.array(colorsVIEW, dtype=pynp.float32)
     glList.indices = pynp.array(indicesVIEW, dtype=pynp.uint32)

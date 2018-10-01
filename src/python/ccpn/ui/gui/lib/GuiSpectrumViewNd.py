@@ -874,40 +874,41 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #for position, dataArray in self.getPlaneData(guiStrip):
     posContoursAll = negContoursAll = None
 
+    test = None
     for position, dataArray in self._getPlaneData():
 
       #print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray), dataArray)
 
-      if doPosLevels:
-        start_time = process_time()
-
-        posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-
-        # print("posContours", posContours)
-        print('>>>_addContoursToGLList pos', self, process_time() - start_time)
-
-        if posContoursAll is None:
-          posContoursAll = posContours
-        else:
-          for n, contourData in enumerate(posContours):
-            if len(posContoursAll) == n: # this can happen (if no contours at a given level then contourer immediately exits)
-              posContoursAll.append(contourData)
-            else:
-              posContoursAll[n].extend(contourData)
-            # print(contourData)
-
-      if doNegLevels:
-        negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
-        #print("negContours", len(negContours))
-        if negContoursAll is None:
-          negContoursAll = negContours
-        else:
-          for n, contourData in enumerate(negContours):
-            if len(negContoursAll) == n: # this can happen (if no contours at a given level then contourer immediately exits)
-              negContoursAll.append(contourData)
-            else:
-              negContoursAll[n].extend(contourData)
-            # print(contourData)
+      # if doPosLevels:
+      #   start_time = process_time()
+      #
+      #   posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
+      #
+      #   # print("posContours", posContours)
+      #   print('>>>_addContoursToGLList pos', self, process_time() - start_time)
+      #
+      #   if posContoursAll is None:
+      #     posContoursAll = posContours
+      #   else:
+      #     for n, contourData in enumerate(posContours):
+      #       if len(posContoursAll) == n: # this can happen (if no contours at a given level then contourer immediately exits)
+      #         posContoursAll.append(contourData)
+      #       else:
+      #         posContoursAll[n].extend(contourData)
+      #       # print(contourData)
+      #
+      # if doNegLevels:
+      #   negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
+      #   #print("negContours", len(negContours))
+      #   if negContoursAll is None:
+      #     negContoursAll = negContours
+      #   else:
+      #     for n, contourData in enumerate(negContours):
+      #       if len(negContoursAll) == n: # this can happen (if no contours at a given level then contourer immediately exits)
+      #         negContoursAll.append(contourData)
+      #       else:
+      #         negContoursAll[n].extend(contourData)
+      #       # print(contourData)
 
       test = Contourer2d.contourerGLList(dataArray,
                                          posLevelsArray,
@@ -915,18 +916,23 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                          np.array(self.posColour, dtype=np.float32),
                                          np.array(self.negColour, dtype=np.float32))
 
-      print('>>>contourerGLList', test)
-
     glList.clearArrays()
-    if posContoursAll:
 
-      start_time = process_time()
+    if test and test[1] > 0:
+      glList.numVertices = test[1]
+      glList.indices = test[2]
+      glList.vertices = test[3]
+      glList.colors = test[4]
 
-      for n, contourData in enumerate(posContoursAll):
-        # self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
-        _addContoursToGLList(contourData, glList=glList, colour=self.posColour)
-
-      print('>>>_addContoursToGLList pos', self, process_time()-start_time)
+    # if posContoursAll:
+    #
+    #   start_time = process_time()
+    #
+    #   for n, contourData in enumerate(posContoursAll):
+    #     # self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
+    #     _addContoursToGLList(contourData, glList=glList, colour=self.posColour)
+    #
+    #   print('>>>_addContoursToGLList pos', self, process_time()-start_time)
 
 
     # if negContoursAll:

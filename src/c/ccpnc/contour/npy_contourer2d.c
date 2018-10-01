@@ -901,8 +901,8 @@ static CcpnStatus process_chain(PyObject *contours, Contour_vertex v)
     }
 
     // ejb - keep a count of the number of indices/vertices
-    numIndices += i;
-    numVertices += i;
+    numIndices += 2*nvertices;
+    numVertices += nvertices;
 
     return CCPN_OK;
 }
@@ -956,25 +956,25 @@ static fillContours(PyArrayObject *contours, PyArrayObject *lineColour)
             // point to the first element in this contour line
             fromArray = (float32 *) PyArray_DATA(thisLine);
 
-            // duh - used lineCount in wrong place
-            indexPTR[indexCount++] = lineCount;
+//            // duh - used lineCount in wrong place
+//            indexPTR[indexCount++] = lineCount;
 
-//            endIndex = lastIndex;
-//            for (i=0, z=0; i < (int) (lineCount / 2); i++)
-//            {
-//                indexPTR[indexCount++] = lastIndex++;
-//                indexPTR[indexCount++] = lastIndex;
-//                vertexPTR[vertexCount++] = fromArray[z++];
-//                vertexPTR[vertexCount++] = fromArray[z++];
-//
-//                // copy the colour across
-//                for (col=0; col<4; col++)
-//                {
-//                    colourPTR[colourCount+col] = fromColour[col];
-//                }
-//                colourCount += 4;
-//            }
-//            indexPTR[indexCount-1] = endIndex;
+            endIndex = lastIndex;
+            for (i=0, z=0; i < (int) (lineCount / 2); i++)
+            {
+                indexPTR[indexCount++] = lastIndex++;
+                indexPTR[indexCount++] = lastIndex;
+                vertexPTR[vertexCount++] = fromArray[z++];
+                vertexPTR[vertexCount++] = fromArray[z++];
+
+                // copy the colour across
+                for (col=0; col<4; col++)
+                {
+                    colourPTR[colourCount+col] = fromColour[col];
+                }
+                colourCount += 4;
+            }
+            indexPTR[indexCount-1] = endIndex;
         }
     }
 }
@@ -1209,7 +1209,7 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
 
     // fill the new arrays
     fillContours(posContours, posColour);
-    //fillContours(negContours, negColour);
+    fillContours(negContours, negColour);
 
     PyObject *ind = PyLong_FromDouble(numIndices);
     PyObject *vect = PyLong_FromDouble(numVertices);

@@ -875,9 +875,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     posContoursAll = negContoursAll = None
 
     test = None
+    dataArrays = tuple()
     for position, dataArray in self._getPlaneData():
 
-      #print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray), dataArray)
+      print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray))
+      dataArrays += (dataArray,)
 
       # if doPosLevels:
       #   start_time = process_time()
@@ -910,7 +912,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       #         negContoursAll[n].extend(contourData)
       #       # print(contourData)
 
-      test = Contourer2d.contourerGLList(dataArray,
+      test = Contourer2d.contourerGLList(dataArrays,
                                          posLevelsArray,
                                          negLevelsArray,
                                          np.array(self.posColour, dtype=np.float32),
@@ -932,7 +934,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #     # self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
     #     _addContoursToGLList(contourData, glList=glList, colour=self.posColour)
     #
-    #   print('>>>_addContoursToGLList pos', self, process_time()-start_time)
+    # print('>>>_addContoursToGLList pos', self)
 
 
     # if negContoursAll:

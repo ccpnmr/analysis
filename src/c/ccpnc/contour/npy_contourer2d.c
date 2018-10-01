@@ -1119,10 +1119,12 @@ static appendFloatList(PyObject *list, double value)
 
 static PyObject *contourerGLList(PyObject *self, PyObject *args)
 {
+    PyObject *dataArrays;
     PyArrayObject *dataArray, *posLevels, *posColour;
     PyArrayObject *negLevels, *negColour;
     PyObject *contours;
-    PyObject *posContours, *negContours;
+//    PyObject *posContours, *negContours;
+    int arr;
 
 //    PyArrayObject *colours;
 
@@ -1130,19 +1132,19 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
     contours = newList(1);
 
     // assumes that the parameters are all numpy arrays
-    if (!PyArg_ParseTuple(args, "O!O!O!O!O!", &PyArray_Type, &dataArray,
+    if (!PyArg_ParseTuple(args, "O!O!O!O!O!", &PyTuple_Type, &dataArrays,
                                             &PyArray_Type, &posLevels,
                                             &PyArray_Type, &negLevels,
                                             &PyArray_Type, &posColour,
                                             &PyArray_Type, &negColour))
 
-        RETURN_OBJ_ERROR("need arguments: dataArray, posLevels, negLevels, posColour, negColour");
+        RETURN_OBJ_ERROR("need arguments: dataArrays, posLevels, negLevels, posColour, negColour");
 
-    if (PyArray_TYPE(dataArray) != NPY_FLOAT)
-        RETURN_OBJ_ERROR("dataArray needs to be array of floats");
-
-    if (PyArray_NDIM(dataArray) != 2)
-        RETURN_OBJ_ERROR("dataArray needs to be NumPy array with ndim 2");
+//    if (PyArray_TYPE(dataArray) != NPY_FLOAT)
+//        RETURN_OBJ_ERROR("dataArray needs to be array of floats");
+//
+//    if (PyArray_NDIM(dataArray) != 2)
+//        RETURN_OBJ_ERROR("dataArray needs to be NumPy array with ndim 2");
 
     if (PyArray_TYPE(posLevels) != NPY_FLOAT)
         RETURN_OBJ_ERROR("posLevels needs to be array of floats");
@@ -1182,9 +1184,17 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
     vertexCount = 0;
     colourCount = 0;
 
-    // get the positive contours
-    posContours = calculate_contours(dataArray, posLevels);
-    negContours = calculate_contours(dataArray, negLevels);
+    int numArrays = PyTuple_GET_SIZE(dataArrays);
+    PyObject *posContours[numArrays], *negContours[numArrays];
+
+    for (arr=0; arr < numArrays; arr++)
+    {
+        dataArray = (PyArrayObject *) PyTuple_GET_ITEM(dataArrays, arr);
+
+        // get the positive contours
+        posContours[arr] = calculate_contours(dataArray, posLevels);
+        negContours[arr] = calculate_contours(dataArray, negLevels);
+    }
 
     npy_intp dims[1] = {numIndices};
     indexing = (PyArrayObject *) PyArray_SimpleNew(1, dims, NPY_UINT32);
@@ -1207,9 +1217,12 @@ static PyObject *contourerGLList(PyObject *self, PyObject *args)
     lastIndex = 0;
     lastVertex = 0;
 
-    // fill the new arrays
-    fillContours(posContours, posColour);
-    fillContours(negContours, negColour);
+    for (arr=0; arr < numArrays; arr++)
+    {
+        // fill the new arrays
+        fillContours(posContours[arr], posColour);
+        fillContours(negContours[arr], negColour);
+    }
 
     PyObject *ind = PyLong_FromDouble(numIndices);
     PyObject *vect = PyLong_FromDouble(numVertices);

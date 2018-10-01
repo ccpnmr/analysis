@@ -878,7 +878,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     dataArrays = tuple()
     for position, dataArray in self._getPlaneData():
 
-      print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray))
+      # print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray))
       dataArrays += (dataArray,)
 
       # if doPosLevels:

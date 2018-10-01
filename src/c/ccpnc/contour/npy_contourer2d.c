@@ -937,7 +937,7 @@ static CcpnStatus process_chains(PyObject *contours, Contour_vertices contour_ve
 static fillContours(PyArrayObject *contours, PyArrayObject *lineColour)
 {
     int i, col, z, k, l, contCount = PyList_GET_SIZE(contours);
-    int lineCount, fromSize, endIndex;
+    int lineCount, fromSize, endIndex, contourCount;
     PyObject *thisContour, *thisLine;
     float32 *fromArray;
     float32 *fromColour = PyArray_DATA(lineColour);
@@ -946,9 +946,9 @@ static fillContours(PyArrayObject *contours, PyArrayObject *lineColour)
     {
         thisContour = (PyObject *) PyList_GET_ITEM(contours, l);
 
-        lineCount = PyList_GET_SIZE(thisContour);
+        contourCount = PyList_GET_SIZE(thisContour);
 
-        for (k=0; k < lineCount; k++)
+        for (k=0; k < contourCount; k++)
         {
             thisLine = (PyObject *) PyList_GET_ITEM(thisContour, k);
             lineCount = (unsigned int *) PyArray_Size(thisLine);
@@ -956,6 +956,7 @@ static fillContours(PyArrayObject *contours, PyArrayObject *lineColour)
             // point to the first element in this contour line
             fromArray = (float32 *) PyArray_DATA(thisLine);
 
+            // duh - used lineCount in wrong place
             indexPTR[indexCount++] = lineCount;
 
 //            endIndex = lastIndex;

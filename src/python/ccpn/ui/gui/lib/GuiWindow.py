@@ -464,7 +464,10 @@ class GuiWindow():
 
         # colour = colourDict.get(atomName[:min(2,len(atomName))])
         colourMarks = guiSettings.getColours().get(guiSettings.MARKS_COLOURS)
-        colour = colourMarks[atomName[:min(2,len(atomName))]]
+        # colour = colourMarks[atomName[:min(2,len(atomName))]]
+        colour = colourMarks.get(atomName[:min(2,len(atomName))])
+        if not colour:
+          colour = colourMarks.get(guiSettings.DEFAULT)
 
         # exit if mark exists
         found = False

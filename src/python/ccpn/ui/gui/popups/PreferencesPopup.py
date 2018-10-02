@@ -194,8 +194,8 @@ class PreferencesPopup(CcpnDialog):
         self.colourSchemeBox.addItems(COLOUR_SCHEMES)
         self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(
                 self.preferences.general.colourScheme))
-        self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
         self._oldColourScheme = self.preferences.general.colourScheme
+        self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
 
         row += 1
         self.useNativeLabel = Label(parent, text="Use Native File Dialogs: ", grid=(row, 0))
@@ -206,6 +206,10 @@ class PreferencesPopup(CcpnDialog):
         self.useNativeLabel = Label(parent, text="Use Native Web Browser: ", grid=(row, 0))
         self.useNativeBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.useNativeWebbrowser)
         self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
+
+        self._toggleGeneralOptions('useNativeWebbrowser', True)
+        self.useNativeLabel.setEnabled(False)
+        self.useNativeBox.setEnabled(False)
 
         row += 1
         self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit: ", grid=(row, 0))

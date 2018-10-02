@@ -211,11 +211,15 @@ class ExportStripToFilePopup(ExportDialog):
         # populate initial pulldown from background colour
         spectrumColourKeys = list(spectrumColours.keys())
         fillColourPulldown(self.colourBox, allowAuto=False)
-        if self.current.strip:
-            self.backgroundColour = rgbRatioToHex(*self.current.strip._CcpnGLWidget.background[:3])
-        else:
-            print('>>>NOSTRIP')
-            self.backgroundColour = spectrumColours[0]
+
+        # if self.current.strip:
+        #     self.backgroundColour = rgbRatioToHex(*self.current.strip._CcpnGLWidget.background[:3])
+        # else:
+        #     self.backgroundColour = spectrumColours[0]
+
+        # set background to white
+        self.colourBox.setCurrentText(spectrumColours['#ffffff'])
+        self._changeBackgroundPulldown(0)
 
         if self.backgroundColour in spectrumColourKeys:
             self.colourBox.setCurrentText(spectrumColours[self.backgroundColour])
@@ -224,8 +228,6 @@ class ExportStripToFilePopup(ExportDialog):
             fillColourPulldown(self.colourBox, allowAuto=False)
             spectrumColourKeys = list(spectrumColours.keys())
             self.colourBox.setCurrentText(spectrumColours[self.backgroundColour])
-
-        self.colourBox.setCurrentText(spectrumColours['#ffffff'])
 
         self.colourBox.activated.connect(self._changeBackgroundPulldown)
 

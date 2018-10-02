@@ -373,7 +373,7 @@ class GLExporter():
                             vectEnd = mat.dot(vectEnd)
                             newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
 
-                            colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=thisSpec.colors[ii0 * 4 + 3])
+                            colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=min(max(thisSpec.colors[ii0 * 4 + 3], 0.0), 0.9999))
                             colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                             newLine = self.parent.lineVisible(newLine,

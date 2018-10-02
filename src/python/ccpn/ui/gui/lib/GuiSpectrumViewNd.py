@@ -877,46 +877,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     test = None
     dataArrays = tuple()
     for position, dataArray in self._getPlaneData():
-
-      # print ("gotPlaneData", position, doPosLevels, doNegLevels, len(dataArray))
       dataArrays += (dataArray,)
 
-      # if doPosLevels:
-      #   start_time = process_time()
-      #
-      #   posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-      #
-      #   # print("posContours", posContours)
-      #   print('>>>_addContoursToGLList pos', self, process_time() - start_time)
-      #
-      #   if posContoursAll is None:
-      #     posContoursAll = posContours
-      #   else:
-      #     for n, contourData in enumerate(posContours):
-      #       if len(posContoursAll) == n: # this can happen (if no contours at a given level then contourer immediately exits)
-      #         posContoursAll.append(contourData)
-      #       else:
-      #         posContoursAll[n].extend(contourData)
-      #       # print(contourData)
-      #
-      # if doNegLevels:
-      #   negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
-      #   #print("negContours", len(negContours))
-      #   if negContoursAll is None:
-      #     negContoursAll = negContours
-      #   else:
-      #     for n, contourData in enumerate(negContours):
-      #       if len(negContoursAll) == n: # this can happen (if no contours at a given level then contourer immediately exits)
-      #         negContoursAll.append(contourData)
-      #       else:
-      #         negContoursAll[n].extend(contourData)
-      #       # print(contourData)
-
-      test = Contourer2d.contourerGLList(dataArrays,
-                                         posLevelsArray,
-                                         negLevelsArray,
-                                         np.array(self.posColour, dtype=np.float32),
-                                         np.array(self.negColour, dtype=np.float32))
+    test = Contourer2d.contourerGLList(dataArrays,
+                                       posLevelsArray,
+                                       negLevelsArray,
+                                       np.array(self.posColour, dtype=np.float32),
+                                       np.array(self.negColour, dtype=np.float32))
 
     glList.clearArrays()
 

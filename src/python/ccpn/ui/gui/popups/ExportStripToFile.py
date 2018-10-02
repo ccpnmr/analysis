@@ -527,7 +527,7 @@ class ExportStripToFilePopup(ExportDialog):
                     svgExport.writeSVGFile()
 
     def actionButtons(self):
-        self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save & Close'], [self._rejectDialog, self._saveDialog, self._acceptDialog],
+        self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save and Close'], [self._rejectDialog, self._saveDialog, self._acceptDialog],
                                   tipTexts=['Close the export dialog',
                                             'Export the strip to a file, dialog will remain open',
                                             'Export the strip and close the dialog'],

@@ -323,11 +323,20 @@ class GeneralTab(QtWidgets.QWidget, Base):
             Label(self, text='n/a', vAlign='t', hAlign='l', grid=(11, 1))
 
             Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(12, 0))
-            self.noiseLevelData = LineEdit(self, vAlign='t', hAlign='l', grid=(12, 1))
+            self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', hAlign='l', grid=(12, 1))
+
+            self.noiseLevelData.valueChanged.connect(self._queueNoiseLevelDataChange)
             if spectrum.noiseLevel is not None:
-                self.noiseLevelData.setText(str('%.3d' % spectrum.noiseLevel))
+                self.noiseLevelData.setValue(spectrum.noiseLevel)
             else:
-                self.noiseLevelData.setText('None')
+                self.noiseLevelData.setValue(0)
+
+            # self.noiseLevelData.textChanged.connect(self._queueNoiseLevelDataChange)
+            # if spectrum.noiseLevel is not None:
+            #     self.noiseLevelData.setText(str('%.3d' % spectrum.noiseLevel))
+            # else:
+            #     self.noiseLevelData.setText('None')
+
         else:
             Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
             self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(7, 1))
@@ -372,13 +381,18 @@ class GeneralTab(QtWidgets.QWidget, Base):
             self.spectrumScalingData.textChanged.connect(self._queueSpectrumScaleChange)
 
             noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(10, 0))
-            self.noiseLevelData = LineEdit(self, vAlign='t', grid=(10, 1))
-            self.noiseLevelData.textChanged.connect(self._queueNoiseLevelDataChange)
+            self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', grid=(10, 1))
+            self.noiseLevelData.valueChanged.connect(self._queueNoiseLevelDataChange)
 
             if spectrum.noiseLevel is None:
-                self.noiseLevelData.setText(str('%.3d' % spectrum.estimateNoise()))
+                self.noiseLevelData.setValue(spectrum.estimateNoise())
             else:
-                self.noiseLevelData.setText('%.3d' % spectrum.noiseLevel)
+                self.noiseLevelData.setValue(spectrum.noiseLevel)
+
+            # if spectrum.noiseLevel is None:
+            #     self.noiseLevelData.setText(str('%.3d' % spectrum.estimateNoise()))
+            # else:
+            #     self.noiseLevelData.setText('%.3d' % spectrum.noiseLevel)
 
             doubleCrosshairLabel = Label(self, text="Show Second Cursor", grid=(11, 0), vAlign='t', hAlign='l')
             doubleCrosshairCheckBox = CheckBox(self, grid=(11, 1), checked=True, vAlign='t', hAlign='l')
@@ -439,11 +453,11 @@ class GeneralTab(QtWidgets.QWidget, Base):
         self.pythonConsole.writeConsoleCommand("spectrum.scale = %s" % self.spectrumScalingData.text(), spectrum=self.spectrum)
 
     def _queueNoiseLevelDataChange(self):
-        self._changes['spectrumNoiseLevel'] = partial(self._setNoiseLevelData, self.noiseLevelData.text())
+        self._changes['spectrumNoiseLevel'] = partial(self._setNoiseLevelData, self.noiseLevelData.value())
 
     def _setNoiseLevelData(self, noise):
         self.spectrum.noiseLevel = float(noise)
-        self._writeLoggingMessage("spectrum.noiseLevel = %s" % self.noiseLevelData.text())
+        self._writeLoggingMessage("spectrum.noiseLevel = %s" % self.noiseLevelData.value())
 
     def _queueChangePositiveContourDisplay(self, state):
         self._changes['positiveContourDisplay'] = partial(self._changePositiveContourDisplay, state)

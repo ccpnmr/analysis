@@ -64,12 +64,16 @@ class SetupNmrResiduesPopup(CcpnDialog):
       nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
       keepAssignments = self.assignmentCheckBox.isChecked() #This option is broken.
 
+      # go through all the peaks in the peakList
       for peak in peakList.peaks:
-        nmrResidue = nmrChain.newNmrResidue()
-        for i, axisCode in enumerate(peak.axisCodes):
-          if not keepAssignments or not any(len(dimensionNmrAtoms) > 0 for dimensionNmrAtoms in peak.dimensionNmrAtoms):
-            nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
-            peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
+
+        # only process those that are empty OR those not empty when checkbox cleared
+        if not keepAssignments or all(not dimensionNmrAtoms for dimensionNmrAtoms in peak.dimensionNmrAtoms):
+
+          nmrResidue = nmrChain.newNmrResidue()
+          for i, axisCode in enumerate(peak.axisCodes):
+              nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
+              peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
 
     finally:
       self.accept()

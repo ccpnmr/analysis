@@ -112,10 +112,10 @@ class GLExporter():
 
         # set default colours
         # self.backgroundColour = colors.Color(*self.parent.background[0:3],
-        #                                      alpha=self.parent.background[3])
-        self.backgroundColour = colors.Color(*self.params[GLBACKGROUND], alpha=1.0)
+        #                                      alpha=float(self.parent.background[3]))
+        self.backgroundColour = colors.Color(*self.params[GLBACKGROUND], alpha=float(1.0))
         self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
-                                             alpha=self.parent.foreground[3])
+                                             alpha=float(self.parent.foreground[3]))
         self.baseThickness = self.params[GLBASETHICKNESS]
         self.symbolThickness = self.params[GLSYMBOLTHICKNESS]
 
@@ -373,7 +373,7 @@ class GLExporter():
                             vectEnd = mat.dot(vectEnd)
                             newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
 
-                            colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=min(max(thisSpec.colors[ii0 * 4 + 3], 0.0), 0.9999))
+                            colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=float(thisSpec.colors[ii0 * 4 + 3]))
                             colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                             newLine = self.parent.lineVisible(newLine,
@@ -427,7 +427,7 @@ class GLExporter():
                 fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
                 if spectrumView.spectrum.dimensionCount > 1:
                     fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
-                    colour = colors.Color(*spectrumView.posColour[0:3], alpha=0.5)
+                    colour = colors.Color(*spectrumView.posColour[0:3], alpha=float(0.5))
                 else:
                     fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
 
@@ -436,7 +436,7 @@ class GLExporter():
                     colG = int(colour.strip('# ')[2:4], 16) / 255.0
                     colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-                    colour = colors.Color(colR, colG, colB, alpha=0.5)
+                    colour = colors.Color(colR, colG, colB, alpha=float(0.5))
 
                 colourPath = 'spectrumViewBoundaries%s%s%s%s%s' % (
                     spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
@@ -1142,7 +1142,7 @@ class GLExporter():
             for vv in ii0:
                 newLine.extend([indArray.vertices[vv * 2], indArray.vertices[vv * 2 + 1]])
 
-            colour = (setColour or colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=indArray.colors[ii0[0] * 4 + 3]))
+            colour = (setColour or colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=float(indArray.colors[ii0[0] * 4 + 3])))
             colourPath = 'spectrumView%s%s%s%s%s' % (name,
                                                      colour.red, colour.green, colour.blue, colour.alpha)
 
@@ -1374,7 +1374,7 @@ if __name__ == '__main__':
     p.close()
     c.clipPath(p, fill=0, stroke=0)
 
-    red50transparent = colors.Color(100, 0, 0, alpha=0.5)
+    red50transparent = colors.Color(100, 0, 0, alpha=float(0.5))
     c.setFillColor(colors.black)
     c.setFont('Helvetica', 10)
     c.drawString(25, 180, 'solid')

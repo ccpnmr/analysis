@@ -78,7 +78,7 @@ class DeleteItemsPopup(CcpnDialog):
 
     def _refreshGLItems(self):
         # emit a signal to rebuild all peaks and multiplets
-        self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])
+        self.GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
 
     def _okButton(self):
         """

@@ -1164,6 +1164,21 @@ def _spectrumHasChanged(spectrum:Spectrum):
       # update toolbar button name
       action.setText(spectrum.name)
 
+  # force redraw of the spectra
+  from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+  for specView in spectrum.spectrumViews:
+    specView.buildContours = True
+
+  # fire refresh event to repaint the screen
+  GLSignals = GLNotifier(parent=spectrum)
+  targets = [objList for objList in spectrum.peakLists]+[objList for objList in spectrum.multipletLists]
+  GLSignals.emitEvent(targets=targets, triggers=[GLNotifier.GLPEAKLISTS,
+                                                  GLNotifier.GLPEAKLISTLABELS,
+                                                 GLNotifier.GLMULTIPLETLISTS,
+                                                 GLNotifier.GLMULTIPLETLISTLABELS
+                                                 ])
+
 def _deletedSpectrumView(project:Project, apiSpectrumView):
   """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
   spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]

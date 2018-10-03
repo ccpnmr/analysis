@@ -3799,11 +3799,15 @@ class CcpnGLWidget(QOpenGLWidget):
                         #         if integralListView in self._GLIntegralLists.keys():
                         #             self._updateHighlightedIntegrals(spectrumView, integralListView)
 
-                    if GLNotifier.GLCONTOURS in triggers:
+                    if GLNotifier.GLALLCONTOURS in triggers:
                         self.buildAllContours()
 
                     if GLNotifier.GLALLPEAKS in triggers:
                         self._GLPeaks.updateAllSymbols()
+
+                    # Integrals are handled differently
+                    # if GLNotifier.GLALLINTEGRALS in triggers:
+                    #     self._GLIntegrals.updateAllSymbols()
 
                     if GLNotifier.GLALLMULTIPLETS in triggers:
                         self._GLMultiplets.updateAllSymbols()

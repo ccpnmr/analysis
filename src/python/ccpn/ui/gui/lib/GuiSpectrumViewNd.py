@@ -29,7 +29,6 @@ import math
 import numpy
 import os
 import numpy as np
-from time import process_time
 
 from OpenGL import GL
 from OpenGL.error import GLError

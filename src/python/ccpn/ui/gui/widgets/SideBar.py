@@ -688,7 +688,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     #  Force redrawing
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=self)
-    GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLMULTIPLETS])
+    GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
 
 
   # def _traverse(self, o, tree_types=(list, tuple)):

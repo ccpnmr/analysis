@@ -121,7 +121,7 @@ class PreferencesPopup(CcpnDialog):
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
         GLSignals = GLNotifier(parent=self)
-        GLSignals.emitEvent(triggers=[GLNotifier.GLCONTOURS,
+        GLSignals.emitEvent(triggers=[GLNotifier.GLALLCONTOURS,
                                       GLNotifier.GLALLPEAKS,
                                       GLNotifier.GLALLMULTIPLETS,
                                       GLNotifier.GLPREFERENCES])

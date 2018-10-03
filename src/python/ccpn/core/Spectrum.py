@@ -296,8 +296,12 @@ class Spectrum(AbstractWrapperObject):
     @scale.setter
     def scale(self, value: float):
         self._wrappedData.scale = value
-        for spectrumView in self.spectrumViews:
-            spectrumView.refreshData()
+
+        # # update the intensities as the scale has changed
+        # self._intensities = self.getSliceData()
+
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.refreshData()
 
     @property
     def spinningRate(self) -> float:
@@ -1078,18 +1082,22 @@ class Spectrum(AbstractWrapperObject):
             raise Exception('Currently this method only works for 1D spectra')
 
         if self._intensities is None:
-            self._intensities = self.getSliceData()
-            # below not needed any more since now scaled in getSliceData()
+
+            # store the unscaled value internally so need to multiply the return value again
+            self._intensities = self.getSliceData() / self.scale
+
+            # OLD - below not needed any more since now scaled in getSliceData()
             # if self._intensities is not None:
             #   self._intensities *= self.scale
 
-        return self._intensities
+        return self._intensities * self.scale
 
     @intensities.setter
     def intensities(self, value):
         self._intensities = value
-        for spectrumView in self.spectrumViews:
-            spectrumView.refreshData()
+
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.refreshData()
 
     @property
     def positions(self) -> numpy.ndarray:
@@ -1110,8 +1118,9 @@ class Spectrum(AbstractWrapperObject):
     @positions.setter
     def positions(self, value):
         self._positions = value
-        for spectrumView in self.spectrumViews:
-            spectrumView.refreshData()
+
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.refreshData()
 
     # Implementation functions
 

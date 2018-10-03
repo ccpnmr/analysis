@@ -57,10 +57,10 @@ SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 def _updateGl(self, spectrumList):
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-    # spawn a redraw of the contours
-    for spec in spectrumList:
-        for specViews in spec.spectrumViews:
-            specViews.buildContours = True
+    # # spawn a redraw of the contours
+    # for spec in spectrumList:
+    #     for specViews in spec.spectrumViews:
+    #         specViews.buildContours = True
 
     GLSignals = GLNotifier(parent=self)
     GLSignals.emitPaintEvent()

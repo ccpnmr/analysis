@@ -28,7 +28,6 @@ __date__ = "$Date$"
 import sys
 from PyQt5 import QtWidgets
 import numpy as np
-import ctypes
 
 
 try:

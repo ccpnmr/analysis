@@ -54,6 +54,18 @@ from ccpn.util.Logging import getLogger
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
 
+def _updateGl(self, spectrumList):
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+    # spawn a redraw of the contours
+    for spec in spectrumList:
+        for specViews in spec.spectrumViews:
+            specViews.buildContours = True
+
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
+
+
 class SpectrumPropertiesPopup(CcpnDialog):
     # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
     # The apply button then steps through each tab, and calls each function in the _changes dictionary
@@ -133,7 +145,8 @@ class SpectrumPropertiesPopup(CcpnDialog):
         tabs = (self._generalTab, self._dimensionsTab, self._contoursTab)
 
         applyAccept = False
-        oldUndo = self.project._undo.numItems()
+        _undo = self.project._undo
+        oldUndo = _undo.numItems()
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -146,8 +159,17 @@ class SpectrumPropertiesPopup(CcpnDialog):
                 if t is not None:
                     changes = t._changes
                     if changes:
-                        self._applyAllChanges(changes)
                         spectrumList.append(t.spectrum)
+
+            _undo._newItem(undoPartial=partial(_updateGl, self, spectrumList))
+
+            for t in tabs:
+                if t is not None:
+                    changes = t._changes
+                    if changes:
+                        self._applyAllChanges(changes)
+
+            _undo._newItem(redoPartial=partial(_updateGl, self, spectrumList))
 
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:
@@ -428,9 +450,14 @@ class GeneralTab(QtWidgets.QWidget, Base):
             self.spectrumScalingData.setText(str(self.spectrum.scale))
 
         if self.spectrum.noiseLevel is None:
-            self.noiseLevelData.setText(str('%.3d' % self.spectrum.estimateNoise()))
+            self.noiseLevelData.setValue(self.spectrum.estimateNoise())
         else:
-            self.noiseLevelData.setText('%.3d' % self.spectrum.noiseLevel)
+            self.noiseLevelData.setValue(self.spectrum.noiseLevel)
+
+        # if self.spectrum.noiseLevel is None:
+        #     self.noiseLevelData.setText(str('%.3d' % self.spectrum.estimateNoise()))
+        # else:
+        #     self.noiseLevelData.setText('%.3d' % self.spectrum.noiseLevel)
 
     def _writeLoggingMessage(self, command):
         self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
@@ -1149,7 +1176,8 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
         tabs = self._contoursTab
 
         applyAccept = False
-        oldUndo = self.project._undo.numItems()
+        _undo = self.project._undo
+        oldUndo = _undo.numItems()
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -1162,8 +1190,17 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
                 if t is not None:
                     changes = t._changes
                     if changes:
-                        self._applyAllChanges(changes)
                         spectrumList.append(t.spectrum)
+
+            _undo._newItem(undoPartial=partial(_updateGl, self, spectrumList))
+
+            for t in tabs:
+                if t is not None:
+                    changes = t._changes
+                    if changes:
+                        self._applyAllChanges(changes)
+
+            _undo._newItem(redoPartial=partial(_updateGl, self, spectrumList))
 
             for spec in spectrumList:
                 for specViews in spec.spectrumViews:
@@ -1276,7 +1313,8 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
         tabs = self._generalTab
 
         applyAccept = False
-        oldUndo = self.project._undo.numItems()
+        _undo = self.project._undo
+        oldUndo = _undo.numItems()
 
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
@@ -1289,8 +1327,17 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
                 if t is not None:
                     changes = t._changes
                     if changes:
-                        self._applyAllChanges(changes)
                         spectrumList.append(t.spectrum)
+
+            _undo._newItem(undoPartial=partial(_updateGl, self, spectrumList))
+
+            for t in tabs:
+                if t is not None:
+                    changes = t._changes
+                    if changes:
+                        self._applyAllChanges(changes)
+
+            _undo._newItem(redoPartial=partial(_updateGl, self, spectrumList))
 
             # for specNum, thisSpec in enumerate(self.orderedSpectra):
             #   for specViews in thisSpec.spectrumViews:

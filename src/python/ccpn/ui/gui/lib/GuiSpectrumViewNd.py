@@ -1181,20 +1181,25 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   def refreshData(self):
 
-    if self.spectrum.includePositiveContours:           # .displayPositiveContours:
-      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
-    else:
-      posLevels = []
+    # spawn a rebuild in the openGL strip
+    self.buildContoursOnly = True
 
-    if self.spectrum.includeNegativeContours:           # .displayNegativeContours:
-      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
-    else:
-      negLevels = []
-
-    # if not posLevels and not negLevels:
-    #   return
-
-    # the makeCurrent() happens automatically when Qt itself calls paint() but here we need to do it
-    self.strip.plotWidget.viewport().makeCurrent()
-
-    self._constructContours(posLevels, negLevels, doRefresh=True)
+    # if self.spectrum.includePositiveContours:           # .displayPositiveContours:
+    #   posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
+    # else:
+    #   posLevels = []
+    #
+    # if self.spectrum.includeNegativeContours:           # .displayNegativeContours:
+    #   negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
+    # else:
+    #   negLevels = []
+    #
+    # # if not posLevels and not negLevels:
+    # #   return
+    #
+    # print('>>>refreshDataNd')
+    #
+    # # the makeCurrent() happens automatically when Qt itself calls paint() but here we need to do it
+    # # self.strip.plotWidget.viewport().makeCurrent()
+    #
+    # self._constructContours(posLevels, negLevels, doRefresh=True)

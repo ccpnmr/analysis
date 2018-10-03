@@ -148,12 +148,13 @@ class GLVertexArray():
         #     self.VAOs = GL.glGenVertexArrays(1)
         # GL.glBindVertexArray(self.VAOs)                # define VAOs
 
+        # create the VBOs if they don't exist - reusing will just rewrite the buffers
         if not hasattr(self, 'VBOs'):
             self.VBOs = GL.glGenBuffers(3)
 
-        sizeVertices = self.vertices.size * self.vertices.itemsize          # GL.arrays.ArrayDatatype.arrayByteCount(self.vertices)
-        sizeColors = self.colors.size * self.colors.itemsize          # GL.arrays.ArrayDatatype.arrayByteCount(self.colors)
-        sizeIndices = self.indices.size * self.indices.itemsize          # GL.arrays.ArrayDatatype.arrayByteCount(self.indices)
+        sizeVertices = self.vertices.size * self.vertices.itemsize
+        sizeColors = self.colors.size * self.colors.itemsize
+        sizeIndices = self.indices.size * self.indices.itemsize
 
         # bind to the buffers
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
@@ -162,60 +163,8 @@ class GLVertexArray():
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
         GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_STATIC_DRAW)
 
-        # why is this not GL_ELEMENT_ARRAY_BUFFER?
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
         GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeIndices, self.indices, GL.GL_STATIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-        return
-
-        self.TESTvertices = np.array([5, 110, 10, 110, 10, 120, 5, 120,
-                                      6, 112, 11, 107, 9, 122, 7, 127,
-                                      7, 113, 15, 128, 11, 116, 7, 126,
-                                      8, 115, 15, 125, 11, 115, 7, 128,
-                                      9, 118, 15, 113, 15, 122, 6, 114,
-                                      8, 119, 15, 114, 15, 121, 6, 112,
-                                      7, 120, 15, 121, 12, 103, 8, 108,
-                                      5, 120, 15, 121, 12, 106, 8, 115],
-                                     dtype=np.float32)
-        self.TESTcolors = np.array([1.0, 0.2, 0.1, 1.0,
-                                    0.3, 1.0, 0.1, 1.0,
-                                    0.1, 0.2, 1.0, 1.0,
-                                    1.0, 0.8, 0.1, 1.0,
-                                    1.0, 0.2, 0.1, 1.0,
-                                    0.3, 1.0, 0.1, 1.0,
-                                    0.1, 0.2, 1.0, 1.0,
-                                    1.0, 0.8, 0.1, 1.0,
-                                    1.0, 0.2, 0.1, 1.0,
-                                    0.3, 1.0, 0.1, 1.0,
-                                    0.1, 0.2, 1.0, 1.0,
-                                    1.0, 0.8, 0.1, 1.0,
-                                    1.0, 0.2, 0.1, 1.0,
-                                    0.3, 1.0, 0.1, 1.0,
-                                    0.1, 0.2, 1.0, 1.0,
-                                    1.0, 0.8, 0.1, 1.0
-                                    ],
-                                   dtype=np.float32)
-        self.TESTindices = np.array([0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 0],
-                                    dtype=np.uint32)
-
-        sizeVertices = GL.arrays.ArrayDatatype.arrayByteCount(self.TESTvertices)
-        sizeColors = GL.arrays.ArrayDatatype.arrayByteCount(self.TESTcolors)
-        sizeIndices = GL.arrays.ArrayDatatype.arrayByteCount(self.TESTindices)
-        memVertices = GL.arrays.ArrayDatatype.voidDataPointer(self.TESTvertices)
-        memColors = GL.arrays.ArrayDatatype.voidDataPointer(self.TESTcolors)
-        memIndices = GL.arrays.ArrayDatatype.voidDataPointer(self.TESTindices)
-
-        # bind to the buffers
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, memVertices, GL.GL_STATIC_DRAW)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, memColors, GL.GL_STATIC_DRAW)
-
-        # why is this not GL_ELEMENT_ARRAY_BUFFER?
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[2])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeIndices, memIndices, GL.GL_STATIC_DRAW)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
@@ -301,6 +250,7 @@ class GLVertexArray():
 
         # print('>>>defineVertexColorVBO')
 
+        # create the VBOs if they don't exist - reusing will just rewrite the buffers
         if not hasattr(self, 'VBOs'):
             self.VBOs = GL.glGenBuffers(3)
 

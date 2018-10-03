@@ -50,7 +50,7 @@ GLREFRESHMODE_NEVER = 0
 GLREFRESHMODE_ALWAYS = 1
 GLREFRESHMODE_REBUILD = 2
 
-ENABLE_VBOS = False
+ENABLE_VBOS = True
 
 
 class GLVertexArray():
@@ -116,6 +116,9 @@ class GLVertexArray():
         self.numVertices = 0
 
     def drawIndexArray(self):
+
+        # print('>>>drawIndexArray')
+
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
         if self.fillMode is not None:
@@ -135,9 +138,11 @@ class GLVertexArray():
         if self.blendMode:
             GL.glDisable(GL.GL_BLEND)
 
-    def defineIndexVBO(self):
-        if not ENABLE_VBOS:
+    def defineIndexVBO(self, enableVBO=False):
+        if not (ENABLE_VBOS and enableVBO):
             return
+
+        # print('>>>defineIndexVBO')
 
         # if not hasattr(self, 'VAOs'):
         #     self.VAOs = GL.glGenVertexArrays(1)
@@ -146,13 +151,13 @@ class GLVertexArray():
         if not hasattr(self, 'VBOs'):
             self.VBOs = GL.glGenBuffers(3)
 
-        sizeVertices = GL.arrays.ArrayDatatype.arrayByteCount(self.vertices)
-        sizeColors = GL.arrays.ArrayDatatype.arrayByteCount(self.colors)
-        sizeIndices = GL.arrays.ArrayDatatype.arrayByteCount(self.indices)
+        sizeVertices = self.vertices.size * self.vertices.itemsize          # GL.arrays.ArrayDatatype.arrayByteCount(self.vertices)
+        sizeColors = self.colors.size * self.colors.itemsize          # GL.arrays.ArrayDatatype.arrayByteCount(self.colors)
+        sizeIndices = self.indices.size * self.indices.itemsize          # GL.arrays.ArrayDatatype.arrayByteCount(self.indices)
 
         # bind to the buffers
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, np.array(self.vertices, dtype=np.float32), GL.GL_STATIC_DRAW)
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, self.vertices, GL.GL_STATIC_DRAW)
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
         GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_STATIC_DRAW)
@@ -214,10 +219,14 @@ class GLVertexArray():
 
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
-    def drawIndexVBO(self):
-        if not ENABLE_VBOS:
+    def drawIndexVBO(self, enableVBO=False):
+        if not (ENABLE_VBOS and enableVBO):
+
+            # call the normal drawIndex routine
             self.drawIndexArray()
         else:
+
+            # print('>>>drawIndexVBO')
 
             if self.blendMode:
                 GL.glEnable(GL.GL_BLEND)
@@ -246,6 +255,9 @@ class GLVertexArray():
                 GL.glDisable(GL.GL_BLEND)
 
     def drawIndexArrayNoColor(self):
+
+        # print('>>>drawIndexArrayNoColor')
+
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
         if self.fillMode is not None:
@@ -262,6 +274,9 @@ class GLVertexArray():
             GL.glDisable(GL.GL_BLEND)
 
     def drawVertexColor(self):
+
+        # print('>>>drawVertexColor')
+
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
         if self.fillMode is not None:
@@ -280,10 +295,35 @@ class GLVertexArray():
         if self.blendMode:
             GL.glDisable(GL.GL_BLEND)
 
-    def drawVertexColorVBO(self):
-        if not ENABLE_VBOS:
+    def defineVertexColorVBO(self, enableVBO=False):
+        if not (ENABLE_VBOS and enableVBO):
+            return
+
+        # print('>>>defineVertexColorVBO')
+
+        if not hasattr(self, 'VBOs'):
+            self.VBOs = GL.glGenBuffers(3)
+
+        sizeVertices = self.vertices.size * self.vertices.itemsize
+        sizeColors = self.colors.size * self.colors.itemsize
+
+        # bind to the buffers
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[0])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeVertices, self.vertices, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBOs[1])
+        GL.glBufferData(GL.GL_ARRAY_BUFFER, sizeColors, self.colors, GL.GL_STATIC_DRAW)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
+    def drawVertexColorVBO(self, enableVBO=False):
+        if not (ENABLE_VBOS and enableVBO):
+
+            # call the normal drawVertex routine
             self.drawVertexColor()
         else:
+
+            # print('>>>drawVertexColorVBO')
 
             if self.blendMode:
                 GL.glEnable(GL.GL_BLEND)
@@ -311,6 +351,9 @@ class GLVertexArray():
                 GL.glDisable(GL.GL_BLEND)
 
     def drawVertexNoColor(self):
+
+        # print('>>>drawVertexNoColor')
+
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
         if self.fillMode is not None:

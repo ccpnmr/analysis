@@ -1889,7 +1889,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 rebuildFlag = True
 
                 # define the VBOs to pass to the graphics card
-                self._contourList[spectrumView].defineIndexVBO()
+                self._contourList[spectrumView].defineIndexVBO(enableVBO=True)
 
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:
@@ -1997,7 +1997,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         # spectrumView._paintContoursNoClip()
 
                         # self._contourList[spectrumView].drawIndexArray()
-                        self._contourList[spectrumView].drawIndexVBO()
+                        self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
                 else:
                     if spectrumView in self._contourList.keys():
                         if self._stackingMode:
@@ -2008,7 +2008,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                                     GLDefs.SPECTRUM_STACKEDMATRIX])
 
                         # self._contourList[spectrumView].drawVertexColor()
-                        self._contourList[spectrumView].drawVertexColorVBO()
+                        self._contourList[spectrumView].drawVertexColorVBO(enableVBO=True)
                     else:
                         pass
 
@@ -3233,6 +3233,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         hTrace.vertices[1:-4:2] = y
 
+                    # build the VBOs here
+
             for dd in deleteHList:
                 self._staticHTraces.remove(dd)
 
@@ -3256,6 +3258,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     vTrace.vertices[:-4:2] = x
 
+                # build the VBOs here
+
             for dd in deleteVList:
                 self._staticVTraces.remove(dd)
 
@@ -3270,10 +3274,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
             for hTrace in self._staticHTraces:
                 if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
-                    hTrace.drawVertexColor()
+                    # hTrace.drawVertexColor()
+                    hTrace.drawVertexColorVBO(enableVBO=False)
+
             for vTrace in self._staticVTraces:
                 if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
-                    vTrace.drawVertexColor()
+                    # vTrace.drawVertexColor()
+                    vTrace.drawVertexColorVBO(enableVBO=False)
 
         # only paint if mouse is in the window
         if self.underMouse():
@@ -3292,7 +3299,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         continue
 
                     if hTrace and not hTrace.isDeleted and hTrace.isVisible():
-                        trace.drawVertexColor()
+                        # trace.drawVertexColor()
+                        trace.drawVertexColorVBO(enableVBO=False)
 
             for dd in deleteHList:
                 del self._hTraces[dd]
@@ -3306,7 +3314,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         continue
 
                     if vTrace and not vTrace.isDeleted and vTrace.isVisible():
-                        trace.drawVertexColor()
+                        # trace.drawVertexColor()
+                        trace.drawVertexColorVBO(enableVBO=False)
 
             for dd in deleteVList:
                 del self._vTraces[dd]

@@ -352,7 +352,7 @@ class Gui1dWidget(CcpnGLWidget):
                 rebuildFlag = True
 
                 # define the VBOs to pass to the graphics card
-                self._contourList[spectrumView].defineIndexVBO()
+                self._contourList[spectrumView].defineIndexVBO(enableVBO=True)
 
         # rebuild the traces as the spectrum/plane may have changed
         if rebuildFlag:

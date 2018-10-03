@@ -83,6 +83,9 @@ PDFCLOSEPATH = 'closePath'
 PDFLINES = 'lines'
 
 
+def alphaClip(value):
+    return np.clip(float(value), 0.0, 1.0)
+
 class GLExporter():
     """
     Class container for exporting OpenGL stripDisplay to a file or object
@@ -112,10 +115,10 @@ class GLExporter():
 
         # set default colours
         # self.backgroundColour = colors.Color(*self.parent.background[0:3],
-        #                                      alpha=float(self.parent.background[3]))
-        self.backgroundColour = colors.Color(*self.params[GLBACKGROUND], alpha=float(1.0))
+        #                                      alpha=alphaClip(self.parent.background[3]))
+        self.backgroundColour = colors.Color(*self.params[GLBACKGROUND], alpha=alphaClip(1.0))
         self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
-                                             alpha=float(self.parent.foreground[3]))
+                                             alpha=alphaClip(self.parent.foreground[3]))
         self.baseThickness = self.params[GLBASETHICKNESS]
         self.symbolThickness = self.params[GLSYMBOLTHICKNESS]
 
@@ -373,7 +376,7 @@ class GLExporter():
                             vectEnd = mat.dot(vectEnd)
                             newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
 
-                            colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=float(thisSpec.colors[ii0 * 4 + 3]))
+                            colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=alphaClip(thisSpec.colors[ii0 * 4 + 3]))
                             colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                             newLine = self.parent.lineVisible(newLine,
@@ -427,7 +430,7 @@ class GLExporter():
                 fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
                 if spectrumView.spectrum.dimensionCount > 1:
                     fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
-                    colour = colors.Color(*spectrumView.posColour[0:3], alpha=float(0.5))
+                    colour = colors.Color(*spectrumView.posColour[0:3], alpha=alphaClip(0.5))
                 else:
                     fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
 
@@ -436,7 +439,7 @@ class GLExporter():
                     colG = int(colour.strip('# ')[2:4], 16) / 255.0
                     colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-                    colour = colors.Color(colR, colG, colB, alpha=float(0.5))
+                    colour = colors.Color(colR, colG, colB, alpha=alphaClip(0.5))
 
                 colourPath = 'spectrumViewBoundaries%s%s%s%s%s' % (
                     spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
@@ -575,7 +578,7 @@ class GLExporter():
                             else:
                                 newLine = list(thisSpec.vertices[vv:vv + 6])
 
-                            colour = colors.Color(*thisSpec.colors[vv * 2:vv * 2 + 3], alpha=float(thisSpec.colors[vv * 2 + 3]))
+                            colour = colors.Color(*thisSpec.colors[vv * 2:vv * 2 + 3], alpha=alphaClip(thisSpec.colors[vv * 2 + 3]))
                             colourPath = 'spectrumViewIntegralFill%s%s%s%s%s' % (
                                 spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
@@ -626,7 +629,7 @@ class GLExporter():
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
                         col = drawString.colors[0:4]
-                    colour = colors.Color(*col[0:3], alpha=float(col[3]))
+                    colour = colors.Color(*col[0:3], alpha=alphaClip(col[3]))
                     colourPath = 'spectrumViewPeakLabels%s%s%s%s%s' % (
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
@@ -672,7 +675,7 @@ class GLExporter():
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
                         col = drawString.colors[0:4]
-                    colour = colors.Color(*col[0:3], alpha=float(col[3]))
+                    colour = colors.Color(*col[0:3], alpha=alphaClip(col[3]))
                     colourPath = 'spectrumViewIntegralLabels%s%s%s%s%s' % (
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
@@ -718,7 +721,7 @@ class GLExporter():
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
                         col = drawString.colors[0:4]
-                    colour = colors.Color(*col[0:3], alpha=float(col[3]))
+                    colour = colors.Color(*col[0:3], alpha=alphaClip(col[3]))
                     colourPath = 'spectrumViewMultipletLabels%s%s%s%s%s' % (
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
@@ -754,7 +757,7 @@ class GLExporter():
             col = drawString.colors[0]
             if not isinstance(col, Iterable):
                 col = drawString.colors[0:4]
-            colour = colors.Color(*col[0:3], alpha=float(col[3]))
+            colour = colors.Color(*col[0:3], alpha=alphaClip(col[3]))
             colourPath = 'projectMarks%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
             newLine = [drawString.attribs[0], drawString.attribs[1]]
@@ -808,7 +811,7 @@ class GLExporter():
         colourGroups = OrderedDict()
         for infLine in self.parent._infiniteLines:
             if infLine.visible:
-                colour = colors.Color(*infLine.brush[0:3], alpha=float(infLine.brush[3]))
+                colour = colors.Color(*infLine.brush[0:3], alpha=alphaClip(infLine.brush[3]))
                 colourPath = 'infiniteLines%s%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha, infLine.lineStyle)
 
                 if infLine.orientation == 'h':
@@ -1097,7 +1100,7 @@ class GLExporter():
             else:
                 newLine = list(indArray.vertices[vv:vv + 4])
 
-            colour = colors.Color(*indArray.colors[vv * 2:vv * 2 + 3], alpha=float(indArray.colors[vv * 2 + 3]))
+            colour = colors.Color(*indArray.colors[vv * 2:vv * 2 + 3], alpha=alphaClip(indArray.colors[vv * 2 + 3]))
             colourPath = '%s%s%s%s%s' % (name, colour.red, colour.green, colour.blue, colour.alpha)
             if colourPath not in colourGroups:
                 cc = colourGroups[colourPath] = {}
@@ -1142,7 +1145,7 @@ class GLExporter():
             for vv in ii0:
                 newLine.extend([indArray.vertices[vv * 2], indArray.vertices[vv * 2 + 1]])
 
-            colour = (setColour or colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=float(indArray.colors[ii0[0] * 4 + 3])))
+            colour = (setColour or colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=alphaClip(indArray.colors[ii0[0] * 4 + 3])))
             colourPath = 'spectrumView%s%s%s%s%s' % (name,
                                                      colour.red, colour.green, colour.blue, colour.alpha)
 
@@ -1374,7 +1377,7 @@ if __name__ == '__main__':
     p.close()
     c.clipPath(p, fill=0, stroke=0)
 
-    red50transparent = colors.Color(100, 0, 0, alpha=float(0.5))
+    red50transparent = colors.Color(100, 0, 0, alpha=alphaClip(0.5))
     c.setFillColor(colors.black)
     c.setFont('Helvetica', 10)
     c.drawString(25, 180, 'solid')

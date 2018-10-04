@@ -669,10 +669,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
 
     # print('>>>_buildContours %s' % self)
-    self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
-    self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
-    glList.posColour = self.posColour
-    glList.negColour = self.negColour
+    # self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
+    # self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
+    # glList.posColour = self.posColour
+    # glList.negColour = self.negColour
 
     if self.spectrum.positiveContourBase == 10000.0:  # horrid
       # base has not yet been set, so guess a sensible value
@@ -693,10 +693,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # if not self.posLevels and not self.negLevels:
     #   return
 
-    # self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
-    # self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
-    # glList.posColour = self.posColour
-    # glList.negColour = self.negColour
+    self.posColour = Colour.scaledRgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
+    self.negColour = Colour.scaledRgba(self._getColour('negativeContourColour'))  # and assumes these attributes are set
+    glList.posColour = self.posColour
+    glList.negColour = self.negColour
 
     # contourDict = self.constructContours(guiStrip, posLevels, negLevels)
     try:
@@ -948,7 +948,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
           glList.indices[thisIndex:thisIndex+count] = [(((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count)]
           glList.vertices[thisVertex:thisVertex+count] = contour
-          glList.colors[thisColor:thisColor+colCount] = self.posColour*thisNumVertices
+          glList.colors[thisColor:thisColor+colCount] = self.negColour*thisNumVertices
           indexCount += thisNumVertices
           thisIndex += count
           thisVertex += count

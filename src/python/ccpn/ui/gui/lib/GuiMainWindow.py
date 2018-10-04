@@ -30,6 +30,7 @@ __date__ = "$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $"
 #import datetime
 import json
 import os
+import sys
 from functools import partial
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -638,6 +639,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # Close and clean up project
         self.application._closeProject()      # close if saved
         QtWidgets.QApplication.quit()
+        os._exit(0)
+
       else:
         if event:                             # ejb - don't close the project
           event.ignore()
@@ -650,7 +653,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
       prefFile.close()
 
       self.application._closeProject()
+
       QtWidgets.QApplication.quit()
+      os._exit(0)
+
     else:
       if event:
         event.ignore()

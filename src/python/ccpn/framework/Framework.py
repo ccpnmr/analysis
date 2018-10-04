@@ -1865,6 +1865,8 @@ class Framework:
         # Close and clean up project
         self._closeProject()
         QtWidgets.QApplication.quit()
+        os._exit(0)
+
       else:
         if event:                             # ejb - don't close the project
           event.ignore()
@@ -1876,7 +1878,10 @@ class Framework:
       json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
       self._closeProject()
+
       QtWidgets.QApplication.quit()
+      os._exit(0)
+
     else:
       if event:
         event.ignore()
@@ -2521,9 +2526,9 @@ class Framework:
     from ccpn.framework.update.UpdatePopup import UpdatePopup
 
     if not self.updatePopup:
-      self.updatePopup = UpdatePopup(parent=self.ui.mainWindow)
+      self.updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
     self.updatePopup.show()
-    self.updatePopup.raise_()
+    self.updatePopup.exec_()
 
   def showFeedbackPopup(self):
     from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup

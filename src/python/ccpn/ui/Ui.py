@@ -173,6 +173,9 @@ class NoUi(Ui):
         applicationVersion = __version__.split()[1]  # ejb - read from the header
         installUpdates(applicationVersion)
 
+        sys.stderr.write('Please restart the program to apply the updates\n')
+        sys.exit(1)
+
 class TestUi(NoUi):
 
     def __init__(self, application):

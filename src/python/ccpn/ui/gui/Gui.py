@@ -281,7 +281,7 @@ class Gui(Ui):
         sys.stderr.write('==> Gui update\n')
         from ccpn.framework.update.UpdatePopup import UpdatePopup
 
-        updatePopup = UpdatePopup(parent=self.mainWindow)
+        updatePopup = UpdatePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
         self.mainWindow.show()
         updatePopup.exec_()
 

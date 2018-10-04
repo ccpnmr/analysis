@@ -41,7 +41,7 @@ from ccpn.util import Colour
 from ccpn.util import Phasing
 
 from ccpnc.contour import Contourer2d
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLContours import _addContoursToGLList
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLContours import _addContoursToGLList
 
 #from ccpn.ui.gui.modules import SpectrumDisplayNd
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
@@ -868,47 +868,107 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if not doPosLevels and not doNegLevels:
       return
 
-    ###GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-
     #for position, dataArray in self.getPlaneData(guiStrip):
     posContoursAll = negContoursAll = None
 
-    test = None
-    dataArrays = tuple()
     for position, dataArray in self._getPlaneData():
-      dataArrays += (dataArray,)
+      if doPosLevels:
+        posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
+        #print("posContours", posContours)
+        if posContoursAll is None:
+          posContoursAll = posContours
+        else:
+          for n, contourData in enumerate(posContours):
+            if len(posContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
+              posContoursAll.append(contourData)
+            else:
+              posContoursAll[n].extend(contourData)
+            # print(contourData)
 
-    test = Contourer2d.contourerGLList(dataArrays,
-                                       posLevelsArray,
-                                       negLevelsArray,
-                                       np.array(self.posColour, dtype=np.float32),
-                                       np.array(self.negColour, dtype=np.float32))
+      if doNegLevels:
+        negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
+        #print("negContours", len(negContours))
+        if negContoursAll is None:
+          negContoursAll = negContours
+        else:
+          for n, contourData in enumerate(negContours):
+            if len(negContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
+              negContoursAll.append(contourData)
+            else:
+              negContoursAll[n].extend(contourData)
+            # print(contourData)
 
     glList.clearArrays()
 
-    if test and test[1] > 0:
-      glList.numVertices = test[1]
-      glList.indices = test[2]
-      glList.vertices = test[3]
-      glList.colors = test[4]
+    if posContoursAll:
+      for n, contourData in enumerate(posContoursAll):
+        for contour in contourData:
+          glList.numVertices += len(contour)
 
-    # if posContoursAll:
+    if negContoursAll:
+      for n, contourData in enumerate(negContoursAll):
+        for contour in contourData:
+          glList.numVertices += len(contour)
+
+    glList.vertices = np.empty(glList.numVertices, dtype=np.float32)
+    glList.indices = np.empty(glList.numVertices, dtype=np.uint32)
+    glList.colors = np.empty(2*glList.numVertices, dtype=np.float32)
+
+    thisIndex = 0
+    thisVertex = 0
+    thisColor = 0
+    indexCount = 0
+
+    if posContoursAll:
+      for n, contourData in enumerate(posContoursAll):
+        for contour in contourData:
+          count = len(contour)
+          thisNumVertices = count // 2
+          colCount = 2*count
+
+          glList.indices[thisIndex:thisIndex+count] = [(((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count)]
+          glList.vertices[thisVertex:thisVertex+count] = contour
+          glList.colors[thisColor:thisColor+colCount] = self.posColour*thisNumVertices
+          indexCount += thisNumVertices
+          thisIndex += count
+          thisVertex += count
+          thisColor += colCount
+
+    if negContoursAll:
+      for n, contourData in enumerate(negContoursAll):
+        for contour in contourData:
+
+          count = len(contour)
+          thisNumVertices = count // 2
+          colCount = 2*count
+
+          glList.indices[thisIndex:thisIndex+count] = [(((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count)]
+          glList.vertices[thisVertex:thisVertex+count] = contour
+          glList.colors[thisColor:thisColor+colCount] = self.posColour*thisNumVertices
+          indexCount += thisNumVertices
+          thisIndex += count
+          thisVertex += count
+          thisColor += colCount
+
+    # # new code for the recompiled glList
+    # test = None
+    # dataArrays = tuple()
+    # for position, dataArray in self._getPlaneData():
+    #   dataArrays += (dataArray,)
     #
-    #   start_time = process_time()
+    # test = Contourer2d.contourerGLList(dataArrays,
+    #                                    posLevelsArray,
+    #                                    negLevelsArray,
+    #                                    np.array(self.posColour, dtype=np.float32),
+    #                                    np.array(self.negColour, dtype=np.float32))
     #
-    #   for n, contourData in enumerate(posContoursAll):
-    #     # self._addContoursToDisplayList(self.posDisplayLists[n], contourData, posLevels[n])
-    #     _addContoursToGLList(contourData, glList=glList, colour=self.posColour)
+    # glList.clearArrays()
     #
-    # print('>>>_addContoursToGLList pos', self)
-
-
-    # if negContoursAll:
-    #   for n, contourData in enumerate(negContoursAll):
-    #     # self._addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
-    #     _addContoursToGLList(contourData, glList=glList, colour=self.negColour)
-
-    ###GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    # if test and test[1] > 0:
+    #   glList.numVertices = test[1]
+    #   glList.indices = test[2]
+    #   glList.vertices = test[3]
+    #   glList.colors = test[4]
 
   def _releaseDisplayLists(self, displayLists):
 
@@ -1111,7 +1171,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     GL.glEndList()
 
-  def _OLDaddContoursToGLList(self, contourData, glList=None, colour=None):
+  def _addContoursToGLList(self, contourData, glList=None, colour=None):
     """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
 
     for contour in contourData:

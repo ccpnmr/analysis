@@ -89,7 +89,7 @@ def downloadFile(serverScript, serverDbRoot, fileName):
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
                                ca_certs=certifi.where(),
                                timeout=urllib3.Timeout(connect=5.0, read=5.0),
-                               retries=urllib3.Retry(3, redirect=False))
+                               retries=urllib3.Retry(1, redirect=False))
 
     try:
         response = http.request('POST', serverScript,
@@ -134,7 +134,7 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
                                ca_certs=certifi.where(),
                                timeout=urllib3.Timeout(connect=5.0, read=5.0),
-                               retries=urllib3.Retry(3, redirect=False))
+                               retries=urllib3.Retry(1, redirect=False))
 
     try:
         response = http.request('POST', serverScript,

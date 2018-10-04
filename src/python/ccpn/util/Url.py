@@ -52,7 +52,7 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
     # # http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
     # #                            ca_certs=certifi.where(),
     # #                            timeout=urllib3.Timeout(connect=5.0, read=5.0),
-    # #                            retries=urllib3.Retry(3, redirect=False))
+    # #                            retries=urllib3.Retry(1, redirect=False))
     # # response = http.request('POST', url,
     # #                         headers={'Content-Type': 'application/json'},
     # #                         body=json.dumps(data),
@@ -90,7 +90,7 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
                                ca_certs=certifi.where(),
                                timeout=urllib3.Timeout(connect=5.0, read=5.0),
-                               retries=urllib3.Retry(3, redirect=False))
+                               retries=urllib3.Retry(1, redirect=False))
 
     response = http.request('POST', url,
                             headers=headers,

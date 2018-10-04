@@ -96,15 +96,18 @@ def downloadFile(serverScript, serverDbRoot, fileName):
   fileName = os.path.join(serverDbRoot, fileName)
 
   addr = '%s?fileName=%s' % (serverScript, fileName)
-  response = urlopen(addr, context=context)
+  try:
+    response = urlopen(addr, context=context)
 
-  data = response.read().decode('utf-8')
-  response.close()
+    data = response.read().decode('utf-8')
+    response.close()
 
-  if data.startswith(BAD_DOWNLOAD):
-    raise Exception(data[len(BAD_DOWNLOAD):])
+    if data.startswith(BAD_DOWNLOAD):
+      raise Exception(data[len(BAD_DOWNLOAD):])
 
-  return data
+    return data
+  except:
+    return None
 
 def installUpdates(version):
 
@@ -215,6 +218,10 @@ class UpdateAgent(object):
     serverDownloadScript = '%s%s' % (self.server, self.serverDownloadScript)
     serverUploadScript = '%s%s' % (self.server, self.serverUploadScript)
     data = downloadFile(serverDownloadScript, self.serverDbRoot, self.serverDbFile)
+
+    if not data:
+      return
+
     if data.startswith(BAD_DOWNLOAD):
       raise Exception('Could not download database file from server')
 

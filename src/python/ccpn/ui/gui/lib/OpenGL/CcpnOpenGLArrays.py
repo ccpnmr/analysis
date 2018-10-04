@@ -96,6 +96,9 @@ class GLVertexArray():
         self.dimension = int(dimension)
         self._GLContext = GLContext
 
+        # if not hasattr(self, 'VBOs'):
+        #     self.VBOs = GL.glGenBuffers(3)
+
     def __del__(self):
         if hasattr(self, 'VBOs'):
             GL.glDeleteLists(3, self.VBOs)

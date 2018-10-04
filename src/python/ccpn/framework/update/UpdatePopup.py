@@ -84,16 +84,15 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
   def resetFromServer(self):
 
     UpdateAgent.resetFromServer(self)
-    """
-    if self.updateFiles:
-      n = len(self.updateFiles)
-      msg = '%d update%s available' % (n, n > 1 and 's' or '')
-    else:
-      msg = 'No new updates available'
-    #self.messageLabel.set(msg)
-    print(msg)
-    """
-    
+
+    # if self.updateFiles:
+    #   n = len(self.updateFiles)
+    #   msg = '%d update%s available' % (n, n > 1 and 's' or '')
+    # else:
+    #   msg = 'No new updates available'
+    # #self.messageLabel.set(msg)
+    # print(msg)
+
     #self.updateTable.setObjects(self.updateFiles)
     self.updatesLabel.set('%d' % len(self.updateFiles))
 

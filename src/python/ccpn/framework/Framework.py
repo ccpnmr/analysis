@@ -325,7 +325,10 @@ class Framework:
       project = self.newProject()
     self._updateCheckableMenuItems()
 
-    if not self._checkRegistration():
+    if not self.ui._checkRegistration():
+      return
+
+    if not self.ui._checkUpdates():
       return
 
     # Needed in case project load failed
@@ -567,36 +570,35 @@ class Framework:
     # translator.setDebug(True)
     sys.stderr.write('==> Language set to "%s"\n' % translator._language)
 
-
-  def _isRegistered(self):
-    """return True if registered"""
-    self._registrationDict = Register.loadDict()
-    return not Register.isNewRegistration(self._registrationDict)
-
-
-  def _checkRegistration(self):
-    """
-    Display registration popup if there is a gui
-    return True if ok
-    return False on error
-    """
-    from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
-
-    if self.ui:
-      if not self._isRegistered():
-        self.ui.mainWindow.show()
-        QtWidgets.QApplication.processEvents()
-        popup = RegisterPopup(self.ui.mainWindow, version=self.applicationVersion, modal=True)
-        QtWidgets.QApplication.processEvents()
-        popup.show()
-        popup.raise_()
-        popup.exec_()
-
-    if not self._isRegistered():
-      return False
-
-    Register.updateServer(self._registrationDict, self.applicationVersion)
-    return True
+  # def _isRegistered(self):
+  #   """return True if registered"""
+  #   self._registrationDict = Register.loadDict()
+  #   return not Register.isNewRegistration(self._registrationDict)
+  #
+  #
+  # def _checkRegistration(self):
+  #   """
+  #   Display registration popup if there is a gui
+  #   return True if ok
+  #   return False on error
+  #   """
+  #   from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+  #
+  #   if self.ui:
+  #     if not self._isRegistered():
+  #       self.ui.mainWindow.show()
+  #       QtWidgets.QApplication.processEvents()
+  #       popup = RegisterPopup(self.ui.mainWindow, version=self.applicationVersion, modal=True)
+  #       QtWidgets.QApplication.processEvents()
+  #       popup.show()
+  #       # popup.raise_()
+  #       popup.exec_()
+  #
+  #   if not self._isRegistered():
+  #     return False
+  #
+  #   Register.updateServer(self._registrationDict, self.applicationVersion)
+  #   return True
 
   def applyPreferences(self, project):
     """Apply user preferences

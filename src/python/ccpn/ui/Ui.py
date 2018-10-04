@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -20,7 +20,6 @@ __version__ = "$Revision: 3.0.b3 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: TJ Ragan $"
 __date__ = "$Date: 2017-03-22 13:00:57 +0000 (Wed, March 22, 2017) $"
 #=========================================================================================
@@ -35,113 +34,159 @@ from ccpn.ui._implementation import _uiImportOrder
 from ccpn.core import _coreClassMap
 
 from ccpn.util import Register
+from ccpn.util.Update import installUpdates, UpdateAgent
+
 
 class Ui:
-  """Superclass for all user interface classes"""
+    """Superclass for all user interface classes"""
 
-  # Factory functions for UI-specific instantiation of wrapped graphics classes
-  _factoryFunctions = {}
+    # Factory functions for UI-specific instantiation of wrapped graphics classes
+    _factoryFunctions = {}
 
-  def __init__(self, application):
+    def __init__(self, application):
 
-    self.application = application
+        self.application = application
 
-    self.mainWindow = None
+        self.mainWindow = None
 
-    self.pluginModules = []
+        self.pluginModules = []
 
-  def addMenu(self, name, position=None):
-    '''
-    Add a menu specification for the top menu bar.
-    '''
-    if position is None:
-      position = len(self._menuSpec)
-    self._menuSpec.insert(position, (str(name), []))
+    def addMenu(self, name, position=None):
+        '''
+        Add a menu specification for the top menu bar.
+        '''
+        if position is None:
+            position = len(self._menuSpec)
+        self._menuSpec.insert(position, (str(name), []))
 
-  @classmethod
-  def setUp(cls):
-    """Set up graphics data classes, cleaning up previous settings"""
+    @classmethod
+    def setUp(cls):
+        """Set up graphics data classes, cleaning up previous settings"""
 
-    for className in _uiImportOrder:
-      # Remove ui-specific settings. Will be reset as necessary in subclasses
-      _coreClassMap[className]._factoryFunction = cls._factoryFunctions.get(className)
+        for className in _uiImportOrder:
+            # Remove ui-specific settings. Will be reset as necessary in subclasses
+            _coreClassMap[className]._factoryFunction = cls._factoryFunctions.get(className)
 
+    def initialize(self, mainWindow):
+        """UI operations done after every project load/create"""
+        pass
 
-  def initialize(self, mainWindow):
-    """UI operations done after every project load/create"""
-    pass
+    def start(self):
+        """Start the program execution"""
 
-  def start(self):
-    """Start the program execution"""
+        # self._checkRegistered()
+        # Register.updateServer(Register.loadDict(), self.application.applicationVersion)
 
-    # self._checkRegistered()
-    # Register.updateServer(Register.loadDict(), self.application.applicationVersion)
+        sys.stderr.write('==> %s interface is ready\n' % self.__class__.__name__)
 
-    sys.stderr.write('==> %s interface is ready\n' % self.__class__.__name__)
+    def _checkRegistration(self):
+        """Check if registered and if not popup registration and if still no good then exit"""
 
-  def _checkRegistered(self):
-    """Check if registered and if not popup registration and if still no good then exit"""
+        # checking the registration; need to have the app running, but before the splashscreen, as it will hang
+        # in case the popup is needed.
+        # We want to give some feedback; sometimes this takes a while (e.g. poor internet)
+        sys.stderr.write('==> Checking registration ... \n')
+        sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
+        if not self._isRegistered:
 
-    # checking the registration; need to have the app running, but before the splashscreen, as it will hang
-    # in case the popup is needed.
-    # We want to give some feedback; sometimes this takes a while (e.g. poor internet)
-    sys.stderr.write('==> Checking registration ... \n')
-    sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
-    if not self._isRegistered:
-      self._showRegisterPopup()
-      if not self._isRegistered:
-        sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
-        sys.exit(1)
-    sys.stderr.write('==> Registered to: %s (%s)\n' %
-                     (self.application._registrationDict.get('name'),
-                      self.application._registrationDict.get('organisation')))
+            # call the subclassed register method
+            self._showRegisterPopup()
 
+            if not self._isRegistered:
+                sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
+                return False
 
-  def echoCommands(self, commands:typing.List[str]):
-    """Echo commands strings, one by one, to logger.
-    Overwritten in subclasses to handle e.g. console putput
-    """
+        sys.stderr.write('==> Registered to: %s (%s)\n' %
+                         (self.application._registrationDict.get('name'),
+                          self.application._registrationDict.get('organisation')))
+        Register.updateServer(self.application._registrationDict, self.application.applicationVersion)
 
-    logger = self.application.project._logger
+        return True
 
-    for command in commands:
-      logger.info(command)
+    def echoCommands(self, commands: typing.List[str]):
+        """Echo commands strings, one by one, to logger.
+        Overwritten in subclasses to handle e.g. console putput
+        """
 
+        logger = self.application.project._logger
 
-  @property
-  def _isRegistered(self):
-    """return True if registered"""
-    return not Register.isNewRegistration(Register.loadDict())
+        for command in commands:
+            logger.info(command)
+
+    def _execUpdates(self):
+        raise('ERROR: ..to be subclassed by ui types')
+
+    def _checkUpdates(self):
+        applicationVersion = __version__.split()[1]  # ejb - read from the header
+
+        updateAgent = UpdateAgent(applicationVersion)
+        numUpdates = updateAgent.checkNumberUpdates()
+        sys.stderr.write('==> Updates available: %s\n' % str(numUpdates))
+
+        if numUpdates:
+            self._execUpdates()
+
+        return True
+
+    @property
+    def _isRegistered(self):
+        """return True if registered"""
+        self.application._registrationDict = Register.loadDict()
+        return not Register.isNewRegistration(self.application._registrationDict)
+
 
 class NoUi(Ui):
 
-  def _showRegisterPopup(self):
-    """Display registration popup"""
+    def _showRegisterPopup(self):
+        """Display registration information
+        """
+        applicationVersion = __version__.split()[1]
 
-    sys.stderr.write('\n### Please register, using another application\n')
-    # popup = RegisterPopup(version=self.application.applicationVersion, modal=True)
-    # popup.show()
-    # popup.raise_()
-    # popup.exec_()
-    # self.application.processEvents()
+        # sys.stderr.write('\n### Please register, using another application, or in Gui Mode\n')
+
+        self.application.showLicense()
+
+        sys.stderr.write('Please take a moment to read the licence\n')
+        agree = None
+        while agree is None:
+            agreeIn = input('Do you agree to the terms and conditions of the Licence? [Yes/No]')
+            if agreeIn.lower() in ['y', 'yes']:
+                agree = True
+            elif agreeIn.lower() in ['n', 'no']:
+                agree = False
+            else:
+                sys.stderr.write("Enter 'yes' or 'no'\n")
+
+        if agree:
+            registrationDict = {}
+            for n, attr in enumerate(Register.userAttributes):
+                regIn = input('Please enter: ' + attr + ' >')
+                registrationDict[attr] = regIn or ''
+
+            Register.setHashCode(registrationDict)
+            Register.saveDict(registrationDict)
+            Register.updateServer(registrationDict, applicationVersion)
+
+    def _execUpdates(self):
+        sys.stderr.write('==> NoUi update\n')
+
+        applicationVersion = __version__.split()[1]  # ejb - read from the header
+        installUpdates(applicationVersion)
 
 class TestUi(NoUi):
 
-  def __init__(self, application):
+    def __init__(self, application):
+        Ui.__init__(self, application)
+        application._consoleOutput = []
 
-    Ui.__init__(self, application)
-    application._consoleOutput = []
+    def echoCommands(self, commands: typing.List[str]):
+        """Echo commands strings, one by one, to logger
+        and store them in internal list for perusal
+        """
+        self.application._consoleOutput.extend(commands)
 
+        logger = self.application.project._logger
 
-  def echoCommands(self, commands:typing.List[str]):
-    """Echo commands strings, one by one, to logger
-    and store them in internal list for perusal
-    """
-
-    self.application._consoleOutput.extend(commands)
-
-    logger = self.application.project._logger
-
-    for command in commands:
-      logger.info(command)
+        for command in commands:
+            logger.info(command)
 

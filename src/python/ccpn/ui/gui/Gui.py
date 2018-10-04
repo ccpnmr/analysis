@@ -206,9 +206,8 @@ class Gui(Ui):
     def _showRegisterPopup(self):
         """Display registration popup"""
 
-        popup = RegisterPopup(version=self.application.applicationVersion, modal=True)
-        popup.show()
-        popup.raise_()
+        popup = RegisterPopup(self.mainWindow, version=self.application.applicationVersion, modal=True)
+        self.mainWindow.show()
         popup.exec_()
         self.qtApp.processEvents()
 
@@ -278,6 +277,13 @@ class Gui(Ui):
         #   if log:
         #     self.application._endCommandBlock()
 
+    def _execUpdates(self):
+        sys.stderr.write('==> Gui update\n')
+        from ccpn.framework.update.UpdatePopup import UpdatePopup
+
+        updatePopup = UpdatePopup(parent=self.mainWindow)
+        self.mainWindow.show()
+        updatePopup.exec_()
 
 #######################################################################################
 #

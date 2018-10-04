@@ -101,18 +101,16 @@ This needs to be done once on every computer you use the programme on.
   def _showLicense(self):
     self.parent().application.showLicense()
 
-  """
-  def _toggleLicense(self):
-
-    if self.licensePanel.isVisible():
-      self.licensePanel.hide()
-      self.resize(300,200)
-      self.licenseButton.setText('Show License')
-    else:
-      self.licensePanel.show()
-      self.resize(700,700)
-      self.licenseButton.setText('Hide License')
-  """
+  # def _toggleLicense(self):
+  #
+  #   if self.licensePanel.isVisible():
+  #     self.licensePanel.hide()
+  #     self.resize(300,200)
+  #     self.licenseButton.setText('Show License')
+  #   else:
+  #     self.licensePanel.show()
+  #     self.resize(700,700)
+  #     self.licenseButton.setText('Hide License')
 
   def _register(self):
 
@@ -127,6 +125,7 @@ This needs to be done once on every computer you use the programme on.
     
     if self.isModal():
       self.close()
+
 
 if __name__ == '__main__':
 

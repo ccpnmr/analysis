@@ -28,7 +28,7 @@ __date__ = "$Date$"
 import sys
 from PyQt5 import QtWidgets
 import numpy as np
-
+from ccpn.util.Logging import getLogger
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -119,7 +119,7 @@ class GLVertexArray():
 
     def drawIndexArray(self):
 
-        # print('>>>drawIndexArray')
+        # getLogger().info('>>>drawIndexArray')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -144,7 +144,7 @@ class GLVertexArray():
         if not (ENABLE_VBOS and enableVBO):
             return
 
-        # print('>>>defineIndexVBO')
+        # getLogger().info('>>>defineIndexVBO')
 
         # if not hasattr(self, 'VAOs'):
         #     self.VAOs = GL.glGenVertexArrays(1)
@@ -177,7 +177,7 @@ class GLVertexArray():
             self.drawIndexArray()
         else:
 
-            # print('>>>drawIndexVBO')
+            # getLogger().info('>>>drawIndexVBO')
 
             if self.blendMode:
                 GL.glEnable(GL.GL_BLEND)
@@ -207,7 +207,7 @@ class GLVertexArray():
 
     def drawIndexArrayNoColor(self):
 
-        # print('>>>drawIndexArrayNoColor')
+        # getLogger().info('>>>drawIndexArrayNoColor')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -226,7 +226,7 @@ class GLVertexArray():
 
     def drawVertexColor(self):
 
-        # print('>>>drawVertexColor')
+        # getLogger().info('>>>drawVertexColor')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -250,7 +250,7 @@ class GLVertexArray():
         if not (ENABLE_VBOS and enableVBO):
             return
 
-        # print('>>>defineVertexColorVBO')
+        # getLogger().info('>>>defineVertexColorVBO')
 
         # create the VBOs if they don't exist - reusing will just rewrite the buffers
         if not hasattr(self, 'VBOs'):
@@ -275,7 +275,7 @@ class GLVertexArray():
             self.drawVertexColor()
         else:
 
-            # print('>>>drawVertexColorVBO')
+            # getLogger().info('>>>drawVertexColorVBO')
 
             if self.blendMode:
                 GL.glEnable(GL.GL_BLEND)
@@ -304,7 +304,7 @@ class GLVertexArray():
 
     def drawVertexNoColor(self):
 
-        # print('>>>drawVertexNoColor')
+        # getLogger().info('>>>drawVertexNoColor')
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)

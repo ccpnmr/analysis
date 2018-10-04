@@ -673,7 +673,7 @@ class CcpnGLWidget(QOpenGLWidget):
             zoomScale = 8.0
 
             # stop the very sensitive movements
-            if abs(scrollDirection) < 2:
+            if abs(scrollDirection) < 1:
                 event.ignore()
                 return
 
@@ -684,7 +684,7 @@ class CcpnGLWidget(QOpenGLWidget):
             zoomScale = 8.0
 
             # stop the very sensitive movements
-            if abs(scrollDirection) < 2:
+            if abs(scrollDirection) < 1:
                 event.ignore()
                 return
 
@@ -1767,6 +1767,9 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
+        # stop notifiers interfering with paint event
+        self.project.blankNotification()
+
         self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
@@ -1873,6 +1876,9 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glVertex2d(w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM)
 
         GL.glEnd()
+
+        # re-enable notifiers
+        self.project.unblankNotification()
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)

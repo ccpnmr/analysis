@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -37,118 +37,105 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 # from ccpn.framework.update.UpdateAgent import UpdateAgent
 from ccpn.util.Update import UpdateAgent
 
-# class UpdatePopup(QtWidgets.QDialog, UpdateAgent):
+
 class UpdatePopup(CcpnDialog, UpdateAgent):
-  def __init__(self, parent=None, mainWindow=None, title='Update CCPN code', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    def __init__(self, parent=None, mainWindow=None, title='Update CCPN code', **kw):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
-    # keep focus on this window
-    self.setModal(True)
+        # keep focus on this window
+        self.setModal(True)
 
-    self.mainWindow = mainWindow
+        self.mainWindow = mainWindow
 
-    version = QtCore.QCoreApplication.applicationVersion()
-    UpdateAgent.__init__(self, version)
+        version = QtCore.QCoreApplication.applicationVersion()
+        UpdateAgent.__init__(self, version)
 
-    self.setWindowTitle(title)
+        self.setWindowTitle(title)
 
-    row = 0
+        row = 0
 
-    #label = Label(self, 'Server location:', grid=(row, 0))
-    #label = Label(self, self.server, grid=(row, 1))
-    #row += 1
+        #label = Label(self, 'Server location:', grid=(row, 0))
+        #label = Label(self, self.server, grid=(row, 1))
+        #row += 1
 
-    label = Label(self, 'Installation location:', grid=(row, 0))
-    label = Label(self, text=self.installLocation, grid=(row, 1))
-    row += 1
+        label = Label(self, 'Installation location:', grid=(row, 0))
+        label = Label(self, text=self.installLocation, grid=(row, 1))
+        row += 1
 
-    label = Label(self, 'Version:', grid=(row, 0))
-    label = Label(self, text=version, grid=(row, 1))
-    row += 1
+        label = Label(self, 'Version:', grid=(row, 0))
+        label = Label(self, text=version, grid=(row, 1))
+        row += 1
 
-    label = Label(self, 'Number of updates:', grid=(row, 0))
-    self.updatesLabel = Label(self, text='TBD', grid=(row, 1))
-    row += 1
+        label = Label(self, 'Number of updates:', grid=(row, 0))
+        self.updatesLabel = Label(self, text='TBD', grid=(row, 1))
+        row += 1
 
-    label = Label(self, 'Installing updates will require a restart of the program.', grid=(row, 0))
-    row += 1
+        label = Label(self, 'Installing updates will require a restart of the program.', grid=(row, 0))
+        row += 1
 
-    texts = ('Refresh Updates Information', 'Download and Install Updates', 'Close')
-    callbacks = (self.resetFromServer, self._install, self._accept)
-    tipTexts = ('Refresh the updates information by querying server and comparing with what is installed locally',
-                'Install the updates from the server',
-                'Close update dialog')
-    icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/window-close.png')
-    self.buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row,0), gridSpan=(1,2))
-    row += 1
+        texts = ('Refresh Updates Information', 'Download and Install Updates', 'Close')
+        callbacks = (self.resetFromServer, self._install, self._accept)
+        tipTexts = ('Refresh the updates information by querying server and comparing with what is installed locally',
+                    'Install the updates from the server',
+                    'Close update dialog')
+        icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/window-close.png')
+        self.buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row, 0), gridSpan=(1, 2))
+        row += 1
 
-    self.setFixedSize(750, 150)
+        self.setFixedSize(750, 150)
 
-    # initialise the popup
-    self.resetFromServer()
-    self._numUpdatesInstalled = 0
+        # initialise the popup
+        self.resetFromServer()
+        self._numUpdatesInstalled = 0
 
-  def _install(self):
-    """The update button has been clicked. Install updates and flag that files have been changed
-    """
-    self._numUpdatesInstalled += len(self.updateFiles)
-    self.installUpdates()
+    def _install(self):
+        """The update button has been clicked. Install updates and flag that files have been changed
+        """
+        self._numUpdatesInstalled += len(self.updateFiles)
+        self.installUpdates()
 
-    self.buttonList.buttons[2].setText('Close and Exit')
+        self.buttonList.buttons[2].setText('Close and Exit')
 
-  def _closeProgram(self):
-    """Call the mainWindow close function giving user option to save, then close program
-    """
-    self.mainWindow._closeEvent()
-    os._exit(0)
+    def _closeProgram(self):
+        """Call the mainWindow close function giving user option to save, then close program
+        """
+        self.mainWindow._closeEvent()
+        os._exit(0)
 
-  def _accept(self):
-    """Close button has been clicked, close if files have been updated or close dialog
-    """
-    if self._numUpdatesInstalled:
-      self._closeProgram()
-    else:
-      self.accept()
+    def _accept(self):
+        """Close button has been clicked, close if files have been updated or close dialog
+        """
+        if self._numUpdatesInstalled:
+            self._closeProgram()
+        else:
+            self.accept()
 
-  def reject(self):
-    """Dialog-frame close button has been clicked, close if files have been updated or close dialog
-    """
-    if self._numUpdatesInstalled:
-      self._closeProgram()
-    else:
-      super(UpdatePopup, self).reject()
+    def reject(self):
+        """Dialog-frame close button has been clicked, close if files have been updated or close dialog
+        """
+        if self._numUpdatesInstalled:
+            self._closeProgram()
+        else:
+            super(UpdatePopup, self).reject()
 
-  def resetFromServer(self):
-    """Get current number of updates from the server
-    """
-    UpdateAgent.resetFromServer(self)
+    def resetFromServer(self):
+        """Get current number of updates from the server
+        """
+        UpdateAgent.resetFromServer(self)
+        self.updatesLabel.set('%d' % len(self.updateFiles))
 
-    # if self.updateFiles:
-    #   n = len(self.updateFiles)
-    #   msg = '%d update%s available' % (n, n > 1 and 's' or '')
-    # else:
-    #   msg = 'No new updates available'
-    # #self.messageLabel.set(msg)
-    # print(msg)
-
-    #self.updateTable.setObjects(self.updateFiles)
-    self.updatesLabel.set('%d' % len(self.updateFiles))
-
-  #def update(self):
-
-  #  self.updateTable.update()
 
 if __name__ == '__main__':
+    import sys
 
-  import sys
 
-  qtApp = QtWidgets.QApplication(['Update'])
+    qtApp = QtWidgets.QApplication(['Update'])
 
-  QtCore.QCoreApplication.setApplicationName('Update')
-  QtCore.QCoreApplication.setApplicationVersion('3.0')
+    QtCore.QCoreApplication.setApplicationName('Update')
+    QtCore.QCoreApplication.setApplicationVersion('3.0')
 
-  popup = UpdatePopup()
-  popup.raise_()
-  popup.show()
+    popup = UpdatePopup()
+    popup.raise_()
+    popup.show()
 
-  sys.exit(qtApp.exec_())
+    sys.exit(qtApp.exec_())

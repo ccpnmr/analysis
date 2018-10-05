@@ -145,7 +145,11 @@ class NoUi(Ui):
 
         # sys.stderr.write('\n### Please register, using another application, or in Gui Mode\n')
 
-        self.application.showLicense()
+        from ccpn.framework.PathsAndUrls import licensePath
+        try:
+            self.application.showLicense()
+        except:
+            sys.stderr.write('The licence file can be found at %s\n' % licensePath)
 
         validEmailRegex = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-_]+\.)+[A-Za-z]{2,63}$')
 
@@ -175,6 +179,9 @@ class NoUi(Ui):
                         registrationDict[attr] = regIn or ''
 
                         validEmail = True if validEmailRegex.match(regIn) else False
+                        if not validEmail:
+                            sys.stderr.write(attr + ' is invalid, please try again\n')
+
                 else:
                     regIn = input(attr + ' >')
                     registrationDict[attr] = regIn or ''

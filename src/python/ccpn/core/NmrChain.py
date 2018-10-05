@@ -219,8 +219,8 @@ class NmrChain(AbstractWrapperObject):
     apiNmrChain = self._wrappedData
     project = self._project
 
-    if not self.isConnected:
-      raise ValueError("assignConnectedResidues only allowed for connected NmrChains")
+    # if not self.isConnected:
+    #   raise ValueError("assignConnectedResidues only allowed for connected NmrChains")
 
     if isinstance(firstResidue, str):
       xx = project.getByPid(firstResidue)

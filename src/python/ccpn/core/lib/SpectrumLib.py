@@ -3,6 +3,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
+
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -29,11 +31,14 @@ import collections
 
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
+from ccpnmodel.ccpncore.lib.Io import Formats
+
 import numpy as np
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
   ['dimension1', 'dimension2', 'transferType', 'isIndirect']
 )
+
 
 def getExperimentClassifications(project:Project) -> dict:
   """
@@ -74,9 +79,11 @@ def _calibrateX1D(spectrum, currentPosition, newPosition):
   shift = newPosition - currentPosition
   spectrum.positions = spectrum.positions+shift
 
+
 def _calibrateY1D(spectrum, currentPosition, newPosition):
   shift = newPosition - currentPosition
   spectrum.intensities = spectrum.intensities+shift
+
 
 def _set1DRawDataFromCcpnInternal(spectrum):
      if not spectrum._ccpnInternalData['positions'] and not spectrum._ccpnInternalData['intensities']:
@@ -88,6 +95,7 @@ def _set1DRawDataFromCcpnInternal(spectrum):
 def _negLogLikelihood(deltas, queryPeakPositions, kde):
   shifted = queryPeakPositions - deltas
   return -kde.logpdf(shifted.T)
+
 
 def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=-1):
 
@@ -140,6 +148,84 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
 #     p2x = p2-(a[0][1])
 #     peak.position = (p1x,p2x)
 
+
+#------------------------------------------------------------------------------------------------------
+# Spectrum projection
+# GWV: Adapted from DataSource.py
+#------------------------------------------------------------------------------------------------------
+
+PROJECTION_METHODS = ('max', 'max above noise', 'min', 'min below noise', 'sum', 'sum above noise')
+
+def getProjection(spectrum: 'Spectrum', axisCodes: tuple,
+                  method: str = 'max', noise=None,
+                  path=None, format:str=Formats.NMRPIPE
+                  ):
+    """Get projected plane defined by axisCodes using method and optional noise
+    optionally save to path as format
+    return projected data array
+    """
+    numDim = spectrum.dimensionCount
+
+    if numDim != 3:
+        raise Exception('Currently can only project from 3D')
+
+    xDim, yDim = spectrum.getByAxisCodes('dimensions', axisCodes)[0:2]
+
+    if not (1 <= xDim <= numDim):
+        raise Exception('For spectrum projection, xDim = %d, must be in range 1 to $d' % (xDim, numDim))
+
+    if not (1 <= yDim <= numDim):
+        raise Exception('For spectrum projection, yDim = %d, must be in range 1 to $d' % (yDim, numDim))
+
+    if xDim == yDim:
+        raise Exception('For spectrum projection, must have xDim != yDim')
+
+    if method not in PROJECTION_METHODS:
+        raise Exception('For spectrum projection, method must be one of %s' % (PROJECTION_METHODS,))
+
+    if method.endswith('noise') and noise is None:
+        raise Exception('For spectrum projection method "%s", noise parameter must be defined' % (method,))
+
+    if path is not None and format != Formats.NMRPIPE:
+        raise Exception('Can only save spectrum projection to %s format currently' % Formats.NMRPIPE)
+
+    dims = set(range(1, numDim + 1))
+    dims.remove(xDim)
+    dims.remove(yDim)
+    zDim = dims.pop()
+
+    position = [1] * numDim
+    projectedData = None
+    numZPoints = spectrum.pointCounts[zDim - 1]
+
+    for zPos in range(1, numZPoints + 1):
+        position[zDim - 1] = zPos
+        planeData = spectrum.getPlaneData(position, xDim, yDim)
+        if method == 'sum above noise' or method == 'max above noise':
+            lowIndices = planeData < noise
+            planeData[lowIndices] = 0
+        elif method == 'min below noise':
+            lowIndices = planeData > -noise
+            planeData[lowIndices] = 0
+
+        if projectedData is None:
+            # first plane
+            projectedData = planeData
+        else:
+            if method == 'max' or method == 'max above noise':
+                projectedData = np.maximum(projectedData, planeData)
+            elif method == 'min' or method == 'min below noise':
+                projectedData = np.minimum(projectedData, planeData)
+            else:
+                projectedData += planeData
+
+    if path is not None:
+        with open(path, 'wb') as fp:
+            #TODO: remove dependency on apiLayer
+            _saveNmrPipe2DHeader(spectrum._wrappedData, fp, xDim, yDim)
+            projectedData.tofile(fp)
+
+    return projectedData
 
 
 ###################################################################################################

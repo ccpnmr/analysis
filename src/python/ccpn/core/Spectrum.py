@@ -75,6 +75,8 @@ from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple
 
+from ccpn.util.Common import axisCodeMapping
+
 from ccpnmodel.ccpncore.lib.Io import Formats
 
 
@@ -128,11 +130,9 @@ class Spectrum(AbstractWrapperObject):
     dataSource = self._wrappedData
     return(dataSource.experiment.serial, dataSource.serial)
 
-
   @property
   def name(self) -> str:
     """short form of name, used for id"""
-
     return self._wrappedData.name
 
   @property
@@ -146,6 +146,13 @@ class Spectrum(AbstractWrapperObject):
   def dimensionCount(self) -> int:
     """Number of dimensions in spectrum"""
     return self._wrappedData.numDim
+
+  @property
+  def dimensions(self) -> tuple:
+    """tuple of length dimensionCount with dimesnion integers; ie. (1,2,3,..).
+    Useful for mapping axisCodes: eg: self.getByAxisCodes('dimensions', ['N','C','H']
+    """
+    return tuple(range(1,self.dimensionCount+1))
 
   @property
   def comment(self) -> str:
@@ -1002,9 +1009,6 @@ class Spectrum(AbstractWrapperObject):
 because the spectrum experimentType was defined.
 Use axisCodes to set magnetisation transfers instead.""")
 
-
-
-
   @property
   def intensities(self) -> numpy.ndarray:
     """ spectral intensities as NumPy array for 1D spectra """
@@ -1071,29 +1075,35 @@ Use axisCodes to set magnetisation transfers instead.""")
   # Library functions
 
   def getPositionValue(self, position):
-
     return self._apiDataSource.getPositionValue(position)
 
   def getPlaneData(self, position=None, xDim:int=1, yDim:int=2):
-
     return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
   def getSliceData(self, position=None, sliceDim:int=1):
-
     return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 
   def automaticIntegration(self, spectralData):
-
     return self._apiDataSource.automaticIntegration(spectralData)
 
   def estimateNoise(self):
     return self._apiDataSource.estimateNoise()
 
-  def projectedPlaneData(self, xDim:int=1, yDim:int=2, method:str='max'):
-    return self._apiDataSource.projectedPlaneData(xDim, yDim, method)
+  PROJECTION_METHODS = ('max', 'max above noise', 'min', 'min below noise', 'sum', 'sum above noise')  # Need to match definitions in DataSource.py
 
-  def projectedToFile(self, path:str, xDim:int=1, yDim:int=2, method:str='max', format:str=Formats.NMRPIPE):
-    return self._apiDataSource.projectedToFile(path, xDim, yDim, method, format)
+  def projectedPlaneData(self, xDim:int=1, yDim:int=2, method:str='max', noise=None):
+    if method not in self.PROJECTION_METHODS:
+      raise ValueError('Invalid method "%s", must one of %s' % (method, self.PROJECTION_METHODS))
+    if method.endswith('noise') and noise is None:
+      noise = self.noiseLevel
+    return self._apiDataSource.projectedPlaneData(xDim, yDim, method=method, noise=noise)
+
+  def projectedToFile(self, path:str, xDim:int=1, yDim:int=2, method:str='max', noise=None, format:str=Formats.NMRPIPE):
+    if method not in self.PROJECTION_METHODS:
+      raise ValueError('Invalid method "%s", must one of %s' % (method, self.PROJECTION_METHODS))
+    if method.endswith('noise') and noise is None:
+      noise = self.noiseLevel
+    return self._apiDataSource.projectedToFile(path, xDim, yDim, method=method, noise=noise, format=format)
 
   def get1dSpectrumData(self):
     """Get position,scaledData numpy array for 1D spectrum.
@@ -1101,15 +1111,31 @@ Use axisCodes to set magnetisation transfers instead.""")
     Gives first 1D slice for nD"""
     return self._apiDataSource.get1dSpectrumData()
 
-  def reorderValues(self, values, newAxisCodeOrder):
+  def _reorderValues(self, values, newAxisCodeOrder, partialMap=True):
     """Reorder values in spectrum dimension order to newAxisCodeOrder
-    by matching newAxisCodeOrder to spectrum axis code order"""
-    return commonUtil.reorder(values, self.axisCodes, newAxisCodeOrder)
+    only perform a partialmap if True (eg. 'H' to 'Hn')"""
+    mapping = dict((axisCode, i) for i, axisCode in enumerate(self.axisCodes))
+    if partialMap:
+      # adjust the mapping
+      # find the map of newAxisCodeOrder to self.axisCodes; eg. 'H' to 'Hn'
+      axisCodeMap = axisCodeMapping(newAxisCodeOrder, self.axisCodes)
+      if len(axisCodeMap) == 0:
+        raise ValueError('newAxisCodeOrder %s contains an invalid element' % newAxisCodeOrder)
+      #
+      mapping = dict((axisCode, mapping[axisCodeMap[axisCode]]) for i,axisCode in enumerate(newAxisCodeOrder))
+    #print('mapping>>', mapping)
+    # assemble the newValues in order
+    newValues = []
+    for axisCode in newAxisCodeOrder:
+      if axisCode in mapping:
+        newValues.append(values[mapping[axisCode]])
+      else:
+        newValues.append(None)
+    return newValues
 
-
-  def getInAxisOrder(self, attributeName:str, axisCodes:Sequence[str]=None):
+  def getByAxisCodes(self, attributeName:str, axisCodes:Sequence[str]=None, partialMap=True):
     """Get attributeName in order defined by axisCodes :
-       (default order if None)
+       (default order if None), only perform a partialmap if True (eg. 'H' to 'Hn')
     """
     if not hasattr(self, attributeName):
       raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
@@ -1119,18 +1145,18 @@ Use axisCodes to set magnetisation transfers instead.""")
       return values
     else:
       # change to order defined by axisCodes
-      return self.reorderValues(values, axisCodes)
+      return self._reorderValues(values, axisCodes, partialMap=partialMap)
 
-  def setInAxisOrder(self, attributeName:str, values:Sequence, axisCodes:Sequence[str]=None):
+  def setByAxisCodes(self, attributeName:str, values:Sequence, axisCodes:Sequence[str]=None, partialMap=True):
     """Set attributeName from values in order defined by axisCodes
-       (default order if None)
+       (default order if None), only perform a partialmap if True (eg. 'H' to 'Hn')
     """
     if not hasattr(self, attributeName):
       raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
 
     if axisCodes is not None:
       # change values to the order appropriate for spectrum
-      values = self.reorderValues(values, axisCodes)
+      values = self._reorderValues(values, axisCodes, partialMap=partialMap)
     setattr(self, attributeName, values)
 
   def _clone1D(self):

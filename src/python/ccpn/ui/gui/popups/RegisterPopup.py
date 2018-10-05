@@ -29,6 +29,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
+from functools import partial
+import re
 
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -39,11 +41,13 @@ from ccpn.ui.gui.widgets.MessageDialog import showError
 from ccpn.framework.PathsAndUrls import ccpnUrl
 ###from ccpn.ui.gui.widgets.WebView import WebViewPanel
 from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
-
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util import Register
 
 
 licenseUrl = ccpnUrl + '/license'
+validEmailRegex = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-_]+\.)+[A-Za-z]{2,63}$')
+
 
 # class RegisterPopup(QtWidgets.QDialog):
 class RegisterPopup(CcpnDialog):
@@ -68,12 +72,18 @@ This needs to be done once on every computer you use the programme on.
 
     row = 1
     self.entries = []
+    self.validateEntries = []
     registrationDict = Register.loadDict()
     for attr in Register.userAttributes:
       label = Label(frame, metaUtil.upperFirst(attr), grid=(row,0))
       text = registrationDict.get(attr, '')
       entry = Entry(frame, text=text, grid=(row,1), maxLength=60)
       self.entries.append(entry)
+
+      if 'email' in attr:
+        currentBaseColour = entry.palette().color(QtGui.QPalette.Base)
+        entry.textChanged.connect(partial(self._checkEmailValid, entry, currentBaseColour))
+        self.validateEntries.append(entry)
       row += 1
 
     licenseFrame = Frame(frame,setLayout=True, grid=(row, 0), gridSpan=(1,2))
@@ -95,6 +105,18 @@ This needs to be done once on every computer you use the programme on.
     ##self.licensePanel.hide()
     #self.resize(300,200)
 
+  def _checkEmailValid(self, entryBox, baseColour):
+    palette = entryBox.palette()
+
+    regIn = entryBox.text()
+    validEmail = True if validEmailRegex.match(regIn) else False
+    if validEmail:
+      palette.setColor(QtGui.QPalette.Base, baseColour)
+    else:
+      palette.setColor(QtGui.QPalette.Base, QtGui.QColor('lightpink'))
+
+    entryBox.setPalette(palette)
+
   def _toggledCheckBox(self, *args, **kw):
     self.registerButton.setEnabled(self.licenseCheckBox.isChecked())
 
@@ -114,18 +136,22 @@ This needs to be done once on every computer you use the programme on.
 
   def _register(self):
 
-    registrationDict = {}
-    for n, attr in enumerate(Register.userAttributes):
-      entry = self.entries[n]
-      registrationDict[attr] = entry.get() or ''
-      
-    Register.setHashCode(registrationDict)
-    Register.saveDict(registrationDict)
-    Register.updateServer(registrationDict, self.version)
-    
-    if self.isModal():
-      self.close()
+    allValid = all([True if validEmailRegex.match(entry.text()) else False for entry in self.validateEntries])
 
+    if allValid:
+      registrationDict = {}
+      for n, attr in enumerate(Register.userAttributes):
+        entry = self.entries[n]
+        registrationDict[attr] = entry.get() or ''
+
+      Register.setHashCode(registrationDict)
+      Register.saveDict(registrationDict)
+      Register.updateServer(registrationDict, self.version)
+
+      if self.isModal():
+        self.close()
+    else:
+      showWarning('', 'Please check all entries are valid')
 
 if __name__ == '__main__':
 

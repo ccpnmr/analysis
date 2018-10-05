@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-03-22 13:00:57 +0000 (Wed, March 22, 2017) $"
 
 import sys
 import typing
+import re
 
 from ccpn.core.Project import Project
 from ccpn.ui._implementation import _uiImportOrder
@@ -146,6 +147,8 @@ class NoUi(Ui):
 
         self.application.showLicense()
 
+        validEmailRegex = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-_]+\.)+[A-Za-z]{2,63}$')
+
         sys.stderr.write('Please take a moment to read the licence\n')
         agree = None
         while agree is None:
@@ -159,9 +162,22 @@ class NoUi(Ui):
 
         if agree:
             registrationDict = {}
+
+            sys.stderr.write("Please enter registration details:\n")
+
+            # ('name', 'organisation', 'email')
+
             for n, attr in enumerate(Register.userAttributes):
-                regIn = input('Please enter: ' + attr + ' >')
-                registrationDict[attr] = regIn or ''
+                if 'email' in attr:
+                    validEmail = False
+                    while validEmail is False:
+                        regIn = input(attr + ' >')
+                        registrationDict[attr] = regIn or ''
+
+                        validEmail = True if validEmailRegex.match(regIn) else False
+                else:
+                    regIn = input(attr + ' >')
+                    registrationDict[attr] = regIn or ''
 
             Register.setHashCode(registrationDict)
             Register.saveDict(registrationDict)

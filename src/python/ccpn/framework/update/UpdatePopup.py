@@ -46,17 +46,12 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
     self.setModal(True)
 
     self.mainWindow = mainWindow
-    self.application = mainWindow.application
 
     version = QtCore.QCoreApplication.applicationVersion()
-    # QtWidgets.QDialog.__init__(self, parent=parent)
     UpdateAgent.__init__(self, version)
-
-    #self.appName = QtCore.QCoreApplication.applicationName()
 
     self.setWindowTitle(title)
 
-    # frame = Frame(self, setLayout=True)   # ejb
     row = 0
 
     #label = Label(self, 'Server location:', grid=(row, 0))
@@ -87,36 +82,45 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
     self.buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row,0), gridSpan=(1,2))
     row += 1
 
-    # self.resize(600,150)
+    self.setFixedSize(750, 150)
+
+    # initialise the popup
     self.resetFromServer()
     self._numUpdatesInstalled = 0
 
-    self.setFixedSize(750, 150)
-
   def _install(self):
+    """The update button has been clicked. Install updates and flag that files have been changed
+    """
     self._numUpdatesInstalled += len(self.updateFiles)
     self.installUpdates()
 
     self.buttonList.buttons[2].setText('Close and Exit')
 
   def _closeProgram(self):
+    """Call the mainWindow close function giving user option to save, then close program
+    """
     self.mainWindow._closeEvent()
     os._exit(0)
 
   def _accept(self):
+    """Close button has been clicked, close if files have been updated or close dialog
+    """
     if self._numUpdatesInstalled:
       self._closeProgram()
     else:
       self.accept()
 
   def reject(self):
+    """Dialog-frame close button has been clicked, close if files have been updated or close dialog
+    """
     if self._numUpdatesInstalled:
       self._closeProgram()
     else:
       super(UpdatePopup, self).reject()
 
   def resetFromServer(self):
-
+    """Get current number of updates from the server
+    """
     UpdateAgent.resetFromServer(self)
 
     # if self.updateFiles:

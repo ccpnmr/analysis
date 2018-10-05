@@ -43,7 +43,7 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
     # keep focus on this window
-    # self.setModal(True)
+    self.setModal(True)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application
@@ -75,22 +75,29 @@ class UpdatePopup(CcpnDialog, UpdateAgent):
     self.updatesLabel = Label(self, text='TBD', grid=(row, 1))
     row += 1
 
+    label = Label(self, 'Installing updates will require a restart of the program.', grid=(row, 0))
+    row += 1
+
     texts = ('Refresh Updates Information', 'Download and Install Updates', 'Close')
     callbacks = (self.resetFromServer, self._install, self._accept)
     tipTexts = ('Refresh the updates information by querying server and comparing with what is installed locally',
                 'Install the updates from the server',
                 'Close update dialog')
     icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/window-close.png')
-    buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row,0), gridSpan=(1,2))
+    self.buttonList = ButtonList(self, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row,0), gridSpan=(1,2))
     row += 1
 
     # self.resize(600,150)
     self.resetFromServer()
     self._numUpdatesInstalled = 0
 
+    self.setFixedSize(750, 150)
+
   def _install(self):
     self._numUpdatesInstalled += len(self.updateFiles)
     self.installUpdates()
+
+    self.buttonList.buttons[2].setText('Close and Exit')
 
   def _closeProgram(self):
     self.mainWindow._closeEvent()

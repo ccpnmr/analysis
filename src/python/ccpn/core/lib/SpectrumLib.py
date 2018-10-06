@@ -3,8 +3,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
-
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
 __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -154,76 +152,42 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
 # GWV: Adapted from DataSource.py
 #------------------------------------------------------------------------------------------------------
 
-PROJECTION_METHODS = ('max', 'max above noise', 'min', 'min below noise', 'sum', 'sum above noise')
+PROJECTION_METHODS = ('max', 'max above threshold', 'min', 'min below threshold',
+                      'sum', 'sum above threshold', 'sum below threshold')
 
-def getProjection(spectrum: 'Spectrum', axisCodes: tuple,
-                  method: str = 'max', noise=None,
-                  path=None, format:str=Formats.NMRPIPE
-                  ):
-    """Get projected plane defined by axisCodes using method and optional noise
-    optionally save to path as format
+def _getProjection(spectrum: 'Spectrum', axisCodes: tuple,
+                  method: str = 'max', threshold=None):
+    """Get projected plane defined by axisCodes using method and optional threshold
     return projected data array
+
+    NB Called by Spectrum.getProjection
     """
-    numDim = spectrum.dimensionCount
-
-    if numDim != 3:
-        raise Exception('Currently can only project from 3D')
-
-    xDim, yDim = spectrum.getByAxisCodes('dimensions', axisCodes)[0:2]
-
-    if not (1 <= xDim <= numDim):
-        raise Exception('For spectrum projection, xDim = %d, must be in range 1 to $d' % (xDim, numDim))
-
-    if not (1 <= yDim <= numDim):
-        raise Exception('For spectrum projection, yDim = %d, must be in range 1 to $d' % (yDim, numDim))
-
-    if xDim == yDim:
-        raise Exception('For spectrum projection, must have xDim != yDim')
 
     if method not in PROJECTION_METHODS:
-        raise Exception('For spectrum projection, method must be one of %s' % (PROJECTION_METHODS,))
+        raise ValueError('For spectrum projection, method must be one of %s' % (PROJECTION_METHODS,))
 
-    if method.endswith('noise') and noise is None:
-        raise Exception('For spectrum projection method "%s", noise parameter must be defined' % (method,))
+    if method.endswith('threshold') and threshold is None:
+        raise ValueError('For spectrum projection method "%s", threshold parameter must be defined' % (method,))
 
-    if path is not None and format != Formats.NMRPIPE:
-        raise Exception('Can only save spectrum projection to %s format currently' % Formats.NMRPIPE)
-
-    dims = set(range(1, numDim + 1))
-    dims.remove(xDim)
-    dims.remove(yDim)
-    zDim = dims.pop()
-
-    position = [1] * numDim
     projectedData = None
-    numZPoints = spectrum.pointCounts[zDim - 1]
+    for position, planeData in spectrum.allPlanes(axisCodes):
 
-    for zPos in range(1, numZPoints + 1):
-        position[zDim - 1] = zPos
-        planeData = spectrum.getPlaneData(position, xDim, yDim)
-        if method == 'sum above noise' or method == 'max above noise':
-            lowIndices = planeData < noise
+        if method == 'sum above threshold' or method == 'max above threshold':
+            lowIndices = planeData < threshold
             planeData[lowIndices] = 0
-        elif method == 'min below noise':
-            lowIndices = planeData > -noise
+        elif method == 'sum below threshold' or method == 'min below threshold':
+            lowIndices = planeData > -threshold
             planeData[lowIndices] = 0
 
         if projectedData is None:
             # first plane
             projectedData = planeData
+        elif method == 'max' or method == 'max above threshold':
+            projectedData = np.maximum(projectedData, planeData)
+        elif method == 'min' or method == 'min below threshold':
+            projectedData = np.minimum(projectedData, planeData)
         else:
-            if method == 'max' or method == 'max above noise':
-                projectedData = np.maximum(projectedData, planeData)
-            elif method == 'min' or method == 'min below noise':
-                projectedData = np.minimum(projectedData, planeData)
-            else:
-                projectedData += planeData
-
-    if path is not None:
-        with open(path, 'wb') as fp:
-            #TODO: remove dependency on apiLayer
-            _saveNmrPipe2DHeader(spectrum._wrappedData, fp, xDim, yDim)
-            projectedData.tofile(fp)
+            projectedData += planeData
 
     return projectedData
 

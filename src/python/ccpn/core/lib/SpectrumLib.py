@@ -170,7 +170,7 @@ def _getProjection(spectrum: 'Spectrum', axisCodes: tuple,
         raise ValueError('For spectrum projection method "%s", threshold parameter must be defined' % (method,))
 
     projectedData = None
-    for position, planeData in spectrum.allPlanes(axisCodes):
+    for position, planeData in spectrum.allPlanes(axisCodes, exactMatch=True):
 
         if method == 'sum above threshold' or method == 'max above threshold':
             lowIndices = planeData < threshold

@@ -73,9 +73,9 @@ class SpectrumProjectionPopup(CcpnDialog):
         contourLabel = Label(self, 'Preserve contour colours', grid=(6, 0))
         self.contourCheckBox = CheckBox(self, checked=True, grid=(6, 1))
         # action buttons
-        self.buttonBox = ButtonList(self, grid=(7, 0), gridSpan=(1, 2),
-                                    callbacks=[self.makeProjection, self.reject],
-                                    texts=['Make Projection', 'Done'])
+        self.buttonBox = ButtonList(self, grid=(7, 0), gridSpan=(1, 2), hAlign='r',
+                                    callbacks=[self.reject, self.makeProjection],
+                                    texts=['Close','Make Projection'])
 
         # update all widgets to correct settings
         if self.application.current.strip is not None:
@@ -134,6 +134,7 @@ class SpectrumProjectionPopup(CcpnDialog):
                 projectedSpectrum = objs[0]
                 projectedSpectrum.positiveContourColour = spectrum.positiveContourColour
                 projectedSpectrum.negativeContourColour = spectrum.negativeContourColour
+        self.accept()  # close the popup
 
     def _getSpectrumFile(self):
         if os.path.exists('/'.join(self.filePathLineEdit.text().split('/')[:-1])):

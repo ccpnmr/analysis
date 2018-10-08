@@ -1092,6 +1092,19 @@ Use axisCodes to set magnetisation transfers instead.""")
     #print('getPlaneData>>>', xDim, yDim, position)
     if xDim == yDim:
         raise ValueError('Spectrum.getPlaneData; must have xDim != yDim')
+    dims = self.dimensions
+    if xDim not in dims:
+        raise ValueError('Spectrum.getPlaneData; invalid xDim "%s"; must one of %s' %
+                         (xDim, dims))
+    if yDim not in dims:
+        raise ValueError('Spectrum.getPlaneData; invalid yDim "%s"; must one of %s' %
+                         (yDim, dims))
+    if position is None:
+        position = [1]*self.dimensionCount
+    for idx, p in enumerate(position):
+        if not (1 <= p <= self.pointCounts[idx]):
+            raise ValueError('Spectrum.getPlaneData; invalid position[%d] "%d"; should be in range (%d,%d)' %
+                             (idx, p, 1, self.pointCounts[idx]))
 
     return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
@@ -1103,13 +1116,10 @@ Use axisCodes to set magnetisation transfers instead.""")
     """
     if len(axisCodes) != 2:
         raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
-
     xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=exactMatch)
-    if position is None:
-      position = [1]*self.dimensionCount
     return self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
-  def allPlanes2(self, axisCodes:tuple, exactMatch=True):
+  def allPlanes(self, axisCodes:tuple, exactMatch=True):
     """An iterator over all planes defined by axisCodes, yielding (position, data-array) tuples
     Expand axisCodes if exactMatch=False
     """
@@ -1117,6 +1127,8 @@ Use axisCodes to set magnetisation transfers instead.""")
     if len(axisCodes) != 2:
         raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
     axisCodes = self.getByAxisCodes('axisCodes', axisCodes, exactMatch=exactMatch)  # check and optionally expand axisCodes
+    if axisCodes[0] == axisCodes[1]:
+        raise ValueError('Invalid axisCodes %s; identical' % axisCodes)
 
     # get axisCodes of dimensions to interate over
     iterAxisCodes = list(set(self.axisCodes) - set(axisCodes))
@@ -1140,44 +1152,10 @@ Use axisCodes to set magnetisation transfers instead.""")
     done = False
     xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
     while not done:
-        # Using direct getPlaneData call to reduce overhead
-        planeData = self.getPlaneData(position, xDim=xDim, yDim=yDim)
+        # Using direct api getPlaneData call to reduce overhead; (all parameters have been checked)
+        planeData = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
         yield (position, planeData)
         done, position = _nextPosition(position)
-
-  def allPlanes(self, axisCodes):
-    """An iterator over all planes, yielding (position, data-array) tuples"""
-
-    # hard coded for 4D max for now
-    xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
-    dims = list(self.dimensions)
-    dims.remove(xDim)
-    dims.remove(yDim)
-    #print('>>>', xDim, yDim, dims)
-    zRange = [1]
-    aRange = [1]
-    if self.dimensionCount == 2:
-      zDim = 3
-      aDim = 4
-    elif self.dimensionCount == 3:
-      zDim = dims.pop()
-      zRange = range(1, self.pointCounts[zDim-1]+1)
-      aDim = 4
-    elif self.dimensionCount == 4:
-      zDim = dims.pop()
-      zRange = range(1, self.pointCounts[zDim-1] + 1)
-      aDim = dims.pop()
-      aRange = range(1, self.pointCounts[aDim-1] + 1)
-    else:
-      raise RuntimeError('allPlanes not implemented for spectrum %s with dimensionality %d' %
-                         (self.name, self.dimensionCount))
-
-    position = [1]*4
-    for z in zRange:
-      position[zDim-1] = z
-      for a in aRange:
-        position[aDim-1] = a
-        yield (position[0:self.dimensionCount], self.getPlaneData(position[0:self.dimensionCount], xDim, yDim))
 
   def getProjection(self, axisCodes: tuple, method: str = 'max', threshold=None, path=None, format:str=Formats.NMRPIPE):
     """Get projected plane defined by a tuple of two axisCodes, using method and an optional threshold
@@ -1192,7 +1170,7 @@ Use axisCodes to set magnetisation transfers instead.""")
     if path is not None:
         from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.DataSource import _saveNmrPipe2DHeader
         with open(path, 'wb') as fp:
-            #TODO: remove dependency on apiLayer
+            #TODO: remove dependency on filestorage on apiLayer
             xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)[0:2]
             _saveNmrPipe2DHeader(self._wrappedData, fp, xDim, yDim)
             projectedData.tofile(fp)
@@ -1207,11 +1185,11 @@ Use axisCodes to set magnetisation transfers instead.""")
 
   def get1dSpectrumData(self):
     """Get position,scaledData numpy array for 1D spectrum.
-
-    Gives first 1D slice for nD"""
+    Yields first 1D slice for nD
+    """
     return self._apiDataSource.get1dSpectrumData()
 
-  def _mapAxisCodes(self, axisCodes):
+  def _mapAxisCodes(self, axisCodes:Sequence[str]):
     """Map axisCodes on self.axisCodes
     return mapped axisCodes as list
     """
@@ -1219,10 +1197,9 @@ Use axisCodes to set magnetisation transfers instead.""")
     axisCodeMap = axisCodeMapping(axisCodes, self.axisCodes)
     if len(axisCodeMap) == 0:
         raise ValueError('axisCodes %s contains an invalid element' % axisCodes)
-    #
     return [axisCodeMap[a] for a in axisCodes]
 
-  def _reorderValues(self, values, newAxisCodeOrder):
+  def _reorderValues(self, values:Sequence, newAxisCodeOrder:Sequence[str]):
     """Reorder values in spectrum dimension order to newAxisCodeOrder
     """
     mapping = dict((axisCode, i) for i, axisCode in enumerate(self.axisCodes))
@@ -1240,6 +1217,7 @@ Use axisCodes to set magnetisation transfers instead.""")
     """Return values defined by attributeName in order defined by axisCodes :
        (default order if None)
         perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
+       NB: Use getByDimensions for dimensions (1..dimensionCount) based access
     """
     if not hasattr(self, attributeName):
       raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
@@ -1257,6 +1235,7 @@ Use axisCodes to set magnetisation transfers instead.""")
     """Set attributeName to values in order defined by axisCodes
        (default order if None)
         perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
+       NB: Use setByDimensions for dimensions (1..dimensionCount) based access
     """
     if not hasattr(self, attributeName):
       raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
@@ -1268,6 +1247,46 @@ Use axisCodes to set magnetisation transfers instead.""")
       # change values to the order appropriate for spectrum
       values = self._reorderValues(values, axisCodes)
     setattr(self, attributeName, values)
+
+  def getByDimensions(self, attributeName:str, dimensions:Sequence[int]=None):
+    """Return values defined by attributeName in order defined by dimensions (1..dimensionCount).
+       (default order if None)
+       NB: Use getByAxisCodes for axisCode based access
+    """
+    if not hasattr(self, attributeName):
+      raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
+    values = getattr(self, attributeName)
+
+    if dimensions is None:
+      return values
+
+    newValues = []
+    for dim in dimensions:
+      if not (1 <= dim <= self.dimensionCount):
+        raise ValueError('Invalid dimension "%d"; should be one of %s' % (dim, self.dimensions))
+      else:
+        newValues.append(values[dim-1])
+    return newValues
+
+  def setByDimensions(self, attributeName:str, values:Sequence, dimensions:Sequence[int]=None):
+      """Set attributeName to values in order defined by dimensions (1..dimensionCount).
+         (default order if None)
+         NB: Use setByAxisCodes for axisCode based access
+      """
+      if not hasattr(self, attributeName):
+          raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
+
+      if dimensions is None:
+          setattr(self, attributeName, values)
+          return
+
+      newValues = []
+      for dim in dimensions:
+          if not (1 <= dim <= self.dimensionCount):
+              raise ValueError('Invalid dimension "%d"; should be one of %s' % (dim, self.dimensions))
+          else:
+              newValues.append(values[dim-1])
+      setattr(self, attributeName, newValues)
 
   def _clone1D(self):
     'Clone 1D spectrum to a new spectrum.'

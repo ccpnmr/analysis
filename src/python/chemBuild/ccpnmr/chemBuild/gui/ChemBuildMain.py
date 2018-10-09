@@ -664,12 +664,12 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     if self.compound:
       fType = 'JPEG (*.jpg *.jpr *.jpeg)'
       dialog = QtWidgets.QFileDialog
-      #filePath, filtr = dialog.getSaveFileName(self,filter=fType)
-      filePath = dialog.getSaveFileName(self,filter=fType)
+      filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      # filePath = dialog.getSaveFileName(self,filter=fType)
     
       if filePath:
         widget = self.compoundView
-        pixmap = QtGui.QPixmap.grabWidget(widget, widget.rect())
+        pixmap = widget.grab( widget.rect())
         if not pixmap.save(filePath, 'JPEG'):
           showError('Save', "Save failed (unknown reason)", self)
   
@@ -678,8 +678,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     if self.compound:
       fType = 'PNG (*.png)'
       dialog = QtWidgets.QFileDialog
-      #filePath, filtr = dialog.getSaveFileName(self,filter=fType)
-      filePath = dialog.getSaveFileName(self,filter=fType)
+      filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      # filePath = dialog.getSaveFileName(self,filter=fType)
     
       if filePath:
         widget = self.compoundView
@@ -703,8 +703,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
       fType = 'SVG (*.svg)'
       dialog = QtWidgets.QFileDialog
-      #filePath, filtr = dialog.getSaveFileName(self,filter=fType)
-      filePath = dialog.getSaveFileName(self,filter=fType)
+      filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      # filePath = dialog.getSaveFileName(self,filter=fType)
       
       if filePath:
         printer.setFileName(filePath)
@@ -737,8 +737,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
       fType = 'PDF (*.pdf)'
       dialog = QtWidgets.QFileDialog
-      #filePath, filtr = dialog.getSaveFileName(self,filter=fType)
-      filePath = dialog.getSaveFileName(self,filter=fType)
+      filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      # filePath = dialog.getSaveFileName(self,filter=fType)
       
       if filePath:
         printer.setOutputFileName(filePath)
@@ -1014,7 +1014,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
   def exportPdb(self):
     
     if self.variant:
-      code,  ok = QtGui.QInputDialog.getText(self, 'Query', 'PDB Three-letter Residue Code')
+      code,  ok = QtWidgets.QInputDialog.getText(self, 'Query', 'PDB Three-letter Residue Code')
       
       if not ok:
         return
@@ -1032,10 +1032,10 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         #filePath, filtr = dialog.getSaveFileName(self,msg, dir=self.userDir, filter=fType)
         filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
     
-        if filePath:
-          dirName, fileName = path.split(filePath)
+        if len(filePath)>1:
+          dirName, fileName = filePath[0], filePath[1]
           self.userDir = dirName
-          fileObj = open(filePath, 'w')
+          fileObj = open(self.userDir, 'w')
           fileObj.write(lines)
           fileObj.close()
           
@@ -1102,7 +1102,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         msg = 'Cannot export CCPN ChemComp XML file.\n'
         msg += 'Code "%s" already in use for molecule type "%s".\n' % (ccpCode, molType)
         msg += 'Please enter a different code:'
-        ccpCode, isOk =  QtGui.QInputDialog.getText(self, 'Error', msg)
+        ccpCode, isOk =  QtWidgets.QInputDialog.getText(self, 'Error', msg)
         
         if isOk:
           ccpCode = ccpCode.strip()
@@ -1553,8 +1553,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     fType = 'ChemBuild (*.pickle)'
 
     dialog = QtWidgets.QFileDialog
-    #filePath, filtr = dialog.getSaveFileName(self, dir=self.userDir, filter=fType)
-    filePath = dialog.getSaveFileName(self, directory=self.userDir, filter=fType)
+    filePath, filtr = dialog.getSaveFileName(self, dir=self.userDir, filter=fType)
+    # filePath = dialog.getSaveFileName(self, directory=self.userDir, filter=fType)
 
     if filePath:
       dirName, fileName = path.split(filePath)

@@ -29,11 +29,14 @@ import collections
 
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
+from ccpnmodel.ccpncore.lib.Io import Formats
+
 import numpy as np
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
   ['dimension1', 'dimension2', 'transferType', 'isIndirect']
 )
+
 
 def getExperimentClassifications(project:Project) -> dict:
   """
@@ -74,6 +77,7 @@ def _calibrateX1D(spectrum, currentPosition, newPosition):
   shift = newPosition - currentPosition
   spectrum.positions = spectrum.positions+shift
 
+
 def _calibrateY1D(spectrum, currentPosition, newPosition):
   shift = newPosition - currentPosition
   spectrum.intensities = spectrum.intensities+shift
@@ -98,6 +102,7 @@ def _set1DRawDataFromCcpnInternal(spectrum):
 def _negLogLikelihood(deltas, queryPeakPositions, kde):
   shifted = queryPeakPositions - deltas
   return -kde.logpdf(shifted.T)
+
 
 def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=-1):
 
@@ -150,6 +155,50 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
 #     p2x = p2-(a[0][1])
 #     peak.position = (p1x,p2x)
 
+
+#------------------------------------------------------------------------------------------------------
+# Spectrum projection
+# GWV: Adapted from DataSource.py
+#------------------------------------------------------------------------------------------------------
+
+PROJECTION_METHODS = ('max', 'max above threshold', 'min', 'min below threshold',
+                      'sum', 'sum above threshold', 'sum below threshold')
+
+def _getProjection(spectrum: 'Spectrum', axisCodes: tuple,
+                  method: str = 'max', threshold=None):
+    """Get projected plane defined by axisCodes using method and optional threshold
+    return projected data array
+
+    NB Called by Spectrum.getProjection
+    """
+
+    if method not in PROJECTION_METHODS:
+        raise ValueError('For spectrum projection, method must be one of %s' % (PROJECTION_METHODS,))
+
+    if method.endswith('threshold') and threshold is None:
+        raise ValueError('For spectrum projection method "%s", threshold parameter must be defined' % (method,))
+
+    projectedData = None
+    for position, planeData in spectrum.allPlanes(axisCodes, exactMatch=True):
+
+        if method == 'sum above threshold' or method == 'max above threshold':
+            lowIndices = planeData < threshold
+            planeData[lowIndices] = 0
+        elif method == 'sum below threshold' or method == 'min below threshold':
+            lowIndices = planeData > -threshold
+            planeData[lowIndices] = 0
+
+        if projectedData is None:
+            # first plane
+            projectedData = planeData
+        elif method == 'max' or method == 'max above threshold':
+            projectedData = np.maximum(projectedData, planeData)
+        elif method == 'min' or method == 'min below threshold':
+            projectedData = np.minimum(projectedData, planeData)
+        else:
+            projectedData += planeData
+
+    return projectedData
 
 
 ###################################################################################################

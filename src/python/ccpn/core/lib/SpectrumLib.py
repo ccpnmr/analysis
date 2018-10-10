@@ -8,7 +8,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -33,16 +33,17 @@ from ccpnmodel.ccpncore.lib.Io import Formats
 
 import numpy as np
 
+
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
-  ['dimension1', 'dimension2', 'transferType', 'isIndirect']
-)
+                                                    ['dimension1', 'dimension2', 'transferType', 'isIndirect']
+                                                    )
 
 
-def getExperimentClassifications(project:Project) -> dict:
-  """
-  Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
-  """
-  return getExpClassificationDict(project._wrappedData)
+def getExperimentClassifications(project: Project) -> dict:
+    """
+    Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
+    """
+    return getExpClassificationDict(project._wrappedData)
 
 
 # def _oldEstimateNoiseLevel1D(x, y, factor=3):
@@ -61,88 +62,91 @@ def getExperimentClassifications(project:Project) -> dict:
 
 
 def _oldEstimateNoiseLevel1D(y, factor=0.5):
-  '''
-  Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
-  only noise is present. To increase the threshold value: increase the factor.
-  return:  float of estimated noise threshold
-  '''
-  if y is not None:
-    # print('_oldEstimateNoiseLevel1D',max(y[:int(len(y)/20)]) * factor, 'STD, ')
-    return max(y[:int(len(y)/20)]) * factor
-  else:
-    return 0
+    '''
+    Estimates the noise threshold based on the max intensity of the first portion of the spectrum where
+    only noise is present. To increase the threshold value: increase the factor.
+    return:  float of estimated noise threshold
+    '''
+    if y is not None:
+        # print('_oldEstimateNoiseLevel1D',max(y[:int(len(y)/20)]) * factor, 'STD, ')
+        return max(y[:int(len(y) / 20)]) * factor
+    else:
+        return 0
 
 
 def _calibrateX1D(spectrum, currentPosition, newPosition):
-  shift = newPosition - currentPosition
-  spectrum.positions = spectrum.positions+shift
+    shift = newPosition - currentPosition
+    spectrum.positions = spectrum.positions + shift
 
 
 def _calibrateY1D(spectrum, currentPosition, newPosition):
-  shift = newPosition - currentPosition
-  spectrum.intensities = spectrum.intensities+shift
+    shift = newPosition - currentPosition
+    spectrum.intensities = spectrum.intensities + shift
+
 
 def _calibrateXND(spectrum, currentPosition, newPosition):
-  spectrumReferencing = list(spectrum.referenceValues)
-  spectrumReferencing[0] = float(spectrumReferencing[0]+(newPosition-currentPosition))
-  spectrum.referenceValues = spectrumReferencing
+    spectrumReferencing = list(spectrum.referenceValues)
+    spectrumReferencing[0] = float(spectrumReferencing[0] + (newPosition - currentPosition))
+    spectrum.referenceValues = spectrumReferencing
+
 
 def _calibrateYND(spectrum, currentPosition, newPosition):
-  spectrumReferencing = list(spectrum.referenceValues)
-  spectrumReferencing[1] = float(spectrumReferencing[1]+(newPosition-currentPosition))
-  spectrum.referenceValues = spectrumReferencing
+    spectrumReferencing = list(spectrum.referenceValues)
+    spectrumReferencing[1] = float(spectrumReferencing[1] + (newPosition - currentPosition))
+    spectrum.referenceValues = spectrumReferencing
+
 
 def _set1DRawDataFromCcpnInternal(spectrum):
-     if not spectrum._ccpnInternalData['positions'] and not spectrum._ccpnInternalData['intensities']:
-         return
-     spectrum.positions = np.array(spectrum._ccpnInternalData['positions'])
-     spectrum.intensities = np.array(spectrum._ccpnInternalData['intensities'])
+    if not spectrum._ccpnInternalData['positions'] and not spectrum._ccpnInternalData['intensities']:
+        return
+    spectrum.positions = np.array(spectrum._ccpnInternalData['positions'])
+    spectrum.intensities = np.array(spectrum._ccpnInternalData['intensities'])
 
 
 def _negLogLikelihood(deltas, queryPeakPositions, kde):
-  shifted = queryPeakPositions - deltas
-  return -kde.logpdf(shifted.T)
+    shifted = queryPeakPositions - deltas
+    return -kde.logpdf(shifted.T)
 
 
 def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=-1):
+    # Get hold of the peakLists in the two spectra
+    queryPeakList = querySpectrum.peakLists[queryPeakListIdx]
+    refPeakList = refSpectrum.peakLists[refPeakListIdx]
 
-  # Get hold of the peakLists in the two spectra
-  queryPeakList = querySpectrum.peakLists[queryPeakListIdx]
-  refPeakList = refSpectrum.peakLists[refPeakListIdx]
+    # Create numpy arrays containing the peak positions of
+    # each peakList
 
-  # Create numpy arrays containing the peak positions of
-  # each peakList
+    import numpy as np
 
-  import numpy as np
-  refPeakPositions = np.array([peak.position for peak in
-                               refPeakList.peaks])
-  queryPeakPositions = np.array([peak.position for peak in queryPeakList.peaks])
+    refPeakPositions = np.array([peak.position for peak in
+                                 refPeakList.peaks])
+    queryPeakPositions = np.array([peak.position for peak in queryPeakList.peaks])
 
-  # Align the two numpy arrays by centre of mass
-  refMean = np.mean(refPeakPositions, axis=0)
-  queryMean = np.mean(queryPeakPositions, axis=0)
-  roughShift = queryMean - refMean
-  shiftedQueryPeakPositions = queryPeakPositions - roughShift
+    # Align the two numpy arrays by centre of mass
+    refMean = np.mean(refPeakPositions, axis=0)
+    queryMean = np.mean(queryPeakPositions, axis=0)
+    roughShift = queryMean - refMean
+    shiftedQueryPeakPositions = queryPeakPositions - roughShift
 
-  # Define a log-likelihood target for fitting the query
-  # peak positions
-  from scipy.optimize import leastsq
-  from scipy.stats import gaussian_kde
+    # Define a log-likelihood target for fitting the query
+    # peak positions
+    from scipy.optimize import leastsq
+    from scipy.stats import gaussian_kde
 
-  # Create the Gaussian KDE
-  kde = gaussian_kde(refPeakPositions.T, bw_method=0.1)
+    # Create the Gaussian KDE
+    kde = gaussian_kde(refPeakPositions.T, bw_method=0.1)
 
-  # Get hold of the values to overlay the two spectra
-  shifts, status = leastsq(_negLogLikelihood, roughShift,
-                           args=(queryPeakPositions, kde))
+    # Get hold of the values to overlay the two spectra
+    shifts, status = leastsq(_negLogLikelihood, roughShift,
+                             args=(queryPeakPositions, kde))
 
-  # Get hold of the reference values of the querySpectrum
-  queryRefValues = queryPeakList.spectrum.referenceValues
+    # Get hold of the reference values of the querySpectrum
+    queryRefValues = queryPeakList.spectrum.referenceValues
 
-  # Calculate the corrected reference values
-  correctedValues = np.array(queryRefValues) - shifts
+    # Calculate the corrected reference values
+    correctedValues = np.array(queryRefValues) - shifts
 
-  return shifts, correctedValues
+    return shifts, correctedValues
 
 
 # refSpectrum = project.spectra[]
@@ -164,8 +168,9 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
 PROJECTION_METHODS = ('max', 'max above threshold', 'min', 'min below threshold',
                       'sum', 'sum above threshold', 'sum below threshold')
 
+
 def _getProjection(spectrum: 'Spectrum', axisCodes: tuple,
-                  method: str = 'max', threshold=None):
+                   method: str = 'max', threshold=None):
     """Get projected plane defined by axisCodes using method and optional threshold
     return projected data array
 
@@ -226,13 +231,9 @@ Analytica Chimica Acta. September 2016 DOI: 10.1016/j.aca.2016.08.046
 
 '''
 
-
-
-
 from scipy.sparse import csc_matrix, eye, diags
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
-
 
 
 '''
@@ -241,29 +242,26 @@ Asl algorithm
 
 
 def als(y, lam=10 ** 2, p=0.001, nIter=10):
+    """Implements an Asymmetric Least Squares Smoothing
+    baseline correction algorithm
+    H C Eilers, Paul & F M Boelens, Hans. (2005). Baseline Correction with Asymmetric Least Squares Smoothing. Unpubl. Manuscr. .
 
-  """Implements an Asymmetric Least Squares Smoothing
-  baseline correction algorithm
-  H C Eilers, Paul & F M Boelens, Hans. (2005). Baseline Correction with Asymmetric Least Squares Smoothing. Unpubl. Manuscr. . 
+    y = signal
+    lam = smoothness, 10**2 ≤ λ ≤ 10**9.
+    p = asymmetry, 0.001 ≤ p ≤ 0.1 is a good choice for a signal with positive peaks.
+    niter = Number of iteration , default 10.
 
-  y = signal
-  lam = smoothness, 10**2 ≤ λ ≤ 10**9.
-  p = asymmetry, 0.001 ≤ p ≤ 0.1 is a good choice for a signal with positive peaks.
-  niter = Number of iteration , default 10.
+    """
 
-  """
-
-  L = len(y)
-  D = sparse.csc_matrix(np.diff(np.eye(L), 2))
-  w = np.ones(L)
-  for i in range(nIter):
-    W = sparse.spdiags(w, 0, L, L)
-    Z = W + lam * D.dot(D.transpose())
-    z = spsolve(Z, w*y)
-    w = p * (y > z) + (1-p) * (y < z)
-  return z
-
-
+    L = len(y)
+    D = sparse.csc_matrix(np.diff(np.eye(L), 2))
+    w = np.ones(L)
+    for i in range(nIter):
+        W = sparse.spdiags(w, 0, L, L)
+        Z = W + lam * D.dot(D.transpose())
+        z = spsolve(Z, w * y)
+        w = p * (y > z) + (1 - p) * (y < z)
+    return z
 
 
 ###################################################################################################
@@ -275,32 +273,29 @@ Whittaker Smooth algorithm
 
 
 def WhittakerSmooth(y, w, lambda_, differences=1):
-  '''
-  no licence , source from web
-  Penalized least squares algorithm for background fitting
+    '''
+    no licence , source from web
+    Penalized least squares algorithm for background fitting
 
-  input
-      x: input data (i.e. chromatogram of spectrum)
-      w: binary masks (value of the mask is zero if a point belongs to peaks and one otherwise)
-      lambda_: parameter that can be adjusted by user. The larger lambda is,  the smoother the resulting background
-      differences: integer indicating the order of the difference of penalties
+    input
+        x: input data (i.e. chromatogram of spectrum)
+        w: binary masks (value of the mask is zero if a point belongs to peaks and one otherwise)
+        lambda_: parameter that can be adjusted by user. The larger lambda is,  the smoother the resulting background
+        differences: integer indicating the order of the difference of penalties
 
-  output
-      the fitted background vector
-  '''
-  X = np.matrix(y)
-  m = X.size
-  i = np.arange(0, m)
-  E = eye(m, format='csc')
-  D = E[1:] - E[:-1]  # numpy.diff() does not work with sparse matrix. This is a workaround.
-  W = diags(w, 0, shape=(m, m))
-  A = csc_matrix(W + (lambda_ * D.T * D))
-  B = csc_matrix(W * X.T)
-  background = spsolve(A, B)
-  return np.array(background)
-
-
-
+    output
+        the fitted background vector
+    '''
+    X = np.matrix(y)
+    m = X.size
+    i = np.arange(0, m)
+    E = eye(m, format='csc')
+    D = E[1:] - E[:-1]  # numpy.diff() does not work with sparse matrix. This is a workaround.
+    W = diags(w, 0, shape=(m, m))
+    A = csc_matrix(W + (lambda_ * D.T * D))
+    B = csc_matrix(W * X.T)
+    background = spsolve(A, B)
+    return np.array(background)
 
 
 ###################################################################################################
@@ -309,35 +304,34 @@ def WhittakerSmooth(y, w, lambda_, differences=1):
 airPLS algorithm
 '''
 
+
 def airPLS(y, lambda_=100, porder=1, itermax=15):
-  '''
-  no licence , source from web
-  Adaptive iteratively reweighted penalized least squares for baseline fitting
+    '''
+    no licence , source from web
+    Adaptive iteratively reweighted penalized least squares for baseline fitting
 
-  input
-      x: input data (i.e. chromatogram of spectrum)
-      lambda_: parameter that can be adjusted by user. The larger lambda is,  the smoother the resulting background, z
-      porder: adaptive iteratively reweighted penalized least squares for baseline fitting
+    input
+        x: input data (i.e. chromatogram of spectrum)
+        lambda_: parameter that can be adjusted by user. The larger lambda is,  the smoother the resulting background, z
+        porder: adaptive iteratively reweighted penalized least squares for baseline fitting
 
-  output
-      the fitted background vector
-  '''
-  m = y.shape[0]
-  w = np.ones(m)
-  for i in range(1, itermax + 1):
-    z = WhittakerSmooth(y, w, lambda_, porder)
-    d = y - z
-    dssn = np.abs(d[d < 0].sum())
-    if (dssn < 0.001 * (abs(y)).sum() or i == itermax):
-      if (i == itermax): print('WARING max iteration reached!')
-      break
-    w[d >= 0] = 0  # d>0 means that this point is part of a peak, so its weight is set to 0 in order to ignore it
-    w[d < 0] = np.exp(i * np.abs(d[d < 0]) / dssn)
-    w[0] = np.exp(i * (d[d < 0]).max() / dssn)
-    w[-1] = w[0]
-  return z
-
-
+    output
+        the fitted background vector
+    '''
+    m = y.shape[0]
+    w = np.ones(m)
+    for i in range(1, itermax + 1):
+        z = WhittakerSmooth(y, w, lambda_, porder)
+        d = y - z
+        dssn = np.abs(d[d < 0].sum())
+        if (dssn < 0.001 * (abs(y)).sum() or i == itermax):
+            if (i == itermax): print('WARING max iteration reached!')
+            break
+        w[d >= 0] = 0  # d>0 means that this point is part of a peak, so its weight is set to 0 in order to ignore it
+        w[d < 0] = np.exp(i * np.abs(d[d < 0]) / dssn)
+        w[0] = np.exp(i * (d[d < 0]).max() / dssn)
+        w[-1] = w[0]
+    return z
 
 
 ###################################################################################################
@@ -348,16 +342,15 @@ polynomial Fit algorithm
 '''
 
 
-def polynomialFit(x, y, order:int=3):
-  '''
-  :param x: x values
-  :param y: y values
-  :param order: polynomial order
-  :return: fitted baseline
-  '''
-  fit = np.polyval(np.polyfit(x, y, deg=order), x)
-  return fit
-
+def polynomialFit(x, y, order: int = 3):
+    '''
+    :param x: x values
+    :param y: y values
+    :param order: polynomial order
+    :return: fitted baseline
+    '''
+    fit = np.polyval(np.polyfit(x, y, deg=order), x)
+    return fit
 
 
 ###################################################################################################
@@ -391,56 +384,56 @@ def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
 
     N = y.shape[0]
 
-    E=eye(N,format='csc')
+    E = eye(N, format='csc')
     # numpy.diff() does not work with sparse matrix. This is a workaround.
     # It creates the second order difference matrix.
     # [1 -2 1 ......]
     # [0 1 -2 1 ....]
     # [.............]
     # [.... 0 1 -2 1]
-    D=E[:-2]-2*E[1:-1]+E[2:]
+    D = E[:-2] - 2 * E[1:-1] + E[2:]
 
-    H = lambda_*D.T*D
+    H = lambda_ * D.T * D
     Y = np.matrix(y)
 
     w = np.ones(N)
 
-    for i in range(itermax+10):
-        W=diags(w,0,shape=(N,N))
-        Q = W+H
-        B = W*Y.T
+    for i in range(itermax + 10):
+        W = diags(w, 0, shape=(N, N))
+        Q = W + H
+        B = W * Y.T
 
-        z=spsolve(Q,B)
-        d = y-z
-        dn = d[d<0.0]
+        z = spsolve(Q, B)
+        d = y - z
+        dn = d[d < 0.0]
 
         m = np.mean(dn)
         if np.isnan(m):
             # add a tiny bit of noise to Y
             y2 = y.copy()
             if np.std(y) != 0.:
-                y2 += (np.random.random(y.size)-0.5)*np.std(y)/1000.
-            elif np.mean(y) != 0.0 :
-                y2 += (np.random.random(y.size)-0.5)*np.mean(y)/1000.
+                y2 += (np.random.random(y.size) - 0.5) * np.std(y) / 1000.
+            elif np.mean(y) != 0.0:
+                y2 += (np.random.random(y.size) - 0.5) * np.mean(y) / 1000.
             else:
-                y2 += (np.random.random(y.size)-0.5)/1000.
+                y2 += (np.random.random(y.size) - 0.5) / 1000.
             y = y2
             Y = np.matrix(y2)
-            W=diags(w,0,shape=(N,N))
-            Q = W+H
-            B = W*Y.T
+            W = diags(w, 0, shape=(N, N))
+            Q = W + H
+            B = W * Y.T
 
-            z=spsolve(Q,B)
-            d = y-z
-            dn = d[d<0.0]
+            z = spsolve(Q, B)
+            d = y - z
+            dn = d[d < 0.0]
 
             m = np.mean(dn)
-        s = np.std(dn,ddof=1)
+        s = np.std(dn, ddof=1)
 
-        wt = 1./(1 + np.exp(2. * (d - (2*s-m))/s))
+        wt = 1. / (1 + np.exp(2. * (d - (2 * s - m)) / s))
 
         # check exit condition
-        condition = np.linalg.norm(w-wt) / np.linalg.norm(w)
+        condition = np.linalg.norm(w - wt) / np.linalg.norm(w)
         if condition < ratio:
             break
         if i > itermax:
@@ -448,8 +441,6 @@ def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
         w = wt
 
     return z
-
-
 
 
 ###################################################################################################
@@ -461,90 +452,89 @@ Implementation of the  arPLS algorithm
 
 
 def arPLS_Implementation(y, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, itermax=10, interpolate=True):
-  """
-  maxValue = maxValue of the baseline noise
-  minValue = minValue of the baseline noise
-  interpolate: Where are the peaks: interpolate the points from neighbours otherwise set them to 0.
+    """
+    maxValue = maxValue of the baseline noise
+    minValue = minValue of the baseline noise
+    interpolate: Where are the peaks: interpolate the points from neighbours otherwise set them to 0.
 
-  """
+    """
 
-  lenghtY = len(y)
-  sparseMatrix=eye(lenghtY, format='csc')
-  differenceMatrix = sparseMatrix[:-2] - 2*sparseMatrix[1:-1] + sparseMatrix[2:]
-  H = lambdaValue * differenceMatrix.T * differenceMatrix
+    lenghtY = len(y)
+    sparseMatrix = eye(lenghtY, format='csc')
+    differenceMatrix = sparseMatrix[:-2] - 2 * sparseMatrix[1:-1] + sparseMatrix[2:]
+    H = lambdaValue * differenceMatrix.T * differenceMatrix
 
-  Y = np.matrix(y)
-  w = np.ones(lenghtY)
+    Y = np.matrix(y)
+    w = np.ones(lenghtY)
 
-  for i in range(itermax):
-    W=diags(w,1,shape=(lenghtY,lenghtY))
-    Q = W+H
-    B = W*Y.T
-    z=spsolve(Q,B)
-    mymask = (z >maxValue) | (z < minValue)
-    b = np.ma.masked_where(mymask, z)
-    if interpolate:
-      c = np.interp(np.where(mymask)[0], np.where(~mymask)[0], b[np.where(~mymask)[0]])
-      b[np.where(mymask)[0]] = c
-    else:
-      b = np.ma.filled(b, fill_value=0)
+    for i in range(itermax):
+        W = diags(w, 1, shape=(lenghtY, lenghtY))
+        Q = W + H
+        B = W * Y.T
+        z = spsolve(Q, B)
+        mymask = (z > maxValue) | (z < minValue)
+        b = np.ma.masked_where(mymask, z)
+        if interpolate:
+            c = np.interp(np.where(mymask)[0], np.where(~mymask)[0], b[np.where(~mymask)[0]])
+            b[np.where(mymask)[0]] = c
+        else:
+            b = np.ma.filled(b, fill_value=0)
 
-  return b
-
-
-def lowess(x,y):
-  '''
-   LOWESS (Locally Weighted Scatterplot Smoothing)
-  A lowess function that outs smoothed estimates of endog
-  at the given exog values from points (exog, endog)
-  To use this, you need to install statsmodels in your miniconda:
-   - conda install statsmodels or pip install --upgrade --no-deps statsmodels
-  '''
-
-  from scipy.interpolate import interp1d
-  import statsmodels.api as sm
-
-  # introduce some floats in our x-values
-
-  # lowess will return our "smoothed" data with a y value for at every x-value
-  lowess = sm.nonparametric.lowess(y, x, frac=.3)
-
-  # unpack the lowess smoothed points to their values
-  lowess_x = list(zip(*lowess))[0]
-  lowess_y = list(zip(*lowess))[1]
-
-  # run scipy's interpolation. There is also extrapolation I believe
-  f = interp1d(lowess_x, lowess_y, bounds_error=False)
+    return b
 
 
-  # this this generate y values for our xvalues by our interpolator
-  # it will MISS values outsite of the x window (less than 3, greater than 33)
-  # There might be a better approach, but you can run a for loop
-  # and if the value is out of the range, use f(min(lowess_x)) or f(max(lowess_x))
-  ynew = f(x)
-  return ynew
+def lowess(x, y):
+    '''
+     LOWESS (Locally Weighted Scatterplot Smoothing)
+    A lowess function that outs smoothed estimates of endog
+    at the given exog values from points (exog, endog)
+    To use this, you need to install statsmodels in your miniconda:
+     - conda install statsmodels or pip install --upgrade --no-deps statsmodels
+    '''
+
+    from scipy.interpolate import interp1d
+    import statsmodels.api as sm
+
+    # introduce some floats in our x-values
+
+    # lowess will return our "smoothed" data with a y value for at every x-value
+    lowess = sm.nonparametric.lowess(y, x, frac=.3)
+
+    # unpack the lowess smoothed points to their values
+    lowess_x = list(zip(*lowess))[0]
+    lowess_y = list(zip(*lowess))[1]
+
+    # run scipy's interpolation. There is also extrapolation I believe
+    f = interp1d(lowess_x, lowess_y, bounds_error=False)
+
+    # this this generate y values for our xvalues by our interpolator
+    # it will MISS values outsite of the x window (less than 3, greater than 33)
+    # There might be a better approach, but you can run a for loop
+    # and if the value is out of the range, use f(min(lowess_x)) or f(max(lowess_x))
+    ynew = f(x)
+    return ynew
 
 
 from typing import Tuple
 
 
-def getDefaultSpectrumColours(self:'DataSource') -> Tuple[str,str]:
-  """Get default positivecontourcolour, negativecontourcolour for Spectrum
-  (calculated by hashing spectrum properties to avoid always getting the same colours
-  Currently matches getDefaultColours in dataSource that is set through the api
-  """
+def getDefaultSpectrumColours(self: 'DataSource') -> Tuple[str, str]:
+    """Get default positivecontourcolour, negativecontourcolour for Spectrum
+    (calculated by hashing spectrum properties to avoid always getting the same colours
+    Currently matches getDefaultColours in dataSource that is set through the api
+    """
 
-  # from ccpn.util.Colour import spectrumHexColours
-  from ccpn.ui.gui.guiSettings import getColours, getColourScheme, SPECTRUM_HEXCOLOURS
+    # from ccpn.util.Colour import spectrumHexColours
+    from ccpn.ui.gui.guiSettings import getColours, getColourScheme, SPECTRUM_HEXCOLOURS
 
-  spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
-  colorCount = len(spectrumHexColours)
-  step = ((colorCount//2 -1) //2)
-  index = self.experiment.serial - 1 + step * (self._serial -1)
+    spectrumHexColours = getColours().get(SPECTRUM_HEXCOLOURS)
+    colorCount = len(spectrumHexColours)
+    step = ((colorCount // 2 - 1) // 2)
+    index = self.experiment.serial - 1 + step * (self._serial - 1)
 
-  if self._numDim == 1:
-    ii = (2 * index) % colorCount
-  else:
-    ii = (2 * index) % colorCount
-  #
-  return (spectrumHexColours[ii], spectrumHexColours[ii+1])
+    if self._numDim == 1:
+        ii = (2 * index) % colorCount
+    else:
+        ii = (2 * index) % colorCount
+    #
+    return (spectrumHexColours[ii], spectrumHexColours[ii + 1])

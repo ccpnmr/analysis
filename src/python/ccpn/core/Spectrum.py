@@ -1092,7 +1092,6 @@ class Spectrum(AbstractWrapperObject):
             raise Exception('Currently this method only works for 1D spectra')
 
         if self._intensities is None:
-
             # store the unscaled value internally so need to multiply the return value again
             self._intensities = self.getSliceData() / self.scale
 
@@ -1156,7 +1155,7 @@ class Spectrum(AbstractWrapperObject):
     def getPositionValue(self, position):
         return self._apiDataSource.getPositionValue(position)
 
-    def getSliceData(self, position=None, sliceDim:int=1):
+    def getSliceData(self, position=None, sliceDim: int = 1):
         return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 
     def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
@@ -1417,6 +1416,7 @@ class Spectrum(AbstractWrapperObject):
         """
         if self._wrappedData.experiment:
             self._wrappedData.experiment.temperature = value
+
 
 def _newSpectrum(self: Project, name: str) -> Spectrum:
     """Creation of new Spectrum NOT IMPLEMENTED.

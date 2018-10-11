@@ -121,7 +121,7 @@ class GLGlobalData(QtWidgets.QWidget):
     uniform vec4 viewport;
     varying vec4 FC;
     varying vec4 FO;
-    varying vec4 varyingTexCoord;
+    varying vec2 varyingTexCoord;
     attribute vec2 offset;
 
     void main()
@@ -139,7 +139,7 @@ class GLGlobalData(QtWidgets.QWidget):
 
 //      gl_Position = (pTexMatrix * vec4(offset, 0.0, 0.0)) + ((pTexMatrix * gl_Vertex) * axisScale);
       
-      varyingTexCoord = gl_MultiTexCoord0;
+      varyingTexCoord = gl_MultiTexCoord0.st;
       FC = gl_Color;
     }
     """
@@ -153,11 +153,11 @@ class GLGlobalData(QtWidgets.QWidget):
     uniform vec4 background;
     uniform int  blendEnabled;
     varying vec4 FO;
-    varying vec4 varyingTexCoord;
+    varying vec2 varyingTexCoord;
 
     void main()
     {
-      filter = texture2D(texture, varyingTexCoord.xy);
+      filter = texture2D(texture, varyingTexCoord.st);
       // colour for blending enabled
       if (blendEnabled != 0)
         gl_FragColor = vec4(FC.xyz, filter.w);

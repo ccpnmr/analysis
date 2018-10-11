@@ -346,6 +346,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                0.0, 0.0, 1.0, 0.0,
                                0.0, 0.0, 0.0, 1.0]
 
+        self.vInv = None
+        self.mouseTransform = None
+
         self._useTexture = np.zeros((1,), dtype=np.int)
         self._axisScale = np.zeros((4,), dtype=np.float32)
         self._background = np.zeros((4,), dtype=np.float32)
@@ -439,12 +442,16 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
 
-        self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))  # projection
-        self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))  # viewport
-        try:
-            self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))  # axis scale
-        except Exception as es:
-            pass
+        # self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))  # projection
+
+        # calculate the screen to axes transform
+        self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))
+        self.mouseTransform = np.matmul(self._aMatrix.reshape((4, 4)), self.vInv)
+
+        # try:
+        #     self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))  # axis scale
+        # except Exception as es:
+        #     pass
 
         self.modelViewMatrix = (GL.GLdouble * 16)()
         self.projectionMatrix = (GL.GLdouble * 16)()
@@ -1401,9 +1408,11 @@ class CcpnGLWidget(QOpenGLWidget):
                 my = self.height() - pnt.y() - self.AXIS_MARGINBOTTOM
             else:
                 my = self.height() - pnt.y()
-            vect = self.vInv.dot([mx, my, 0.0, 1.0])
 
-            return tuple(self._aMatrix.reshape((4, 4)).dot(vect)[:2])
+            # vect = self.vInv.dot([mx, my, 0.0, 1.0])
+            # return tuple(self._aMatrix.reshape((4, 4)).dot(vect)[:2])
+
+            return tuple(self.mouseTransform.dot([mx, my, 0.0, 1.0])[:2])
         else:
             return None
 
@@ -1536,9 +1545,10 @@ class CcpnGLWidget(QOpenGLWidget):
             my = self.height() - ev.pos().y()
         self._mouseStart = (mx, my)
 
-        vect = self.vInv.dot([mx, my, 0.0, 1.0])
-        self._mouseStart = (mx, my)
-        self._startCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
+        # vect = self.vInv.dot([mx, my, 0.0, 1.0])
+        # self._startCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
+
+        self._startCoordinate = self.mouseTransform.dot([mx, my, 0.0, 1.0])
 
         self._endCoordinate = self._startCoordinate
         # self._drawSelectionBox = True
@@ -1664,11 +1674,8 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
             self._mouseY = self.height() - event.pos().y()
 
-        # translate mouse to NDC
-        vect = self.vInv.dot([self._mouseX, self._mouseY, 0.0, 1.0])
-
-        # translate to axis coordinates
-        self.cursorCoordinate = self._aMatrix.reshape((4, 4)).dot(vect)
+        # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
+        self.cursorCoordinate = self.mouseTransform.dot([self._mouseX, self._mouseY, 0.0, 1.0])
 
         currentPos = self.current.cursorPosition
         try:
@@ -1903,6 +1910,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                         -1.0, 1.0)
 
         self.viewports.setViewport(self._currentView)
+
+        # why are these labelled the other way round?
         currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uVMatrix)
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
@@ -2816,7 +2825,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._updateVTrace = visible
 
     def buildMouseCoords(self, refresh=False):
-        if refresh or self._widthsChangedEnough(self.cursorCoordinate, self._mouseCoords):
+        if refresh or self._widthsChangedEnough(self.cursorCoordinate, self._mouseCoords, tol=1e-10):
 
             newCoords = self.mouseFormat % (self._axisOrder[0], self.cursorCoordinate[0],
                                             self._axisOrder[1], self.cursorCoordinate[1])

@@ -131,6 +131,9 @@ class GLGlobalData(QtWidgets.QWidget):
                                //pos.zw );
 
       gl_Position = pTexMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+
+//      gl_Position = (pTexMatrix * vec4(offset, 0.0, 0.0)) + (pTexMatrix * (gl_Vertex * axisScale));
+      
       varyingTexCoord = gl_MultiTexCoord0;
       FC = gl_Color;
     }

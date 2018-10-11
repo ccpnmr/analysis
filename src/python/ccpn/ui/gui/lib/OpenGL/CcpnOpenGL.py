@@ -713,32 +713,39 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.between(mx, mw[0], mw[2]) and self.between(my, mw[1], mw[3]):
             # if in the mainView
             if zoomCentre == 0:  # centre on mouse
-                mb = (mx - mw[0]) / (mw[2] - mw[0])
+                mb0 = (mx - mw[0]) / (mw[2] - mw[0])
+                mb1 = (my - mw[1]) / (mw[3] - mw[1])
             else:  # centre on the screen
-                mb = 0.5
+                mb0 = 0.5
+                mb1 = 0.5
 
-            mbx = self.axisL + mb * (self.axisR - self.axisL)
+            mbx = self.axisL + mb0 * (self.axisR - self.axisL)
+            mby = self.axisB + mb1 * (self.axisT - self.axisB)
 
             if scrollDirection < 0:
                 self.axisL = mbx + zoomIn * (self.axisL - mbx)
                 self.axisR = mbx - zoomIn * (mbx - self.axisR)
-            else:
-                self.axisL = mbx + zoomOut * (self.axisL - mbx)
-                self.axisR = mbx - zoomOut * (mbx - self.axisR)
-
-            if zoomCentre == 0:  # centre on mouse
-                mb = (my - mw[1]) / (mw[3] - mw[1])
-            else:  # centre on the screen
-                mb = 0.5
-
-            mby = self.axisB + mb * (self.axisT - self.axisB)
-
-            if scrollDirection < 0:
                 self.axisB = mby + zoomIn * (self.axisB - mby)
                 self.axisT = mby - zoomIn * (mby - self.axisT)
             else:
+                self.axisL = mbx + zoomOut * (self.axisL - mbx)
+                self.axisR = mbx - zoomOut * (mbx - self.axisR)
                 self.axisB = mby + zoomOut * (self.axisB - mby)
                 self.axisT = mby - zoomOut * (mby - self.axisT)
+
+            # if zoomCentre == 0:  # centre on mouse
+            #     mb1 = (my - mw[1]) / (mw[3] - mw[1])
+            # else:  # centre on the screen
+            #     mb1 = 0.5
+            #
+            # mby = self.axisB + mb1 * (self.axisT - self.axisB)
+            #
+            # if scrollDirection < 0:
+            #     self.axisB = mby + zoomIn * (self.axisB - mby)
+            #     self.axisT = mby - zoomIn * (mby - self.axisT)
+            # else:
+            #     self.axisB = mby + zoomOut * (self.axisB - mby)
+            #     self.axisT = mby - zoomOut * (mby - self.axisT)
 
             self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                axisB=self.axisB, axisT=self.axisT,

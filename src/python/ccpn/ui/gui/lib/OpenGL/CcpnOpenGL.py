@@ -439,7 +439,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
                                   self.pixelX, self.pixelY, w, h,
-                                  0, 0, 0, 0, 0, 0, 0, 0]
+                                  0.2, 1.0, 0.4, 1.0,
+                                  0.3, 0.1, 1.0, 1.0]
         currentShader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
 
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)

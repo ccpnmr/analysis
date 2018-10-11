@@ -75,7 +75,10 @@ class GLGlobalData(QtWidgets.QWidget):
         
             uniform mat4 mvMatrix;
             uniform mat4 pMatrix;
+            
+            // data matrix is column major so dataMatrix[0] is the first 4 elements
             uniform mat4 dataMatrix;
+            
             varying vec4 FC;
             uniform vec4 axisScale;
             attribute vec2 offset;

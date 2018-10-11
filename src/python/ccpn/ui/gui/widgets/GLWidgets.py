@@ -154,7 +154,7 @@ class GuiNdWidget(CcpnGLWidget):
 
 
 class Gui1dWidget(CcpnGLWidget):
-    AXIS_MARGINRIGHT = 65
+    AXIS_MARGINRIGHT = 80
     YAXISUSEEFORMAT = True
     INVERTXAXIS = True
     INVERTYAXIS = False

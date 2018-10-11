@@ -485,6 +485,25 @@ class PreferencesPopup(CcpnDialog):
             row += 1
 
         row += 1
+        self.showZoomXLimitApplyLabel = Label(parent, text="Apply Zoom limit to X axis: ", grid=(row, 0))
+        self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.zoomXLimitApply)
+        self.showZoomXLimitApplyBox.toggled.connect(partial(self._toggleGeneralOptions, 'zoomXLimitApply'))
+
+        row += 1
+        self.showZoomYLimitApplyLabel = Label(parent, text="Apply Zoom limit to Y axis: ", grid=(row, 0))
+        self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.zoomYLimitApply)
+        self.showZoomYLimitApplyBox.toggled.connect(partial(self._toggleGeneralOptions, 'zoomYLimitApply'))
+
+        row += 1
+        intensityLimit = self.preferences.general.intensityLimit
+        self.showIntensityLimitLabel = Label(parent, text='Minimum Intensity Limit', grid=(row, 0), hAlign='r')
+        self.showIntensityLimitBox = ScientificDoubleSpinBox(parent,  #step=1,
+                                                          min=1e-6, grid=(row, 1), hAlign='l')
+        self.showIntensityLimitBox.setValue(intensityLimit)
+        self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
+        self.showIntensityLimitBox.editingFinished.connect(self._setIntensityLimit)
+
+        row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=15)
 
         row += 1
@@ -891,6 +910,16 @@ class PreferencesPopup(CcpnDialog):
         except Exception as es:
             return
         self.preferences.general.aspectRatios[aspect] = aspectValue
+
+    def _setIntensityLimit(self):
+        """
+        Set the value for the minimum intensity limit
+        """
+        try:
+            limitValue = float(self.showIntensityLimitBox.text())
+        except Exception as es:
+            return
+        self.preferences.general.intensityLimit = limitValue
 
     def _setMultipletAveraging(self):
         """

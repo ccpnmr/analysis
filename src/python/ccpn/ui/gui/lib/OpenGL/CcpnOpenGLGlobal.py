@@ -110,8 +110,8 @@ class GLGlobalData(QtWidgets.QWidget):
         self._vertexShaderTex = """
     #version 120
 
-    uniform mat4 mvMatrix;
-    uniform mat4 pMatrix;
+    uniform mat4 mvTexMatrix;
+    uniform mat4 pTexMatrix;
     uniform vec4 axisScale;
     uniform vec4 viewport;
     varying vec4 FC;
@@ -122,14 +122,15 @@ class GLGlobalData(QtWidgets.QWidget):
     void main()
     {
       // viewport is scaled to axis
-      vec4 pos = pMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
-                        // character_pos              world_coord
+//      vec4 pos = pTexMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
+                               // character_pos        // world_coord
 
       // centre on the nearest pixel in NDC - shouldn't be needed but textures not correct yet
-      gl_Position = pos;       //vec4( pos.x,        //floor(0.5 + viewport.x*pos.x) / viewport.x,
+//      gl_Position = pos;       //vec4( pos.x,        //floor(0.5 + viewport.x*pos.x) / viewport.x,
                                //pos.y,        //floor(0.5 + viewport.y*pos.y) / viewport.y,
                                //pos.zw );
 
+      gl_Position = pTexMatrix * (gl_Vertex * axisScale + vec4(offset, 0.0, 0.0));
       varyingTexCoord = gl_MultiTexCoord0;
       FC = gl_Color;
     }
@@ -152,7 +153,8 @@ class GLGlobalData(QtWidgets.QWidget):
       // colour for blending enabled
       if (blendEnabled != 0)
         gl_FragColor = vec4(FC.xyz, filter.w);
-      else
+      else   
+        // gives a background box around the character, giving a simple border
         gl_FragColor = vec4((FC.xyz * filter.w) + (1-filter.w)*background.xyz, 1.0);
         
       // if (filter.w < 0.01)
@@ -320,26 +322,33 @@ class GLGlobalData(QtWidgets.QWidget):
         }
         """
 
+        # main shader for all plotting
         self._shaderProgram1 = ShaderProgram(vertex=self._vertexShader1,
                                              fragment=self._fragmentShader1,
                                              attributes={'pMatrix': (16, np.float32),
                                                          'mvMatrix': (16, np.float32),
                                                          'parameterList': (4, np.int32),
                                                          'background': (4, np.float32)})
+
+        # currently not being used
         self._shaderProgram2 = ShaderProgram(vertex=self._vertexShader2,
                                              fragment=self._fragmentShader2,
                                              attributes={'pMatrix': (16, np.float32),
                                                          'mvMatrix': (16, np.float32),
                                                          'positiveContours': (4, np.float32),
                                                          'negativeContours': (4, np.float32)})
+
+        # currently not being used
         self._shaderProgram3 = ShaderProgram(vertex=self._vertexShader3,
                                              fragment=self._fragmentShader3,
                                              attributes={'pMatrix': (16, np.float32),
                                                          'mvMatrix': (16, np.float32)})
+
+        # main shader for all the text
         self._shaderProgramTex = ShaderProgram(vertex=self._vertexShaderTex,
                                                fragment=self._fragmentShaderTex,
-                                               attributes={'pMatrix': (16, np.float32),
-                                                           'mvMatrix': (16, np.float32),
+                                               attributes={'pTexMatrix': (16, np.float32),
+                                                           'mvTexMatrix': (16, np.float32),
                                                            'axisScale': (4, np.float32),
                                                            'background': (4, np.float32),
                                                            'viewport': (4, np.float32),

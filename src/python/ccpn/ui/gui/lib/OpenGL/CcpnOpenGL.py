@@ -163,6 +163,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._preferences = self.strip.application.preferences.general
         self.globalGL = None
+
+        # add a flag so that scaling cannot be done until the gl attributes are initialised
+        self.glReady = False
+
         self.stripIDLabel = stripIDLabel if stripIDLabel else ''
 
         self.setMouseTracking(True)  # generate mouse events when button not pressed
@@ -191,6 +195,8 @@ class CcpnGLWidget(QOpenGLWidget):
     def _initialiseAll(self):
         """Initialise all attributes for the display
         """
+        # if self.glReady: return
+
         self.w = self.width()
         self.h = self.height()
 
@@ -200,11 +206,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.lastPos = QPoint()
         self._mouseX = 0
         self._mouseY = 0
+        self.pixelX = 1.0
+        self.pixelY = 1.0
 
         self._devicePixelRatio = 1.0  # set in the initialiseGL routine
         self.peakWidthPixels = 16
-        # self.boxWidth = 0.0
-        # self.boxHeight = 0.0
 
         # set initial axis limits - should be changed by strip.display..
         self.axisL = 0.0
@@ -281,6 +287,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self._updateHTrace = False
         self._updateVTrace = False
 
+        self._applyXLimit = self._preferences.zoomXLimitApply
+        self._applyYLimit = self._preferences.zoomYLimitApply
+        self._intensityLimit = self._preferences.intensityLimit
+
         self._GLIntegralLists = {}
         self._GLIntegralLabels = {}
 
@@ -347,19 +357,13 @@ class CcpnGLWidget(QOpenGLWidget):
         self.orderedAxes = self.strip.orderedAxes
         self.axisOrder = self.strip.axisOrder
         self.axisCodes = self.strip.axisCodes
-        self.initialiseTraces()
 
         self._dragRegions = set()
 
-        # define zoom limits for the display
-        self._minXRange, self._maxXRange = GLDefs.RANGELIMITS
-        self._minYRange, self._maxYRange = GLDefs.RANGELIMITS
-        self._minReached = False
-        self._maxReached = False
-        self._maxX, self._minX = GLDefs.AXISLIMITS
-        self._maxY, self._minY = GLDefs.AXISLIMITS
+        self.resetRangeLimits()
 
         self._ordering = []
+        self.glReady = True
 
     def close(self):
         self.GLSignals.glXAxisChanged.disconnect()
@@ -379,7 +383,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted or not self.globalGL:
             return
 
-        # use the upated size
+        # use the updated size
         w = self.w
         h = self.h
 
@@ -450,7 +454,7 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
         self._view[0:4] = [w - self.AXIS_MARGINRIGHT, h - self.AXIS_MARGINBOTTOM, 1.0, 1.0]
@@ -475,17 +479,30 @@ class CcpnGLWidget(QOpenGLWidget):
         self.rescaleSpectra()
         self.update()
 
+    def resetRangeLimits(self, allLimits=True):
+        # reset zoom limits for the display
+        self._minXRange, self._maxXRange = GLDefs.RANGELIMITS
+        self._minYRange, self._maxYRange = GLDefs.RANGELIMITS
+        self._maxX, self._minX = GLDefs.AXISLIMITS
+        self._maxY, self._minY = GLDefs.AXISLIMITS
+        if allLimits:
+            self._rangeXDefined = False
+            self._rangeYDefined = False
+            self._minXReached = False
+            self._minYReached = False
+            self._maxXReached = False
+            self._maxYReached = False
+
+            self._minReached = False
+            self._maxReached = False
+
     def rescaleSpectra(self):
         if self.strip.isDeleted:
             return
 
         # rescale the matrices each spectrumView
         stackCount = 0
-
-        self._minXRange, self._maxXRange = GLDefs.RANGELIMITS
-        self._minYRange, self._maxYRange = GLDefs.RANGELIMITS
-        self._maxX, self._minX = GLDefs.AXISLIMITS
-        self._maxY, self._minY = GLDefs.AXISLIMITS
+        self.resetRangeLimits(allLimits=False)
 
         for spectrumView in self.strip.spectrumViews:  #.orderedSpectrumViews():
             # self._spectrumSettings[spectrumView] = {}
@@ -543,6 +560,7 @@ class CcpnGLWidget(QOpenGLWidget):
             dyAF = fy0 - fy1
             yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
 
+            # set to nD limits to twice the width of the spectrum and a few data points
             self._minXRange = min(self._minXRange, 3.0 * (fx0 - fx1) / self._spectrumValues[0].totalPointCount)
             self._maxXRange = max(self._maxXRange, (fx0 - fx1))
             self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self._spectrumValues[1].totalPointCount)
@@ -555,10 +573,11 @@ class CcpnGLWidget(QOpenGLWidget):
             dyAF = fy0 - fy1
             yScale = dy * dyAF / 1.0
 
-            self._minXRange = min(self._minXRange,
-                                  3.0 * (fx0 - fx1) / max(self._spectrumValues[0].totalPointCount, self.SPECTRUMXZOOM))
+            # set to 1D limits to twice the width of the spectrum and the intensity limit
+            self._minXRange = min(self._minXRange, 3.0 * (fx0 - fx1) / max(self._spectrumValues[0].totalPointCount, self.SPECTRUMXZOOM))
             self._maxXRange = max(self._maxXRange, (fx0 - fx1))
-            self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self.SPECTRUMYZOOM)
+            # self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self.SPECTRUMYZOOM)
+            self._minYRange = min(self._minYRange, self._intensityLimit)
             self._maxYRange = max(self._maxYRange, (fy0 - fy1))
 
             if self._stackingMode:
@@ -570,6 +589,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                                                                              0.0, 1.0, 0.0, 0.0,
                                                                                              0.0, 0.0, 1.0, 0.0,
                                                                                              0.0, st, 0.0, 1.0]
+
+        self._rangeXDefined = True
+        self._rangeYDefined = True
 
         # create modelview matrix for the spectrum to be drawn
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_MATRIX] = np.zeros((16,), dtype=np.float32)
@@ -692,7 +714,9 @@ class CcpnGLWidget(QOpenGLWidget):
             event.ignore()
             return
 
-        if (scrollDirection > 0 and self._minReached) or (scrollDirection < 0 and self._maxReached):
+        # test whether the limits have been reached in either axis
+        if (scrollDirection > 0 and self._minReached and self._axisLocked) or \
+                (scrollDirection < 0 and self._maxReached and self._axisLocked):
             event.accept()
             return
 
@@ -711,7 +735,14 @@ class CcpnGLWidget(QOpenGLWidget):
         my = self.height() - event.pos().y()
 
         if self.between(mx, mw[0], mw[2]) and self.between(my, mw[1], mw[3]):
+
             # if in the mainView
+
+            if (scrollDirection > 0 and self._minReached) or \
+                    (scrollDirection < 0 and self._maxReached):
+                event.accept()
+                return
+
             if zoomCentre == 0:  # centre on mouse
                 mb0 = (mx - mw[0]) / (mw[2] - mw[0])
                 mb1 = (my - mw[1]) / (mw[3] - mw[1])
@@ -733,20 +764,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisB = mby + zoomOut * (self.axisB - mby)
                 self.axisT = mby - zoomOut * (mby - self.axisT)
 
-            # if zoomCentre == 0:  # centre on mouse
-            #     mb1 = (my - mw[1]) / (mw[3] - mw[1])
-            # else:  # centre on the screen
-            #     mb1 = 0.5
-            #
-            # mby = self.axisB + mb1 * (self.axisT - self.axisB)
-            #
-            # if scrollDirection < 0:
-            #     self.axisB = mby + zoomIn * (self.axisB - mby)
-            #     self.axisT = mby - zoomIn * (mby - self.axisT)
-            # else:
-            #     self.axisB = mby + zoomOut * (self.axisB - mby)
-            #     self.axisT = mby - zoomOut * (mby - self.axisT)
-
             self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
                                                axisB=self.axisB, axisT=self.axisT,
                                                axisL=self.axisL, axisR=self.axisR)
@@ -754,7 +771,14 @@ class CcpnGLWidget(QOpenGLWidget):
             self._rescaleAllAxes()
 
         elif self.between(mx, ba[0], ba[2]) and self.between(my, ba[1], ba[3]):
-            # in the bottomAxisBar
+
+            # in the bottomAxisBar, so zoom in the X axis
+
+            # check the X limits
+            if (scrollDirection > 0 and self._minXReached) or (scrollDirection < 0 and self._maxXReached):
+                event.accept()
+                return
+
             if zoomCentre == 0:  # centre on mouse
                 mb = (mx - ba[0]) / (ba[2] - ba[0])
             else:  # centre on the screen
@@ -792,7 +816,14 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._rescaleAllAxes()
 
         elif self.between(mx, ra[0], ra[2]) and self.between(my, ra[1], ra[3]):
-            # in the rightAxisBar
+
+            # in the rightAxisBar, so zoom in the Y axis
+
+            # check the Y limits
+            if (scrollDirection > 0 and self._minYReached) or (scrollDirection < 0 and self._maxYReached):
+                event.accept()
+                return
+
             if zoomCentre == 0:  # centre on mouse
                 mb = (my - ra[1]) / (ra[3] - ra[1])
             else:  # centre on the screen
@@ -853,8 +884,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.rescale()
 
         # spawn rebuild event for the grid
-        self.gridList[0].renderMode = GLRENDERMODE_REBUILD
-        self.gridList[2].renderMode = GLRENDERMODE_REBUILD
+        if self.gridList:
+            self.gridList[0].renderMode = GLRENDERMODE_REBUILD
+            self.gridList[2].renderMode = GLRENDERMODE_REBUILD
 
         # ratios have changed so rescale the peak/multiplet symbols
         self._GLPeaks.rescale()
@@ -865,10 +897,13 @@ class CcpnGLWidget(QOpenGLWidget):
         if update:
             self.update()
 
+        # self.project._startCommandEchoBlock('_rescaleXAxis', quiet=True)
         try:
             self._orderedAxes[0].region = (self.axisL, self.axisR)
         except:
             getLogger().debug('error setting viewbox X-range')
+        # finally:
+        #     self.project._endCommandEchoBlock()
 
     def _rescaleYAxis(self, update=True):
         self._testAxisLimits()
@@ -888,10 +923,13 @@ class CcpnGLWidget(QOpenGLWidget):
         if update:
             self.update()
 
+        # self.project._startCommandEchoBlock('_rescaleYAxis', quiet=True)
         try:
             self._orderedAxes[1].region = (self.axisT, self.axisB)
         except Exception as es:
             getLogger().debug('error setting viewbox Y-range')
+        # finally:
+        #     self.project._endCommandEchoBlock()
 
     def _rebuildMarks(self, update=True):
         self.rescale()
@@ -908,33 +946,38 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _testAxisLimits(self):
         xRange = abs(self.axisL - self.axisR) / 2.0
-        self._minReached = False
-        self._maxReached = False
-
-        if xRange < self._minXRange:
-            xMid = (self.axisR + self.axisL) / 2.0
-            self.axisL = xMid - self._minXRange * np.sign(self.pixelX)
-            self.axisR = xMid + self._minXRange * np.sign(self.pixelX)
-            self._minReached = True
-
-        if xRange > self._maxXRange:
-            xMid = (self.axisR + self.axisL) / 2.0
-            self.axisL = xMid - self._maxXRange * np.sign(self.pixelX)
-            self.axisR = xMid + self._maxXRange * np.sign(self.pixelX)
-            self._maxReached = True
-
         yRange = abs(self.axisT - self.axisB) / 2.0
-        if yRange < self._minYRange:
-            yMid = (self.axisT + self.axisB) / 2.0
-            self.axisT = yMid + self._minYRange * np.sign(self.pixelY)
-            self.axisB = yMid - self._minYRange * np.sign(self.pixelY)
-            self._minReached = True
+        self._minXReached = False
+        self._minYReached = False
+        self._maxXReached = False
+        self._maxYReached = False
 
-        if yRange > self._maxYRange:
-            yMid = (self.axisT + self.axisB) / 2.0
-            self.axisT = yMid + self._maxYRange * np.sign(self.pixelY)
-            self.axisB = yMid - self._maxYRange * np.sign(self.pixelY)
-            self._maxReached = True
+        if xRange < self._minXRange and self._rangeXDefined and self._applyXLimit:
+            # xMid = (self.axisR + self.axisL) / 2.0
+            # self.axisL = xMid - self._minXRange * np.sign(self.pixelX)
+            # self.axisR = xMid + self._minXRange * np.sign(self.pixelX)
+            self._minXReached = True
+
+        if yRange < self._minYRange and self._rangeYDefined and self._applyYLimit:
+            # yMid = (self.axisT + self.axisB) / 2.0
+            # self.axisT = yMid + self._minYRange * np.sign(self.pixelY)
+            # self.axisB = yMid - self._minYRange * np.sign(self.pixelY)
+            self._minYReached = True
+
+        if xRange > self._maxXRange and self._rangeXDefined and self._applyXLimit:
+            # xMid = (self.axisR + self.axisL) / 2.0
+            # self.axisL = xMid - self._maxXRange * np.sign(self.pixelX)
+            # self.axisR = xMid + self._maxXRange * np.sign(self.pixelX)
+            self._maxXReached = True
+
+        if yRange > self._maxYRange and self._rangeYDefined and self._applyYLimit:
+            # yMid = (self.axisT + self.axisB) / 2.0
+            # self.axisT = yMid + self._maxYRange * np.sign(self.pixelY)
+            # self.axisB = yMid - self._maxYRange * np.sign(self.pixelY)
+            self._maxYReached = True
+
+        self._minReached = self._minXReached or self._minYReached
+        self._maxReached = self._maxXReached or self._maxYReached
 
     def _rescaleAllAxes(self, update=True):
         self._testAxisLimits()
@@ -954,12 +997,14 @@ class CcpnGLWidget(QOpenGLWidget):
         if update:
             self.update()
 
+        # self.project._startCommandEchoBlock('_rescaleYAxis', quiet=True)
         try:
             self._orderedAxes[0].region = (self.axisL, self.axisR)
             self._orderedAxes[1].region = (self.axisT, self.axisB)
-
         except Exception as es:
             getLogger().debug('error setting viewbox XY-range')
+        # finally:
+        #     self.project._endCommandEchoBlock()
 
     def eventFilter(self, obj, event):
         self._key = '_'
@@ -1302,6 +1347,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if self.strip:
             self.initialiseAxes(self.strip)
+            self.initialiseTraces()
 
     def _preferencesUpdate(self):
         """update GL values after the preferences have changed
@@ -1320,6 +1366,11 @@ class CcpnGLWidget(QOpenGLWidget):
         # change the colour of the selected 'Lock' string
         self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
                                         color=self.highlightColour, GLContext=self)
+
+        # set the new limits
+        self._applyXLimit = self._preferences.zoomXLimitApply
+        self._applyYLimit = self._preferences.zoomYLimitApply
+        self._intensityLimit = self._preferences.intensityLimit
 
         self.setBackgroundColour(self.background)
 
@@ -1693,7 +1744,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         reg[0].values = values
 
-                        # TODO:ED check moving of _baseline
+                        # NOTE:ED check moving of _baseline
                         if hasattr(reg[0], '_integralArea'):
                             # reg[0].renderMode = GLRENDERMODE_REBUILD
                             reg[0]._rebuildIntegral()
@@ -1805,7 +1856,7 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
         currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB, self.axisT, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+        currentShader.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         self._axisScale[0:4] = [self.pixelX, self.pixelY, 1.0, 1.0]
         currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
@@ -1839,19 +1890,10 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.crosshairVisible:
             self.drawMouseCoords()
 
-        # # GL.glBlendColor(1.0, 0.15, 0.15, 0.0)
-        # # # GL.glBlendColor(*self.background[:3], 0.0)
-        # # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_CONSTANT_COLOR, GL.GL_ONE, GL.GL_ONE)
-        #
-        # GL.glBlendColor(1.0, 0.15, 0.15, 0.0)
-        # # GL.glBlendColor(*self.background[:3], 0.0)
-        # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_CONSTANT_COLOR, GL.GL_ONE, GL.GL_ZERO)
-
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
         self.drawOverlayText()
         self.drawAxisLabels()
         self.globalGL._shaderProgramTex.setBlendEnabled(1)
-        # GL.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE)
 
         self.disableTexture()
 
@@ -1955,81 +1997,6 @@ class CcpnGLWidget(QOpenGLWidget):
         if rebuildFlag:
             self.rebuildTraces()
 
-    # def _buildIntegralLists(self, spectrumView, integralListView):
-    #
-    #     if integralListView not in self._GLIntegralLists:
-    #         self._GLIntegralLists[integralListView] = GLIntegralRegion(project=self.project, GLContext=self,
-    #                                                                    spectrumView=spectrumView,
-    #                                                                    integralListView=integralListView)
-    #
-    #     drawList = self._GLIntegralLists[integralListView]
-    #
-    #     if drawList.renderMode == GLRENDERMODE_REBUILD:
-    #         drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-    #
-    #         drawList.clearArrays()
-    #         drawList._clearRegions()
-    #
-    #         ils = integralListView.integralList
-    #         listCol = getAutoColourRgbRatio(ils.symbolColour, ils.spectrum, self.SPECTRUMPOSCOLOUR,
-    #                                         getColours()[CCPNGLWIDGET_FOREGROUND])
-    #
-    #         for integral in ils.integrals:
-    #             drawList.addIntegral(integral, integralListView, colour=None,
-    #                                  brush=(*listCol, CCPNGLWIDGET_INTEGRALSHADE))
-    #
-    #     elif drawList.renderMode == GLRENDERMODE_RESCALE:
-    #         drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-    #         drawList._rebuildIntegralAreas()
-
-    # def buildIntegralLists(self):
-    #     if self.strip.isDeleted:
-    #         return
-    #
-    #     for spectrumView in self.strip.spectrumViews:
-    #
-    #         for integralListView in spectrumView.integralListViews:
-    #             if integralListView in self._GLIntegralLists.keys():
-    #                 if self._GLIntegralLists[integralListView].renderMode == GLRENDERMODE_RESCALE:
-    #                     self._buildIntegralLists(spectrumView, integralListView)
-    #
-    #             if integralListView.buildSymbols:
-    #                 integralListView.buildSymbols = False
-    #
-    #                 if integralListView in self._GLIntegralLists.keys():
-    #                     self._GLIntegralLists[integralListView].renderMode = GLRENDERMODE_REBUILD
-    #
-    #                 self._buildIntegralLists(spectrumView, integralListView)
-
-    # def drawIntegralLists(self):
-    #     if self.strip.isDeleted:
-    #         return
-    #
-    #     self.buildIntegralLists()
-    #
-    #     # loop through the attached integralListViews to the strip
-    #     for spectrumView in self._ordering:  #self.strip.spectrumViews:
-    #         for integralListView in spectrumView.integralListViews:
-    #             if spectrumView.isVisible() and integralListView.isVisible():
-    #
-    #                 if integralListView in self._GLIntegralLists.keys():
-    #                     self._GLIntegralLists[integralListView].drawIndexArray()
-    #
-    #                     # draw the integralAreas if they exist
-    #                     for integralArea in self._GLIntegralLists[integralListView]._regions:
-    #                         if hasattr(integralArea, '_integralArea'):
-    #                             if self._stackingValue:
-    #                                 # use the stacking matrix to offset the 1D spectra
-    #                                 self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-    #                                                                                     1, GL.GL_FALSE,
-    #                                                                                     self._spectrumSettings[
-    #                                                                                         spectrumView][
-    #                                                                                         GLDefs.SPECTRUM_STACKEDMATRIX])
-    #
-    #                             integralArea._integralArea.drawVertexColor()
-    #
-    #     self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
-
     def drawSpectra(self):
         if self.strip.isDeleted:
             return
@@ -2048,6 +2015,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if spectrumView.spectrum.dimensionCount > 1:
                     if spectrumView in self._spectrumSettings.keys():
+
+                        # set correct transform when drawing this contour
                         self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                                                                             1, GL.GL_FALSE,
                                                                             self._spectrumSettings[spectrumView][
@@ -2061,6 +2030,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     if spectrumView in self._contourList.keys():
                         if self._stackingMode:
+
                             # use the stacking matrix to offset the 1D spectra
                             self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                                                                                 1, GL.GL_FALSE,
@@ -2077,6 +2047,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 #
                 #   self._makeSpectrumArray(spectrumView, self._testSpectrum)
 
+        # set transform back to identity - ensures only the pMatrix is applied
         self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
         # draw the bounding boxes
@@ -2246,7 +2217,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
                 self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
                                                                   self.AXIS_MARGINBOTTOM, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
                 for lb in self._axisXLabelling:
                     lb.drawTextArray()
@@ -2258,7 +2229,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
                 self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT,
                                                                   self.axisB, self.axisT, -1.0, 1.0)
-                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+                self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
                 for lb in self._axisYLabelling:
                     lb.drawTextArray()
@@ -2437,8 +2408,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         if region.axisCode == psCode:
                             axisIndex = ps
 
-                # TODO:ED check axis units - assume 'ppm' for the minute
-
+                # NOTE:ED check axis units - assume 'ppm' for the minute
                 if axisIndex == 0:
                     # vertical ruler
                     pos0 = x0 = region.values[0]
@@ -2497,8 +2467,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     if axisIndex < 2:
 
-                        # TODO:ED check axis units - assume 'ppm' for the minute
-
+                        # NOTE:ED check axis units - assume 'ppm' for the minute
                         if axisIndex == 0:
                             # vertical ruler
                             pos = x0 = x1 = rr.position
@@ -2524,7 +2493,7 @@ class CcpnGLWidget(QOpenGLWidget):
                         drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 2)
                         drawList.attribs = np.append(drawList.attribs, [axisIndex, pos, axisIndex, pos])
 
-                        # TODO:ED build the string and add the extra axis code
+                        # build the string and add the extra axis code
                         label = rr.label if rr.label else rr.axisCode
 
                         self._marksAxisCodes.append(GLString(text=label,
@@ -2576,7 +2545,6 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
             GL.glBegin(GL.GL_LINES)
 
-            # TODO:ED may want to put other icons for other modes
             if getCurrentMouseMode() == PICK:
                 GL.glColor4f(*self.mousePickColour)
                 x = self.pixelX * 8
@@ -2784,7 +2752,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self._gridVisible = not self._gridVisible
         self.update()
 
-    # TODO:ED check - two cursors are needed
     @property
     def crossHairVisible(self):
         return self._crossHairVisible
@@ -3058,7 +3025,6 @@ class CcpnGLWidget(QOpenGLWidget):
                     [xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
             y = positionPixel[1] + spectrumView._traceScale * (self.axisT - self.axisB) * dataY
 
-            # TODO:ED make this posColour to negColour :) and axis direction
             col1 = getattr(spectrumView.spectrum,
                            self.SPECTRUMPOSCOLOUR)  #spectrumView._getColour('sliceColour', '#aaaaaa')
             if self.is1D:
@@ -3178,7 +3144,6 @@ class CcpnGLWidget(QOpenGLWidget):
             inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
                 = spectrumView._getTraceParams(position)
 
-            # TODO:ED add on the parameters from the phasingFrame
             if direction == 0:
                 self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
                                        xNumPoints, positionPixel, ph0, ph1, pivot)
@@ -3596,7 +3561,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         index += 2
 
             # restrict the labelling to the maximum without overlap based on width
-            while len(labelling['0']) > (self.w / 35.0):
+            # should be dependent on font size though
+            while len(labelling['0']) > (self.w / 60.0):
                 #restrict X axis labelling
                 lStrings = labelling['0']
                 if check(lStrings[0]):
@@ -3649,6 +3615,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self.update()
 
     def setAxisPosition(self, axisCode, position, update=True):
+        # if not self.glReady: return
+
         stripAxisIndex = self.axisCodes.index(axisCode)
 
         if stripAxisIndex == 0:
@@ -3666,6 +3634,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self._rescaleYAxis(update=update)
 
     def setAxisWidth(self, axisCode, width, update=True):
+        # if not self.glReady: return
+
         stripAxisIndex = self.axisCodes.index(axisCode)
 
         if stripAxisIndex == 0:
@@ -3685,6 +3655,8 @@ class CcpnGLWidget(QOpenGLWidget):
             self._rescaleYAxis(update=update)
 
     def setAxisRange(self, axisCode, range, update=True):
+        # if not self.glReady: return
+
         stripAxisIndex = self.axisCodes.index(axisCode)
 
         if stripAxisIndex == 0:
@@ -3774,26 +3746,6 @@ class CcpnGLWidget(QOpenGLWidget):
                         if axis in mouseMovedDict[AXIS_FULLATOMNAME].keys():
                             self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
 
-            # # cursorPosition = self.cursorCoordinates
-            # for n, axis in enumerate(self._axisOrder[:2]):
-            #   if self._preferences.matchAxisCode == 0:       # default - match atom type
-            #     for ax in mouseMovedDict.keys():
-            #       if ax and axis and ax[0] == axis[0]:
-            #         self.cursorCoordinate[n] = mouseMovedDict[ax]
-            #         break
-            #
-            #   elif self._preferences.matchAxisCode == 1:     # match full code
-            #     if axis in mouseMovedDict.keys():
-            #       self.cursorCoordinate[n] = mouseMovedDict[axis]
-
-            # if cursorPosition:
-            #   position = list(cursorPosition)
-            #
-            #   # get all axes for updating traces
-            #   for axis in self._orderedAxes[2:]:
-            #     position.append(axis.position)
-
-            # self.cursorCoordinate = (cursorPosition[0], cursorPosition[1])
             self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
             # only need to redraw if we can see the cursor
@@ -3853,21 +3805,11 @@ class CcpnGLWidget(QOpenGLWidget):
                     if GLNotifier.GLHIGHLIGHTINTEGRALS in triggers:
                         self._GLIntegrals.updateHighlightSymbols()
 
-                        # for spectrumView in self.strip.spectrumViews:
-                        #     for integralListView in spectrumView.integralListViews:
-                        #
-                        #         if integralListView in self._GLIntegralLists.keys():
-                        #             self._updateHighlightedIntegrals(spectrumView, integralListView)
-
                     if GLNotifier.GLALLCONTOURS in triggers:
                         self.buildAllContours()
 
                     if GLNotifier.GLALLPEAKS in triggers:
                         self._GLPeaks.updateAllSymbols()
-
-                    # Integrals are handled differently
-                    # if GLNotifier.GLALLINTEGRALS in triggers:
-                    #     self._GLIntegrals.updateAllSymbols()
 
                     if GLNotifier.GLALLMULTIPLETS in triggers:
                         self._GLMultiplets.updateAllSymbols()
@@ -3972,18 +3914,13 @@ class CcpnGLWidget(QOpenGLWidget):
         for orderedAxis in self._orderedAxes[2:]:
             position.append(orderedAxis.position)
 
-        newPeaks, peakLists = self.strip.peakPickPosition(position)  #self.current.mouseMovedDict)
-
-        # should fire peak notifier
-        # self.GLSignals.emitEvent(targets=peakLists, triggers=[GLNotifier.GLPEAKLISTS,
-        #                                                       GLNotifier.GLPEAKLISTLABELS])
+        newPeaks, peakLists = self.strip.peakPickPosition(position)
 
         self.current.peaks = newPeaks
 
     def _clearIntegralRegions(self):
-        # if self.integralRegions in self.addedItems:
-        #   self.removeItem(self.integralRegions)
-        # getLogger().info('not implemented yet')
+        """Clear the integral regions
+        """
         self._regions = []
         self._regionList.renderMode = GLRENDERMODE_REBUILD
         self._dragRegions = set()
@@ -4114,7 +4051,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def _getCanvasContextMenu(self):
-        ''' give  a needed menu based on strip mode  '''
+        """Give a needed menu based on strip mode
+        """
         strip = self.strip
         menu = strip._contextMenus.get(DefaultMenu)
 
@@ -4131,8 +4069,8 @@ class CcpnGLWidget(QOpenGLWidget):
         return menu
 
     def _setContextMenu(self, menu):
-        ''' set  a needed menu based on strip mode  '''
-
+        """Set a needed menu based on strip mode
+        """
         self.strip.viewBox.menu = menu
 
     def _selectPeaksInRegion(self, xPositions, yPositions, zPositions):

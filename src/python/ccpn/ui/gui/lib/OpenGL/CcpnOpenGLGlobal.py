@@ -75,6 +75,7 @@ class GLGlobalData(QtWidgets.QWidget):
         
             uniform mat4 mvMatrix;
             uniform mat4 pMatrix;
+            uniform mat4 dataMatrix;
             varying vec4 FC;
             uniform vec4 axisScale;
             attribute vec2 offset;
@@ -82,6 +83,10 @@ class GLGlobalData(QtWidgets.QWidget):
             void main()
             {
               gl_Position = (pMatrix * mvMatrix) * gl_Vertex;
+            
+            //  float denom = dataMatrix[0].
+            //  gl_Position = vec4( 
+            //                    , 0.0, 1.0);
               
             //  gl_Position = (pMatrix * gl_Vertex) + vec4(0.2, 0.3, 0.0, 0.0);
               
@@ -336,6 +341,7 @@ class GLGlobalData(QtWidgets.QWidget):
                                              fragment=self._fragmentShader1,
                                              attributes={'pMatrix': (16, np.float32),
                                                          'mvMatrix': (16, np.float32),
+                                                         'dataMatrix': (16, np.float32),
                                                          'parameterList': (4, np.int32),
                                                          'background': (4, np.float32)})
 

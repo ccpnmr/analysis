@@ -339,6 +339,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._uPMatrix = np.zeros((16,), dtype=np.float32)
         self._uMVMatrix = np.zeros((16,), dtype=np.float32)
         self._uVMatrix = np.zeros((16,), dtype=np.float32)
+        self._dataMatrix = np.zeros((16,), dtype=np.float32)
         self._aMatrix = np.zeros((16,), dtype=np.float32)
         self._IMatrix = np.zeros((16,), dtype=np.float32)
         self._IMatrix[0:16] = [1.0, 0.0, 0.0, 0.0,
@@ -435,6 +436,11 @@ class CcpnGLWidget(QOpenGLWidget):
             currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
             self.pixelX = (self.axisR - self.axisL) / w
             self.pixelY = (self.axisT - self.axisB) / h
+
+        self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
+                                  self.pixelX, self.pixelY, w, h,
+                                  0, 0, 0, 0, 0, 0, 0, 0]
+        currentShader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
 
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 

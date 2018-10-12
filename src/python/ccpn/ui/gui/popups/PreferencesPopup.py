@@ -489,18 +489,18 @@ class PreferencesPopup(CcpnDialog):
         self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.zoomXLimitApply)
         self.showZoomXLimitApplyBox.toggled.connect(partial(self._toggleGeneralOptions, 'zoomXLimitApply'))
 
-        self._toggleGeneralOptions('zoomXLimitApply', True)
-        self.showZoomXLimitApplyBox.setChecked(True)
-        self.showZoomXLimitApplyBox.setEnabled(False)
+        # self._toggleGeneralOptions('zoomXLimitApply', True)
+        # self.showZoomXLimitApplyBox.setChecked(True)
+        # self.showZoomXLimitApplyBox.setEnabled(False)
 
         row += 1
         self.showZoomYLimitApplyLabel = Label(parent, text="Apply Zoom limit to Y axis: ", grid=(row, 0))
         self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.zoomYLimitApply)
         self.showZoomYLimitApplyBox.toggled.connect(partial(self._toggleGeneralOptions, 'zoomYLimitApply'))
 
-        self._toggleGeneralOptions('zoomYLimitApply', True)
-        self.showZoomYLimitApplyBox.setChecked(True)
-        self.showZoomYLimitApplyBox.setEnabled(False)
+        # self._toggleGeneralOptions('zoomYLimitApply', True)
+        # self.showZoomYLimitApplyBox.setChecked(True)
+        # self.showZoomYLimitApplyBox.setEnabled(False)
 
         row += 1
         intensityLimit = self.preferences.general.intensityLimit

@@ -208,6 +208,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._mouseY = 0
         self.pixelX = 1.0
         self.pixelY = 1.0
+        self.deltaX = 1.0
+        self.deltaY = 1.0
 
         self._devicePixelRatio = 1.0  # set in the initialiseGL routine
         self.peakWidthPixels = 16
@@ -411,6 +413,9 @@ class CcpnGLWidget(QOpenGLWidget):
                                             -1.0, 1.0)
             self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
             self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
+            self.deltaX = 1.0 / (w - self.AXIS_MARGINRIGHT)
+            self.deltaY = 1.0 / (h - self.AXIS_MARGINBOTTOM)
+
         elif self._drawRightAxis and not self._drawBottomAxis:
 
             self._currentView = GLDefs.MAINVIEWFULLHEIGHT
@@ -420,6 +425,9 @@ class CcpnGLWidget(QOpenGLWidget):
             currentShader.setViewportMatrix(self._uVMatrix, 0, w - self.AXIS_MARGINRIGHT, 0, h, -1.0, 1.0)
             self.pixelX = (self.axisR - self.axisL) / (w - self.AXIS_MARGINRIGHT)
             self.pixelY = (self.axisT - self.axisB) / h
+            self.deltaX = 1.0 / (w - self.AXIS_MARGINRIGHT)
+            self.deltaY = 1.0 / h
+
         elif not self._drawRightAxis and self._drawBottomAxis:
 
             self._currentView = GLDefs.MAINVIEWFULLWIDTH
@@ -429,6 +437,9 @@ class CcpnGLWidget(QOpenGLWidget):
             currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h - self.AXIS_MARGINBOTTOM, -1.0, 1.0)
             self.pixelX = (self.axisR - self.axisL) / w
             self.pixelY = (self.axisT - self.axisB) / (h - self.AXIS_MARGINBOTTOM)
+            self.deltaX = 1.0 / w
+            self.deltaY = 1.0 / (h - self.AXIS_MARGINBOTTOM)
+
         else:
 
             self._currentView = GLDefs.FULLVIEW
@@ -436,6 +447,8 @@ class CcpnGLWidget(QOpenGLWidget):
             currentShader.setViewportMatrix(self._uVMatrix, 0, w, 0, h, -1.0, 1.0)
             self.pixelX = (self.axisR - self.axisL) / w
             self.pixelY = (self.axisT - self.axisB) / h
+            self.deltaX = 1.0 / w
+            self.deltaY = 1.0 / h
 
         self._dataMatrix[0:16] = [self.axisL, self.axisR, self.axisT, self.axisB,
                                   self.pixelX, self.pixelY, w, h,
@@ -1028,9 +1041,9 @@ class CcpnGLWidget(QOpenGLWidget):
             return True
         return super(CcpnGLWidget, self).eventFilter(obj, event)
 
-    def _panSpectrum(self, event,  movePercent = 20):
+    def _panSpectrum(self, event, movePercent=20):
         """Implements Arrows up,down, left, right to pan the spectrum """
-         # percentage of the view to set as single step
+        # percentage of the view to set as single step
 
         if type(event) == QtGui.QKeyEvent:
             moveFactor = movePercent / 100.0
@@ -1068,16 +1081,16 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _movePeakFromKeys(self, event):
 
-        if len(self.current.peaks)<1:
+        if len(self.current.peaks) < 1:
             return
 
-        moveFactor =  5
+        moveFactor = 5
         moveDict = {
-                    QtCore.Qt.Key_Left: (-self.pixelX *moveFactor, 0),
-                    QtCore.Qt.Key_Right:(self.pixelX *moveFactor, 0),
-                    QtCore.Qt.Key_Up:   (0, self.pixelX *moveFactor),
-                    QtCore.Qt.Key_Down: (0, -self.pixelX *moveFactor)
-                    }
+            QtCore.Qt.Key_Left: (-self.pixelX * moveFactor, 0),
+            QtCore.Qt.Key_Right: (self.pixelX * moveFactor, 0),
+            QtCore.Qt.Key_Up: (0, self.pixelX * moveFactor),
+            QtCore.Qt.Key_Down: (0, -self.pixelX * moveFactor)
+            }
 
         if type(event) == QtGui.QKeyEvent:
             if event.key() in moveDict:
@@ -1089,20 +1102,17 @@ class CcpnGLWidget(QOpenGLWidget):
                 finally:
                     self.project._endCommandEchoBlock()
 
-
-
-
     def _singleKeyAction(self, event):
-      """
-      :return: Actions for single key press. If current peaks, moves the peaks when using
-      directional arrow otherwise pans the spectrum.
-      """
-      # if not self.current.peak:
-      if not self._isSHIFT:
-        self._panSpectrum(event)
+        """
+        :return: Actions for single key press. If current peaks, moves the peaks when using
+        directional arrow otherwise pans the spectrum.
+        """
+        # if not self.current.peak:
+        if not self._isSHIFT:
+            self._panSpectrum(event)
 
-      if self._isSHIFT:
-        self._movePeakFromKeys(event)
+        if self._isSHIFT:
+            self._movePeakFromKeys(event)
 
     def initialiseAxes(self, strip=None):
         """
@@ -1623,7 +1633,6 @@ class CcpnGLWidget(QOpenGLWidget):
         if key == QtCore.Qt.Key_Shift:
             self._isSHIFT = ''
 
-
     def _clearKeys(self):
         self._key = ''
         # self._isSHIFT = ''
@@ -1845,12 +1854,18 @@ class CcpnGLWidget(QOpenGLWidget):
         self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
-        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
-                                        self.axisT, -1.0, 1.0)
+
+        # start with the grid mapped to (0..1, 0..1) to remove zoom errors here
+        currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
         currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         # draw the grid components
         self.drawGrid()
+
+        # set the scale to the axis limits, needs addressing correctly, possibly same as grid
+        currentShader.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, self.axisB,
+                                        self.axisT, -1.0, 1.0)
+        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         # draw the spectra, need to reset the viewport
         self.viewports.setViewport(self._currentView)
@@ -2031,7 +2046,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if spectrumView.spectrum.dimensionCount > 1:
                     if spectrumView in self._spectrumSettings.keys():
-
                         # set correct transform when drawing this contour
                         self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                                                                             1, GL.GL_FALSE,
@@ -2046,7 +2060,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     if spectrumView in self._contourList.keys():
                         if self._stackingMode:
-
                             # use the stacking matrix to offset the 1D spectra
                             self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                                                                                 1, GL.GL_FALSE,
@@ -2169,9 +2182,12 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 labelColour = self.foreground
 
+            # create the X axis labelling
             for axLabel in self.axisLabelling['0']:
                 axisX = axLabel[2]
-                axisXText = str(int(axisX)) if axLabel[3] >= 1 else str(axisX)
+                axisXLabel = axLabel[3]
+
+                axisXText = str(int(axisXLabel)) if axLabel[4] >= 1 else str(axisXLabel)
 
                 self._axisXLabelling.append(GLString(text=axisXText,
                                                      font=self.globalGL.glSmallFont,
@@ -2179,44 +2195,51 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      # , x=axisX-(10.0*self.pixelX) #*len(str(axisX))),
                                                      # , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE,
 
-                                                     x=axisX - (
-                                                             0.4 * self.globalGL.glSmallFont.width * self.pixelX * len(
-                                                             axisXText)),  #*len(str(axisX))),
+                                                     # x=axisX - (
+                                                     #         0.4 * self.globalGL.glSmallFont.width * self.pixelX * len(
+                                                     #         axisXText)),  #*len(str(axisX))),
+                                                     x=axisX - (0.4 * self.globalGL.glSmallFont.width * self.deltaX * len(
+                                                                axisXText)),
                                                      y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
 
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
 
             # append the axisCode to the end
-            self._axisXLabelling.append(GLString(text=self.axisCodes[0],
+            self._axisXLabelling.append(GLString(text=self.axisCodes[0] + ' [ppm]',
                                                  font=self.globalGL.glSmallFont,
-                                                 x=self.axisL + (GLDefs.AXISTEXTXOFFSET * self.pixelX),
+                                                 # x=self.axisL + (GLDefs.AXISTEXTXOFFSET * self.pixelX),
+                                                 x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
                                                  y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
                                                  color=labelColour, GLContext=self,
                                                  obj=None))
 
             self._axisYLabelling = []
 
+            # create the Y axis labelling
             for xx, ayLabel in enumerate(self.axisLabelling['1']):
                 axisY = ayLabel[2]
+                axisYLabel = ayLabel[3]
 
                 if self.YAXISUSEEFORMAT:
-                    axisYText = self._eformat(axisY, 3)
+                    axisYText = self._eformat(axisYLabel, 3)
                 else:
-                    axisYText = str(int(axisY)) if ayLabel[3] >= 1 else str(axisY)
+                    axisYText = str(int(axisYLabel)) if ayLabel[4] >= 1 else str(axisYLabel)
 
                 self._axisYLabelling.append(GLString(text=axisYText,
                                                      font=self.globalGL.glSmallFont,
                                                      x=self.AXIS_OFFSET,
-                                                     y=axisY - (GLDefs.AXISTEXTYOFFSET * self.pixelY),
+                                                     # y=axisY - (GLDefs.AXISTEXTYOFFSET * self.pixelY),
+                                                     y=axisY - (GLDefs.AXISTEXTYOFFSET * self.deltaY),
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
 
             # append the axisCode to the end
-            self._axisYLabelling.append(GLString(text=self.axisCodes[1],
+            self._axisYLabelling.append(GLString(text=self.axisCodes[1] + '\n[ppm]',
                                                  font=self.globalGL.glSmallFont,
                                                  x=self.AXIS_OFFSET,
-                                                 y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
+                                                 # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
+                                                 y=1.0 - (2 * GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
                                                  color=labelColour, GLContext=self,
                                                  obj=None))
 
@@ -2229,9 +2252,12 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._drawBottomAxis:
                 # put the axis labels into the bottom bar
                 self.viewports.setViewport(self._currentBottomAxisBarView)
-                self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
+
+                # self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
+                self._axisScale[0:4] = [1.0 / (self.w - self.AXIS_MARGINRIGHT), 1.0, 1.0, 1.0]
+
                 self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
-                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, self.axisL, self.axisR, 0,
+                self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0,
                                                                   self.AXIS_MARGINBOTTOM, -1.0, 1.0)
                 self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
@@ -2241,10 +2267,13 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._drawRightAxis:
                 # put the axis labels into the right bar
                 self.viewports.setViewport(self._currentRightAxisBarView)
-                self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
+
+                # self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
+                self._axisScale[0:4] = [1.0, 1.0 / (self.h - self.AXIS_MARGINBOTTOM), 1.0, 1.0]
+
                 self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
                 self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT,
-                                                                  self.axisB, self.axisT, -1.0, 1.0)
+                                                                  0.0, 1.0, -1.0, 1.0)
                 self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
                 for lb in self._axisYLabelling:
@@ -3180,7 +3209,7 @@ class CcpnGLWidget(QOpenGLWidget):
         for axis in self._orderedAxes[2:]:
             position.append(axis.position)
 
-        positionPixel = position    #(self.cursorCoordinate[0], self.cursorCoordinate[1])
+        positionPixel = position  #(self.cursorCoordinate[0], self.cursorCoordinate[1])
 
         for spectrumView in self.strip.spectrumViews:
 
@@ -3495,13 +3524,18 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
+        """Build the grid
+        """
 
         def check(ll):
             # check if a number ends in an even digit
-            val = '%.0f' % (ll[2] / ll[3])
+            val = '%.0f' % (ll[3] / ll[4])
             if val[-1] in '02468':
                 return True
             return False
+
+        def valueToRatio(val, x0, x1):
+            return (val - x0) / (x1 - x0)
 
         labelling = {'0': [], '1': []}
         labelsChanged = False
@@ -3519,15 +3553,6 @@ class CcpnGLWidget(QOpenGLWidget):
             gridGLList.clearArrays()
 
             index = 0
-            # if ul[0] > br[0]:
-            #   x = ul[0]
-            #   ul[0] = br[0]
-            #   br[0] = x
-            # if ul[1] > br[1]:
-            #   y = ul[1]
-            #   ul[1] = br[1]
-            #   br[1] = y
-
             for scaleOrder, i in enumerate(scaleGrid):  #  [2,1,0]:   ## Draw three different scales of grid
                 dist = br - ul
                 nlTarget = 10. ** i
@@ -3538,9 +3563,6 @@ class CcpnGLWidget(QOpenGLWidget):
                 nl = (dist / d) + 0.5
 
                 for ax in axisList:  #   range(0,2):  ## Draw grid for both axes
-                    # ppl = np.array( dim[ax] / nl[ax] )                      # ejb
-                    # c = np.clip(3.*(ppl-3), 0., 30.)
-                    # print ('>>>clip %d %s %0.3f %0.3f %s %0.3f' % (scaleOrder, c, dim[ax], nl[ax], ppl, d))
 
                     c = 30.0 + (scaleOrder * 20)
 
@@ -3564,13 +3586,22 @@ class CcpnGLWidget(QOpenGLWidget):
                             d[1] = self._round_sig(d[1], sig=4)
 
                             if '%.5f' % p1[0] == '%.5f' % p2[0]:  # easy to round off as strings
-                                labelling[str(ax)].append((i, ax, p1[0], d[0]))
+                                labelling[str(ax)].append((i, ax, valueToRatio(p1[0], self.axisL, self.axisR),
+                                                           p1[0], d[0]))
                             else:
-                                labelling[str(ax)].append((i, ax, p1[1], d[1]))
+                                labelling[str(ax)].append((i, ax, valueToRatio(p1[1], self.axisB, self.axisT),
+                                                           p1[1], d[1]))
 
                         # append the new points to the end of nparray
                         gridGLList.indices = np.append(gridGLList.indices, [index, index + 1])
-                        gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
+
+                        # gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
+
+                        gridGLList.vertices = np.append(gridGLList.vertices, [valueToRatio(p1[0], self.axisL, self.axisR),
+                                                                              valueToRatio(p1[1], self.axisB, self.axisT),
+                                                                              valueToRatio(p2[0], self.axisL, self.axisR),
+                                                                              valueToRatio(p2[1], self.axisB, self.axisT)])
+
                         alpha = min([1.0, c / transparency])
                         gridGLList.colors = np.append(gridGLList.colors, [r, g, b, alpha, r, g, b, alpha])
                         gridGLList.numVertices += 2

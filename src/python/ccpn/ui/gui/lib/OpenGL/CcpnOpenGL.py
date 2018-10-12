@@ -122,6 +122,11 @@ except ImportError:
                                    "PyOpenGL must be installed to run this example.")
     sys.exit(1)
 
+UNITS_PPM = 'ppm'
+UNITS_HZ = 'Hz'
+UNITS_POINT = 'point'
+UNITS = [UNITS_PPM, UNITS_HZ, UNITS_POINT]
+
 
 class CcpnGLWidget(QOpenGLWidget):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
@@ -129,7 +134,7 @@ class CcpnGLWidget(QOpenGLWidget):
     AXIS_MARGINRIGHT = 40
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
-    AXIS_OFFSET = 5
+    AXIS_OFFSET = 3
     YAXISUSEEFORMAT = False
     INVERTXAXIS = True
     INVERTYAXIS = True
@@ -1807,7 +1812,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # offsets = [self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
             #            self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY)]
             offsets = [GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.deltaX,
-                        1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY)]
+                       1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY)]
 
             for pp in range(0, 2 * vertices, 2):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
@@ -2189,72 +2194,89 @@ class CcpnGLWidget(QOpenGLWidget):
         if refresh or self.labelsChanged:
 
             self._axisXLabelling = []
+            self._axisScaleLabelling = []
 
             if self.highlighted:
                 labelColour = self.highlightColour
             else:
                 labelColour = self.foreground
 
-            # create the X axis labelling
-            for axLabel in self.axisLabelling['0']:
-                axisX = axLabel[2]
-                axisXLabel = axLabel[3]
+            if self._drawBottomAxis:
+                # create the X axis labelling
+                for axLabel in self.axisLabelling['0']:
+                    axisX = axLabel[2]
+                    axisXLabel = axLabel[3]
 
-                axisXText = str(int(axisXLabel)) if axLabel[4] >= 1 else str(axisXLabel)
+                    axisXText = str(int(axisXLabel)) if axLabel[4] >= 1 else str(axisXLabel)
 
-                self._axisXLabelling.append(GLString(text=axisXText,
+                    self._axisXLabelling.append(GLString(text=axisXText,
+                                                         font=self.globalGL.glSmallFont,
+                                                         # , angle=np.pi/2.0,
+                                                         # , x=axisX-(10.0*self.pixelX) #*len(str(axisX))),
+                                                         # , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE,
+
+                                                         # x=axisX - (
+                                                         #         0.4 * self.globalGL.glSmallFont.width * self.pixelX * len(
+                                                         #         axisXText)),  #*len(str(axisX))),
+                                                         x=axisX - (0.4 * self.globalGL.glSmallFont.width * self.deltaX * len(
+                                                                 axisXText)),
+                                                         y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+
+                                                         color=labelColour, GLContext=self,
+                                                         obj=None))
+
+                # append the axisCode
+                self._axisXLabelling.append(GLString(text=self.axisCodes[0],
                                                      font=self.globalGL.glSmallFont,
-                                                     # , angle=np.pi/2.0,
-                                                     # , x=axisX-(10.0*self.pixelX) #*len(str(axisX))),
-                                                     # , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE,
-
-                                                     # x=axisX - (
-                                                     #         0.4 * self.globalGL.glSmallFont.width * self.pixelX * len(
-                                                     #         axisXText)),  #*len(str(axisX))),
-                                                     x=axisX - (0.4 * self.globalGL.glSmallFont.width * self.deltaX * len(
-                                                                axisXText)),
+                                                     # x=self.axisL + (GLDefs.AXISTEXTXOFFSET * self.pixelX),
+                                                     x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
                                                      y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
-
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
-
-            # append the axisCode to the end
-            self._axisXLabelling.append(GLString(text=self.axisCodes[0] + ' [ppm]',
-                                                 font=self.globalGL.glSmallFont,
-                                                 # x=self.axisL + (GLDefs.AXISTEXTXOFFSET * self.pixelX),
-                                                 x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
-                                                 y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
-                                                 color=labelColour, GLContext=self,
-                                                 obj=None))
+                # and the axis dimensions
+                self._axisXLabelling.append(GLString(text='[ppm]',
+                                                     font=self.globalGL.glSmallFont,
+                                                     x=1.0 - (self.deltaX * len('[ppm]') * self.globalGL.glSmallFont.width),
+                                                     y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
+                                                     color=labelColour, GLContext=self,
+                                                     obj=None))
 
             self._axisYLabelling = []
 
-            # create the Y axis labelling
-            for xx, ayLabel in enumerate(self.axisLabelling['1']):
-                axisY = ayLabel[2]
-                axisYLabel = ayLabel[3]
+            if self._drawRightAxis:
+                # create the Y axis labelling
+                for xx, ayLabel in enumerate(self.axisLabelling['1']):
+                    axisY = ayLabel[2]
+                    axisYLabel = ayLabel[3]
 
-                if self.YAXISUSEEFORMAT:
-                    axisYText = self._eformat(axisYLabel, 3)
-                else:
-                    axisYText = str(int(axisYLabel)) if ayLabel[4] >= 1 else str(axisYLabel)
+                    if self.YAXISUSEEFORMAT:
+                        axisYText = self._eformat(axisYLabel, 3)
+                    else:
+                        axisYText = str(int(axisYLabel)) if ayLabel[4] >= 1 else str(axisYLabel)
 
-                self._axisYLabelling.append(GLString(text=axisYText,
+                    self._axisYLabelling.append(GLString(text=axisYText,
+                                                         font=self.globalGL.glSmallFont,
+                                                         x=self.AXIS_OFFSET,
+                                                         # y=axisY - (GLDefs.AXISTEXTYOFFSET * self.pixelY),
+                                                         y=axisY - (GLDefs.AXISTEXTYOFFSET * self.deltaY),
+                                                         color=labelColour, GLContext=self,
+                                                         obj=None))
+
+                # append the axisCode
+                self._axisYLabelling.append(GLString(text=self.axisCodes[1],
                                                      font=self.globalGL.glSmallFont,
                                                      x=self.AXIS_OFFSET,
-                                                     # y=axisY - (GLDefs.AXISTEXTYOFFSET * self.pixelY),
-                                                     y=axisY - (GLDefs.AXISTEXTYOFFSET * self.deltaY),
+                                                     # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
+                                                     y=1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
-
-            # append the axisCode to the end
-            self._axisYLabelling.append(GLString(text=self.axisCodes[1] + '\n[ppm]',
-                                                 font=self.globalGL.glSmallFont,
-                                                 x=self.AXIS_OFFSET,
-                                                 # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
-                                                 y=1.0 - (2 * GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
-                                                 color=labelColour, GLContext=self,
-                                                 obj=None))
+                # and the axis dimensions
+                self._axisYLabelling.append(GLString(text='[ppm]',
+                                                     font=self.globalGL.glSmallFont,
+                                                     x=self.AXIS_OFFSET,
+                                                     y=1.0 * self.deltaY,
+                                                     color=labelColour, GLContext=self,
+                                                     obj=None))
 
     def drawAxisLabels(self):
         # draw axes labelling

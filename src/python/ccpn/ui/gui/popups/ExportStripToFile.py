@@ -53,6 +53,8 @@ from ccpn.ui.gui.widgets.MessageDialog import progressManager
 
 EXPORTPDF = 'PDF'
 EXPORTSVG = 'SVG'
+EXPORTPDFEXTENSION = '.pdf'
+EXPORTSVGEXTENSION = '.svg'
 EXPORTPDFFILTER = 'pdf files (*.pdf)'
 EXPORTSVGFILTER = 'svg files (*.svg)'
 EXPORTTYPES = [EXPORTPDF, EXPORTSVG]
@@ -257,8 +259,13 @@ class ExportStripToFilePopup(ExportDialog):
         # currentPath = self.getPathHistory()
         # currentPath = currentPath if currentPath else os.path.expanduser(self.project.path)
 
+        if self.exportType.get() == EXPORTPDF:
+            exportExtension = EXPORTPDFEXTENSION
+        else:
+            exportExtension = EXPORTSVGEXTENSION
+
         currentPath = os.path.expanduser(self.project.path)
-        self.updateFilename(os.path.join(currentPath, self.objectPulldown.getText()))
+        self.updateFilename(os.path.join(currentPath, self.objectPulldown.getText()+exportExtension))
 
         self.setMinimumSize(self.sizeHint())
 
@@ -279,16 +286,21 @@ class ExportStripToFilePopup(ExportDialog):
 
     def _changePulldown(self, int):
         selected = self.objectPulldown.getText()
+        if self.exportType.get() == EXPORTPDF:
+            exportExtension = EXPORTPDFEXTENSION
+        else:
+            exportExtension = EXPORTSVGEXTENSION
+
         if 'SpectrumDisplay' in selected:
             self.spectrumDisplay = self.objects[selected][0]
             self.strip = self.spectrumDisplay.strips[0]
 
-            self.updateFilename(self.spectrumDisplay.id)
+            self.updateFilename(self.spectrumDisplay.id+exportExtension)
         else:
             self.spectrumDisplay = None
             self.strip = self.objects[selected][0]
 
-            self.updateFilename(self.strip.id)
+            self.updateFilename(self.strip.id+exportExtension)
 
         selectedList = self.treeView.getItems()
         self._populateTreeView(selectedList)
@@ -448,13 +460,16 @@ class ExportStripToFilePopup(ExportDialog):
 
     def _changePrintType(self):
         selected = self.exportType.get()
+        lastPath = os.path.splitext(self.saveText.text())[0]
         if selected == EXPORTPDF:
             self._dialogFilter = EXPORTPDFFILTER
             self.updateDialog()
+            self.updateFilename(lastPath+EXPORTPDFEXTENSION)
 
         elif selected == EXPORTSVG:
             self._dialogFilter = EXPORTSVGFILTER
             self.updateDialog()
+            self.updateFilename(lastPath+EXPORTSVGEXTENSION)
 
     def buildParameters(self):
         """build parameters dict from the user widgets, to be passed to the export method.

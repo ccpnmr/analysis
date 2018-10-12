@@ -46,6 +46,7 @@ BOTTOMAXISBAR = 'bottomAxisBar'
 FULLBOTTOMAXIS = 'fullBottomAxis'
 FULLBOTTOMAXISBAR = 'fullBottomAxisBar'
 FULLVIEW = 'fullView'
+AXISCORNER = 'axisCorner'
 
 GLLINE_STYLES = {
     'solid': 0xFFFF,

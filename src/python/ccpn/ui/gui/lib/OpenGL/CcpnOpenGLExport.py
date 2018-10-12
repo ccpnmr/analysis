@@ -86,6 +86,7 @@ PDFLINES = 'lines'
 def alphaClip(value):
     return np.clip(float(value), 0.0, 1.0)
 
+
 class GLExporter():
     """
     Class container for exporting OpenGL stripDisplay to a file or object
@@ -163,7 +164,7 @@ class GLExporter():
 
         # load all system fonts to find matches with OpenGl fonts
         for glFonts in self.parent.globalGL.fonts.values():
-            pdfmetrics.registerFont(TTFont(glFonts.fontName, os.path.join(fontsPath, 'open-sans', SUBSTITUTEFONT+'.ttf')))
+            pdfmetrics.registerFont(TTFont(glFonts.fontName, os.path.join(fontsPath, 'open-sans', SUBSTITUTEFONT + '.ttf')))
 
         # set a default fontName
         self.fontName = self.parent.globalGL.glSmallFont.fontName
@@ -235,7 +236,8 @@ class GLExporter():
 
         self.pixHeight = self._report.doc.height - (2.0 * cm)
         self.pixWidth = self.pixHeight / frameRatio
-        self.fontScale = 1.025 * self.pixHeight / self.parent.h
+        # self.fontScale = 1.025 * self.pixHeight / self.parent.h
+        self.fontScale = self.pixHeight / self.parent.h
 
         # strip axis ratio
         ratio = self.parent.h / self.parent.w
@@ -337,7 +339,8 @@ class GLExporter():
                                                 PLOTBOTTOM: self.displayScale * self.mainB,
                                                 PLOTWIDTH: self.displayScale * self.mainW,
                                                 PLOTHEIGHT: self.displayScale * self.mainH},
-                                       name='grid')
+                                       name='grid',
+                                       ratioLine=True)
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='grid')
 
     def _addSpectrumContours(self):
@@ -833,6 +836,10 @@ class GLExporter():
 
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='infiniteLines')
 
+    def _scaleRatioToWindow(self, values):
+        return [values[0] * (self.parent.axisR - self.parent.axisL) + self.parent.axisL,
+                values[1] * (self.parent.axisT - self.parent.axisB) + self.parent.axisB]
+
     def _addOverlayText(self):
         """
         Add the overlay text to the main drawing area.
@@ -843,15 +850,19 @@ class GLExporter():
         colour = self.foregroundColour
         colourPath = 'overlayText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
-        newLine = [drawString.attribs[0], drawString.attribs[1]]
+        # newLine = [drawString.attribs[0], drawString.attribs[1]]
+        newLine = self._scaleRatioToWindow(drawString.attribs[0:2])
+
         if self.parent.pointVisible(newLine,
-                                    x=self.displayScale * self.mainL,
-                                    y=self.displayScale * self.mainB,
+                                    x=self.displayScale,  # * self.mainL,
+                                    y=self.displayScale,  # * self.mainB,
                                     width=self.displayScale * self.mainW,
                                     height=self.displayScale * self.mainH):
-            if colourPath not in colourGroups:
-                colourGroups[colourPath] = Group()
-            self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
+            pass
+
+        if colourPath not in colourGroups:
+            colourGroups[colourPath] = Group()
+        self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=True)
 
         for colourGroup in colourGroups.values():
             self._mainPlot.add(colourGroup)
@@ -914,7 +925,8 @@ class GLExporter():
                                                         PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
                                                         PLOTHEIGHT: self.displayScale * self.mainH},
                                                name='gridAxes',
-                                               setColour=self.foregroundColour)
+                                               setColour=self.foregroundColour,
+                                               ratioLine=True)
                     if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                         list(colourGroups.values())[0][PDFLINES].append([self.displayScale * self.mainW, self.displayScale * self.mainB,
                                                                          self.displayScale * self.mainW, self.pixHeight])
@@ -932,7 +944,8 @@ class GLExporter():
                                                         PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
                                                         PLOTHEIGHT: self.displayScale * self.mainH},
                                                name='gridAxes',
-                                               setColour=self.foregroundColour)
+                                               setColour=self.foregroundColour,
+                                               ratioLine=True)
                     list(colourGroups.values())[0][PDFLINES] = [[self.displayScale * self.mainW, self.displayScale * self.mainB,
                                                                  self.displayScale * self.mainW, self.pixHeight]]
 
@@ -945,7 +958,8 @@ class GLExporter():
                                                         PLOTWIDTH: self.displayScale * self.mainW,
                                                         PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
                                                name='gridAxes',
-                                               setColour=self.foregroundColour)
+                                               setColour=self.foregroundColour,
+                                               ratioLine=True)
                     if self.params[GLPLOTBORDER] or self.params[GLAXISLINES]:
                         list(colourGroups.values())[0][PDFLINES].append([0.0, self.displayScale * self.bAxisH,
                                                                          self.displayScale * self.mainW, self.displayScale * self.bAxisH])
@@ -963,7 +977,8 @@ class GLExporter():
                                                         PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
                                                         PLOTHEIGHT: self.displayScale * self.mainH},
                                                name='gridAxes',
-                                               setColour=self.foregroundColour)
+                                               setColour=self.foregroundColour,
+                                               ratioLine=True)
 
                     # if the rAxis is not visible then just set this line, otherwise append to the above line
                     if not self.rAxis:
@@ -981,16 +996,17 @@ class GLExporter():
                         fillColor=colour)
         if boxed:
             bounds = newStr.getBounds()
-            dx = drawString.font.fontSize * self.fontScale * 0.11       #bounds[0] - position[0]
-            dy = drawString.font.fontSize * self.fontScale * 0.125      #(position[1] - bounds[1]) / 2.0
+            dx = drawString.font.fontSize * self.fontScale * 0.11  #bounds[0] - position[0]
+            dy = drawString.font.fontSize * self.fontScale * 0.125  #(position[1] - bounds[1]) / 2.0
             colourGroups[colourPath].add(Rect(bounds[0] - dx, bounds[1] - dy,
                                               (bounds[2] - bounds[0]) + 5 * dx, (bounds[3] - bounds[1]) + 2.0 * dy,
                                               # newLine[0], newLine[1],
                                               # drawString.font.fontSize * self.fontScale * len(newLine),
                                               # drawString.font.fontSize * self.fontScale,
                                               strokeColor=None,
-                                              fillColor=self.backgroundColour))
-                                                # fillColor = colors.lightgreen))
+                                              # fillColor=self.backgroundColour))
+                                                fillColor = colors.lawngreen))
+            # fillColor = colors.lightgreen))
         colourGroups[colourPath].add(newStr)
 
     def _addGridLabels(self):
@@ -1007,8 +1023,13 @@ class GLExporter():
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
                     # add (0, 3) to mid-point
-                    mid = self.parent.axisL + (0 + drawString.attribs[0]) * (self.parent.axisR - self.parent.axisL) / self.parent.AXIS_MARGINRIGHT
-                    newLine = [mid, drawString.attribs[1] + (3 * self.parent.pixelY)]
+                    # mid = self.parent.axisL + (0 + drawString.attribs[0]) * (self.parent.axisR - self.parent.axisL) / self.parent.AXIS_MARGINRIGHT
+                    # newLine = [mid, drawString.attribs[1] + (3 * self.parent.pixelY)]
+                    # mid = self.parent.axisL + drawString.attribs[0] * (self.parent.axisR - self.parent.axisL) * self.parent.pixelX
+                    # newLine = [mid, drawString.attribs[1] + (3 * self.parent.deltaY)]
+
+                    newLine = self._scaleRatioToWindow([drawString.attribs[0] / self.parent.AXIS_MARGINRIGHT, drawString.attribs[1] + (3 * self.parent.deltaY)])
+
                     if self.parent.pointVisible(newLine,
                                                 x=self.displayScale * self.rAxisL,
                                                 y=self.displayScale * self.rAxisB,
@@ -1016,8 +1037,10 @@ class GLExporter():
                                                 height=self.displayScale * self.rAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
+
+                        # set box around the last 2 elements (name and dimensions)
                         self._addString(colourGroups, colourPath, drawString, newLine, colour,
-                                        boxed=False if strNum < len(self.parent._axisYLabelling)-1 else True)
+                                        boxed=False if strNum < len(self.parent._axisYLabelling) - 2 else True)
 
             if self.bAxis:
                 for strNum, drawString in enumerate(self.parent._axisXLabelling):
@@ -1027,8 +1050,13 @@ class GLExporter():
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
                     # add (0, 3) to mid
-                    mid = self.parent.axisB + (3 + drawString.attribs[1]) * (self.parent.axisT - self.parent.axisB) / self.parent.AXIS_MARGINBOTTOM
-                    newLine = [drawString.attribs[0] + (0 * self.parent.pixelX), mid]
+                    # mid = self.parent.axisB + (3 + drawString.attribs[1]) * (self.parent.axisT - self.parent.axisB) / self.parent.AXIS_MARGINBOTTOM
+                    # newLine = [drawString.attribs[0] + (0 * self.parent.pixelX), mid]
+                    # mid = self.parent.axisB + drawString.attribs[1] * (self.parent.axisT - self.parent.axisB)
+                    # newLine = [drawString.attribs[0] + (0 * self.parent.deltaX), mid]
+
+                    newLine = self._scaleRatioToWindow([drawString.attribs[0], (3 + drawString.attribs[1]) / self.parent.AXIS_MARGINBOTTOM])
+
                     if self.parent.pointVisible(newLine,
                                                 x=self.displayScale * self.bAxisL,
                                                 y=self.displayScale * self.bAxisB,
@@ -1036,8 +1064,10 @@ class GLExporter():
                                                 height=self.displayScale * self.bAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
+
+                        # set box around the last 2 elements (name and dimensions)
                         self._addString(colourGroups, colourPath, drawString, newLine, colour,
-                                        boxed=False if strNum < len(self.parent._axisXLabelling)-1 else True)
+                                        boxed=False if strNum < len(self.parent._axisXLabelling) - 2 else True)
 
             for colourGroup in colourGroups.values():
                 self._mainPlot.add(colourGroup)
@@ -1126,7 +1156,7 @@ class GLExporter():
 
     def _appendIndexLineGroup(self, indArray, colourGroups, plotDim, name,
                               fillMode=None, splitGroups=False,
-                              setColour=None, lineWidth=0.5):
+                              setColour=None, lineWidth=0.5, ratioLine=False):
         if indArray.drawMode == GL.GL_TRIANGLES:
             indexLen = 3
         elif indArray.drawMode == GL.GL_QUADS:
@@ -1143,7 +1173,14 @@ class GLExporter():
 
             newLine = []
             for vv in ii0:
-                newLine.extend([indArray.vertices[vv * 2], indArray.vertices[vv * 2 + 1]])
+                if ratioLine:
+                    # convert ratio to axis coordinates
+                    # newLine.extend([self._scaleRatioToWindow(indArray.vertices[vv * 2], (self.parent.axisR - self.parent.axisL), self.parent.axisL),
+                    #                 self._scaleRatioToWindow(indArray.vertices[vv * 2 + 1], (self.parent.axisT - self.parent.axisB), self.parent.axisB)])
+
+                    newLine.extend(self._scaleRatioToWindow(indArray.vertices[vv * 2:vv*2+2]))
+                else:
+                    newLine.extend([indArray.vertices[vv * 2], indArray.vertices[vv * 2 + 1]])
 
             colour = (setColour or colors.Color(*indArray.colors[ii0[0] * 4:ii0[0] * 4 + 3], alpha=alphaClip(indArray.colors[ii0[0] * 4 + 3])))
             colourPath = 'spectrumView%s%s%s%s%s' % (name,

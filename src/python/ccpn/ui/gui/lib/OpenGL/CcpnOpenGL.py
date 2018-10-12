@@ -131,7 +131,7 @@ UNITS = [UNITS_PPM, UNITS_HZ, UNITS_POINT]
 class CcpnGLWidget(QOpenGLWidget):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
     """
-    AXIS_MARGINRIGHT = 40
+    AXIS_MARGINRIGHT = 45
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
     AXIS_OFFSET = 3
@@ -1362,6 +1362,10 @@ class CcpnGLWidget(QOpenGLWidget):
         # define the full viewport
         self.viewports.addViewport(GLDefs.FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
 
+        # define the remaining corner
+        self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+
+        # set strings for the overlay text
         self._lockStringFalse = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
                                          color=(0.5, 0.5, 0.5, 1.0), GLContext=self)
         self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,

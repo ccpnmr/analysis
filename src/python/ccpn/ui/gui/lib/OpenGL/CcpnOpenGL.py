@@ -86,7 +86,9 @@ from ccpn.ui.gui.lib.GuiStrip import DefaultMenu, PeakMenu, IntegralMenu, \
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_BACKGROUND, CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, \
     CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_INTEGRALSHADE, \
     CCPNGLWIDGET_LABELLING, CCPNGLWIDGET_PHASETRACE, getColours, \
-    CCPNGLWIDGET_HEXBACKGROUND
+    CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_ZOOMAREA, CCPNGLWIDGET_PICKAREA, \
+    CCPNGLWIDGET_SELECTAREA, CCPNGLWIDGET_ZOOMLINE, CCPNGLWIDGET_MOUSEMOVELINE, \
+    CCPNGLWIDGET_HARDSHADE
 # from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakAnnotation  # temp until I rewrite
 import ccpn.util.Phasing as Phasing
 from ccpn.ui.gui.lib.mouseEvents import \
@@ -279,16 +281,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings = {}
         self._newStripID = False
 
-        # colours
-        self.colours = getColours()
-        self.hexBackground = self.colours[CCPNGLWIDGET_HEXBACKGROUND]
-        self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
-        self.foreground = self.colours[CCPNGLWIDGET_FOREGROUND]
-        self.mousePickColour = self.colours[CCPNGLWIDGET_PICKCOLOUR]
-        self.gridColour = self.colours[CCPNGLWIDGET_GRID]
-        self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
-        self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
-        self._phasingTraceColour = self.colours[CCPNGLWIDGET_PHASETRACE]
+        self._setColourScheme()
 
         self._gridVisible = self._preferences.showGrid
         self._updateHTrace = False
@@ -976,7 +969,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if update:
             self.update()
 
-    def _testAxisLimits(self):
+    def _testAxisLimits(self, setLimits=False):
         xRange = abs(self.axisL - self.axisR) / 2.0
         yRange = abs(self.axisT - self.axisB) / 2.0
         self._minXReached = False
@@ -985,27 +978,31 @@ class CcpnGLWidget(QOpenGLWidget):
         self._maxYReached = False
 
         if xRange < self._minXRange and self._rangeXDefined and self._applyXLimit:
-            # xMid = (self.axisR + self.axisL) / 2.0
-            # self.axisL = xMid - self._minXRange * np.sign(self.pixelX)
-            # self.axisR = xMid + self._minXRange * np.sign(self.pixelX)
+            if setLimits:
+                xMid = (self.axisR + self.axisL) / 2.0
+                self.axisL = xMid - self._minXRange * np.sign(self.pixelX)
+                self.axisR = xMid + self._minXRange * np.sign(self.pixelX)
             self._minXReached = True
 
         if yRange < self._minYRange and self._rangeYDefined and self._applyYLimit:
-            # yMid = (self.axisT + self.axisB) / 2.0
-            # self.axisT = yMid + self._minYRange * np.sign(self.pixelY)
-            # self.axisB = yMid - self._minYRange * np.sign(self.pixelY)
+            if setLimits:
+                yMid = (self.axisT + self.axisB) / 2.0
+                self.axisT = yMid + self._minYRange * np.sign(self.pixelY)
+                self.axisB = yMid - self._minYRange * np.sign(self.pixelY)
             self._minYReached = True
 
         if xRange > self._maxXRange and self._rangeXDefined and self._applyXLimit:
-            # xMid = (self.axisR + self.axisL) / 2.0
-            # self.axisL = xMid - self._maxXRange * np.sign(self.pixelX)
-            # self.axisR = xMid + self._maxXRange * np.sign(self.pixelX)
+            if setLimits:
+                xMid = (self.axisR + self.axisL) / 2.0
+                self.axisL = xMid - self._maxXRange * np.sign(self.pixelX)
+                self.axisR = xMid + self._maxXRange * np.sign(self.pixelX)
             self._maxXReached = True
 
         if yRange > self._maxYRange and self._rangeYDefined and self._applyYLimit:
-            # yMid = (self.axisT + self.axisB) / 2.0
-            # self.axisT = yMid + self._maxYRange * np.sign(self.pixelY)
-            # self.axisB = yMid - self._maxYRange * np.sign(self.pixelY)
+            if setLimits:
+                yMid = (self.axisT + self.axisB) / 2.0
+                self.axisT = yMid + self._maxYRange * np.sign(self.pixelY)
+                self.axisB = yMid - self._maxYRange * np.sign(self.pixelY)
             self._maxYReached = True
 
         self._minReached = self._minXReached or self._minYReached
@@ -1362,8 +1359,8 @@ class CcpnGLWidget(QOpenGLWidget):
         # define the full viewport
         self.viewports.addViewport(GLDefs.FULLVIEW, self, (0, 'a'), (0, 'a'), (0, 'w'), (0, 'h'))
 
-        # define the remaining corner
-        self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
+        # # define the remaining corner
+        # self.viewports.addViewport(GLDefs.AXISCORNER, self, (-self.AXIS_MARGINRIGHT, 'w'), (0, 'a'), (0, 'w'), (self.AXIS_MARGINBOTTOM, 'a'))
 
         # set strings for the overlay text
         self._lockStringFalse = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
@@ -1382,10 +1379,9 @@ class CcpnGLWidget(QOpenGLWidget):
             self.initialiseAxes(self.strip)
             self.initialiseTraces()
 
-    def _preferencesUpdate(self):
-        """update GL values after the preferences have changed
+    def _setColourScheme(self):
+        """Update colours from colourScheme
         """
-        # colours
         self.colours = getColours()
         self.hexBackground = self.colours[CCPNGLWIDGET_HEXBACKGROUND]
         self.background = self.colours[CCPNGLWIDGET_BACKGROUND]
@@ -1395,6 +1391,21 @@ class CcpnGLWidget(QOpenGLWidget):
         self.highlightColour = self.colours[CCPNGLWIDGET_HIGHLIGHT]
         self._labellingColour = self.colours[CCPNGLWIDGET_LABELLING]
         self._phasingTraceColour = self.colours[CCPNGLWIDGET_PHASETRACE]
+
+        self.zoomAreaColour = self.colours[CCPNGLWIDGET_ZOOMAREA]
+        self.pickAreaColour = self.colours[CCPNGLWIDGET_PICKAREA]
+        self.selectAreaColour = self.colours[CCPNGLWIDGET_SELECTAREA]
+        self.zoomLineColour = self.colours[CCPNGLWIDGET_ZOOMLINE]
+        self.mouseMoveLineColour = self.colours[CCPNGLWIDGET_MOUSEMOVELINE]
+
+        self.zoomAreaColourHard = (*self.colours[CCPNGLWIDGET_ZOOMAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.pickAreaColourHard = (*self.colours[CCPNGLWIDGET_PICKAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+        self.selectAreaColourHard = (*self.colours[CCPNGLWIDGET_SELECTAREA][0:3], CCPNGLWIDGET_HARDSHADE)
+
+    def _preferencesUpdate(self):
+        """update GL values after the preferences have changed
+        """
+        self._setColourScheme()
 
         # change the colour of the selected 'Lock' string
         self._lockStringTrue = GLString(text='Lock', font=self.globalGL.glSmallFont, x=0, y=0,
@@ -1926,14 +1937,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.drawInfiniteLines()
 
+        currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
+        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
         self.drawSelectionBox()
         self.drawMouseMoveLine()
 
         if self._successiveClicks:
             self.drawDottedCursor()
-
-        currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
-        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
         self.drawCursors()
 
@@ -2625,19 +2636,19 @@ class CcpnGLWidget(QOpenGLWidget):
         for mark in self._marksAxisCodes:
             mark.drawTextArray()
 
+    def _scaleAxisToRatio(self, values):
+        return [(values[0] - self.axisL) / (self.axisR - self.axisL),
+                (values[1] - self.axisB) / (self.axisT - self.axisB)]
+
     def drawCursors(self):
         # draw the cursors
         # need to change to VBOs
-
-        def _scaleRatioToWindow(values):
-            return [values[0] * (self.axisR - self.axisL) + self.axisL,
-                    values[1] * (self.axisT - self.axisB) + self.axisB]
 
         if self.strip.crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
             GL.glBegin(GL.GL_LINES)
 
             # map the cursor to the ratio coordinates
-            newCoords = _scaleRatioToWindow(self.cursorCoordinate[0:2])
+            newCoords = self._scaleAxisToRatio(self.cursorCoordinate[0:2])
 
             if getCurrentMouseMode() == PICK:
                 GL.glColor4f(*self.mousePickColour)
@@ -2687,15 +2698,17 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the cursors
         # need to change to VBOs
 
-        GL.glColor4f(1.0, 0.9, 0.1, 1.0)
+        GL.glColor4f(*self.zoomLineColour)
         GL.glLineStipple(1, 0xF0F0)
         GL.glEnable(GL.GL_LINE_STIPPLE)
 
+        succClick = self._scaleAxisToRatio(self._successiveClicks[0:2])
+
         GL.glBegin(GL.GL_LINES)
-        GL.glVertex2d(self._successiveClicks[0], self.axisT)
-        GL.glVertex2d(self._successiveClicks[0], self.axisB)
-        GL.glVertex2d(self.axisL, self._successiveClicks[1])
-        GL.glVertex2d(self.axisR, self._successiveClicks[1])
+        GL.glVertex2d(succClick[0], 1.0)
+        GL.glVertex2d(succClick[0], 0.0)
+        GL.glVertex2d(0.0, succClick[1])
+        GL.glVertex2d(1.0, succClick[1])
         GL.glEnd()
 
         GL.glDisable(GL.GL_LINE_STIPPLE)
@@ -2979,15 +2992,15 @@ class CcpnGLWidget(QOpenGLWidget):
         if self._drawSelectionBox:
             GL.glEnable(GL.GL_BLEND)
 
-            self._dragStart = self._startCoordinate
-            self._dragEnd = self._endCoordinate
+            self._dragStart = self._scaleAxisToRatio(self._startCoordinate[0:2])
+            self._dragEnd = self._scaleAxisToRatio(self._endCoordinate[0:2])
 
             if self._selectionMode == 1:  # yellow
-                GL.glColor4f(0.8, 0.9, 0.2, 0.3)
+                GL.glColor4f(*self.zoomAreaColour)
             elif self._selectionMode == 2:  # purple
-                GL.glColor4f(0.8, 0.2, 0.9, 0.3)
+                GL.glColor4f(*self.selectAreaColour)
             elif self._selectionMode == 3:  # cyan
-                GL.glColor4f(0.2, 0.5, 0.9, 0.3)
+                GL.glColor4f(*self.pickAreaColour)
 
             GL.glBegin(GL.GL_QUADS)
             GL.glVertex2d(self._dragStart[0], self._dragStart[1])
@@ -2997,11 +3010,11 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glEnd()
 
             if self._selectionMode == 1:  # yellow
-                GL.glColor4f(0.8, 0.9, 0.2, 0.9)
+                GL.glColor4f(*self.zoomAreaColourHard)
             elif self._selectionMode == 2:  # purple
-                GL.glColor4f(0.8, 0.2, 0.9, 0.9)
+                GL.glColor4f(*self.selectAreaColourHard)
             elif self._selectionMode == 3:  # cyan
-                GL.glColor4f(0.2, 0.5, 0.9, 0.9)
+                GL.glColor4f(*self.pickAreaColourHard)
 
             GL.glBegin(GL.GL_LINE_STRIP)
             GL.glVertex2d(self._dragStart[0], self._dragStart[1])
@@ -3014,10 +3027,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def drawMouseMoveLine(self):
         if self._drawMouseMoveLine:
-            GL.glColor4f(0.8, 0.2, 0.9, 1.0)
+            GL.glColor4f(*self.mouseMoveLineColour)
             GL.glBegin(GL.GL_LINES)
-            GL.glVertex2d(self._startCoordinate[0], self._startCoordinate[1])
-            GL.glVertex2d(self.cursorCoordinate[0], self.cursorCoordinate[1])
+
+            startCoord = self._scaleAxisToRatio(self._startCoordinate[0:2])
+            cursCoord = self._scaleAxisToRatio(self.cursorCoordinate[0:2])
+
+            GL.glVertex2d(startCoord[0], startCoord[1])
+            GL.glVertex2d(cursCoord[0], cursCoord[1])
             GL.glEnd()
 
     def _newStaticHTraceData(self, spectrumView, tracesDict,
@@ -4103,19 +4120,20 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      abs(self.pixelY))):
 
                     if self.INVERTXAXIS:
-                        self.axisL = max(self._startCoordinate[0], self._endCoordinate[0])
-                        self.axisR = min(self._startCoordinate[0], self._endCoordinate[0])
+                        self.axisL = max(self._startCoordinate[0], self._successiveClicks[0])
+                        self.axisR = min(self._startCoordinate[0], self._successiveClicks[0])
                     else:
-                        self.axisL = min(self._startCoordinate[0], self._endCoordinate[0])
-                        self.axisR = max(self._startCoordinate[0], self._endCoordinate[0])
+                        self.axisL = min(self._startCoordinate[0], self._successiveClicks[0])
+                        self.axisR = max(self._startCoordinate[0], self._successiveClicks[0])
 
                     if self.INVERTYAXIS:
-                        self.axisB = max(self._startCoordinate[1], self._endCoordinate[1])
-                        self.axisT = min(self._startCoordinate[1], self._endCoordinate[1])
+                        self.axisB = max(self._startCoordinate[1], self._successiveClicks[1])
+                        self.axisT = min(self._startCoordinate[1], self._successiveClicks[1])
                     else:
-                        self.axisB = min(self._startCoordinate[1], self._endCoordinate[1])
-                        self.axisT = max(self._startCoordinate[1], self._endCoordinate[1])
+                        self.axisB = min(self._startCoordinate[1], self._successiveClicks[1])
+                        self.axisT = max(self._startCoordinate[1], self._successiveClicks[1])
 
+                    self._testAxisLimits(setLimits=True)
                     self._rescaleXAxis()
 
                 self._resetBoxes()
@@ -4349,6 +4367,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisB = min(self._startCoordinate[1], self._endCoordinate[1])
                 self.axisT = max(self._startCoordinate[1], self._endCoordinate[1])
 
+            self._testAxisLimits(setLimits=True)
             self._resetBoxes()
 
             # this also rescales the peaks

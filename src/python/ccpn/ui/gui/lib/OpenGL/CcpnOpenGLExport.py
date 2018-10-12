@@ -854,11 +854,14 @@ class GLExporter():
         colourPath = 'overlayText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
         # newLine = [drawString.attribs[0], drawString.attribs[1]]
-        newLine = self._scaleRatioToWindow(drawString.attribs[0:2])
+        # newLine = self._scaleRatioToWindow(drawString.attribs[0:2])
+
+        newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self.parent.deltaX),
+                                            drawString.attribs[1] + (self.fontYOffset * self.parent.deltaY)])
 
         if self.parent.pointVisible(newLine,
-                                    x=self.displayScale,  # * self.mainL,
-                                    y=self.displayScale,  # * self.mainB,
+                                    x=self.displayScale * self.mainL,
+                                    y=self.displayScale * self.mainB,
                                     width=self.displayScale * self.mainW,
                                     height=self.displayScale * self.mainH):
             pass
@@ -1007,8 +1010,7 @@ class GLExporter():
                                               # drawString.font.fontSize * self.fontScale * len(newLine),
                                               # drawString.font.fontSize * self.fontScale,
                                               strokeColor=None,
-                                              # fillColor=self.backgroundColour))
-                                                fillColor = colors.lawngreen))
+                                              fillColor=self.backgroundColour))
             # fillColor = colors.lightgreen))
         colourGroups[colourPath].add(newStr)
 

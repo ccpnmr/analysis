@@ -1921,18 +1921,21 @@ class CcpnGLWidget(QOpenGLWidget):
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
-        self.drawSelectionBox()
-        self.drawMouseMoveLine()
-
-        self.drawCursors()
-
-        if self._successiveClicks:
-            self.drawDottedCursor()
-
         if not self._drawSelectionBox:
             self.drawTraces()
 
         self.drawInfiniteLines()
+
+        self.drawSelectionBox()
+        self.drawMouseMoveLine()
+
+        if self._successiveClicks:
+            self.drawDottedCursor()
+
+        currentShader.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
+        currentShader.setGLUniformMatrix4fv('pMatrix', 1, GL.GL_FALSE, self._uPMatrix)
+
+        self.drawCursors()
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
@@ -2626,31 +2629,57 @@ class CcpnGLWidget(QOpenGLWidget):
         # draw the cursors
         # need to change to VBOs
 
+        def _scaleRatioToWindow(values):
+            return [values[0] * (self.axisR - self.axisL) + self.axisL,
+                    values[1] * (self.axisT - self.axisB) + self.axisB]
+
         if self.strip.crosshairVisible:  # and (not self._updateHTrace or not self._updateVTrace):
             GL.glBegin(GL.GL_LINES)
 
+            # map the cursor to the ratio coordinates
+            newCoords = _scaleRatioToWindow(self.cursorCoordinate[0:2])
+
             if getCurrentMouseMode() == PICK:
                 GL.glColor4f(*self.mousePickColour)
-                x = self.pixelX * 8
-                y = self.pixelY * 8
-                GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] - y)
-                GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] - y)
-                GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] - y)
-                GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] + y)
-                GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] + y)
-                GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] + y)
-                GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] + y)
-                GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] - y)
+
+                # x = self.pixelX * 8
+                # y = self.pixelY * 8
+                # GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] - y)
+                # GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] - y)
+                # GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] - y)
+                # GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] + y)
+                # GL.glVertex2d(self.cursorCoordinate[0] + x, self.cursorCoordinate[1] + y)
+                # GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] + y)
+                # GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] + y)
+                # GL.glVertex2d(self.cursorCoordinate[0] - x, self.cursorCoordinate[1] - y)
+
+                x = self.deltaX * 8
+                y = self.deltaY * 8
+                GL.glVertex2d(newCoords[0] - x, newCoords[1] - y)
+                GL.glVertex2d(newCoords[0] + x, newCoords[1] - y)
+                GL.glVertex2d(newCoords[0] + x, newCoords[1] - y)
+                GL.glVertex2d(newCoords[0] + x, newCoords[1] + y)
+                GL.glVertex2d(newCoords[0] + x, newCoords[1] + y)
+                GL.glVertex2d(newCoords[0] - x, newCoords[1] + y)
+                GL.glVertex2d(newCoords[0] - x, newCoords[1] + y)
+                GL.glVertex2d(newCoords[0] - x, newCoords[1] - y)
 
             else:
                 GL.glColor4f(*self.foreground)
 
+            # # if not self._updateVTrace:
+            # GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
+            # GL.glVertex2d(self.cursorCoordinate[0], self.axisB)
+            # # if not self._updateHTrace:
+            # GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
+            # GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
+
             # if not self._updateVTrace:
-            GL.glVertex2d(self.cursorCoordinate[0], self.axisT)
-            GL.glVertex2d(self.cursorCoordinate[0], self.axisB)
+            GL.glVertex2d(newCoords[0], 1.0)
+            GL.glVertex2d(newCoords[0], 0.0)
             # if not self._updateHTrace:
-            GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
-            GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
+            GL.glVertex2d(0.0, newCoords[1])
+            GL.glVertex2d(1.0, newCoords[1])
 
             GL.glEnd()
 

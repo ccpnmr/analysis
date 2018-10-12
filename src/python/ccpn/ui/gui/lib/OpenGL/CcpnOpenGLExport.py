@@ -247,13 +247,16 @@ class GLExporter():
         self.pixHeight = self.pixWidth * ratio
 
         # scale fonts to appear the correct size
-        self.fontScale = 1.1 * self.pixWidth / self.parent.w
+        self.fontScale = 1.0 * self.pixWidth / self.parent.w            #   1.1
 
         # if too tall then flip the scaling
         if self.pixHeight > (self._report.doc.height - 2 * cm):
             self.pixHeight = self._report.doc.height - (2 * cm)
             self.pixWidth = self.pixHeight / ratio
-            self.fontScale = 1.025 * self.pixHeight / self.parent.h
+            self.fontScale = 1.0 * self.pixHeight / self.parent.h     # 1.025
+
+        self.fontXOffset = 0.75
+        self.fontYOffset = 3.0
 
         # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
         self.displayScale = self.pixHeight / self.parent.h
@@ -1028,7 +1031,8 @@ class GLExporter():
                     # mid = self.parent.axisL + drawString.attribs[0] * (self.parent.axisR - self.parent.axisL) * self.parent.pixelX
                     # newLine = [mid, drawString.attribs[1] + (3 * self.parent.deltaY)]
 
-                    newLine = self._scaleRatioToWindow([drawString.attribs[0] / self.parent.AXIS_MARGINRIGHT, drawString.attribs[1] + (3 * self.parent.deltaY)])
+                    newLine = self._scaleRatioToWindow([(self.fontXOffset + drawString.attribs[0]) / self.parent.AXIS_MARGINRIGHT,
+                                                        drawString.attribs[1] + (self.fontYOffset * self.parent.deltaY)])
 
                     if self.parent.pointVisible(newLine,
                                                 x=self.displayScale * self.rAxisL,
@@ -1055,7 +1059,8 @@ class GLExporter():
                     # mid = self.parent.axisB + drawString.attribs[1] * (self.parent.axisT - self.parent.axisB)
                     # newLine = [drawString.attribs[0] + (0 * self.parent.deltaX), mid]
 
-                    newLine = self._scaleRatioToWindow([drawString.attribs[0], (3 + drawString.attribs[1]) / self.parent.AXIS_MARGINBOTTOM])
+                    newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self.parent.deltaX),
+                                                        (self.fontYOffset + drawString.attribs[1]) / self.parent.AXIS_MARGINBOTTOM])
 
                     if self.parent.pointVisible(newLine,
                                                 x=self.displayScale * self.bAxisL,

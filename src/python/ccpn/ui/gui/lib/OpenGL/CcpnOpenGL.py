@@ -1803,8 +1803,12 @@ class CcpnGLWidget(QOpenGLWidget):
     def _rescaleOverlayText(self):
         if self.stripIDString:
             vertices = self.stripIDString.numVertices
-            offsets = [self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
-                       self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY)]
+
+            # offsets = [self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
+            #            self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY)]
+            offsets = [GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.deltaX,
+                        1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY)]
+
             for pp in range(0, 2 * vertices, 2):
                 self.stripIDString.attribs[pp:pp + 2] = offsets
 
@@ -1835,6 +1839,13 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def between(self, val, l, r):
         return (l - val) * (r - val) <= 0
+
+    def _setViewPortFontScale(self):
+        # set the scale for drawing the overlay text correctly
+        self._axisScale[0:4] = [self.deltaX, self.deltaY, 1.0, 1.0]
+        self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
+        self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0, 1.0, -1.0, 1.0)
+        self.globalGL._shaderProgramTex.setGLUniformMatrix4fv('pTexMatrix', 1, GL.GL_FALSE, self._uPMatrix)
 
     def paintGL(self):
         w = self.w
@@ -1916,9 +1927,11 @@ class CcpnGLWidget(QOpenGLWidget):
 
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
+        self._setViewPortFontScale()
         if self.strip.crosshairVisible:
             self.drawMouseCoords()
 
+        # make the overlay/axis solid
         self.globalGL._shaderProgramTex.setBlendEnabled(0)
         self.drawOverlayText()
         self.drawAxisLabels()
@@ -2254,7 +2267,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.viewports.setViewport(self._currentBottomAxisBarView)
 
                 # self._axisScale[0:4] = [self.pixelX, 1.0, 1.0, 1.0]
-                self._axisScale[0:4] = [1.0 / (self.w - self.AXIS_MARGINRIGHT), 1.0, 1.0, 1.0]
+                self._axisScale[0:4] = [self.deltaX, 1.0, 1.0, 1.0]
 
                 self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
                 self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0.0, 1.0, 0,
@@ -2269,7 +2282,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.viewports.setViewport(self._currentRightAxisBarView)
 
                 # self._axisScale[0:4] = [1.0, self.pixelY, 1.0, 1.0]
-                self._axisScale[0:4] = [1.0, 1.0 / (self.h - self.AXIS_MARGINBOTTOM), 1.0, 1.0]
+                self._axisScale[0:4] = [1.0, self.deltaY, 1.0, 1.0]
 
                 self.globalGL._shaderProgramTex.setGLUniform4fv('axisScale', 1, self._axisScale)
                 self.globalGL._shaderProgramTex.setProjectionAxes(self._uPMatrix, 0, self.AXIS_MARGINRIGHT,
@@ -2668,9 +2681,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._newStripID = True
 
     def drawOverlayText(self, refresh=False):
+        """Draw extra information to the screen
         """
-    draw extra information to the screen
-    """
         # cheat for the moment
         if self._newStripID or self.stripIDString.renderMode == GLRENDERMODE_REBUILD:
             self.stripIDString.renderMode = GLRENDERMODE_DRAW
@@ -2683,8 +2695,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self.stripIDString = GLString(text=self.stripIDLabel,
                                           font=self.globalGL.glSmallFont,
-                                          x=self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
-                                          y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
+                                          # x=self.axisL + (GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.pixelX),
+                                          # y=self.axisT - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.pixelY),
+                                          x=GLDefs.TITLEXOFFSET * self.globalGL.glSmallFont.width * self.deltaX,
+                                          y=1.0 - (GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height * self.deltaY),
                                           color=colour, GLContext=self,
                                           obj=None, blendMode=False)
 
@@ -2695,10 +2709,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if self.AXISLOCKEDBUTTON:
             if self._axisLocked:
-                self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
+                # self._lockStringTrue.setStringOffset((self.axisL, self.axisB))
                 self._lockStringTrue.drawTextArray()
             else:
-                self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
+                # self._lockStringFalse.setStringOffset((self.axisL, self.axisB))
                 self._lockStringFalse.drawTextArray()
 
     def _rescaleRegions(self):
@@ -2835,8 +2849,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._orderedAxes = axes
         try:
             if self._orderedAxes[1] and self._orderedAxes[1].code == 'intensity':
-                self.mouseFormat = " %s: %.3f\n %s: %.4g"
-                self.diffMouseFormat = " d%s: %.3f\n d%s: %.4g"
+                self.mouseFormat = " %s: %.3f\n %s: %.6g"
+                self.diffMouseFormat = " d%s: %.3f\n d%s: %.6g"
             else:
                 self.mouseFormat = " %s: %.2f\n %s: %.2f"
                 self.diffMouseFormat = " d%s: %.2f\n d%s: %.2f"
@@ -2861,6 +2875,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self._updateVTrace = visible
 
     def buildMouseCoords(self, refresh=False):
+
+        def valueToRatio(val, x0, x1):
+            return (val - x0) / (x1 - x0)
+
         if refresh or self._widthsChangedEnough(self.cursorCoordinate, self._mouseCoords, tol=1e-10):
 
             newCoords = self.mouseFormat % (self._axisOrder[0], self.cursorCoordinate[0],
@@ -2868,8 +2886,10 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self.mouseString = GLString(text=newCoords,
                                         font=self.globalGL.glSmallFont,
-                                        x=self.cursorCoordinate[0],
-                                        y=self.cursorCoordinate[1],
+                                        # x=self.cursorCoordinate[0],
+                                        # y=self.cursorCoordinate[1],
+                                        x=valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR),
+                                        y=valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT),
                                         color=self.foreground, GLContext=self,
                                         obj=None)
             self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
@@ -2882,9 +2902,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 self.diffMouseString = GLString(text=diffCoords,
                                                 font=self.globalGL.glSmallFont,
-                                                x=self.cursorCoordinate[0],
-                                                y=self.cursorCoordinate[1] - (
-                                                        self.globalGL.glSmallFont.height * 2.0 * self.pixelY),
+                                                # x=self.cursorCoordinate[0],
+                                                # y=self.cursorCoordinate[1] - (
+                                                #         self.globalGL.glSmallFont.height * 2.0 * self.pixelY),
+                                                x=valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR),
+                                                y=valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT) - (
+                                                        self.globalGL.glSmallFont.height * 2.0 * self.deltaY),
                                                 color=self.foreground, GLContext=self,
                                                 obj=None)
 

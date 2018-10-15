@@ -60,7 +60,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
-    GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS
+    GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 from ccpn.util.Logging import getLogger
@@ -118,8 +118,10 @@ class GLExporter():
         # self.backgroundColour = colors.Color(*self.parent.background[0:3],
         #                                      alpha=alphaClip(self.parent.background[3]))
         self.backgroundColour = colors.Color(*self.params[GLBACKGROUND], alpha=alphaClip(1.0))
-        self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
-                                             alpha=alphaClip(self.parent.foreground[3]))
+        # self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
+        #                                      alpha=alphaClip(self.parent.foreground[3]))
+        self.foregroundColour = colors.Color(*self.params[GLFOREGROUND], alpha=alphaClip(1.0))
+
         self.baseThickness = self.params[GLBASETHICKNESS]
         self.symbolThickness = self.params[GLSYMBOLTHICKNESS]
 

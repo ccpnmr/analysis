@@ -67,7 +67,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, \
-    GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS
+    GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND
 
 
 class ExportStripToFilePopup(ExportDialog):
@@ -203,35 +203,57 @@ class ExportStripToFilePopup(ExportDialog):
                                      grid=(row, 0), direction='h', hAlign='left', spacing=(20, 0))
         self.pageType.set(PAGEPORTRAIT)
 
+        # create a pulldown for the foreground (axes) colour
         row += 1
-        colourFrame = Frame(userFrame, grid=(row, 0), setLayout=True, showBorder=False)
-        Label(colourFrame, text="Background Colour", vAlign='c', hAlign='l', grid=(0, 0))
-        self.colourBox = PulldownList(colourFrame, vAlign='t', grid=(0, 1))
-        self.colourButton = Button(colourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
+        foregroundColourFrame = Frame(userFrame, grid=(row, 0), setLayout=True, showBorder=False)
+        Label(foregroundColourFrame, text="Foreground Colour", vAlign='c', hAlign='l', grid=(0, 0))
+        self.foregroundColourBox = PulldownList(foregroundColourFrame, vAlign='t', grid=(0, 1))
+        self.foregroundColourButton = Button(foregroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
+                                   callback=self._changeForegroundButton, icon='icons/colours')
+
+        # populate initial pulldown from background colour
+        spectrumColourKeys = list(spectrumColours.keys())
+        fillColourPulldown(self.foregroundColourBox, allowAuto=False)
+
+        # set foreground to black
+        self.foregroundColourBox.setCurrentText(spectrumColours['#000000'])
+        self._changeForegroundPulldown(0)
+
+        if self.foregroundColour in spectrumColourKeys:
+            self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
+        else:
+            addNewColourString(self.foregroundColour)
+            fillColourPulldown(self.foregroundColourBox, allowAuto=False)
+            spectrumColourKeys = list(spectrumColours.keys())
+            self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
+
+        self.foregroundColourBox.activated.connect(self._changeForegroundPulldown)
+
+        # create a pulldown for the background colour
+        row += 1
+        backgroundColourFrame = Frame(userFrame, grid=(row, 0), setLayout=True, showBorder=False)
+        Label(backgroundColourFrame, text="Background Colour", vAlign='c', hAlign='l', grid=(0, 0))
+        self.backgroundColourBox = PulldownList(backgroundColourFrame, vAlign='t', grid=(0, 1))
+        self.backgroundColourButton = Button(backgroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
                                    callback=self._changeBackgroundButton, icon='icons/colours')
 
         # populate initial pulldown from background colour
         spectrumColourKeys = list(spectrumColours.keys())
-        fillColourPulldown(self.colourBox, allowAuto=False)
-
-        # if self.current.strip:
-        #     self.backgroundColour = rgbRatioToHex(*self.current.strip._CcpnGLWidget.background[:3])
-        # else:
-        #     self.backgroundColour = spectrumColours[0]
+        fillColourPulldown(self.backgroundColourBox, allowAuto=False)
 
         # set background to white
-        self.colourBox.setCurrentText(spectrumColours['#ffffff'])
+        self.backgroundColourBox.setCurrentText(spectrumColours['#ffffff'])
         self._changeBackgroundPulldown(0)
 
         if self.backgroundColour in spectrumColourKeys:
-            self.colourBox.setCurrentText(spectrumColours[self.backgroundColour])
+            self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
         else:
             addNewColourString(self.backgroundColour)
-            fillColourPulldown(self.colourBox, allowAuto=False)
+            fillColourPulldown(self.backgroundColourBox, allowAuto=False)
             spectrumColourKeys = list(spectrumColours.keys())
-            self.colourBox.setCurrentText(spectrumColours[self.backgroundColour])
+            self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
 
-        self.colourBox.activated.connect(self._changeBackgroundPulldown)
+        self.backgroundColourBox.activated.connect(self._changeBackgroundPulldown)
 
         row += 1
         self.baseThicknessBox = DoubleSpinBoxCompoundWidget(
@@ -269,8 +291,23 @@ class ExportStripToFilePopup(ExportDialog):
 
         self.setMinimumSize(self.sizeHint())
 
+    def _changeForegroundPulldown(self, int):
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.foregroundColourBox.currentText())]
+        if newColour:
+            self.foregroundColour = newColour
+
+    def _changeForegroundButton(self, int):
+        dialog = ColourDialog(self)
+
+        newColour = dialog.getColor()
+        if newColour:
+            addNewColour(newColour)
+            fillColourPulldown(self.colourBox, allowAuto=False)
+            self.colourBox.setCurrentText(spectrumColours[newColour.name()])
+            self.foregroundColour = newColour.name()
+
     def _changeBackgroundPulldown(self, int):
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.colourBox.currentText())]
+        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(self.backgroundColourBox.currentText())]
         if newColour:
             self.backgroundColour = newColour
 
@@ -500,6 +537,7 @@ class ExportStripToFilePopup(ExportDialog):
         # prType = EXPORTTYPES[prIndex]
         prType = self.exportType.get()
         pageType = self.pageType.get()
+        foregroundColour = hexToRgbRatio(self.foregroundColour)
         backgroundColour = hexToRgbRatio(self.backgroundColour)
         baseThickness = self.baseThicknessBox.getValue()
         symbolThickness = self.application.preferences.general.symbolThickness
@@ -512,6 +550,7 @@ class ExportStripToFilePopup(ExportDialog):
                       GLWIDGET: strip._CcpnGLWidget,
                       GLPRINTTYPE: prType,
                       GLPAGETYPE: pageType,
+                      GLFOREGROUND: foregroundColour,
                       GLBACKGROUND: backgroundColour,
                       GLBASETHICKNESS: baseThickness,
                       GLSYMBOLTHICKNESS: symbolThickness,

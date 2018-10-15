@@ -52,6 +52,9 @@ from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 # TBD: for now ignore fact that apiSpectrumView can override contour colour and/or contour levels
 
 
+_NEWCOMPILEDCONTOURS = False
+
+
 #TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels
 # attributes
 def _getLevels(count:int, base:float, factor:float)->list:
@@ -875,104 +878,106 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #for position, dataArray in self.getPlaneData(guiStrip):
     posContoursAll = negContoursAll = None
 
-    for position, dataArray in self._getPlaneData():
-      if doPosLevels:
-        posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-        #print("posContours", posContours)
-        if posContoursAll is None:
-          posContoursAll = posContours
-        else:
-          for n, contourData in enumerate(posContours):
-            if len(posContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
-              posContoursAll.append(contourData)
-            else:
-              posContoursAll[n].extend(contourData)
-            # print(contourData)
+    if _NEWCOMPILEDCONTOURS:
+      # new code for the recompiled glList
+      test = None
+      dataArrays = tuple()
+      for position, dataArray in self._getPlaneData():
+        dataArrays += (dataArray,)
 
-      if doNegLevels:
-        negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
-        #print("negContours", len(negContours))
-        if negContoursAll is None:
-          negContoursAll = negContours
-        else:
-          for n, contourData in enumerate(negContours):
-            if len(negContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
-              negContoursAll.append(contourData)
-            else:
-              negContoursAll[n].extend(contourData)
-            # print(contourData)
+      test = Contourer2d.contourerGLList(dataArrays,
+                                         posLevelsArray,
+                                         negLevelsArray,
+                                         np.array(self.posColour, dtype=np.float32),
+                                         np.array(self.negColour, dtype=np.float32))
 
-    glList.clearArrays()
+      glList.clearArrays()
 
-    if posContoursAll:
-      for n, contourData in enumerate(posContoursAll):
-        for contour in contourData:
-          glList.numVertices += len(contour)
+      if test and test[1] > 0:
+        glList.numVertices = test[1]
+        glList.indices = test[2]
+        glList.vertices = test[3]
+        glList.colors = test[4]
 
-    if negContoursAll:
-      for n, contourData in enumerate(negContoursAll):
-        for contour in contourData:
-          glList.numVertices += len(contour)
+    else:
+      for position, dataArray in self._getPlaneData():
+        if doPosLevels:
+          posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
+          #print("posContours", posContours)
+          if posContoursAll is None:
+            posContoursAll = posContours
+          else:
+            for n, contourData in enumerate(posContours):
+              if len(posContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
+                posContoursAll.append(contourData)
+              else:
+                posContoursAll[n].extend(contourData)
+              # print(contourData)
 
-    glList.vertices = np.empty(glList.numVertices, dtype=np.float32)
-    glList.indices = np.empty(glList.numVertices, dtype=np.uint32)
-    glList.colors = np.empty(2*glList.numVertices, dtype=np.float32)
+        if doNegLevels:
+          negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
+          #print("negContours", len(negContours))
+          if negContoursAll is None:
+            negContoursAll = negContours
+          else:
+            for n, contourData in enumerate(negContours):
+              if len(negContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
+                negContoursAll.append(contourData)
+              else:
+                negContoursAll[n].extend(contourData)
+              # print(contourData)
 
-    thisIndex = 0
-    thisVertex = 0
-    thisColor = 0
-    indexCount = 0
+      glList.clearArrays()
 
-    if posContoursAll:
-      for n, contourData in enumerate(posContoursAll):
-        for contour in contourData:
-          count = len(contour)
-          thisNumVertices = count // 2
-          colCount = 2*count
+      if posContoursAll:
+        for n, contourData in enumerate(posContoursAll):
+          for contour in contourData:
+            glList.numVertices += len(contour)
 
-          glList.indices[thisIndex:thisIndex+count] = [(((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count)]
-          glList.vertices[thisVertex:thisVertex+count] = contour
-          glList.colors[thisColor:thisColor+colCount] = self.posColour*thisNumVertices
-          indexCount += thisNumVertices
-          thisIndex += count
-          thisVertex += count
-          thisColor += colCount
+      if negContoursAll:
+        for n, contourData in enumerate(negContoursAll):
+          for contour in contourData:
+            glList.numVertices += len(contour)
 
-    if negContoursAll:
-      for n, contourData in enumerate(negContoursAll):
-        for contour in contourData:
+      glList.vertices = np.empty(glList.numVertices, dtype=np.float32)
+      glList.indices = np.empty(glList.numVertices, dtype=np.uint32)
+      glList.colors = np.empty(2*glList.numVertices, dtype=np.float32)
 
-          count = len(contour)
-          thisNumVertices = count // 2
-          colCount = 2*count
+      thisIndex = 0
+      thisVertex = 0
+      thisColor = 0
+      indexCount = 0
 
-          glList.indices[thisIndex:thisIndex+count] = [(((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count)]
-          glList.vertices[thisVertex:thisVertex+count] = contour
-          glList.colors[thisColor:thisColor+colCount] = self.negColour*thisNumVertices
-          indexCount += thisNumVertices
-          thisIndex += count
-          thisVertex += count
-          thisColor += colCount
+      if posContoursAll:
+        for n, contourData in enumerate(posContoursAll):
+          for contour in contourData:
+            count = len(contour)
+            thisNumVertices = count // 2
+            colCount = 2*count
 
-    # # new code for the recompiled glList
-    # test = None
-    # dataArrays = tuple()
-    # for position, dataArray in self._getPlaneData():
-    #   dataArrays += (dataArray,)
-    #
-    # test = Contourer2d.contourerGLList(dataArrays,
-    #                                    posLevelsArray,
-    #                                    negLevelsArray,
-    #                                    np.array(self.posColour, dtype=np.float32),
-    #                                    np.array(self.negColour, dtype=np.float32))
-    #
-    # glList.clearArrays()
-    #
-    # if test and test[1] > 0:
-    #   glList.numVertices = test[1]
-    #   glList.indices = test[2]
-    #   glList.vertices = test[3]
-    #   glList.colors = test[4]
+            glList.indices[thisIndex:thisIndex+count] = [(((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count)]
+            glList.vertices[thisVertex:thisVertex+count] = contour
+            glList.colors[thisColor:thisColor+colCount] = self.posColour*thisNumVertices
+            indexCount += thisNumVertices
+            thisIndex += count
+            thisVertex += count
+            thisColor += colCount
+
+      if negContoursAll:
+        for n, contourData in enumerate(negContoursAll):
+          for contour in contourData:
+
+            count = len(contour)
+            thisNumVertices = count // 2
+            colCount = 2*count
+
+            glList.indices[thisIndex:thisIndex+count] = [(((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count)]
+            glList.vertices[thisVertex:thisVertex+count] = contour
+            glList.colors[thisColor:thisColor+colCount] = self.negColour*thisNumVertices
+            indexCount += thisNumVertices
+            thisIndex += count
+            thisVertex += count
+            thisColor += colCount
 
   def _releaseDisplayLists(self, displayLists):
 

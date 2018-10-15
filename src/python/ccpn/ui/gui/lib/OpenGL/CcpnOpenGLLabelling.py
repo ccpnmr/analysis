@@ -384,6 +384,81 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                        GLContext=self._GLParent,
                                        obj=obj))
 
+    def _insertLabel(self, spectrumView, objListView, stringList, obj):
+        """insert a new label to the end of the list
+        """
+        spectrum = spectrumView.spectrum
+        spectrumFrequency = spectrum.spectrometerFrequencies
+        # pls = peakListView.peakList
+        pls = self.objectList(objListView)
+
+        symbolWidth = self.strip.symbolSize / 2.0
+
+        p0 = [0.0] * 2  # len(self.axisOrder)
+        lineWidths = [None] * 2  # len(self.axisOrder)
+        frequency = [0.0] * 2  # len(self.axisOrder)
+        axisCount = 0
+        for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+            for pp, ppCode in enumerate(obj.axisCodes):
+
+                if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+                    if ppCode[0] == psCode[0]:
+                        p0[ps] = obj.position[pp]
+                        lineWidths[ps] = obj.lineWidths[pp]
+                        frequency[ps] = spectrumFrequency[pp]
+                        axisCount += 1
+
+                elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+                    if ppCode == psCode:
+                        p0[ps] = obj.position[pp]
+                        lineWidths[ps] = obj.lineWidths[pp]
+                        frequency[ps] = spectrumFrequency[pp]
+                        axisCount += 1
+
+        if None in p0:
+            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+            return
+
+        if lineWidths[0] and lineWidths[1]:
+            # draw 24 connected segments
+            r = 0.5 * lineWidths[0] / frequency[0]
+            w = 0.5 * lineWidths[1] / frequency[1]
+        else:
+            r = symbolWidth
+            w = symbolWidth
+
+        if axisCount == 2:
+            # TODO:ED display the required peaks
+            strip = spectrumView.strip
+            _isInPlane = self.objIsInPlane(strip, obj)
+            if not _isInPlane:
+                _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
+                fade = GLDefs.FADE_FACTOR
+            else:
+                _isInFlankingPlane = None
+                fade = 1.0
+
+            if not _isInPlane and not _isInFlankingPlane:
+                return
+
+            if self._isSelected(obj):
+                listCol = self._GLParent.highlightColour[:3]
+            else:
+                listCol = getAutoColourRgbRatio(pls.textColour, pls.spectrum,
+                                                self.autoColour,
+                                                getColours()[CCPNGLWIDGET_FOREGROUND])
+
+            text = self.getLabelling(obj, self.strip.peakLabelling)
+
+            stringList.append(GLString(text=text,
+                                       font=self._GLParent.globalGL.glSmallFont if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                       x=p0[0], y=p0[1],
+                                       ox=r, oy=w,
+                                       # x=self._screenZero[0], y=self._screenZero[1]
+                                       color=(*listCol, fade),
+                                       GLContext=self._GLParent,
+                                       obj=obj))
+
     def _removeSymbol(self, spectrumView, objListView, delObj):
         """Remove a symbol from the list
         """
@@ -1123,6 +1198,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if self.strip.isDeleted:
             return
 
+        return
+
         # list through the valid peakListViews attached to the strip - including undeleted
         for spectrumView in self.strip.spectrumViews:
             # for peakListView in spectrumView.peakListViews:
@@ -1141,46 +1218,46 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                     self._buildSymbols(spectrumView, objListView)
 
-    def _buildLabels(self, spectrumView, objListView):
-        # spectrum = spectrumView.spectrum
-
-        if objListView not in self._GLLabels.keys():
-            self._GLLabels[objListView] = GLLabelArray(GLContext=self,
-                                                       spectrumView=spectrumView,
-                                                       objListView=objListView)
-
-        drawList = self._GLLabels[objListView]
-        if drawList.renderMode == GLRENDERMODE_REBUILD:
-            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-
-            # drawList.clearArrays()
-            drawList.stringList = []
-
-            # if spectrumView in self._threads:
-            #   self._threads[spectrumView].terminate()
-
-            buildQueue = (spectrumView, objListView, drawList, self._GLParent)
-            buildPeaks = Thread(name=str(self.strip.pid + spectrumView.pid),
-                                target=self._threadBuildLabels,
-                                args=buildQueue)
-            # self._threads[spectrumView] = buildPeaks
-            buildPeaks.start()
-            return
-
-            # drawList.clearArrays()
-            # drawList.stringList = []
-            #
-            # # symbolWidth = self._parent.symbolSize / 2.0
-            #
-            # pls = peakListView.peakList
-            # # spectrumFrequency = spectrum.spectrometerFrequencies
-            #
-            # for obj in self.objects(pls):
-            #     self._appendLabel(spectrumView, peakListView, drawList.stringList, obj)
-
-        elif drawList.renderMode == GLRENDERMODE_RESCALE:
-            drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
-            self._rescaleLabels(spectrumView, objListView, drawList)
+    # def _buildLabels(self, spectrumView, objListView):
+    #     # spectrum = spectrumView.spectrum
+    #
+    #     if objListView not in self._GLLabels.keys():
+    #         self._GLLabels[objListView] = GLLabelArray(GLContext=self,
+    #                                                    spectrumView=spectrumView,
+    #                                                    objListView=objListView)
+    #
+    #     drawList = self._GLLabels[objListView]
+    #     if drawList.renderMode == GLRENDERMODE_REBUILD:
+    #         drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+    #
+    #         # drawList.clearArrays()
+    #         drawList.stringList = []
+    #
+    #         # if spectrumView in self._threads:
+    #         #   self._threads[spectrumView].terminate()
+    #
+    #         buildQueue = (spectrumView, objListView, drawList, self._GLParent)
+    #         buildPeaks = Thread(name=str(self.strip.pid + spectrumView.pid),
+    #                             target=self._threadBuildLabels,
+    #                             args=buildQueue)
+    #         # self._threads[spectrumView] = buildPeaks
+    #         buildPeaks.start()
+    #         return
+    #
+    #         # drawList.clearArrays()
+    #         # drawList.stringList = []
+    #         #
+    #         # # symbolWidth = self._parent.symbolSize / 2.0
+    #         #
+    #         # pls = peakListView.peakList
+    #         # # spectrumFrequency = spectrum.spectrometerFrequencies
+    #         #
+    #         # for obj in self.objects(pls):
+    #         #     self._appendLabel(spectrumView, peakListView, drawList.stringList, obj)
+    #
+    #     elif drawList.renderMode == GLRENDERMODE_RESCALE:
+    #         drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
+    #         self._rescaleLabels(spectrumView, objListView, drawList)
 
     def buildLabels(self):
         if self.strip.isDeleted:
@@ -1243,7 +1320,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         # buildPeaks.apply_async(self._threadBuildAllPeakListLabels,
         #                         args=(viewList, self))
 
-        buildPeaks.start()
+        # buildPeaks.start()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Threads

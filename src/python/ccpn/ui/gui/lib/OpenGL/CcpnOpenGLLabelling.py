@@ -575,11 +575,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if _isInPlane or _isInFlankingPlane:
                     if self._isSelected(obj):
                         _selected = True
-                        drawList.indices = np.concatenate((drawList.indices, [index, index + 1, index + 2, index + 3,
+                        drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3,
                                                                         index, index + 2, index + 2, index + 1,
-                                                                        index, index + 3, index + 3, index + 1]))
+                                                                        index, index + 3, index + 3, index + 1])
                     else:
-                        drawList.indices = np.concatenate((drawList.indices, [index, index + 1, index + 2, index + 3]))
+                        drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
 
                 # add extra indices for the multiplet
                 extraIndices = self.appendExtraIndices(drawList, index + 4, obj)

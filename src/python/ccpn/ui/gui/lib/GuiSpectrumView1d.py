@@ -172,7 +172,13 @@ class GuiSpectrumView1d(GuiSpectrumView):
     point = []
     for n, pos in enumerate(position): # n = 0 is x, n = 1 is y, etc.
       if n != 1:
-        valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+
+        try:
+          valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+        except:
+          # skip if the dimension doesn't exist
+          break
+
         if dataDim:
           if n == 0:
             xDataDim = dataDim

@@ -374,9 +374,16 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     inRange = True
     point = len(position) * [0]
+
     for n, pos in enumerate(position): # n = 0 is x, n = 1 is y, etc.
       # spectrumPos, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
-      valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+
+      try:
+        valuePerPoint, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(n)
+      except:
+        # skip if the dimension doesn't exist
+        break
+
       if dataDim:
         if n == 0:
           xDataDim = dataDim
@@ -395,7 +402,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             break
         pnt = (dataDim.primaryDataDimRef.valueToPoint(pos)-1) % totalPointCount
         pnt += (dataDim.pointOffset if hasattr(dataDim, "pointOffset") else 0)
-        point[dataDim.dim-1] = pnt
+
+        try:
+          point[dataDim.dim-1] = pnt
+        except Exception as es:
+          pass
 
     return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints
 

@@ -52,7 +52,7 @@ from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 # TBD: for now ignore fact that apiSpectrumView can override contour colour and/or contour levels
 
 
-_NEWCOMPILEDCONTOURS = False
+_NEWCOMPILEDCONTOURS = True
 
 
 #TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels

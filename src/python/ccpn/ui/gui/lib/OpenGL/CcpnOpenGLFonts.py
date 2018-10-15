@@ -32,6 +32,7 @@ import numpy as np
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray, GLRENDERMODE_DRAW
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import LEFTBORDER, RIGHTBORDER, TOPBORDER, BOTTOMBORDER
 
+
 try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -57,6 +58,7 @@ GlyphPX0 = 'px0'
 GlyphPY0 = 'py0'
 GlyphPX1 = 'px1'
 GlyphPY1 = 'py1'
+
 
 class CcpnGLFont():
     def __init__(self, fileName=None, base=0, fontTransparency=None, activeTexture=0):
@@ -121,14 +123,14 @@ class CcpnGLFont():
                             # TODO:ED okay for now, but need to check for rounding errors
 
                             # calculate the coordinated within the texture
-                            x = a0                                  # +0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
-                            y = b0                                  # -0.005           # self.fontGlyph[chrNum][GlyphYpos])
-                            px = e0                                 # self.fontGlyph[chrNum][GlyphXoffset]
-                            py = f0                                 # self.fontGlyph[chrNum][GlyphYoffset]
-                            w = c0 + LEFTBORDER + RIGHTBORDER       # -1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
-                            h = d0 + TOPBORDER + BOTTOMBORDER       # + 0.5  # self.fontGlyph[chrNum][GlyphHeight]+1
-                            gw = g0                                 # self.fontGlyph[chrNum][GlyphOrigW]
-                            gh = h0                                 # self.fontGlyph[chrNum][GlyphOrigH]
+                            x = a0  # +0.5           # self.fontGlyph[chrNum][GlyphXpos])   # try +0.5 for centre of texel
+                            y = b0  # -0.005           # self.fontGlyph[chrNum][GlyphYpos])
+                            px = e0  # self.fontGlyph[chrNum][GlyphXoffset]
+                            py = f0  # self.fontGlyph[chrNum][GlyphYoffset]
+                            w = c0 + LEFTBORDER + RIGHTBORDER  # -1           # self.fontGlyph[chrNum][GlyphWidth]+1       # if 0.5 above, remove the +1
+                            h = d0 + TOPBORDER + BOTTOMBORDER  # + 0.5  # self.fontGlyph[chrNum][GlyphHeight]+1
+                            gw = g0  # self.fontGlyph[chrNum][GlyphOrigW]
+                            gh = h0  # self.fontGlyph[chrNum][GlyphOrigH]
 
                             # coordinates in the texture
                             self.fontGlyph[chrNum][GlyphTX0] = x * dx
@@ -228,10 +230,10 @@ class GLString(GLVertexArray):
         self.font = font
         self.object = obj
         self.pid = obj.pid if hasattr(obj, 'pid') else None
-        self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
-        self.indices = np.zeros((len(text) * 6,), dtype=np.uint32)
-        self.colors = np.zeros((len(text) * 4, 4), dtype=np.float32)
-        self.texcoords = np.zeros((len(text) * 4, 2), dtype=np.float32)
+        self.vertices = np.empty((len(text) * 4, 2), dtype=np.float32)
+        self.indices = np.zeros(len(text) * 6, dtype=np.uint32)
+        self.colors = np.empty((len(text) * 4, 4), dtype=np.float32)
+        self.texcoords = np.empty((len(text) * 4, 2), dtype=np.float32)
         # self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
         # self.offsets = np.zeros((len(text) * 4, 2), dtype=np.float32)
         self.indexOffset = 0
@@ -264,7 +266,6 @@ class GLString(GLVertexArray):
 
                     kerning = font.get_kerning(charCode, prev)
 
-                    # TODO:ED check that these are correct
                     x0 = penX + glyph[GlyphPX0] + kerning  # penX + glyph.offset[0] + kerning
                     y0 = penY + glyph[GlyphPY0]  # penY + glyph.offset[1]
                     x1 = penX + glyph[GlyphPX1] + kerning  # x0 + glyph.size[0]
@@ -280,18 +281,21 @@ class GLString(GLVertexArray):
                     # xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
                     # xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
 
-                    index = i * 4
-                    indices = [index, index + 1, index + 2, index, index + 2, index + 3]
-                    vertices = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
-                    texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
-                    colors = [color, ] * 4
+                    # index = i * 4
+                    i4 = i * 4
+                    i6 = i * 6
+                    # indices = [index, index + 1, index + 2, index, index + 2, index + 3]
+                    # vertices = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
+                    # texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
+                    # colors = [color, ] * 4
+
                     # attribs = [[x, y], [x, y], [x, y], [x, y]]
                     # offsets = [[x, y], [x, y], [x, y], [x, y]]
 
-                    self.vertices[i * 4:i * 4 + 4] = vertices
-                    self.indices[i * 6:i * 6 + 6] = indices
-                    self.texcoords[i * 4:i * 4 + 4] = texcoords
-                    self.colors[i * 4:i * 4 + 4] = colors
+                    self.vertices[i4:i4 + 4] = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
+                    self.indices[i6:i6 + 6] = [i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3]
+                    self.texcoords[i4:i4 + 4] = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
+                    self.colors[i4:i4 + 4] = [color, ] * 4
                     # self.attribs[i * 4:i * 4 + 4] = attribs
                     # self.offsets[i * 4:i * 4 + 4] = offsets
 

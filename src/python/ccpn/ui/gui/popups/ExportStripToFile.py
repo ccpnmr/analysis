@@ -302,8 +302,9 @@ class ExportStripToFilePopup(ExportDialog):
         newColour = dialog.getColor()
         if newColour:
             addNewColour(newColour)
-            fillColourPulldown(self.colourBox, allowAuto=False)
-            self.colourBox.setCurrentText(spectrumColours[newColour.name()])
+            fillColourPulldown(self.foregroundColourBox, allowAuto=False)
+            fillColourPulldown(self.backgroundColourBox, allowAuto=False)
+            self.foregroundColourBox.setCurrentText(spectrumColours[newColour.name()])
             self.foregroundColour = newColour.name()
 
     def _changeBackgroundPulldown(self, int):
@@ -317,8 +318,9 @@ class ExportStripToFilePopup(ExportDialog):
         newColour = dialog.getColor()
         if newColour:
             addNewColour(newColour)
-            fillColourPulldown(self.colourBox, allowAuto=False)
-            self.colourBox.setCurrentText(spectrumColours[newColour.name()])
+            fillColourPulldown(self.backgroundColourBox, allowAuto=False)
+            fillColourPulldown(self.foregroundColourBox, allowAuto=False)
+            self.backgroundColourBox.setCurrentText(spectrumColours[newColour.name()])
             self.backgroundColour = newColour.name()
 
     def _changePulldown(self, int):

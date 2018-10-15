@@ -196,7 +196,7 @@ class Gui(Ui):
         project = self.application.project
         self.application.experimentClassifications = getExperimentClassifications(project)
 
-        sys.stderr.write('==> Gui interface is ready\n')
+        # sys.stderr.write('==> Gui interface is ready\n')
 
         self.mainWindow.show()
         QtWidgets.QApplication.setActiveWindow(self.mainWindow)

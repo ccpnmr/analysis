@@ -86,7 +86,7 @@ class Ui:
         # checking the registration; need to have the app running, but before the splashscreen, as it will hang
         # in case the popup is needed.
         # We want to give some feedback; sometimes this takes a while (e.g. poor internet)
-        sys.stderr.write('==> Checking registration ... \n')
+        # sys.stderr.write('==> Checking registration ... \n')
         sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
         if not self._isRegistered:
 
@@ -97,9 +97,9 @@ class Ui:
                 sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
                 return False
 
-        sys.stderr.write('==> Registered to: %s (%s)\n' %
-                         (self.application._registrationDict.get('name'),
-                          self.application._registrationDict.get('organisation')))
+        # sys.stderr.write('==> Registered to: %s (%s)\n' %
+        #                  (self.application._registrationDict.get('name'),
+        #                   self.application._registrationDict.get('organisation')))
         Register.updateServer(self.application._registrationDict, self.application.applicationVersion)
 
         return True
@@ -122,7 +122,7 @@ class Ui:
 
         updateAgent = UpdateAgent(applicationVersion)
         numUpdates = updateAgent.checkNumberUpdates()
-        sys.stderr.write('==> Updates available: %s\n' % str(numUpdates))
+        # sys.stderr.write('==> Updates available: %s\n' % str(numUpdates))
 
         if numUpdates:
             self._execUpdates()

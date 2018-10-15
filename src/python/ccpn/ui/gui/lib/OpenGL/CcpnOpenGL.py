@@ -133,7 +133,7 @@ UNITS = [UNITS_PPM, UNITS_HZ, UNITS_POINT]
 class CcpnGLWidget(QOpenGLWidget):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
     """
-    AXIS_MARGINRIGHT = 45
+    AXIS_MARGINRIGHT = 50
     AXIS_MARGINBOTTOM = 25
     AXIS_LINE = 7
     AXIS_OFFSET = 3
@@ -586,9 +586,9 @@ class CcpnGLWidget(QOpenGLWidget):
             yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
 
             # set to nD limits to twice the width of the spectrum and a few data points
-            self._minXRange = min(self._minXRange, 3.0 * (fx0 - fx1) / self._spectrumValues[0].totalPointCount)
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / self._spectrumValues[0].totalPointCount)
             self._maxXRange = max(self._maxXRange, (fx0 - fx1))
-            self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self._spectrumValues[1].totalPointCount)
+            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fy0 - fy1) / self._spectrumValues[1].totalPointCount)
             self._maxYRange = max(self._maxYRange, (fy0 - fy1))
 
         else:
@@ -599,7 +599,7 @@ class CcpnGLWidget(QOpenGLWidget):
             yScale = dy * dyAF / 1.0
 
             # set to 1D limits to twice the width of the spectrum and the intensity limit
-            self._minXRange = min(self._minXRange, 3.0 * (fx0 - fx1) / max(self._spectrumValues[0].totalPointCount, self.SPECTRUMXZOOM))
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / max(self._spectrumValues[0].totalPointCount, self.SPECTRUMXZOOM))
             self._maxXRange = max(self._maxXRange, (fx0 - fx1))
             # self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self.SPECTRUMYZOOM)
             self._minYRange = min(self._minYRange, self._intensityLimit)

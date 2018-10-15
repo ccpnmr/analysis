@@ -77,6 +77,7 @@ class CcpnGLFont():
 
         self.width = 0
         self.height = 0
+        self.spaceWidth = 0
         self.activeTexture = GL.GL_TEXTURE0 + activeTexture
         self.activeTextureNum = activeTexture
         self.fontTransparency = fontTransparency
@@ -145,6 +146,10 @@ class CcpnGLFont():
                                 # use 'A' for the referencing the tab size
                                 self.width = gw
                                 self.height = gh
+
+                            if chrNum == 32:
+                                # store the width of the space character
+                                self.spaceWidth = gw
 
                     else:
                         exitDims = True
@@ -252,7 +257,10 @@ class GLString(GLVertexArray):
                 elif (c == 9):  # tab
                     penX = penX + 4 * font.width
 
-                elif (c >= 32):
+                elif (c == 32):  # space
+                    penX += font.spaceWidth
+
+                elif (c > 32):  # other visible characters
 
                     kerning = font.get_kerning(charCode, prev)
 

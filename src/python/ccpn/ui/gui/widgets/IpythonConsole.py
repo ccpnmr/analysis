@@ -114,6 +114,8 @@ class IpythonConsole(Widget, Base):
 
         self._startChannels()  # this is important, otherwise the console does't run anything
 
+        # hide this widget, it may be visible before the pythonConsoleModule has been instantiated
+        self.hide()
 
     def setProject(self, project):
       self.project = project

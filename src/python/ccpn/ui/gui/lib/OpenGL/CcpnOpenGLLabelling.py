@@ -2070,7 +2070,8 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
         cols = getAutoColourRgbRatio(multiplet.multipletList.lineColour, multiplet.multipletList.spectrum, self.autoColour,
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
-        posList = [p0]
+        # posList = [p0]
+        posList = p0
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
             p1 = [0.0] * 2  # len(self.axisOrder)
@@ -2094,18 +2095,21 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
                 getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
                 continue
 
-            posList.append(p1)
+            # posList.append(p1)
+            posList += p1               # append p1 to the end
 
-        newVertices = makeIterableList(posList)
+        # newVertices = makeIterableList(posList)
+        # numVertices = len(newVertices) // 2
+        # drawList.vertices = np.append(drawList.vertices, newVertices)
 
-        numVertices = len(newVertices) // 2
-        drawList.vertices = np.append(drawList.vertices, newVertices)
+        numVertices = len(posList) // 2
+        drawList.vertices = np.append(drawList.vertices, posList)
 
         drawList.colors = np.append(drawList.colors, [*cols, fade] * numVertices)
         # drawList.colors = np.append(drawList.colors, colour * numVertices)
 
-        attribs = makeIterableList([p0 * numVertices])
-        drawList.attribs = np.append(drawList.attribs, attribs)
+        # attribs = makeIterableList([p0 * numVertices])
+        drawList.attribs = np.append(drawList.attribs, p0 * numVertices)
 
         return numVertices
 

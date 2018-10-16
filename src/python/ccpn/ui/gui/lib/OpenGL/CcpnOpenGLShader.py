@@ -85,8 +85,8 @@ class ShaderProgram(object):
 
         oa = 2.0 / (right - left)               #if abs(right-left) > 1.0e-7 else 1.0
         ob = 2.0 / (top - bottom)               #if abs(top-bottom) > 1.0e-7 else 1.0
-        oc = -1.0                               #-2.0 / (far - near)                #if abs(far-near) > 1.0e-7 else 1.0
-        od = 0.0                                #-(far + near) / (far - near)       #if abs(far-near) > 1.0e-7 else 0.0
+        oc = -2.0 / (far - near)                #if abs(far-near) > 1.0e-7 else 1.0
+        od = -(far + near) / (far - near)       #if abs(far-near) > 1.0e-7 else 0.0
         oe = -(top + bottom) / (top - bottom)   #if abs(top-bottom) > 1.0e-7 else 0.0
         og = -(right + left) / (right - left)   #if abs(right-left) > 1.0e-7 else 0.0
         # orthographic
@@ -101,10 +101,10 @@ class ShaderProgram(object):
         #   viewport * NDC_cooord = world_coord
         oa = (right - left) / 2.0               #if abs(right-left) > 1.0e-7 else 1.0
         ob = (top - bottom) / 2.0               #if abs(top-bottom) > 1.0e-7 else 1.0
-        oc = 1.0                                #(far - near) / 2.0                 #if abs(far-near) > 1.0e-7 else 1.0
+        oc = (far - near) / 2.0                 #if abs(far-near) > 1.0e-7 else 1.0
         og = (right + left) / 2.0
         oe = (top + bottom) / 2.0
-        od = 0.0                                #(near + far) / 2.0
+        od = (near + far) / 2.0
         # orthographic
         # viewMatrix[0:16] = [oa, 0.0, 0.0,  0.0,
         #                     0.0,  ob, 0.0,  0.0,

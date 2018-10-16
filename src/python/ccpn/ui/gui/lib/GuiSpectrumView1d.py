@@ -283,7 +283,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
     glList.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
-    glList.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+    glList.vertices = np.zeros(numVertices * 2, dtype=np.float32)
     glList.vertices[::2] = self.spectrum.positions
     glList.vertices[1::2] = self.spectrum.intensities
     pass

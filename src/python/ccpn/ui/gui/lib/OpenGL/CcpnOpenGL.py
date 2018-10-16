@@ -3072,7 +3072,7 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum.numVertices = numVertices + 2
             hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
-            hSpectrum.vertices = np.zeros((hSpectrum.numVertices * 2), dtype=np.float32)
+            hSpectrum.vertices = np.zeros(hSpectrum.numVertices * 2, dtype=np.float32)
 
             x = np.append(x, [xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
                               xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)])
@@ -3127,7 +3127,7 @@ class CcpnGLWidget(QOpenGLWidget):
             vSpectrum.numVertices = numVertices + 2
             vSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             vSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
-            vSpectrum.vertices = np.zeros((vSpectrum.numVertices * 2), dtype=np.float32)
+            vSpectrum.vertices = np.zeros(vSpectrum.numVertices * 2, dtype=np.float32)
 
             y = np.append(y, [yDataDim.primaryDataDimRef.pointToValue(yMaxFrequency + 1),
                               yDataDim.primaryDataDimRef.pointToValue(yMinFrequency)])
@@ -3190,7 +3190,7 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum.indices = numVertices
             hSpectrum.numVertices = numVertices
             hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
-            hSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+            hSpectrum.vertices = np.zeros(numVertices * 2, dtype=np.float32)
             hSpectrum.vertices[::2] = x
             hSpectrum.vertices[1::2] = y
             hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
@@ -3242,7 +3242,7 @@ class CcpnGLWidget(QOpenGLWidget):
             vSpectrum.indices = numVertices
             vSpectrum.numVertices = numVertices
             vSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
-            vSpectrum.vertices = np.zeros((numVertices * 2), dtype=np.float32)
+            vSpectrum.vertices = np.zeros(numVertices * 2, dtype=np.float32)
             vSpectrum.vertices[::2] = x
             vSpectrum.vertices[1::2] = y
             vSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)

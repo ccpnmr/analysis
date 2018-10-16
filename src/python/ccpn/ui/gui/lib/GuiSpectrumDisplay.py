@@ -808,8 +808,10 @@ class GuiSpectrumDisplay(CcpnModule):
       for strip in strips[:-1]:
         strip.setMinimumWidth(currentWidth)
       strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
+      self.stripFrame.setMinimumWidth(currentWidth + AXIS_WIDTH)
     else:
       strips[0].setMinimumWidth(currentWidth)
+      self.stripFrame.setMinimumWidth(currentWidth)
 
     self.stripFrame.show()
 
@@ -823,8 +825,10 @@ class GuiSpectrumDisplay(CcpnModule):
       for strip in strips[:-1]:
         strip.setMinimumWidth(currentWidth)
       strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
+      self.stripFrame.setMinimumWidth(currentWidth + AXIS_WIDTH)
     else:
       strips[0].setMinimumWidth(currentWidth)
+      self.stripFrame.setMinimumWidth(currentWidth)
 
     self.stripFrame.show()
 

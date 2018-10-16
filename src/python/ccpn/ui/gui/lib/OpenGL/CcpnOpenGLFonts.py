@@ -230,10 +230,17 @@ class GLString(GLVertexArray):
         self.font = font
         self.object = obj
         self.pid = obj.pid if hasattr(obj, 'pid') else None
-        self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
+
+        # self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
+        # self.indices = np.zeros(len(text) * 6, dtype=np.uint32)
+        # self.colors = np.empty((len(text) * 4, 4), dtype=np.float32)
+        # self.texcoords = np.empty((len(text) * 4, 2), dtype=np.float32)
+
+        self.vertices = np.zeros(len(text) * 8, dtype=np.float32)
         self.indices = np.zeros(len(text) * 6, dtype=np.uint32)
-        self.colors = np.empty((len(text) * 4, 4), dtype=np.float32)
-        self.texcoords = np.empty((len(text) * 4, 2), dtype=np.float32)
+        self.colors = np.empty(len(text) * 16, dtype=np.float32)
+        self.texcoords = np.empty(len(text) * 8, dtype=np.float32)
+
         # self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
         # self.offsets = np.zeros((len(text) * 4, 2), dtype=np.float32)
         self.indexOffset = 0
@@ -256,7 +263,8 @@ class GLString(GLVertexArray):
                     #   vt[1] = vt[1] + font.height
 
                     # occasional strange - RuntimeWarning: invalid value encountered in add
-                    self.vertices[:, 1] += font.height
+                    # self.vertices[:, 1] += font.height
+                    self.vertices[1::2] += font.height
 
                 elif (c == 9):  # tab
                     penX = penX + 4 * font.width
@@ -286,6 +294,8 @@ class GLString(GLVertexArray):
                     # index = i * 4
                     i4 = i * 4
                     i6 = i * 6
+                    i8 = i * 8
+                    i16 = i * 16
                     # indices = [index, index + 1, index + 2, index, index + 2, index + 3]
                     # vertices = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
                     # texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
@@ -294,10 +304,11 @@ class GLString(GLVertexArray):
                     # attribs = [[x, y], [x, y], [x, y], [x, y]]
                     # offsets = [[x, y], [x, y], [x, y], [x, y]]
 
-                    self.vertices[i4:i4 + 4] = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
+                    self.vertices[i8:i8 + 8] = [x0, y0, x0, y1, x1, y1, x1, y0]
                     self.indices[i6:i6 + 6] = [i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3]
-                    self.texcoords[i4:i4 + 4] = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
-                    self.colors[i4:i4 + 4] = [color, ] * 4
+                    self.texcoords[i8:i8 + 8] = [u0, v0, u0, v1, u1, v1, u1, v0]
+                    self.colors[i16:i16 + 16] = color * 4
+
                     # self.attribs[i * 4:i * 4 + 4] = attribs
                     # self.offsets[i * 4:i * 4 + 4] = offsets
 
@@ -305,13 +316,13 @@ class GLString(GLVertexArray):
                     # penY = penY + glyph[GlyphHeight]
                     prev = charCode
 
-            self.numVertices = len(self.vertices)
-            self.attribs = np.array([x + ox, y + oy] * self.numVertices, dtype=np.float32)
-            self.offsets = np.array([x, y] * self.numVertices, dtype=np.float32)
-            self.lineWidths = [ox, oy]
+                    self.numVertices = len(self.vertices)
+                    self.attribs = np.array([x + ox, y + oy] * self.numVertices, dtype=np.float32)
+                    self.offsets = np.array([x, y] * self.numVertices, dtype=np.float32)
+                    self.lineWidths = [ox, oy]
 
-        # total width of text - probably don't need
-        # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
+                    # total width of text - probably don't need
+                    # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
 
     def drawTextArray(self):
         # TODO:ED need to sort out the speed of this

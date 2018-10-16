@@ -230,7 +230,7 @@ class GLString(GLVertexArray):
         self.font = font
         self.object = obj
         self.pid = obj.pid if hasattr(obj, 'pid') else None
-        self.vertices = np.empty((len(text) * 4, 2), dtype=np.float32)
+        self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
         self.indices = np.zeros(len(text) * 6, dtype=np.uint32)
         self.colors = np.empty((len(text) * 4, 4), dtype=np.float32)
         self.texcoords = np.empty((len(text) * 4, 2), dtype=np.float32)
@@ -254,6 +254,8 @@ class GLString(GLVertexArray):
                     penY = 0  # penY + font.height
                     # for vt in self.vertices:
                     #   vt[1] = vt[1] + font.height
+
+                    # occasional strange - RuntimeWarning: invalid value encountered in add
                     self.vertices[:, 1] += font.height
 
                 elif (c == 9):  # tab

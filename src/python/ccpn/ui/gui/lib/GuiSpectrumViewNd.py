@@ -406,7 +406,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         try:
           point[dataDim.dim-1] = pnt
         except Exception as es:
-          pass
+          # error here if the axis code can't be found in the array, e.g. when viewing 2d overlaid on Nd spectra
+          continue
 
     return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints
 

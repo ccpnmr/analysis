@@ -287,7 +287,7 @@ class GLString(GLVertexArray):
 
                     # # apply rotation to the text
                     # xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
-                    # xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
+                    # xbl, ybl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
                     # xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
                     # xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
 
@@ -304,25 +304,26 @@ class GLString(GLVertexArray):
                     # attribs = [[x, y], [x, y], [x, y], [x, y]]
                     # offsets = [[x, y], [x, y], [x, y], [x, y]]
 
-                    self.vertices[i8:i8 + 8] = [x0, y0, x0, y1, x1, y1, x1, y0]
-                    self.indices[i6:i6 + 6] = [i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3]
-                    self.texcoords[i8:i8 + 8] = [u0, v0, u0, v1, u1, v1, u1, v0]
+                    self.vertices[i8:i8 + 8] = (x0, y0, x0, y1, x1, y1, x1, y0)
+                    self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
+                    self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
                     self.colors[i16:i16 + 16] = color * 4
 
                     # self.attribs[i * 4:i * 4 + 4] = attribs
                     # self.offsets[i * 4:i * 4 + 4] = offsets
 
                     penX = penX + glyph[GlyphOrigW] + kerning
-                    # penY = penY + glyph[GlyphHeight]
-                    prev = charCode
 
-                    self.numVertices = len(self.vertices)
-                    self.attribs = np.array([x + ox, y + oy] * self.numVertices, dtype=np.float32)
-                    self.offsets = np.array([x, y] * self.numVertices, dtype=np.float32)
-                    self.lineWidths = [ox, oy]
+            # penY = penY + glyph[GlyphHeight]
+            prev = charCode
 
-                    # total width of text - probably don't need
-                    # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
+        self.numVertices = len(self.vertices) // 2
+        self.attribs = np.array((x + ox, y + oy) * self.numVertices, dtype=np.float32)
+        self.offsets = np.array((x, y) * self.numVertices, dtype=np.float32)
+        self.lineWidths = [ox, oy]
+
+        # total width of text - probably don't need
+        # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
 
     def drawTextArray(self):
         # TODO:ED need to sort out the speed of this

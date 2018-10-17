@@ -287,7 +287,7 @@ class GLString(GLVertexArray):
 
                     # # apply rotation to the text
                     # xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
-                    # xbl, ybl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
+                    # xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
                     # xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
                     # xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
 

@@ -60,7 +60,7 @@ def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
     shiftDict = dict(zip(nmrResidueIsotopeCodes, nmrResidueShifts))
     shiftIsotopeCodes = [commonUtil.name2IsotopeCode(code) for code in axisCodes]
     positionCodeDict = {axisCodes[ii]: shiftDict[shiftIsotopeCode]
-                        for ii, shiftIsotopeCode in enumerate(shiftIsotopeCodes)}
+                        for ii, shiftIsotopeCode in enumerate(shiftIsotopeCodes) if shiftIsotopeCode in shiftDict}
 
                         # sometimes get an error when using spectrum projections - but modification for the future
                         # if ii in axisCodes and shiftIsotopeCode in shiftDict}

@@ -307,6 +307,7 @@ class progressPopup(CcpnDialog):
     self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
     self.show()
     self.raise_()
+    self.setModal(True)
 
   # 'progress_simulation()' slot
   @pyqtSlot()
@@ -331,6 +332,7 @@ class progressPopup(CcpnDialog):
 @contextmanager
 def progressManager(parent, title=None, progressMax=100):
   thisProg = progressPopup(parent=parent, title=title, progressMax=progressMax)
+
   try:
     thisProg.progress_simulation()
     thisProg.update()

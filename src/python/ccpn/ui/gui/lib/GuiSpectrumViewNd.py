@@ -52,7 +52,7 @@ from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 # TBD: for now ignore fact that apiSpectrumView can override contour colour and/or contour levels
 
 
-_NEWCOMPILEDCONTOURS = True
+_NEWCOMPILEDCONTOURS = False
 
 
 #TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels
@@ -967,7 +967,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             thisNumVertices = count // 2
             colCount = 2*count
 
-            glList.indices[thisIndex:thisIndex+count] = [(((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count)]
+            glList.indices[thisIndex:thisIndex+count] = tuple((((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count))
             glList.vertices[thisVertex:thisVertex+count] = contour
             glList.colors[thisColor:thisColor+colCount] = self.posColour*thisNumVertices
             indexCount += thisNumVertices
@@ -983,7 +983,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             thisNumVertices = count // 2
             colCount = 2*count
 
-            glList.indices[thisIndex:thisIndex+count] = [(((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count)]
+            glList.indices[thisIndex:thisIndex+count] = tuple((((ll+1) // 2) % thisNumVertices)+indexCount for ll in range(count))
             glList.vertices[thisVertex:thisVertex+count] = contour
             glList.colors[thisColor:thisColor+colCount] = self.negColour*thisNumVertices
             indexCount += thisNumVertices
@@ -1192,19 +1192,19 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     GL.glEndList()
 
-  def _addContoursToGLList(self, contourData, glList=None, colour=None):
-    """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
-
-    for contour in contourData:
-      index = glList.numVertices
-      thisNumVertices = len(contour)//2
-      glList.vertices = np.append(glList.vertices, contour)
-
-      newIndices = list([(((ll+1) // 2) % thisNumVertices)+index for ll in range(2*thisNumVertices)])
-      glList.indices = np.append(glList.indices, newIndices)
-      glList.colors = np.append(glList.colors, colour * thisNumVertices)
-
-      glList.numVertices = len(glList.vertices)//2
+  # def _addContoursToGLList(self, contourData, glList=None, colour=None):
+  #   """ contourData is list of [NumPy array with ndim = 1 and size = twice number of points] """
+  #
+  #   for contour in contourData:
+  #     index = glList.numVertices
+  #     thisNumVertices = len(contour)//2
+  #     glList.vertices = np.append(glList.vertices, contour)
+  #
+  #     newIndices = list([(((ll+1) // 2) % thisNumVertices)+index for ll in range(2*thisNumVertices)])
+  #     glList.indices = np.append(glList.indices, newIndices)
+  #     glList.colors = np.append(glList.colors, colour * thisNumVertices)
+  #
+  #     glList.numVertices = len(glList.vertices)//2
 
   # def getTranslateScale(self, dim, ind:int):
   def _getTranslateScale(self, ind:int, pixelViewBox0:float=None, pixelViewBox1:float=None):

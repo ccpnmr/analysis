@@ -323,14 +323,14 @@ class GLExternalRegion(GLVertexArray):
 
         colour = brush
         index = self.numVertices
-        self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
+        self.indices = np.append(self.indices, (index, index + 1, index + 2, index + 3,
                                                 index, index + 1, index, index + 1,
                                                 index + 1, index + 2, index + 1, index + 2,
                                                 index + 2, index + 3, index + 2, index + 3,
-                                                index, index + 3, index, index + 3])
-        self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+                                                index, index + 3, index, index + 3))
+        self.vertices = np.append(self.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
         self.colors = np.append(self.colors, colour * 4)
-        self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+        self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
 
         index += 4
         self.numVertices += 4
@@ -446,14 +446,14 @@ class GLExternalRegion(GLVertexArray):
 
             colour = reg.brush
             index = self.numVertices
-            self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
+            self.indices = np.append(self.indices, (index, index + 1, index + 2, index + 3,
                                                     index, index + 1, index, index + 1,
                                                     index + 1, index + 2, index + 1, index + 2,
                                                     index + 2, index + 3, index + 2, index + 3,
-                                                    index, index + 3, index, index + 3])
-            self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+                                                    index, index + 3, index, index + 3))
+            self.vertices = np.append(self.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
             self.colors = np.append(self.colors, colour * 4)
-            self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+            self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
 
             index += 4
             self.numVertices += 4
@@ -547,14 +547,14 @@ class GLIntegralRegion(GLExternalRegion):
             colour[3] = CCPNGLWIDGET_INTEGRALSHADE
 
             index = self.numVertices
-            self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
+            self.indices = np.append(self.indices, (index, index + 1, index + 2, index + 3,
                                                     index, index + 1, index, index + 1,
                                                     index + 1, index + 2, index + 1, index + 2,
                                                     index + 2, index + 3, index + 2, index + 3,
-                                                    index, index + 3, index, index + 3])
-            self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+                                                    index, index + 3, index, index + 3))
+            self.vertices = np.append(self.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
             self.colors = np.append(self.colors, colour * 4)
-            self.attribs = np.append(self.attribs, [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+            self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
 
             index += 4
             self.numVertices += 4
@@ -654,15 +654,14 @@ class GLIntegralRegion(GLExternalRegion):
                 solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
 
                 index = self.numVertices
-                self.indices = np.append(self.indices, [index, index + 1, index + 2, index + 3,
+                self.indices = np.append(self.indices, (index, index + 1, index + 2, index + 3,
                                                         index, index + 1, index, index + 1,
                                                         index + 1, index + 2, index + 1, index + 2,
                                                         index + 2, index + 3, index + 2, index + 3,
-                                                        index, index + 3, index, index + 3])
-                self.vertices = np.append(self.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+                                                        index, index + 3, index, index + 3))
+                self.vertices = np.append(self.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
                 self.colors = np.append(self.colors, solidColour * 4)
-                self.attribs = np.append(self.attribs,
-                                         [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+                self.attribs = np.append(self.attribs, (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
 
                 index += 4
                 self.numVertices += 4

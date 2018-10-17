@@ -2521,15 +2521,15 @@ class CcpnGLWidget(QOpenGLWidget):
                     x1 = self.axisR
 
                 colour = region.brush
-                drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3,
+                drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
                                                                 index, index + 1, index, index + 1,
                                                                 index + 1, index + 2, index + 1, index + 2,
                                                                 index + 2, index + 3, index + 2, index + 3,
-                                                                index, index + 3, index, index + 3])
-                drawList.vertices = np.append(drawList.vertices, [x0, y0, x0, y1, x1, y1, x1, y0])
+                                                                index, index + 3, index, index + 3))
+                drawList.vertices = np.append(drawList.vertices, (x0, y0, x0, y1, x1, y1, x1, y0))
                 drawList.colors = np.append(drawList.colors, colour * 4)
                 drawList.attribs = np.append(drawList.attribs,
-                                             [axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1])
+                                             (axisIndex, pos0, axisIndex, pos1, axisIndex, pos0, axisIndex, pos1))
 
                 index += 4
                 drawList.numVertices += 4
@@ -2586,10 +2586,10 @@ class CcpnGLWidget(QOpenGLWidget):
                         colG = int(colour.strip('# ')[2:4], 16) / 255.0
                         colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
-                        drawList.indices = np.append(drawList.indices, [index, index + 1])
-                        drawList.vertices = np.append(drawList.vertices, [x0, y0, x1, y1])
-                        drawList.colors = np.append(drawList.colors, [colR, colG, colB, 1.0] * 2)
-                        drawList.attribs = np.append(drawList.attribs, [axisIndex, pos, axisIndex, pos])
+                        drawList.indices = np.append(drawList.indices, (index, index + 1))
+                        drawList.vertices = np.append(drawList.vertices, (x0, y0, x1, y1))
+                        drawList.colors = np.append(drawList.colors, (colR, colG, colB, 1.0) * 2)
+                        drawList.attribs = np.append(drawList.attribs, (axisIndex, pos, axisIndex, pos))
 
                         # build the string and add the extra axis code
                         label = rr.label if rr.label else rr.axisCode
@@ -3074,9 +3074,9 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
             hSpectrum.vertices = np.zeros(hSpectrum.numVertices * 2, dtype=np.float32)
 
-            x = np.append(x, [xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
-                              xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)])
-            y = np.append(y, [positionPixel[1], positionPixel[1]])
+            x = np.append(x, (xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
+                              xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)))
+            y = np.append(y, (positionPixel[1], positionPixel[1]))
             hSpectrum.colors = np.append(hSpectrum.colors, (colR, colG, colB, 1.0, colR, colG, colB, 1.0))
 
             hSpectrum.vertices[::2] = x
@@ -3084,9 +3084,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # store the pre-phase data
             hSpectrum.data = data
-            hSpectrum.values = [spectrumView, point, xDataDim,
+            hSpectrum.values = (spectrumView, point, xDataDim,
                                 xMinFrequency, xMaxFrequency,
-                                xNumPoints, positionPixel, position]
+                                xNumPoints, positionPixel, position)
             hSpectrum.spectrumView = spectrumView
 
         except Exception as es:
@@ -3129,9 +3129,9 @@ class CcpnGLWidget(QOpenGLWidget):
             vSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
             vSpectrum.vertices = np.zeros(vSpectrum.numVertices * 2, dtype=np.float32)
 
-            y = np.append(y, [yDataDim.primaryDataDimRef.pointToValue(yMaxFrequency + 1),
-                              yDataDim.primaryDataDimRef.pointToValue(yMinFrequency)])
-            x = np.append(x, [positionPixel[0], positionPixel[0]])
+            y = np.append(y, (yDataDim.primaryDataDimRef.pointToValue(yMaxFrequency + 1),
+                              yDataDim.primaryDataDimRef.pointToValue(yMinFrequency)))
+            x = np.append(x, (positionPixel[0], positionPixel[0]))
             vSpectrum.colors = np.append(vSpectrum.colors, (colR, colG, colB, 1.0, colR, colG, colB, 1.0))
 
             vSpectrum.vertices[::2] = x
@@ -3139,9 +3139,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # store the pre-phase data
             vSpectrum.data = data
-            vSpectrum.values = [spectrumView, point, yDataDim,
+            vSpectrum.values = (spectrumView, point, yDataDim,
                                 yMinFrequency, yMaxFrequency,
-                                yNumPoints, positionPixel, position]
+                                yNumPoints, positionPixel, position)
             vSpectrum.spectrumView = spectrumView
 
         except Exception as es:
@@ -3686,17 +3686,17 @@ class CcpnGLWidget(QOpenGLWidget):
                                                            p1[1], d[1]))
 
                         # append the new points to the end of nparray
-                        gridGLList.indices = np.append(gridGLList.indices, [index, index + 1])
+                        gridGLList.indices = np.append(gridGLList.indices, (index, index + 1))
 
                         # gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
 
-                        gridGLList.vertices = np.append(gridGLList.vertices, [valueToRatio(p1[0], self.axisL, self.axisR),
+                        gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], self.axisL, self.axisR),
                                                                               valueToRatio(p1[1], self.axisB, self.axisT),
                                                                               valueToRatio(p2[0], self.axisL, self.axisR),
-                                                                              valueToRatio(p2[1], self.axisB, self.axisT)])
+                                                                              valueToRatio(p2[1], self.axisB, self.axisT)))
 
                         alpha = min([1.0, c / transparency])
-                        gridGLList.colors = np.append(gridGLList.colors, [r, g, b, alpha, r, g, b, alpha])
+                        gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))
                         gridGLList.numVertices += 2
                         index += 2
 

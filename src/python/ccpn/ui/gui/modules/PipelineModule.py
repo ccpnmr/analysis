@@ -427,11 +427,11 @@ class GuiPipeline(CcpnModule, Pipeline):
 
         else:
           position = self.pipelineSettingsParams['addPosit']
-          guiPipe = guiPipe(parent=self, application=self.application, name=name, project=self.project)
-          self.pipelineArea.addDock(guiPipe, position=position)
+          newGuiPipe = guiPipe(parent=self, application=self.application, name=name, project=self.project)
+          self.pipelineArea.addDock(newGuiPipe, position=position)
           autoActive = self.pipelineSettingsParams['autoActive']
-          guiPipe.label.checkBox.setChecked(autoActive)
-
+          newGuiPipe.label.checkBox.setChecked(autoActive)
+          return
 
   def _runPipeline(self):
     self.project._logger.info('Pipeline: Started.')

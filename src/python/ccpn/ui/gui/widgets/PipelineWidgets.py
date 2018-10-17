@@ -625,6 +625,7 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
   def updateStyle(self):
     self.hStyle =  PipelineBoxLabelStyle
     self.setStyleSheet(self.hStyle)
+    pass
 
   def setExtraButtons(self):
     self.checkBox = CheckBox(self, text='Active', callback=None)
@@ -636,7 +637,7 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
     self.closeButton = Button(self)
     self.closeButton.setStyleSheet("""QPushButton {background-color: transparent;
                                                   color:black;
-                                                  border: 0px solid transparent}}""")
+                                                  border: 0px solid transparent}""")
     self.closeButton.setIcon(QtWidgets.QApplication.style().standardIcon(QtGui.QStyle.SP_TitleBarCloseButton))
     self.closeButton.setMaximumHeight(15)
 

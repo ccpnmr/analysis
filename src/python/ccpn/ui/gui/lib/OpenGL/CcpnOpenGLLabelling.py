@@ -614,14 +614,14 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     r = 0.5 * lineWidths[0] / frequency[0]
                     w = 0.5 * lineWidths[1] / frequency[1]
                     numPoints = 24
-                    angPlus = 2 * np.pi
+                    angPlus = 2.0 * np.pi
                     skip = 1
                 else:
                     # draw 12 disconnected segments (dotted)
                     # r = symbolWidth
                     # w = symbolWidth
                     numPoints = 12
-                    angPlus = 1.0 * np.pi
+                    angPlus = np.pi
                     skip = 2
 
                 np2 = 2 * numPoints
@@ -629,8 +629,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 _selected = False
 
                 if _isInPlane or _isInFlankingPlane:
-                    drawList.indices = np.append(drawList.indices,
-                                                 [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+                    drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
 
                     if self._isSelected(obj):
                         _selected = True
@@ -896,17 +895,13 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                         if self._isSelected(obj):
                             _selected = True
                             cols = self._GLParent.highlightColour[:3]
-                            drawList.indices = np.append(drawList.indices,
-                                                         np.array([index, index + 1, index + 2, index + 3,
-                                                                   index, index + 2, index + 2, index + 1,
-                                                                   index, index + 3, index + 3, index + 1],
-                                                                  dtype=np.uint32))
+                            drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3,
+                                                                            index, index + 2, index + 2, index + 1,
+                                                                            index, index + 3, index + 3, index + 1])
                         else:
                             cols = listCol
 
-                            drawList.indices = np.append(drawList.indices,
-                                                         np.array([index, index + 1, index + 2, index + 3],
-                                                                  dtype=np.uint32))
+                            drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
 
                         # make sure that links for the multiplets are added
                         extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
@@ -942,8 +937,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                         fade = 1.0
 
                     if _isInPlane or _isInFlankingPlane:
-                        drawList.indices = np.append(drawList.indices,
-                                                     [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+                        drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1] for an in ang])
+
                         if self._isSelected(obj):
                             _selected = True
                             cols = self._GLParent.highlightColour[:3]
@@ -985,9 +980,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                         fade = 1.0
 
                     if _isInPlane or _isInFlankingPlane:
-                        drawList.indices = np.append(drawList.indices,
-                                                     [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4] for an
-                                                      in ang])
+                        drawList.indices = np.append(drawList.indices, [[index + (2 * an), index + (2 * an) + 1, index + np2 + 4]
+                                                                        for an in ang])
                         if self._isSelected(obj):
                             _selected = True
                             cols = self._GLParent.highlightColour[:3]
@@ -1454,14 +1448,13 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                         # if hasattr(obj, '_isSelected') and obj._isSelected:
                         _selected = True
                         cols = self._GLParent.highlightColour[:3]
-                        drawList.indices = np.append(drawList.indices, np.array([index, index + 1, index + 2, index + 3,
-                                                                                 index, index + 2, index + 2, index + 1,
-                                                                                 index, index + 3, index + 3, index + 1], dtype=np.uint32))
+                        drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3,
+                                                                        index, index + 2, index + 2, index + 1,
+                                                                        index, index + 3, index + 3, index + 1])
                     else:
                         cols = listCol
 
-                        drawList.indices = np.append(drawList.indices,
-                                                     np.array([index, index + 1, index + 2, index + 3], dtype=np.uint32))
+                        drawList.indices = np.append(drawList.indices, [index, index + 1, index + 2, index + 3])
 
                     # make sure that links for the multiplets are added
                     extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
@@ -1984,9 +1977,7 @@ class GLmultipletListMethods():
         if not multiplet.peaks:
             return 0
 
-        newIndices = [(index, 1 + index + ii) for ii in range(len(multiplet.peaks))]
-        newIndices = makeIterableList(newIndices)
-        drawList.indices = np.append(drawList.indices, newIndices)
+        drawList.indices = np.append(drawList.indices, [(index, 1 + index + ii) for ii in range(len(multiplet.peaks))])
         return len(multiplet.peaks) + 1
 
 
@@ -2096,7 +2087,7 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
                 continue
 
             # posList.append(p1)
-            posList += p1               # append p1 to the end
+            posList += p1  # append p1 to the end
 
         # newVertices = makeIterableList(posList)
         # numVertices = len(newVertices) // 2

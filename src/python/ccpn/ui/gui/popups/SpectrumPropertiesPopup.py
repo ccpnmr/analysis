@@ -718,8 +718,10 @@ class DimensionsTab(QtWidgets.QWidget, Base):
             # Label(self, text=str(spectrum.isotopeCodes[i]), grid=(row, i + 1), hAlign='l', vAlign='t', )
 
             self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i+1), vAlign='t')
-            isotopeList = [code for code in DEFAULT_ISOTOPE_DICT.values()]
+            isotopeList = [code for code in DEFAULT_ISOTOPE_DICT.values() if code]
             self.isotopeCodePullDowns[i].setData(isotopeList)
+            self.isotopeCodePullDowns[i].setMaxVisibleItems(10)
+
             if spectrum.isotopeCodes[i] in isotopeList:
                 index = isotopeList.index(spectrum.isotopeCodes[i])
                 self.isotopeCodePullDowns[i].setIndex(index)

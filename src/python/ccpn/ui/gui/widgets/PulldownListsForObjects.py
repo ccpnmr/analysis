@@ -94,11 +94,11 @@ class _Pulldown(PulldownListCompoundWidget):
                                                 callback=callback, default=default, **kwds)
         # add a notifier to update the pulldown list
         if project:
-          self.updatePulldownList(project
-                                  , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-                                  , self.className
-                                  , self._getPids)
-                                  # , getPids, self.attributeName)
+          self.updatePulldownList(project,
+                                  [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                  self.className,
+                                  self._getPids)
+                                  # getPids, self.attributeName)
 
     def __str__(self):
         return '<PulldownListCompoundWidget for "%s">' % self.className

@@ -85,6 +85,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
       padding-top: 3px;
       padding-bottom: 3px;
       padding-left: 2px;
+      combobox-popup: 0;
     }
     """)
     # self.connect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)
@@ -292,6 +293,15 @@ class PulldownList(QtWidgets.QComboBox, Base):
       elif self.texts:
         self.callback(self.texts[index])
 
+
+  def setMaxVisibleItems(self, maxItems: int):
+    """Set the maximum height of the combobox when opened
+    """
+    super(PulldownList, self).setMaxVisibleItems(maxItems)
+
+    # qt bug fix - maxVisible only works if the following is set in the stylesheet
+    # self.setStyleSheet("combobox-popup: 0;")
+    # This is currently set at the top but added here so I remember, Ed
 
 if __name__ == '__main__':
 

@@ -88,9 +88,9 @@ class PeakFindPopup(CcpnDialog):
       self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
       self.checkBox3.setChecked(True)
 
-      self.estimateFrame = Frame(parent=self, setLayout=True, spacing=(5,0)
-                            , showBorder=False, fShape='noFrame'
-                            , grid=(7,0))
+      self.estimateFrame = Frame(parent=self, setLayout=True, spacing=(5,0),
+                            showBorder=False, fShape='noFrame',
+                            grid=(7,0))
       self.estimateLineWidthLabel = Label(self.estimateFrame, 'Estimate Line Widths', grid=(0,1))
       self.estimateLineWidthData = CheckBox(self.estimateFrame, grid=(0,0), checked=True, vAlign='t', hAlign='l')
       self.estimateLineWidthData.setChecked(True)

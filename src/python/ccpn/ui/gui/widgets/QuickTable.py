@@ -1753,10 +1753,10 @@ class QuickTableDelegate(QtWidgets.QStyledItemDelegate):
 
 class QuickTableFrame(Frame):
     def __init__(self, *args, **kwargs):
-        super(QuickTableFrame, self).__init__(parent=self.mainWidget, setLayout=True, spacing=(0, 0)
-                                              , showBorder=False, fShape='noFrame'
-                                              , grid=(1, 0)
-                                              , hPolicy='expanding', vPolicy='expanding')
+        super(QuickTableFrame, self).__init__(parent=self.mainWidget, setLayout=True, spacing=(0, 0),
+                                              showBorder=False, fShape='noFrame',
+                                              grid=(1, 0),
+                                              hPolicy='expanding', vPolicy='expanding')
 
         self.quickTable = QuickTable(self, *args, **kwargs)
         self.searchWidget = None

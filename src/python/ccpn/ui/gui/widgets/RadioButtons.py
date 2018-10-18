@@ -170,8 +170,8 @@ if __name__ == '__main__':
   # radioButtons = RadioButtons(parent=popup,
   #              callback=testCallback, grid=(0, 0))
   for i in range(10):
-    button = RadioButton(popup, text='TEST', grid=(i, 0)
-                         , callback=None)  # partial(self.assignSelect
+    button = RadioButton(popup, text='TEST', grid=(i, 0),
+                         callback=None)  # partial(self.assignSelect
     buttonGroup.addButton(button)
 
 

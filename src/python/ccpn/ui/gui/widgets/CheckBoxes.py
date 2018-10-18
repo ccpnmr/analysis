@@ -113,11 +113,13 @@ class CheckBoxes(QtWidgets.QWidget, Base):
         self.setIndex(i)
 
     def getSelectedText(self):
-        for radioCheckBox in self.checkBoxes:
-            if radioCheckBox.isChecked():
-                name = radioCheckBox.text()
-                if name:
-                    return name
+        return [checkBox.text() for checkBox in self.checkBoxes if checkBox.isChecked()]
+
+        # for checkBox in self.checkBoxes:
+        #     if checkBox.isChecked():
+        #         name = checkBox.text()
+        #         if name:
+        #             return name
 
     def setIndex(self, i):
 

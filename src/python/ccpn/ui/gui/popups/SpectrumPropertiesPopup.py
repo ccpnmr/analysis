@@ -49,7 +49,7 @@ from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, 
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
-
+from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
@@ -386,7 +386,7 @@ class GeneralTab(QtWidgets.QWidget, Base):
             # or (too ugly for words) to have a third attribute in parallel with
             # spectrum.experimentName and spectrum.experimentType
             text = spectrum.experimentName
-            if text not in experimentTypes:
+            if experimentTypes and text not in experimentTypes:
                 text = spectrum.experimentType
             # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
             # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
@@ -664,7 +664,7 @@ class DimensionsTab(QtWidgets.QWidget, Base):
             dimLabel = Label(self, text='%s' % str(i + 1), grid=(1, i + 1), vAlign='t', hAlign='l')
 
         self.axisCodes = [i for i in range(dimensions)]
-        self.isotopeCodes = [i for i in range(dimensions)]
+        self.isotopeCodePullDowns = [i for i in range(dimensions)]
         self.spectralReferencingData = [i for i in range(dimensions)]
         self.spectralReferencingDataPoints = [i for i in range(dimensions)]
         self.spectralAssignmentToleranceData = [i for i in range(dimensions)]
@@ -715,7 +715,16 @@ class DimensionsTab(QtWidgets.QWidget, Base):
                                                           self.axisCodes[i].text, i))
 
             row += 1
-            Label(self, text=str(spectrum.isotopeCodes[i]), grid=(row, i + 1), hAlign='l', vAlign='t', )
+            # Label(self, text=str(spectrum.isotopeCodes[i]), grid=(row, i + 1), hAlign='l', vAlign='t', )
+
+            self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i+1), vAlign='t')
+            isotopeList = [code for code in DEFAULT_ISOTOPE_DICT.values()]
+            self.isotopeCodePullDowns[i].setData(isotopeList)
+            if spectrum.isotopeCodes[i] in isotopeList:
+                index = isotopeList.index(spectrum.isotopeCodes[i])
+                self.isotopeCodePullDowns[i].setIndex(index)
+
+            self.isotopeCodePullDowns[i].currentIndexChanged.connect(partial(self._queueSetIsotopeCodes, self.isotopeCodePullDowns[i].getText, i))
 
             row += 1
             Label(self, text=str(spectrum.pointCounts[i]), grid=(row, i + 1), vAlign='t', hAlign='l')
@@ -823,6 +832,20 @@ class DimensionsTab(QtWidgets.QWidget, Base):
 
         self.pythonConsole.writeConsoleCommand("spectrum.axisCodes = {0}".format(axisCodes), spectrum=spectrum)
         self._writeLoggingMessage("spectrum.referenceValues = {0}".format(axisCodes))
+
+    def _queueSetIsotopeCodes(self, valueGetter, dim):
+        self._changes['IsotopeCodes{}'.format(dim)] = partial(self._setIsotopeCodes,
+                                                           self.spectrum, dim, valueGetter())
+
+    def _setIsotopeCodes(self, spectrum, dim, value):
+        isotopeCodes = list(spectrum.isotopeCodes)
+        isotopeCodes[dim] = str(value)
+        spectrum.isotopeCodes = isotopeCodes
+        showWarning('Change Isotope Code', 'Caution is advised when changing isotope codes\n'
+                                        'It can adversely affect spectrumDisplays and peak/integral/multiplet lists.')
+
+        self.pythonConsole.writeConsoleCommand("spectrum.isotopeCodes = {0}".format(isotopeCodes), spectrum=spectrum)
+        self._writeLoggingMessage("spectrum.referenceValues = {0}".format(isotopeCodes))
 
     def _queueSetDimensionReferencing(self, valueGetter, dim):
         self._changes['dimensionReferencing{}'.format(dim)] = partial(self._setDimensionReferencing,

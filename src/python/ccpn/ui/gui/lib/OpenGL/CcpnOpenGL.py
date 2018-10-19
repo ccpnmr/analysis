@@ -1260,9 +1260,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisT, self.axisB = axisLimits[2:4]
 
     def initializeGL(self):
-        GLversionFunctions = self.context().versionFunctions()
-        GLversionFunctions.initializeOpenGLFunctions()
-        self._GLVersion = GLversionFunctions.glGetString(GL.GL_VERSION)
+        # GLversionFunctions = self.context().versionFunctions()
+        # GLversionFunctions.initializeOpenGLFunctions()
+        # self._GLVersion = GLversionFunctions.glGetString(GL.GL_VERSION)
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, strip=self.strip)

@@ -112,7 +112,12 @@ class CheckBoxes(QtWidgets.QWidget, Base):
         i = self.texts.index(text)
         self.setIndex(i)
 
+    def getSelectedIndexes(self):
+
+        return [ii for ii, checkBox in enumerate(self.checkBoxes) if checkBox.isChecked()]
+
     def getSelectedText(self):
+
         return [checkBox.text() for checkBox in self.checkBoxes if checkBox.isChecked()]
 
         # for checkBox in self.checkBoxes:
@@ -123,13 +128,28 @@ class CheckBoxes(QtWidgets.QWidget, Base):
 
     def setIndex(self, i):
 
-        self.checkBoxes[i].setChecked(True)
+        if len(self.checkBoxes) > i:
+            self.checkBoxes[i].setChecked(True)
+
+    def clearIndex(self, i):
+
+        if len(self.checkBoxes) > i:
+            self.checkBoxes[i].setChecked(False)
 
     def deselectAll(self):
+
         self.checkBoxGroup.setExclusive(False)
         for i in self.checkBoxes:
             i.setChecked(False)
         self.checkBoxGroup.setExclusive(self.isExclusive)
+
+    def selectAll(self):
+
+        self.checkBoxGroup.setExclusive(False)
+        for i in self.checkBoxes:
+            i.setChecked(True)
+        self.checkBoxGroup.setExclusive(self.isExclusive)
+
 
     def setCallback(self, callback):
 
@@ -161,7 +181,7 @@ if __name__ == '__main__':
     #              callback=testCallback, grid=(0, 0))
     for i in range(10):
         checkBox = CheckBox(popup, text='TEST', grid=(i, 0),
-                             callback=None)  # partial(self.assignSelect
+                            callback=None)  # partial(self.assignSelect
         checkBoxGroup.addCheckBox(checkBox)
 
     popup.raise_()

@@ -832,3 +832,25 @@ class GuiStripNd(GuiStrip):
         else:
             self.calibrateYNDWidgets.setVisible(False)
             self.calibrateYNDWidgets._toggleLines()
+
+    def toggleCalibrateXY(self):
+        """Toggle widgets for both axes
+        """
+        if self.calibrateXYAction.isChecked():
+            if self.calibrateXNDWidgets is None:
+                self._addCalibrateXNDSpectrumWidget()
+            self.calibrateXNDWidgets.setVisible(True)
+            self.calibrateXNDWidgets._toggleLines()
+            self.calibrateXNDWidgets.resetUndos()
+
+            if self.calibrateYNDWidgets is None:
+                self._addCalibrateYNDSpectrumWidget()
+            self.calibrateYNDWidgets.setVisible(True)
+            self.calibrateYNDWidgets._toggleLines()
+            self.calibrateYNDWidgets.resetUndos()
+
+        else:
+            self.calibrateXNDWidgets.setVisible(False)
+            self.calibrateXNDWidgets._toggleLines()
+            self.calibrateYNDWidgets.setVisible(False)
+            self.calibrateYNDWidgets._toggleLines()

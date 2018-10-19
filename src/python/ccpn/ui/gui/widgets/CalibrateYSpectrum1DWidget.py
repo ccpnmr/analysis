@@ -58,6 +58,7 @@ class CalibrateY1DWidgets(Frame):
 
         self.strip = strip
         self.newPosition = None
+        self.targetLineVisible = False
 
         try:
             self.GLWidget = self.current.strip._CcpnGLWidget
@@ -73,7 +74,9 @@ class CalibrateY1DWidgets(Frame):
         i += 1
         self.boxNewPosition = DoubleSpinbox(self, step=0.001, decimals=3, grid=(0, i))
         i += 1
-        self.okButtons = ButtonList(self, ['Apply', 'Close'], callbacks=[self._apply, self._close],
+        # self.okButtons = ButtonList(self, ['Apply', 'Close'], callbacks=[self._apply, self._close],
+        #                             grid=(0, i))
+        self.okButtons = ButtonList(self, ['Apply'], callbacks=[self._apply],
                                     grid=(0, i))
 
         # self.infiniteLine = pg.InfiniteLine(movable=True, angle=0)
@@ -113,7 +116,7 @@ class CalibrateY1DWidgets(Frame):
                 self.originalPosInfiniteLine.setValue(self.originalPosition)
                 self.boxOriginalPosition.setValue(round(self.originalPosition, 3))
 
-                self.infiniteLine.visible = True
+                self.infiniteLine.visible = True and self.targetLineVisible
                 self.originalPosInfiniteLine.visible = True
 
     def _newBoxCallback(self):

@@ -152,15 +152,21 @@ def _resetZoom(strip):
 
 def _calibrateX(strip):
     return _SCMitem(name='Calibrate X',
-                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate X points', checkable=True, checked=False,
+                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate X axis', checkable=True, checked=False,
                     callback=strip.toggleCalibrateX, stripMethodName='calibrateXAction')
 
 
 def _calibrateY(strip):
     return _SCMitem(name='Calibrate Y',
-                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate Y points',
+                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate Y axis',
                     checkable=True, checked=False,
                     callback=strip.toggleCalibrateY, stripMethodName='calibrateYAction')
+
+def _calibrateXY(strip):
+    return _SCMitem(name='Calibrate Spectra',
+                    typeItem=ItemTypes.get(ITEM), toolTip='calibrate spectrum axes', checkable=True, checked=False,
+                    callback=strip.toggleCalibrateXY, stripMethodName='calibrateXYAction')
+
 
 
 def _toggleHorizontalTraceItem(strip):
@@ -477,8 +483,9 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _resetZoom(guiStripNd),
 
         _separator(),
-        _calibrateX(guiStripNd),
-        _calibrateY(guiStripNd),
+        # _calibrateX(guiStripNd),
+        # _calibrateY(guiStripNd),
+        _calibrateXY(guiStripNd),
 
         _separator(),
         _toggleHorizontalTraceItem(guiStripNd),

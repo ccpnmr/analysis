@@ -43,4 +43,5 @@ class CalibrateXNDWidgets(CalibrateX1DWidgets):
 
         if self.GLWidget:
             # spawn a redraw of the GL windows
+            self.GLWidget._moveAxes((toPos-fromPos, 0.0))
             self.GLSignals.emitPaintEvent()

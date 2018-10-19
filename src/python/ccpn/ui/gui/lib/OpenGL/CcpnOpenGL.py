@@ -1081,6 +1081,20 @@ class CcpnGLWidget(QOpenGLWidget):
 
             self._rescaleAllAxes()
 
+    def _moveAxes(self, delta=(0.0, 0.0)):
+        """Implements Arrows up,down, left, right to pan the spectrum """
+        # percentage of the view to set as single step
+
+        self.axisL += delta[0]
+        self.axisR += delta[0]
+        self.axisT += delta[1]
+        self.axisB += delta[1]
+
+        self.GLSignals._emitAllAxesChanged(source=self, strip=self.strip,
+                                           axisB=self.axisB, axisT=self.axisT,
+                                           axisL=self.axisL, axisR=self.axisR)
+        self._rescaleAllAxes()
+
     def _movePeakFromKeys(self, event):
 
         if len(self.current.peaks) < 1:

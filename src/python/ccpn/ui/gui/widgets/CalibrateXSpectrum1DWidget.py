@@ -70,11 +70,11 @@ class CalibrateX1DWidgets(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
         i = 0
-        self.labelOriginalPosition = Label(self, OP, grid=(0, i))
+        self.labelOriginalPosition = Label(self, OP, grid=(0, i), hAlign='r')
         i += 1
         self.boxOriginalPosition = ScientificDoubleSpinBox(self, step=0.001, decimals=3, grid=(0, i))
         i += 1
-        self.labelNewPosition = Label(self, NP, grid=(0, i))
+        self.labelNewPosition = Label(self, NP, grid=(0, i), hAlign='r')
         i += 1
         self.boxNewPosition = ScientificDoubleSpinBox(self, step=0.001, decimals=3, grid=(0, i))
         i += 1
@@ -217,6 +217,7 @@ class CalibrateX1DWidgets(Frame):
 
         if self.GLWidget:
             # spawn a redraw of the GL windows
+            self.GLWidget._moveAxes((toPos-fromPos, 0.0))
             self.GLSignals.emitPaintEvent()
 
     def _cancel(self):

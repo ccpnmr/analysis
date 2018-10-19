@@ -42,4 +42,5 @@ class CalibrateXNDWidgets(CalibrateX1DWidgets):
                     spectrumView.buildContours = True
 
         if self.GLWidget:
-            self.GLWidget.update()
+            # spawn a redraw of the GL windows
+            self.GLSignals.emitPaintEvent()

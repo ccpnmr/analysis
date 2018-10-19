@@ -25,6 +25,7 @@ __date__ = "$Date$"
 
 from ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget import CalibrateY1DWidgets
 from ccpn.core.lib.SpectrumLib import _calibrateYND
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
 
 class CalibrateYNDWidgets(CalibrateY1DWidgets):
@@ -43,4 +44,5 @@ class CalibrateYNDWidgets(CalibrateY1DWidgets):
                     spectrumView.buildContours = True
 
         if self.GLWidget:
-            self.GLWidget.update()
+            # spawn a redraw of the GL windows
+            self.GLSignals.emitPaintEvent()

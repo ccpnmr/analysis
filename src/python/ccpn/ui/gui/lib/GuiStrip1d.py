@@ -132,7 +132,7 @@ class GuiStrip1d(GuiStrip):
         self.calibrateY1DWidgets = None
         self.offsetWidget = None
         self.offsetValue = 0
-        self.widgetIndex = 2  #start adding widgets from row 2
+        self.widgetIndex = 3  #start adding widgets from row 3
 
     # def _get1dContextMenu(self) -> Menu:
     #   """

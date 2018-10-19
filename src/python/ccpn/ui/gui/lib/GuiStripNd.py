@@ -166,7 +166,7 @@ class GuiStripNd(GuiStrip):
         self.axesSwapped = False
         self.calibrateXNDWidgets = None
         self.calibrateYNDWidgets = None
-        self.widgetIndex = 2  #start adding widgets from row 2
+        self.widgetIndex = 3  #start adding widgets from row 3
 
         self.planeToolbar = None
         # TODO: this should be refactored; together with the 'Z-plane' mess: should general, to be used for other dimensions

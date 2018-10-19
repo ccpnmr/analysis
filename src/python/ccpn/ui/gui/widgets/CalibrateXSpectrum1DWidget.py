@@ -31,11 +31,12 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.core.lib.SpectrumLib import _calibrateX1D
 # import pyqtgraph as pg
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
 
 OP = 'Calibrate X - Original Position: '
@@ -71,11 +72,11 @@ class CalibrateX1DWidgets(Frame):
         i = 0
         self.labelOriginalPosition = Label(self, OP, grid=(0, i))
         i += 1
-        self.boxOriginalPosition = DoubleSpinbox(self, step=0.001, decimals=3, grid=(0, i))
+        self.boxOriginalPosition = ScientificDoubleSpinBox(self, step=0.001, decimals=3, grid=(0, i))
         i += 1
         self.labelNewPosition = Label(self, NP, grid=(0, i))
         i += 1
-        self.boxNewPosition = DoubleSpinbox(self, step=0.001, decimals=3, grid=(0, i))
+        self.boxNewPosition = ScientificDoubleSpinBox(self, step=0.001, decimals=3, grid=(0, i))
         i += 1
         # self.okButtons = ButtonList(self, ['Apply', 'Close'], callbacks=[self._apply, self._close],
         #                             grid=(0, i))
@@ -95,6 +96,7 @@ class CalibrateX1DWidgets(Frame):
             self.infiniteLine = self.GLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='solid')
             self.originalPosInfiniteLine = self.GLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')
 
+            # openGL callbacks
             self.infiniteLine.valuesChanged.connect(self._newPositionLineCallback)
             self.originalPosInfiniteLine.valuesChanged.connect(self._originalPositionLineCallback)
 
@@ -106,6 +108,8 @@ class CalibrateX1DWidgets(Frame):
 
         self._initLines()
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
+
+        self.GLSignals = GLNotifier(parent=None)
 
     def _initLines(self):
 
@@ -135,8 +139,9 @@ class CalibrateX1DWidgets(Frame):
 
     def _newPositionBoxCallback(self):
         box = self.sender()
-        self.newPosition = round(box.value(), 3)
-        self.infiniteLine.setValue(self.newPosition)
+        if box.hasFocus():
+            self.newPosition = round(box.value(), 3)
+            self.infiniteLine.setValue(self.newPosition)
 
     def _originalPositionLineCallback(self):
         self.originalPosition = self.originalPosInfiniteLine.values[0]
@@ -144,8 +149,9 @@ class CalibrateX1DWidgets(Frame):
 
     def _originalPositionBoxCallback(self):
         box = self.sender()
-        self.originalPosition = round(box.value(), 3)
-        self.originalPosInfiniteLine.setValue(self.originalPosition)
+        if box.hasFocus():
+            self.originalPosition = round(box.value(), 3)
+            self.originalPosInfiniteLine.setValue(self.originalPosition)
 
     def _removeLines(self):
         if self.mainWindow is not None:
@@ -210,7 +216,8 @@ class CalibrateX1DWidgets(Frame):
                     spectrumView.buildContours = True
 
         if self.GLWidget:
-            self.GLWidget.update()
+            # spawn a redraw of the GL windows
+            self.GLSignals.emitPaintEvent()
 
     def _cancel(self):
         """Cancel has been pressed, undo all items since the widget was opened

@@ -34,6 +34,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_RESCALE, GLREND
     GLRENDERMODE_DRAW
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 from ccpn.core.Integral import Integral
+# spawn a redraw of the GL windows
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
 
 try:
@@ -85,8 +87,11 @@ class GLRegion(QtWidgets.QWidget):
         self.lineStyle = lineStyle
         self.pid = obj.pid if hasattr(obj, 'pid') else None
 
-    def _mouseDrag(self, values):
-        self.valuesChanged.emit(list(values))
+        # create a notifier for updating
+        self.GLSignals = GLNotifier(parent=None)
+
+    # def _mouseDrag(self, values):
+    #     self.valuesChanged.emit(list(values))
 
     @property
     def values(self):
@@ -100,17 +105,18 @@ class GLRegion(QtWidgets.QWidget):
         except Exception as es:
             pass
 
-        self.parent.update()
         self.valuesChanged.emit(list(values))
 
-        # TODO:ED change the integral object - should spawn change event
+        # change the limits in the integral object
         if self._object and not self._object.isDeleted:
             self._object.limits = [(min(values), max(values))]
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
 
     def setValue(self, val):
         # use the region to simulate an infinite line - calls setter above
         self.values = (val, val)
-        # self.parent.update()
 
     @property
     def axisCode(self):
@@ -120,7 +126,9 @@ class GLRegion(QtWidgets.QWidget):
     def axisCode(self, axisCode):
         self._axisCode = axisCode
         self._glList.renderMode = GLRENDERMODE_REBUILD
-        self.parent.update()
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
 
     @property
     def orientation(self):
@@ -151,7 +159,9 @@ class GLRegion(QtWidgets.QWidget):
 
         if self._glList:
             self._glList.renderMode = GLRENDERMODE_REBUILD
-        self.parent.update()
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
 
     @property
     def brush(self):
@@ -161,7 +171,9 @@ class GLRegion(QtWidgets.QWidget):
     def brush(self, brush):
         self._brush = brush
         self._glList.renderMode = GLRENDERMODE_REBUILD
-        self.parent.update()
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
 
     @property
     def colour(self):
@@ -174,7 +186,9 @@ class GLRegion(QtWidgets.QWidget):
             self._brush = REGION_COLOURS[colour]
 
         self._glList.renderMode = GLRENDERMODE_REBUILD
-        self.parent.update()
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
 
     @property
     def visible(self):
@@ -184,7 +198,9 @@ class GLRegion(QtWidgets.QWidget):
     def visible(self, visible):
         self._visible = visible
         self._glList.renderMode = GLRENDERMODE_REBUILD
-        self.parent.update()
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
 
     @property
     def bounds(self):
@@ -194,7 +210,9 @@ class GLRegion(QtWidgets.QWidget):
     def bounds(self, bounds):
         self._bounds = bounds
         self._glList.renderMode = GLRENDERMODE_REBUILD
-        self.parent.update()
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
 
     def _rebuildIntegral(self):
         if isinstance(self._object, Integral) and hasattr(self._object, '_1Dregions'):

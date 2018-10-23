@@ -892,24 +892,24 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     if _NEWCOMPILEDCONTOURS:
       # new code for the recompiled glList
-      test = None
+      # test = None
       dataArrays = tuple()
       for position, dataArray in self._getPlaneData():
         dataArrays += (dataArray,)
 
-      test = Contourer2d.contourerGLList(dataArrays,
+      contourList = Contourer2d.contourerGLList(dataArrays,
                                          posLevelsArray,
                                          negLevelsArray,
                                          np.array(self.posColour, dtype=np.float32),
                                          np.array(self.negColour, dtype=np.float32))
 
-      glList.clearArrays()
+      # glList.clearArrays()
 
-      if test and test[1] > 0:
-        glList.numVertices = test[1]
-        glList.indices = test[2]
-        glList.vertices = test[3]
-        glList.colors = test[4]
+      if contourList and contourList[1] > 0:
+        glList.numVertices = contourList[1]
+        glList.indices = contourList[2]
+        glList.vertices = contourList[3]
+        glList.colors = contourList[4]
 
     else:
       for position, dataArray in self._getPlaneData():

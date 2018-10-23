@@ -60,34 +60,31 @@ class GLVertexArray():
                  drawMode=GL.GL_LINES,
                  fillMode=None,
                  dimension=3,
-                 GLContext=None):
+                 GLContext=None,
+                 clearArrays=True):
 
         self.initialise(numLists=numLists, renderMode=renderMode, refreshMode=refreshMode,
                         blendMode=blendMode, drawMode=drawMode, fillMode=fillMode,
-                        dimension=dimension, GLContext=GLContext)
+                        dimension=dimension, GLContext=GLContext, clearArrays=clearArrays)
 
     def initialise(self, numLists=1, renderMode=GLRENDERMODE_IGNORE,
                    refreshMode=GLREFRESHMODE_NEVER,
                    blendMode=False, drawMode=GL.GL_LINES, fillMode=None,
                    dimension=3,
-                   GLContext=None):
+                   GLContext=None,
+                   clearArrays=True):
 
         self.parent = GLContext
         self.renderMode = renderMode
         self.refreshMode = refreshMode
-        self.vertices = np.empty(0, dtype=np.float32)
-        self.indices = np.empty(0, dtype=np.uint32)
-        self.colors = np.empty(0, dtype=np.float32)
-        self.texcoords = np.empty(0, dtype=np.float32)
-        self.attribs = np.empty(0, dtype=np.float32)
-        self.offsets = np.empty(0, dtype=np.float32)
-        self.pids = np.empty(0, dtype=np.object_)
+
+        if clearArrays:
+            self.clearArrays()
+
         self.lineWidths = [0.0, 0.0]
         self.color = None
         self.posColour = None
         self.negColour = None
-
-        self.numVertices = 0
 
         self.numLists = numLists
         self.blendMode = blendMode
@@ -104,8 +101,9 @@ class GLVertexArray():
             GL.glDeleteLists(3, self.VBOs)
 
     def clearArrays(self):
-        self.vertices = np.empty(0, dtype=np.float32)
+        # set everything to 32 bit for openGL VBOs, indices are ints, everything else is float
         self.indices = np.empty(0, dtype=np.uint32)
+        self.vertices = np.empty(0, dtype=np.float32)
         self.colors = np.empty(0, dtype=np.float32)
         self.texcoords = np.empty(0, dtype=np.float32)
         self.attribs = np.empty(0, dtype=np.float32)

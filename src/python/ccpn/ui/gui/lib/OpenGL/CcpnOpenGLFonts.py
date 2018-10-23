@@ -219,10 +219,11 @@ class GLString(GLVertexArray):
     def __init__(self, text=None, font=None, obj=None, color=(1.0, 1.0, 1.0, 1.0),
                  x=0.0, y=0.0,
                  ox=0.0, oy=0.0,
-                 angle=0.0, width=None, height=None, GLContext=None, blendMode=True):
+                 angle=0.0, width=None, height=None, GLContext=None, blendMode=True,
+                 clearArrays=False):
         super(GLString, self).__init__(renderMode=GLRENDERMODE_DRAW, blendMode=blendMode,
                                        GLContext=GLContext, drawMode=GL.GL_TRIANGLES,
-                                       dimension=2)
+                                       dimension=2, clearArrays=clearArrays)
         if text is None:
             text = ''
 
@@ -230,19 +231,17 @@ class GLString(GLVertexArray):
         self.font = font
         self.object = obj
         self.pid = obj.pid if hasattr(obj, 'pid') else None
+        lenText = len(text)
 
-        # self.vertices = np.zeros((len(text) * 4, 2), dtype=np.float32)
-        # self.indices = np.zeros(len(text) * 6, dtype=np.uint32)
-        # self.colors = np.empty((len(text) * 4, 4), dtype=np.float32)
-        # self.texcoords = np.empty((len(text) * 4, 2), dtype=np.float32)
-
-        self.vertices = np.zeros(len(text) * 8, dtype=np.float32)
-        self.indices = np.zeros(len(text) * 6, dtype=np.uint32)
-        self.colors = np.empty(len(text) * 16, dtype=np.float32)
-        self.texcoords = np.empty(len(text) * 8, dtype=np.float32)
+        # allocate space for all the letters
+        self.indices = np.zeros(lenText * 6, dtype=np.uint32)
+        self.vertices = np.zeros(lenText * 8, dtype=np.float32)
+        self.colors = np.empty(lenText * 16, dtype=np.float32)
+        self.texcoords = np.empty(lenText * 8, dtype=np.float32)
 
         # self.attribs = np.zeros((len(text) * 4, 2), dtype=np.float32)
         # self.offsets = np.zeros((len(text) * 4, 2), dtype=np.float32)
+
         self.indexOffset = 0
         penX = penY = 0  # offset the string from (0,0) and use (x,y) in shader
         prev = None
@@ -254,69 +253,70 @@ class GLString(GLVertexArray):
             c = ord(charCode)
             glyph = font.fontGlyph[c]
 
-            if glyph or c == 10 or c == 9:  # newline and tab
+            # if glyph or c == 10 or c == 9:  # newline and tab
 
-                if (c == 10):  # newline
-                    penX = 0
-                    penY = 0  # penY + font.height
-                    # for vt in self.vertices:
-                    #   vt[1] = vt[1] + font.height
+            if (c > 32):  # visible characters
 
-                    # occasional strange - RuntimeWarning: invalid value encountered in add
-                    # self.vertices[:, 1] += font.height
-                    self.vertices[1::2] += font.height
+                kerning = font.get_kerning(charCode, prev)
 
-                elif (c == 9):  # tab
-                    penX = penX + 4 * font.width
+                x0 = penX + glyph[GlyphPX0] + kerning  # penX + glyph.offset[0] + kerning
+                y0 = penY + glyph[GlyphPY0]  # penY + glyph.offset[1]
+                x1 = penX + glyph[GlyphPX1] + kerning  # x0 + glyph.size[0]
+                y1 = penY + glyph[GlyphPY1]  # y0 - glyph.size[1]
+                u0 = glyph[GlyphTX0]  # glyph.texcoords[0]
+                v0 = glyph[GlyphTY0]  # glyph.texcoords[1]
+                u1 = glyph[GlyphTX1]  # glyph.texcoords[2]
+                v1 = glyph[GlyphTY1]  # glyph.texcoords[3]
 
-                elif (c == 32):  # space
-                    penX += font.spaceWidth
+                # # apply rotation to the text
+                # xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
+                # xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
+                # xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
+                # xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
 
-                elif (c > 32):  # other visible characters
+                # index = i * 4
+                i4 = i * 4
+                i6 = i * 6
+                i8 = i * 8
+                i16 = i * 16
+                # indices = [index, index + 1, index + 2, index, index + 2, index + 3]
+                # vertices = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
+                # texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
+                # colors = [color, ] * 4
 
-                    kerning = font.get_kerning(charCode, prev)
+                # attribs = [[x, y], [x, y], [x, y], [x, y]]
+                # offsets = [[x, y], [x, y], [x, y], [x, y]]
 
-                    x0 = penX + glyph[GlyphPX0] + kerning  # penX + glyph.offset[0] + kerning
-                    y0 = penY + glyph[GlyphPY0]  # penY + glyph.offset[1]
-                    x1 = penX + glyph[GlyphPX1] + kerning  # x0 + glyph.size[0]
-                    y1 = penY + glyph[GlyphPY1]  # y0 - glyph.size[1]
-                    u0 = glyph[GlyphTX0]  # glyph.texcoords[0]
-                    v0 = glyph[GlyphTY0]  # glyph.texcoords[1]
-                    u1 = glyph[GlyphTX1]  # glyph.texcoords[2]
-                    v1 = glyph[GlyphTY1]  # glyph.texcoords[3]
+                self.vertices[i8:i8 + 8] = (x0, y0, x0, y1, x1, y1, x1, y0)
+                self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
+                self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
+                self.colors[i16:i16 + 16] = color * 4
 
-                    # # apply rotation to the text
-                    # xbl, ybl = x0 * cs + y0 * sn, -x0 * sn + y0 * cs
-                    # xtl, ytl = x0 * cs + y1 * sn, -x0 * sn + y1 * cs
-                    # xtr, ytr = x1 * cs + y1 * sn, -x1 * sn + y1 * cs
-                    # xbr, ybr = x1 * cs + y0 * sn, -x1 * sn + y0 * cs
+                # self.attribs[i * 4:i * 4 + 4] = attribs
+                # self.offsets[i * 4:i * 4 + 4] = offsets
 
-                    # index = i * 4
-                    i4 = i * 4
-                    i6 = i * 6
-                    i8 = i * 8
-                    i16 = i * 16
-                    # indices = [index, index + 1, index + 2, index, index + 2, index + 3]
-                    # vertices = [x0, y0], [x0, y1], [x1, y1], [x1, y0]
-                    # texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
-                    # colors = [color, ] * 4
+                penX = penX + glyph[GlyphOrigW] + kerning
 
-                    # attribs = [[x, y], [x, y], [x, y], [x, y]]
-                    # offsets = [[x, y], [x, y], [x, y], [x, y]]
+            if (c == 32):  # space
+                penX += font.spaceWidth
 
-                    self.vertices[i8:i8 + 8] = (x0, y0, x0, y1, x1, y1, x1, y0)
-                    self.indices[i6:i6 + 6] = (i4, i4 + 1, i4 + 2, i4, i4 + 2, i4 + 3)
-                    self.texcoords[i8:i8 + 8] = (u0, v0, u0, v1, u1, v1, u1, v0)
-                    self.colors[i16:i16 + 16] = color * 4
+            elif (c == 10):  # newline
+                penX = 0
+                penY = 0  # penY + font.height
+                # for vt in self.vertices:
+                #   vt[1] = vt[1] + font.height
 
-                    # self.attribs[i * 4:i * 4 + 4] = attribs
-                    # self.offsets[i * 4:i * 4 + 4] = offsets
+                # occasional strange - RuntimeWarning: invalid value encountered in add
+                # self.vertices[:, 1] += font.height
+                self.vertices[1::2] += font.height
 
-                    penX = penX + glyph[GlyphOrigW] + kerning
+            elif (c == 9):  # tab
+                penX = penX + 4 * font.width
 
             # penY = penY + glyph[GlyphHeight]
             prev = charCode
 
+        # set the offsets for the characters top the desired coordinates
         self.numVertices = len(self.vertices) // 2
         self.attribs = np.array((x + ox, y + oy) * self.numVertices, dtype=np.float32)
         self.offsets = np.array((x, y) * self.numVertices, dtype=np.float32)

@@ -1276,6 +1276,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if objListView in self._GLLabels.keys():
                     if self._GLLabels[objListView].renderMode == GLRENDERMODE_RESCALE:
                         self._rescaleLabels(spectrumView, objListView, self._GLLabels[objListView])
+                        self._GLLabels[objListView].renderMode = GLRENDERMODE_DRAW
+                        continue
 
                 if objListView.buildLabels:
                     objListView.buildLabels = False
@@ -1333,7 +1335,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         drawList.stringList = tempList
         drawList.renderMode = GLRENDERMODE_RESCALE
-        # glStrip.GLSignals.emitPaintEvent(source=glStrip)
 
     def _threadBuildAllLabels(self, viewList, glStrip, _outList):
         # def _threadBuildAllPeakListLabels(self, threadQueue):#viewList, glStrip, _outList):

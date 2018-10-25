@@ -287,15 +287,19 @@ class NmrResidueTable(QuickTable):
 
         # parent.getLayout().setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
 
-        self._widgetScrollArea = ScrollArea(parent, setLayout=True, grid=(0, 0), gridSpan=(1, 1))
+        # strange, need to do this when usong scrollArea, but not a Widget
+        parent.getLayout().setHorizontalSpacing(0)
+
+        self._widgetScrollArea = ScrollArea(parent=parent, **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
         # self._widgetScrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         # self._widgetScrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
-        self._widget = Frame(setLayout=True, showBorder=False)
+        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
         self._widgetScrollArea.setWidget(self._widget)
+        self._widgetScrollArea.setGridLayout()
 
-        self._widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
         # # self._widget.setStyleSheet("""ScrollArea { border: 0px; }""")
         # self._widget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
@@ -321,8 +325,8 @@ class NmrResidueTable(QuickTable):
             ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None),
             ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
             ('NmrAtoms', lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
-            ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue)
-             , 'Number of peaks assigned to NmrResidue', None),
+            ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue),
+              'Number of peaks assigned to NmrResidue', None),
             ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes',
              lambda nmr, value: NmrResidueTable._setComment(nmr, value))
             ])
@@ -340,10 +344,10 @@ class NmrResidueTable(QuickTable):
                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                          callback=self._selectionPulldownCallback
                                          )
-        # self.spacer = Spacer(self._widget, 5, 5,
-        #                      QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-        #                      grid=(2, 50), gridSpan=(1, 1))
-        self._setWidgetHeight(30)
+        self.spacer = Spacer(self._widget, 5, 5,
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+                             grid=(2, 50), gridSpan=(1, 1))
+        self._setWidgetHeight(35)
         self.ncWidget.setFixedSize(self.ncWidget.sizeHint())
         # self.ncWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         # self._widget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
@@ -424,7 +428,7 @@ class NmrResidueTable(QuickTable):
         self._widget.setFixedSize(self._widget.sizeHint())
 
     def _setWidgetHeight(self, height):
-        self._widget.setFixedHeight(height)
+        self._widgetScrollArea.setFixedHeight(height)
 
     def _selectNmrChain(self, nmrChain=None):
         """

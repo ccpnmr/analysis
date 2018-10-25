@@ -23,7 +23,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -48,374 +48,376 @@ from ccpn.framework.Current import Current
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 
 from ccpn.util.Logging import getLogger
+
+
 logger = getLogger()
 
 
 def skip(*args, **kwargs):
-  "Do nothing"
-  pass
+    "Do nothing"
+    pass
 
 
 class Notifier(object):
-  """
-  Notifier class:
-
-  triggers callback function with signature:  callback(callbackDict [, *args] [, **kwargs])
-
-  ____________________________________________________________________________________________________________________
-
-  trigger             targetName           callbackDict keys          Notes
-  ____________________________________________________________________________________________________________________
-
-   Notifier.CREATE    className             theObject, object,        targetName: valid child className of theObject
-                                            targetName, trigger       (any for project instances)
-                                            notifier                  
-
-   Notifier.DELETE    className or None     theObject, object,        targetName: valid child className of theObject
-                                            targetName, trigger       (any for project instances)
-                                            notifier                  targetName==None: monitor theObject itself
-
-   Notifier.RENAME    className or None     theObject, object         targetName: valid child className of theObject
-                                            targetName, oldPid,       (any for project instances)
-                                            trigger                   targetName==None: monitor theObject itself
-
-   Notifier.CHANGE    className or None     theObject, object         targetName: valid child className of theObject
-                                            targetName,               (any for project instances)
-                                            trigger, notifier         targetName==None: monitor theObject itself
-
-   Notifier.MONITOR   attributeName         theObject,targetName      targetName: valid attribute name of theObject
-                                            value, previousValue,     NB: should only be used in isolation; i.e. not
-                                            trigger, notifier         combined with other triggers
-
-   Notifier.CURRENT   attributeName         theObject,targetName      theObject should be current object
-                                            value, previousValue,     targetName: valid attribute name of current
-                                            trigger, notifier         NB: should only be used in isolation; i.e. not
-                                                                      combined with other triggers
-
-  Implemention:
-
-    Uses current notifier system from Project and Current;filters for child objects of type targetName in theObject.
-    TargetName does need to denote a valid child-class or attribute of theObject, except for Project instances
-    which can be triggered by all classes (see Table).
-    The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if
-    defined in the instantiation of the Notifier object. (idea following the Trailtlets concept).
-    Note that this dict also contains a reference to the Notifier object itself; this way it can be used 
-    to pass-on additional implementation specfic information to the callback function.
-    
-  """
-  _currentIndex = 0
-
-  # Trigger keywords
-  CREATE = 'create'
-  DELETE = 'delete'
-  RENAME = 'rename'
-  CHANGE = 'change'
-  MONITOR = 'monitor'
-  CURRENT = 'current'
-
-  NOTIFIER = 'notifier'
-  THEOBJECT = 'theObject'
-  TRIGGER = 'trigger'
-  OBJECT = 'object'
-  GETPID = 'pid'
-  OLDPID = 'oldPid'
-  VALUE = 'value'
-  PREVIOUSVALUE = 'previousValue'
-  TARGETNAME = 'targetName'
-
-  _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, MONITOR, CURRENT)
-
-  def __init__(self, theObject:Any
-               , triggers:list
-               , targetName:str
-               , callback:Callable[..., str]
-               , onceOnly=False
-               , *args, **kwargs):
     """
-    Create Notifier object; 
-    The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature
+    Notifier class:
 
-    :param theObject: valid V3 core object or current object to watch
-    :param triggers: list of trigger keywords callback
-    :param targetName: valid className, attributeName or None
-    :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
-    :param *args: optional arguments to callback
-    :param **kwargs: optional keyword,value arguments to callback
+    triggers callback function with signature:  callback(callbackDict [, *args] [, **kwargs])
+
+    ____________________________________________________________________________________________________________________
+
+    trigger             targetName           callbackDict keys          Notes
+    ____________________________________________________________________________________________________________________
+
+     Notifier.CREATE    className             theObject, object,        targetName: valid child className of theObject
+                                              targetName, trigger       (any for project instances)
+                                              notifier
+
+     Notifier.DELETE    className or None     theObject, object,        targetName: valid child className of theObject
+                                              targetName, trigger       (any for project instances)
+                                              notifier                  targetName==None: monitor theObject itself
+
+     Notifier.RENAME    className or None     theObject, object         targetName: valid child className of theObject
+                                              targetName, oldPid,       (any for project instances)
+                                              trigger                   targetName==None: monitor theObject itself
+
+     Notifier.CHANGE    className or None     theObject, object         targetName: valid child className of theObject
+                                              targetName,               (any for project instances)
+                                              trigger, notifier         targetName==None: monitor theObject itself
+
+     Notifier.MONITOR   attributeName         theObject,targetName      targetName: valid attribute name of theObject
+                                              value, previousValue,     NB: should only be used in isolation; i.e. not
+                                              trigger, notifier         combined with other triggers
+
+     Notifier.CURRENT   attributeName         theObject,targetName      theObject should be current object
+                                              value, previousValue,     targetName: valid attribute name of current
+                                              trigger, notifier         NB: should only be used in isolation; i.e. not
+                                                                        combined with other triggers
+
+    Implemention:
+
+      Uses current notifier system from Project and Current;filters for child objects of type targetName in theObject.
+      TargetName does need to denote a valid child-class or attribute of theObject, except for Project instances
+      which can be triggered by all classes (see Table).
+      The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if
+      defined in the instantiation of the Notifier object. (idea following the Trailtlets concept).
+      Note that this dict also contains a reference to the Notifier object itself; this way it can be used
+      to pass-on additional implementation specfic information to the callback function.
+
     """
-    self._index = Notifier._currentIndex
-    Notifier._currentIndex += 1
+    _currentIndex = 0
 
-    self._theObject = theObject # The object we are monitoring
+    # Trigger keywords
+    CREATE = 'create'
+    DELETE = 'delete'
+    RENAME = 'rename'
+    CHANGE = 'change'
+    MONITOR = 'monitor'
+    CURRENT = 'current'
 
-    # bit of a clutch for now
-    if isinstance(theObject, Current):
-      # assume we have current
-      self._project = None
-      self._isProject = False
-      self._isCurrent = True
-    elif isinstance(theObject, AbstractWrapperObject):
-      self._project = theObject.project # toplevel Project instance for theObject
-      self._isProject = (theObject == self._project) # theObject is the toplevel Project instance
-      self._isCurrent = False
-    else:
-      raise RuntimeError('Invalid object (%s)', theObject)
+    NOTIFIER = 'notifier'
+    THEOBJECT = 'theObject'
+    TRIGGER = 'trigger'
+    OBJECT = 'object'
+    GETPID = 'pid'
+    OLDPID = 'oldPid'
+    VALUE = 'value'
+    PREVIOUSVALUE = 'previousValue'
+    TARGETNAME = 'targetName'
 
-    self._value = None # used to store the value of attribute to monitor for change
-    triggerForTheObject = False  # flag to denote if triggers are firing for theObject, not children
+    _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, MONITOR, CURRENT)
 
-    self._notifiers = []  # list of tuples defining Notifier call signature; used for __str__
-    self._unregister = [] # list of tuples needed for unregistering
+    def __init__(self, theObject: Any,
+                 triggers: list,
+                 targetName: str,
+                 callback: Callable[..., str],
+                 onceOnly=False,
+                 *args, **kwargs):
+        """
+        Create Notifier object;
+        The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature
 
-    self._callback = callback
-    self._args = args
-    self._kwargs = kwargs
+        :param theObject: valid V3 core object or current object to watch
+        :param triggers: list of trigger keywords callback
+        :param targetName: valid className, attributeName or None
+        :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
+        :param *args: optional arguments to callback
+        :param **kwargs: optional keyword,value arguments to callback
+        """
+        self._index = Notifier._currentIndex
+        Notifier._currentIndex += 1
 
-    self._debug = False # ability to report on individual instances
+        self._theObject = theObject  # The object we are monitoring
 
-    # some sanity checks
-    if len(triggers) > 1 and Notifier.MONITOR in triggers:
-      raise RuntimeError('Notifier: trigger "%s" only to be used in isolation' % Notifier.MONITOR)
-    if len(triggers) > 1 and Notifier.CURRENT in triggers:
-      raise RuntimeError('Notifier.__init__: trigger "%s" only to be used in isolation' % Notifier.CURRENT)
-    if triggers[0] == Notifier.CURRENT and not self._isCurrent:
-      raise RuntimeError('Notifier.__init__: invalid object "%s" for trigger "%s"' % (theObject, triggers[0]))
+        # bit of a clutch for now
+        if isinstance(theObject, Current):
+            # assume we have current
+            self._project = None
+            self._isProject = False
+            self._isCurrent = True
+        elif isinstance(theObject, AbstractWrapperObject):
+            self._project = theObject.project  # toplevel Project instance for theObject
+            self._isProject = (theObject == self._project)  # theObject is the toplevel Project instance
+            self._isCurrent = False
+        else:
+            raise RuntimeError('Invalid object (%s)', theObject)
 
-    # register the callbacks
-    for trigger in triggers:
+        self._value = None  # used to store the value of attribute to monitor for change
+        triggerForTheObject = False  # flag to denote if triggers are firing for theObject, not children
 
-      if trigger not in Notifier._triggerKeywords:
-        raise RuntimeWarning('Notifier.__init__: invalid trigger "%s"' % trigger)
+        self._notifiers = []  # list of tuples defining Notifier call signature; used for __str__
+        self._unregister = []  # list of tuples needed for unregistering
 
-      # CURRENT special case; has its own callback mechanism
-      if trigger == Notifier.CURRENT:
+        self._callback = callback
+        self._args = args
+        self._kwargs = kwargs
 
-        if not hasattr(theObject, targetName):
-          raise RuntimeWarning(
-            'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject))
+        self._debug = False  # ability to report on individual instances
 
-        triggerForTheObject = True
-        self._value = getattr(theObject, targetName)
+        # some sanity checks
+        if len(triggers) > 1 and Notifier.MONITOR in triggers:
+            raise RuntimeError('Notifier: trigger "%s" only to be used in isolation' % Notifier.MONITOR)
+        if len(triggers) > 1 and Notifier.CURRENT in triggers:
+            raise RuntimeError('Notifier.__init__: trigger "%s" only to be used in isolation' % Notifier.CURRENT)
+        if triggers[0] == Notifier.CURRENT and not self._isCurrent:
+            raise RuntimeError('Notifier.__init__: invalid object "%s" for trigger "%s"' % (theObject, triggers[0]))
 
-        notifier = (trigger, targetName, triggerForTheObject)
-        # current has its own notifier system
+        # register the callbacks
+        for trigger in triggers:
 
-        #TODO:RASMUS: change this and remove this hack
-        # to register strip, the keywords is strips!
-        tName = targetName + 's' if targetName=='strip' else targetName
-        func = theObject.registerNotify(partial(self, notifier=notifier), tName)
-        self._notifiers.append(notifier)
-        self._unregister.append((tName, Notifier.CURRENT, func))
-        if self._debug:
-          # logger.info
-          print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
-                (self._index, self._theObject, trigger, tName, self._callback)
-                )
+            if trigger not in Notifier._triggerKeywords:
+                raise RuntimeWarning('Notifier.__init__: invalid trigger "%s"' % trigger)
 
-      # MONITOR special case, as the current underpinning implementation does not allow this directly
-      # Hence, we track all changes to the object class, filtering those that apply
-      elif trigger == Notifier.MONITOR:
-        if not hasattr(theObject, targetName):
-          raise RuntimeWarning(
-            'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
+            # CURRENT special case; has its own callback mechanism
+            if trigger == Notifier.CURRENT:
 
-        triggerForTheObject = True
-        self._value = getattr(theObject, targetName)
+                if not hasattr(theObject, targetName):
+                    raise RuntimeWarning(
+                            'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject))
 
-        notifier = (trigger, targetName, triggerForTheObject)
-        func = self._project.registerNotifier(theObject.className
-                                              , Notifier.CHANGE
-                                              , partial(self, notifier=notifier)
-                                              , onceOnly=onceOnly)
-        self._notifiers.append(notifier)
-        self._unregister.append((theObject.className, Notifier.CHANGE, func))
-        if self._debug:
-          # logger.info
-          print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
-                (self._index, self._theObject, trigger, targetName, self._callback)
-                )
+                triggerForTheObject = True
+                self._value = getattr(theObject, targetName)
 
-      # All other triggers; if targetName == None, respond to changes in the object itself.
-      else:
-        if targetName is None:
-          targetName = theObject.className
-          triggerForTheObject = True
+                notifier = (trigger, targetName, triggerForTheObject)
+                # current has its own notifier system
 
-        if trigger == Notifier.CREATE and triggerForTheObject:
-          raise RuntimeWarning('Notifier.__init__: invalid trigger "%s" for instance "%s"' % (targetName, theObject))
+                #TODO:RASMUS: change this and remove this hack
+                # to register strip, the keywords is strips!
+                tName = targetName + 's' if targetName == 'strip' else targetName
+                func = theObject.registerNotify(partial(self, notifier=notifier), tName)
+                self._notifiers.append(notifier)
+                self._unregister.append((tName, Notifier.CURRENT, func))
+                if self._debug:
+                    # logger.info
+                    print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
+                          (self._index, self._theObject, trigger, tName, self._callback)
+                          )
 
-        # Projects allow all registering of all classes
-        allowedClassNames = [theObject.className] + \
-                            [c.className for c in self._getChildClasses(theObject, recursion=self._isProject)]
-        if targetName not in allowedClassNames:
-          raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
+            # MONITOR special case, as the current underpinning implementation does not allow this directly
+            # Hence, we track all changes to the object class, filtering those that apply
+            elif trigger == Notifier.MONITOR:
+                if not hasattr(theObject, targetName):
+                    raise RuntimeWarning(
+                            'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
-        notifier = (trigger, targetName, triggerForTheObject)
-        func = self._project.registerNotifier(targetName
-                                              , trigger
-                                              , partial(self, notifier=notifier)
-                                              , onceOnly=onceOnly)
-        self._notifiers.append(notifier)
-        self._unregister.append((targetName,trigger,func))
-        if self._debug:
-          # logger.info
-          print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
-                (self._index, self._theObject, trigger, targetName, self._callback)
-                )
+                triggerForTheObject = True
+                self._value = getattr(theObject, targetName)
 
-    if len(self._notifiers) == 0:
-      raise RuntimeWarning('Notifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
-                         (theObject, targetName, triggers))
+                notifier = (trigger, targetName, triggerForTheObject)
+                func = self._project.registerNotifier(theObject.className,
+                                                      Notifier.CHANGE,
+                                                      partial(self, notifier=notifier),
+                                                      onceOnly=onceOnly)
+                self._notifiers.append(notifier)
+                self._unregister.append((theObject.className, Notifier.CHANGE, func))
+                if self._debug:
+                    # logger.info
+                    print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
+                          (self._index, self._theObject, trigger, targetName, self._callback)
+                          )
 
-  # GV: can't use __del__ at the moment as it crashes on closing the program (when used in python console)
-  # Improper destructor sequences?
-  #
-  # def __del__(self):
-  #   "del( notifier ) does not trigger this call immediately, as circular references exists"
-  #   print('__del__>', self)
-  #   self.unRegister()
-  #   self._theObject = None
-  #   self._callback = None
-  #   self._project = None
-  #   self._args = None
-  #   self._kwargs = None
+            # All other triggers; if targetName == None, respond to changes in the object itself.
+            else:
+                if targetName is None:
+                    targetName = theObject.className
+                    triggerForTheObject = True
 
-  def unRegister(self):
-    """
-    unregister the notifiers
-    """
-    for targetName, trigger, func in self._unregister:
-      if self._debug:
-        # logger.info # logger apears not to work
-        print('>>> Notifier (%d): unregister %r, %r, %r, %r' % \
-              (self._index, self._theObject, trigger, targetName, self._callback)
-              )
-      if trigger == Notifier.CURRENT:
-        self._theObject.unRegisterNotify(func, targetName)
-      else:
-        self._project.unRegisterNotifier(targetName, trigger, func)
-    self._notifiers = []
-    self._unregister = []
+                if trigger == Notifier.CREATE and triggerForTheObject:
+                    raise RuntimeWarning('Notifier.__init__: invalid trigger "%s" for instance "%s"' % (targetName, theObject))
 
-  def setDebug(self, flag:bool):
-    "Set debug output on/off"
-    self._debug = flag
+                # Projects allow all registering of all classes
+                allowedClassNames = [theObject.className] + \
+                                    [c.className for c in self._getChildClasses(theObject, recursion=self._isProject)]
+                if targetName not in allowedClassNames:
+                    raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
-  def __call__(self, obj:Any, parameter2:Any=None, notifier:tuple=None):
-    """
-    wrapper, accomodating the different triggers before firing the callback
-    """
-    trigger, targetName, triggerForTheObject = notifier
+                notifier = (trigger, targetName, triggerForTheObject)
+                func = self._project.registerNotifier(targetName,
+                                                      trigger,
+                                                      partial(self, notifier=notifier),
+                                                      onceOnly=onceOnly)
+                self._notifiers.append(notifier)
+                self._unregister.append((targetName, trigger, func))
+                if self._debug:
+                    # logger.info
+                    print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
+                          (self._index, self._theObject, trigger, targetName, self._callback)
+                          )
 
-    # CURRENT special case
-    if trigger == Notifier.CURRENT:
-      value = getattr(self._theObject, targetName)
-      if value != self._value:
-        if self._debug:
-          #logger.info
-          print ('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
-                       (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+        if len(self._notifiers) == 0:
+            raise RuntimeWarning('Notifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
+                                 (theObject, targetName, triggers))
+
+    # GV: can't use __del__ at the moment as it crashes on closing the program (when used in python console)
+    # Improper destructor sequences?
+    #
+    # def __del__(self):
+    #   "del( notifier ) does not trigger this call immediately, as circular references exists"
+    #   print('__del__>', self)
+    #   self.unRegister()
+    #   self._theObject = None
+    #   self._callback = None
+    #   self._project = None
+    #   self._args = None
+    #   self._kwargs = None
+
+    def unRegister(self):
+        """
+        unregister the notifiers
+        """
+        for targetName, trigger, func in self._unregister:
+            if self._debug:
+                # logger.info # logger apears not to work
+                print('>>> Notifier (%d): unregister %r, %r, %r, %r' % \
+                      (self._index, self._theObject, trigger, targetName, self._callback)
                       )
-        callbackDict = dict(
-          notifier = self,
-          trigger = trigger,
-          theObject = self._theObject,
-          object = self._theObject,  # triggerForTheObject is True
-          value = value,
-          targetName = targetName,
-          previousValue = self._value
-        )
-        self._callback(callbackDict, *self._args, **self._kwargs)
-        self._value = value
+            if trigger == Notifier.CURRENT:
+                self._theObject.unRegisterNotify(func, targetName)
+            else:
+                self._project.unRegisterNotifier(targetName, trigger, func)
+        self._notifiers = []
+        self._unregister = []
 
-    # MONITOR special case
-    elif trigger == Notifier.MONITOR:
-      if (triggerForTheObject and obj.id == self._theObject.id):
-        value = getattr(self._theObject, targetName)
-        if value != self._value:
-          if self._debug:
-            # logger.info
-            print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
-                  (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+    def setDebug(self, flag: bool):
+        "Set debug output on/off"
+        self._debug = flag
+
+    def __call__(self, obj: Any, parameter2: Any = None, notifier: tuple = None):
+        """
+        wrapper, accomodating the different triggers before firing the callback
+        """
+        trigger, targetName, triggerForTheObject = notifier
+
+        # CURRENT special case
+        if trigger == Notifier.CURRENT:
+            value = getattr(self._theObject, targetName)
+            if value != self._value:
+                if self._debug:
+                    #logger.info
+                    print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
+                          (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+                          )
+                callbackDict = dict(
+                        notifier=self,
+                        trigger=trigger,
+                        theObject=self._theObject,
+                        object=self._theObject,  # triggerForTheObject is True
+                        value=value,
+                        targetName=targetName,
+                        previousValue=self._value
                         )
-          callbackDict = dict(
-            notifier=self,
-            trigger=trigger,
-            theObject=self._theObject,
-            object = self._theObject,  # triggerForTheObject is True
-            value=value,
-            targetName=targetName,
-            previousValue=self._value
-          )
-          self._callback(callbackDict, *self._args, **self._kwargs)
-          self._value = value
+                self._callback(callbackDict, *self._args, **self._kwargs)
+                self._value = value
 
-    # check if the trigger applies for all other cases
-    elif  self._isProject \
-      or (triggerForTheObject and obj.id == self._theObject.id) \
-      or  obj._parent.id == self._theObject.id:
+        # MONITOR special case
+        elif trigger == Notifier.MONITOR:
+            if (triggerForTheObject and obj.id == self._theObject.id):
+                value = getattr(self._theObject, targetName)
+                if value != self._value:
+                    if self._debug:
+                        # logger.info
+                        print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
+                              (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+                              )
+                    callbackDict = dict(
+                            notifier=self,
+                            trigger=trigger,
+                            theObject=self._theObject,
+                            object=self._theObject,  # triggerForTheObject is True
+                            value=value,
+                            targetName=targetName,
+                            previousValue=self._value
+                            )
+                    self._callback(callbackDict, *self._args, **self._kwargs)
+                    self._value = value
 
-      if self._debug:
-        # logger.info
-        print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
-              (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+        # check if the trigger applies for all other cases
+        elif self._isProject \
+                or (triggerForTheObject and obj.id == self._theObject.id) \
+                or obj._parent.id == self._theObject.id:
+
+            if self._debug:
+                # logger.info
+                print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
+                      (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+                      )
+
+            callbackDict = dict(
+                    notifier=self,
+                    trigger=trigger,
+                    theObject=self._theObject,
+                    object=obj,
+                    targetName=targetName,
                     )
+            if trigger == self.RENAME and parameter2 is not None:
+                callbackDict['oldPid'] = parameter2
+            self._callback(callbackDict, *self._args, **self._kwargs)
 
-      callbackDict = dict(
-        notifier=self,
-        trigger=trigger,
-        theObject=self._theObject,
-        object=obj,
-        targetName=targetName,
-      )
-      if trigger==self.RENAME and parameter2 is not None:
-        callbackDict['oldPid'] = parameter2
-      self._callback(callbackDict, *self._args, **self._kwargs)
+        return
 
-    return
+    def __str__(self) -> str:
+        return '<Notifier (%d): theObject=%s, notifiers=%s>' % \
+               (self._index, self._theObject, self._notifiers)
 
-  def __str__(self) -> str:
-    return '<Notifier (%d): theObject=%s, notifiers=%s>' % \
-           (self._index, self._theObject, self._notifiers)
+    # convenience methods
 
-  # convenience methods
+    @staticmethod
+    def _getChildClasses(obj: AbstractWrapperObject, recursion: bool) -> list:
+        """
+        :param obj: valid V3 object
+        :param recursion: use recursion to also add child objects
+        :return: list of valid child classes of obj
+        """
+        #if not isinstance(obj, AbstractWrapperObject):
+        #  raise RuntimeError('Ivalid object type (%s)' % obj)
 
-  @staticmethod
-  def _getChildClasses(obj:AbstractWrapperObject, recursion:bool) -> list:
-    """
-    :param obj: valid V3 object
-    :param recursion: use recursion to also add child objects
-    :return: list of valid child classes of obj
-    """
-    #if not isinstance(obj, AbstractWrapperObject):
-    #  raise RuntimeError('Ivalid object type (%s)' % obj)
+        cls = []
+        for child in obj._childClasses:
+            cls.append(child)
+            if recursion:
+                for grandchild in Notifier._getChildClasses(child, recursion=True):
+                    cls.append(grandchild)
+        return cls
 
-    cls = []
-    for child in obj._childClasses:
-      cls.append(child)
-      if recursion:
-        for grandchild in Notifier._getChildClasses(child, recursion=True):
-          cls.append(grandchild)
-    return cls
+    @staticmethod
+    def _getChildObjects(obj: AbstractWrapperObject, recursion: bool = False) -> list:
+        """
+        depth-first extraction of all child objects, optionally using recursion
+        :param obj: valid V3 object
+        :return: list of child objects
+        """
+        #if not isinstance(obj, AbstractWrapperObject):
+        #  raise RuntimeError('Invalid object type (%s)' % obj)
 
-  @staticmethod
-  def _getChildObjects(obj:AbstractWrapperObject, recursion:bool=False) -> list:
-    """
-    depth-first extraction of all child objects, optionally using recursion
-    :param obj: valid V3 object
-    :return: list of child objects
-    """
-    #if not isinstance(obj, AbstractWrapperObject):
-    #  raise RuntimeError('Invalid object type (%s)' % obj)
-
-    children = []
-    for cls in obj._childClasses:
-      if hasattr(obj, cls._pluralLinkName):
-        for child in getattr(obj, cls._pluralLinkName):
-          children.append(child)
-          if recursion:
-            for grandchild in Notifier._getChildObjects(child, recursion=True):
-              children.append(grandchild)
-    return children
+        children = []
+        for cls in obj._childClasses:
+            if hasattr(obj, cls._pluralLinkName):
+                for child in getattr(obj, cls._pluralLinkName):
+                    children.append(child)
+                    if recursion:
+                        for grandchild in Notifier._getChildObjects(child, recursion=True):
+                            children.append(grandchild)
+        return children
 
 #=============================================================================================================
 # adjust V3 classes by patching AbstractWrapperObject (just a hack for trying)
@@ -547,4 +549,3 @@ class Notifier(object):
 #
 #   n0.delete()
 #   a = r.newNmrAtom()
-

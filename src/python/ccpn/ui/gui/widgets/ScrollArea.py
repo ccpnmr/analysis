@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -29,33 +29,35 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 
+
 SCROLLBAR_POLICY_DICT = dict(
-    always   = QtCore.Qt.ScrollBarAlwaysOn,
-    never    = QtCore.Qt.ScrollBarAlwaysOff,
-    asNeeded = QtCore.Qt.ScrollBarAsNeeded,
-)
+        always=QtCore.Qt.ScrollBarAlwaysOn,
+        never=QtCore.Qt.ScrollBarAlwaysOff,
+        asNeeded=QtCore.Qt.ScrollBarAsNeeded,
+        )
+
 
 class ScrollArea(QtWidgets.QScrollArea, Base):
 
-  def __init__(self, parent, scrollBarPolicies=('asNeeded','asNeeded')
-                     , setLayout=True, minimumSizes=(50, 50), **kwds):
-    QtWidgets.QScrollArea.__init__(self, parent)
-    # kwds['setLayout'] = True  # A scrollable area always needs a layout to function
+    def __init__(self, parent, scrollBarPolicies=('asNeeded', 'asNeeded'),
+                 setLayout=True, minimumSizes=(50, 50), **kwds):
+        QtWidgets.QScrollArea.__init__(self, parent)
+        # kwds['setLayout'] = True  # A scrollable area always needs a layout to function
 
-    Base.__init__(self, setLayout=setLayout, **kwds)
+        Base.__init__(self, setLayout=setLayout, **kwds)
 
-    self.setScrollBarPolicies(scrollBarPolicies)
-    self.setMinimumSizes(minimumSizes)
+        self.setScrollBarPolicies(scrollBarPolicies)
+        self.setMinimumSizes(minimumSizes)
 
-  def setMinimumSizes(self, minimumSizes):
-    "Set (minimumWidth, minimumHeight)"
-    self.setMinimumWidth(minimumSizes[0])
-    self.setMinimumHeight(minimumSizes[1])
+    def setMinimumSizes(self, minimumSizes):
+        "Set (minimumWidth, minimumHeight)"
+        self.setMinimumWidth(minimumSizes[0])
+        self.setMinimumHeight(minimumSizes[1])
 
-  def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded','asNeeded')):
-    "Set the scrolbar policy: always, never, asNeeded"
+    def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded', 'asNeeded')):
+        "Set the scrolbar policy: always, never, asNeeded"
 
-    hp = SCROLLBAR_POLICY_DICT.get(scrollBarPolicies[0])
-    vp = SCROLLBAR_POLICY_DICT.get(scrollBarPolicies[1])
-    self.setHorizontalScrollBarPolicy(hp)
-    self.setVerticalScrollBarPolicy(vp)
+        hp = SCROLLBAR_POLICY_DICT.get(scrollBarPolicies[0])
+        vp = SCROLLBAR_POLICY_DICT.get(scrollBarPolicies[1])
+        self.setHorizontalScrollBarPolicy(hp)
+        self.setVerticalScrollBarPolicy(vp)

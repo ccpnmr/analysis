@@ -88,11 +88,11 @@ measurementType2ElementCode = {
 }
 
 # Isotope-dependent assignment tolerances (in ppm)
-defaultAssignmentTolerance = 0.02
+defaultAssignmentTolerance = 0.03
 isotope2Tolerance = {
-  '1H':0.02,
-  '13C':0.2,
-  '15N':0.2,
+  '1H':0.03,
+  '13C':0.4,
+  '15N':0.4,
 }
 
 # Chosen to be 1) stable. 2) NMR-active, 3)Spin 1/2, 4) abundant
@@ -100,6 +100,7 @@ isotope2Tolerance = {
 # whereas values are titlecase, as standard for isotopeCodes
 DEFAULT_ISOTOPE_DICT = OrderedDict((
   ('H', '1H'),
+  ('D', '2H'),
   ('B', '11B'),
   ('C', '13C'),
   ('N', '15N'),

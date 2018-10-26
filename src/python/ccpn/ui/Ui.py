@@ -97,13 +97,14 @@ class Ui:
                 sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
                 return False
 
-            # sys.stderr.write('==> Registered to: %s (%s)\n' %
-            #                  (self.application._registrationDict.get('name'),
-            #                   self.application._registrationDict.get('organisation')))
-            return Register.updateServer(self.application._registrationDict, self.application.applicationVersion)
+        #     # sys.stderr.write('==> Registered to: %s (%s)\n' %
+        #     #                  (self.application._registrationDict.get('name'),
+        #     #                   self.application._registrationDict.get('organisation')))
+        #       return Register.updateServer(self.application._registrationDict, self.application.applicationVersion)
+        #
+        # else:
 
-        else:
-            return True
+        return True
 
     def echoCommands(self, commands: typing.List[str]):
         """Echo commands strings, one by one, to logger.
@@ -196,6 +197,10 @@ class NoUi(Ui):
             Register.setHashCode(registrationDict)
             Register.saveDict(registrationDict)
             Register.updateServer(registrationDict, applicationVersion)
+
+        else:
+            sys.stderr.write('You must agree to the licence to continue')
+            sys.exit(0)
 
     def _execUpdates(self):
         sys.stderr.write('==> NoUi update\n')

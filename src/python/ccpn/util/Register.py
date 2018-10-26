@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -38,95 +38,97 @@ from ccpn.util import Url
 
 from ccpn.framework.PathsAndUrls import ccpn2Url
 
+
 userAttributes = ('name', 'organisation', 'email')
 
-def _registrationPath():
 
-  return os.path.expanduser('~/.ccpn/register.txt')
+def _registrationPath():
+    return os.path.expanduser('~/.ccpn/register.txt')
+
 
 def _registrationServerScript():
+    return ccpn2Url + '/cgi-bin/register/registerV3'
 
-  return ccpn2Url + '/cgi-bin/register/registerV3'
 
 def loadDict():
+    path = _registrationPath()
 
-  path = _registrationPath()
+    registrationDict = {}
+    try:
+        if os.path.isfile(path):
+            with open(path) as fp:
+                data = fp.read()
+                registrationDict = ast.literal_eval(data)
+    except Exception as e:
+        sys.stderr.write('Error loading registration: %s\n' % e)
 
-  registrationDict = {}
-  try:
-    if os.path.isfile(path):
-      with open(path) as fp:
-        data = fp.read()
-        registrationDict = ast.literal_eval(data)
-  except Exception as e:
-    sys.stderr.write('Error loading registration: %s\n' % e)
+    return registrationDict
 
-  return registrationDict
 
 def saveDict(registrationDict):
+    path = _registrationPath()
+    directory = os.path.dirname(path)
 
-  path = _registrationPath()
-  directory = os.path.dirname(path)
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
 
-  try:
-    if not os.path.exists(directory):
-      os.makedirs(directory)
+        with open(path, 'w') as fp:
+            fp.write(str(registrationDict))
+    except Exception as e:
+        sys.stderr.write('Error saving registration: %s\n' % e)
 
-    with open(path, 'w') as fp:
-      fp.write(str(registrationDict))
-  except Exception as e:
-    sys.stderr.write('Error saving registration: %s\n' % e)
 
 def getHashCode(registrationDict):
-  
-  macAddress = uuid.getnode()
+    macAddress = uuid.getnode()
 
-  m = hashlib.md5()
-  for attrib in userAttributes:
-    value = registrationDict.get(attrib, '')
-    m.update(value.encode('utf-8'))
+    m = hashlib.md5()
+    for attrib in userAttributes:
+        value = registrationDict.get(attrib, '')
+        m.update(value.encode('utf-8'))
 
-  return m.hexdigest()
-  
+    return m.hexdigest()
+
+
 def setHashCode(registrationDict):
-  
-  registrationDict['hashcode'] = getHashCode(registrationDict)
-  
+    registrationDict['hashcode'] = getHashCode(registrationDict)
+
+
 def isNewRegistration(registrationDict):
-  
-  for attrib in userAttributes:
-    if not registrationDict.get(attrib):
-      return True
+    for attrib in userAttributes:
+        if not registrationDict.get(attrib):
+            return True
 
-  if 'hashcode' not in registrationDict:
-    return True
-    
-  hashcode = getHashCode(registrationDict)
-  
-  return hashcode != registrationDict['hashcode']
-  
+    if 'hashcode' not in registrationDict:
+        return True
+
+    hashcode = getHashCode(registrationDict)
+
+    return hashcode != registrationDict['hashcode']
+
+
 def updateServer(registrationDict, version='3'):
+    url = _registrationServerScript()
 
-  url = _registrationServerScript()
+    values = {}
+    for attr in userAttributes + ('hashcode',):
+        value = []
+        for c in registrationDict[attr]:
+            value.append(c if 32 <= ord(c) < 128 else '_')
+        values[attr] = ''.join(value)
 
-  values = {}
-  for attr in userAttributes + ('hashcode',):
-    value = []
-    for c in registrationDict[attr]:
-      value.append(c if 32 <= ord(c) < 128 else '_')
-    values[attr] = ''.join(value)
+    values['version'] = str(version)
 
-  values['version'] = str(version)
-  
-  try:
-    return Url.fetchUrl(url, values, timeout=2.0)
-  except Exception as e:
-    logger = Logging.getLogger()
-    logger.warning('Could not update registration on server.')
+    try:
+        return Url.fetchUrl(url, values, timeout=2.0)
+    except Exception as e:
+        logger = Logging.getLogger()
+        logger.warning('Could not update registration on server.')
+
 
 def checkInternetConnection():
-  try:
-    return Url.checkInternetConnection()
+    try:
+        return Url.checkInternetConnection()
 
-  except:
-    return False
+    except:
+        return False

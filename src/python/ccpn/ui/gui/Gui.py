@@ -38,10 +38,11 @@ from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.core.lib.Notifiers import Notifier
-
+from ccpn.ui.gui.widgets.MessageDialog import showError
 # This import initializes relative paths for QT style-sheets.  Do not remove!
 
 from ccpn.util import Logging
+from ccpn.util import Register
 
 
 def qtMessageHandler(*errors):
@@ -203,13 +204,19 @@ class Gui(Ui):
 
         self.qtApp.start()
 
-    def _showRegisterPopup(self):
+    def _registerDetails(self):
         """Display registration popup"""
 
-        popup = RegisterPopup(self.mainWindow, version=self.application.applicationVersion, modal=True)
-        self.mainWindow.show()
-        popup.exec_()
-        self.qtApp.processEvents()
+        # check valid internet connection first
+        if not Register.checkInternetConnection():
+            showError('Registration','Could not connect to the registration server, please check your internet connection.')
+            sys.exit(0)
+
+        else:
+            popup = RegisterPopup(self.mainWindow, version=self.application.applicationVersion, modal=True)
+            self.mainWindow.show()
+            popup.exec_()
+            self.qtApp.processEvents()
 
     def _setupMainWindow(self, mainWindow):
         # Set up mainWindow

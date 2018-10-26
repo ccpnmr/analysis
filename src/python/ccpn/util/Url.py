@@ -34,49 +34,10 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
     from urllib.parse import urlencode, quote
     import certifi
     import ssl
+    import logging
 
-    # import urllib
-    # import urllib.parse
-    # import urllib.request
-    # import ssl
-    #
-    # # testing urllib3 - not needed yet as server is not passing through POST body
-    # # import sys
-    # # import urllib3
-    #
-
-    import json
-
-    # #
-    # # urllib3.contrib.pyopenssl.inject_into_urllib3()
-    # # http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
-    # #                            ca_certs=certifi.where(),
-    # #                            timeout=urllib3.Timeout(connect=5.0, read=5.0),
-    # #                            retries=urllib3.Retry(1, redirect=False))
-    # # response = http.request('POST', url,
-    # #                         headers={'Content-Type': 'application/json'},
-    # #                         body=json.dumps(data),
-    # #                         preload_content=False)
-    # # print('>>>REGISTERurllib3', response.read().decode('utf-8'))
-    #
-    # if not headers:
-    #     headers = {}
-    #
-    # if data:
-    #     data = urllib.parse.urlencode(data)
-    #     # data = data.encode('utf-8')
-    # else:
-    #     data = None
-    #
-    # # This restores the same behavior as before.
-    # context = ssl._create_unverified_context()
-    #
-    # # edit - added data to url as server not passing through POST data
-    # request = urllib.request.Request(url+'?'+str(data))                          #)   , data, headers)
-    # response = urllib.request.urlopen(request, timeout=timeout, context=context)
-    # result = response.read().decode('utf-8')
-    #
-    # return result
+    urllib3_logger = logging.getLogger('urllib3')
+    urllib3_logger.setLevel(logging.CRITICAL)
 
     context = ssl.create_default_context()
     context.check_hostname = False
@@ -84,22 +45,19 @@ def fetchUrl(url, data=None, headers=None, timeout=None):
 
     if not headers:
         headers = {'Content-type': 'application/x-www-form-urlencoded;charset=UTF-8'}
-    body = urlencode(data, quote_via=quote).encode('utf-8')
+    body = urlencode(data, quote_via=quote).encode('utf-8') if data else None
 
     urllib3.contrib.pyopenssl.inject_into_urllib3()
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
                                ca_certs=certifi.where(),
-                               timeout=urllib3.Timeout(connect=5.0, read=5.0),
+                               timeout=urllib3.Timeout(connect=3.0, read=3.0),
                                retries=urllib3.Retry(1, redirect=False))
 
     response = http.request('POST', url,
                             headers=headers,
                             body=body,
                             preload_content=False)
-    result = response.read().decode('utf-8')
-
-    return result
-
+    return response.read().decode('utf-8')
 
 def uploadFile(url, fileName, data=None):
     import os
@@ -118,3 +76,13 @@ def uploadFile(url, fileName, data=None):
         return fetchUrl(url, data)
     except:
         return None
+
+def checkInternetConnection():
+    from ccpn.framework.PathsAndUrls import ccpnUrl
+
+    try:
+        fetchUrl(ccpnUrl)
+        return True
+
+    except Exception as es:
+        return False

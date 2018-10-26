@@ -122,6 +122,11 @@ def updateServer(registrationDict, version='3'):
     return Url.fetchUrl(url, values, timeout=2.0)
   except Exception as e:
     logger = Logging.getLogger()
-    logger.warning('Could not update registration on server: %s' % e)
+    logger.warning('Could not update registration on server.')
 
+def checkInternetConnection():
+  try:
+    return Url.checkInternetConnection()
 
+  except:
+    return False

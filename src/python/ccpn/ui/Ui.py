@@ -91,18 +91,19 @@ class Ui:
         if not self._isRegistered:
 
             # call the subclassed register method
-            self._showRegisterPopup()
+            self._registerDetails()
 
             if not self._isRegistered:
                 sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
                 return False
 
-        # sys.stderr.write('==> Registered to: %s (%s)\n' %
-        #                  (self.application._registrationDict.get('name'),
-        #                   self.application._registrationDict.get('organisation')))
-        Register.updateServer(self.application._registrationDict, self.application.applicationVersion)
+            # sys.stderr.write('==> Registered to: %s (%s)\n' %
+            #                  (self.application._registrationDict.get('name'),
+            #                   self.application._registrationDict.get('organisation')))
+            return Register.updateServer(self.application._registrationDict, self.application.applicationVersion)
 
-        return True
+        else:
+            return True
 
     def echoCommands(self, commands: typing.List[str]):
         """Echo commands strings, one by one, to logger.
@@ -138,9 +139,15 @@ class Ui:
 
 class NoUi(Ui):
 
-    def _showRegisterPopup(self):
+    def _registerDetails(self):
         """Display registration information
         """
+
+        # check valid internet connection first
+        if not Register.checkInternetConnection():
+            sys.stderr.write('Could not connect to the registration server, please check your internet connection.')
+            sys.exit(0)
+
         applicationVersion = __version__.split()[1]
 
         # sys.stderr.write('\n### Please register, using another application, or in Gui Mode\n')

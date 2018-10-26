@@ -50,6 +50,10 @@ def _registrationServerScript():
     return ccpn2Url + '/cgi-bin/register/registerV3'
 
 
+def _checkRegistrationServerScript():
+    return ccpn2Url + '/cgi-bin/register/checkV3'
+
+
 def loadDict():
     path = _registrationPath()
 
@@ -124,6 +128,27 @@ def updateServer(registrationDict, version='3'):
     except Exception as e:
         logger = Logging.getLogger()
         logger.warning('Could not update registration on server.')
+
+
+def checkServer(registrationDict, version='3'):
+    url = _checkRegistrationServerScript()
+
+    values = {}
+    for attr in userAttributes + ('hashcode',):
+        value = []
+        for c in registrationDict[attr]:
+            value.append(c if 32 <= ord(c) < 128 else '_')
+        values[attr] = ''.join(value)
+
+    values['version'] = str(version)
+
+    try:
+        found = Url.fetchUrl(url, values, timeout=2.0)
+        return found.strip() == 'OK'
+
+    except Exception as e:
+        logger = Logging.getLogger()
+        logger.warning('Could not check registration on server.')
 
 
 def checkInternetConnection():

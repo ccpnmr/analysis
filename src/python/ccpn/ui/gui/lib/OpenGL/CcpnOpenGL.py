@@ -105,7 +105,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_IGNORE, GLRENDE
     GLSymbolArray, GLLabelArray
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import GLViewports
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLWidgets import GLIntegralRegion, GLExternalRegion, \
-    GLRegion, REGION_COLOURS
+    GLRegion, REGION_COLOURS, GLInfiniteLine
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLLabelling import GLpeakNdLabelling, GLpeak1dLabelling, \
     GLintegral1dLabelling, GLintegralNdLabelling, \
     GLmultiplet1dLabelling, GLmultipletNdLabelling
@@ -1573,6 +1573,26 @@ class CcpnGLWidget(QOpenGLWidget):
 
         return self._dragRegions
 
+    def mousePressInfiniteLine(self, regions):
+        for region in regions:
+            if region._objectView and not region._objectView.isVisible():
+                continue
+
+            if region.visible and region.movable:
+                if region.orientation == 'h':
+                    if not self._widthsChangedEnough((0.0, region.values),
+                                                     (0.0, self.cursorCoordinate[1]),
+                                                     tol=abs(3 * self.pixelY)):
+                        self._dragRegions.add((region, 'h', 4))  # line 0 of h-region
+
+                elif region.orientation == 'v':
+                    if not self._widthsChangedEnough((region.values, 0.0),
+                                                     (self.cursorCoordinate[0], 0.0),
+                                                     tol=abs(3 * self.pixelX)):
+                        self._dragRegions.add((region, 'v', 4))  # line 0 of v-region
+
+        return self._dragRegions
+
     def mousePressInIntegralLists(self):
         """Check whether the mouse has been pressed in an integral
         """
@@ -1609,8 +1629,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.mousePressInCornerButtons(mx, my)
 
-        #€ check for dragging of infinite lines, region boundaries, integrals
-        self.mousePressInRegion(self._infiniteLines)
+        # check for dragging of infinite lines, region boundaries, integrals
+        self.mousePressInfiniteLine(self._infiniteLines)
+
         while len(self._dragRegions) > 1:
             self._dragRegions.pop()
 
@@ -1786,17 +1807,33 @@ class CcpnGLWidget(QOpenGLWidget):
                         if reg[1] == 'v':
 
                             if reg[2] == 3:
+
+                                # moving the mouse in a region
                                 values[0] += dx * self.pixelX
                                 values[1] += dx * self.pixelX
+                            elif reg[2] == 4:
+
+                                # moving an infinite line
+                                values += dx * self.pixelX
                             else:
+
+                                # moving one edge of a region
                                 values[reg[2]] += dx * self.pixelX
 
                         elif reg[1] == 'h':
 
                             if reg[2] == 3:
+
+                                # moving the mouse in a region
                                 values[0] -= dy * self.pixelY
                                 values[1] -= dy * self.pixelY
+                            elif reg[2] == 4:
+
+                                # moving an infinite line
+                                values -= dy * self.pixelY
                             else:
+
+                                # moving one edge of a region
                                 values[reg[2]] -= dy * self.pixelY
 
                         reg[0].values = values
@@ -2390,7 +2427,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 axisCode = self._axisCodes[0]
                 orientation = 'v'
 
-        self._infiniteLines.append(GLRegion(self.strip, self._regionList,
+        self._infiniteLines.append(GLInfiniteLine(self.strip, self._regionList,
                                             values=values,
                                             axisCode=axisCode,
                                             orientation=orientation,
@@ -2746,13 +2783,21 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glColor4f(*infLine.brush)
                 GL.glLineStipple(1, GLDefs.GLLINE_STYLES[infLine.lineStyle])
 
+                # GL.glBegin(GL.GL_LINES)
+                # if infLine.orientation == 'h':
+                #     GL.glVertex2d(self.axisL, infLine.values[0])
+                #     GL.glVertex2d(self.axisR, infLine.values[0])
+                # else:
+                #     GL.glVertex2d(infLine.values[0], self.axisT)
+                #     GL.glVertex2d(infLine.values[0], self.axisB)
+
                 GL.glBegin(GL.GL_LINES)
                 if infLine.orientation == 'h':
-                    GL.glVertex2d(self.axisL, infLine.values[0])
-                    GL.glVertex2d(self.axisR, infLine.values[0])
+                    GL.glVertex2d(self.axisL, infLine.values)
+                    GL.glVertex2d(self.axisR, infLine.values)
                 else:
-                    GL.glVertex2d(infLine.values[0], self.axisT)
-                    GL.glVertex2d(infLine.values[0], self.axisB)
+                    GL.glVertex2d(infLine.values, self.axisT)
+                    GL.glVertex2d(infLine.values, self.axisB)
 
                 GL.glEnd()
 

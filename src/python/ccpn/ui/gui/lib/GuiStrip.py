@@ -818,7 +818,7 @@ class GuiStrip(Frame):
     def _newPositionLineCallback(self):
         if not self.isDeleted:
             phasingFrame = self.spectrumDisplay.phasingFrame
-            self._newPosition = self.pivotLine.values[0]
+            self._newPosition = self.pivotLine.values               # [0]
             phasingFrame.pivotEntry.setValue(self._newPosition)
 
     def _newPositionPivotCallback(self, value):

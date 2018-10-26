@@ -60,6 +60,9 @@ GLLINE_STYLES_ARRAY = {
     'dotted': [1, 1]
 }
 
+GLLINETYPE = 'line'
+GLREGIONTYPE = 'region'
+
 AXISLIMITS = [-1.0e12, 1.0e12]
 INVERTED_AXISLIMITS = [1.0e12, -1.0e12]
 RANGELIMITS = [1.0e12, 0.0]

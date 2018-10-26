@@ -130,7 +130,7 @@ class CalibrateY1DWidgets(Frame):
     def _newPositionLineCallback(self):
         # self.newPosition = self.infiniteLine.pos().y()
 
-        self.newPosition = self.infiniteLine.values[0]
+        self.newPosition = self.infiniteLine.values                         # [0]
         self.boxNewPosition.setValue(round(self.newPosition, 3))
 
     def _newPositionBoxCallback(self):
@@ -140,7 +140,7 @@ class CalibrateY1DWidgets(Frame):
             self.infiniteLine.setValue(self.newPosition)
 
     def _originalPositionLineCallback(self):
-        self.originalPosition = self.originalPosInfiniteLine.values[0]
+        self.originalPosition = self.originalPosInfiniteLine.values                 # [0]
         self.boxOriginalPosition.setValue(round(self.originalPosition, 3))
 
     def _originalPositionBoxCallback(self):
@@ -148,6 +148,10 @@ class CalibrateY1DWidgets(Frame):
         if box.hasFocus():
             self.originalPosition = round(box.value(), 3)
             self.originalPosInfiniteLine.setValue(self.originalPosition)
+
+    def setOriginalPos(self, value):
+        self.originalPosition = round(value, 3)
+        self.originalPosInfiniteLine.setValue(self.originalPosition)
 
     def _removeLines(self):
         if self.mainWindow is not None:
@@ -202,13 +206,13 @@ class CalibrateY1DWidgets(Frame):
             getLogger().debug('>>>Undo.%s._applychanges' % errorName)
 
     def _calibrateSpectra(self, fromPos, toPos):
-
         if self.mainWindow is not None:
             if self.strip is not None:
                 for spectrumView in self.strip.spectrumViews:
                     if spectrumView.plot.isVisible():
                         spectrum = spectrumView.spectrum
                         _calibrateY1D(spectrum, fromPos, toPos)
+                        self.setOriginalPos(toPos)
 
                         spectrumView.buildContours = True
 

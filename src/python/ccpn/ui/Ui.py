@@ -104,6 +104,9 @@ class Ui:
         #
         # else:
 
+        # check whether your registration details are on the server
+        check = Register.checkServer(self.application._registrationDict, self.application.applicationVersion)
+
         return True
 
     def echoCommands(self, commands: typing.List[str]):

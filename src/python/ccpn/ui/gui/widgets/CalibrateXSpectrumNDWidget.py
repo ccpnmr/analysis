@@ -38,8 +38,9 @@ class CalibrateXNDWidgets(CalibrateX1DWidgets):
                     if spectrumView.isVisible():
                         spectrum = spectrumView.spectrum
                         _calibrateXND(spectrum, fromPos, toPos)
+                        self.setOriginalPos(toPos)
 
-                    spectrumView.buildContours = True
+                        spectrumView.buildContours = True
 
         if self.GLWidget:
             # spawn a redraw of the GL windows

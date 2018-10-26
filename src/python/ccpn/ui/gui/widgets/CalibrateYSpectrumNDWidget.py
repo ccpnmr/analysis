@@ -40,8 +40,9 @@ class CalibrateYNDWidgets(CalibrateY1DWidgets):
                     if spectrumView.isVisible():
                         spectrum = spectrumView.spectrum
                         _calibrateYND(spectrum, fromPos, toPos)
+                        self.setOriginalPos(toPos)
 
-                    spectrumView.buildContours = True
+                        spectrumView.buildContours = True
 
         if self.GLWidget:
             # spawn a redraw of the GL windows

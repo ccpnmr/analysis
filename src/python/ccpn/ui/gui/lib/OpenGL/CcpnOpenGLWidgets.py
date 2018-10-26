@@ -36,6 +36,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLVertexArray
 from ccpn.core.Integral import Integral
 # spawn a redraw of the GL windows
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLREGIONTYPE, GLLINETYPE
 
 
 try:
@@ -59,7 +60,7 @@ REGION_COLOURS = {
     'purple': (0.7, 0.4, 1.0, CCPNGLWIDGET_REGIONSHADE),
     None: (0.2, 0.1, 1.0, CCPNGLWIDGET_REGIONSHADE),
     'highlight': (0.5, 0.5, 0.5, CCPNGLWIDGET_REGIONSHADE)
-}
+    }
 
 
 class GLRegion(QtWidgets.QWidget):
@@ -68,7 +69,7 @@ class GLRegion(QtWidgets.QWidget):
     def __init__(self, parent, glList, values=(0, 0), axisCode=None, orientation='h',
                  brush=None, colour='blue',
                  movable=True, visible=True, bounds=None,
-                 obj=None, objectView=None, lineStyle='dashed'):
+                 obj=None, objectView=None, lineStyle='dashed', regionType=GLREGIONTYPE):
 
         super(GLRegion, self).__init__(parent)
 
@@ -85,6 +86,7 @@ class GLRegion(QtWidgets.QWidget):
         self._object = obj
         self._objectView = objectView
         self.lineStyle = lineStyle
+        self.regionType = regionType
         self.pid = obj.pid if hasattr(obj, 'pid') else None
 
         # create a notifier for updating
@@ -235,6 +237,47 @@ class GLRegion(QtWidgets.QWidget):
             solidColour[3] = 1.0
 
             intArea.colors = np.array(solidColour * intArea.numVertices)
+
+
+class GLInfiniteLine(GLRegion):
+    valuesChanged = pyqtSignal(float)
+
+    def __init__(self, parent, glList, values=(0, 0), axisCode=None, orientation='h',
+                 brush=None, colour='blue',
+                 movable=True, visible=True, bounds=None,
+                 obj=None, objectView=None, lineStyle='dashed', regionType=GLLINETYPE):
+
+        super(GLInfiniteLine, self).__init__(parent, glList, values=values, axisCode=axisCode, orientation=orientation,
+                                             brush=brush, colour=colour,
+                                             movable=movable, visible=visible, bounds=bounds,
+                                             obj=obj, objectView=objectView, lineStyle=lineStyle, regionType=regionType)
+
+    # same as GLRegion, but _values is a singular item
+    @property
+    def values(self):
+        return self._values
+
+    @values.setter
+    def values(self, value):
+        self._values = value
+        try:
+            self._glList.renderMode = GLRENDERMODE_RESCALE
+        except Exception as es:
+            pass
+
+        self.valuesChanged.emit(value)
+
+        # change the limits in the integral object
+        if self._object and not self._object.isDeleted:
+            self._object.limits = [(value, value)]
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
+
+    def setValue(self, val):
+        # use the region to simulate an infinite line - calls setter above
+        # raise RuntimeError('Deprecated, please us values = <value>')
+        self.values = val
 
 
 class GLExternalRegion(GLVertexArray):

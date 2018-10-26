@@ -2979,8 +2979,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.mouseFormat = " %s: %.3f\n %s: %.6g"
                 self.diffMouseFormat = " d%s: %.3f\n d%s: %.6g"
             else:
-                self.mouseFormat = " %s: %.2f\n %s: %.2f"
-                self.diffMouseFormat = " d%s: %.2f\n d%s: %.2f"
+                self.mouseFormat = " %s: %.3f\n %s: %.3f"
+                self.diffMouseFormat = " d%s: %.3f\n d%s: %.3f"
         except:
             self.mouseFormat = " %s: %.3f  %s: %.4g"
             self.diffMouseFormat = " d%s: %.3f  d%s: %.4g"

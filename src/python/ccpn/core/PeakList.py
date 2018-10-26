@@ -705,7 +705,10 @@ class PeakList(AbstractWrapperObject):
     codes = list(positionCodeDict.keys())
     positions = [positionCodeDict[code] for code in codes]
     axisCodeMapping = commonUtil._axisCodeMapIndices(codes, self.spectrum.axisCodes)
-    tolerances = self.spectrum.assignmentTolerances
+
+    # divide by 2 to get the double-width tolerance, i.e. the width of the region
+    tolerances = tuple(tol / 2 for tol in self.spectrum.assignmentTolerances)
+
     limits = self.spectrum.spectrumLimits
     selectedRegion = []
     minDropFactor = self.project._appBase.preferences.general.peakDropFactor

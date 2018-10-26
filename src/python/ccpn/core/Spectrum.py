@@ -816,9 +816,15 @@ class Spectrum(AbstractWrapperObject):
         return tuple(result)
 
     @axisCodes.setter
-    def axisCodes(self, value):
-        # TODO axisCodes shold be unique, but I am not sure this is enforced
-        self._setExpDimRefAttribute('axisCode', value, mandatory=False)
+    def axisCodes(self, values):
+        check = {}
+        for i, v in enumerate(values):
+            if v in check:
+                raise ValueError('axisCodes should be an unique sequence of strings; got duplicate entry axisCodes[%s]="%s"'
+                                 % (i,v))
+            else:
+                check[v] = i
+        self._setExpDimRefAttribute('axisCode', values, mandatory=False)
 
     @property
     def acquisitionAxisCode(self) -> Optional[str]:

@@ -74,9 +74,9 @@ class NmrResidueTableModule(CcpnModule):
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
 
-    includePeakListButton = True
-    includeNmrChainButton = True
-    includeSpectrumTable = True
+    includePeakLists = False
+    includeNmrChains = False
+    includeSpectrumTable = False
 
     className = 'NmrResidueTableModule'
 
@@ -100,65 +100,68 @@ class NmrResidueTableModule(CcpnModule):
             self.current = None
             displayText = []
 
-        # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
-        # backBoneAssignment modules
-        self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
-                                 grid=(0, 0), vAlign='top', hAlign='left')
-        #self._NTSwidget = self.settingsWidget
+        # # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
+        # # backBoneAssignment modules
+        # self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
+        #                          grid=(0, 0), vAlign='top', hAlign='left')
+        # #self._NTSwidget = self.settingsWidget
+        #
+        # # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
+        # # underpinning the addNotifier call do not allow for it either
+        # row = 0
+        # colwidth = 140
+        # self.displaysWidget = ListCompoundWidget(self._NTSwidget,
+        #                                          grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+        #                                          vPolicy='minimal',
+        #                                          #minimumWidths=(colwidth, 0, 0),
+        #                                          fixedWidths=(colwidth, colwidth, colwidth),
+        #                                          orientation='left',
+        #                                          labelText='Display(s):',
+        #                                          tipText='SpectrumDisplay modules to respond to double-click',
+        #                                          texts=[ALL] + displayText)
+        # self.displaysWidget.setFixedHeights((None, None, 40))
+        # self.displaysWidget.pulldownList.set(ALL)
+        # self.displaysWidget.setPreSelect(self._fillDisplayWidget)
+        #
+        # row += 1
+        # self.sequentialStripsWidget = CheckBoxCompoundWidget(
+        #         self._NTSwidget,
+        #         grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+        #         #minimumWidths=(colwidth, 0),
+        #         fixedWidths=(colwidth, 30),
+        #         orientation='left',
+        #         labelText='Show sequential strips:',
+        #         checked=False
+        #         )
+        #
+        # row += 1
+        # self.markPositionsWidget = CheckBoxCompoundWidget(
+        #         self._NTSwidget,
+        #         grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+        #         #minimumWidths=(colwidth, 0),
+        #         fixedWidths=(colwidth, 30),
+        #         orientation='left',
+        #         labelText='Mark positions:',
+        #         checked=True
+        #         )
+        #
+        # row += 1
+        # self.autoClearMarksWidget = CheckBoxCompoundWidget(
+        #         self._NTSwidget,
+        #         grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+        #         #minimumWidths=(colwidth, 0),
+        #         fixedWidths=(colwidth, 30),
+        #         orientation='left',
+        #         labelText='Auto clear marks:',
+        #         checked=True
+        #         )
+        # row += 1
 
-        # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
-        # underpinning the addNotifier call do not allow for it either
-        row = 0
-        colwidth = 140
-        self.displaysWidget = ListCompoundWidget(self._NTSwidget,
-                                                 grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                 vPolicy='minimal',
-                                                 #minimumWidths=(colwidth, 0, 0),
-                                                 fixedWidths=(colwidth, colwidth, colwidth),
-                                                 orientation='left',
-                                                 labelText='Display(s):',
-                                                 tipText='SpectrumDisplay modules to respond to double-click',
-                                                 texts=[ALL] + displayText)
-        self.displaysWidget.setFixedHeights((None, None, 40))
-        self.displaysWidget.pulldownList.set(ALL)
-        self.displaysWidget.setPreSelect(self._fillDisplayWidget)
-
-        row += 1
-        self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                self._NTSwidget,
-                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Show sequential strips:',
-                checked=False
-                )
-
-        row += 1
-        self.markPositionsWidget = CheckBoxCompoundWidget(
-                self._NTSwidget,
-                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Mark positions:',
-                checked=True
-                )
-
-        row += 1
-        self.autoClearMarksWidget = CheckBoxCompoundWidget(
-                self._NTSwidget,
-                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Auto clear marks:',
-                checked=True
-                )
-
-        row += 1
-        self._newStripPlotWidget = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
-                                             grid=(1,1))
+        self.nmrResidueTableSettings = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
+                                                 includePeakLists=self.includePeakLists,
+                                                 includeNmrChains=self.includeNmrChains,
+                                                 includeSpectrumTable=self.includeSpectrumTable,
+                                                 grid=(0, 0))
 
         # initialise the table
         self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget,
@@ -175,9 +178,9 @@ class NmrResidueTableModule(CcpnModule):
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
         # self.mainWidget.layout().setVerticalSpacing(0)
 
-    def _fillDisplayWidget(self):
-        list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-        self.displaysWidget.pulldownList.setData(texts=list)
+    # def _fillDisplayWidget(self):
+    #     list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
+    #     self.displaysWidget.pulldownList.setData(texts=list)
 
     def _maximise(self):
         """
@@ -197,7 +200,7 @@ class NmrResidueTableModule(CcpnModule):
         """
         displays = []
         # check for valid displays
-        gids = self.displaysWidget.getTexts()
+        gids = self.nmrResidueTableSettings.displaysWidget.getTexts()
         if len(gids) == 0: return displays
         if ALL in gids:
             displays = self.application.ui.mainWindow.spectrumDisplays
@@ -226,7 +229,7 @@ class NmrResidueTableModule(CcpnModule):
                                             (self.className, nmrResidue.pid))
         try:
             # optionally clear the marks
-            if self.autoClearMarksWidget.checkBox.isChecked():
+            if self.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
                 self.application.ui.mainWindow.clearMarks()
 
             # navigate the displays
@@ -236,22 +239,21 @@ class NmrResidueTableModule(CcpnModule):
                     navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0,
                                                   widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
                                                   showSequentialResidues=(len(display.axisCodes) > 2) and
-                                                                         self.sequentialStripsWidget.checkBox.isChecked(),
-                                                  markPositions=self.markPositionsWidget.checkBox.isChecked()
+                                                                         self.nmrResidueTableSettings.sequentialStripsWidget.checkBox.isChecked(),
+                                                  markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked()
                                                   )
         finally:
             self.application._endCommandBlock()
 
     def _closeModule(self):
-        """
-        CCPN-INTERNAL: used to close the module
+        """CCPN-INTERNAL: used to close the module
         """
         self.nmrResidueTable._close()
+        self.nmrResidueTableSettings._cleanupWidget()
         super(NmrResidueTableModule, self)._closeModule()
 
     def close(self):
-        """
-        Close the table from the commandline
+        """Close the table from the commandline
         """
         self._closeModule()
 
@@ -311,7 +313,7 @@ class NmrResidueTable(QuickTable):
 
         self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
         self._widgetScrollArea.setWidget(self._widget)
-        self._widgetScrollArea.setGridLayout()
+        # self._widgetScrollArea.setGridLayout()
 
         self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 

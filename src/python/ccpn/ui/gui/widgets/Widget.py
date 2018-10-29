@@ -51,14 +51,15 @@ class Widget(QtWidgets.QWidget, Base):
         """Delete all the contents of the widget
         """
         layout = self.getLayout()
-        rowCount = layout.rowCount()
-        colCount = layout.columnCount()
+        if layout:
+            rowCount = layout.rowCount()
+            colCount = layout.columnCount()
 
-        for r in range(rowCount):
-            for m in range(colCount):
-                item = layout.itemAtPosition(r, m)
-                if item and item.widget():
-                    item.widget().deleteLater()
+            for r in range(rowCount):
+                for m in range(colCount):
+                    item = layout.itemAtPosition(r, m)
+                    if item and item.widget():
+                        item.widget().deleteLater()
 
 
 class ScrollableWidget(Widget):

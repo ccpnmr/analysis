@@ -52,8 +52,11 @@ class EstimateNoisePopup(CcpnDialog):
         # import the new strip plot widget - also used in backbone assignment and pick and assign module
 
         self.spectrumDisplay = spectrumDisplay
-        self.spectrumDisplayLabel = Label(self, "spectrumDisplay Name ", grid=(0, 0))
-        self.spectrumDisplayText = Label(self, spectrumDisplay.pid, grid=(0, 1))
+        self.spectrumDisplayLabel = Label(self, "Estimate noise in spectrumDisplay %s" % spectrumDisplay.id, grid=(0, 0))
 
         ButtonList(self, ['Cancel', 'OK'], [self.reject, self.accept], grid=(1, 1))
 
+    def _cleanupWidget(self):
+        """Cleanup the notifiers that are left behind after the widget is closed
+        """
+        self.close()

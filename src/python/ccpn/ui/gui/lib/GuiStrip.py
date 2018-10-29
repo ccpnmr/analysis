@@ -467,6 +467,7 @@ class GuiStrip(Frame):
 
         popup = EstimateNoisePopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumDisplay=self.spectrumDisplay)
         popup.exec_()
+        popup._cleanupWidget()
 
     def makeStripPlot(self):
         """
@@ -475,8 +476,9 @@ class GuiStrip(Frame):
         from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
 
         popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumDisplay=self.spectrumDisplay,
-                               includePeakLists=True, includeNmrChains=True, includeSpectrumTable=True)
+                               includePeakLists=True, includeNmrChains=True, includeSpectrumTable=False)
         popup.exec_()
+        popup._cleanupWidget()
 
     def _unregisterStrip(self):
         self._stripNotifier.unRegister()

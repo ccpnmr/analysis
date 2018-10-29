@@ -83,10 +83,11 @@ class CheckBoxes(QtWidgets.QWidget, Base):
 
         self.texts = texts
         if selectedInd is not None:
-            self.checkBoxes[selectedInd].setChecked(True)
+            if selectedInd < len(self.checkBoxes):
+                self.checkBoxes[selectedInd].setChecked(True)
         elif selected and selected in self.texts:
             self.set(selected)
-        else:
+        elif self.checkBoxes:
             self.checkBoxes[0].setChecked(True)
 
     def getCheckBox(self, text):

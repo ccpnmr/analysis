@@ -334,7 +334,7 @@ class StripPlot(Widget):
                                    grid=(spectraRow, 0), gridSpan=(1, self.maxLen + 1),
                                    vAlign='top', hAlign='left')
         self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
-        self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=0, texts=['C'],
+        self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=None, texts=[],
                                           callback=self._changeAxisCode, grid=(0, 1))
 
         self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
@@ -428,6 +428,12 @@ class StripPlot(Widget):
         """Handle the return from widget callback
         """
         pass
+
+    def _cleanupWidget(self):
+        """Cleanup the notifiers that are left behind after the widget is closed
+        """
+        self._unRegisterNotifiers()
+        self._unregisterMonitors()
 
 class _SpectrumRow(Frame):
     "Class to make a spectrum row"

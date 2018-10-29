@@ -1121,9 +1121,20 @@ class GuiSpectrumDisplay(CcpnModule):
       newSpectrum = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
       if newSpectrum:
 
+        newInd = self.spectrumViews.index(newSpectrum)
         index = list(self.getOrderedSpectrumViewsIndex())
-        index.append(len(index))
+        index = [(ii+1) if (ii >= newInd) else ii for ii in index]
+        index.append(newInd)
+
+
+        # index = list(self.getOrderedSpectrumViewsIndex())
+        # index.append(len(index))
         self.setOrderedSpectrumViewsIndex(tuple(index))
+
+        # now move the inserted item to the end
+        # get index of the new item, update all current indices greater than this + 1
+        # add new index to the end
+
 
         # self._orderedSpectra.append(spectrum)
 

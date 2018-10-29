@@ -260,26 +260,38 @@ class StripPlot(Widget):
             if not maxLen:
                 return 0, None, None, None
 
-            axisLabels = [set() for ii in range(maxLen)]
-
             mappings = {}
             for spectrum, visible in validSpectrumViews.items():
 
                 matchAxisCodes = spectrum.axisCodes
 
-                mapping = axisCodeMapping(refAxisCodes, matchAxisCodes)
-                for k, v in mapping.items():
-                    if v not in mappings:
-                        mappings[v] = set([k])
-                    else:
-                        mappings[v].add(k)
+                for refAxisCode in refAxisCodes:
+                    for matchAxisCode in matchAxisCodes:
+                        mapping = axisCodeMapping([matchAxisCode], [refAxisCode])
+                        for k, v in mapping.items():
+                            if v not in mappings:
+                                mappings[v] = set([k])
+                            else:
+                                mappings[v].add(k)
 
-                mapping = axisCodeMapping(matchAxisCodes, refAxisCodes)
-                for k, v in mapping.items():
-                    if v not in mappings:
-                        mappings[v] = set([k])
-                    else:
-                        mappings[v].add(k)
+                # for matchAxisCode in matchAxisCodes:
+                #     mapping = axisCodeMapping(matchAxisCode, refAxisCodes)
+                #     if len(mapping.keys()) > 0:
+                #         for k, v in mapping.items():
+                #             if v not in mappings:
+                #                 mappings[v] = set([k])
+                #             else:
+                #                 mappings[v].add(k)
+                #     else:
+                #         if matchAxisCode not in mappings.keys():
+                #             mappings[matchAxisCode] = set([matchAxisCode])
+
+                # mapping = axisCodeMapping(matchAxisCodes, refAxisCodes)
+                # for k, v in mapping.items():
+                #     if v not in mappings:
+                #         mappings[v] = set([k])
+                #     else:
+                #         mappings[v].add(k)
 
             # example of mappings dict
             # ('Hn', 'C', 'Nh')
@@ -287,6 +299,8 @@ class StripPlot(Widget):
             # {'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'C'}}
             # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
             # {'CA': {'C'}, 'Hn': {'H', 'Hn'}, 'Nh': {'Nh'}, 'C': {'CA', 'C'}}
+
+            axisLabels = [set() for ii in range(len(mappings))]
 
             spectrumIndex = {}
             # go through the spectra again
@@ -297,8 +311,9 @@ class StripPlot(Widget):
                 # get the spectrum dimension axisCode, nd see if is already there
                 for spectrumDim, spectrumAxis in enumerate(spectrum.axisCodes):
 
-                    if spectrumAxis in refAxisCodes:
-                        spectrumIndex[spectrum][spectrumDim] = refAxisCodes.index(spectrumAxis)
+                    axisTestCodes = tuple(mappings.keys())
+                    if spectrumAxis in axisTestCodes:
+                        spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(spectrumAxis)
                         axisLabels[spectrumIndex[spectrum][spectrumDim]].add(spectrumAxis)
 
                     else:
@@ -306,8 +321,8 @@ class StripPlot(Widget):
                         for k, v in mappings.items():
                             if spectrumAxis in v:
                                 # refAxisCodes[dim] = k
-                                spectrumIndex[spectrum][spectrumDim] = refAxisCodes.index(k)
-                                axisLabels[refAxisCodes.index(k)].add(spectrumAxis)
+                                spectrumIndex[spectrum][spectrumDim] = axisTestCodes.index(k)
+                                axisLabels[axisTestCodes.index(k)].add(spectrumAxis)
 
             axisLabels = [', '.join(ax) for ax in axisLabels]
 

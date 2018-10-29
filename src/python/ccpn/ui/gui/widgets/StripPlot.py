@@ -154,51 +154,53 @@ class StripPlot(Widget):
 
         if includeSpectrumTable:
             # create row's of spectrum information
-            self._spectraWidget = Frame(parent=self,
-                                        setLayout=True, showBorder=True, hPolicy='minimal',
+            self._spectraWidget = Widget(parent=self,
+                                        setLayout=True, hPolicy='minimal',
                                         grid=(0, 1), gridSpan=(4, 1), vAlign='top', hAlign='left')
 
-            # calculate the maximum number of axes
-            self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
-
-            # modifier for atomCode
-            spectraRow = 0
-            self.atomCodeFrame = Frame(self._spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
-                                       grid=(spectraRow, 0), gridSpan=(1, self.maxLen+1),
-                                       vAlign='top', hAlign='left')
-            self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
-            self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=0, texts=['C'],
-                                              callback=self._changeAxisCode, grid=(0, 1))
-
-            self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
-
-            # put in a divider
-            spectraRow += 1
-            HLine(self._spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
-                  colour=getColours()[DIVIDER], height=15)
-
-            # add labels for the columns
-            spectraRow += 1
-            Label(self._spectraWidget, 'Spectrum', grid=(spectraRow, 0))
-            for ii in range(self.maxLen):
-                Label(self._spectraWidget, 'Tolerance', grid=(spectraRow, ii+1))
-            self.spectraStartRow = spectraRow + 1
-
-            if self.application:
-                self._spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
-                for row, spectrum in enumerate(self.validSpectrumViews.keys()):
-
-                    spectraRow += 1
-                    f = _SpectrumRow(parent=self._spectraWidget, row=spectraRow, col=0, setLayout=True, spectrum=spectrum)
-
-                    self._spectraWidgets[spectrum.pid] = f
-
-            # add a spacer in the bottom-right corner to stop everything moving
-            rows = self.getLayout().rowCount()
-            cols = self.getLayout().columnCount()
-            Spacer(self, 5, 5,
-                   QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-                   grid=(rows, cols), gridSpan=(1, 1))
+            self._fillSpectrumFrame(self._spectraWidget)
+            
+            # # calculate the maximum number of axes
+            # self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
+            # 
+            # # modifier for atomCode
+            # spectraRow = 0
+            # self.atomCodeFrame = Frame(self._spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
+            #                            grid=(spectraRow, 0), gridSpan=(1, self.maxLen+1),
+            #                            vAlign='top', hAlign='left')
+            # self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
+            # self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=0, texts=['C'],
+            #                                   callback=self._changeAxisCode, grid=(0, 1))
+            # 
+            # self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
+            # 
+            # # put in a divider
+            # spectraRow += 1
+            # HLine(self._spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
+            #       colour=getColours()[DIVIDER], height=15)
+            # 
+            # # add labels for the columns
+            # spectraRow += 1
+            # Label(self._spectraWidget, 'Spectrum', grid=(spectraRow, 0))
+            # for ii in range(self.maxLen):
+            #     Label(self._spectraWidget, 'Tolerance', grid=(spectraRow, ii+1))
+            # self.spectraStartRow = spectraRow + 1
+            # 
+            # if self.application:
+            #     self._spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
+            #     for row, spectrum in enumerate(self.validSpectrumViews.keys()):
+            # 
+            #         spectraRow += 1
+            #         f = _SpectrumRow(parent=self._spectraWidget, row=spectraRow, col=0, setLayout=True, spectrum=spectrum)
+            # 
+            #         self._spectraWidgets[spectrum.pid] = f
+            # 
+            # # add a spacer in the bottom-right corner to stop everything moving
+            # rows = self.getLayout().rowCount()
+            # cols = self.getLayout().columnCount()
+            # Spacer(self, 5, 5,
+            #        QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+            #        grid=(rows, cols), gridSpan=(1, 1))
 
         self._registerNotifiers()
 
@@ -211,6 +213,8 @@ class StripPlot(Widget):
         """Handle adding/removing items from display selection
         """
         print('>>>_displayWidgetChanged')
+        if self.includeSpectrumTable:
+            self._fillSpectrumFrame(self._spectraWidget)
 
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
@@ -289,7 +293,7 @@ class StripPlot(Widget):
                     refAxisCodes = list(spectrum.axisCodes)
 
             if not maxLen:
-                return
+                return 0, None, None, None
 
             axisLabels = [set() for ii in range(maxLen)]
 
@@ -344,6 +348,59 @@ class StripPlot(Widget):
 
             return maxLen, axisLabels, spectrumIndex, validSpectrumViews
             # self.axisCodeOptions.setCheckBoxes(texts=axisLabels, tipTexts=axisLabels)
+
+        else:
+            return 0, None, None, None
+
+    def _fillSpectrumFrame(self, spectraWidget):
+        """Populate then spectrumFrame with the selectable spectra
+        """
+        spectraWidget.clearWidget()
+
+        print('>>>_fillSpectrumFrame')
+        # calculate the maximum number of axes
+        self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
+
+        if not self.maxLen:
+            return
+
+        # modifier for atomCode
+        spectraRow = 0
+        self.atomCodeFrame = Frame(spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
+                                   grid=(spectraRow, 0), gridSpan=(1, self.maxLen + 1),
+                                   vAlign='top', hAlign='left')
+        self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
+        self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=0, texts=['C'],
+                                          callback=self._changeAxisCode, grid=(0, 1))
+
+        self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
+
+        # put in a divider
+        spectraRow += 1
+        HLine(spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
+              colour=getColours()[DIVIDER], height=15)
+
+        # add labels for the columns
+        spectraRow += 1
+        Label(spectraWidget, 'Spectrum', grid=(spectraRow, 0))
+        for ii in range(self.maxLen):
+            Label(spectraWidget, 'Tolerance', grid=(spectraRow, ii + 1))
+        self.spectraStartRow = spectraRow + 1
+
+        if self.application:
+            spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
+            for row, spectrum in enumerate(self.validSpectrumViews.keys()):
+                spectraRow += 1
+                f = _SpectrumRow(parent=spectraWidget, row=spectraRow, col=0, setLayout=True, spectrum=spectrum)
+
+                spectraWidgets[spectrum.pid] = f
+
+        # add a spacer in the bottom-right corner to stop everything moving
+        rows = self.getLayout().rowCount()
+        cols = self.getLayout().columnCount()
+        Spacer(self, 5, 5,
+               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+               grid=(rows, cols), gridSpan=(1, 1))
 
     def _registerNotifiers(self):
         return

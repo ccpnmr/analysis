@@ -49,6 +49,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
     # """
 
     dropped = pyqtSignal(list)
+    cleared = pyqtSignal()
 
     def __init__(self, parent=None, objects=None, callback=None,
                  rightMouseCallback=None,
@@ -99,6 +100,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
     def setTexts(self, texts, clear=True):
         if clear:
             self.clear()
+            self.cleared.emit()
+
             self.items = []
         for text in texts:
             item = QtWidgets.QListWidgetItem(str(text))
@@ -106,6 +109,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
 
     def setObjects(self, objects, name='pid'):
         self.clear()
+        self.cleared.emit()
+
         self.objects = list(objects)
         for obj in objects:
             if hasattr(obj, name):
@@ -247,6 +252,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
 
     def _deleteAll(self):
         self.clear()
+        self.cleared.emit()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():

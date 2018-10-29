@@ -60,6 +60,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.StripPlot import StripPlot
 
 logger = getLogger()
 ALL = '<all>'
@@ -72,6 +73,10 @@ class NmrResidueTableModule(CcpnModule):
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
+
+    includePeakListButton = True
+    includeNmrChainButton = True
+    includeSpectrumTable = True
 
     className = 'NmrResidueTableModule'
 
@@ -103,9 +108,10 @@ class NmrResidueTableModule(CcpnModule):
 
         # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
         # underpinning the addNotifier call do not allow for it either
+        row = 0
         colwidth = 140
         self.displaysWidget = ListCompoundWidget(self._NTSwidget,
-                                                 grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                                                 grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                  vPolicy='minimal',
                                                  #minimumWidths=(colwidth, 0, 0),
                                                  fixedWidths=(colwidth, colwidth, colwidth),
@@ -117,9 +123,10 @@ class NmrResidueTableModule(CcpnModule):
         self.displaysWidget.pulldownList.set(ALL)
         self.displaysWidget.setPreSelect(self._fillDisplayWidget)
 
+        row += 1
         self.sequentialStripsWidget = CheckBoxCompoundWidget(
                 self._NTSwidget,
-                grid=(1, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                 #minimumWidths=(colwidth, 0),
                 fixedWidths=(colwidth, 30),
                 orientation='left',
@@ -127,24 +134,31 @@ class NmrResidueTableModule(CcpnModule):
                 checked=False
                 )
 
+        row += 1
         self.markPositionsWidget = CheckBoxCompoundWidget(
                 self._NTSwidget,
-                grid=(2, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                 #minimumWidths=(colwidth, 0),
                 fixedWidths=(colwidth, 30),
                 orientation='left',
                 labelText='Mark positions:',
                 checked=True
                 )
+
+        row += 1
         self.autoClearMarksWidget = CheckBoxCompoundWidget(
                 self._NTSwidget,
-                grid=(3, 0), vAlign='top', stretch=(0, 0), hAlign='left',
+                grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                 #minimumWidths=(colwidth, 0),
                 fixedWidths=(colwidth, 30),
                 orientation='left',
                 labelText='Auto clear marks:',
                 checked=True
                 )
+
+        row += 1
+        self._newStripPlotWidget = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
+                                             grid=(1,1))
 
         # initialise the table
         self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget,

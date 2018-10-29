@@ -111,14 +111,14 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
   def _dragEntered(self, module):
     # print('>>>sigDragEntered from:', module)
     for mod in self.modules.values():
-      mod.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+      mod.setWidgetTransparency(True)
 
     self.update()
 
   def _dragFinished(self, ev):
     # print('>>>sigDragFinished', self)
     for mod in self.modules.values():
-      mod.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+      mod.setWidgetTransparency(False)
 
   def dropEvent(self, event, *args):
     data = self.parseEvent(event)

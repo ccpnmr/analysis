@@ -51,12 +51,12 @@ class Widget(QtWidgets.QWidget, Base):
         """Delete all the contents of the widget
         """
         layout = self.getLayout()
-        rowCount = self.getLayout().rowCount()
-        colCount = self.getLayout().columnCount()
+        rowCount = layout.rowCount()
+        colCount = layout.columnCount()
 
         for r in range(rowCount):
             for m in range(colCount):
-                item = self.getLayout().itemAtPosition(r, m)
+                item = layout.itemAtPosition(r, m)
                 if item and item.widget():
                     item.widget().deleteLater()
 

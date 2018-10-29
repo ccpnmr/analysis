@@ -201,6 +201,17 @@ def _clearMarksItem(strip):
                     callback=strip.clearMarks)
 
 
+def _estimateNoise(strip):
+    return _SCMitem(name='Estimate Noise',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Estimate spectral noise in the visible region', shortcut='EN',
+                    callback=strip.estimateNoise)
+
+def _makeStripPlot(strip):
+    return _SCMitem(name='Make Strip Plot',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Make a strip plot in the current spectrumDisplay', shortcut='SP',
+                    callback=strip.makeStripPlot)
+
+
 def _printItem(strip):
     return _SCMitem(name='Print to File...',
                     typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Print Spectrum Display to File',
@@ -496,6 +507,9 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _clearMarksItem(guiStripNd),
         _separator(),
         _navigateToCursorPosItem(guiStripNd),
+        _separator(),
+        _estimateNoise(guiStripNd),
+        _makeStripPlot(guiStripNd),
         _separator(),
         _printItem(guiStripNd),
         ]

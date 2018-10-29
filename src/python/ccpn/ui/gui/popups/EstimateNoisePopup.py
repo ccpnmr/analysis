@@ -29,14 +29,10 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.StripPlot import StripPlot
 
 
-class StripPlotPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, spectrumDisplay=None, title='StripPlot',
-                 includePeakLists=False,
-                 includeNmrChains=False,
-                 includeSpectrumTable=False, **kw):
+class EstimateNoisePopup(CcpnDialog):
+    def __init__(self, parent=None, mainWindow=None, spectrumDisplay=None, title='EstimateNoise', **kw):
         """
         Initialise the widget
         """
@@ -59,13 +55,5 @@ class StripPlotPopup(CcpnDialog):
         self.spectrumDisplayLabel = Label(self, "spectrumDisplay Name ", grid=(0, 0))
         self.spectrumDisplayText = Label(self, spectrumDisplay.pid, grid=(0, 1))
 
-        self._newStripPlotWidget = StripPlot(parent=self, mainWindow=self.mainWindow,
-                                             includePeakLists=includePeakLists,
-                                             includeNmrChains=includeNmrChains,
-                                             includeSpectrumTable=includeSpectrumTable,
-                                             grid=(1, 0), gridSpan=(1, 3))
+        ButtonList(self, ['Cancel', 'OK'], [self.reject, self.accept], grid=(1, 1))
 
-        ButtonList(self, ['Cancel', 'OK'], [self.reject, self._accept], grid=(3, 3))
-
-    def _accept(self):
-        self.accept()

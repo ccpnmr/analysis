@@ -37,6 +37,8 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, DoubleSp
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.core.lib.Notifiers import Notifier
+from ccpn.ui._implementation.SpectrumView import SpectrumView
+from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from functools import partial
 
 
@@ -154,77 +156,40 @@ class StripPlot(Widget):
 
         if includeSpectrumTable:
             # create row's of spectrum information
-            self._spectraWidget = Widget(parent=self,
-                                        setLayout=True, hPolicy='minimal',
-                                        grid=(0, 1), gridSpan=(4, 1), vAlign='top', hAlign='left')
+            self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
+                                        grid=(0, 1), gridSpan=(row+len(texts), 1), vAlign='top', hAlign='left')
 
             self._fillSpectrumFrame(self._spectraWidget)
-            
-            # # calculate the maximum number of axes
-            # self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
-            # 
-            # # modifier for atomCode
-            # spectraRow = 0
-            # self.atomCodeFrame = Frame(self._spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
-            #                            grid=(spectraRow, 0), gridSpan=(1, self.maxLen+1),
-            #                            vAlign='top', hAlign='left')
-            # self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
-            # self.axisCodeOptions = CheckBoxes(self.atomCodeFrame, selectedInd=0, texts=['C'],
-            #                                   callback=self._changeAxisCode, grid=(0, 1))
-            # 
-            # self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
-            # 
-            # # put in a divider
-            # spectraRow += 1
-            # HLine(self._spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
-            #       colour=getColours()[DIVIDER], height=15)
-            # 
-            # # add labels for the columns
-            # spectraRow += 1
-            # Label(self._spectraWidget, 'Spectrum', grid=(spectraRow, 0))
-            # for ii in range(self.maxLen):
-            #     Label(self._spectraWidget, 'Tolerance', grid=(spectraRow, ii+1))
-            # self.spectraStartRow = spectraRow + 1
-            # 
-            # if self.application:
-            #     self._spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
-            #     for row, spectrum in enumerate(self.validSpectrumViews.keys()):
-            # 
-            #         spectraRow += 1
-            #         f = _SpectrumRow(parent=self._spectraWidget, row=spectraRow, col=0, setLayout=True, spectrum=spectrum)
-            # 
-            #         self._spectraWidgets[spectrum.pid] = f
-            # 
-            # # add a spacer in the bottom-right corner to stop everything moving
-            # rows = self.getLayout().rowCount()
-            # cols = self.getLayout().columnCount()
-            # Spacer(self, 5, 5,
-            #        QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-            #        grid=(rows, cols), gridSpan=(1, 1))
+
+        # add a spacer in the bottom-right corner to stop everything moving
+        rows = self.getLayout().rowCount()
+        cols = self.getLayout().columnCount()
+        Spacer(self, 5, 5,
+               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+               grid=(rows, cols), gridSpan=(1, 1))
 
         self._registerNotifiers()
 
     def _selectDisplayInList(self):
         """Handle clicking items in display selection
         """
-        print('>>>_selectDisplayInList')
+        pass
 
     def _displayWidgetChanged(self):
         """Handle adding/removing items from display selection
         """
-        print('>>>_displayWidgetChanged')
         if self.includeSpectrumTable:
             self._fillSpectrumFrame(self._spectraWidget)
 
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
         """
-        print('>>>_changeAxisCode')
+        pass
 
     def _buttonClick(self):
         """Handle clicking the peak/nmrChain buttons
         """
-        print('>>>_buttonClick')
+        pass
 
     def _fillDisplayWidget(self):
         """Fill the display box with the currently available spectrumDisplays
@@ -357,7 +322,6 @@ class StripPlot(Widget):
         """
         spectraWidget.clearWidget()
 
-        print('>>>_fillSpectrumFrame')
         # calculate the maximum number of axes
         self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
 
@@ -391,60 +355,68 @@ class StripPlot(Widget):
             spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
             for row, spectrum in enumerate(self.validSpectrumViews.keys()):
                 spectraRow += 1
-                f = _SpectrumRow(parent=spectraWidget, row=spectraRow, col=0, setLayout=True, spectrum=spectrum)
+                f = _SpectrumRow(parent=spectraWidget,
+                                 row=spectraRow, col=0,
+                                 setLayout=True,
+                                 spectrum=spectrum, visible=self.validSpectrumViews[spectrum])
 
                 spectraWidgets[spectrum.pid] = f
 
-        # add a spacer in the bottom-right corner to stop everything moving
-        rows = self.getLayout().rowCount()
-        cols = self.getLayout().columnCount()
-        Spacer(self, 5, 5,
-               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-               grid=(rows, cols), gridSpan=(1, 1))
-
     def _registerNotifiers(self):
-        return
+        """Notifiers for responding to spectrumViews
+        """
+        self._spectrumViewNotifier = Notifier(self.project,
+                                            [Notifier.CREATE, Notifier.DELETE],
+                                            SpectrumView.__name__,
+                                            self._spectrumViewChanged,
+                                            onceOnly=True)
 
-        # self.current.registerNotify(self._updateModule, 'nmrChains')
-        #
-        # # use the new notifier class
-        # self._nmrResidueNotifier = Notifier(self.project,
-        #                                     [Notifier.RENAME, Notifier.CHANGE],
-        #                                     NmrResidue.__name__,
-        #                                     self._resetNmrResiduePidForAssigner,
-        #                                     onceOnly=True)
-        #
-        # # self._peakNotifier = None
-        # self._peakNotifier = Notifier(self.project,
-        #                               [Notifier.CHANGE],
-        #                               Peak.__name__,
-        #                               self._updateShownAssignments,
-        #                               onceOnly=True)
-        #
-        # self._spectrumNotifier = Notifier(self.project,
-        #                                   [Notifier.CHANGE],
-        #                                   Spectrum.__name__,
-        #                                   self._updateShownAssignments)
-        #
-        # # notifier for changing the selected chain - draw new display
-        # self._nmrChainNotifier = Notifier(self.project,
-        #                                   [Notifier.CHANGE, Notifier.DELETE],
-        #                                   NmrChain.__name__,
-        #                                   self._updateShownAssignments,
-        #                                   onceOnly=True)
+        self._registerMonitors()
 
     def _unRegisterNotifiers(self):
-        return
+        """Unregister all notifiers
+        """
+        if self._spectrumViewNotifier:
+            self._spectrumViewNotifier.unRegister()
 
-        # # use the new notifier class
-        # if self._nmrResidueNotifier:
-        #     self._nmrResidueNotifier.unRegister()
-        # if self._peakNotifier:
-        #     self._peakNotifier.unRegister()
-        # if self._spectrumNotifier:
-        #     self._spectrumNotifier.unRegister()
-        # if self._nmrChainNotifier:
-        #     self._nmrChainNotifier.unRegister()
+    def _registerMonitors(self):
+        """Register monitors of spectrumView visibleChanged
+        """
+        self._spectrumMonitors = []
+
+        # get the valid displays
+        displays = self._getDisplays()
+
+        # loop through all the selected displays/spectrumViews that are visible
+        for dp in displays:
+            if dp.strips:
+                for sv in dp.strips[0].spectrumViews:
+                    self._spectrumMonitors.append(sv)
+
+        for sv in self._spectrumMonitors:
+            sv.visibleChanged.connect(self._spectrumViewVisibleChanged)
+
+    def _unregisterMonitors(self):
+        """Unregister monitors of spectrumView visibleChanged
+        """
+        for sv in self._spectrumMonitors:
+            sv.visibleChanged.disconnect(self._spectrumViewVisibleChanged)
+
+    def _spectrumViewChanged(self, data):
+        """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
+        """
+        if self.includeSpectrumTable:
+            self._fillSpectrumFrame(self._spectraWidget)
+
+        # clear the old monitors and reregister new ones
+        self._unregisterMonitors()
+        self._registerMonitors()
+
+    def _spectrumViewVisibleChanged(self):
+        """Respond to a visibleChanged in one of the spectrumViews, don't know which though
+        """
+        if self.includeSpectrumTable:
+            self._fillSpectrumFrame(self._spectraWidget)
 
     def doCallback(self):
         """Handle the user callback
@@ -460,7 +432,7 @@ class StripPlot(Widget):
 class _SpectrumRow(Frame):
     "Class to make a spectrum row"
 
-    def __init__(self, parent, spectrum, row=0, col=0, **kwds):
+    def __init__(self, parent, spectrum, row=0, col=0, visible=True, **kwds):
         super(_SpectrumRow, self).__init__(parent, **kwds)
 
         # col = 0
@@ -469,6 +441,7 @@ class _SpectrumRow(Frame):
         #                                        fixedWidths=[100, 50])
 
         self.checkbox = Label(parent, spectrum.pid, grid=(row, col), gridSpan=(1, 1), hAlign='left')
+        self.checkbox.setEnabled(visible)
 
         self.spinBoxes = []
         for ii, axisCode in enumerate(spectrum.axisCodes):
@@ -483,6 +456,7 @@ class _SpectrumRow(Frame):
             ds.setObjectName(str(spectrum.pid + axisCode))
             self.spinBoxes.append(ds)
 
+            ds.setEnabled(visible)
 
 if __name__ == '__main__':
     import os

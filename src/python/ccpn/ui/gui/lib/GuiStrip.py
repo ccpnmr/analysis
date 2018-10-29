@@ -459,6 +459,25 @@ class GuiStrip(Frame):
         """
         self.spectrumDisplay.mainWindow.clearMarks()
 
+    def estimateNoise(self):
+        """
+        Estimate noise in the current region
+        """
+        from ccpn.ui.gui.popups.EstimateNoisePopup import EstimateNoisePopup
+
+        popup = EstimateNoisePopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumDisplay=self.spectrumDisplay)
+        popup.exec_()
+
+    def makeStripPlot(self):
+        """
+        Make a atrip plot in the current spectrumDisplay
+        """
+        from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+
+        popup = StripPlotPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumDisplay=self.spectrumDisplay,
+                               includePeakLists=True, includeNmrChains=True, includeSpectrumTable=True)
+        popup.exec_()
+
     def _unregisterStrip(self):
         self._stripNotifier.unRegister()
         self._peakNotifier.unRegister()
@@ -1356,17 +1375,17 @@ class GuiStrip(Frame):
         # Redundant but still removing
 
 
-            return
+        return
 
-        # if not peaks:
-        #     peaks = peakList.peaks
-        #
-        # peakListView = self._findPeakListView(peakList)
-        # if not peakListView:
-        #     return
-        #
-        # peaks = [peak for peak in peaks if self.peakIsInPlane(peak) or self.peakIsInFlankingPlane(peak)]
-        # self.spectrumDisplay.showPeaks(peakListView, peaks)
+    # if not peaks:
+    #     peaks = peakList.peaks
+    #
+    # peakListView = self._findPeakListView(peakList)
+    # if not peakListView:
+    #     return
+    #
+    # peaks = [peak for peak in peaks if self.peakIsInPlane(peak) or self.peakIsInFlankingPlane(peak)]
+    # self.spectrumDisplay.showPeaks(peakListView, peaks)
 
     def _resetRemoveStripAction(self):
         """Update interface when a strip is created or deleted.

@@ -43,7 +43,7 @@ SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoin
                                                                    'dataDim'))
 
 
-class GuiSpectrumView(QtWidgets.QGraphicsItem):
+class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
   #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
   def __init__(self):

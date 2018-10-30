@@ -61,6 +61,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
+from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.core.lib.ContextManagers import undoBlock
 
 
@@ -195,8 +196,7 @@ class GuiSpectrumDisplay(CcpnModule):
     if useScrollArea:
       # scroll area for strips
       # This took a lot of sorting-out; better leave as is or test thoroughly
-      self._stripFrameScrollArea = ScrollArea(parent=self.qtParent, setLayout=False,
-                                              scrollBarPolicies = ('always', 'asNeeded'),
+      self._stripFrameScrollArea = ScrollArea(parent=self.qtParent, setLayout=True,
                                               acceptDrops=True
                                               )
       self._stripFrameScrollArea.setWidget(self.stripFrame)
@@ -204,8 +204,10 @@ class GuiSpectrumDisplay(CcpnModule):
       self._stripFrameScrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
       self._stripFrameScrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
       self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, stripRow, 0, 1, 7)
-      self.stripFrame.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+      self._stripFrameScrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                     QtWidgets.QSizePolicy.Expanding)
+      self.stripFrame.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                               QtWidgets.QSizePolicy.Expanding)
     else:
       self.qtParent.getLayout().addWidget(self.stripFrame, stripRow, 0, 1, 7)
 
@@ -343,9 +345,12 @@ class GuiSpectrumDisplay(CcpnModule):
       elif obj is not None and isinstance(obj, NmrChain):
         nmrChains.append(obj)
 
+      elif obj is not None and isinstance(obj, GuiStrip):
+        self._handleStrip(obj, strip)
+
       else:
         showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, PeakList,'
-                                                   ' NmrChain, NmrResidue or NmrAtom')
+                                                   ' NmrChain, NmrResidue, NmrAtom or Strip')
     if nmrChains:
       # with suspendSideBarNotifications(self.project):
 
@@ -363,6 +368,17 @@ class GuiSpectrumDisplay(CcpnModule):
         self._handleNmrAtoms(nmrAtoms)
 
     return success
+
+
+  def _handleStrip(self, moveStrip, dropStrip):
+    """Move a strip within a spectrumDisplay by dragging the strip label to another strip
+    """
+    if moveStrip.spectrumDisplay == self:
+      strips = self.orderedStrips
+      stripInd = strips.index(dropStrip)
+
+      if stripInd != strips.index(moveStrip):
+        moveStrip.moveTo(stripInd)
 
 
   def _handlePeakList(self, peakList):
@@ -747,7 +763,7 @@ class GuiSpectrumDisplay(CcpnModule):
   def setLastAxisOnly(self, lastAxisOnly:bool=True):
     self.lastAxisOnly = lastAxisOnly
 
-  def showAxes(self, strips=None):
+  def showAxes(self, strips=None, stretchValue=False, widths=True):
     # use the strips as they are ordered in the model
     currentStrips = self.orderedStrips
     # currentStrips = strips if strips else self.strips
@@ -776,7 +792,8 @@ class GuiSpectrumDisplay(CcpnModule):
           except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated', strip=ss, error=es)
 
-      self.setColumnStretches(True)
+      # self.setColumnStretches(True)
+      self.setColumnStretches(stretchValue=stretchValue, widths=widths)
 
   def increaseTraceScale(self):
     # self.mainWindow.traceScaleUp(self.mainWindow)
@@ -808,7 +825,7 @@ class GuiSpectrumDisplay(CcpnModule):
       for strip in strips[:-1]:
         strip.setMinimumWidth(currentWidth)
       strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
-      self.stripFrame.setMinimumWidth(currentWidth + AXIS_WIDTH)
+      self.stripFrame.setMinimumWidth(currentWidth*len(strips) + AXIS_WIDTH)
     else:
       strips[0].setMinimumWidth(currentWidth)
       self.stripFrame.setMinimumWidth(currentWidth)
@@ -825,7 +842,7 @@ class GuiSpectrumDisplay(CcpnModule):
       for strip in strips[:-1]:
         strip.setMinimumWidth(currentWidth)
       strips[-1].setMinimumWidth(currentWidth+AXIS_WIDTH)
-      self.stripFrame.setMinimumWidth(currentWidth + AXIS_WIDTH)
+      self.stripFrame.setMinimumWidth(currentWidth*len(strips) + AXIS_WIDTH)
     else:
       strips[0].setMinimumWidth(currentWidth)
       self.stripFrame.setMinimumWidth(currentWidth)
@@ -915,7 +932,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     if widgets:
       thisLayout = self.stripFrame.layout()
-      thisLayoutWidth = self.stripFrame.width()
+      thisLayoutWidth = self.width()          # self.stripFrame.width()
       # thisLayout = self.layout
       # thisLayoutWidth = self.width()-2
 
@@ -933,7 +950,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
       if not self.lastAxisOnly:
         maxCol = 0
-        for wid in widgets[1:]:
+        for wid in self.orderedStrips:        #widgets[1:]:
           index = thisLayout.indexOf(wid)
           if index >= 0:
             row, column, cols, rows = thisLayout.getItemPosition(index)
@@ -943,26 +960,54 @@ class GuiSpectrumDisplay(CcpnModule):
           if widths and thisLayout.itemAt(col):
             thisLayout.itemAt(col).widget().setMinimumWidth(firstStripWidth)
           thisLayout.setColumnStretch(col, 1 if stretchValue else 0)
+
+        self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
+
       else:
         maxCol = 0
-        for wid in widgets[1:]:
+        for wid in self.orderedStrips:        #widgets[1:]:
           index = thisLayout.indexOf(wid)
           if index >= 0:
             row, column, cols, rows = thisLayout.getItemPosition(index)
             maxCol = max(maxCol, column)
 
+        # set the correct widths for the strips
         leftWidth = scaleFactor*(thisLayoutWidth - AXIS_WIDTH - (maxCol*AXIS_PADDING)) / (maxCol+1)
         endWidth = leftWidth + AXIS_WIDTH
-        for col in range(0, maxCol):
-          if widths:
-            thisLayout.itemAt(col).widget().setMinimumWidth(leftWidth)
-            # self.orderedStrips[col].setMinimumWidth(leftWidth)
-          thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
 
-        if widths and thisLayout.itemAt(maxCol):
-          thisLayout.itemAt(maxCol).widget().setMinimumWidth(endWidth)
-          # self.orderedStrips[maxCol].setMinimumWidth(leftWidth)
-        thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
+        # # set the widths and column stretches
+        # for col in range(0, maxCol):
+        #   if widths:
+        #     thisLayout.itemAt(col).widget().setMinimumWidth(leftWidth)
+        #
+        #   print('>>>', col, leftWidth, thisLayout.itemAt(col).widget())
+        #   # self.orderedStrips[col].setMinimumWidth(leftWidth)
+        #   thisLayout.setColumnStretch(col, leftWidth if stretchValue else 0)
+        #
+        # if widths and thisLayout.itemAt(maxCol):
+        #   thisLayout.itemAt(maxCol).widget().setMinimumWidth(endWidth)
+        #   # self.orderedStrips[maxCol].setMinimumWidth(leftWidth)
+        #
+        # print('>>>', maxCol, thisLayout.itemAt(maxCol).widget())
+        # thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 0)
+
+        # set the widths and column stretches
+        for wid in self.orderedStrips:
+          index = thisLayout.indexOf(wid)
+          if index >= 0:
+            row, column, cols, rows = thisLayout.getItemPosition(index)
+
+            if column == maxCol:
+              thisLayout.setColumnStretch(column, endWidth if stretchValue else 0)
+              if widths:
+                wid.setMinimumWidth(endWidth)
+            else:
+              thisLayout.setColumnStretch(column, leftWidth if stretchValue else 0)
+              if widths:
+                wid.setMinimumWidth(leftWidth)
+
+        # fix the width of the stripFrame
+        self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
 
       # printWidths = [thisLayout.itemAt(col).widget().width() for col in list(range(maxCol+1))]
       # printWidths = [ss.width() for ss in self.orderedStrips]

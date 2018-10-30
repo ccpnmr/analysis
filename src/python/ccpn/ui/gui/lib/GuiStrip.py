@@ -128,8 +128,8 @@ class GuiStrip(Frame):
 
             self._CcpnGLWidget = CcpnGLWidget(strip=self, mainWindow=self.mainWindow)
             self.getLayout().addWidget(self._CcpnGLWidget, 1, 0)  # (3,0) if not hiding plotWidget
-            self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                             QtWidgets.QSizePolicy.Expanding)
+            self._CcpnGLWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                             QtWidgets.QSizePolicy.MinimumExpanding)
 
             # set the ID label in the new widget
             self._CcpnGLWidget.setStripID('.'.join(self.id.split('.')))
@@ -1530,8 +1530,8 @@ class GuiStrip(Frame):
         # reorder the strips in the layout
         self._resetStripLayout(currentIndex, newIndex)
 
-        # rebuild the axes for each strip
-        self.spectrumDisplay.showAxes()
+        # # rebuild the axes for each strip
+        # self.spectrumDisplay.showAxes()
 
         return
 
@@ -1693,7 +1693,7 @@ class GuiStrip(Frame):
                         layout.addItem(item, m + newIndex, 0)
 
         # rebuild the axes for each strip
-        self.spectrumDisplay.showAxes()
+        self.spectrumDisplay.showAxes(stretchValue=True, widths=False)
 
     def _removeFromLayout(self):
         """Remove the current strip from the layout and store in the temporary area for undoing

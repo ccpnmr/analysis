@@ -114,6 +114,12 @@ import ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs as GLDefs
 # from ccpn.util.Common import makeIterableList
 from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
+from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND, \
+    STRIPHEADER_FOREGROUND, GUINMRRESIDUE
+
+import json
+from ccpn.ui.gui.widgets.DropBase import DropBase
+from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 
 
 try:
@@ -1468,10 +1474,14 @@ class CcpnGLWidget(QOpenGLWidget):
             return None
 
     def _toggleAxisLocked(self):
+        """Toggle the axis locked button
+        """
         self._axisLocked = not self._axisLocked
         self.GLSignals._emitAxisLockChanged(source=self, strip=self.strip, lock=self._axisLocked)
 
     def mousePressInCornerButtons(self, mx, my):
+        """Check if the mouse has been pressed in the lock button
+        """
         if self.AXISLOCKEDBUTTON:
             buttons = ((14, 6, 14, 6, self._toggleAxisLocked),)
             for button in buttons:
@@ -1480,6 +1490,72 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 if (minDiff < button[2]) and (maxDiff < button[3]):
                     button[4]()
+
+    def mousePressInLabel(self, mx, my, ty):
+        """Check if the mouse has been pressed in the stripIDlabel
+        """
+        buttons = (((GLDefs.TITLEXOFFSET + 0.5 * len(self.stripIDLabel)) * self.globalGL.glSmallFont.width,
+                    ty - ((GLDefs.TITLEYOFFSET - 0.5) * self.globalGL.glSmallFont.height),
+                    0.5 * len(self.stripIDLabel) * self.globalGL.glSmallFont.width,
+                    0.4 * self.globalGL.glSmallFont.height),)
+
+        for button in buttons:
+            minDiff = abs(mx - button[0])
+            maxDiff = abs(my - button[1])
+
+            if (minDiff < button[2]) and (maxDiff < button[3]):
+                return True
+
+    def _dragStrip(self, event: QtGui.QMouseEvent):
+        """
+        Re-implementation of the mouse press event to enable a NmrResidue label to be dragged as a json object
+        containing its id and a modifier key to encode the direction to drop the strip.
+        """
+        event.accept()
+        mimeData = QtCore.QMimeData()
+        # create the dataDict
+        dataDict = {DropBase.PIDS: [self.strip.pid]}
+        # connectDir = self._connectDir if hasattr(self, STRIPLABEL_CONNECTDIR) else STRIPLABEL_CONNECTNONE
+        # dataDict[STRIPLABEL_CONNECTDIR] = connectDir
+
+        # update the dataDict with all mouseEvents﻿{"controlRightMouse": false, "text": "NR:@-.@27.", "leftMouse": true, "controlShiftMiddleMouse": false, "middleMouse": false, "controlMiddleMouse": false, "controlShiftLeftMouse": false, "controlShiftRightMouse": false, "shiftMiddleMouse": false, "_connectDir": "isRight", "controlLeftMouse": false, "rightMouse": false, "shiftLeftMouse": false, "shiftRightMouse": false}
+        dataDict.update(getMouseEventDict(event))
+        # convert into json
+        itemData = json.dumps(dataDict)
+
+        # ejb - added so that itemData works with PyQt5
+        tempData = QtCore.QByteArray()
+        stream = QtCore.QDataStream(tempData, QtCore.QIODevice.WriteOnly)
+        stream.writeQString(self.stripIDLabel)
+        mimeData.setData(DropBase.JSONDATA, tempData)
+
+        # mimeData.setData(DropBase.JSONDATA, self.text())
+        mimeData.setText(itemData)
+        drag = QtGui.QDrag(self)
+        drag.setMimeData(mimeData)
+
+        # create a new temporary label the the dragged pixmap
+        # fixes labels that are very big with small text
+        dragLabel = QtWidgets.QLabel()
+        dragLabel.setText(self.stripIDLabel)
+        dragLabel.setFont(textFont)
+        dragLabel.setStyleSheet('color : %s' % (getColours()[GUINMRRESIDUE]))
+
+        # set the pixmap
+        pixmap = dragLabel.grab()
+
+        # make the label slightly transparent
+        painter = QtGui.QPainter(pixmap)
+        painter.setCompositionMode(painter.CompositionMode_DestinationIn)
+        painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 240))
+        painter.end()
+        drag.setPixmap(pixmap)
+
+        # drag.setHotSpot(event.pos())
+        drag.setHotSpot(QtCore.QPoint(dragLabel.width() / 2, dragLabel.height() / 2))
+
+        # drag.targetChanged.connect(self._targetChanged)
+        drag.exec_(QtCore.Qt.CopyAction)
 
     def mousePressIn1DArea(self, regions):
         for region in regions:
@@ -1612,8 +1688,10 @@ class CcpnGLWidget(QOpenGLWidget):
         mx = ev.pos().x()
         if self._drawBottomAxis:
             my = self.height() - ev.pos().y() - self.AXIS_MARGINBOTTOM
+            top = self.height() - self.AXIS_MARGINBOTTOM
         else:
             my = self.height() - ev.pos().y()
+            top = self.height()
         self._mouseStart = (mx, my)
 
         # vect = self.vInv.dot([mx, my, 0.0, 1.0])
@@ -1628,6 +1706,8 @@ class CcpnGLWidget(QOpenGLWidget):
         #   self.mousePressInIntegralLists()
 
         self.mousePressInCornerButtons(mx, my)
+        if self.mousePressInLabel(mx, my, top):
+            self._dragStrip(ev)
 
         # check for dragging of infinite lines, region boundaries, integrals
         self.mousePressInfiniteLine(self._infiniteLines)
@@ -1742,8 +1822,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self._mouseX = event.pos().x()
         if self._drawBottomAxis:
             self._mouseY = self.height() - event.pos().y() - self.AXIS_MARGINBOTTOM
+            self._top = self.height() - self.AXIS_MARGINBOTTOM
         else:
             self._mouseY = self.height() - event.pos().y()
+            self._top = self.height()
 
         # translate from screen (0..w, 0..h) to NDC (-1..1, -1..1) to axes (axisL, axisR, axisT, axisB)
         self.cursorCoordinate = self.mouseTransform.dot([self._mouseX, self._mouseY, 0.0, 1.0])
@@ -2428,16 +2510,16 @@ class CcpnGLWidget(QOpenGLWidget):
                 orientation = 'v'
 
         self._infiniteLines.append(GLInfiniteLine(self.strip, self._regionList,
-                                            values=values,
-                                            axisCode=axisCode,
-                                            orientation=orientation,
-                                            brush=brush,
-                                            colour=colour,
-                                            movable=movable,
-                                            visible=visible,
-                                            bounds=bounds,
-                                            obj=obj,
-                                            lineStyle=lineStyle))
+                                                  values=values,
+                                                  axisCode=axisCode,
+                                                  orientation=orientation,
+                                                  brush=brush,
+                                                  colour=colour,
+                                                  movable=movable,
+                                                  visible=visible,
+                                                  bounds=bounds,
+                                                  obj=obj,
+                                                  lineStyle=lineStyle))
 
         self.update()
         return self._infiniteLines[-1]

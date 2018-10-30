@@ -154,12 +154,12 @@ class StripPlot(Widget):
         self.listButtons = RadioButtons(self, texts=texts, tipTexts=tipTexts, callback=self._buttonClick,
                                       grid=(row, 0), direction='v') if texts else None
 
+        self._spectraWidget = None
+
         if includeSpectrumTable:
             # create row's of spectrum information
-            self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
-                                        grid=(0, 1), gridSpan=(row+len(texts), 1), vAlign='top', hAlign='left')
-
-            self._fillSpectrumFrame(self._spectraWidget)
+            self._spectrRows = row+len(texts)
+            self._fillSpectrumFrame()
 
         # add a spacer in the bottom-right corner to stop everything moving
         rows = self.getLayout().rowCount()
@@ -179,7 +179,7 @@ class StripPlot(Widget):
         """Handle adding/removing items from display selection
         """
         if self.includeSpectrumTable:
-            self._fillSpectrumFrame(self._spectraWidget)
+            self._fillSpectrumFrame()
 
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
@@ -332,10 +332,15 @@ class StripPlot(Widget):
         else:
             return 0, None, None, None
 
-    def _fillSpectrumFrame(self, spectraWidget):
+    def _fillSpectrumFrame(self):
         """Populate then spectrumFrame with the selectable spectra
         """
-        spectraWidget.clearWidget()
+        if self._spectraWidget:
+            self._spectraWidget.hide()
+            self._spectraWidget.deleteLater()
+
+        self._spectraWidget = Widget(parent=self, setLayout=True, hPolicy='minimal',
+                                     grid=(0, 1), gridSpan=(self._spectrRows, 1), vAlign='top', hAlign='left')
 
         # calculate the maximum number of axes
         self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
@@ -345,7 +350,7 @@ class StripPlot(Widget):
 
         # modifier for atomCode
         spectraRow = 0
-        self.atomCodeFrame = Frame(spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
+        self.atomCodeFrame = Frame(self._spectraWidget, setLayout=True, showBorder=False, fShape='noFrame',
                                    grid=(spectraRow, 0), gridSpan=(1, self.maxLen + 1),
                                    vAlign='top', hAlign='left')
         self.axisCodeLabel = Label(self.atomCodeFrame, 'Restricted Axes:', grid=(0, 0))
@@ -356,21 +361,21 @@ class StripPlot(Widget):
 
         # put in a divider
         spectraRow += 1
-        HLine(spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
+        HLine(self._spectraWidget, grid=(spectraRow, 0), gridSpan=(1, 4),
               colour=getColours()[DIVIDER], height=15)
 
         # add labels for the columns
         spectraRow += 1
-        Label(spectraWidget, 'Spectrum', grid=(spectraRow, 0))
+        Label(self._spectraWidget, 'Spectrum', grid=(spectraRow, 0))
         for ii in range(self.maxLen):
-            Label(spectraWidget, 'Tolerance', grid=(spectraRow, ii + 1))
+            Label(self._spectraWidget, 'Tolerance', grid=(spectraRow, ii + 1))
         self.spectraStartRow = spectraRow + 1
 
         if self.application:
             spectraWidgets = {}  # spectrum.pid, frame dict to show/hide
             for row, spectrum in enumerate(self.validSpectrumViews.keys()):
                 spectraRow += 1
-                f = _SpectrumRow(parent=spectraWidget,
+                f = _SpectrumRow(parent=self._spectraWidget,
                                  row=spectraRow, col=0,
                                  setLayout=True,
                                  spectrum=spectrum, visible=self.validSpectrumViews[spectrum])
@@ -421,7 +426,7 @@ class StripPlot(Widget):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
         if self.includeSpectrumTable:
-            self._fillSpectrumFrame(self._spectraWidget)
+            self._fillSpectrumFrame()
 
         # clear the old monitors and reregister new ones
         self._unregisterMonitors()
@@ -431,7 +436,7 @@ class StripPlot(Widget):
         """Respond to a visibleChanged in one of the spectrumViews, don't know which though
         """
         if self.includeSpectrumTable:
-            self._fillSpectrumFrame(self._spectraWidget)
+            self._fillSpectrumFrame()
 
     def doCallback(self):
         """Handle the user callback

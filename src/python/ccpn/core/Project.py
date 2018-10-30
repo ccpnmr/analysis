@@ -211,11 +211,6 @@ class Project(AbstractWrapperObject):
     # del self._wrappedData
     self.__dict__.clear()
 
-  # This is all we want to happen
-  # delete = _close
-  def delete(self):
-    print("This function is deprecated; use .close()")
-
   def __repr__(self):
     """String representation"""
     if self.isDeleted:

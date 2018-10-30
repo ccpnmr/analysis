@@ -152,6 +152,7 @@ class NmrResidueTableModule(CcpnModule):
                                                moduleParent=self,
                                                setLayout=True,
                                                actionCallback=self.navigateToNmrResidueCallBack,
+                                               multiSelect=True,
                                                grid=(0, 0))
 
         if nmrChain is not None:

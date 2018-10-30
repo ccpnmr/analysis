@@ -214,16 +214,22 @@ def navigateToNmrAtomsInStrip(strip:GuiStrip, nmrAtoms:typing.List[NmrAtom], wid
   shiftDict = matchAxesAndNmrAtoms(strip, nmrAtoms)
   # atomPositions = shiftDict[strip.axisOrder[2]]
   atomPositions = [[x.value for x in shiftDict[axisCode]] for axisCode in strip.axisOrder]
+  #print('shiftDict>>', shiftDict)
+  #print('atomPositions', atomPositions)
+
   positions = []
   for atomPos in atomPositions:
-    if atomPos:
-      if len(atomPos) < 2:
-        positions.append(atomPos[0])
-      else:
-        # positions.append(max(atomPos)-min(atomPos)/2)
+    # 20181029: GWV amended to take first value only
+    if atomPos and len(atomPos) >= 1:
+      positions.append(atomPos[0])
+      # if len(atomPos) < 2:
+      #   positions.append(atomPos[0])
+      # else:
+      #   # positions.append(max(atomPos)-min(atomPos)/2)
+      #
+      #   # get the midpoint of each axis
+      #   #positions.append((max(atomPos)+min(atomPos))/2)
 
-        # get the midpoint of each axis
-        positions.append((max(atomPos)+min(atomPos))/2)
     else:
       positions.append('')
   navigateToPositionInStrip(strip, positions, widths=widths)

@@ -133,11 +133,25 @@ NEW_ITEM_DICT = {
 }
 
 def _openItemObject(mainWindow, objs, **args):
+  spectrumDisplay = None
+
   for obj in objs:
     if obj:
       try:
         if obj.__class__ in OpenObjAction:
-          OpenObjAction[obj.__class__](mainWindow, obj, **args)
+
+          # if a spectrum object has already been opened then attach to that spectrumDisplay
+          if isinstance(obj, Spectrum) and spectrumDisplay:
+            spectrumDisplay.displaySpectrum(obj)
+
+          else:
+
+            # process objects to open
+            returnObj = OpenObjAction[obj.__class__](mainWindow, obj, **args)
+
+            # if the first spectrum then set the spectrumDisplay
+            if isinstance(obj, Spectrum):
+              spectrumDisplay = returnObj
 
         else:
           info = showInfo('Not implemented yet!',
@@ -162,6 +176,8 @@ def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
     "application.createSpectrumDisplay(spectrum)", spectrum=spectrum)
   getLogger().info('spectrum = project.getByPid(%r)' % spectrum.id)
   getLogger().info('application.createSpectrumDisplay(spectrum)')
+
+  return spectrumDisplay
 
 def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None):
   '''displays spectrumGroup on spectrumDisplay. It creates the display based on the first spectrum of the group.

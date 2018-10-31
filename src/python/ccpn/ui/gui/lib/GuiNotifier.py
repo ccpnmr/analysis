@@ -209,25 +209,14 @@ class GuiNotifier(object):
                         break
             if skip: return
 
-            callbackDict = dict(
-                    notifier=self,
-                    trigger=trigger,
-                    theObject=self._theObject,
-                    targetName=targetName,
-                    )
-            callbackDict.update(data)
-            self._callback(callbackDict, *self._args, **self._kwargs)
-
-        if trigger == GuiNotifier.DRAGMOVEEVENT:
-            callbackDict = dict(
-                    notifier=self,
-                    trigger=trigger,
-                    theObject=self._theObject,
-                    targetName=targetName,
-                    )
-            callbackDict.update(data)
-            self._callback(callbackDict, *self._args, **self._kwargs)
-
+        callbackDict = dict(
+                notifier=self,
+                trigger=trigger,
+                theObject=self._theObject,
+                targetName=targetName,
+                )
+        callbackDict.update(data)
+        self._callback(callbackDict, *self._args, **self._kwargs)
         return
 
     def __str__(self) -> str:

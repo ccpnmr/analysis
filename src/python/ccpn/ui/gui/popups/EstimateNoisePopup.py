@@ -236,21 +236,21 @@ class NoiseTab(QtWidgets.QWidget, Base):
         numDim = dataSource.numDim
 
         minLinewidth = [0.0] * numDim
-        exclusionBuffer = [1] * numDim
+        exclusionBuffer = [0] * numDim          # [1] * numDim
         nonAdj = 0
         excludedRegions = []
         excludedDiagonalDims = []
         excludedDiagonalTransform = []
 
-        startPoint = np.array(startPoint)
-        endPoint = np.array(endPoint)
+        startPoint = np.array(startPoints)
+        endPoint = np.array(endPoints)
 
         startPoint, endPoint = np.minimum(startPoint, endPoint), np.maximum(startPoint, endPoint)
 
         # extend region by exclusionBuffer
-        # bufferArray = np.array(exclusionBuffer)
-        startPointBuffer = startPoint           # - bufferArray
-        endPointBuffer = endPoint               # + bufferArray
+        bufferArray = np.array(exclusionBuffer)
+        startPointBuffer = startPoint - bufferArray
+        endPointBuffer = endPoint + bufferArray
 
         regions = numDim * [0]
         npts = numDim * [0]

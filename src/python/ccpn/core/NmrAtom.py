@@ -368,20 +368,10 @@ def setter(self:Atom, value:NmrAtom):
     value.atom = self
 Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
 
-
-def getter(self: Residue) -> Tuple[NmrAtom]:
-  result = []
-  for nmrResidue in self.allNmrResidues:
-    result.extend(nmrResidue.nmrAtoms)
-  #
-  return tuple(result)
-Residue.allNmrAtoms = property(getter, None, None,
-                                  "All NmrAtoms corresponding to Residue - E.g. (for MR:A.87)"
-                                  " NmrAtoms in NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.")
-
 del getter
 del setter
-    
+
+
 def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None,
                 comment:str=None) -> NmrAtom:
   """Create new NmrAtom within NmrResidue. If name is None, use default name

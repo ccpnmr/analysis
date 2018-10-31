@@ -350,7 +350,7 @@ class NoiseTab(QtWidgets.QWidget, Base):
 
         # populate the widgets
         for axis, region in enumerate(regionToPick):
-            self.axisCodes[axis].setText(str(tuple(round(rr, 3) for rr in region)))
+            self.axisCodes[axis].setText('('+','.join(['%.3f' % rr for rr in region])+')')
         self.meanLabel.setText(str(self.mean))
         self.SDLabel.setText(str(self.SD))
         self.maxLabel.setText(str(self.max))

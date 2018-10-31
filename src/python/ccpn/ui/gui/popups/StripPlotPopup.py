@@ -56,17 +56,20 @@ class StripPlotPopup(CcpnDialog):
         # import the new strip plot widget - also used in backbone assignment and pick and assign module
 
         self.spectrumDisplay = spectrumDisplay
-        self.spectrumDisplayLabel = Label(self, "Make a strip plot in spectrumDisplay %s" % spectrumDisplay.id, grid=(0, 0))
+        self.spectrumDisplayLabel = Label(self, "Current spectrumDisplay: %s" % spectrumDisplay.id, grid=(0, 0))
 
         self._newStripPlotWidget = StripPlot(parent=self, mainWindow=self.mainWindow,
                                              includePeakLists=includePeakLists,
                                              includeNmrChains=includeNmrChains,
                                              includeSpectrumTable=includeSpectrumTable,
+                                             defaultSpectrum=spectrumDisplay,
                                              grid=(1, 0), gridSpan=(1, 3))
 
         ButtonList(self, ['Cancel', 'OK'], [self.reject, self._accept], grid=(3, 3))
 
     def _accept(self):
+        """OK button pressed
+        """
         self.accept()
 
     def _cleanupWidget(self):

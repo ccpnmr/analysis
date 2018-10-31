@@ -57,6 +57,7 @@ class StripPlot(Widget):
                  applyCallback=None,
                  includePeakLists=True, includeNmrChains=True,
                  includeSpectrumTable=True,
+                 defaultSpectrum=None,
                  **kw):
         Widget.__init__(self, parent, setLayout=True, **kw)
 
@@ -85,6 +86,9 @@ class StripPlot(Widget):
         # underpinning the addNotifier call do not allow for it either
         row = 0
         colwidth = 140
+
+        texts = [defaultSpectrum.pid] if defaultSpectrum else ([ALL] + displayText)
+
         self.displaysWidget = ListCompoundWidget(self,
                                                  grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                  vPolicy='minimal',
@@ -93,10 +97,15 @@ class StripPlot(Widget):
                                                  orientation='left',
                                                  labelText='Display(s):',
                                                  tipText='SpectrumDisplay modules to respond to double-click',
-                                                 texts=[ALL] + displayText,
+                                                 texts=texts,
                                                  callback=self._selectDisplayInList)
         self.displaysWidget.setFixedHeights((None, None, 40))
-        self.displaysWidget.pulldownList.set(ALL)
+
+        if defaultSpectrum:
+            self.displaysWidget.pulldownList.set(defaultSpectrum.pid)
+        else:
+            self.displaysWidget.pulldownList.set(ALL)
+
         self.displaysWidget.setPreSelect(self._fillDisplayWidget)
 
         # handle signals when the items in the displaysWidget have changed

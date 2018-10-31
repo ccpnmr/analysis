@@ -27,12 +27,11 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
 class EstimateNoisePopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, spectrumDisplay=None, title='EstimateNoise', **kw):
+    def __init__(self, parent=None, mainWindow=None, strip=None, title='EstimateNoise', **kw):
         """
         Initialise the widget
         """
@@ -49,8 +48,8 @@ class EstimateNoisePopup(CcpnDialog):
             self.project = None
             self.current = None
 
-        self.spectrumDisplay = spectrumDisplay
-        self.spectrumDisplayLabel = Label(self, "Current spectrumDisplay: %s" % spectrumDisplay.id, grid=(0, 0))
+        self.strip = strip
+        self.stripLabel = Label(self, "Current strip: %s" % strip.id, grid=(0, 0))
 
         # estimate noise function here
 

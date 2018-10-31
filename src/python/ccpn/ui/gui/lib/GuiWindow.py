@@ -459,6 +459,7 @@ class GuiWindow():
     # colourDict = guiSettings.MARK_LINE_COLOUR_DICT  # maps atomName --> colour
     for ii, axisCode in enumerate(axisCodes):
       for chemicalShift in chemicalShifts[ii]:
+        atomId = chemicalShift.nmrAtom.id
         atomName = chemicalShift.nmrAtom.name
         # TODO: the below fails, for example, if nmrAtom.name = 'Hn', can that happen?
 
@@ -482,12 +483,13 @@ class GuiWindow():
 
         project._startCommandEchoBlock('markPositions', project, [axisCode], [chemicalShift])
         try:
+          # GWV 20181030: changed from atomName to id
           if colour:
-            project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomName])
+            project.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
           else:
             # just use gray rather than checking colourScheme
             # project.newMark(colourDict[guiSettings.DEFAULT], [chemicalShift.value], [axisCode])
-            project.newMark(self.application.preferences.general.defaultMarksColour, [chemicalShift.value], [axisCode])
+            project.newMark(self.application.preferences.general.defaultMarksColour, [chemicalShift.value], [atomId])
 
         finally:
           project._endCommandEchoBlock()

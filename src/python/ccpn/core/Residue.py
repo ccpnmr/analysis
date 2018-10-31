@@ -339,6 +339,13 @@ class Residue(AbstractWrapperObject):
 
     pass
 
+  @property
+  def hasAssignedAtoms(self) -> bool:
+    """
+    :return: True if any of its atoms have an assignment
+    """
+    return any([a.isAssigned for a in self.atoms])
+
   @classmethod
   def _getAllWrappedData(cls, parent: Chain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
@@ -347,6 +354,7 @@ class Residue(AbstractWrapperObject):
     # NBNB the doe relies on this sorting order to handle position-specific labeling
     # for substances
     return parent._apiChain.sortedResidues()
+
 
 def getter(self:Residue) -> Residue:
   apiResidue = self._wrappedData

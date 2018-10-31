@@ -1282,6 +1282,7 @@ def setter(self:Residue, value:NmrResidue):
   #
   if value is not None:
     value.residue = self
+
 Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
 def getter(self:Residue) -> typing.Tuple[NmrResidue]:

@@ -345,7 +345,6 @@ class Peak(AbstractWrapperObject):
     #
     return tuple(sorted(result))
 
-
   @assignedNmrAtoms.setter
   def assignedNmrAtoms(self, value:Sequence):
     self._startCommandEchoBlock('assignedNmrAtoms', value, propertySetter=True)
@@ -376,7 +375,9 @@ class Peak(AbstractWrapperObject):
     finally:
       self._endCommandEchoBlock()
 
-
+  # alternativeNames
+  assignments = assignedNmrAtoms
+  assignmentsByDimensions = dimensionNmrAtoms
 
   def _linkPeaks(self, peaks):
       """

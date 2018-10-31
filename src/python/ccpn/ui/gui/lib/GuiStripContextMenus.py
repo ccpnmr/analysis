@@ -246,6 +246,10 @@ def _editPeakAssignmentItem(strip):
     return _SCMitem(name='Edit Peak',
                     typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
 
+def _refitPeakItem(strip):
+    return _SCMitem(name='Refit Peak(s)',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Refit current peak(s)', shortcut='RP',
+                    callback=strip.mainWindow.refitCurrentPeaks)
 
 def _newMultipletItem(strip):
     return _SCMitem(name='New Multiplet',
@@ -531,6 +535,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
         _deletePeakItem(guiStripNd),
         _copyPeakItem(guiStripNd),
         _editPeakAssignmentItem(guiStripNd),
+        _refitPeakItem(guiStripNd),
         _separator(),
         _newMultipletItem(guiStripNd),
         _separator(),

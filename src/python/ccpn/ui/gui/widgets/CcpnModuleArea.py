@@ -130,20 +130,25 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
       objs = [self.mainWindow.project.getByPid(pid) for pid in pids]
       _openItemObject(self.mainWindow, objs, position=self.dropArea)
 
-      # reset the dock area
-      self.dropArea = None
-      self.overlay.setDropArea(self.dropArea)
+      # # reset the dock area
+      # self.dropArea = None
+      # self.overlay.setDropArea(self.dropArea)
 
     elif DropBase.URLS in data:
       objs = self.mainWindow.sideBar._processDroppedItems(data)
       spectra = [obj for obj in objs if isinstance(obj, Spectrum)]
       _openItemObject(self.mainWindow, spectra, position=self.dropArea)
-      # reset the dock area
-      self.dropArea = None
-      self.overlay.setDropArea(self.dropArea)
+
+      # # reset the dock area
+      # self.dropArea = None
+      # self.overlay.setDropArea(self.dropArea)
 
     if hasattr(source, 'implements') and source.implements('dock'):
       DockArea.dropEvent(self, event, *args)
+
+    # reset the dock area
+    self.dropArea = None
+    self.overlay.setDropArea(self.dropArea)
 
     event.accept()
 

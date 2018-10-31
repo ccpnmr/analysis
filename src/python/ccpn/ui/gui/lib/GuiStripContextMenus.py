@@ -394,6 +394,8 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _separator(),
         _navigateToCursorPosItem(guiStrip1d),
         _separator(),
+        _estimateNoise(guiStrip1d),
+        _separator(),
         _printItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]

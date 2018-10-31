@@ -37,6 +37,20 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util import Common as commonUtil
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from functools import partial
+
+
+def _updateGl(self, spectrumList):
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+    # # spawn a redraw of the contours
+    # for spec in spectrumList:
+    #     for specViews in spec.spectrumViews:
+    #         specViews.buildContours = True
+
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
 
 
 # These can be imported from Nmr/PeakList
@@ -166,10 +180,7 @@ class NoiseTab(QtWidgets.QWidget, Base):
         self.noiseLevelSpinBox.setMinimum(0.1)
         self.noiseLevelButton = Button(self, grid=(row, 2), callback=self._setNoiseLevel, text='Apply')
 
-        # calculate the noise levels
-        self.noise = self.spectrum.estimateNoise()
-
-        # This can be moved somewhjere more sensible
+        # This can be moved somewhere more sensible
 
         # calculate the region over which to estimate the noise
         selectedRegion = [[self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR],
@@ -191,6 +202,10 @@ class NoiseTab(QtWidgets.QWidget, Base):
                     regionToPick[n] = sortedSelectedRegion[idx]
             else:
                 regionToPick = sortedSelectedRegion
+
+        else:
+            sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
+            regionToPick = [sortedSelectedRegion[0]]
 
         startPoint = []
         endPoint = []
@@ -236,7 +251,7 @@ class NoiseTab(QtWidgets.QWidget, Base):
         numDim = dataSource.numDim
 
         minLinewidth = [0.0] * numDim
-        exclusionBuffer = [0] * numDim          # [1] * numDim
+        exclusionBuffer = [0] * numDim  # [1] * numDim
         nonAdj = 0
         excludedRegions = []
         excludedDiagonalDims = []
@@ -273,7 +288,13 @@ class NoiseTab(QtWidgets.QWidget, Base):
         objectsCreated = []
 
         nregions = [len(region) for region in regions]
+
+        # # force there to be only one region which is the central tile containing the spectrum
+        nregions = numDim * [1]
+
         nregionsTotal, cumulRegions = _cumulativeArray(nregions)
+
+        # allows there to be a repeating pattern of the spectrum across the display
         for n in range(nregionsTotal):
             array = _arrayOfIndex(n, cumulRegions)
             chosenRegion = [regions[i][array[i]] for i in range(numDim)]
@@ -284,14 +305,83 @@ class NoiseTab(QtWidgets.QWidget, Base):
             endPointBuffer = np.array([endPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
 
             dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
-            pass
+
+            # now process the dataArray - the data only in the specified region
+
+            # # temporary plot
+            # import matplotlib
+            # import matplotlib.pyplot as plt
+            # cplot = plt.contour(dataArray[0])
+            # plt.show()
+            # pass
+
+            if dataSource.numDim > 1:
+                flatData = dataArray.flatten()
+                self.SD = np.std(flatData)
+                self.max = np.max(flatData)
+                self.min = np.min(flatData)
+                self.mean = np.mean(flatData)
+                self.noiseLevel = self.mean + 3.0 * self.SD
+            else:
+
+                flatData = dataArray.flatten()
+                self.SD = np.std(flatData)
+                self.max = np.max(flatData)
+                self.min = np.min(flatData)
+                self.mean = np.mean(flatData)
+                self.noiseLevel = self.mean + 3.0 * self.SD
+
+                pass
+                # # not ready for 1d yet :)
+                # if hasattr(dataSource, 'valueArray') and len(dataSource.valueArray) != 0:
+                #     sliceData = dataSource.valueArray
+                # else:
+                #     self.valueArray = sliceData = getSliceData(self)
+                # # print(sliceData)
+                # # print(sliceData[1])
+                # sliceDataStd = numpy.std(sliceData)
+                # sliceData = numpy.array(sliceData, numpy.float32)
+                # # Clip the data to remove outliers
+                # sliceData = sliceData.clip(-sliceDataStd, sliceDataStd)
+                #
+                # value = 1.1 * numpy.std(sliceData)  # multiplier a guess
+
+            #value *= self.scale
 
         # populate the widgets
-        self.noiseLevelSpinBox.setValue(self.noise)
-
-        self.meanLabel.setText(str(regionToPick))
+        for axis, region in enumerate(regionToPick):
+            self.axisCodes[axis].setText(str(tuple(round(rr, 3) for rr in region)))
+        self.meanLabel.setText(str(self.mean))
+        self.SDLabel.setText(str(self.SD))
+        self.maxLabel.setText(str(self.max))
+        self.minLabel.setText(str(self.min))
+        self.noiseLevelSpinBox.setValue(self.noiseLevel)
 
     def _setNoiseLevel(self):
         """Apply the current noiseLevel to the spectrum
         """
-        pass
+        self.spectrum.noiseLevel = self.noiseLevel
+
+        # # doesn't change anything!
+        # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        #
+        # GLSignals = GLNotifier(parent=self)
+        # _undo = self.spectrum.project._undo
+        #
+        # self.spectrum.project._startCommandEchoBlock('_setNoiseLevel', quiet=True)
+        # try:
+        #     _undo._newItem(undoPartial=partial(_updateGl, self, [self.spectrum]))
+        #     self.spectrum.noiseLevel = self.noiseLevel
+        #     _undo._newItem(redoPartial=partial(_updateGl, self, [self.spectrum]))
+        #
+        #     for specViews in self.spectrum.spectrumViews:
+        #         specViews.buildContours = True
+        #
+        #     # repaint
+        #     GLSignals.emitPaintEvent()
+        #
+        #     applyAccept = True
+        # except Exception as es:
+        #     showWarning(str(self.windowTitle()), str(es))
+        # finally:
+        #     self.spectrum.project._endCommandEchoBlock()

@@ -364,7 +364,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
     return success
 
-
   def _handlePeakList(self, peakList):
     "See if peaklist can be copied"
     spectrum = peakList.spectrum
@@ -403,7 +402,6 @@ class GuiSpectrumDisplay(CcpnModule):
     if self.current.strip not in self.strips:
       self.current.strip = self.strips[0]
 
-
   def _handleNmrChains(self, nmrChains):
     for chain in nmrChains:
       self._handleNmrResidues(chain.nmrResidues)
@@ -425,9 +423,6 @@ class GuiSpectrumDisplay(CcpnModule):
     # Assign nmrAtoms to peaks
     if self.current.strip:
       _assignNmrAtomsToPeaks(nmrAtoms=nmrAtoms, peaks=self.current.peaks)
-
-
-
 
   def _processDragEnterEvent(self, data):
     pass
@@ -451,11 +446,6 @@ class GuiSpectrumDisplay(CcpnModule):
     #     boxH = (pH + bh, pH - bh)
     #     if pW + bw>position[0]>pW - bw and  pH + bh >position[1]>pH - bh:
     #      print('NOT IMPLEMENTED YET')
-
-
-
-
-
 
   def _createNmrResidueMarks(self, nmrResidue):
     """
@@ -661,6 +651,7 @@ class GuiSpectrumDisplay(CcpnModule):
       for strip in self.strips:
         getLogger().debug2('unregistering strip: %s' % strip)
         strip._unregisterStrip()
+      self.droppedNotifier.unRegister()
 
     finally:
       CcpnModule._closeModule(self)
@@ -1072,7 +1063,6 @@ class GuiSpectrumDisplay(CcpnModule):
       for strip in self.strips:
         strip.cyclePeakLabelling()
 
-
     except:
       getLogger().warning('Error cycling peak labelling')
 
@@ -1094,7 +1084,6 @@ class GuiSpectrumDisplay(CcpnModule):
         strip.cyclePeakSymbols()
     except:
       getLogger().warning('Error cycling peak symbols')
-
 
   def _deletedPeak(self, peak):
     apiPeak = peak._wrappedData

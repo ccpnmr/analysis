@@ -68,21 +68,28 @@ class GuiNotifier(object):
     trigger             targetName           callbackDict keys          Notes
     ____________________________________________________________________________________________________________________
 
-    Notifier.DROPEVENT  [dropTargets]         theObject,targetName      theObject should inherit from QtWidgets.QWidget and
-                                                                        be droppable
-                                              trigger, notifier,        targetName: optional dropTargets to filter for
-                                              event, isCcpnJson,        before callback (None to skip, defined in DropBase)
+    Notifier.DROPEVENT  [dropTargets]         theObject,                theObject should inherit from QtWidgets.QWidget
+                                                                        and be droppable
+                                              targetName                targetName: optional dropTargets to filter for
+                                                                        before callback (None to skip), as defined in
+                                                                        DropBase
+                                              trigger,
+                                              notifier,
+                                              event, isCcpnJson,
                                               [dropTargets]
 
 
-    dropTargets: keywords defining type of dropped objects: currently implemented: 'urls', 'text', 'pids'
+    dropTargets: keywords defining type of dropped objects: currently implemented: 'urls', 'text', 'pids' (see DropBase)
 
     Implemention:
 
-      The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if
-      defined in the instantiation of the Notifier object. (idea following the Traitlets concept).
+      The callback provides a dict with several key, value pairs and optional arguments and/or keyword
+      arguments if defined in the instantiation of the Notifier object. (idea following the Traitlets concept).
       Note that this dict also contains a reference to the GuiNotifier object itself; this way it can be used
       to pass-on additional implementation specfic information to the callback function.
+
+      On Intialisation, the GuiNotifier instance sets the appropriate callback functions of the widget,
+      as defined in DropBase, from which each Ccpn-Widget derives.
 
     """
     _currentIndex = 0
@@ -93,14 +100,15 @@ class GuiNotifier(object):
     DRAGMOVEEVENT = 'dragMoveEvent'
     _triggerKeywords = (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
 
-    def __init__(self, theObject: Any, triggers: list, targetName: list, callback: Callable[..., str], *args, **kwargs):
+    def __init__(self, theObject: Any, triggers: list, targetName: list,
+                       callback: Callable[..., str], *args, **kwargs):
         """
         Create GuiNotifier object;
 
-        :param theObject: valid V3 core object or current object to watch
-        :param triggers: list of trigger keywords callback
-        :param targetName: optional list of dropTargets or None
-        :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
+        :param theObject: Widget to watch
+        :param triggers: list of trigger keywords callback; i.e. (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
+        :param targetName: optional list of dropTargets (URLS, TEXT, PIDS, IDS) or None
+        :param callback: callback function with signature: callback(callbackDict [, *args] [, **kwargs])
         :param *args: optional arguments to callback
         :param **kwargs: optional keyword,value arguments to callback
         """
@@ -147,19 +155,19 @@ class GuiNotifier(object):
                 notifier = (trigger, targetName)
                 self._notifiers.append(notifier)
                 self._theObject.setDropEventCallback(partial(self, notifier=notifier))
-                self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this late
+                self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this later
 
             elif trigger == GuiNotifier.ENTEREVENT:
                 notifier = (trigger, targetName)
                 self._notifiers.append(notifier)
                 self._theObject.setDragEnterEventCallback(partial(self, notifier=notifier))
-                self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this late
+                self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this later
 
             elif trigger == GuiNotifier.DRAGMOVEEVENT:
                 notifier = (trigger, targetName)
                 self._notifiers.append(notifier)
                 self._theObject.setDragMoveEventCallback(partial(self, notifier=notifier))
-                self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this late
+                self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this later
 
         if len(self._notifiers) == 0:
             raise RuntimeWarning('GuiNotifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
@@ -186,11 +194,11 @@ class GuiNotifier(object):
         trigger, targetName = notifier
 
         # DROPEVENT
+        if self._debug:
+            logger.info('>>> GuiNotifier (%d): obj=%s  callback for %s, %s: data=%s' % \
+                        (self._index, self._theObject, notifier, self._callback, data)
+                        )
         if trigger == GuiNotifier.DROPEVENT:
-            if self._debug:
-                logger.info('>>> GuiNotifier (%d): obj=%s  callback for %s, %s: data=%s' % \
-                            (self._index, self._theObject, notifier, self._callback, data)
-                            )
             # optionally filter for targetName
             skip = False
             if targetName is not None:

@@ -48,8 +48,10 @@ from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+from ccpn.util.OrderedSet import OrderedSet
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
@@ -1147,19 +1149,23 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
         self.application = mainWindow.application
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
-        self.orderedSpectrumViews = orderedSpectrumViews
-        self.orderedSpectra = set([spec.spectrum for spec in self.orderedSpectrumViews])
 
-        self.tabWidget = QtWidgets.QTabWidget()
-        self.tabWidget.setMinimumWidth(
-                max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB * len(self.orderedSpectra)))
+        self.orderedSpectrumViews = orderedSpectrumViews
+        self.orderedSpectra = OrderedSet([spec.spectrum for spec in self.orderedSpectrumViews])
+
+        # self.tabWidget = QtWidgets.QTabWidget()
+        # self.tabWidget.setMinimumWidth(
+        #         max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB * len(self.orderedSpectra)))
+
+
+        self.tabWidget = Tabs(self, setLayout=True, grid=(0,0), gridSpan=(2,4))
 
         self._contoursTab = []
         for specNum, thisSpec in enumerate(self.orderedSpectra):
             self._contoursTab.append(ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec))
             self.tabWidget.addTab(self._contoursTab[specNum], thisSpec.name)
 
-        self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
+        # self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
 
         self.applyButtons = ButtonList(self, texts=['Cancel', 'Apply', 'Ok'],
                                        callbacks=[self.reject, self._applyChanges, self._okButton],
@@ -1172,6 +1178,8 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
         tabs = self._contoursTab
         for t in tabs:
             t._changes = dict()
+
+        self.setFixedSize(self.sizeHint())
 
     def _fillPullDowns(self):
         for aTab in self._contoursTab:

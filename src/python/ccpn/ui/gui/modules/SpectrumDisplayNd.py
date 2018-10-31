@@ -346,7 +346,6 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
     popup = SpectrumDisplayPropertiesPopupNd(parent=self.mainWindow, mainWindow=self.mainWindow,
                                              orderedSpectrumViews=self.orderedSpectrumViews(self.spectrumViews))
     popup.exec_()
-    popup.raise_()
 
   def showPeaks(self, peakListView: GuiPeakListView.GuiPeakListView, peaks:typing.List[Peak]):
     """

@@ -465,7 +465,8 @@ class GuiStrip(Frame):
         """
         from ccpn.ui.gui.popups.EstimateNoisePopup import EstimateNoisePopup
 
-        popup = EstimateNoisePopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumDisplay=self.spectrumDisplay)
+        popup = EstimateNoisePopup(parent=self.mainWindow, mainWindow=self.mainWindow, strip=self,
+                                   orderedSpectrumViews=self.spectrumDisplay.orderedSpectrumViews(self.spectrumViews))
         popup.exec_()
         popup._cleanupWidget()
 

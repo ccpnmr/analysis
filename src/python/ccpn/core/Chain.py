@@ -84,6 +84,9 @@ class Chain(AbstractWrapperObject):
   def compoundName(self) -> str:
     """Short name of chemical compound (e.g. 'Lysozyme') making up Chain"""
     return self._wrappedData.molecule.name
+
+  # GWV: more logical attribute!
+  name = compoundName
     
   @property
   def _parent(self) -> Project:

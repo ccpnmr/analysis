@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -25,172 +25,117 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtGui, QtWidgets
 
 from ccpn.core.Chain import Chain
-from ccpn.core.lib.AssignmentLib import CCP_CODES,  getNmrResiduePrediction
+from ccpn.core.lib.AssignmentLib import CCP_CODES, getNmrResiduePrediction
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
+from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
 
-
 import sys
 
 
 class NmrResiduePopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, nmrResidue=None, nmrAtom=None, title='Nmr Residues', **kw):
-    """
-    Initialise the widget
-    """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    def __init__(self, parent=None, mainWindow=None, nmrResidue=None, nmrAtom=None, title='NmrResidue', **kw):
+        """
+        Initialise the widget
+        """
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
-    self.mainWindow = mainWindow
-    self.application = mainWindow.application
-    self.project = mainWindow.application.project
-    self.current = mainWindow.application.current
+        self.mainWindow = mainWindow
+        self.application = mainWindow.application
+        self.project = mainWindow.application.project
+        self.current = mainWindow.application.current
 
-    # self.setStyleSheet("border: 0px solid")
-    self.parent = parent
-    self.nmrAtom = nmrAtom
-    self.nmrResidueLabel = Label(self, grid=(0, 0), gridSpan=(1, 2))
-    chainLabel = Label(self, "Chain ", grid=(1, 0))
-    self.chainPulldown = PulldownList(self, grid=(1, 1), callback=self._selectNmrChain)
-    nmrChains = [nmrChain.pid for nmrChain in self.project.nmrChains] + [chain.pid for chain in self.project.chains]
-    self.chainPulldown.setData(nmrChains)
-    self.seqCodeLabel = Label(self, "Sequence Code ", grid=(1, 2))
-    self.seqCodePulldown = PulldownList(self, grid=(1, 3), callback=self._getResidueType)
+        self.parent = parent
+        self.nmrAtom = nmrAtom
 
-    residueTypeLabel = Label(self, "Residue Type ", grid=(2, 0))
-    self.residueTypePulldown = FilteringPulldownList(self, grid=(2, 1))
-    self.residueTypePulldown.setData(('',)+CCP_CODES)              # ejb
-    self.residueTypePulldown.setFixedWidth(100)
-    leftOverLabel = Label(self, "Leftover Possibilities ", grid=(5, 0))
-    leftOvers = Label(self, grid=(5, 1))
-    closeButton = Button(self, grid=(6, 1), text='Close', callback=self.reject)
-    applyButton = Button(self, grid=(6, 2), text='Apply', callback=self._applyChanges)
-    okButton = Button(self, grid=(6, 3), text='Ok', callback=self._okButton)
+        row = 0
+        hspan = 3
+        hWidth = 100
 
-    self._updatePopup(nmrResidue)
+        row += 1
+        self.chainPulldown = NmrChainPulldown(self, project=self.project,
+                                              minimumWidths=(hWidth, hWidth), maximumWidths=(hWidth, hWidth),
+                                              grid=(row, 0), gridSpan=(1, hspan))
+        row += 1
+        self.sequenceCode = EntryCompoundWidget(self, labelText="Sequence Code", grid=(row, 0), gridSpan=(1, hspan))
 
+        row += 1
+        self.residueType = PulldownListCompoundWidget(self, labelText="Residue Type", editable=True,
+                                                      minimumWidths=(hWidth, hWidth), maximumWidths=(hWidth, hWidth),
+                                                      grid=(row, 0), gridSpan=(1, hspan))
+        row += 1
+        self.comment = EntryCompoundWidget(self, labelText="Comment",
+                                           minimumWidths=(hWidth, hWidth), maximumWidths=(hWidth, hWidth),
+                                           grid=(row, 0), gridSpan=(1, hspan))
+        row += 1
+        self.buttons = ButtonList(self, texts=('Close', 'Apply', 'Ok'),
+                                  callbacks=(self.reject, self._applyChanges, self._okButton),
+                                  grid=(row, 0), gridSpan=(1, hspan))
 
-  def _getResidueTypeProb(self, currentNmrResidue):
-    # try:
-    #   self.project.chemicalShiftLists[0]
-    # except Exception:
-    #   getLogger().warning('No chemicalShiftLists in project.')
-    #   return
+        self._updatePopup(nmrResidue)
 
-    if self.project.chemicalShiftLists and len(self.project.chemicalShiftLists) > 0:
-      predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
-      preds1 = [' '.join([x[0], x[1]]) for x in predictions if not currentNmrResidue.residueType]
-      predictedTypes = [x[0] for x in predictions]
-      remainingResidues = [x for x in CCP_CODES if x not in predictedTypes and not currentNmrResidue.residueType]
-      possibilities = [currentNmrResidue.residueType]+preds1+remainingResidues
-      self.residueTypePulldown.setData(possibilities)
+    def _updatePopup(self, nmrResidue):
+        if nmrResidue is not None:
+            self.setWindowTitle(nmrResidue.pid)
+            self.nmrResidue = nmrResidue
 
-  def _updatePopup(self, nmrResidue):
-    if nmrResidue is not None:
+            chain = nmrResidue.nmrChain
+            self.chainPulldown.select(chain.pid)
+            self.sequenceCode.setText(nmrResidue.sequenceCode)
+            self._getResidueTypeProb(nmrResidue)
+            self.residueType.select(nmrResidue.residueType)
+            self.comment.setText(nmrResidue.comment)
 
-      self.nmrResidueLabel.setText("NMR Residue: %s" % nmrResidue.id)
-      self.chainPulldown.setCurrentIndex(self.chainPulldown.findText(nmrResidue.nmrChain.pid))
-      chain = self.project.getByPid(self.chainPulldown.currentText())
-      sequenceCodes = ["%s %s" % (nmrResidue.sequenceCode, nmrResidue.residueType)
-                   for nmrResidue in chain.nmrResidues]
-      self.seqCodePulldown.setData(sequenceCodes)
-      sequenceCode = "%s %s" % (nmrResidue.sequenceCode, nmrResidue.residueType)
-      self.seqCodePulldown.setCurrentIndex(self.seqCodePulldown.findText(sequenceCode))
-      self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.findText(self._getCcpCodeFromNmrResidueName(nmrResidue)))
-      self._getResidueTypeProb(nmrResidue)
-      self.nmrResidue = nmrResidue
+    def _getResidueTypeProb(self, currentNmrResidue):
 
-  def _selectNmrChain(self, item):
-    chain = self.project.getByPid(self.chainPulldown.currentText())
-    if isinstance(chain, Chain):
-      self.seqCodePulldown.setData(["%s %s" % (residue.sequenceCode, residue.residueType)
-                     for residue in chain.residues])
-    else:
-      self.seqCodePulldown.setData(["%s %s" % (nmrResidue.sequenceCode, nmrResidue.residueType)
-                     for nmrResidue in chain.nmrResidues])
-    self._getResidueType(self.seqCodePulldown.currentText())
+        if self.project.chemicalShiftLists and len(self.project.chemicalShiftLists) > 0:
+            predictions = getNmrResiduePrediction(currentNmrResidue, self.project.chemicalShiftLists[0])
+            preds1 = [' '.join([x[0], x[1]]) for x in predictions if not currentNmrResidue.residueType]
+            predictedTypes = [x[0] for x in predictions]
+            remainingResidues = [x for x in CCP_CODES if x not in predictedTypes and not currentNmrResidue.residueType]
+            possibilities = [currentNmrResidue.residueType] + preds1 + remainingResidues
+        else:
+            possibilities = ('',) + CCP_CODES,
+        self.residueType.modifyTextList(possibilities)
 
-  def _getResidueType(self, item):
-    try:
-      residueType = item.split(' ')[1].capitalize()       # ejb - crash when empty
-    except:
-      residueType = ''
-    for type in self.residueTypePulldown.texts:
-      if type.split(' ')[0] == residueType:
-        self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.texts.index(type))
+    def _applyChanges(self):
+        """
+        The apply button has been clicked
+        Define an undo block for setting the properties of the object
+        If there is an error setting any values then generate an error message
+          If anything has been added to the undo queue then remove it with application.undo()
+          repopulate the popup widgets
+        """
+        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
+        try:
+            nmrChain = self.nmrResidue.nmrChain
+            newNmrchain = self.project.getByPid(self.chainPulldown.getText())
+            if newNmrchain != nmrChain:
+                self.nmrResidue.moveToNmrChain(newNmrchain)
 
-  def _getCcpCodeFromNmrResidueName(self, currentNmrResidue):
-    if currentNmrResidue.residue is not None:
-      return currentNmrResidue.residueType.capitalize()
+            sequenceCode = self.sequenceCode.getText()
+            residueType = self.residueType.getText()
+            if self.nmrResidue.sequenceCode != sequenceCode or self.nmrResidue.residueType != residueType:
+                newSeqCode = '.'.join((sequenceCode, residueType))
+                self.nmrResidue.rename(newSeqCode)
 
-  def _getLeftOverResidues(self):
-    leftovers = []
-    for residue in self.project.residues:
-      if residue.residueType == self.residueTypePulldown.currentText().upper():
-        leftovers.append(residue)
-    leftovers.remove(self.nmrResidue.residue)
-    return [residue.id for residue in leftovers]
+        except Exception as es:
+            showWarning(str(self.windowTitle()), str(es))
+            self.application.undo()
 
-  def _repopulate(self):
-    #TODO:ED make sure that this popup is repopulated correctly
-    pass
+        finally:
+            self.project._endCommandEchoBlock()
+            self._updatePopup(self.nmrResidue)  # Repopulate
 
-  def _applyChanges(self):
-    """
-    The apply button has been clicked
-    Define an undo block for setting the properties of the object
-    If there is an error setting any values then generate an error message
-      If anything has been added to the undo queue then remove it with application.undo()
-      repopulate the popup widgets
-    """
-    chain = self.project.getByPid(self.chainPulldown.currentText())
-
-    applyAccept = False
-    oldUndo = self.project._undo.numItems()
-
-    self.project._startCommandEchoBlock('_applyChanges', quiet=True)
-    try:
-      if isinstance(chain, Chain):
-        residueItem = self.seqCodePulldown.currentText().split(' ')
-        residue = self.project.getByPid('MR:%s.%s.%s' % (chain.shortName, residueItem[0], residueItem[1]))
-        self.nmrResidue.residue = residue
-      else:
-        seqCode = self.seqCodePulldown.currentText().split(' ')[0]
-        residueType = self.residueTypePulldown.currentText().split(' ')[0].upper()
-        newSeqCode = '.'.join([seqCode, residueType])
-        self.nmrResidue.rename(newSeqCode)
-
-      self.nmrResidueLabel.setText("NMR Residue: %s" % self.nmrResidue.id)
-
-      applyAccept = True
-    except Exception as es:
-      showWarning(str(self.windowTitle()), str(es))
-    finally:
-      self.project._endCommandEchoBlock()
-
-    if applyAccept is False:
-      # should only undo if something new has been added to the undo deque
-      # may cause a problem as some things may be set with the same values
-      # and still be added to the change list, so only undo if length has changed
-      errorName = str(self.__class__.__name__)
-      if oldUndo != self.project._undo.numItems():
-        self.project._undo.undo()
-        getLogger().debug('>>>Undo.%s._applychanges' % errorName)
-      else:
-        getLogger().debug('>>>Undo.%s._applychanges nothing to remove' % errorName)
-
-      # repopulate popup
-      self._repopulate()
-      return False
-    else:
-      return True
-
-  def _okButton(self):
-    if self._applyChanges() is True:
-      self.accept()
+    def _okButton(self):
+        self._applyChanges()
+        self.accept()

@@ -706,7 +706,7 @@ class PeakList(AbstractWrapperObject):
     positions = [positionCodeDict[code] for code in codes]
     axisCodeMapping = commonUtil._axisCodeMapIndices(codes, self.spectrum.axisCodes)
 
-    # divide by 2 to get the double-width tolerance, i.e. the width of the region
+    # divide by 2 to get the double-width tolerance, i.e. the width of the region - CHECK WITH GEERTEN
     tolerances = tuple(tol / 2 for tol in self.spectrum.assignmentTolerances)
 
     limits = self.spectrum.spectrumLimits

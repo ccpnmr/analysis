@@ -187,6 +187,13 @@ class Spectrum(AbstractWrapperObject):
         return tuple(range(1, self.dimensionCount + 1))
 
     @property
+    def indices(self) -> tuple:
+        """tuple of length dimensionCount with indices integers; ie. (0,1,2,3).
+        Useful for mapping axisCodes: eg: self.getByAxisCodes('indices', ['N','C','H']
+        """
+        return tuple(range(0, self.dimensionCount))
+
+    @property
     def comment(self) -> str:
         """Free-form text comment"""
         return self._wrappedData.details
@@ -1303,7 +1310,7 @@ class Spectrum(AbstractWrapperObject):
         # find the map of newAxisCodeOrder to self.axisCodes; eg. 'H' to 'Hn'
         axisCodeMap = axisCodeMapping(axisCodes, self.axisCodes)
         if len(axisCodeMap) == 0:
-            raise ValueError('axisCodes %s contains an invalid element' % axisCodes)
+            raise ValueError('axisCodes %s contains an invalid element' % str(axisCodes))
         return [axisCodeMap[a] for a in axisCodes]
 
     def _reorderValues(self, values: Sequence, newAxisCodeOrder: Sequence[str]):
@@ -1320,18 +1327,27 @@ class Spectrum(AbstractWrapperObject):
                                  (axisCode, newAxisCodeOrder, self.axisCodes))
         return newValues
 
-    def getRegionData(self, regionToPick: Sequence):
+    def getRegionData(self, **axisDict):
         """Return the region of the spectrum data defined by the axis limits
         """
         startPoint = []
         endPoint = []
         # spectrum = self.spectrum
 
-        # need to create regionToPick
+        # fill with the spectrum limits first
+        regionToPick = list(self.spectrumLimits)
 
+        # insert axis regions into the limits list based on axisCode
+        for axis, region in axisDict.items():
+            for specAxis in self.axisCodes:
+                mapAxis = axisCodeMapping([axis], [specAxis])
+                if mapAxis:
+                    regionToPick[self.axisCodes.index(mapAxis[axis])] = region
+                    break
+            else:
+                raise ValueError('Invalid axis: %s' % axis)
 
-
-
+        # convert the region limits to point coordinates with the dataSource
         dataDims = self._apiDataSource.sortedDataDims()
         aliasingLimits = self.aliasingLimits
         apiPeaks = []
@@ -1342,13 +1358,17 @@ class Spectrum(AbstractWrapperObject):
                              " with defined primary SpectrumReferences ")
         if regionToPick is None:
             regionToPick = self.aliasingLimits
+
         for ii, spectrumReference in enumerate(spectrumReferences):
             aliasingLimit0, aliasingLimit1 = aliasingLimits[ii]
             value0 = regionToPick[ii][0]
             value1 = regionToPick[ii][1]
             value0, value1 = min(value0, value1), max(value0, value1)
+
             if value1 < aliasingLimit0 or value0 > aliasingLimit1:
-                break  # completely outside aliasing region
+                # completely outside limits
+                break
+
             value0 = max(value0, aliasingLimit0)
             value1 = min(value1, aliasingLimit1)
 
@@ -1361,78 +1381,108 @@ class Spectrum(AbstractWrapperObject):
 
             startPoint.append((spectrumReference.dimension, position0))
             endPoint.append((spectrumReference.dimension, position1))
+
         else:
+
+            # this is a for..else, completes only if all limits are within spectrum bounds
             startPoints = [point[1] for point in sorted(startPoint)]
             endPoints = [point[1] for point in sorted(endPoint)]
 
-            # print('>>>', startPoint, startPoints, endPoint, endPoints)
+            # originally from the PeakList dataSource which should be the same as the spectrum _apiDataSource
+            # dataSource = self.dataSource
+            dataSource = self._apiDataSource
+            numDim = dataSource.numDim
 
-        # originally from the PeakList datasource which should be the same as the spectrum _apiDataSource
-        # dataSource = self.dataSource
-        dataSource = self._apiDataSource
-        numDim = dataSource.numDim
+            minLinewidth = [0.0] * numDim
+            exclusionBuffer = [0] * numDim  # [1] * numDim
+            nonAdj = 0
+            excludedRegions = []
+            excludedDiagonalDims = []
+            excludedDiagonalTransform = []
 
-        minLinewidth = [0.0] * numDim
-        exclusionBuffer = [0] * numDim  # [1] * numDim
-        nonAdj = 0
-        excludedRegions = []
-        excludedDiagonalDims = []
-        excludedDiagonalTransform = []
+            startPoint = np.array(startPoints)
+            endPoint = np.array(endPoints)
 
-        startPoint = np.array(startPoints)
-        endPoint = np.array(endPoints)
+            startPoint, endPoint = np.minimum(startPoint, endPoint), np.maximum(startPoint, endPoint)
 
-        startPoint, endPoint = np.minimum(startPoint, endPoint), np.maximum(startPoint, endPoint)
+            # extend region by exclusionBuffer
+            bufferArray = np.array(exclusionBuffer)
+            startPointBuffer = startPoint - bufferArray
+            endPointBuffer = endPoint + bufferArray
 
-        # extend region by exclusionBuffer
-        bufferArray = np.array(exclusionBuffer)
-        startPointBuffer = startPoint - bufferArray
-        endPointBuffer = endPoint + bufferArray
+            regions = numDim * [0]
+            npts = numDim * [0]
+            for n in range(numDim):
+                start = startPointBuffer[n]
+                end = endPointBuffer[n]
+                npts[n] = dataSource.findFirstDataDim(dim=n + 1).numPointsOrig
+                tile0 = start // npts[n]
+                tile1 = (end - 1) // npts[n]
+                region = regions[n] = []
+                if tile0 == tile1:
+                    region.append((start, end, tile0))
+                else:
+                    region.append((start, (tile0 + 1) * npts[n], tile0))
+                    region.append((tile1 * npts[n], end, tile1))
+                for tile in range(tile0 + 1, tile1):
+                    region.append((tile * npts[n], (tile + 1) * npts[n], tile))
 
-        regions = numDim * [0]
-        npts = numDim * [0]
-        for n in range(numDim):
-            start = startPointBuffer[n]
-            end = endPointBuffer[n]
-            npts[n] = dataSource.findFirstDataDim(dim=n + 1).numPointsOrig
-            tile0 = start // npts[n]
-            tile1 = (end - 1) // npts[n]
-            region = regions[n] = []
-            if tile0 == tile1:
-                region.append((start, end, tile0))
+            peaks = []
+            objectsCreated = []
+
+            nregions = [len(region) for region in regions]
+
+            # # force there to be only one region which is the central tile containing the spectrum
+            nregions = numDim * [1]
+
+            nregionsTotal, cumulRegions = _cumulativeArray(nregions)
+
+            # # allows there to be a repeating pattern of the spectrum tiled across the display
+            # for n in range(nregionsTotal):
+
+            # fix to just the first tile
+            n = 0
+
+            array = _arrayOfIndex(n, cumulRegions)
+            chosenRegion = [regions[i][array[i]] for i in range(numDim)]
+            startPointBufferActual = np.array([cr[0] for cr in chosenRegion])
+            endPointBufferActual = np.array([cr[1] for cr in chosenRegion])
+            tile = np.array([cr[2] for cr in chosenRegion])
+            startPointBuffer = np.array([startPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
+            endPointBuffer = np.array([endPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
+
+            dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
+
+            return  dataArray, intRegion
+
+        # for loop fails so return empty
+        return np.empty([]), np.empty([])
+
+    def _getByValidAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
+        """Return values defined by attributeName in order defined by axisCodes :
+           (default order if None)
+            perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
+           NB: Use getByDimensions for dimensions (1..dimensionCount) based access
+        """
+        if not hasattr(self, attributeName):
+            raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
+
+        mappings = []
+        for ind, axis in enumerate(axisCodes):
+            for specAxis in self.axisCodes:
+                mapAxis = axisCodeMapping([axis], [specAxis])
+                if mapAxis:
+                    mappings.append(mapAxis[axis])       #[self.axisCodes.index(mapAxis[axis])] = ind
+                    break
             else:
-                region.append((start, (tile0 + 1) * npts[n], tile0))
-                region.append((tile1 * npts[n], end, tile1))
-            for tile in range(tile0 + 1, tile1):
-                region.append((tile * npts[n], (tile + 1) * npts[n], tile))
+                # raise ValueError('Invalid axis: %s' % axis)
+                pass
 
-        peaks = []
-        objectsCreated = []
-
-        nregions = [len(region) for region in regions]
-
-        # # force there to be only one region which is the central tile containing the spectrum
-        nregions = numDim * [1]
-
-        nregionsTotal, cumulRegions = _cumulativeArray(nregions)
-
-        # # allows there to be a repeating pattern of the spectrum tiled across the display
-        # for n in range(nregionsTotal):
-
-        # fix to just the first tile
-        n = 0
-
-        array = _arrayOfIndex(n, cumulRegions)
-        chosenRegion = [regions[i][array[i]] for i in range(numDim)]
-        startPointBufferActual = np.array([cr[0] for cr in chosenRegion])
-        endPointBufferActual = np.array([cr[1] for cr in chosenRegion])
-        tile = np.array([cr[2] for cr in chosenRegion])
-        startPointBuffer = np.array([startPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
-        endPointBuffer = np.array([endPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
-
-        dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
-
-        return  dataArray, intRegion
+        values = getattr(self, attributeName)
+        if mappings is not None:
+            # change to order defined by axisCodes
+            values = self._reorderValues(values, mappings)
+        return values
 
     def getByAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
         """Return values defined by attributeName in order defined by axisCodes :

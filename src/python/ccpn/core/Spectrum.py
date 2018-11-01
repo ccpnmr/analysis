@@ -63,7 +63,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import numpy
+import numpy as np
 import operator
 from typing import Sequence, Tuple, Optional
 from ccpn.util import Common as commonUtil
@@ -82,6 +82,33 @@ from ccpnmodel.ccpncore.lib.Io import Formats
 
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
 INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
+
+def _cumulativeArray(array):
+    """ get total size and strides array.
+        NB assumes fastest moving index first """
+
+    ndim = len(array)
+    cumul = ndim * [0]
+    n = 1
+    for i, size in enumerate(array):
+        cumul[i] = n
+        n = n * size
+
+    return (n, cumul)
+
+
+def _arrayOfIndex(index, cumul):
+    """ Get from 1D index to point address tuple
+    NB assumes fastest moving index first
+    """
+
+    ndim = len(cumul)
+    array = ndim * [0]
+    for i in range(ndim - 1, -1, -1):
+        c = cumul[i]
+        array[i], index = divmod(index, c)
+
+    return np.array(array)
 
 
 class Spectrum(AbstractWrapperObject):
@@ -1091,7 +1118,7 @@ class Spectrum(AbstractWrapperObject):
                   Use axisCodes to set magnetisation transfers instead.""")
 
     @property
-    def intensities(self) -> numpy.ndarray:
+    def intensities(self) -> np.ndarray:
         """ spectral intensities as NumPy array for 1D spectra """
 
         if self.dimensionCount != 1:
@@ -1115,7 +1142,7 @@ class Spectrum(AbstractWrapperObject):
         #     spectrumView.refreshData()
 
     @property
-    def positions(self) -> numpy.ndarray:
+    def positions(self) -> np.ndarray:
         """ spectral region in ppm as NumPy array for 1D spectra """
 
         if self.dimensionCount != 1:
@@ -1126,7 +1153,7 @@ class Spectrum(AbstractWrapperObject):
             pointCount = self.pointCounts[0]
             # WARNING: below assumes that spectrumLimits are "backwards" (as is true for ppm)
             scale = (spectrumLimits[0] - spectrumLimits[1]) / pointCount
-            self._positions = spectrumLimits[1] + scale * numpy.arange(pointCount, dtype='float32')
+            self._positions = spectrumLimits[1] + scale * np.arange(pointCount, dtype='float32')
 
         return self._positions
 
@@ -1189,7 +1216,7 @@ class Spectrum(AbstractWrapperObject):
         return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
     def getPlane(self, axisCodes: tuple, position=None, exactMatch=True):
-        """Get a plane defined by by a tuple of two axisCodes, and a position vector ('1' based, defaults to first point)
+        """Get a plane defined by a tuple of two axisCodes, and a position vector ('1' based, defaults to first point)
         Expand axisCodes if exactMatch=False
         return data array
         NB: use getPlaneData method for dimension based access
@@ -1292,6 +1319,120 @@ class Spectrum(AbstractWrapperObject):
                 raise ValueError('Invalid axisCode "%s" in %s; should be one of %s' %
                                  (axisCode, newAxisCodeOrder, self.axisCodes))
         return newValues
+
+    def getRegionData(self, regionToPick: Sequence):
+        """Return the region of the spectrum data defined by the axis limits
+        """
+        startPoint = []
+        endPoint = []
+        # spectrum = self.spectrum
+
+        # need to create regionToPick
+
+
+
+
+        dataDims = self._apiDataSource.sortedDataDims()
+        aliasingLimits = self.aliasingLimits
+        apiPeaks = []
+        # for ii, dataDim in enumerate(dataDims):
+        spectrumReferences = self.mainSpectrumReferences
+        if None in spectrumReferences:
+            raise ValueError("pickPeaksNd() only works for Frequency dimensions"
+                             " with defined primary SpectrumReferences ")
+        if regionToPick is None:
+            regionToPick = self.aliasingLimits
+        for ii, spectrumReference in enumerate(spectrumReferences):
+            aliasingLimit0, aliasingLimit1 = aliasingLimits[ii]
+            value0 = regionToPick[ii][0]
+            value1 = regionToPick[ii][1]
+            value0, value1 = min(value0, value1), max(value0, value1)
+            if value1 < aliasingLimit0 or value0 > aliasingLimit1:
+                break  # completely outside aliasing region
+            value0 = max(value0, aliasingLimit0)
+            value1 = min(value1, aliasingLimit1)
+
+            position0 = spectrumReference.valueToPoint(value0) - 1
+            position1 = spectrumReference.valueToPoint(value1) - 1
+            position0, position1 = min(position0, position1), max(position0, position1)
+
+            position0 = int(position0 + 1)
+            position1 = int(position1 + 1)
+
+            startPoint.append((spectrumReference.dimension, position0))
+            endPoint.append((spectrumReference.dimension, position1))
+        else:
+            startPoints = [point[1] for point in sorted(startPoint)]
+            endPoints = [point[1] for point in sorted(endPoint)]
+
+            # print('>>>', startPoint, startPoints, endPoint, endPoints)
+
+        # originally from the PeakList datasource which should be the same as the spectrum _apiDataSource
+        # dataSource = self.dataSource
+        dataSource = self._apiDataSource
+        numDim = dataSource.numDim
+
+        minLinewidth = [0.0] * numDim
+        exclusionBuffer = [0] * numDim  # [1] * numDim
+        nonAdj = 0
+        excludedRegions = []
+        excludedDiagonalDims = []
+        excludedDiagonalTransform = []
+
+        startPoint = np.array(startPoints)
+        endPoint = np.array(endPoints)
+
+        startPoint, endPoint = np.minimum(startPoint, endPoint), np.maximum(startPoint, endPoint)
+
+        # extend region by exclusionBuffer
+        bufferArray = np.array(exclusionBuffer)
+        startPointBuffer = startPoint - bufferArray
+        endPointBuffer = endPoint + bufferArray
+
+        regions = numDim * [0]
+        npts = numDim * [0]
+        for n in range(numDim):
+            start = startPointBuffer[n]
+            end = endPointBuffer[n]
+            npts[n] = dataSource.findFirstDataDim(dim=n + 1).numPointsOrig
+            tile0 = start // npts[n]
+            tile1 = (end - 1) // npts[n]
+            region = regions[n] = []
+            if tile0 == tile1:
+                region.append((start, end, tile0))
+            else:
+                region.append((start, (tile0 + 1) * npts[n], tile0))
+                region.append((tile1 * npts[n], end, tile1))
+            for tile in range(tile0 + 1, tile1):
+                region.append((tile * npts[n], (tile + 1) * npts[n], tile))
+
+        peaks = []
+        objectsCreated = []
+
+        nregions = [len(region) for region in regions]
+
+        # # force there to be only one region which is the central tile containing the spectrum
+        nregions = numDim * [1]
+
+        nregionsTotal, cumulRegions = _cumulativeArray(nregions)
+
+        # # allows there to be a repeating pattern of the spectrum tiled across the display
+        # for n in range(nregionsTotal):
+
+        # fix to just the first tile
+        n = 0
+
+        array = _arrayOfIndex(n, cumulRegions)
+        chosenRegion = [regions[i][array[i]] for i in range(numDim)]
+        startPointBufferActual = np.array([cr[0] for cr in chosenRegion])
+        endPointBufferActual = np.array([cr[1] for cr in chosenRegion])
+        tile = np.array([cr[2] for cr in chosenRegion])
+        startPointBuffer = np.array([startPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
+        endPointBuffer = np.array([endPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
+
+        dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
+
+        return  dataArray, intRegion
 
     def getByAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
         """Return values defined by attributeName in order defined by axisCodes :

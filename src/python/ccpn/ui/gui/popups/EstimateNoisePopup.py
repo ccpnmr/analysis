@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-07-04 09:28:16 +0000 (Tue, July 04, 2017) $"
 #=========================================================================================
 
 import numpy as np
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -34,52 +34,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
-from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util import Common as commonUtil
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from functools import partial
-
-
-def _updateGl(self, spectrumList):
-    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-    # # spawn a redraw of the contours
-    # for spec in spectrumList:
-    #     for specViews in spec.spectrumViews:
-    #         specViews.buildContours = True
-
-    GLSignals = GLNotifier(parent=self)
-    GLSignals.emitPaintEvent()
-
-
-# These can be imported from Nmr/PeakList
-def _cumulativeArray(array):
-    """ get total size and strides array.
-        NB assumes fastest moving index first """
-
-    ndim = len(array)
-    cumul = ndim * [0]
-    n = 1
-    for i, size in enumerate(array):
-        cumul[i] = n
-        n = n * size
-
-    return (n, cumul)
-
-
-def _arrayOfIndex(index, cumul):
-    """ Get from 1D index to point address tuple
-    NB assumes fastest moving index first
-    """
-
-    ndim = len(cumul)
-    array = ndim * [0]
-    for i in range(ndim - 1, -1, -1):
-        c = cumul[i]
-        array[i], index = divmod(index, c)
-
-    return np.array(array)
 
 
 class EstimateNoisePopup(CcpnDialog):
@@ -116,12 +72,11 @@ class EstimateNoisePopup(CcpnDialog):
         self.tabWidget.setMinimumWidth(
                 max(self.MINIMUM_WIDTH, self.MINIMUM_WIDTH_PER_TAB * len(self.orderedSpectra)))
 
+        # add a tab for each spectrum in the spectrumDisplay
         self._noiseTab = []
         for specNum, thisSpec in enumerate(self.orderedSpectra):
             self._noiseTab.append(NoiseTab(parent=self, mainWindow=self.mainWindow, spectrum=thisSpec, strip=strip))
             self.tabWidget.addTab(self._noiseTab[specNum], thisSpec.name)
-
-        # estimate noise function here
 
         ButtonList(self, ['Close'], [self._accept], grid=(2, 3))
 
@@ -188,6 +143,8 @@ class NoiseTab(QtWidgets.QWidget, Base):
         for n in self.strip.orderedAxes[2:]:
             selectedRegion.append((n.region[0], n.region[1]))
 
+        # map the limits to the correct axisCodes
+        axisCodeDict = {}
         if self.spectrum.dimensionCount > 1:
             sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
             spectrumAxisCodes = self.spectrum.axisCodes
@@ -200,157 +157,31 @@ class NoiseTab(QtWidgets.QWidget, Base):
                     # idx = stripAxisCodes.index(axisCode)
                     idx = remapIndices[n]
                     regionToPick[n] = sortedSelectedRegion[idx]
+
+                    axisCodeDict[axisCode] = sortedSelectedRegion[idx]
             else:
                 regionToPick = sortedSelectedRegion
+
+                for n, axisCode in enumerate(spectrumAxisCodes):
+                    axisCodeDict[axisCode] = sortedSelectedRegion[n]
 
         else:
             sortedSelectedRegion = [list(sorted(x)) for x in selectedRegion]
             regionToPick = [sortedSelectedRegion[0]]
 
-        startPoint = []
-        endPoint = []
-        spectrum = self.spectrum
-        dataDims = spectrum._apiDataSource.sortedDataDims()
-        aliasingLimits = spectrum.aliasingLimits
-        apiPeaks = []
-        # for ii, dataDim in enumerate(dataDims):
-        spectrumReferences = spectrum.mainSpectrumReferences
-        if None in spectrumReferences:
-            raise ValueError("pickPeaksNd() only works for Frequency dimensions"
-                             " with defined primary SpectrumReferences ")
-        if regionToPick is None:
-            regionToPick = self.spectrum.aliasingLimits
-        for ii, spectrumReference in enumerate(spectrumReferences):
-            aliasingLimit0, aliasingLimit1 = aliasingLimits[ii]
-            value0 = regionToPick[ii][0]
-            value1 = regionToPick[ii][1]
-            value0, value1 = min(value0, value1), max(value0, value1)
-            if value1 < aliasingLimit0 or value0 > aliasingLimit1:
-                break  # completely outside aliasing region
-            value0 = max(value0, aliasingLimit0)
-            value1 = min(value1, aliasingLimit1)
+        dataArray, intRegion = self.spectrum.getRegionData(regionToPick)
 
-            position0 = spectrumReference.valueToPoint(value0) - 1
-            position1 = spectrumReference.valueToPoint(value1) - 1
-            position0, position1 = min(position0, position1), max(position0, position1)
-
-            position0 = int(position0 + 1)
-            position1 = int(position1 + 1)
-
-            startPoint.append((spectrumReference.dimension, position0))
-            endPoint.append((spectrumReference.dimension, position1))
-        else:
-            startPoints = [point[1] for point in sorted(startPoint)]
-            endPoints = [point[1] for point in sorted(endPoint)]
-
-            # print('>>>', startPoint, startPoints, endPoint, endPoints)
-
-        # originally from the PeakList datasource which should be the same as the spectrum _apiDataSource
-        # dataSource = self.dataSource
-        dataSource = self.spectrum._apiDataSource
-        numDim = dataSource.numDim
-
-        minLinewidth = [0.0] * numDim
-        exclusionBuffer = [0] * numDim  # [1] * numDim
-        nonAdj = 0
-        excludedRegions = []
-        excludedDiagonalDims = []
-        excludedDiagonalTransform = []
-
-        startPoint = np.array(startPoints)
-        endPoint = np.array(endPoints)
-
-        startPoint, endPoint = np.minimum(startPoint, endPoint), np.maximum(startPoint, endPoint)
-
-        # extend region by exclusionBuffer
-        bufferArray = np.array(exclusionBuffer)
-        startPointBuffer = startPoint - bufferArray
-        endPointBuffer = endPoint + bufferArray
-
-        regions = numDim * [0]
-        npts = numDim * [0]
-        for n in range(numDim):
-            start = startPointBuffer[n]
-            end = endPointBuffer[n]
-            npts[n] = dataSource.findFirstDataDim(dim=n + 1).numPointsOrig
-            tile0 = start // npts[n]
-            tile1 = (end - 1) // npts[n]
-            region = regions[n] = []
-            if tile0 == tile1:
-                region.append((start, end, tile0))
-            else:
-                region.append((start, (tile0 + 1) * npts[n], tile0))
-                region.append((tile1 * npts[n], end, tile1))
-            for tile in range(tile0 + 1, tile1):
-                region.append((tile * npts[n], (tile + 1) * npts[n], tile))
-
-        peaks = []
-        objectsCreated = []
-
-        nregions = [len(region) for region in regions]
-
-        # # force there to be only one region which is the central tile containing the spectrum
-        nregions = numDim * [1]
-
-        nregionsTotal, cumulRegions = _cumulativeArray(nregions)
-
-        # allows there to be a repeating pattern of the spectrum across the display
-        for n in range(nregionsTotal):
-            array = _arrayOfIndex(n, cumulRegions)
-            chosenRegion = [regions[i][array[i]] for i in range(numDim)]
-            startPointBufferActual = np.array([cr[0] for cr in chosenRegion])
-            endPointBufferActual = np.array([cr[1] for cr in chosenRegion])
-            tile = np.array([cr[2] for cr in chosenRegion])
-            startPointBuffer = np.array([startPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
-            endPointBuffer = np.array([endPointBufferActual[i] - tile[i] * npts[i] for i in range(numDim)])
-
-            dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
-
-            # now process the dataArray - the data only in the specified region
-
-            # # temporary plot
-            # import matplotlib
-            # import matplotlib.pyplot as plt
-            # cplot = plt.contour(dataArray[0])
-            # plt.show()
-            # pass
-
-            if dataSource.numDim > 1:
-                flatData = dataArray.flatten()
-                self.SD = np.std(flatData)
-                self.max = np.max(flatData)
-                self.min = np.min(flatData)
-                self.mean = np.mean(flatData)
-                self.noiseLevel = self.mean + 3.0 * self.SD
-            else:
-
-                flatData = dataArray.flatten()
-                self.SD = np.std(flatData)
-                self.max = np.max(flatData)
-                self.min = np.min(flatData)
-                self.mean = np.mean(flatData)
-                self.noiseLevel = self.mean + 3.0 * self.SD
-
-                pass
-                # # not ready for 1d yet :)
-                # if hasattr(dataSource, 'valueArray') and len(dataSource.valueArray) != 0:
-                #     sliceData = dataSource.valueArray
-                # else:
-                #     self.valueArray = sliceData = getSliceData(self)
-                # # print(sliceData)
-                # # print(sliceData[1])
-                # sliceDataStd = numpy.std(sliceData)
-                # sliceData = numpy.array(sliceData, numpy.float32)
-                # # Clip the data to remove outliers
-                # sliceData = sliceData.clip(-sliceDataStd, sliceDataStd)
-                #
-                # value = 1.1 * numpy.std(sliceData)  # multiplier a guess
-
-            #value *= self.scale
+        # calculate the noise values
+        flatData = dataArray.flatten()
+        self.SD = np.std(flatData)
+        self.max = np.max(flatData)
+        self.min = np.min(flatData)
+        self.mean = np.mean(flatData)
+        self.noiseLevel = self.mean + 3.0 * self.SD
 
         # populate the widgets
         for axis, region in enumerate(regionToPick):
-            self.axisCodes[axis].setText('('+','.join(['%.3f' % rr for rr in region])+')')
+            self.axisCodes[axis].setText('(' + ','.join(['%.3f' % rr for rr in region]) + ')')
         self.meanLabel.setText(str(self.mean))
         self.SDLabel.setText(str(self.SD))
         self.maxLabel.setText(str(self.max))
@@ -361,27 +192,3 @@ class NoiseTab(QtWidgets.QWidget, Base):
         """Apply the current noiseLevel to the spectrum
         """
         self.spectrum.noiseLevel = self.noiseLevel
-
-        # # doesn't change anything!
-        # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-        #
-        # GLSignals = GLNotifier(parent=self)
-        # _undo = self.spectrum.project._undo
-        #
-        # self.spectrum.project._startCommandEchoBlock('_setNoiseLevel', quiet=True)
-        # try:
-        #     _undo._newItem(undoPartial=partial(_updateGl, self, [self.spectrum]))
-        #     self.spectrum.noiseLevel = self.noiseLevel
-        #     _undo._newItem(redoPartial=partial(_updateGl, self, [self.spectrum]))
-        #
-        #     for specViews in self.spectrum.spectrumViews:
-        #         specViews.buildContours = True
-        #
-        #     # repaint
-        #     GLSignals.emitPaintEvent()
-        #
-        #     applyAccept = True
-        # except Exception as es:
-        #     showWarning(str(self.windowTitle()), str(es))
-        # finally:
-        #     self.spectrum.project._endCommandEchoBlock()

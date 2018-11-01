@@ -672,6 +672,10 @@ class CcpnModule(Dock, DropBase):
         # except Exception as es:
         #   getLogger().debug('>>>delete CcpnModule Error %s' %es)
 
+    # def setAcceptDrops(self, value):
+    #     """Method to pass drops"""
+    #     self.mainWidget.setAcceptDrops(value)
+
     def dragMoveEvent(self, *args):
         DockDrop.dragMoveEvent(self, *args)
 
@@ -744,10 +748,9 @@ class CcpnModule(Dock, DropBase):
             if hasattr(src, 'implements') and src.implements('dock'):
                 DockDrop.dragEnterEvent(self, *args)
 
-    def dropEvent(self, *args):
+    def dropEvent(self, event):
         self.setWidgetTransparency(False)
-        if args:
-            event = args[0]
+        if event:
             source = event.source()
             data = self.parseEvent(event)
             if DropBase.PIDS in data:
@@ -766,9 +769,9 @@ class CcpnModule(Dock, DropBase):
 
             if hasattr(source, 'implements') and source.implements('dock'):
                 CcpnModule._lastActionWasDrop = True
-                DockDrop.dropEvent(self, *args)
+                DockDrop.dropEvent(self, event)
             else:
-                args[0].ignore()
+                event.ignore()
                 return
 
     def _fillDisplayWidget(self):

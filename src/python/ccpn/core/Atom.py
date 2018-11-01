@@ -167,7 +167,6 @@ class Atom(AbstractWrapperObject):
       # NB isEquivalent is None for symmetric aromatic rings. We return True for that
       return apiChemAtomSet.isEquivalent != False
 
-
   def addInterAtomBond(self, atom:'Atom'):
     """ADVANCED Add generic bond between atoms - for creating disulfides or other crosslinks
     The bound-to atom will appear in self.boundAtoms.
@@ -177,6 +176,14 @@ class Atom(AbstractWrapperObject):
     project = self._project
     project._wrappedData.molSystem.newGenericBond(atoms=(self._wrappedData, atom._wrappedData))
 
+  @property
+  def isAssigned(self) -> bool:
+    """
+    :return: True if Atom has as NmrAtom with an associated ChemicalShift object
+    """
+    if self.nmrAtom is None: return False
+    if not self.nmrAtom.chemicalShifts: return False # either None or len==0
+    return True
 
   # Implementation functions
 

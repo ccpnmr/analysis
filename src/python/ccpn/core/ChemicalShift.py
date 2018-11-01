@@ -140,7 +140,7 @@ def getter(self:NmrAtom) -> Tuple[ChemicalShift, ...]:
   getDataObj = self._project._data2Obj.get
   return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
 
-NmrAtom.chemicalShifts = property(getter, None, None, "Chemical shifts belonging to NmrAtom")
+NmrAtom.chemicalShifts = property(getter, None, None, "Returns ChemicalShift objects connected to NmrAtom")
 
 del getter
 

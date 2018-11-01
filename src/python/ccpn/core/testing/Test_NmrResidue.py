@@ -62,7 +62,6 @@ class ResidueAllNmrResiduesTest(WrapperTesting):
 
     for res in self.chain.residues:
       self.assertEquals(res.allNmrResidues, ())
-      self.assertEquals(res.allNmrAtoms, ())
 
     nmrResidues = []
     nmrChain = self.project.newNmrChain(isConnected=True)
@@ -86,7 +85,6 @@ class ResidueAllNmrResiduesTest(WrapperTesting):
                       )
     for ii, residue in enumerate(self.chain.residues):
       self.assertEquals(tuple(x.pid for x in residue.allNmrResidues), allResidues[ii])
-      self.assertEquals(tuple(x.pid for x in residue.allNmrAtoms), allAtoms[ii])
 
     self.assertIs(nmrResidues[4].previousNmrResidue, nmrResidues[0])
     self.assertIs(nmrResidues[8].previousNmrResidue, nmrResidues[4])

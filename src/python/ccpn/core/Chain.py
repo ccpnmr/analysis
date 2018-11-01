@@ -261,7 +261,6 @@ class Chain(AbstractWrapperObject):
         self._project._logger.warning("Only %s residues found in range %s tos %s"
                                       % (len(changedResidues), start, stop))
 
-
   @property
   def sequence(self):
     """
@@ -274,6 +273,13 @@ class Chain(AbstractWrapperObject):
         if c:
           sequence+=c
     return sequence
+
+  @property
+  def hasAssignedAtoms(self) -> bool:
+    """
+    :return: True if any of its atoms have an assignment
+    """
+    return any([a.isAssigned for a in self.atoms])
 
   def _toNmrChain(self):
     ''' Makes an Nmr Chain from the chain '''

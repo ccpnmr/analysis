@@ -109,7 +109,7 @@ class DropBase:
     else:
       getLogger().debug('Widget not droppable')
 
-  def parseEvent(self, event):
+  def parseEvent(self, event) -> dict:
     """ 
     Interpret drop event; extract urls, text or JSONDATA dicts 
     convert PIDS to Pid object's
@@ -134,9 +134,9 @@ class DropBase:
 
     elif event.mimeData().hasUrls():
       filePaths = [url.path() for url in event.mimeData().urls()]
-      data['urls'] = filePaths
+      data[self.URLS] = filePaths
 
     elif event.mimeData().hasText():
-      data['text'] = event.mimeData().text()
+      data[self.TEXT] = event.mimeData().text()
 
     return data

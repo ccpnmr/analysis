@@ -73,6 +73,8 @@ class Entry(QtWidgets.QLineEdit, Base):
   def get(self):
     
     return self.convertText(self.text())
+  #gwv 20181101; some consistency
+  getText = get
     
   def set(self, value, doCallback=True):
     

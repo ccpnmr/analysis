@@ -32,6 +32,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
+from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
@@ -207,6 +208,81 @@ class ListCompoundWidget(CompoundBaseWidget):
     self.pulldownList.setIndex(0)
 
 
+class EntryCompoundWidget(CompoundBaseWidget):
+  """
+  Compound class comprising a Label and a Entry widget, combined in a CompoundBaseWidget (i.e. a Frame)
+
+    orientation       widget layout
+    ------------      ------------------------
+    left:             Label       Entry
+
+    right:            Entry    Label
+
+    top:              Label
+                      Entry
+
+    bottom:           Entry
+                      Label
+
+  """
+  layoutDict = dict(
+    # grid positions for label and Entry for the different orientations
+    left   = [(0, 0), (0, 1)],
+    right  = [(0, 1), (0, 0)],
+    top    = [(0, 0), (1, 0)],
+    bottom = [(1, 0), (0, 0)],
+  )
+
+  def __init__(self, parent=None, showBorder=False, orientation='left',
+               minimumWidths=None, maximumWidths=None, fixedWidths=None,
+               labelText='', callback=None, default=None,
+               sizeAdjustPolicy=None, **kwds):
+    """
+    :param parent: parent widget
+    :param showBorder: flag to display the border of Frame (True, False)
+    :param orientation: flag to determine the orientation of the labelText relative to the Entry widget.
+                        Allowed values: 'left', 'right', 'top', 'bottom'
+    :param minimumWidths: tuple of two values specifying the minimum width of the Label and Entry widget, respectively
+    :param maximumWidths: tuple of two values specifying the maximum width of the Label and Entry widget, respectively
+    :param labelText: Text for the Label
+    :param callback: (optional) callback for the Entry
+    :param default: (optional) initial text of the Entry
+    :param kwds: (optional) keyword, value pairs for the gridding of Frame
+    """
+
+    CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                showBorder=showBorder, **kwds)
+
+    self.label = Label(parent=self, text=labelText, vAlign='center')
+    self._addWidget(self.label)
+
+    self.entry = Entry(parent=self, callback=callback)
+    self._addWidget(self.entry)
+
+    if default is not None:
+      self.setText(default)
+
+    if minimumWidths is not None:
+      self.setMinimumWidths(minimumWidths)
+
+    if maximumWidths is not None:
+      self.setMinimumWidths(maximumWidths)
+
+    if fixedWidths is not None:
+      self.setFixedWidths(fixedWidths)
+
+    if sizeAdjustPolicy is not None:
+      self.pulldownList.setSizeAdjustPolicy(sizeAdjustPolicy)
+
+  def getText(self):
+    "Convenience: Return text of Entry"
+    return self.entry.getText()
+
+  def setText(self, text):
+    "Convenience: set text of Entry"
+    self.entry.setText(text)
+
+
 class PulldownListCompoundWidget(CompoundBaseWidget):
   """
   Compound class comprising a Label and a PulldownList, combined in a CompoundBaseWidget (i.e. a Frame)
@@ -364,6 +440,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         self.modifyTextList(texts=texts)
     except:
       pass
+
 
 class CheckBoxCompoundWidget(CompoundBaseWidget):
   """
@@ -687,7 +764,7 @@ if __name__ == '__main__':
   listWidget2.showPulldownList(False)
 
   row += 1
-  doubleSpinBox = DoubleSpinBoxCompoundWidget(parent=popup, labelText='doubleSpinBox: rage (-3,10)', grid=(row,0),
+  doubleSpinBox = DoubleSpinBoxCompoundWidget(parent=popup, labelText='doubleSpinBox: range (-3,10)', grid=(row,0),
                                               callback = callback1, range=(-3,10)
                                               )
 
@@ -695,8 +772,14 @@ if __name__ == '__main__':
   doubleSpinBox2 = DoubleSpinBoxCompoundWidget(parent=popup, labelText='doubleSpinBox no buttons', grid=(row,0),
                                               showButtons=False, callback = callback1
                                               )
+  #doubleSpinBox2.set(10.3)
 
-  doubleSpinBox2.set(10.3)
+  # row += 1
+  # selectorWidget = SelectorWidget(parent=popup, label='selectorWidget', grid=(row,0))
+
+  row += 1
+  entry = EntryCompoundWidget(parent=popup, labelText="Entry widget", default='test', callback=callback1, grid=(row,0))
+
   popup.show()
   popup.raise_()
   app.start()

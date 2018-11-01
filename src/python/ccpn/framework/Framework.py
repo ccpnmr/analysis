@@ -1495,11 +1495,15 @@ class Framework:
     successful = self.project.save(newPath=newPath, createFallback=createFallback,
                                    overwriteExisting=overwriteExisting)
     if not successful:
-      sys.stderr.write('==> Project save failed\n')
+      failMessage = '==> Project save failed\n'
+      sys.stderr.write(failMessage)
+      self.ui.mainWindow.statusBar().showMessage(failMessage)
       # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
 
     else:
+      successMessage = '==> Project successfully saved\n'
       self.ui.mainWindow._updateWindowTitle()
+      self.ui.mainWindow.statusBar().showMessage(successMessage)
       self.ui.mainWindow.getMenuAction('Project->Archive').setEnabled(True)
       self.ui.mainWindow._fillRecentProjectsMenu()
       # self._createApplicationPaths()
@@ -1511,7 +1515,7 @@ class Framework:
         getLogger().warning('Impossible to save Layout %s' % e)
 
       # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
-      sys.stderr.write('==> Project successfully saved\n')
+      sys.stderr.write(successMessage)
       # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
       #                            iconPath=saveIconPath)
 

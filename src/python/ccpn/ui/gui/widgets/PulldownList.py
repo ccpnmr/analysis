@@ -341,6 +341,10 @@ if __name__ == '__main__':
   pulldownList.insertSeparator(2)
   pulldownList.clearEditText()
 
+  pulldownList2 = PulldownList(parent=popup, texts=texts, editable=True,
+                               callback=callback2, grid=(1,0), **policyDict
+                              )
+  pulldownList.clearEditText()
 
   popup.show()
   popup.raise_()

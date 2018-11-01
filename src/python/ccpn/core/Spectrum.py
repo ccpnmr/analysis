@@ -1455,8 +1455,8 @@ class Spectrum(AbstractWrapperObject):
 
             return  dataArray, intRegion
 
-        # for loop fails so return empty
-        return np.empty([]), np.empty([])
+        # for loop fails so return empty arrays
+        return np.array([]), np.array([])
 
     def _getByValidAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
         """Return values defined by attributeName in order defined by axisCodes :

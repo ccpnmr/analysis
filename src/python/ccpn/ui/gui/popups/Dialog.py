@@ -29,6 +29,18 @@ from PyQt5 import QtGui, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 
 
+def _updateGl(self, spectrumList):
+  from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+  # # spawn a redraw of the contours
+  # for spec in spectrumList:
+  #     for specViews in spec.spectrumViews:
+  #         specViews.buildContours = True
+
+  GLSignals = GLNotifier(parent=self)
+  GLSignals.emitPaintEvent()
+
+
 class CcpnDialog(QtWidgets.QDialog, Base):
     def __init__(self, parent=None, windowTitle='', setLayout=False, size=(200, 100), **kw):
         QtWidgets.QDialog.__init__(self, parent)
@@ -51,16 +63,6 @@ class CcpnDialog(QtWidgets.QDialog, Base):
 
     #TODO:ED include widget here for self.centralWidget, self.buttonWidget and undo functionality
 
-    # def _updateGl(self, spectrumList):
-    #   from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-    #
-    #   # # spawn a redraw of the contours
-    #   # for spec in spectrumList:
-    #   #     for specViews in spec.spectrumViews:
-    #   #         specViews.buildContours = True
-    #
-    #   GLSignals = GLNotifier(parent=self)
-    #   GLSignals.emitPaintEvent()
 
     # # doesn't change anything!
     # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

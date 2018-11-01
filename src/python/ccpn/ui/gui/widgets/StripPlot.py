@@ -151,17 +151,22 @@ class StripPlot(Widget):
         texts = []
         tipTexts = []
         callbacks = []
+        buttonTypes = []
         if includePeakLists:
             texts += ['use Peak selection']
             tipTexts += ['Use current selected peaks']
             callbacks += [partial(self._buttonClick, STRIPPLOT_PEAKS)]
+            buttonTypes += [STRIPPLOT_PEAKS]
         if includeNmrChains:
             texts += ['use nmrResidue selection']
             tipTexts += ['Use current selected nmrResidues']
             callbacks += [partial(self._buttonClick, STRIPPLOT_NMRRESIDUES)]
+            buttonTypes += [STRIPPLOT_NMRRESIDUES]
 
         self.listButtons = RadioButtons(self, texts=texts, tipTexts=tipTexts, callback=self._buttonClick,
                                       grid=(row, 0), direction='v') if texts else None
+        if self.listButtons:
+            self.listButtons.buttonTypes = buttonTypes
 
         self._spectraWidget = None
 

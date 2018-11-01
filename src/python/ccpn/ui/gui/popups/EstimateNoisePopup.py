@@ -157,15 +157,16 @@ class NoiseTab(QtWidgets.QWidget, Base):
             except Exception as es:
 
                 # spectrum possibly no compatible here, may be 2d overlaid onto Nd
-                return
-
-            # # sort the axis limits by spectrum axis order
-            # for ii, ind in enumerate(indices):
-            #     axisCodeDict[spectrumAxisCodes[ind]] = sortedSelectedRegion[ind]
+                indices = self.spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
 
             # sort the axis limits by spectrum axis order
-            for n, axisCode in enumerate(spectrumAxisCodes):
-                axisCodeDict[axisCode] = sortedSelectedRegion[indices[n]]
+            for ii, ind in enumerate(indices):
+                axisCodeDict[spectrumAxisCodes[ind]] = sortedSelectedRegion[ii]
+
+            # # sort the axis limits by spectrum axis order
+            # for n, axisCode in enumerate(spectrumAxisCodes):
+            #     if indices and n <len(indices):
+            #         axisCodeDict[axisCode] = sortedSelectedRegion[indices[n]]
 
             # regionToPick = [0] * self.spectrum.dimensionCount
             #

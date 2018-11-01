@@ -29,7 +29,8 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.StripPlot import StripPlot
+from ccpn.ui.gui.widgets.StripPlot import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES
+from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
 
 class StripPlotPopup(CcpnDialog):
@@ -53,11 +54,10 @@ class StripPlotPopup(CcpnDialog):
             self.project = None
             self.current = None
 
-        # import the new strip plot widget - also used in backbone assignment and pick and assign module
-
         self.spectrumDisplay = spectrumDisplay
         self.spectrumDisplayLabel = Label(self, "Current spectrumDisplay: %s" % spectrumDisplay.id, grid=(0, 0))
 
+        # import the new strip plot widget - also used in backbone assignment and pick and assign module
         self._newStripPlotWidget = StripPlot(parent=self, mainWindow=self.mainWindow,
                                              includePeakLists=includePeakLists,
                                              includeNmrChains=includeNmrChains,
@@ -70,7 +70,40 @@ class StripPlotPopup(CcpnDialog):
     def _accept(self):
         """OK button pressed
         """
+        listType = self._newStripPlotWidget.listButtons.getIndex()
+        buttonType = self._newStripPlotWidget.listButtons.buttonTypes[listType]
+
+        if buttonType == STRIPPLOT_PEAKS:
+            self._buildStrips(peaks=self.current.peaks)
+        elif buttonType == STRIPPLOT_NMRRESIDUES:
+            self._buildStrips(nmrResidues=self.current.nmrResidues)
+
         self.accept()
+
+    def _buildStrips(self, spectrumDisplays=None, peaks=None, nmrResidues=None):
+        """Build the strips in the selected spectrumDisplays
+        """
+        spectrumDisplays = self._newStripPlotWidget._getDisplays()
+
+        autoClearMarks = self._newStripPlotWidget.autoClearMarksWidget.isChecked()
+        sequentialStrips = self._newStripPlotWidget.sequentialStripsWidget.isChecked()
+        markPositions = self._newStripPlotWidget.markPositionsWidget.isChecked()
+
+        # loop through the spectrumDisplays
+        for specDisplay in spectrumDisplays:
+
+            if peaks:
+                specDisplay.makeStripPlot(peaks=peaks, nmrResidues=None,
+                                          autoClearMarks=autoClearMarks,
+                                          sequentialStrips=sequentialStrips,
+                                          markPositions=markPositions
+                                          )
+            elif nmrResidues:
+                specDisplay.makeStripPlot(peaks=None, nmrResidues=nmrResidues,
+                                          autoClearMarks=autoClearMarks,
+                                          sequentialStrips=sequentialStrips,
+                                          markPositions=markPositions
+                                          )
 
     def _cleanupWidget(self):
         """Cleanup the notifiers that are left behind after the widget is closed

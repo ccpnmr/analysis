@@ -53,19 +53,17 @@ class ResidueTableModule(CcpnModule):
     This class implements the module by wrapping a ResidueTable instance
     """
     includeSettingsWidget = False
-    maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+    maxSettingsState = 2
     settingsPosition = 'left'
 
     className = 'ResidueTableModule'
 
-    # we are subclassing this Module, hence some more arguments to the init
     def __init__(self, mainWindow=None, name='Residue Table', chain=None):
         """
         Initialise the Module widgets
         """
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
-        # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
         if mainWindow:
             self.application = mainWindow.application
@@ -76,7 +74,6 @@ class ResidueTableModule(CcpnModule):
             self.project = None
             self.current = None
 
-        # initialise the table
         self.residueTable = ResidueTable(parent=self.mainWidget,
                                                mainWindow=self.mainWindow,
                                                moduleParent=self,
@@ -162,7 +159,6 @@ class ResidueTable(QuickTable):
             self.current = None
 
         self.moduleParent = moduleParent
-        # strange, need to do this when usong scrollArea, but not a Widget
         parent.getLayout().setHorizontalSpacing(0)
         self._widgetScrollArea = ScrollArea(parent=parent, **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
@@ -180,7 +176,6 @@ class ResidueTable(QuickTable):
         self.NMRcolumns = ColumnClass([
             # ('#', lambda residue: residue.serial, 'Residue serial number', None),
             ('Index', lambda residue: ResidueTable._nmrIndex(residue), 'Index of Residue in the Chain', None),
-
             ('Pid', lambda residue: residue.pid, 'Pid of Residue', None),
             ('_object', lambda residue: residue, 'Object', None),
             ('Sequence', lambda residue: residue.sequenceCode, 'Sequence code of Residue', None),
@@ -222,10 +217,8 @@ class ResidueTable(QuickTable):
                             enableDelete=True
                             )
 
-
         # TODO: see how to handle peaks as this is too costly at present
         # Notifier object to update the table if the peaks change
-        self._peakNotifier = None
 
         if chain is not None:
             self._selectChain(chain)

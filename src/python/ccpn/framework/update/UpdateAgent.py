@@ -480,7 +480,7 @@ class UpdateAgent(object):
                     write('No server copy of file\n')
                 else:
                     haveDiff = False
-                    localLines = open(fullFilePath, 'rU').readlines()
+                    localLines = open(fullFilePath, 'rU', encoding='utf-8').readlines()
                     serverData = downloadFile(serverDownloadScript, self.serverDbRoot, updateFile.fileStoredAs)
                     if serverData:
                         serverLines = serverData.splitlines(True)

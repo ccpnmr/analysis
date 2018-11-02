@@ -97,23 +97,30 @@ def calcHashCode(filePath):
 def isBinaryFile(fileName):
     """Check whether the fileName is a binary file (not always guaranteed)
     Doesn't check for a fullPath
+    Returns False if the file does not exist
     """
     if os.path.isfile(fileName):
-        fileObj = open(fileName, 'rb')
-        firstData = fileObj.read(1024)
+        with open(fileName, 'rb') as fileObj:
 
-        textchars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)) - {0x7f})
-        isBinary = bool(firstData.translate(None, textchars))
+            # read the first 1024 bytes of the file
+            firstData = fileObj.read(1024)
 
-        return isBinary
+            # remove all characters that are considered as text
+            textchars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)) - {0x7f})
+            isBinary = bool(firstData.translate(None, textchars))
+
+            return isBinary
 
 def isBinaryData(data):
     """Check whether the byte-string is binary
     """
     if data:
+
+        # check the first 1024 bytes of the file
         firstData = data[0:max(1024, len(data))]
         firstData = bytearray(firstData, encoding='utf-8')
 
+        # remove all characters that are considered as text
         textchars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)) - {0x7f})
         isBinary = bool(firstData.translate(None, textchars))
 
@@ -408,7 +415,7 @@ class UpdateAgent(object):
                     write('No server copy of file\n')
                 else:
                     haveDiff = False
-                    localLines = open(fullFilePath, 'rU').readlines()
+                    localLines = open(fullFilePath, 'rU', encoding='utf-8').readlines()
                     serverData = downloadFile(serverDownloadScript, self.serverDbRoot, updateFile.fileStoredAs)
                     if serverData:
                         serverLines = serverData.splitlines(True)

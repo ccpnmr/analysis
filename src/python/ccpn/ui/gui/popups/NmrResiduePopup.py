@@ -110,32 +110,25 @@ class NmrResiduePopup(CcpnDialog):
     def _applyChanges(self):
         """
         The apply button has been clicked
-        Define an undo block for setting the properties of the object
-        If there is an error setting any values then generate an error message
-          If anything has been added to the undo queue then remove it with application.undo()
-          repopulate the popup widgets
+        If there is an error setting the values then popup an error message
+        repopulate the settings
         """
-        self.project._startCommandEchoBlock('_applyChanges', quiet=True)
+        error = False
         try:
-            nmrChain = self.nmrResidue.nmrChain
-            newNmrchain = self.project.getByPid(self.chainPulldown.getText())
-            if newNmrchain != nmrChain:
-                self.nmrResidue.moveToNmrChain(newNmrchain)
-
-            sequenceCode = self.sequenceCode.getText()
-            residueType = self.residueType.getText()
-            if self.nmrResidue.sequenceCode != sequenceCode or self.nmrResidue.residueType != residueType:
-                newSeqCode = '.'.join((sequenceCode, residueType))
-                self.nmrResidue.rename(newSeqCode)
+            self.nmrResidue.moveToNmrChain(
+                    self.chainPulldown.getText(),
+                    self.sequenceCode.getText(),
+                    self.residueType.getText()
+            )
 
         except Exception as es:
             showWarning(str(self.windowTitle()), str(es))
-            self.application.undo()
+            error = True
 
         finally:
-            self.project._endCommandEchoBlock()
             self._updatePopup(self.nmrResidue)  # Repopulate
+            return error
 
     def _okButton(self):
-        self._applyChanges()
-        self.accept()
+        error = self._applyChanges()
+        if not error: self.accept()

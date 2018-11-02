@@ -1084,7 +1084,7 @@ class NmrResidue(AbstractWrapperObject):
     Routine is illegal for offset NmrResidues, use the main nmrResidue instead
 
     Routine will fail if current sequenceCode,residueType already exists in newNmrChain, as the nmrResidue is first moved
-    then renamed.
+    then renamed; consider moving to temporary chain first.
     """
 
     values = dict(newNmrChain = newNmrChain, sequenceCode=sequenceCode, residueType=residueType)

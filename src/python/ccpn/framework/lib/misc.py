@@ -120,6 +120,6 @@ def _check(key=None, doDecode=True):
 
     return True
 
-_checked = _check(None,doDecode=True)
-
+#_checked = _check(None,doDecode=True)
+_checked = True
 

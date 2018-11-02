@@ -849,8 +849,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       fType = 'XML (*.xml)'
       dialog = QtWidgets.QFileDialog
       msg = 'Select CCPN ChemComp XML file'
-      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
-      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+      filePath, filtr = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+      # filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
  
     if filePath:
       dirName, fileName = path.split(filePath)
@@ -880,8 +880,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       fType = 'MOL2 (*.mol2)'
       dialog = QtWidgets.QFileDialog
       msg = 'Select Mol2 file'
-      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
-      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+      filePath, filtr = dialog.getOpenFileName(self, msg, ddirectoryir=self.userDir, filter=fType)
+      # filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
  
     if filePath:
       dirName, fileName = path.split(filePath)
@@ -901,8 +901,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       fType = 'PDB (*.pdb)'
       dialog = QtWidgets.QFileDialog
       msg = 'Select PDB file'
-      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
-      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+      filePath, filtr = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+      # filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
  
     if filePath:
       
@@ -923,8 +923,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       fType = 'InChI (*.inchi)'
       dialog = QtWidgets.QFileDialog
       msg = 'Select or enter InChi file name'
-      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
-      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+      filePath, filtr = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+      # filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
 
     if filePath:
       
@@ -962,8 +962,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       fType = 'Molfile (*.mol)'
       dialog = QtWidgets.QFileDialog
       msg = 'Select Molfile file'
-      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
-      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+      filePath, filtr = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
+      # filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
  
     if filePath:
       dirName, fileName = path.split(filePath)
@@ -982,8 +982,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         fType = 'MOL2 (*.mol2)'
         dialog = QtWidgets.QFileDialog
         msg = 'Select or enter Mol2 file name'
-        #filePath, filtr = dialog.getSaveFileName(self, msg, dir=self.userDir, filter=fType)
-        filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
+        filePath, filtr = dialog.getSaveFileName(self, msg, directory=self.userDir, filter=fType)
+        # filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
     
         if filePath:
           dirName, fileName = path.split(filePath)
@@ -1001,8 +1001,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         fType = 'Molfile (*.mol)'
         dialog = QtWidgets.QFileDialog
         msg = 'Select or enter Molfile name'
-        #filePath, filtr = dialog.getSaveFileName(self, msg, dir=self.userDir, filter=fType)
-        filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
+        filePath, filtr = dialog.getSaveFileName(self, msg, directory=self.userDir, filter=fType)
+        # filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
     
         if filePath:
           dirName, fileName = path.split(filePath)
@@ -1048,8 +1048,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         fType = 'InChI (*.inchi)'
         dialog = QtWidgets.QFileDialog
         msg = 'Select or enter Inchi file name'
-        #filePath, filtr = dialog.getSaveFileName(self, msg, dir=self.userDir, filter=fType)
-        filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
+        filePath, filtr = dialog.getSaveFileName(self, msg, directory=self.userDir, filter=fType)
+        # filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
     
         if filePath:
           dirName, fileName = path.split(filePath)
@@ -1553,7 +1553,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
     fType = 'ChemBuild (*.pickle)'
 
     dialog = QtWidgets.QFileDialog
-    filePath, filtr = dialog.getSaveFileName(self, dir=self.userDir, filter=fType)
+    filePath, filtr = dialog.getSaveFileName(self, directory=self.userDir, filter=fType)
     # filePath = dialog.getSaveFileName(self, directory=self.userDir, filter=fType)
 
     if filePath:
@@ -1606,8 +1606,8 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       
       fType = 'ChemBuild (*.pickle)'
       dialog = QtWidgets.QFileDialog
-      #filePath, filtr = dialog.getOpenFileName(self, dir=self.userDir, filter=fType)
-      filePath = dialog.getOpenFileName(self, directory=self.userDir, filter=fType)
+      filePath, filtr = dialog.getOpenFileName(self, directory=self.userDir, filter=fType)
+      # filePath = dialog.getOpenFileName(self, directory=self.userDir, filter=fType)
 
     if filePath:
       dirName, fileName = path.split(filePath)

@@ -44,6 +44,7 @@ from ccpn.core.Note import Note
 from ccpn.core.Sample import Sample
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.NmrChain import NmrChain
+from ccpn.core.Chain import Chain
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintList import RestraintList
 from ccpn.ui.gui.guiSettings import sidebarFont
@@ -68,7 +69,7 @@ from ccpn.ui.gui.popups.EditMultipletPopup import EditMultipletPopup
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager, showNotImplementedMessage
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
@@ -242,6 +243,10 @@ def _openNmrResidueTable(mainWindow, nmrChain, position=None, relativeTo=None):
   application = mainWindow.application
   application.showNmrResidueTable(nmrChain=nmrChain, position=position, relativeTo=relativeTo)
 
+def _openResidueTable(mainWindow, chain, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showResidueTable(chain=chain, position=position, relativeTo=relativeTo)
+
 def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
   application = mainWindow.application
   application.showIntegralTable(integralList=integralList, position=position, relativeTo=relativeTo)
@@ -251,6 +256,7 @@ OpenObjAction = {
                   PeakList: _openPeakList,
                   MultipletList:_openMultipletList,
                   NmrChain: _openNmrResidueTable,
+                  Chain: _openResidueTable,
                   SpectrumGroup:_openSpectrumGroup,
                   Sample:_openSampleSpectra,
                   ChemicalShiftList:_openChemicalShiftList,

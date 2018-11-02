@@ -1122,6 +1122,7 @@ class Framework:
       ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       # ("Structure Table", self.showStructureTable, [('shortcut', 'st')]),
+      ("Residue Table", self.showResidueTable),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
       ("Integral Table", self.showIntegralTable, [('shortcut', 'it')]),
       ("Multiplet Table", self.showMultipletTable, [('shortcut', 'mt')]),
@@ -2154,6 +2155,20 @@ class Framework:
     mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     getLogger().info("application.showNmrResidueTable()")
     return self.nmrResidueTableModule
+
+  def showResidueTable(self, position='bottom', relativeTo=None, chain=None):
+    """Displays  Residue Table"""
+    from ccpn.ui.gui.modules.ResidueTable import ResidueTableModule
+
+    mainWindow = self.ui.mainWindow
+    #FIXME:ED - sometimes crashes
+    if not relativeTo:
+      relativeTo = mainWindow.moduleArea
+    self.residueTableModule = ResidueTableModule(mainWindow=mainWindow, chain=chain)
+    mainWindow.moduleArea.addModule(self.residueTableModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showResidueTable()")
+    getLogger().info("application.showResidueTable()")
+    return self.residueTableModule
 
   # def showStructureTable(self, position='bottom', relativeTo=None, structureEnsemble=None):
   #   """Displays Structure Table"""

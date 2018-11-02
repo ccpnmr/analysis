@@ -1061,11 +1061,11 @@ class NmrResidue(AbstractWrapperObject):
         residueType = ll[1] or None
 
     if sequenceCode:
-      # Check if name is free
+      # Check if name is not already used
       partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
-      ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
+      ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
       if ll and ll != [self]:
-        raise ValueError("Cannot rename %s to %s - assignment already exists" % (self, value))
+        raise ValueError("Cannot rename %s to %s.%s - assignment already exists" % (self, self.nmrChain.id, value))
     #
     self._startCommandEchoBlock('rename', value)
     try:
@@ -1076,33 +1076,59 @@ class NmrResidue(AbstractWrapperObject):
     finally:
       self._endCommandEchoBlock()
 
-  def moveToNmrChain(self, newNmrChain:typing.Union['NmrChain', str]=None):
-    """Reset NmrChain, breaking connected NmrChain if necessary.
+  def moveToNmrChain(self, newNmrChain:typing.Union['NmrChain', str]='@-', sequenceCode:str=None, residueType:str=None):
+    """Move residue to newNmrChain, breaking connected NmrChain if necessary.
+    Optionally rename residue using sequenceCode and residueType
 
-    If set to None resets to NmrChain '@-'
-    Illegal for offset NmrResidues"""
+    newNmrChain default resets to NmrChain '@-'
+    Routine is illegal for offset NmrResidues, use the main nmrResidue instead
 
-    values ={}
-    if newNmrChain:
-      values['newNmrChain'] = newNmrChain
+    Routine will fail if current sequenceCode,residueType already exists in newNmrChain, as the nmrResidue is first moved
+    then renamed.
+    """
+
+    values = dict(newNmrChain = newNmrChain, sequenceCode=sequenceCode, residueType=residueType)
 
     apiResonanceGroup = self._apiResonanceGroup
     if apiResonanceGroup.relativeOffset is not None:
       raise ValueError("Cannot reset NmrChain for offset NmrResidue %s" % self.id)
 
-    if newNmrChain is None:
-      apiNmrChain = None
-    elif isinstance(newNmrChain, str):
-      apiNmrChain = self._project.getByPid(newNmrChain)._wrappedData
-    else:
-      apiNmrChain = newNmrChain._wrappedData
+    # optionally get newNmrChain from str object
+    if isinstance(newNmrChain, str):
+      nChain = self._project.getByPid(newNmrChain)
+      if nChain is None:
+        raise ValueError('Invalid newNmrChain "%s"' % newNmrChain)
+      newNmrChain = nChain
 
+    nmrChain = self.nmrChain
+
+    #print('>>> start try')
     self._startCommandEchoBlock('moveToNmrChain', values=values)
     try:
-      apiResonanceGroup.moveToNmrChain(apiNmrChain)
+      # if needed: move self to newNmrChain
+      movedChain = False
+      if newNmrChain != nmrChain:
+        apiResonanceGroup.moveToNmrChain(newNmrChain._wrappedData)
+        movedChain = True
+      # optionally rename
+      if self.sequenceCode != sequenceCode or self.residueType != residueType:
+        if sequenceCode is None:
+          sequenceCode = self.sequenceCode
+        if residueType is None:
+          residueType = self.residueType
+        newSeqCode = '.'.join((sequenceCode, residueType))
+        self.rename(newSeqCode)
+
     except Exception as es:
+      #print('>>> exception')
       getLogger().warning(str(es))
+      if movedChain:
+        # Need to undo this
+        apiResonanceGroup.moveToNmrChain(nmrChain._wrappedData)
+      raise es
+
     finally:
+      #print('>>> finally')
       self._endCommandEchoBlock()
 
   def assignTo(self, chainCode:str=None, sequenceCode:typing.Union[int,str]=None,

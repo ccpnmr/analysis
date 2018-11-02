@@ -220,34 +220,26 @@ class Pid(str):
 
     def __init__(self, string:str, **kw):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
-        Additional arguments are converted to string with disallowed characters changed to altCharacter"""
-        super().__init__(**kw)
-        # str.__init__(self,string)
+        Additional arguments are converted to string with disallowed characters changed to altCharacter
+        """
+        super().__init__(**kw)  # GWV does not understand this
 
         # inlining this here is 1) faster, 2) guarantees that we never get invalid Pids.
         # We can then assume validity for the rest of the functions
         if PREFIXSEP not in self or self.startswith(PREFIXSEP):
             raise ValueError("String %s is not a valid Pid" % str.__repr__(self))
 
-        self._version = 'cing:%s' % __version__
+        self._version = 'CcpNmr:%s' % __version__
 
     @property
     def type(self) -> str:
-        """
-        return type part of pid
-        """
-
+        """return type part of pid"""
         return self.split(PREFIXSEP,1)[0]
     
     @property
     def id(self) -> str:
-        """
-        return id part of pid
-        """
-
+        """return id part of pid"""
         return self.split(PREFIXSEP,1)[1]
-
-    #end def
 
     @property
     def fields(self) -> Tuple[str, ...]:
@@ -258,10 +250,6 @@ class Pid(str):
     def isValid(text:str) -> bool:
          return PREFIXSEP in text and text[0] != PREFIXSEP
 
-    # NBNB having a property called 'str' confuses Sphinx.
-    # It is probably a bad idea on general grounds
-
-
     # NBNB TODO function name 'str' confuses Sphinx documentation and is bad for, Change it?
     @property
     def str(self):
@@ -269,26 +257,15 @@ class Pid(str):
         Convenience: return as string rather than object;
         allows to do things as obj.asPid.str rather then str(obj.asPid)
         """
-
-        # TODO CLashes with Python str class. Strongly recommends changing to e.g. asString
-
         return str(self)
 
-
     def _split(self):
-        """
-        Return a splitted pid as list or empty list on error
-        # """
-
+        """Return a splitted pid as list or empty list on error"""
         parts = self.split(PREFIXSEP, 1)
         result = [parts[0]]
-
         if parts[1]:
             result.extend(parts[1].split(IDSEP))
-
         return result
-
-    #end def
 
     @staticmethod
     def new( *args:object) -> 'Pid':
@@ -305,7 +282,6 @@ class Pid(str):
             args[0] = Pid.nameMap[args[0]]
         #end if
         return Pid( Pid._join(*args) )
-    #end def
 
     @staticmethod
     def _join(*args:str) -> str:
@@ -318,11 +294,8 @@ class Pid(str):
         else:
             return ''
 
-    #end def
-
-    # NBNB TODO parameter name 'type' clashes with built-in and confuses Sphinx documentation
-    def modify(self, index:int, newId:object, type:str=None) -> 'Pid':
-        """Return new pid with position index modified by newId
+    def modify(self, index:int, newId:object, newType:str=None) -> 'Pid':
+        """Return new pid with position index modified by newId or newType replaced
         """
         parts = self._split()
 
@@ -335,46 +308,33 @@ class Pid(str):
             io.error('Pid.modify: invalid index ({0})\n', index+1)
         parts[1:] = idparts
 
-        if type is not None:
+        if newType is not None:
             parts[0] = type
 
         return Pid.new(*parts)
-
-
-    #end def
 
     def extend(self, *args:object):
       """Make copy with additional fields """
       return self._join(self._split() + [str(x) for x in args])
 
-    def increment(self, index:str, value:int) -> 'Pid':
+    def increment(self, index:str, value:int=1) -> 'Pid':
         """Return new pid with position index incremented by value
         Assumes integer valued id at position index
         """
-
-        # NBNB do you want to set value=1 as parameter, so self.increment(index) increments by 1?
-
         parts = self._split()
         parts[index+1] = int(parts[index+1]) + value
         return Pid.new(*parts)
-    #end def
 
-    def decrement(self, index:int, value:int) -> 'Pid':
+    def decrement(self, index:int, value:int=1) -> 'Pid':
         """Return new pid with position index decremented by value
         Assumes integer valued id at position index
         """
-
-        # NBNB do you want to set value=11 as parameter, so self.decrement(index) decrements by 1?
-
         return self.increment(index, -value)
-    #end def
-    
+
     def clone(self) -> 'Pid':
         """Return copy of pid
         """
         # Use Pid.new to pass it by any 'translater/checking routine'
         parts = self._split()
         return Pid.new(*parts)
-    #end def
-#end class
 

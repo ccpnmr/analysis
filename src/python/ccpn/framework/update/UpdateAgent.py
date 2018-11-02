@@ -59,7 +59,8 @@ def calcHashCode(filePath):
     if not os.access(filePath, os.R_OK):
         return 0
 
-    fp = open(filePath, 'rU', encoding='utf-8')
+    # fp = open(filePath, 'rU', encoding='utf-8')
+    fp = open(filePath, 'rb')
     try:
         data = fp.read()
     except:
@@ -68,7 +69,8 @@ def calcHashCode(filePath):
     fp.close()
 
     h = hashlib.md5()
-    h.update(data.encode('utf-8'))
+    # h.update(data.encode('utf-8'))
+    h.update(data)
 
     return h.hexdigest()
 
@@ -155,7 +157,8 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
 def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot, fileStoredAs):
     """Upload a file to the server
     """
-    fp = open(fileName, 'rU')
+    # fp = open(fileName, 'rU')
+    fp = open(fileName, 'rb')
     try:
         fileData = fp.read()
     except:

@@ -80,12 +80,16 @@ def calcHashCode(filePath):
     if not os.access(filePath, os.R_OK):
         return 0
 
-    fp = open(filePath, 'rU', encoding='utf-8')
-    data = fp.read()
-    fp.close()
+    # fp = open(filePath, 'rU', encoding='utf-8')
+    fp = open(filePath, 'rb')
+    try:
+        data = fp.read()
+    except:
+        data = ''
 
     h = hashlib.md5()
-    h.update(data.encode('utf-8'))
+    # h.update(data.encode('utf-8'))
+    h.update(data)
 
     return h.hexdigest()
 

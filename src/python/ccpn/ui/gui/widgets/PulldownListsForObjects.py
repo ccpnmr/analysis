@@ -35,15 +35,20 @@ SELECT = '<Select>'
 
 class _Pulldown(PulldownListCompoundWidget):
     # need to subclass this
+    _klass = None
     className = None
     attributeName = None
+    currentAttributeName = None
+
 
     def __init__(self, parent, project,
                  showBorder=False, orientation='left',
                  minimumWidths=(100, 150), maximumWidths=None, fixedWidths=None,
                  labelText=None,
                  showSelectName=False, callback=None, default=None,
-                 sizeAdjustPolicy=None, editable=False, filterFunction=None,
+                 sizeAdjustPolicy=None, editable=False,
+                 filterFunction=None, useIds=False,
+                 setCurrent=False, followCurrent=False,
                  **kwds):
         """
         Create  a PulldownListCompoundWidget with callbacks responding to changes in the objects
@@ -64,16 +69,33 @@ class _Pulldown(PulldownListCompoundWidget):
         :param editable: If True: allows for editing the value
         :param filterFunction: a function(pids:list)->list for editing the pids shown in the pulldown;
                                returns list of new pids
+        :param useIds: If true: use id's in stead of pids
+        :param setCurrent: Also set appropriate current attribute when selecting
+        :param followCurrent: Follow current attribute; updating when it changes
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
       
-        :return: PulldownListCompoundWidget instance
         """
+        if self._klass is not None:
+            self.className = self._klass.className
+            self.shortClassName = self._klass.shortClassName
+
         self.project = project
+        self.current = self.project.application.current
+
         self._showSelectName = showSelectName
         self._filterFunction = filterFunction
+        self._useIds = useIds
+        self._userCallback = callback
 
         if labelText is None:
             labelText = self.className + ':'
+
+        if setCurrent and self.currentAttributeName is None:
+            raise ValueError('setCurrent option only valied if currentAttributeName is defined for class')
+        self._setCurrent = setCurrent
+        if followCurrent and self.currentAttributeName is None:
+            raise ValueError('followCurrent option only valied if currentAttributeName is defined for class')
+        self._followCurrent = followCurrent
 
         super(_Pulldown, self).__init__(parent=parent, showBorder=showBorder,
                                         orientation=orientation,
@@ -81,39 +103,94 @@ class _Pulldown(PulldownListCompoundWidget):
                                         labelText=labelText,
                                         texts=self._getPids(),
                                         sizeAdjustPolicy=sizeAdjustPolicy,
-                                        callback=callback, default=default,
+                                        callback=self._callback, default=default,
                                         editable=editable,
                                         **kwds)
         # add a notifier to update the pulldown list
-        self._notifier = Notifier(project,
-                                  [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                  self.className,
-                                  self._updatePulldownList)
+        self._notifier1 = Notifier(project,
+                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+                                   self.className,
+                                   self._updatePulldownList)
+        self._notifier2 = None
+        if self._followCurrent:
+            self._notifier2 = Notifier(self.current,
+                                       [Notifier.CURRENT],
+                                       targetName=self.currentAttributeName,
+                                       callback=self._updateFromCurrent
+                                      )
+
+    @property
+    def textList(self):
+        "Compatibility with previous implementation"
+        return self.pulldownList.texts
 
     def _getPids(self)->list:
         """Return a list of pids defined by 'self.attributeName' from project.
         """
         if not hasattr(self, 'attributeName'):
             raise RuntimeError('%s: attributeName needs to be defined for proper functioning' % self.__class__.__name__)
-        pids = [obj.pid for obj in getattr(self.project, self.attributeName)]
+        pids = [self._obj2value(obj) for obj in getattr(self.project, self.attributeName)]
         if self._filterFunction:
             pids = self._filterFunction(pids)
         if self._showSelectName:
             pids = [SELECT] + pids
         return pids
 
+    def _obj2value(self, obj):
+        "Convert object to a value (pid or id), to be displayed"
+        if obj is None:
+            return str(None)
+        value = obj.id if self._useIds else obj.pid
+        return value
+
+    def _value2obj(self, value):
+        "Convert value to object, using pid or construct a pid from id"
+        if self._useIds:
+            value = self.shortClassName + ':' + value
+        #print('>>> _value2obj:', value)
+        obj = self.project.getByPid(value)
+        return obj
+
     def _updatePulldownList(self, callbackDict=None):
         "Callback to update the pulldown list; triggered by object creation, deletion or renaming"
+        print('>>> updatePulldownList')
         pids = self._getPids()
         self.modifyTexts(pids)
+
+    def _updateFromCurrent(self, callbackDict=None):
+        "Callback to update the selection from current change"
+        newValue = callbackDict[Notifier.VALUE]
+        print('>>> updateFromCurrent:', newValue)
+        self.select(self._obj2value(newValue[0]))
 
     def update(self):
         "Public function to update"
         self._updatePulldownList()
 
+    def _callback(self, value):
+        "Callback when selecting the pulldown"
+        print('>>> callback selecting pulldown:', value)
+        if self._userCallback:
+            value = self._userCallback(value)
+        if self._setCurrent and value != SELECT and len(value) > 0:
+            obj = self._value2obj(value)
+            print('>>> callback setting current.%s: %s' % (self.currentAttributeName, obj))
+            setattr(self.current, self.currentAttributeName, [obj])
+
     def __str__(self):
         return '<PulldownListCompoundWidget for "%s">' % self.className
 
+    def __del__(self):
+        "cleanup"
+        try:
+            if self._notifier1 is not None:
+                self._notifier1.unRegister()
+                del (self._notifier1)
+            if self._notifier2 is not None:
+                self._notifier2.unRegister()
+                del(self._notifier2)
+        except:
+            pass
 
 #==========================================================================================================
 # Implementations for the various V3 objects
@@ -124,9 +201,23 @@ class MultipletListPulldown(_Pulldown):
     attributeName = 'multipletLists'
 
 
+from ccpn.core.NmrChain import NmrChain
 class NmrChainPulldown(_Pulldown):
-    className = 'NmrChain'
+    _klass = NmrChain
     attributeName = 'nmrChains'
+    currentAttributeName = 'nmrChains'
+
+from ccpn.core.NmrResidue import NmrResidue
+class NmrResiduePulldown(_Pulldown):
+    _klass = NmrResidue
+    attributeName = 'nmrResidues'
+    currentAttributeName = 'nmrResidues'
+
+from ccpn.core.NmrAtom import NmrAtom
+class NmrAtomPulldown(_Pulldown):
+    _klass = NmrAtom
+    attributeName = 'nmrAtoms'
+    currentAttributeName = 'nmrAtoms'
 
 
 class ComplexesPulldown(_Pulldown):

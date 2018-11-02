@@ -172,6 +172,10 @@ class Project(AbstractWrapperObject):
     # Set for Pre-May-2016 version. NBNB TODO remove when no longer needed
     self._appBase = None
 
+  # GWV: 20181102: insert to retain consistency with future changes
+  @property
+  def application(self):
+    return self._appBase
 
   def _initialiseProject(self):
     """Complete initialisation of project,

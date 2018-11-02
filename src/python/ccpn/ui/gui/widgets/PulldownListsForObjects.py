@@ -161,7 +161,8 @@ class _Pulldown(PulldownListCompoundWidget):
         "Callback to update the selection from current change"
         newValue = callbackDict[Notifier.VALUE]
         print('>>> updateFromCurrent:', newValue)
-        self.select(self._obj2value(newValue[0]))
+        if newValue:
+            self.select(self._obj2value(newValue[0]))
 
     def update(self):
         "Public function to update"

@@ -11,7 +11,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -29,28 +29,26 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
-SELECT = '<Select>'
 
-def getPids(fromObject, attributeName):
-    "Get a list of pids fromObject.attributeName or None on error"
-    if not hasattr(fromObject, attributeName): return None
-    return [obj.pid for obj in getattr(fromObject, attributeName)]
+SELECT = '<Select>'
 
 
 class _Pulldown(PulldownListCompoundWidget):
-
     # need to subclass this
     className = None
     attributeName = None
 
-    def __init__( self, parent, project,
-                  showBorder=False, orientation='left', minimumWidths=None, labelText=None,
-                  showSelectName=False, callback=None, default=None,
-                  sizeAdjustPolicy=None, *args, **kwds):
+    def __init__(self, parent, project,
+                 showBorder=False, orientation='left',
+                 minimumWidths=(100, 150), maximumWidths=None, fixedWidths=None,
+                 labelText=None,
+                 showSelectName=False, callback=None, default=None,
+                 sizeAdjustPolicy=None, editable=False, filterFunction=None,
+                 **kwds):
         """
         Create  a PulldownListCompoundWidget with callbacks responding to changes in the objects
         in project; not to be used directly, used as a base class for the specific classes for 
-        the different V3 objects
+        the different V3 objects, as defined below.
 
         :param parent: parent widget
         :param project: containing project
@@ -63,93 +61,97 @@ class _Pulldown(PulldownListCompoundWidget):
         :param showSelectName: (optional) insert <Select> at the top of the Pulldown
         :param callback: (optional) callback for the Pulldown
         :param default: (optional) initially selected element of the Pulldown (text or index)
+        :param editable: If True: allows for editing the value
+        :param filterFunction: a function(pids:list)->list for editing the pids shown in the pulldown;
+                               returns list of new pids
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
       
         :return: PulldownListCompoundWidget instance
         """
         self.project = project
-        self.showSelectName = showSelectName
+        self._showSelectName = showSelectName
+        self._filterFunction = filterFunction
 
         if labelText is None:
             labelText = self.className + ':'
 
-        if minimumWidths is None:
-            minimumWidths = (100,150)
-
-        if showSelectName:
-          gotPids = getPids(project, self.attributeName)
-          if gotPids:
-            self.textList = [SELECT]+gotPids
-          else:
-            self.textList = [SELECT]
-        else:
-          self.textList = getPids(project, self.attributeName)  # ejb
-
         super(_Pulldown, self).__init__(parent=parent, showBorder=showBorder,
-        # self.PulldownListCompoundWidget.__init__(self, parent=parent, showBorder=showBorder,
-                                                orientation=orientation, minimumWidths=minimumWidths,
-                                                labelText=labelText,
-                                                texts=self.textList,
-                                                sizeAdjustPolicy=sizeAdjustPolicy,
-                                                callback=callback, default=default, **kwds)
+                                        orientation=orientation,
+                                        minimumWidths=minimumWidths, maximumWidths=maximumWidths, fixedWidths=fixedWidths,
+                                        labelText=labelText,
+                                        texts=self._getPids(),
+                                        sizeAdjustPolicy=sizeAdjustPolicy,
+                                        callback=callback, default=default,
+                                        editable=editable,
+                                        **kwds)
         # add a notifier to update the pulldown list
-        if project:
-          self.updatePulldownList(project,
+        self._notifier = Notifier(project,
                                   [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
                                   self.className,
-                                  self._getPids)
-                                  # getPids, self.attributeName)
+                                  self._updatePulldownList)
+
+    def _getPids(self)->list:
+        """Return a list of pids defined by 'self.attributeName' from project.
+        """
+        if not hasattr(self, 'attributeName'):
+            raise RuntimeError('%s: attributeName needs to be defined for proper functioning' % self.__class__.__name__)
+        pids = [obj.pid for obj in getattr(self.project, self.attributeName)]
+        if self._filterFunction:
+            pids = self._filterFunction(pids)
+        if self._showSelectName:
+            pids = [SELECT] + pids
+        return pids
+
+    def _updatePulldownList(self, callbackDict=None):
+        "Callback to update the pulldown list; triggered by object creation, deletion or renaming"
+        pids = self._getPids()
+        self.modifyTexts(pids)
+
+    def update(self):
+        "Public function to update"
+        self._updatePulldownList()
 
     def __str__(self):
         return '<PulldownListCompoundWidget for "%s">' % self.className
 
-    def _getPids(self, data):
-      "Get a list of pids 'self.attributeName' from project or None on error"
-      if not hasattr(self, 'attributeName'):
-          return None
 
-      if self.showSelectName:
-        gotPids = getPids(self.project, self.attributeName)
-        if gotPids:
-          self.textList = ['<Select>'] + gotPids
-        else:
-          self.textList = ['<Select>']
-      else:
-        self.textList = getPids(self.project, self.attributeName)
-
-      return self.textList
-
+#==========================================================================================================
+# Implementations for the various V3 objects
+#==========================================================================================================
 
 class MultipletListPulldown(_Pulldown):
     className = 'MultipletList'
     attributeName = 'multipletLists'
 
+
 class NmrChainPulldown(_Pulldown):
     className = 'NmrChain'
     attributeName = 'nmrChains'
 
+
 class ComplexesPulldown(_Pulldown):
-  className = 'Complex'
-  attributeName = 'complexes'
+    className = 'Complex'
+    attributeName = 'complexes'
+
 
 class ChainPulldown(_Pulldown):
-  className = 'Chain'
-  attributeName = 'chains'
+    className = 'Chain'
+    attributeName = 'chains'
 
 
 class StructurePulldown(_Pulldown):
-  className = 'StructureEnsemble'
-  attributeName = 'structureEnsembles'
+    className = 'StructureEnsemble'
+    attributeName = 'structureEnsembles'
 
 
 class NotesPulldown(_Pulldown):
-  className = 'Note'
-  attributeName = 'notes'
+    className = 'Note'
+    attributeName = 'notes'
 
 
 class RestraintsPulldown(_Pulldown):
-  className = 'RestraintList'
-  attributeName = 'restraintLists'
+    className = 'RestraintList'
+    attributeName = 'restraintLists'
 
 
 class ChemicalShiftListPulldown(_Pulldown):
@@ -163,8 +165,9 @@ class PeakListPulldown(_Pulldown):
 
 
 class SubstancePulldown(_Pulldown):
-  className = 'Substance'
-  attributeName = 'substances'
+    className = 'Substance'
+    attributeName = 'substances'
+
 
 class SpectrumPulldown(_Pulldown):
     className = 'Spectrum'
@@ -172,5 +175,5 @@ class SpectrumPulldown(_Pulldown):
 
 
 class IntegralListPulldown(_Pulldown):
-  className = 'IntegralList'
-  attributeName = 'integralLists'
+    className = 'IntegralList'
+    attributeName = 'integralLists'

@@ -35,6 +35,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 
 NULL = object()
 
+#TODO: clean various methods, removing 'depreciated' ones
 
 class PulldownList(QtWidgets.QComboBox, Base):
 
@@ -43,7 +44,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
                backgroundText=None, headerText=None,
                headerEnabled=False, headerIcon=None,
                editable=False, **kw):
-    '''
+    """
 
     :param parent:
     :param texts:
@@ -56,8 +57,9 @@ class PulldownList(QtWidgets.QComboBox, Base):
                             Otherwise use HeaderText and enabled = False if you need only a title inside the pulldown
     :param headerText: text of first item of the pullDown. E.g. '-- Select Item --'
     :param headerEnabled: True to be selectable, False to disable and be grayed out
+    :param editable: If True: allows for editing the value
     :param kw:
-    '''
+    """
 
     QtWidgets.QComboBox.__init__(self, parent)
     Base.__init__(self, **kw)

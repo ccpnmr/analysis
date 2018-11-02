@@ -324,6 +324,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         :param texts: (optional) iterable generating text values for the Pulldown
         :param callback: (optional) callback for the Pulldown
         :param default: (optional) initially selected element of the Pulldown (text or index)
+        :param editable: If True: allows for editing the value
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
         """
 
@@ -370,8 +371,8 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         "Convenience: Set item in Pulldown; works with text or item"
         return self.pulldownList.select(item)
 
-    def modifyTextList(self, texts):
-        "Retain the current selection"
+    def modifyTexts(self, texts):
+        "Mofify the pulldown texts, retaining the current selection"
         current = self.getText()
 
         self.pulldownList.blockSignals(True)
@@ -380,67 +381,6 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         self.select(current)
         self.pulldownList.blockSignals(False)
         self.pulldownList.update()
-
-    def updatePulldownList(self, theObject, triggers, targetName, func, *args, **kwds):
-        """
-        Define a notifier to update the pulldown list by calling func(theObj, *args, **kwds)
-
-        :param theObject: A valid V3 core or current object
-        :param triggers: any of the triggers, as defined in Notifier class
-        :param targetName: a valid target for theObject, as defined in the Notifier class
-        :param func: func(theObject, *args, **kwds) should return a list with the new pulldown elements
-        :param args: optional arguments to func
-        :param kwds: optional keyword arguments to func
-        :return: Notifier instance
-        """
-        notifier = self.addObjectNotifier(theObject, triggers, targetName, self._updatePulldownList, *args, **kwds)
-        notifier._listFunc = func
-        return notifier
-
-    def _updatePulldownList(self, callbackDict, *args, **kwds):
-        "Here the action is done to update the pulldown list"
-        listFunc = callbackDict[Notifier.NOTIFIER]._listFunc
-        theObject = callbackDict[Notifier.THEOBJECT]
-        trigger = callbackDict[Notifier.TRIGGER]  # ejb
-        object = callbackDict[Notifier.OBJECT]  # ejb
-
-        texts = listFunc(theObject, *args, **kwds)
-        if texts is None:
-            raise RuntimeError('Unable to update pulldownList')
-
-        #FIXME:ED - fix to stop the removal of <Select Name> from head of list
-        try:
-            if trigger == Notifier.DELETE:  # ejb - fix pulldownList delete
-                item = getattr(object, Notifier.GETPID)
-                tempPulldown = self.pulldownList.texts
-                if item in tempPulldown:
-                    tempPulldown.remove(item)
-                    # self.pulldownList.clear()
-                    # self.pulldownList.setData(texts=tempPulldown)
-                    self.modifyTextList(texts=tempPulldown)
-            elif trigger == Notifier.CREATE:  # ejb - fix pulldownList create
-                item = getattr(object, Notifier.GETPID)
-                tempPulldown = self.pulldownList.texts
-                if item not in tempPulldown:
-                    tempPulldown.append(item)
-                    # self.pulldownList.clear()
-                    # self.pulldownList.setData(texts=tempPulldown)
-                    self.modifyTextList(texts=tempPulldown)
-            elif trigger == Notifier.RENAME:  # ejb - fix pulldownList create
-                item = getattr(object, Notifier.GETPID)
-                tempPulldown = self.pulldownList.texts
-                if item not in tempPulldown:
-                    tempPulldown.remove(callbackDict[Notifier.OLDPID])
-                    tempPulldown.append(item)
-                    # self.pulldownList.clear()
-                    # self.pulldownList.setData(texts=tempPulldown)
-                    self.modifyTextList(texts=tempPulldown)
-            else:
-                # self.pulldownList.clear()
-                # self.pulldownList.setData(texts=texts)
-                self.modifyTextList(texts=texts)
-        except:
-            pass
 
 
 class CheckBoxCompoundWidget(CompoundBaseWidget):

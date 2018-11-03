@@ -77,6 +77,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     # super(GuiMainWindow, self).__init__(parent=None)
     GuiWindow.__init__(self, application)
     QtWidgets.QMainWindow.__init__(self)
+    self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
     # Layout
     layout = self.layout()
 

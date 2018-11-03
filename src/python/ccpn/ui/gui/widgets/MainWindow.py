@@ -36,6 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Base):
 
     QtWidgets.QMainWindow.__init__(self, parent=parent)
     Base.__init__(self, **kw)
+    self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
 
     self.mainFrame = Frame(self, setLayout=1)
     self.setCentralWidget(self.mainFrame)

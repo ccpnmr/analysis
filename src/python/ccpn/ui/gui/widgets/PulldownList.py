@@ -32,6 +32,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
+from functools import partial
+
 
 NULL = object()
 
@@ -43,7 +45,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
                icons=None, callback=None, index=0,
                backgroundText=None, headerText=None,
                headerEnabled=False, headerIcon=None,
-               editable=False, **kw):
+               editable=False, **kwds):
     """
 
     :param parent:
@@ -61,9 +63,11 @@ class PulldownList(QtWidgets.QComboBox, Base):
     :param kw:
     """
 
-    QtWidgets.QComboBox.__init__(self, parent)
-    Base.__init__(self, **kw)
-    
+    # super(QtWidgets.QComboBox, self).__init__(parent)
+    # super(Base, self).__init__(**kwds)
+    super().__init__(parent)
+    Base._init(self, **kwds)
+
     self.text = None
     self.object = None
     self.texts = []

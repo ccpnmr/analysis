@@ -43,23 +43,34 @@ class Widget(QtWidgets.QWidget, Base):
 
     def __init__(self, parent=None, setLayout=False, acceptDrops=True, **kwds):
         "General widget; default accepts drops (for now)"
-        QtWidgets.QWidget.__init__(self, parent)
-        Base.__init__(self, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
+
+        #QtWidgets.QWidget.__init__(self, parent)
+        print('DEBUG Widget: acceptDrops=%s, setLayout=%s, **kwds=%s' % (setLayout, acceptDrops, kwds))
+
+        # super(QtWidgets.QWidget, self).__init__(parent)
+        # super(Base, self).__init__(acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
+
+        super(QtWidgets.QWidget, Widget).__init__(self, parent=parent)
+        super(Base, Widget).__init__(self, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
+
+        # super().__init__(parent=parent, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
+        # Base.__init__(self, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
+
         self.setContentsMargins(0, 0, 0, 0)
 
-    def clearWidget(self):
-        """Delete all the contents of the widget
-        """
-        layout = self.getLayout()
-        if layout:
-            rowCount = layout.rowCount()
-            colCount = layout.columnCount()
-
-            for r in range(rowCount):
-                for m in range(colCount):
-                    item = layout.itemAtPosition(r, m)
-                    if item and item.widget():
-                        item.widget().deleteLater()
+    # def clearWidget(self):
+    #     """Delete all the contents of the widget
+    #     """
+    #     layout = self.getLayout()
+    #     if layout:
+    #         rowCount = layout.rowCount()
+    #         colCount = layout.columnCount()
+    #
+    #         for r in range(rowCount):
+    #             for m in range(colCount):
+    #                 item = layout.itemAtPosition(r, m)
+    #                 if item and item.widget():
+    #                     item.widget().deleteLater()
 
 
 class ScrollableWidget(Widget):

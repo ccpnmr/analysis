@@ -50,7 +50,9 @@ class DropBase:
 
   from ccpn.util.Constants import ccpnmrJsonData as JSONDATA
 
-  def __init__(self, acceptDrops, *args, **kw):
+  def _init(self, acceptDrops=False, **kw):
+
+    print('DEBUG DropBase %r: acceptDrops=%s' % (self, acceptDrops))
 
     self._dropEventCallback = None
     self._enterEventCallback = None

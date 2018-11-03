@@ -38,15 +38,15 @@ from qtconsole.rich_jupyter_widget import RichJupyterWidget
 from qtconsole.inprocess import QtInProcessKernelManager
 from ccpn.util.Logging import getLogger
 
-class IpythonConsole(Widget, Base):
+class IpythonConsole(Widget):
 
-    def __init__(self, mainWindow, namespace=None, **kw):
+    def __init__(self, mainWindow, namespace=None, **kwds):
 
         if namespace is None:
           namespace = mainWindow.namespace
 
-        Widget.__init__(self, parent=mainWindow, setLayout=True)
-        Base.__init__(self, **kw)
+        super().__init__(parent=mainWindow)
+        Base.__init__(self, setLayout=True, **kwds)
 
         km = QtInProcessKernelManager()
         km.start_kernel()
@@ -74,7 +74,7 @@ class IpythonConsole(Widget, Base):
         # so instead call _startChannels() when opened
         ###self.ipythonWidget.kernel_client.start_channels()
 
-        self.layout().setSpacing(1)
+        self.getLayout().setSpacing(1)
 
         self.splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         self.splitter.addWidget(self.textEditor)
@@ -107,7 +107,7 @@ class IpythonConsole(Widget, Base):
         self.splitter.setStretchFactor(1,8)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")
-        self.layout().addWidget(self.splitter)
+        self.getLayout().addWidget(self.splitter)
 
         namespace['runMacro'] = self._runMacro
         km.kernel.shell.push(namespace)

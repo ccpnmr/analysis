@@ -72,7 +72,7 @@ from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, \
     DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
-from ccpn.ui.gui.widgets.PulldownListsForObjects import _Pulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 
 
 CommonWidgets = {
@@ -454,7 +454,7 @@ class CcpnModule(Dock, DropBase):
         widgetsState = {}
         self._setNestedWidgetsAttrToModule()
         for varName, varObj in vars(self).items():
-            if isinstance(varObj, _Pulldown):
+            if isinstance(varObj, _PulldownABC):
                 widgetsState[varName] = varObj.getText()
                 continue
             if varObj.__class__.__name__ in CommonWidgets.keys():
@@ -486,7 +486,7 @@ class CcpnModule(Dock, DropBase):
         for variableName, value in widgetsState.items():
             try:
                 widget = getattr(self, str(variableName))
-                if isinstance(widget, _Pulldown):
+                if isinstance(widget, _PulldownABC):
                     widget.select(value)
                     continue
                 if widget.__class__.__name__ in CommonWidgets.keys():

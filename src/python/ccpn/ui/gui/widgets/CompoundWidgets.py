@@ -367,9 +367,21 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         "Convenience: Return selected text in Pulldown"
         return self.pulldownList.currentText()
 
-    def select(self, item):
+    def select(self, item, blockSignals=False):
         "Convenience: Set item in Pulldown; works with text or item"
-        return self.pulldownList.select(item)
+        if blockSignals:
+            self.pulldownList.blockSignals(True)
+        self.pulldownList.select(item)
+        if blockSignals:
+            self.pulldownList.blockSignals(False)
+
+    def setIndex(self, index, blockSignals=False):
+        "Convenience: set item in Pulldown by index"
+        if blockSignals:
+            self.pulldownList.blockSignals(True)
+        self.pulldownList.setIndex(index)
+        if blockSignals:
+            self.pulldownList.blockSignals(False)
 
     def modifyTexts(self, texts):
         "Mofify the pulldown texts, retaining the current selection"
@@ -378,9 +390,9 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         self.pulldownList.blockSignals(True)
         self.pulldownList.clear()
         self.pulldownList.setData(texts=texts)
-        self.select(current)
-        self.pulldownList.blockSignals(False)
+        self.select(current, blockSignals=True)
         self.pulldownList.update()
+        self.pulldownList.blockSignals(False)
 
 
 class CheckBoxCompoundWidget(CompoundBaseWidget):

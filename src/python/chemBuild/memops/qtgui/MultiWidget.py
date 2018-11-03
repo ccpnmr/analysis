@@ -89,7 +89,7 @@ class MultiWidget(QtWidgets.QFrame, Base):
     
     if self.widgetType == 'PulldownList':
       for i in range(self.numRows):
-        value = self.widgets[i].currentObject()
+        value = self.widgets[i].getCurrentObject()
         if value is not None:
           values.append( value )
           

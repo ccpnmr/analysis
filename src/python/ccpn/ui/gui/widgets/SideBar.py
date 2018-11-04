@@ -163,7 +163,7 @@ def _openItemObject(mainWindow, objs, **args):
                           'This function has not been implemented in the current version')
       except Exception as e:
         getLogger().warning('Error: %s' % e)
-        raise e
+        # raise e
 
 def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
   spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)

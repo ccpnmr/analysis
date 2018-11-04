@@ -159,10 +159,11 @@ class CcpnModule(Dock, DropBase):
         if mainWindow is not None:
             self.area = mainWindow.moduleArea
 
-        Dock.__init__(self, name=name, area=self.area,
-                      autoOrientation=False,
-                      closable=closable)  #, **kwds)   # ejb
+        super().__init__(name=name, area=self.area,
+                         autoOrientation=False,
+                         closable=closable)  #, **kwds)   # ejb
         DropBase._init(self, acceptDrops=True)
+
         self.hStyle = """
                   Dock > QWidget {
                       border: 0px solid #000;

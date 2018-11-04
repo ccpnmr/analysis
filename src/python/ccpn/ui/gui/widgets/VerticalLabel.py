@@ -34,13 +34,13 @@ class VerticalLabel(QtWidgets.QWidget, Base):
 
     def __init__(self, parent, text, **kwargs):
 
-      text = translator.translate(text)
+      super().__init__(parent)
+      Base._init(self, **kwargs)
 
-      QtWidgets.QWidget.__init__(self, parent)
+      text = translator.translate(text)
       self.text = text
       self.setText(text)
       self.height = parent.height()
-      Base.__init__(self, **kwargs)
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)

@@ -29,8 +29,8 @@ from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 
 
 class Blank(CcpnDialog):
-  def __init__(self, parent=None, title='Blank', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, parent=None, title='Blank', **kwds):
+    super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
     self.setWindowFlags(self.windowFlags() |
                           QtCore.Qt.WindowMaximizeButtonHint |
                           QtCore.Qt.WindowMinimizeButtonHint)

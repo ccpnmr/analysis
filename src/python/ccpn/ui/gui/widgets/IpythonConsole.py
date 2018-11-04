@@ -45,8 +45,8 @@ class IpythonConsole(Widget):
         if namespace is None:
           namespace = mainWindow.namespace
 
-        super().__init__(parent=mainWindow)
-        Base.__init__(self, setLayout=True, **kwds)
+        super().__init__(parent=mainWindow, setLayout=True, **kwds)
+        # Base._init(self, setLayout=True, **kwds)
 
         km = QtInProcessKernelManager()
         km.start_kernel()

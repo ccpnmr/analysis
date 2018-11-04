@@ -44,9 +44,9 @@ class PhasingFrame(Frame):
                callback=None,
                returnCallback=None,
                directionCallback=None,
-               applyCallback=None, **kw):
+               applyCallback=None, **kwds):
 
-    Frame.__init__(self, parent, setLayout=True, **kw)
+    super().__init__(parent, setLayout=True, **kwds)
     
     self.callback = callback
     self.returnCallback = returnCallback if returnCallback else self.doCallback

@@ -62,9 +62,6 @@ class PulldownList(QtWidgets.QComboBox, Base):
     :param editable: If True: allows for editing the value
     :param kw:
     """
-
-    # super(QtWidgets.QComboBox, self).__init__(parent)
-    # super(Base, self).__init__(**kwds)
     super().__init__(parent)
     Base._init(self, **kwds)
 

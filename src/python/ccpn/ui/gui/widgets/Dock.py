@@ -30,7 +30,7 @@ from ccpn.ui.gui.guiSettings import moduleLabelFont
 
 class CcpnDock(Dock):
   def __init__(self, name, **kw):
-    super(CcpnDock, self).__init__(name, self)
+    super(CcpnDock, self).__init__(name=name, area=self)
     self.label.hide()
     self.label = CcpnDockLabel(name.upper(), self)
     self.label.show()

@@ -48,9 +48,7 @@ class GuiNdWidget(CcpnGLWidget):
     SPECTRUMNEGCOLOUR = 'negativeContourColour'
 
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
-        super(GuiNdWidget, self).__init__(strip=strip,
-                                          mainWindow=mainWindow,
-                                          stripIDLabel=stripIDLabel)
+        super().__init__(strip=strip, mainWindow=mainWindow, stripIDLabel=stripIDLabel)
 
     def _mouseInPeak(self, xPosition, yPosition, firstOnly=False):
         """Find the peaks under the mouse.

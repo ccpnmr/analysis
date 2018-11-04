@@ -38,16 +38,16 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 
 class CompoundView(QGraphicsView, Base):
 
-  def __init__(self, parent=None, smiles=None, variant=None, preferences=None, **kw):
+  def __init__(self, parent=None, smiles=None, variant=None, preferences=None, **kwds):
 
     super(CompoundView, self).__init__(parent)
+    Base._init(self, **kwds)
+
     self.scene = QGraphicsScene(self)
     self.scene.setSceneRect(0, 0, 300, 300)
     self.setScene(self.scene)
     self.setCacheMode(QGraphicsView.CacheBackground)
     # QtWidgets.QGraphicsView.__init__(self, parent)
-
-    Base.__init__(self, **kw)
 
     self.parent = parent
     self.preferences = preferences

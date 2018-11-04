@@ -19,10 +19,10 @@ INFINITY = float('Inf')
 class Entry(QtWidgets.QLineEdit, Base):
 
   def __init__(self, parent, text='', callback=None, maxLength=32, 
-               listener=None, stripEndWhitespace=True, **kw):
+               listener=None, stripEndWhitespace=True, **kwds):
     
-    QtWidgets.QLineEdit.__init__(self, parent)
-    Base.__init__(self, **kw)
+    super().__init__(parent)
+    Base._init(self, **kwds)
     
     self.setText(self.convertInput(text))
     self.setMaxLength(maxLength)

@@ -5,8 +5,8 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 
 class FilteringPulldownList(PulldownList):
-  def __init__(self, parent=None, **kw):
-      PulldownList.__init__(self, parent, **kw)
+  def __init__(self, parent=None, **kwds):
+      super().__init__(parent, **kwds)
 
       self.setEditable(True)
       self.setFocusPolicy(QtCore.Qt.StrongFocus)

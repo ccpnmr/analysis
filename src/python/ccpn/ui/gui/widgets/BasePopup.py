@@ -28,15 +28,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 from PyQt5 import QtGui, QtWidgets, QtCore
 
-from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Widget import Widget
 
-class BasePopup(QtWidgets.QWidget, Base):
+class BasePopup(Widget):
 
   def __init__(self, parent=None, title='', location=None, hide=False,
-               modal=False, closeFunc=None, tipText=None, **kw):
+               modal=False, closeFunc=None, tipText=None, **kwds):
 
-    QtWidgets.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
+    super().__init__(parent, **kwds)
     
     self.closeFunc = closeFunc
     
@@ -73,62 +72,18 @@ class BasePopup(QtWidgets.QWidget, Base):
       
   # overrides QWidget
   def closeEvent(self, event):
-  
     if self.closeFunc:
       self.closeFunc()
-    
     QtWidgets.QWidget.closeEvent(self, event)
  
   def open(self):
-
     self.showNormal()
     self.raise_()
     self.activateWindow()
-  
-  # def setSize(self, w, h):
-  #
-  #   self.setGeometry(self.x(), self.y(), w, h)
-  #
-  # def setGeometry(self, x, y, w=None, h=None):
-  #
-  #   # this resizes / moves popup if it doesn't fit on screen
-  #   # not sure if we need this functionality but leave for now
-  #
-  #   if w is None:
-  #     w = self.rect().width()
-  #
-  #   if h is None:
-  #     h = self.rect().width()
-  #
-  #   screenRect = QtWidgets.QApplication.desktop()
-  #
-  #   sWidth = screenRect.width()
-  #   sHeight = screenRect.height()
-  #
-  #   w = min(sWidth, w)
-  #   h = min(sHeight, h)
-  #
-  #   if (x+w) > sWidth:
-  #     if w == 1:
-  #       x = sWidth // 2
-  #     else:
-  #       x = sWidth - w
-  #   elif x < 0:
-  #     x = 0
-  #
-  #   if (y+h) > sHeight:
-  #     if h == 1:
-  #       y = sHeight // 2
-  #     else:
-  #       y = sHeight - h
-  #   elif y < 0:
-  #     y = 0
-  #
-  #   QtWidgets.QWidget.setGeometry(self, x, y, w, h)
 
   def body(self, master):
-    
     pass # this method can be overridden in subclass
+
 
 if __name__ == '__main__':
 

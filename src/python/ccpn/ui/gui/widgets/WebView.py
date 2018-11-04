@@ -46,8 +46,8 @@ from ccpn.ui.gui.widgets.Base import Base
 class WebViewPanel(QtWebEngineWidgets.QWebEngineView, Base):
 
   def __init__(self, parent, **kw):
-    QtWebEngineWidgets.QWebEngineView.__init__(self, parent=parent)
-    Base.__init__(self, **kw)
+    super().__init__(parent=parent)
+    Base._init(self, **kw)
     
 class WebViewPopup(BasePopup):
 

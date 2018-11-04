@@ -33,11 +33,10 @@ UNCHECKED = QtCore.Qt.Unchecked
 class RadioButtons(QtWidgets.QWidget, Base):
 
   def __init__(self, parent, texts=None, selectedInd=None, exclusive=True,
-               callback=None, direction='h', tipTexts=None,  **kw):
+               callback=None, direction='h', tipTexts=None,  **kwds):
 
-
-    QtWidgets.QWidget.__init__(self, parent)
-    Base.__init__(self, setLayout = True, **kw)
+    super().__init__(parent)
+    Base._init(self, setLayout = True, **kwds)
 
     if texts is None:
       texts = []

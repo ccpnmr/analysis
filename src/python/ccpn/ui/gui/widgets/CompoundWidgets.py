@@ -548,11 +548,10 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
         return self.doubleSpinBox.setValue(value)
 
 
-class SelectorWidget(QtWidgets.QWidget, Base):
+class SelectorWidget(Widget):
 
-    def __init__(self, parent=None, label='', data=None, callback=None, **kw):
-        QtWidgets.QWidget.__init__(self, parent)
-        Base.__init__(self, **kw)
+    def __init__(self, parent=None, label='', data=None, callback=None, **kwds):
+        super().__init__(parent, **kwds)
 
         if data:
             data.insert(0, '')
@@ -596,9 +595,9 @@ class InputPulldown(PulldownList):
 
 class LineEditPopup(QtWidgets.QDialog, Base):
 
-    def __init__(self, parent=None, dataType=None, **kw):
-        QtWidgets.QDialog.__init__(self, parent)
-        Base.__init__(self, **kw)
+    def __init__(self, parent=None, dataType=None, **kwds):
+        super().__init__(parent)
+        Base._init(self, **kwds)
 
         inputLabel = Label(self, 'Input', grid=(0, 0))
         self.inputField = LineEdit(self, grid=(0, 1))
@@ -621,8 +620,8 @@ class LineEditPopup(QtWidgets.QDialog, Base):
 
 class ColourSelectionWidget(Widget):
 
-    def __init__(self, parent=None, labelName=None, **kw):
-        Widget.__init__(self, parent, **kw)
+    def __init__(self, parent=None, labelName=None, **kwds):
+        super().__init__(parent, **kwds)
 
         Label(self, labelName, grid=(0, 0))
         self.pulldownList = PulldownList(self, vAlign='t', hAlign='l', grid=(0, 1))

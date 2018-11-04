@@ -34,16 +34,16 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.BasePopup import BasePopup
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.WebBrowser import WebBrowser
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util.Logging import getLogger
 
 
-class ButtonList(QtWidgets.QWidget, Base):
+class ButtonList(Widget):
 
   def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
-               tipTexts=None, direction='h', commands=None, images=None, **kw):
+               tipTexts=None, direction='h', commands=None, images=None, **kwds):
 
-    QtWidgets.QWidget.__init__(self, parent)
-    Base.__init__(self, setLayout=True, **kw)     # ejb - added setLayout
+    super().__init__(parent, setLayout=True, **kwds)     # ejb - added setLayout
 
     self.buttonNames = {}
 

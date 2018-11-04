@@ -32,9 +32,11 @@ from ccpn.ui.gui.widgets.Label import Label
 
 class Spinbox(QtGui.QSpinBox, Base):
 
-  def __init__(self, parent, prefix=None, value=None,step=None, min=None, max=None, showButtons=True, **kw):
+  def __init__(self, parent, prefix=None, value=None,step=None, min=None, max=None, showButtons=True, **kwds):
 
-    QtGui.QSpinBox.__init__(self, parent)
+    super().__init__(parent)
+    Base._init(self, **kwds)
+
     if min is not None:
       self.setMinimum(min)
     if max is not None:
@@ -45,10 +47,6 @@ class Spinbox(QtGui.QSpinBox, Base):
       self.setSingleStep(step)
     if prefix:
       self.setPrefix(prefix+' ')
-
-
-    Base.__init__(self, **kw)
-
     if showButtons is False:
       self.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
 

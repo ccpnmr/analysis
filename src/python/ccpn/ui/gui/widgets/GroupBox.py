@@ -7,8 +7,8 @@ class GroupBox(QtWidgets.QGroupBox, Base):
 
   def __init__(self, parent=None, border=None, **kw):
 
-    QtWidgets.QGroupBox.__init__(self, parent)
-    Base.__init__(self, setLayout=True, **kw)   # ejb
+    super().__init__(parent)
+    Base._init(self, setLayout=True, **kw)   # ejb
 
     if border:
       self.setObjectName("borderedGroupBox")

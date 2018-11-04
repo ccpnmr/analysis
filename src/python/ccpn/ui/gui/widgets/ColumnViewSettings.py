@@ -36,7 +36,7 @@ from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 class ColumnViewSettingsPopup(CcpnDialog):
   # def __init__(self, table=None, parent=None, hideColumns=None, title='Column Settings', **kw):
   def __init__(self, dataFrameObject=None, parent=None, hideColumns=None, title='Column Settings', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    super().__init__(parent, setLayout=True, windowTitle=title, **kw)
     self.setContentsMargins(5, 5, 5, 5)
     self.dataFrameObject = dataFrameObject
     # self.widgetColumnViewSettings = ColumnViewSettings(parent=self, table=table, hideColumns=hideColumns, grid=(0,0))
@@ -51,6 +51,7 @@ class ColumnViewSettingsPopup(CcpnDialog):
     self.reject()
     return hiddenColumns
 
+
 SEARCH_MODES = [ 'Literal','Case Sensitive Literal','Regular Expression' ]
 CheckboxTipText = 'Select column to be visible on the table.'
 
@@ -58,7 +59,7 @@ class ColumnViewSettings(Widget):
   ''' hide show check boxes corresponding to the table columns '''
 
   def __init__(self, parent=None, dataFrameObject=None, direction='v', hideColumns=None, **kw):
-    Widget.__init__(self, parent, setLayout=True, **kw)
+    super().__init__(parent, setLayout=True, **kw)
     self.direction=direction
     # self.table = table
     self.dataFrameObject = dataFrameObject
@@ -68,7 +69,6 @@ class ColumnViewSettings(Widget):
     self._hideColumnWidths = {}
     self.initCheckBoxes()
     self.filterLabel =  Label(self, 'Display Columns', grid=(0,1), vAlign='t', hAlign='l')
-
 
   def initCheckBoxes(self):
     columns = self.dataFrameObject.headings   #   self.table._columns

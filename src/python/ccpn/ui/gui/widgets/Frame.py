@@ -101,7 +101,8 @@ class Frame(QtWidgets.QFrame, Base):
 
     """
 
-    QtWidgets.QFrame.__init__(self, parent)
+    super().__init__(parent)
+    Base._init(self, setLayout=setLayout, **kwds)
 
     #TODO: replace with proper stylesheet routines once inplemented
     styleSheet = ''
@@ -120,7 +121,6 @@ class Frame(QtWidgets.QFrame, Base):
       #print('>>', styleSheet)
       self.setStyleSheet('QFrame {' + styleSheet + '}')
 
-    Base.__init__(self, setLayout=setLayout, **kwds)
     self.setContentsMargins(0, 0, 0, 0)
 
     # define frame styles

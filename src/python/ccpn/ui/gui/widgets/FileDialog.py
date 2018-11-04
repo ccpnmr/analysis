@@ -252,10 +252,10 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from os.path import expanduser
 
 
-class LineEditButtonDialog(Widget, Base):
+class LineEditButtonDialog(Widget):
     def __init__(self, parent, textDialog=None, textLineEdit=None, fileMode=None, filter=None, directory=None, **kw):
-        Widget.__init__(self, parent)
-        Base.__init__(self, setLayout=True, **kw)
+
+        super().__init__(parent, setLayout=True, **kw)
         self.openPathIcon = Icon('icons/directory')
 
         if textDialog is None:

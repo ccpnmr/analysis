@@ -47,23 +47,20 @@ def inverseGrey(colour):
 
 class ColourDialog(QtWidgets.QColorDialog):
 
-  def __init__(self, parent=None, doAlpha=False, **kw):
+  def __init__(self, parent=None, doAlpha=False, **kwds):
 
-    QtWidgets.QColorDialog.__init__(self, parent)
+    super().__init__(parent, **kwds)
 
     self.setOption(self.ShowAlphaChannel, doAlpha)
     self.setOption(QtWidgets.QColorDialog.DontUseNativeDialog,  True)
     self.aborted = False
     self.rejected.connect(self.quit)
 
-
   def set(self, colour):
-
     self.setColour(colour)
 
   def get(self):
     return self.getColor()
-
 
   def getColor(self, initialColour=None):
 
@@ -118,6 +115,5 @@ class ColourDialog(QtWidgets.QColorDialog):
     self.setCurrentColor(qColour)
 
   def quit(self):
-
     self.aborted = True
 

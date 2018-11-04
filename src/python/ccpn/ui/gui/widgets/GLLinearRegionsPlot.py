@@ -70,10 +70,11 @@ from PyQt5.QtCore import pyqtSlot
 #     self.lines[1].setPos(max(values))
 
 
-class GLTargetButtonSpinBoxes(Widget, Base):
-  def __init__(self, parent, application=None, orientation = 'v', GLWidget=None, values=None, step=None, colour = None, brush = None, movable=True, bounds=None, **kw):
-    Widget.__init__(self, parent,  setLayout=False,)
-    Base.__init__(self, setLayout=True, **kw)
+class GLTargetButtonSpinBoxes(Widget):
+  def __init__(self, parent, application=None, orientation = 'v', GLWidget=None, values=None, step=None,
+               colour = None, brush = None, movable=True, bounds=None, **kwds):
+    super().__init__(parent, setLayout=True, **kwds)
+
     self.parent = parent
     self.GLWidget = GLWidget
     self.application = application

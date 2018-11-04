@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.PulldownListsForObjects import NotesPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NotePulldown
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Note import Note
@@ -72,7 +72,7 @@ class NotesEditorModule(CcpnModule):
     self.spacer = Spacer(self.mainWidget, 5, 5
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0,0), gridSpan=(1,1))
-    self.noWidget = NotesPulldown(parent=self.mainWidget
+    self.noWidget = NotePulldown(parent=self.mainWidget
                                    , project=self.project, default=0
                                    , grid=(1,0), gridSpan=(1,1), minimumWidths=(0,100)
                                    , showSelectName=True

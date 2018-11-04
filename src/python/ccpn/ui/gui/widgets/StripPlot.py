@@ -58,8 +58,8 @@ class StripPlot(Widget):
                  includePeakLists=True, includeNmrChains=True,
                  includeSpectrumTable=True,
                  defaultSpectrum=None,
-                 **kw):
-        Widget.__init__(self, parent, setLayout=True, **kw)
+                 **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow

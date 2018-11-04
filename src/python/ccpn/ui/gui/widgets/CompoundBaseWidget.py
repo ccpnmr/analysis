@@ -62,7 +62,7 @@ class CompoundBaseWidget(Frame):
     :param orientation: orientation keyword
     :param kwds: (optional) keyword, value pairs for the gridding of Frame
     """
-    Frame.__init__(self, parent=parent, showBorder=showBorder, setLayout=True, **kwds)
+    super().__init__(parent=parent, showBorder=showBorder, setLayout=True, **kwds)
 
     if not orientation in layoutDict:
       raise RuntimeError('Invalid parameter "orientation" (%s)' % orientation)

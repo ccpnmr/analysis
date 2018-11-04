@@ -52,7 +52,7 @@ class DropBase:
 
   def _init(self, acceptDrops=False, **kw):
 
-    print('DEBUG DropBase %r: acceptDrops=%s' % (self, acceptDrops))
+    # print('DEBUG DropBase %r: acceptDrops=%s' % (self, acceptDrops))
 
     self._dropEventCallback = None
     self._enterEventCallback = None

@@ -45,8 +45,8 @@ ToolTip = 'Click the line to select. Hold left click and drag. Release the mouse
 
 
 class CalibrateY1DWidgets(Frame):
-    def __init__(self, parent=None, mainWindow=None, strip=None, **kw):
-        Frame.__init__(self, parent, setLayout=True, **kw)
+    def __init__(self, parent=None, mainWindow=None, strip=None, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
 
         if mainWindow is None:  # This allows opening the popup for graphical tests
             self.mainWindow = None

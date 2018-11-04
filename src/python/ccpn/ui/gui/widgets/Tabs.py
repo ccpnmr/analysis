@@ -51,11 +51,9 @@ from ccpn.ui.gui.widgets.Base import Base
 
 
 class Tabs(QtWidgets.QTabWidget, Base):
-  def __init__(self, parent,  **kw):
-    QtWidgets.QTabWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
-
-
+  def __init__(self, parent,  **kwds):
+    super().__init__(parent)
+    Base._init(self, **kwds)
 
 
 if __name__ == '__main__':

@@ -70,14 +70,13 @@ class LinearRegionsPlot(LinearRegionItem):
     self.lines[1].setPos(max(values))
 
 
-class TargetButtonSpinBoxes(Widget, Base):
-  def __init__(self, parent, application=None, orientation = 'v', plotWidget=None, values=None, step=None, colour = None, brush = None, movable=True, bounds=None, **kw):
-    Widget.__init__(self, parent,  setLayout=False,)
-    Base.__init__(self, setLayout=True, **kw)
+class TargetButtonSpinBoxes(Widget):
+  def __init__(self, parent, application=None, orientation = 'v', plotWidget=None, values=None, step=None,
+               colour = None, brush = None, movable=True, bounds=None, **kwds):
+    super().__init__(parent, setLayout=True, **kwds)
     self.parent = parent
     self.plotWidget = plotWidget
     self.application = application
-
 
     self.movable = movable
     self.brush = brush
@@ -141,9 +140,6 @@ class TargetButtonSpinBoxes(Widget, Base):
           self.pickOnSpectrumButton.setIcon(self.toggleOffIcon)
           self._turnOffPositionPicking()
 
-
-
-
   def _turnOnPositionPicking(self):
     if self.plotWidget is not None:
       self.plotWidget.addItem(self.linearRegions)
@@ -173,7 +169,6 @@ class TargetButtonSpinBoxes(Widget, Base):
     self.linearRegions.lines[0].setPos(min(values))
     self.linearRegions.lines[1].setPos(max(values))
 
-
   def get(self):
     '''
     :return: positions displayed on the boxes
@@ -188,15 +183,10 @@ class TargetButtonSpinBoxes(Widget, Base):
     self.linearRegions.lines[0].setPos(min(values))
     self.linearRegions.lines[1].setPos(max(values))
 
-
-  # def _deleteLater(self):
-  #   'Remove the line from plotWidget if any'
-  #   self._turnOffPositionPicking()
-  #   self.deleteLater()
-
   def destroy(self, bool_destroyWindow=True, bool_destroySubWindows=True):
     self._turnOffPositionPicking()
     self.destroy( bool_destroyWindow=bool_destroyWindow, bool_destroySubWindows=bool_destroySubWindows)
+
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication

@@ -86,11 +86,11 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         PeakCluster._pluralLinkName,
         ]
 
-    def __init__(self, parent=None, project=None, maxSize=(250, 300), **kw):
+    def __init__(self, parent=None, project=None, maxSize=(250, 300), **kwds):
         """Initialise the widget
         """
-        QtWidgets.QTreeWidget.__init__(self, parent)
-        Base.__init__(self, setLayout=False, **kw)
+        super().__init__(parent)
+        Base._init(self, setLayout=False, **kwds)
 
         # self.setMaximumSize(*maxSize)
         self.headerItem = QtWidgets.QTreeWidgetItem()

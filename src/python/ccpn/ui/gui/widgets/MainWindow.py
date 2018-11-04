@@ -32,10 +32,10 @@ from ccpn.ui.gui.widgets.Frame import Frame
 
 class MainWindow(QtWidgets.QMainWindow, Base):
 
-  def __init__(self, parent=None, title='', location=None, hide=False, **kw):
+  def __init__(self, parent=None, title='', location=None, hide=False, **kwds):
 
-    QtWidgets.QMainWindow.__init__(self, parent=parent)
-    Base.__init__(self, **kw)
+    super().__init__(parent=parent)
+    Base._init(self, **kwds)
     self.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
 
     self.mainFrame = Frame(self, setLayout=1)
@@ -70,8 +70,11 @@ class DockWidget(QtGui.QDockWidget):
                      allowedAreas=None,
                      **kwds):
 
-    QtWidgets.QMainWindow.__init__(self, title, parent=parent)
-    Base.__init__(self, **kwds)
+    # QtWidgets.QMainWindow.__init__(self, title, parent=parent) FIXME: GWV doesn't get this
+    super().__init__(parent)
+    Base._init(self, **kwds)
+
+    self.setTitle(title)
 
     if widget is not None:
       self.setWidget(widget)

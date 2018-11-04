@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets
-from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Widget import Widget
 
 
 def _updateGl(self, spectrumList):
@@ -41,10 +41,10 @@ def _updateGl(self, spectrumList):
   GLSignals.emitPaintEvent()
 
 
-class CcpnDialog(QtWidgets.QDialog, Base):
+class CcpnDialog(Widget):
     def __init__(self, parent=None, windowTitle='', setLayout=False, size=(200, 100), **kw):
-        QtWidgets.QDialog.__init__(self, parent)
-        Base.__init__(self, setLayout=setLayout, **kw)
+
+        super.__init__(parent, setLayout=setLayout, **kw)
 
         self.setWindowTitle(windowTitle)
         self.setContentsMargins(15, 15, 15, 15)

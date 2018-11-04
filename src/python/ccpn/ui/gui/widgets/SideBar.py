@@ -133,6 +133,11 @@ NEW_ITEM_DICT = {
 }
 
 def _openItemObject(mainWindow, objs, **args):
+  """
+  Abstract routine to activate a module to display objs
+  Builds on OpenObjAction dict, genererated below, which defines the handling for the various
+  obj classes
+  """
   spectrumDisplay = None
 
   for obj in objs:
@@ -158,6 +163,7 @@ def _openItemObject(mainWindow, objs, **args):
                           'This function has not been implemented in the current version')
       except Exception as e:
         getLogger().warning('Error: %s' % e)
+        raise e
 
 def _openSpectrumDisplay(mainWindow, spectrum, position=None, relativeTo=None):
   spectrumDisplay = mainWindow.createSpectrumDisplay(spectrum)
@@ -266,8 +272,8 @@ OpenObjAction = {
 class SideBar(QtWidgets.QTreeWidget, Base):
   def __init__(self, parent=None, mainWindow=None, multiSelect=True):
 
-    QtWidgets.QTreeWidget.__init__(self, parent)
-    Base.__init__(self, acceptDrops=True)
+    super().__init__(parent)
+    Base._init(self, acceptDrops=True)
 
     self.multiSelect = multiSelect
     if self.multiSelect:

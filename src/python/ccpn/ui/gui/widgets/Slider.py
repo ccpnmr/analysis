@@ -33,8 +33,8 @@ class Slider(QtWidgets.QSlider, Base):
                tracking=True, showNumber=True, tickInterval=None,
                tickPosition=None, listener=None, spinbox=False, **kw):
 
-    QtWidgets.QSlider.__init__(self, parent)
-    Base.__init__(self, **kw)
+    super().__init__(parent)
+    Base._init(self, **kw)
 
     self.callback = callback
 
@@ -161,9 +161,10 @@ class Slider(QtWidgets.QSlider, Base):
 
 
 class SliderSpinBox(QtWidgets.QWidget, Base):
-  def __init__(self,parent, startVal=0, endVal=100, value=None, step=1, bigStep=5, **kw):
-    QtWidgets.QWidget.__init__(self, parent)
-    Base.__init__(self, setLayout=True, **kw)
+  def __init__(self,parent, startVal=0, endVal=100, value=None, step=1, bigStep=5, **kwds):
+
+    super().__init__(parent)
+    Base._init(self, setLayout=True, **kwds)
 
     if value is None:
       value = startVal

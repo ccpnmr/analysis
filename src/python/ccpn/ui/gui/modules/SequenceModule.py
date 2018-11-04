@@ -570,7 +570,7 @@ class GuiChainResidue(QtWidgets.QGraphicsTextItem, Base):
   def __init__(self, guiChainLabel, mainWindow, residue, scene, labelPosition, index, yPosition):
 
     QtWidgets.QGraphicsTextItem.__init__(self)
-    Base.__init__(self, acceptDrops=True)
+    Base._init(self, acceptDrops=True)
 
     self.guiChainLabel = guiChainLabel
     self.mainWindow = mainWindow

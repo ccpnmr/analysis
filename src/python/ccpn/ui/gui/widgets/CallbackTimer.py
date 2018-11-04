@@ -28,10 +28,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtCore, QtWidgets
 
 class CallbackTimer(QtCore.QTimer):
-  
   def __init__(self, callback):
-    
-    QtCore.QTimer.__init__(self)
+    super().__init__()
     self.setSingleShot(True)
     # self.connect(self, QtCore.PYQT_SIGNAL('timeout()'), callback)
     self.timeout.connect(callback)

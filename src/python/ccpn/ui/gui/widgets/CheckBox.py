@@ -30,16 +30,18 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Widget import Widget
 
 class CheckBox(QtWidgets.QCheckBox, Base):
 
-  def __init__(self, parent=None, checked=False, text='', callback=None, **kw):
+  def __init__(self, parent=None, checked=False, text='', callback=None, **kwds):
 
-    QtWidgets.QCheckBox.__init__(self, parent)
+    super().__init__(parent)
+    Base._init(self, **kwds)
+
     self.setChecked(checked)
     if text:
       self.setText(text)
-    Base.__init__(self, **kw)
     if callback:
       self.setCallback(callback)
     self.setObjectName(text)
@@ -59,12 +61,9 @@ class CheckBox(QtWidgets.QCheckBox, Base):
     return self.get()
 
 
-
-class EditableCheckBox(QtWidgets.QWidget, Base):
-  def __init__(self,parent, text=None, checked=False, callback=None,  **kw):
-    QtWidgets.QWidget.__init__(self, parent)
-    Base.__init__(self, setLayout=True, **kw)
-
+class EditableCheckBox(Widget):
+  def __init__(self,parent, text=None, checked=False, callback=None,  **kwds):
+    super().__init__(parent, setLayout=True, **kwds)
 
     self.checkBox = CheckBox(self, checked=checked, grid=(0, 0), hAlign='c', )
     self.lineEdit = LineEdit(self, text=text,  grid=(0, 1), hAlign='c', )
@@ -82,6 +81,7 @@ class EditableCheckBox(QtWidgets.QWidget, Base):
 
   def setChecked(self, value):
     return self.checkBox.setChecked(value)
+
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication

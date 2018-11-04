@@ -83,7 +83,8 @@ class _PulldownABC(PulldownListCompoundWidget):
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
       
         """
-        # class needs some attributes to be defined
+        # class needs some attributes to be checked and defined before super()
+
         if self._attributeName is None:
             raise RuntimeError('%s: _attributeName needs to be defined for proper functioning' % self.__class__.__name__)
 
@@ -105,15 +106,16 @@ class _PulldownABC(PulldownListCompoundWidget):
             raise ValueError('followCurrent option only valid if _currentAttributeName is defined for class')
         self._followCurrent = followCurrent
 
-        super(_PulldownABC, self).__init__(parent=parent, showBorder=showBorder,
-                                           orientation=orientation,
-                                           minimumWidths=minimumWidths, maximumWidths=maximumWidths, fixedWidths=fixedWidths,
-                                           labelText=labelText,
-                                           texts=self._getPids(),
-                                           sizeAdjustPolicy=sizeAdjustPolicy,
-                                           callback=self._callback, default=default,
-                                           editable=editable,
-                                           **kwds)
+        super().__init__(parent=parent, showBorder=showBorder,
+                         orientation=orientation,
+                         minimumWidths=minimumWidths, maximumWidths=maximumWidths, fixedWidths=fixedWidths,
+                         labelText=labelText,
+                         texts=self._getPids(),
+                         sizeAdjustPolicy=sizeAdjustPolicy,
+                         callback=self._callback, default=default,
+                         editable=editable,
+                         **kwds)
+
         # add a notifier to update the pulldown list
         self._notifier1 = Notifier(project,
                                    [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
@@ -129,9 +131,6 @@ class _PulldownABC(PulldownListCompoundWidget):
                                        callback=self._updateFromCurrent
                                       )
             self._notifier2.setDebug(DEBUG)
-
-        # #print('>>>', type(self))
-        # self.destroyed.connect(_PulldownABC._onDestroyed)
 
     @property
     def textList(self):

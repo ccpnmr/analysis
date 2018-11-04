@@ -38,7 +38,7 @@ class CcpnWebView(CcpnModule):
     """
     Initialise the Module widgets
     """
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+    super().__init__(mainWindow=mainWindow, name=name)
 
     self.webView = QWebEngineView()
     self.addWidget(self.webView, 0, 0, 1, 1)  # make it the first item

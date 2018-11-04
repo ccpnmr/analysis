@@ -31,9 +31,11 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class ToolButton(QtWidgets.QToolButton, Base):
 
-  def __init__(self, parent=None, spectrumView=None, **kw):
-    Base.__init__(self, **kw)
-    QtWidgets.QToolButton.__init__(self, parent.spectrumToolBar)
+  def __init__(self, parent=None, spectrumView=None, **kwds):
+
+    super().__init__(parent.spectrumToolBar)  #FIXME: big NoNo
+    Base._init(self, **kwds)
+
     self.spectrumView = spectrumView
     pix=QtGui.QPixmap(120, 10)
     if spectrumView.spectrum.dimensionCount < 2:

@@ -42,19 +42,13 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 class Widget(QtWidgets.QWidget, Base):
 
     def __init__(self, parent=None, setLayout=False, acceptDrops=True, **kwds):
-        "General widget; default accepts drops (for now)"
+        """General widget; default accepts drops (for now)
+        """
 
-        #QtWidgets.QWidget.__init__(self, parent)
-        print('DEBUG Widget: acceptDrops=%s, setLayout=%s, **kwds=%s' % (setLayout, acceptDrops, kwds))
+        # print('DEBUG Widget: acceptDrops=%s, setLayout=%s, **kwds=%s' % (setLayout, acceptDrops, kwds))
 
-        # super(QtWidgets.QWidget, self).__init__(parent)
-        # super(Base, self).__init__(acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
-
-        super(QtWidgets.QWidget, Widget).__init__(self, parent=parent)
-        super(Base, Widget).__init__(self, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
-
-        # super().__init__(parent=parent, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
-        # Base.__init__(self, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
+        super().__init__(parent=parent)
+        Base._init(self, acceptDrops=acceptDrops, setLayout=setLayout, **kwds)
 
         self.setContentsMargins(0, 0, 0, 0)
 

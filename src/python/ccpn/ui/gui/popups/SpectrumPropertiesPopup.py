@@ -44,6 +44,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
 from ccpn.ui.gui.popups.Dialog import CcpnDialog  # ejb
@@ -236,13 +237,12 @@ class FilePathValidator(QtGui.QValidator):
         return state, p_str, p_int
 
 
-class GeneralTab(QtWidgets.QWidget, Base):
+class GeneralTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
 
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
-        super(GeneralTab, self).__init__(parent)
-        Base.__init__(self, setLayout=True)  # ejb
+        super().__init__(parent, setLayout=True)  # ejb
 
         self.parent = parent
         self.mainWindow = mainWindow
@@ -645,10 +645,9 @@ class GeneralTab(QtWidgets.QWidget, Base):
             self.pythonConsole.writeConsoleCommand("spectrum.sliceColour '%s'" % newColour, spectrum=self.spectrum)
 
 
-class DimensionsTab(QtWidgets.QWidget, Base):
+class DimensionsTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, dimensions=None):
-        super(DimensionsTab, self).__init__(parent)
-        Base.__init__(self, setLayout=True)  # ejb
+        super().__init__(parent, setLayout=True)  # ejb
 
         self.parent = parent
         self.mainWindow = mainWindow
@@ -874,11 +873,11 @@ class DimensionsTab(QtWidgets.QWidget, Base):
         self._writeLoggingMessage("spectrum.referencePoints = {0}".format(spectrumReferencing))
 
 
-class ContoursTab(QtWidgets.QWidget, Base):
+class ContoursTab(Widget):
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None):
-        super(ContoursTab, self).__init__(parent)
-        Base.__init__(self, setLayout=True)  # ejb
+
+        super().__init__(parent, setLayout=True)  # ejb
 
         self.parent = parent
         self.mainWindow = mainWindow
@@ -1412,13 +1411,12 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
             self.accept()
 
 
-class ColourTab(QtWidgets.QWidget, Base):
+class ColourTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, item=None, colourOnly=False):
 
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
-        super(ColourTab, self).__init__(parent)
-        Base.__init__(self, setLayout=True)  # ejb
+        super().__init__(parent, setLayout=True)  # ejb
 
         self.parent = parent
         self.mainWindow = mainWindow

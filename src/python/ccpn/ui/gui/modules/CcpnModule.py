@@ -162,7 +162,7 @@ class CcpnModule(Dock, DropBase):
         Dock.__init__(self, name=name, area=self.area,
                       autoOrientation=False,
                       closable=closable)  #, **kwds)   # ejb
-        DropBase.__init__(self, acceptDrops=True)
+        DropBase._init(self, acceptDrops=True)
         self.hStyle = """
                   Dock > QWidget {
                       border: 0px solid #000;

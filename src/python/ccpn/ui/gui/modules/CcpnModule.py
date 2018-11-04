@@ -207,9 +207,11 @@ class CcpnModule(Dock, DropBase):
         # self._originalLabel.hide()
 
         self.topLayout.removeWidget(self.label)  # remove old label, redefine
-        self.label.deleteLater()
-        self.label = CcpnModuleLabel(name, self, showCloseButton=closable, closeCallback=self._closeModule,
-                                     showSettingsButton=self.includeSettingsWidget, settingsCallback=self._settingsCallback
+        self.label.deleteLater()  # GWV: why??
+        self.label = CcpnModuleLabel(name, self,
+                                     showCloseButton=closable, closeCallback=self._closeModule,
+                                     showSettingsButton=self.includeSettingsWidget,
+                                     settingsCallback=self._settingsCallback
                                      )
         self.topLayout.addWidget(self.label, 0, 1)  # ejb - swap out the old widget, keeps hierarchy
         # except it doesn't work properly
@@ -224,7 +226,7 @@ class CcpnModule(Dock, DropBase):
 
         # main widget area
         #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-        self.mainWidget = Widget(parent=None, setLayout=True)  #QtWidgets.QWidget(self)
+        self.mainWidget = Widget(parent=None, setLayout=True, acceptDrops=True)  #QtWidgets.QWidget(self)
 
         #self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
@@ -237,7 +239,7 @@ class CcpnModule(Dock, DropBase):
             #                                       minimumSizes=self.settingsMinimumSizes
             #                                      )
             self._settingsScrollArea = ScrollArea(parent=self.widgetArea)
-            self.settingsWidget = Frame(showBorder=False)
+            self.settingsWidget = Frame(parent=None, showBorder=False)
             # self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
             # self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
             self._settingsScrollArea.setWidget(self.settingsWidget)
@@ -478,8 +480,6 @@ class CcpnModule(Dock, DropBase):
                def restoreWidgetsState(self, **widgetsState):
                   super(TheModule, self).restoreWidgetsState(**widgetsState) #First restore as default
                   #  do some stuff
-
-
         """
 
         self._setNestedWidgetsAttrToModule()

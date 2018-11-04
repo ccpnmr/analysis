@@ -26,25 +26,26 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtGui, QtWidgets
-from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Base import Base
 
 
 def _updateGl(self, spectrumList):
-  from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-  # # spawn a redraw of the contours
-  # for spec in spectrumList:
-  #     for specViews in spec.spectrumViews:
-  #         specViews.buildContours = True
+    # # spawn a redraw of the contours
+    # for spec in spectrumList:
+    #     for specViews in spec.spectrumViews:
+    #         specViews.buildContours = True
 
-  GLSignals = GLNotifier(parent=self)
-  GLSignals.emitPaintEvent()
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
 
 
-class CcpnDialog(Widget):
-    def __init__(self, parent=None, windowTitle='', setLayout=False, size=(200, 100), **kw):
+class CcpnDialog(QtWidgets.QDialog, Base):
+    def __init__(self, parent=None, windowTitle='', setLayout=False, size=(200, 100), **kwds):
 
-        super.__init__(parent, setLayout=setLayout, **kw)
+        super().__init__(parent)
+        Base._init(self, setLayout=setLayout, **kwds)
 
         self.setWindowTitle(windowTitle)
         self.setContentsMargins(15, 15, 15, 15)
@@ -60,30 +61,3 @@ class CcpnDialog(Widget):
         self.setSizePolicy(self.sizePolicy)
         self.setFixedSize(self.maximumWidth(), self.maximumHeight())
         self.setSizeGripEnabled(False)
-
-    #TODO:ED include widget here for self.centralWidget, self.buttonWidget and undo functionality
-
-
-    # # doesn't change anything!
-    # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-    #
-    # GLSignals = GLNotifier(parent=self)
-    # _undo = self.spectrum.project._undo
-    #
-    # self.spectrum.project._startCommandEchoBlock('_setNoiseLevel', quiet=True)
-    # try:
-    #     _undo._newItem(undoPartial=partial(_updateGl, self, [self.spectrum]))
-    #     self.spectrum.noiseLevel = self.noiseLevel
-    #     _undo._newItem(redoPartial=partial(_updateGl, self, [self.spectrum]))
-    #
-    #     for specViews in self.spectrum.spectrumViews:
-    #         specViews.buildContours = True
-    #
-    #     # repaint
-    #     GLSignals.emitPaintEvent()
-    #
-    #     applyAccept = True
-    # except Exception as es:
-    #     showWarning(str(self.windowTitle()), str(es))
-    # finally:
-    #     self.spectrum.project._endCommandEchoBlock()

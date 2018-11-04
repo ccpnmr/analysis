@@ -76,7 +76,8 @@ class SpectrumPropertiesPopup(CcpnDialog):
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None,
                  title='Spectrum Properties', **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+
+        super().__init__(parent, setLayout=True, windowTitle=title, **kw)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application

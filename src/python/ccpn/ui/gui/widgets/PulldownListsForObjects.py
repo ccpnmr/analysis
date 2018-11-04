@@ -30,7 +30,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 
-SELECT = '>> Select >>'
+SELECT = '> Select <'
 UNDEFINED = '<Undefined>'
 
 DEBUG = True

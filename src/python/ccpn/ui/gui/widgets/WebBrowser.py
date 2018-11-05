@@ -55,10 +55,13 @@ class WebBrowser:
       
     except:
       WebViewPopup(url)
-  
+
+
 class WebBrowserPulldown(PulldownList):
 
-  def __init__(self, parent, browser=None, **kw):
+  def __init__(self, parent, browser=None, **kwds):
+
+    super().__init__(parent, **kwds)
 
     self.browserList = getBrowserList()
 
@@ -68,10 +71,7 @@ class WebBrowserPulldown(PulldownList):
     if self.browserList:
       if (not browser) or (browser not in self.browserList):
         browser = self.browserList[0]
-
     self.browser = browser
-
-    PulldownList.__init__(self, parent, **kw)
 
     if self.browserList:
       self.setup(self.browserList, self.browserList, self.browserList.index(self.browser))
@@ -86,6 +86,7 @@ class WebBrowserPulldown(PulldownList):
   def destroy(self):
 
     pass
+
 
 def getBrowserList():
 
@@ -112,6 +113,7 @@ def getBrowserList():
         continue
 
   return browsers
+
 
 def getDefaultBrowser():
 

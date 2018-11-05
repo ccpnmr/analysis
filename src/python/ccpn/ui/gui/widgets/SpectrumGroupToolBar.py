@@ -32,11 +32,10 @@ from ccpn.ui.gui.widgets.Menu import Menu
 
 class SpectrumGroupToolBar(ToolBar):
   def __init__(self, parent=None, spectrumDisplay=None, **kwds):
-    ToolBar.__init__(self, parent=parent, **kwds)
+    super().__init__(parent=parent, **kwds)
     self.spectrumDisplay = spectrumDisplay
     self._project = self.spectrumDisplay.project
     self._spectrumGroups = []
-
 
   def _addAction(self, spectrumGroup):
     if spectrumGroup not in self._spectrumGroups:
@@ -140,7 +139,6 @@ class SpectrumGroupToolBar(ToolBar):
         for peakListView in peakListViews:
           if peakList == peakListView.peakList:
             peakListView.setVisible(True)
-
 
   def _getPeakListViews(self, spectrumGroup):
     spectrumGroupPeakLists = [peakList for spectrum in spectrumGroup.spectra for peakList in spectrum.peakLists]

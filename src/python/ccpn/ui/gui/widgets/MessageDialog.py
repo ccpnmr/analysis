@@ -263,11 +263,12 @@ class progressPopup(CcpnDialog):
   """
   Open a small popup to allow changing the name of a Note
   """
-  def __init__(self, parent=None, mainWindow=None, title='busy', busyFunc=None, progressMax=1, **kw):
+  def __init__(self, parent=None, mainWindow=None, title='busy', busyFunc=None, progressMax=1,
+               **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='busy', **kw)
+    super().__init__(self, parent, setLayout=True, windowTitle='busy', **kwds)
 
     # self.mainWindow = mainWindow
     # self.application = mainWindow.application

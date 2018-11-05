@@ -34,6 +34,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util import Common as commonUtil
 
@@ -93,11 +94,10 @@ class EstimateNoisePopup(CcpnDialog):
         self.close()
 
 
-class NoiseTab(QtWidgets.QWidget, Base):
+class NoiseTab(Widget):
 
-    def __init__(self, parent=None, mainWindow=None, spectrum=None, strip=None):
-        super(NoiseTab, self).__init__(parent)
-        Base.__init__(self, setLayout=True)
+    def __init__(self, parent=None, mainWindow=None, spectrum=None, strip=None, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
 
         self.parent = parent
         self.mainWindow = mainWindow

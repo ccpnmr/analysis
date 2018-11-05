@@ -29,7 +29,6 @@ class NmrAtomPopup(CcpnDialog):
 
     # WARNING: above says nmrAtom can be None but code below assumes it is not None
     # super(NmrAtomPopup, self).__init__(parent)
-    # Base.__init__(self, **kw)
 
     self.nmrAtom = nmrAtom
     # self.project = nmrAtom.project

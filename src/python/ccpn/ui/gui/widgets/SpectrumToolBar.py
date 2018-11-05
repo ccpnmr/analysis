@@ -45,7 +45,7 @@ class SpectrumToolBar(ToolBar):
 
   def __init__(self, parent=None, widget=None, **kwds):
 
-    ToolBar.__init__(self, parent=parent, **kwds)
+    super().__init__(parent=parent, **kwds)
     self.widget = widget
     self.parent = parent
     self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -62,7 +62,6 @@ class SpectrumToolBar(ToolBar):
     painter.end()
     return pixmap
 
-
   def _updateSpectrumViews(self, newIndex):
     newSpectrumViewsOrder = []
 
@@ -74,20 +73,6 @@ class SpectrumToolBar(ToolBar):
     # newIndex = [newIndex.index(ii) for ii in self.widget.getOrderedSpectrumViewsIndex()]
     newIndex = [self.widget.getOrderedSpectrumViewsIndex()[ii] for ii in newIndex]
     self.widget.setOrderedSpectrumViewsIndex(newIndex)
-    # self.widget.project.unblankNotification()
-
-    # defaults = OrderedDict((('newIndex', None),))
-    #
-    # self.widget._startCommandEchoBlock('indexOrderedSpectrumViews', values=locals(), defaults=defaults)
-    # self.widget.project.blankNotification()
-    # try:
-    #   for strip in self.widget.strips:
-    #     # strip.setOrderedSpectrumViews(newSpectrumViewsOrder)
-    #     strip._indexOrderedSpectrumViews(newIndex)
-    #
-    # finally:
-    #   self.widget.project.unblankNotification()
-    #   self.widget._endCommandEchoBlock()
 
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=None)

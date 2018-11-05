@@ -72,7 +72,7 @@ from ccpn.ui.gui.widgets.Frame import ScrollableFrame, Frame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, \
     DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
-from ccpn.ui.gui.widgets.PulldownListsForObjects import _Pulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 
 
 CommonWidgets = {
@@ -159,10 +159,11 @@ class CcpnModule(Dock, DropBase):
         if mainWindow is not None:
             self.area = mainWindow.moduleArea
 
-        Dock.__init__(self, name=name, area=self.area,
-                      autoOrientation=False,
-                      closable=closable)  #, **kwds)   # ejb
-        DropBase.__init__(self, acceptDrops=True)
+        super().__init__(name=name, area=self.area,
+                         autoOrientation=False,
+                         closable=closable)  #, **kwds)   # ejb
+        DropBase._init(self, acceptDrops=True)
+
         self.hStyle = """
                   Dock > QWidget {
                       border: 0px solid #000;
@@ -206,9 +207,11 @@ class CcpnModule(Dock, DropBase):
         # self._originalLabel.hide()
 
         self.topLayout.removeWidget(self.label)  # remove old label, redefine
-        self.label.deleteLater()
-        self.label = CcpnModuleLabel(name, self, showCloseButton=closable, closeCallback=self._closeModule,
-                                     showSettingsButton=self.includeSettingsWidget, settingsCallback=self._settingsCallback
+        self.label.deleteLater()  # GWV: why??
+        self.label = CcpnModuleLabel(name, self,
+                                     showCloseButton=closable, closeCallback=self._closeModule,
+                                     showSettingsButton=self.includeSettingsWidget,
+                                     settingsCallback=self._settingsCallback
                                      )
         self.topLayout.addWidget(self.label, 0, 1)  # ejb - swap out the old widget, keeps hierarchy
         # except it doesn't work properly
@@ -223,7 +226,7 @@ class CcpnModule(Dock, DropBase):
 
         # main widget area
         #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-        self.mainWidget = Widget(parent=None, setLayout=True)  #QtWidgets.QWidget(self)
+        self.mainWidget = Widget(parent=None, setLayout=True, acceptDrops=True)  #QtWidgets.QWidget(self)
 
         #self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
@@ -236,7 +239,7 @@ class CcpnModule(Dock, DropBase):
             #                                       minimumSizes=self.settingsMinimumSizes
             #                                      )
             self._settingsScrollArea = ScrollArea(parent=self.widgetArea)
-            self.settingsWidget = Frame(showBorder=False)
+            self.settingsWidget = Frame(parent=None, showBorder=False)
             # self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
             # self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
             self._settingsScrollArea.setWidget(self.settingsWidget)
@@ -454,7 +457,7 @@ class CcpnModule(Dock, DropBase):
         widgetsState = {}
         self._setNestedWidgetsAttrToModule()
         for varName, varObj in vars(self).items():
-            if isinstance(varObj, _Pulldown):
+            if isinstance(varObj, _PulldownABC):
                 widgetsState[varName] = varObj.getText()
                 continue
             if varObj.__class__.__name__ in CommonWidgets.keys():
@@ -477,8 +480,6 @@ class CcpnModule(Dock, DropBase):
                def restoreWidgetsState(self, **widgetsState):
                   super(TheModule, self).restoreWidgetsState(**widgetsState) #First restore as default
                   #  do some stuff
-
-
         """
 
         self._setNestedWidgetsAttrToModule()
@@ -486,7 +487,7 @@ class CcpnModule(Dock, DropBase):
         for variableName, value in widgetsState.items():
             try:
                 widget = getattr(self, str(variableName))
-                if isinstance(widget, _Pulldown):
+                if isinstance(widget, _PulldownABC):
                     widget.select(value)
                     continue
                 if widget.__class__.__name__ in CommonWidgets.keys():

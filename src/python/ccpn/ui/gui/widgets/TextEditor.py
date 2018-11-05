@@ -39,19 +39,12 @@ class TextEditor(QtWidgets.QTextEdit, Base):
   editingFinished = QtCore.pyqtSignal()
   receivedFocus = QtCore.pyqtSignal()
 
-  def __init__(self, parent=None, filename=None, **kw):
-    super(TextEditor, self).__init__(parent)
-    Base.__init__(self, **kw)
+  def __init__(self, parent=None, filename=None, **kwds):
+    super().__init__(parent)
+    Base._init(self, **kwds)
 
     self.filename = filename
     self.setFont(fixedWidthFont)
-    # if self.filename is not None:
-    #
-    #   fileData = self.filename.read()
-    #   print(fileData)
-    #   self.setText(fileData)
-    #
-    # self.show()
     self._changed = False
     self.setTabChangesFocus(True)
     self.textChanged.connect(self._handle_text_changed)
@@ -59,21 +52,16 @@ class TextEditor(QtWidgets.QTextEdit, Base):
     self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
     self.customContextMenuRequested.connect(self.context_menu)
 
-
-
   def context_menu(self):
     a = self.createStandardContextMenu()
     actions = a.actions()
     edit = Action(a, text='Fonts', callback=self._setFont)
     a.insertAction(actions[3],edit)
-
-
     a.exec_(QtGui.QCursor.pos())
 
   def _setFont(self):
     font, ok = QtWidgets.QFontDialog.getFont(self.font(), self)
     if ok:
-      # QApplication.setFont(font)
       self.setFont(font)
 
   def focusInEvent(self, event):
@@ -122,16 +110,12 @@ class TextEditor(QtWidgets.QTextEdit, Base):
       self.document().print_(printer)
 
 
-
-
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from ccpn.ui.gui.widgets.Widget import Widget
 
-
     app = TestApplication()
-
 
     popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
     widget = TextEditor(parent=popup, grid=(0,0))

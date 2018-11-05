@@ -40,7 +40,7 @@ class MyModule(CcpnModule):
   className = 'MyModule'
 
   def __init__(self, mainWindow, name):
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+    super().__init__(mainWindow=mainWindow, name=name)
 
     # mainWidget
     self.aLabel = Label(parent=self.mainWidget, text='Testing my module', grid=(0, 0))

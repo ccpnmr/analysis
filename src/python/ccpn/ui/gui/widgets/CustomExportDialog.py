@@ -24,7 +24,7 @@ ExporterTypes = {GLType    : [OpenGLImageExporter, OpenGLPDFExporter, OpenGLSVGE
 
 class CustomExportDialog(QtWidgets.QDialog):
   def __init__(self, scene, titleName=None, exportType=Default):
-    QtWidgets.QDialog.__init__(self)
+    super().__init__()
     self.setVisible(False)
     self.shown = False
     self.currentExporter = None

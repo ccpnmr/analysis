@@ -47,11 +47,10 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 from ccpn.ui.gui.widgets.Widget import Widget
 
 
-class SpectraSelectionWidget(Widget,Base):
+class SpectraSelectionWidget(Widget):
 
-  def __init__(self, parent=None, mainWindow=None, **kw):
-    Widget.__init__(self, parent)
-    Base.__init__(self, setLayout=True, **kw)
+  def __init__(self, parent=None, mainWindow=None, **kwds):
+    super().__init__(parent, setLayout=True, **kwds)
 
     self.project = None # Testing reasons
     # Derive application, project, and current from mainWindow

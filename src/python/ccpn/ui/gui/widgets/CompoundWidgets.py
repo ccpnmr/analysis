@@ -367,9 +367,21 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         "Convenience: Return selected text in Pulldown"
         return self.pulldownList.currentText()
 
-    def select(self, item):
+    def select(self, item, blockSignals=False):
         "Convenience: Set item in Pulldown; works with text or item"
-        return self.pulldownList.select(item)
+        if blockSignals:
+            self.pulldownList.blockSignals(True)
+        self.pulldownList.select(item)
+        if blockSignals:
+            self.pulldownList.blockSignals(False)
+
+    def setIndex(self, index, blockSignals=False):
+        "Convenience: set item in Pulldown by index"
+        if blockSignals:
+            self.pulldownList.blockSignals(True)
+        self.pulldownList.setIndex(index)
+        if blockSignals:
+            self.pulldownList.blockSignals(False)
 
     def modifyTexts(self, texts):
         "Mofify the pulldown texts, retaining the current selection"
@@ -378,9 +390,9 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         self.pulldownList.blockSignals(True)
         self.pulldownList.clear()
         self.pulldownList.setData(texts=texts)
-        self.select(current)
-        self.pulldownList.blockSignals(False)
+        self.select(current, blockSignals=True)
         self.pulldownList.update()
+        self.pulldownList.blockSignals(False)
 
 
 class CheckBoxCompoundWidget(CompoundBaseWidget):
@@ -536,11 +548,10 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
         return self.doubleSpinBox.setValue(value)
 
 
-class SelectorWidget(QtWidgets.QWidget, Base):
+class SelectorWidget(Widget):
 
-    def __init__(self, parent=None, label='', data=None, callback=None, **kw):
-        QtWidgets.QWidget.__init__(self, parent)
-        Base.__init__(self, **kw)
+    def __init__(self, parent=None, label='', data=None, callback=None, **kwds):
+        super().__init__(parent, **kwds)
 
         if data:
             data.insert(0, '')
@@ -584,9 +595,9 @@ class InputPulldown(PulldownList):
 
 class LineEditPopup(QtWidgets.QDialog, Base):
 
-    def __init__(self, parent=None, dataType=None, **kw):
-        QtWidgets.QDialog.__init__(self, parent)
-        Base.__init__(self, **kw)
+    def __init__(self, parent=None, dataType=None, **kwds):
+        super().__init__(parent)
+        Base._init(self, **kwds)
 
         inputLabel = Label(self, 'Input', grid=(0, 0))
         self.inputField = LineEdit(self, grid=(0, 1))
@@ -609,8 +620,8 @@ class LineEditPopup(QtWidgets.QDialog, Base):
 
 class ColourSelectionWidget(Widget):
 
-    def __init__(self, parent=None, labelName=None, **kw):
-        Widget.__init__(self, parent, **kw)
+    def __init__(self, parent=None, labelName=None, **kwds):
+        super().__init__(parent, **kwds)
 
         Label(self, labelName, grid=(0, 0))
         self.pulldownList = PulldownList(self, vAlign='t', hAlign='l', grid=(0, 1))

@@ -35,8 +35,8 @@ from ccpn.util.Logging import getLogger
 
 
 class ObjectTableFilter(Widget):
-  def __init__(self, table, parent=None, **kw):
-    Widget.__init__(self, parent, setLayout=False, **kw)
+  def __init__(self, table, parent=None, **kwds):
+    super().__init__(parent, setLayout=False, **kwds)
     self.table = table
     self.origObjects = self.table._objects
 

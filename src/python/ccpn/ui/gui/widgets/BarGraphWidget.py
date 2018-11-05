@@ -24,7 +24,6 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 
-
 from functools import partial
 import weakref
 import pyqtgraph as pg
@@ -34,21 +33,13 @@ from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Base import Base
 
 
+class BarGraphWidget(Widget):
 
-class BarGraphWidget(Widget, Base):
+  def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r',
+               objects=None, threshouldLine=0.01, **kwds):
+    super().__init__(parent, **kwds)
 
-
-  def __init__(self, parent, application=None, xValues=None, yValues=None, colour='r', objects=None, threshouldLine=0.01, **kw):
-    Widget.__init__(self, parent)
-    Base.__init__(self, **kw)
     self.application = application
-    # set background from application
-    # if self.application:
-    #   if self.application.colourScheme == 'light':
-    #     self.backgroundColour = '#f7ffff'
-    #   else:
-    #     self.backgroundColour = '#080000'
-    # else:
     self.backgroundColour = 'w'
     self.thresholdLineColour = 'b'
 
@@ -70,7 +61,6 @@ class BarGraphWidget(Widget, Base):
     self.customViewBox.addItem(self.xLine)
     self.setThresholdLine()
 
-
   def _setViewBox(self):
     self.customViewBox = CustomViewBox(application = self.application)
     self.customViewBox.setMenuEnabled(enableMenu=False)  # override pg default context menu
@@ -87,7 +77,6 @@ class BarGraphWidget(Widget, Base):
     # self.addLegend()
     self.setThresholdLine()
 
-
   def setData(self,viewBox, xValues, yValues, objects, colour, replace=True):
     if replace:
       self.barGraphs = []
@@ -102,7 +91,6 @@ class BarGraphWidget(Widget, Base):
     self.objects = objects
     self.updateViewBoxLimits()
 
-
   def setViewBoxLimits(self, xMin, xMax, yMin, yMax):
     self.customViewBox.setLimits(xMin=xMin, xMax=xMax, yMin=yMin, yMax=yMax)
 
@@ -113,7 +101,6 @@ class BarGraphWidget(Widget, Base):
                                    yMin=min(self.yValues)/2 ,yMax=max(self.yValues) + (max(self.yValues) * 0.5),
                                    )
 
-
   def clear(self):
 
     for item in self.customViewBox.addedItems:
@@ -123,9 +110,6 @@ class BarGraphWidget(Widget, Base):
       if not isinstance(ch, pg.InfiniteLine):
         self.customViewBox.removeItem(ch)
 
-
-
-
   def clearBars(self):
     self.barGraphs = []
     for item in self.customViewBox.addedItems:
@@ -133,8 +117,6 @@ class BarGraphWidget(Widget, Base):
         self.customViewBox.removeItem(item)
 
   def setThresholdLine(self):
-
-
 
     # self.thresholdValueTextItem = pg.TextItem(str(self.xLine.pos().y()), anchor=(self.customViewBox.viewRange()[0][0], 1.0),)
     # self.thresholdValueTextItem.setParentItem(self.xLine)
@@ -149,7 +131,6 @@ class BarGraphWidget(Widget, Base):
 
   def _updateTextLabel(self):
     # self.thresholdValueTextItem.setText(str(round(self.xLine.pos().y(),3)))#, color=self.thresholdLineColour)
-
     self.xLine.setToolTip(str(round(self.xLine.pos().y(), 4)))
 
   def showThresholdLine(self, value=True):
@@ -185,7 +166,6 @@ class BarGraphWidget(Widget, Base):
       disappearedY = []
       disappearedObjects = []
 
-
       pos = self.xLine.pos().y()
       self.xLine.show()
       if self.xValues:
@@ -198,8 +178,6 @@ class BarGraphWidget(Widget, Base):
             belowX.append(x)
             belowY.append(y)
             belowObjects.append(obj)
-
-
 
     self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application = self.application,
                                    xValues=aboveX, yValues=aboveY, objects=aboveObjects, brush=self.aboveBrush)
@@ -221,7 +199,6 @@ class BarGraphWidget(Widget, Base):
     if self.customViewBox.showAboveThresholdOnly:
       self.customViewBox.showAboveThreshold()
 
-
   def addLegend(self):
     self.legendItem = pg.LegendItem((100, 60), offset=(70, 30))  # args are (size, offset)
     self.legendItem.setParentItem(self.customViewBox.graphicsItem())
@@ -235,10 +212,6 @@ class BarGraphWidget(Widget, Base):
       self.legendItem.show()
     else:
      self.legendItem.hide()
-
-
-
-
 
 
 #######################################################################################################

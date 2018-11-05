@@ -35,8 +35,8 @@ Offset = 'Offset Value: '
 
 
 class Offset1DWidget(Frame):
-    def __init__(self, parent=None, mainWindow=None, strip1D=None, **kw):
-        Frame.__init__(self, parent, setLayout=True, **kw)
+    def __init__(self, parent=None, mainWindow=None, strip1D=None, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
 
         if mainWindow is None:  # This allows opening the popup for graphical tests
             self.mainWindow = None

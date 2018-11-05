@@ -40,12 +40,12 @@ from ccpn.ui.gui.widgets.Menu import Menu
 current = []
 
 
-
 #TODO:LUCA: this is most likely yours; update with documentation and check for ViewBox __init__ as it has changed
 
 class BarGraph(pg.BarGraphItem):
-  def __init__(self,application = None, viewBox = None, xValues=None, yValues=None, objects=None, brush=None, **kw):
-    super(BarGraph, self).__init__(**kw)
+  def __init__(self,application = None, viewBox = None, xValues=None, yValues=None,
+               objects=None, brush=None, **kwds):
+    super().__init__(**kwds)
     '''
     This class allows top draw bars with or without objects.It Needs only xValues and yValues.
     The bar width is by default set to 1.

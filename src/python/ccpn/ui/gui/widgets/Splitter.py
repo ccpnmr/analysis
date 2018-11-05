@@ -33,8 +33,8 @@ class Splitter(QtWidgets.QSplitter, Base):
 
   def __init__(self, parent=None, **kw):
 
-    QtWidgets.QSplitter.__init__(self, parent)
-    Base.__init__(self, parent, **kw)
+    super().__init__(parent)
+    Base._init(self, parent, **kw)
 
     self.doResize = False
 

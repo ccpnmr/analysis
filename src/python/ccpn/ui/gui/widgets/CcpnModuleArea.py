@@ -81,7 +81,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
   def __init__(self, mainWindow, **kwargs):
 
     ModuleArea.__init__(self, mainWindow, **kwargs)
-    DropBase.__init__(self, acceptDrops=True)
+    DropBase._init(self, acceptDrops=True)
 
     self.mainWindow = mainWindow  # a link back to the parent MainWindow
 

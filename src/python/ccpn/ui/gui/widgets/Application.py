@@ -33,7 +33,7 @@ class Application(QtWidgets.QApplication):
 
   def __init__(self, applicationName, applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk'):
 
-    QtWidgets.QApplication.__init__(self, [applicationName,])
+    super().__init__([applicationName,])
 
     self.setApplicationVersion(applicationVersion)
     self.setOrganizationName(organizationName)

@@ -41,6 +41,8 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 # Start of code
 #=========================================================================================
 
+import sys
+
 from functools import partial
 from collections import OrderedDict
 from typing import Callable, Any
@@ -181,9 +183,11 @@ class Notifier(object):
             raise RuntimeError('Notifier.__init__: trigger "%s" only to be used in isolation' % Notifier.CURRENT)
         if triggers[0] == Notifier.CURRENT and not self._isCurrent:
             raise RuntimeError('Notifier.__init__: invalid object "%s" for trigger "%s"' % (theObject, triggers[0]))
+        self._triggers = triggers
+        self._targetName = targetName
 
         # register the callbacks
-        for trigger in triggers:
+        for trigger in self._triggers:
 
             if trigger not in Notifier._triggerKeywords:
                 raise RuntimeWarning('Notifier.__init__: invalid trigger "%s"' % trigger)
@@ -209,9 +213,9 @@ class Notifier(object):
                 self._unregister.append((tName, Notifier.CURRENT, func))
                 if self._debug:
                     # logger.info
-                    print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
-                          (self._index, self._theObject, trigger, tName, self._callback)
-                          )
+                    sys.stderr.write('>>> Notifier (%d): registered %r, %r, %r, %r\n' % \
+                                     (self._index, self._theObject, trigger, tName, self._callback)
+                                    )
 
             # MONITOR special case, as the current underpinning implementation does not allow this directly
             # Hence, we track all changes to the object class, filtering those that apply
@@ -232,9 +236,9 @@ class Notifier(object):
                 self._unregister.append((theObject.className, Notifier.CHANGE, func))
                 if self._debug:
                     # logger.info
-                    print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
-                          (self._index, self._theObject, trigger, targetName, self._callback)
-                          )
+                    sys.stderr.write('>>> Notifier (%d): registered %r, %r, %r, %r\n' % \
+                                     (self._index, self._theObject, trigger, targetName, self._callback)
+                                    )
 
             # All other triggers; if targetName == None, respond to changes in the object itself.
             else:
@@ -260,9 +264,9 @@ class Notifier(object):
                 self._unregister.append((targetName, trigger, func))
                 if self._debug:
                     # logger.info
-                    print('>>> Notifier (%d): registered %r, %r, %r, %r' % \
-                          (self._index, self._theObject, trigger, targetName, self._callback)
-                          )
+                    sys.stderr.write('>>> Notifier (%d): registered %r, %r, %r, %r\n' % \
+                                     (self._index, self._theObject, trigger, targetName, self._callback)
+                                    )
 
         if len(self._notifiers) == 0:
             raise RuntimeWarning('Notifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
@@ -285,12 +289,13 @@ class Notifier(object):
         """
         unregister the notifiers
         """
+        if self._debug:
+            # logger.info # logger apears not to work
+            sys.stderr.write('>>> unregister Notifier (%d): %r, triggers=%r, target=%r, callback=%r\n' % \
+                             (self._index, self._theObject, self._triggers,
+                              self._targetName, self._callback)
+                             )
         for targetName, trigger, func in self._unregister:
-            if self._debug:
-                # logger.info # logger apears not to work
-                print('>>> Notifier (%d): unregister %r, %r, %r, %r' % \
-                      (self._index, self._theObject, trigger, targetName, self._callback)
-                      )
             if trigger == Notifier.CURRENT:
                 self._theObject.unRegisterNotify(func, targetName)
             else:
@@ -314,9 +319,9 @@ class Notifier(object):
             if value != self._value:
                 if self._debug:
                     #logger.info
-                    print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
-                          (self._index, self._theObject, notifier, self._callback, obj, parameter2)
-                          )
+                    sys.stderr.write('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r\n' % \
+                                    (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+                                    )
                 callbackDict = dict(
                         notifier=self,
                         trigger=trigger,
@@ -336,9 +341,9 @@ class Notifier(object):
                 if value != self._value:
                     if self._debug:
                         # logger.info
-                        print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
-                              (self._index, self._theObject, notifier, self._callback, obj, parameter2)
-                              )
+                        sys.stderr.write('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r\n' % \
+                                        (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+                                        )
                     callbackDict = dict(
                             notifier=self,
                             trigger=trigger,
@@ -358,9 +363,9 @@ class Notifier(object):
 
             if self._debug:
                 # logger.info
-                print('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r' % \
-                      (self._index, self._theObject, notifier, self._callback, obj, parameter2)
-                      )
+                sys.stderr.write('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r\n' % \
+                                (self._index, self._theObject, notifier, self._callback, obj, parameter2)
+                                )
 
             callbackDict = dict(
                     notifier=self,

@@ -58,10 +58,10 @@ class ListWidget(QtWidgets.QListWidget, Base):
                  acceptDrops=False,
                  sortOnDrop=False,
                  copyDrop=True,
-                 **kw):
+                 **kwds):
 
-        QtWidgets.QListWidget.__init__(self, parent)
-        Base.__init__(self, **kw)
+        super().__init__(parent)
+        Base._init(self, acceptDrops=acceptDrops, **kwds)
 
         self.setDragDropMode(QtWidgets.QAbstractItemView.DragDrop)
 

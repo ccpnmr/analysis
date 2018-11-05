@@ -31,7 +31,7 @@ from PyQt5 import QtGui, QtWidgets
 
 class Console(console.ConsoleWidget):
   def __init__(self, parent=None, namespace=None, historyFile=None):
-    console.ConsoleWidget.__init__(self, parent, namespace)
+    super().__init__(parent, namespace=namespace, historyFile=historyFile)
     # self.console.addAction()
     self.runMacroButton = QtWidgets.QPushButton()
     # self.console.ui.runMacroButton.setCheckable(True)

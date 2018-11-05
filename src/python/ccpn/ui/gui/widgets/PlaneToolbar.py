@@ -59,7 +59,7 @@ class _StripLabel(Label):
 
     def __init__(self, parent, text, dragKey=DropBase.TEXT, **kwds):
 
-        super(_StripLabel, self).__init__(parent, text, **kwds)
+        super().__init__(parent, text, **kwds)
         # The text of the label can be dragged; it will be passed on in the dict under key dragKey
 
         self.parent = parent

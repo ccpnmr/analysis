@@ -168,10 +168,11 @@ class ObjectTable(QtWidgets.QTableView, Base):
                actionCallback=None, selectionCallback=None,
                multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                enableExport=True, enableDelete=True,
-               **kw):
+               **kwds):
 
-    QtWidgets.QTableView.__init__(self, parent)
-    Base.__init__(self, **kw)
+    super().__init__(parent)
+    Base._init(self, **kwds)
+
     self.parent = parent
     self.graphPanel = None
     self.filterPanel = None
@@ -1274,11 +1275,11 @@ EXPORT_FORMATS = (TAB_FORMAT, COMMA_FORMAT)
 class ObjectTableExport(QtWidgets.QDialog, Base):
 
   def __init__(self, table=None, **kw):
-    super(ObjectTableExport, self).__init__(table)
-    # BasePopup.__init__(self, title='Export Table Text', transient=True, modal=True)
-    Base.__init__(self, **kw)
-    self.setWindowFlags(QtCore.Qt.Tool)
 
+    super().__init__(table)
+    Base._init(self, **kw)
+
+    self.setWindowFlags(QtCore.Qt.Tool)
     self.table = table
     label = Label(self, 'Columns to export:', grid=(0, 0), gridSpan=(1, 2))
 

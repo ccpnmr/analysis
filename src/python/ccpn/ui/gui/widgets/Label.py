@@ -52,9 +52,11 @@ class Label(QtWidgets.QLabel, Base):
   def __init__(self, parent=None, text='', textColour=None, textSize=12, bold=False,
                margins=[2, 1, 2, 1], **kwds):
 
+    super().__init__(parent)
+    Base._init(self, **kwds)
+
     text = translator.translate(text)
-    QtWidgets.QLabel.__init__(self, text, parent)
-    Base.__init__(self, **kwds)
+    self.setText(text)
 
     # if textColor:
     #   self.setStyleSheet('QLabel {color: %s}' % textColor)

@@ -38,7 +38,7 @@ class Arrow(ArrowItem):
 
   def __init__(self, pos=None, angle=90, pen=None, movable=False, bounds=None):
     # GraphicsObject.__init__(self)
-    ArrowItem.__init__(self, pos=pos, angle=angle)
+    super().__init__(pos=pos, angle=angle)
     self.moving = False
     self.setMovable(movable)
     self.setZValue(1e-6)

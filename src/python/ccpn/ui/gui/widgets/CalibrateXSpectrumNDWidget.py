@@ -28,8 +28,8 @@ from ccpn.core.lib.SpectrumLib import _calibrateXND
 
 
 class CalibrateXNDWidgets(CalibrateX1DWidgets):
-    def __init__(self, parent=None, mainWindow=None, strip=None, **kw):
-        super(CalibrateXNDWidgets, self).__init__(parent=parent, mainWindow=mainWindow, strip=strip, **kw)
+    def __init__(self, parent=None, mainWindow=None, strip=None, **kwds):
+        super().__init__(parent=parent, mainWindow=mainWindow, strip=strip, **kwds)
 
     def _calibrateSpectra(self, fromPos, toPos):
         if self.mainWindow is not None:

@@ -118,29 +118,6 @@ QuickTable::item::selected {
     color: %(QUICKTABLE_SELECTED_FOREGROUND)s;
 }"""
 
-    @staticmethod
-    def _getCommentText(obj):
-        """
-        CCPN-INTERNAL: Get a comment from QuickTable
-        """
-        try:
-            if obj.comment == '' or not obj.comment:
-                return ''
-            else:
-                return obj.comment
-        except:
-            return ''
-
-    @staticmethod
-    def _setComment(obj, value):
-        """
-        CCPN-INTERNAL: Insert a comment into QuickTable
-        """
-        # ejb - why is it blanking a notification here?
-        # NmrResidueTable._project.blankNotification()
-        obj.comment = value if value else None
-        # NmrResidueTable._project.unblankNotification()
-
     def __init__(self, parent=None,
                  mainWindow=None,
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
@@ -148,7 +125,7 @@ QuickTable::item::selected {
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True,
-                 **kw):
+                 **kwds):
         """
         Create a new instance of a TableWidget with an attached Pandas dataFrame
         :param parent:
@@ -165,8 +142,8 @@ QuickTable::item::selected {
         :param hideIndex:
         :param kw:
         """
-        TableWidget.__init__(self, parent)
-        Base.__init__(self, **kw)
+        super().__init__(parent)
+        Base._init(self, **kwds)
 
         self._parent = parent
 
@@ -304,39 +281,28 @@ QuickTable::item::selected {
         """
         self.resizeColumnsToContents()
 
-    #   self.horizontalHeader().installEventFilter(self.horizontalHeader())
-    #
-    # def eventFilter(self, obj, event):
-    #   """
-    #   Replace all the events with a single filter process
-    #   Not sure if this is the best solution, but doesn't interfere with _processDroppedItems
-    #   and allows changing of the cursor - ejb
-    #   """
-    #   if event.type() == QtCore.QEvent.MouseButtonPress:
-    #     print ('>>>press')
-    #
-    #   elif event.type() == QtCore.QEvent.MouseButtonRelease:
-    #     print ('>>>release')
-    #
-    #   return False
+    @staticmethod
+    def _getCommentText(obj):
+        """
+        CCPN-INTERNAL: Get a comment from QuickTable
+        """
+        try:
+            if obj.comment == '' or not obj.comment:
+                return ''
+            else:
+                return obj.comment
+        except:
+            return ''
 
-    # def resizeEvent(self, event):
-    #   """ Resize all sections to content and user interactive """
-    #
-    #   super(QuickTable, self).resizeEvent(event)
-    #   self.hide()
-    #   header = self.horizontalHeader()
-    #   header.setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-    #   self.show()
-    #   header.setResizeMode(QtWidgets.QHeaderView.Interactive)
-
-    # super(QuickTable, self).resizeEvent(event)
-    # header = self.horizontalHeader()
-    # for column in range(header.count()):
-    #   header.setSectionResizeMode(column, QtWidgets.QHeaderView.ResizeToContents)
-    #   width = header.sectionSize(column)
-    #   header.setSectionResizeMode(column, QtWidgets.QHeaderView.Interactive)
-    #   header.resizeSection(column, width)
+    @staticmethod
+    def _setComment(obj, value):
+        """
+        CCPN-INTERNAL: Insert a comment into QuickTable
+        """
+        # ejb - why is it blanking a notification here?
+        # NmrResidueTable._project.blankNotification()
+        obj.comment = value if value else None
+        # NmrResidueTable._project.unblankNotification()
 
     def _sortChanged(self, col, sortOrder: QtCore.Qt.SortOrder):
         # sort the _dataFrame to match

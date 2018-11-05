@@ -28,15 +28,12 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from pyqtgraph.graphicsItems.FillBetweenItem import FillBetweenItem
 
 
-
-
 class FillBetweenRegions(FillBetweenItem):
   """
   GraphicsItem filling the space between two PlotDataItems.
   """
+  def __init__(self, curve1, curve2, brush = None, **kwds):
 
-  def __init__(self, curve1, curve2, brush = None, **kw):
-
-    FillBetweenItem.__init__(self, curve1=curve1, curve2=curve2, brush=brush)
+    super().__init__(curve1=curve1, curve2=curve2, brush=brush, **kwds)
 
 

@@ -169,7 +169,7 @@ class ObjectTableModel(TableModel):
 
   def __init__(self, table):
     
-    TableModel.__init__(self)
+    super().__init__()
     # self.setSupportedDragActions(QtCore.Qt.MoveAction)
     
     self.editIcon = ICON_FILE

@@ -27,7 +27,7 @@ from functools import partial
 from PyQt5 import QtGui, QtWidgets
 
 from ccpn.core.lib.AssignmentLib import CCP_CODES, ATOM_NAMES
-from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -42,11 +42,10 @@ from ccpn.core.lib.CcpnSorting import stringSortKey
 #                                                       getShiftlistForPeak,
 #                                                       matchingNmrAtomsForDimensionOfPeaks)
 
-class ObjectAssigner(QtWidgets.QWidget, Base):
+class ObjectAssigner(Widget):
   def __init__(self, parent, mainWindow, dim, objects, opts, **kw):
 
-    QtWidgets.QWidget.__init__(self, parent)
-    Base.__init__(self, **kw)
+    super().__init__(parent, **kw)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

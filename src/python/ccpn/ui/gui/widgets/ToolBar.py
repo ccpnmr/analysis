@@ -32,9 +32,10 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 
 class ToolBar(QtWidgets.QToolBar, Base):
 
-  def __init__(self, parent, iconSizes=(None,None), **kw):
-    QtWidgets.QToolBar.__init__(self, parent)
-    Base.__init__(self, **kw)
+  def __init__(self, parent, iconSizes=(None,None), **kwds):
+
+    super().__init__(parent)
+    Base._init(self, **kwds)
 
     # optionally set width and height, making it square if one is missing
     width, height = iconSizes

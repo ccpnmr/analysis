@@ -10,10 +10,12 @@ class RadioButton(QtWidgets.QRadioButton, Base):
 
   def __init__(self, parent, text='', textColor=None, textSize=None, callback=None, **kw):
 
-    text = translator.translate(text)
+    super().__init__(parent)
+    Base._init(self,  **kw)
 
-    QtWidgets.QRadioButton.__init__(self, text, parent)
-    Base.__init__(self,  **kw)
+    text = translator.translate(text)
+    self.setText(text)
+
     if textColor:
       self.setStyleSheet('QRadioButton {color: %s; font-size: 12pt;}' % textColor)
     if textSize :

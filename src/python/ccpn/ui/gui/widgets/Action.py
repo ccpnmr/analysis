@@ -69,12 +69,3 @@ class Action(Base, QtWidgets.QAction):
       ic = Icon(icon)
       self.setIcon(ic)
     self.setEnabled(enabled)
-    # Base.__init__(self, **kw)
-
-    # signal_dict = {'triggered':action.triggered, 'changed':action.changed,
-    #                 'toggled':action.toggled, 'hovered':action.hovered }
-    # if slot is not None:
-    #     # self.connect(action, SIGNAL(signal), slot)
-    #     signal_dict[signal].connect(slot)
-    #
-    #     or    getattr(action, signal).connect(slot)

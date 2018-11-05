@@ -52,8 +52,8 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
     defaultMinimumSizes = (0, 20)
 
-    def __init__(self, parent, value=None, min=None, max=None, step=None, prefix=None, suffix=None, showButtons=True,
-                 decimals=None, callback=None, **kwds):
+    def __init__(self, parent, value=None, min=None, max=None, step=None, prefix=None, suffix=None,
+                 showButtons=True, decimals=None, callback=None, **kwds):
         """
         From the QTdocumentation
         Constructs a spin box with a step value of 1.0 and a precision of 2 decimal places.
@@ -64,8 +64,8 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         The spin box has the given parent.
         """
 
-        QtWidgets.QDoubleSpinBox.__init__(self, parent)
-        Base.__init__(self, **kwds)
+        super().__init__(parent)
+        Base._init(self, **kwds)
 
         # if value is not None:
         #   value = value

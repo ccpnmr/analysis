@@ -6,8 +6,7 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class DateTime(QtGui.QDateEdit, Base):
 
-  def __init__(self, parent, **kw):
+  def __init__(self, parent, **kwds):
 
-    QtGui.QDateEdit.__init__(self, parent)
-
-    Base.__init__(self, **kw)
+    super().__init__(parent)
+    Base._init(self, **kwds)

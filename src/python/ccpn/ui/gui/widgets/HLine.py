@@ -28,7 +28,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util.Colour import hexToRgb
 
-class HLine(Widget, Base):
+class HLine(Widget):
   def __init__(self, parent=None, style='SolidLine', colour=QtCore.Qt.black, height=10, **kwds):
     """
     :param style: Options: 
@@ -38,8 +38,7 @@ class HLine(Widget, Base):
                            'DashDotDotLine'
     """
 
-    QtGui.QWidget.__init__(self, parent)
-    Base.__init__(self, **kwds)
+    super().__init__(parent, **kwds)
     self.parent = parent
     self.style = style
     self.colour = colour

@@ -33,10 +33,13 @@ from ccpn.framework.Translation import translator
 
 
 class Menu(QtWidgets.QMenu, Base):
-    def __init__(self, title, parent, isFloatWidget=False, **kw):
+    def __init__(self, title, parent, isFloatWidget=False, **kwds):
+
+        super().__init__(parent)
+        Base._init(self, isFloatWidget=isFloatWidget, **kwds)
+
         title = translator.translate(title)
-        QtWidgets.QMenu.__init__(self, title, parent)
-        Base.__init__(self, isFloatWidget=isFloatWidget, **kw)
+        self.setTitle(title)
         self.isFloatWidget = isFloatWidget
         self.setFont(menuFont)
         self.setToolTipsVisible(True)

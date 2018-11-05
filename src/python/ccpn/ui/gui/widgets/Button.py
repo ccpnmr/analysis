@@ -43,8 +43,8 @@ class Button(QtWidgets.QPushButton, Base):
 
     #text = translator.translate(text): not needed as it calls setText which does the work
 
-    QtWidgets.QPushButton.__init__(self, parent)
-    Base.__init__(self, **kw)
+    super().__init__(parent)
+    Base._init(self, **kw)
 
     self.setText(text)
 

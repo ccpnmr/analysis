@@ -52,8 +52,10 @@ class LineEdit(QtWidgets.QLineEdit, Base):
     """
     #text = translator.translate(text)
 
-    QtWidgets.QLineEdit.__init__(self, text, parent)
-    Base.__init__(self, **kw)
+    super().__init__(parent)
+    Base._init(self, **kw)
+
+    self.setText(text)
 
     if textColor:
       self.setStyleSheet('QLabel {color: %s;}' % textColor)

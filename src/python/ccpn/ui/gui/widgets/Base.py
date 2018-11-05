@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from functools import partial
 from PyQt5 import QtGui, QtWidgets, QtCore, Qt
 
 from pyqtgraph.dockarea import Dock
@@ -69,7 +70,10 @@ POLICY_DICT = {
 
 class Base(DropBase):
 
-  def __init__(self, isFloatWidget=False,
+  # Base._init(**kwds) should be called from every widget
+  # We don't use __init__ as it messes up the super() methods resolution and the
+  # destroy signal when closing  the windows
+  def _init(self, isFloatWidget=False,
                      tipText=None,
                      bgColor=None, fgColor=None,
 
@@ -103,8 +107,12 @@ class Base(DropBase):
     :param isFloatWidget: indicates widget to be floating
     """
 
+    print('DEBUG Base %r: acceptDrops=%s, setLayout=%s' % (self, acceptDrops, setLayout))
+
     # define the 'droppable' methods
-    DropBase.__init__(self, acceptDrops=acceptDrops)
+    # DropBase._init(self, acceptDrops=acceptDrops)
+    DropBase._init(self, acceptDrops=acceptDrops)
+    # super().__init__(acceptDrops=acceptDrops)
 
     # Tool tips
     if tipText:
@@ -142,6 +150,14 @@ class Base(DropBase):
     if not isFloatWidget and (grid[0] is not None or grid[1] is not None):
       self._addToParent(grid=grid, gridSpan=gridSpan, stretch=stretch,
                         hAlign=hAlign, vAlign=vAlign)
+
+    # connect destruction of widget to onDestroyed method,
+    # which subsequently can be subclassed
+    self.destroyed.connect(partial(self.onDestroyed, self))
+
+  @staticmethod   # has to be a static method
+  def onDestroyed(widget):
+      print("DEBUG on destroyed:", widget)
 
   def setGridLayout(self, margins=(0,0,0,0), spacing=(0,0)):
     "Add a QGridlayout to self"

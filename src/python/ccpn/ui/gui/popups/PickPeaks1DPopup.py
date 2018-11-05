@@ -48,7 +48,7 @@ from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 Estimated = 'Estimated'
 Manual = 'Manual'
 
-class ExcludeRegions(Widget,Base):
+class ExcludeRegions(Widget):
   '''This creates a widget group to exclude Regions from the Spectrum when automatically peak picking '''
   selectionLabelDefault = "Select Regions or \nsolvents to exclude"
 
@@ -75,8 +75,8 @@ class ExcludeRegions(Widget,Base):
               'Water': [0, 0, 5, 4.5]}
 
   def __init__(self, parent=None, selectionLabel=selectionLabelDefault, labelAlign='c',  **kw):
-    Widget.__init__(self, parent)
-    Base.__init__(self, setLayout=True, **kw)
+
+    super().__init__(self, parent, setLayout=True, **kw)
 
 
     self.pulldownSolvents = PulldownList(self, grid=(0, 1), headerText='-- Select --', hAlign=labelAlign)

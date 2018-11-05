@@ -206,9 +206,9 @@ class QLineNumberArea(QWidget):
 #########################################################################################
 
 class QCodeEditor(QPlainTextEdit,Base):
-    def __init__(self, parent=None, **kw):
+    def __init__(self, parent=None, **kwds):
         super().__init__(parent)
-        Base.__init__(self, **kw)
+        Base._init(self, **kwds)
         self.lineNumberArea = QLineNumberArea(self)
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)

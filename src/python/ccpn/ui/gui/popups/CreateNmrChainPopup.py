@@ -39,7 +39,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
-from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, ChainPulldown, SELECT, SubstancePulldown, ComplexesPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown, ChainPulldown, SELECT, SubstancePulldown, ComplexPulldown
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Chain import Chain
 from ccpn.core.Substance import Substance
@@ -103,8 +103,8 @@ class CreateNmrChainPopup(CcpnDialog):
     self.availableNmrChainsPD.label.hide()
     self.availableNmrChainsPD.hide()
     vGrid += 1
-    self.availableComplexesPD = ComplexesPulldown(self, self.project, showSelectName=True,
-                                                  callback=self._populateWidgets, labelText='',tipText=COMPLEXTipText, grid=(vGrid, 1))
+    self.availableComplexesPD = ComplexPulldown(self, self.project, showSelectName=True,
+                                                callback=self._populateWidgets, labelText='',tipText=COMPLEXTipText, grid=(vGrid, 1))
     self.availableComplexesPD.label.hide()
     self.availableComplexesPD.hide()
     vGrid += 1

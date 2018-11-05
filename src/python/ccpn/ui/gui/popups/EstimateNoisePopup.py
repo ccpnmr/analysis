@@ -44,11 +44,11 @@ class EstimateNoisePopup(CcpnDialog):
     MINIMUM_WIDTH = 400
 
     def __init__(self, parent=None, mainWindow=None, title='EstimateNoise',
-                 strip=None, orderedSpectrumViews=None, **kw):
+                 strip=None, orderedSpectrumViews=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow

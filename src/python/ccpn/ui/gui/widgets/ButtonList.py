@@ -147,9 +147,9 @@ class UtilityButtonList(ButtonList):
                cloneText=None, helpText=None, closeText=None,
                cloneCmd=None, helpCmd=None, closeCmd=None,
                cloneTip='Duplicate window', helpTip='Show help', closeTip='Close window',
-               *args, **kw):
+               *args, **kwds):
     
-    ButtonList.__init__(self, parent, *args, **kw)
+    ButtonList.__init__(self, parent, *args, **kwds)
     
     self.helpUrl = helpUrl
     self.helpMsg = helpMsg

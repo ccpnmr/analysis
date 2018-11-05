@@ -46,8 +46,8 @@ restraintTypes = [
 
 
 class RestraintTypePopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, peakList=None, title='Restraints', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, peakList=None, title='Restraints', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

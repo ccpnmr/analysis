@@ -42,14 +42,14 @@ def singleton(cls):
     """
     @functools.wraps(cls.__new__)
 
-    def singleton_new(cls, *args, **kw):
+    def singleton_new(cls, *args, **kwds):
         # check if it already exists
         it =  cls.__dict__.get('__it__')
         if it is not None:
             return it
         # it did not yet exist; generate an instance
-        cls.__it__ = it = cls.__new_original__(cls, *args, **kw)
-        it.__init_original__(*args, **kw)
+        cls.__it__ = it = cls.__new_original__(cls, *args, **kwds)
+        it.__init_original__(*args, **kwds)
         return it
 
     # keep the new method and replace by singleton_new

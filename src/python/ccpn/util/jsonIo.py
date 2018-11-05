@@ -35,21 +35,21 @@ import numpy
 import pandas
 from collections import OrderedDict
 
-def load(fp, **kw):
+def load(fp, **kwds):
   """Load json from file fp with extended object type support"""
-  return json.load(fp, object_pairs_hook=_ccpnObjectPairHook, **kw)
+  return json.load(fp, object_pairs_hook=_ccpnObjectPairHook, **kwds)
 
-def loads(s:str, **kw):
+def loads(s:str, **kwds):
   """Load json from string s with extended object type support"""
-  return json.loads(s, object_pairs_hook=_ccpnObjectPairHook, **kw)
+  return json.loads(s, object_pairs_hook=_ccpnObjectPairHook, **kwds)
 
-def dump(obj:object, fp:str, indent:int=2, **kw):
+def dump(obj:object, fp:str, indent:int=2, **kwds):
   """Dump object to json file with extended object type support"""
-  return json.dump(obj, fp, indent=indent, cls=_CcpnMultiEncoder, **kw)
+  return json.dump(obj, fp, indent=indent, cls=_CcpnMultiEncoder, **kwds)
 
-def dumps(obj:object, indent:int=2, **kw):
+def dumps(obj:object, indent:int=2, **kwds):
   """Dump object to json string with extended object type support"""
-  return json.dumps(obj, indent=indent, cls=_CcpnMultiEncoder, **kw)
+  return json.dumps(obj, indent=indent, cls=_CcpnMultiEncoder, **kwds)
 
 
 class _CcpnMultiEncoder(json.JSONEncoder):

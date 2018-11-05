@@ -31,10 +31,10 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class Splitter(QtWidgets.QSplitter, Base):
 
-  def __init__(self, parent=None, **kw):
+  def __init__(self, parent=None, **kwds):
 
     super().__init__(parent)
-    Base._init(self, parent, **kw)
+    Base._init(self, parent, **kwds)
 
     self.doResize = False
 

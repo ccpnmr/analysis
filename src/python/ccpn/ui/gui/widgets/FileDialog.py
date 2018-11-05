@@ -36,17 +36,17 @@ from ccpn.ui.gui.widgets.Frame import Frame
 class FileDialog(QtWidgets.QFileDialog):
 
     # def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
-    #              acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, **kw):
+    #              acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, **kwds):
 
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
                  acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, filter=None,
                  restrictDirToFilter=False, multiSelection=False,
-                 **kw):
+                 **kwds):
 
         # ejb - added selectFile to suggest a filename in the file box
         #       this is not passed to the super class
 
-        QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kw)
+        QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kwds)
 
         staticFunctionDict = {
             (0, 0): 'getOpenFileName',
@@ -89,7 +89,7 @@ class FileDialog(QtWidgets.QFileDialog):
         # self.result is '' (first case) or 0 (second case) if Cancel button selected
         if self.useNative and not sys.platform.lower() == 'linux':
             funcName = staticFunctionDict[(acceptMode, fileMode)]
-            self.result = getattr(self, funcName)(caption=text, **kw)
+            self.result = getattr(self, funcName)(caption=text, **kwds)
             if isinstance(self.result, tuple):
                 self.result = self.result[0]
         else:
@@ -138,12 +138,12 @@ class NefFileDialog(QtWidgets.QFileDialog):
     _selectPath = os.path.expanduser('~')
 
     def __init__(self, parent=None, fileMode=QtWidgets.QFileDialog.AnyFile, text=None,
-                 acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kw):
+                 acceptMode=QtWidgets.QFileDialog.AcceptOpen, preferences=None, selectFile=None, **kwds):
 
         # ejb - added selectFile to suggest a filename in the file box
         #       this is not passed to the super class
 
-        QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kw)
+        QtWidgets.QFileDialog.__init__(self, parent, caption=text, **kwds)
 
         self.staticFunctionDict = {
             (0, 0): 'getOpenFileName',
@@ -166,7 +166,7 @@ class NefFileDialog(QtWidgets.QFileDialog):
 
         self._fileMode = fileMode
         self._acceptMode = acceptMode
-        self._kw = kw
+        self._kwds = kwds
         self._text = text
         self._selectFile = selectFile
 
@@ -253,9 +253,9 @@ from os.path import expanduser
 
 
 class LineEditButtonDialog(Widget):
-    def __init__(self, parent, textDialog=None, textLineEdit=None, fileMode=None, filter=None, directory=None, **kw):
+    def __init__(self, parent, textDialog=None, textLineEdit=None, fileMode=None, filter=None, directory=None, **kwds):
 
-        super().__init__(parent, setLayout=True, **kw)
+        super().__init__(parent, setLayout=True, **kwds)
         self.openPathIcon = Icon('icons/directory')
 
         if textDialog is None:

@@ -36,8 +36,8 @@ from ccpn.util.Logging import getLogger
 
 
 class PeakListPropertiesPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, peakList=None, title='Peak List Properties', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, peakList=None, title='Peak List Properties', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

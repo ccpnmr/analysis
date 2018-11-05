@@ -66,8 +66,8 @@ CloneOptionsTipTexts = [CHAINTipText, NMRCHAINTipText, SUBSTANCETipText, COMPLEX
 
 class CreateNmrChainPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None
-               , title='Create NmrChain', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title,size=(200,300),  **kw)
+               , title='Create NmrChain', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title,size=(200,300),  **kwds)
 
     self.parent = parent
     self.mainWindow = mainWindow

@@ -30,8 +30,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 
 class TabDialog(CcpnDialog):
-    def __init__(self, fileName, parent=None, title='Tab Dialog', **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    def __init__(self, fileName, parent=None, title='Tab Dialog', **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         fileInfo = QtCore.QFileInfo(fileName)
 

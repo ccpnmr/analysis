@@ -8,10 +8,10 @@ from ccpn.framework.Translation import translator
 
 class RadioButton(QtWidgets.QRadioButton, Base):
 
-  def __init__(self, parent, text='', textColor=None, textSize=None, callback=None, **kw):
+  def __init__(self, parent, text='', textColor=None, textSize=None, callback=None, **kwds):
 
     super().__init__(parent)
-    Base._init(self,  **kw)
+    Base._init(self,  **kwds)
 
     text = translator.translate(text)
     self.setText(text)

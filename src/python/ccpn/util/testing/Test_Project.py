@@ -34,6 +34,6 @@ class ProjectTest(CoreTesting):
   # Path of project to load (None for new project)
   projectPath = 'CcpnCourse1a'
 
-  def Test_ProjectName(self, *args, **kw):
+  def Test_ProjectName(self, *args, **kwds):
     print('project.name = %s' % self.project.name)
 

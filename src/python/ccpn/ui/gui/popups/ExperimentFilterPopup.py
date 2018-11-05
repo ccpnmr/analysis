@@ -39,8 +39,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 
 class ExperimentFilterPopup(CcpnDialog):
     def __init__(self, parent=None, mainWindow=None, spectrum=None,
-                 title: str = 'Experiment Type Filter', **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+                 title: str = 'Experiment Type Filter', **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         detectionBox = Frame(self, setLayout=True, grid=(0, 0), gridSpan=(1, 4), showBorder=False)
         filterBox = Frame(self, setLayout=True, grid=(1, 0), gridSpan=(2, 4), showBorder=False)

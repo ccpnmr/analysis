@@ -56,8 +56,8 @@ class ZoomPopup(CcpnDialog):
     Set Zoom for for current.strip; works for 1D and nD
     """
 
-    def __init__(self, parent=None, mainWindow=None, **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Set Zoom', **kw)
+    def __init__(self, parent=None, mainWindow=None, **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Set Zoom', **kwds)
 
         self.mainWindow = mainWindow
         self.project = self.mainWindow.project

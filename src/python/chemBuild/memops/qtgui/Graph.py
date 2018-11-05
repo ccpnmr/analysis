@@ -1011,10 +1011,10 @@ class Graph(QtWidgets.QGraphicsView, Base):
   # TBC CanvasOrigin equiv; for making multi-plots
 
   def __init__(self, parent, axes, dataSets=None, title=None, size=(400, 300), zoom=1.0,
-               showCoords=True, callback=None, motionCallback=None, showLegend=True, **kw):
+               showCoords=True, callback=None, motionCallback=None, showLegend=True, **kwds):
     
     QtWidgets.QGraphicsView.__init__(self, parent)
-    Base.__init__(self, parent, **kw)
+    Base.__init__(self, parent, **kwds)
  
     self.axes = axes
     if len(axes) == 2:

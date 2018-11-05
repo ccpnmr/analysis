@@ -37,11 +37,11 @@ class StripPlotPopup(CcpnDialog):
     def __init__(self, parent=None, mainWindow=None, spectrumDisplay=None, title='StripPlot',
                  includePeakLists=False,
                  includeNmrChains=False,
-                 includeSpectrumTable=False, **kw):
+                 includeSpectrumTable=False, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow

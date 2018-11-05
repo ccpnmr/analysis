@@ -34,7 +34,7 @@ class ApiFuncTest(CoreTesting):
   # Path of project to load (None for new project)
   projectPath = 'CcpnCourse1a'
 
-  def Test_Spectrum_GetIsotopeCodesList(self, *args, **kw):
+  def Test_Spectrum_GetIsotopeCodesList(self, *args, **kwds):
     spectrum = self.nmrProject.findFirstExperiment(name='HSQC').findFirstDataSource()
     print('spectrum.getIsotopeCodesList() = %s' % spectrum.getIsotopeCodesList())
 

@@ -45,15 +45,15 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class WebViewPanel(QtWebEngineWidgets.QWebEngineView, Base):
 
-  def __init__(self, parent, **kw):
+  def __init__(self, parent, **kwds):
     super().__init__(parent=parent)
-    Base._init(self, **kw)
+    Base._init(self, **kwds)
     
 class WebViewPopup(BasePopup):
 
-  def __init__(self, parent=None, url=None, **kw):
+  def __init__(self, parent=None, url=None, **kwds):
   
-    BasePopup.__init__(self, parent=parent, title='Web View', **kw)
+    BasePopup.__init__(self, parent=parent, title='Web View', **kwds)
 
     self.webViewPanel = WebViewPanel(self)
     

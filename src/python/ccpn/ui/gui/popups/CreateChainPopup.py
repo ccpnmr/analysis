@@ -67,11 +67,11 @@ def _nextChainCode(project):
   return code
 
 class CreateChainPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, title='Generate Chain', **kw):
+  def __init__(self, parent=None, mainWindow=None, title='Generate Chain', **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

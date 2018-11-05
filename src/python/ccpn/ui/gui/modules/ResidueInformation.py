@@ -40,7 +40,7 @@ class ResidueInformation(CcpnModule):
   settingsPosition = 'top'
   className = 'ResidueInformation'
 
-  def __init__(self, mainWindow, name='Residue Information', **kw):
+  def __init__(self, mainWindow, name='Residue Information', **kwds):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
     self.mainWindow = mainWindow
@@ -58,12 +58,12 @@ class ResidueInformation(CcpnModule):
     self.residueLabel = Label(self.mainWidget, text='Residue ', grid=(0, 3))
 
     self.colourScheme = self.application.colourScheme
-    self.residuePulldown = PulldownList(self.mainWidget, callback=self._setCurrentResidue
-                                   , grid=(0, 4))
+    self.residuePulldown = PulldownList(self.mainWidget, callback=self._setCurrentResidue,
+                                   grid=(0, 4))
     self.residuePulldown.setData(CCP_CODES)
     self.selectedResidueType = self.residuePulldown.currentText()
-    self.residueWidget = Widget(self.mainWidget, setLayout=True
-                                , grid=(1,0), gridSpan=(1,5))
+    self.residueWidget = Widget(self.mainWidget, setLayout=True,
+                                grid=(1,0), gridSpan=(1,5))
     # self.residueWidget = QtWidgets.QWidget(self)
     # self.residueWidget.setLayout(QtWidgets.QGridLayout())
     # self.project = project

@@ -39,7 +39,7 @@ TextAlignment = {
 
 class LineEdit(QtWidgets.QLineEdit, Base):
 
-  def __init__(self, parent, text='', textAlignment='c', backgroundText=None, minimumWidth=100, textColor=None, **kw):
+  def __init__(self, parent, text='', textAlignment='c', backgroundText=None, minimumWidth=100, textColor=None, **kwds):
     """
 
     :param parent:
@@ -48,12 +48,12 @@ class LineEdit(QtWidgets.QLineEdit, Base):
     :param backgroundText: a transparent text that will disapear as soon as you click to type.
     :param minimumWidth:
     :param textColor:
-    :param kw:
+    :param kwds:
     """
     #text = translator.translate(text)
 
     super().__init__(parent)
-    Base._init(self, **kw)
+    Base._init(self, **kwds)
 
     self.setText(text)
 

@@ -35,8 +35,8 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 class CopyPeakListPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = self.mainWindow.application

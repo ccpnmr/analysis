@@ -80,7 +80,7 @@ class ExportStripToFilePopup(ExportDialog):
                  filter=EXPORTFILTERS,
                  strips=None,
                  includeSpectumDisplays=True,
-                 **kw):
+                 **kwds):
 
         # initialise attributes
         self.strips = strips
@@ -94,7 +94,7 @@ class ExportStripToFilePopup(ExportDialog):
         super(ExportStripToFilePopup, self).__init__(parent=parent, mainWindow=mainWindow, title=title,
                                                      fileMode=fileMode, text=text, acceptMode=acceptMode,
                                                      preferences=preferences, selectFile=selectFile,
-                                                     filter=filter, **kw)
+                                                     filter=filter, **kwds)
 
         if not strips:
             showWarning(str(self.windowTitle()), 'No strips selected')

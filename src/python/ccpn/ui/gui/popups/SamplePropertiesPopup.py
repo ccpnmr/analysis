@@ -49,11 +49,11 @@ AMOUNT_UNIT = ['L', 'g', 'mole']
 
 
 class SamplePropertiesPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, sample=None, title='Sample Properties', **kw):
+  def __init__(self, parent=None, mainWindow=None, sample=None, title='Sample Properties', **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

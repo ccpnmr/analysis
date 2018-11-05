@@ -74,9 +74,9 @@ class ExcludeRegions(Widget):
               'Carbon Tetrachloride & water ': [0, 0, 1.20, 1.10],
               'Water': [0, 0, 5, 4.5]}
 
-  def __init__(self, parent=None, selectionLabel=selectionLabelDefault, labelAlign='c',  **kw):
+  def __init__(self, parent=None, selectionLabel=selectionLabelDefault, labelAlign='c',  **kwds):
 
-    super().__init__(self, parent, setLayout=True, **kw)
+    super().__init__(self, parent, setLayout=True, **kwds)
 
 
     self.pulldownSolvents = PulldownList(self, grid=(0, 1), headerText='-- Select --', hAlign=labelAlign)
@@ -186,8 +186,8 @@ class ExcludeRegions(Widget):
 
 
 class PickPeak1DPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, title='Pick 1D Peak', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Pick 1D Peak', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     if self.mainWindow is None: #This allows opening the popup for graphical tests

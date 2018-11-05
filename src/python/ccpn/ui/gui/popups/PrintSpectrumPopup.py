@@ -46,8 +46,8 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 class SelectSpectrumDisplayPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Print to File', **kw)
+  def __init__(self, parent=None, mainWindow=None, **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='Print to File', **kwds)
 
     self.mainWindow = mainWindow
     if self.mainWindow:

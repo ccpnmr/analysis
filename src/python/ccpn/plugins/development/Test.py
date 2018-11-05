@@ -67,7 +67,7 @@ def myAlgorithm(data):
 class TsarGuiPlugin(PluginModule):
 
 
-  def __init__(self, mainWindow=None, plugin=None, application=None, **kw):
+  def __init__(self, mainWindow=None, plugin=None, application=None, **kwds):
     super(TsarGuiPlugin, self)
     PluginModule.__init__(self, mainWindow=mainWindow, plugin=plugin, application=application)
     ## add widgets to pipeFrame using Base grid=(i,ii) or self.pipeLayout.addWidget(widgetName)

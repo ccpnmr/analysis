@@ -35,8 +35,8 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 class CopyPeaks(CcpnDialog):
 
-  def __init__(self, parent=None,  mainWindow=None, title='Copy Peaks to PeakLists', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kw)
+  def __init__(self, parent=None,  mainWindow=None, title='Copy Peaks to PeakLists', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

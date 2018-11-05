@@ -70,9 +70,9 @@ class PeakPickerNdGuiPipe(GuiPipe):
   preferredPipe = True
   pipeName = PipeName
 
-  def __init__(self, name=pipeName, parent=None, project=None,   **kw):
+  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
     super(PeakPickerNdGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
+    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
     self.parent = parent
 
     row = 0

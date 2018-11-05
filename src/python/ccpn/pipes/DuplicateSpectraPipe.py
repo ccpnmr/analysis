@@ -70,9 +70,9 @@ class DuplicateSpectrumGuiPipe(GuiPipe):
   _alreadyOpened = False
 
 
-  def __init__(self, name=pipeName, parent=None, project=None, **kw):
+  def __init__(self, name=pipeName, parent=None, project=None, **kwds):
     super(DuplicateSpectrumGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
+    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
     self.parent = parent
     DuplicateSpectrumGuiPipe._alreadyOpened = True
 

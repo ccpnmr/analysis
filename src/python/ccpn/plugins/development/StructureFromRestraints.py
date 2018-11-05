@@ -130,7 +130,7 @@ class StructureFromRestraintsGuiPlugin(PluginModule):
 
     className = 'StructureFromRestraints'
 
-    def __init__(self, mainWindow=None, plugin=None, application=None, **kw):
+    def __init__(self, mainWindow=None, plugin=None, application=None, **kwds):
         super(StructureFromRestraintsGuiPlugin, self)
         PluginModule.__init__(self, mainWindow=mainWindow, plugin=plugin, application=application)
 

@@ -47,11 +47,11 @@ def _getExperimentTypes(project, spectrum):
 
 
 class ExperimentTypePopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, title: str = 'Experiment Type Selection', **kw):
+    def __init__(self, parent=None, mainWindow=None, title: str = 'Experiment Type Selection', **kwds):
 
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         if mainWindow:

@@ -570,8 +570,8 @@ class SelectorWidget(Widget):
 
 class InputPulldown(PulldownList):
 
-    def __init__(self, parent=None, callback=None, **kw):
-        PulldownList.__init__(self, parent, **kw)
+    def __init__(self, parent=None, callback=None, **kwds):
+        PulldownList.__init__(self, parent, **kwds)
 
         self.setData(['', '<New Item>'])
         if callback:

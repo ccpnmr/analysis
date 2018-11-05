@@ -35,7 +35,7 @@ from ccpn.ui.gui.lib.Shortcuts import storeShortcut
 
 class Action(Base, QtWidgets.QAction):
   def __init__(self, parent, text, callback=None, shortcut=None, checked=True, checkable=False,
-               icon=None, translate=True, enabled=True, toolTip=None, **kw):
+               icon=None, translate=True, enabled=True, toolTip=None, **kwds):
     # tr = getTranslator('Dutch')
     # title = tr(title)
     if translate:
@@ -61,7 +61,7 @@ class Action(Base, QtWidgets.QAction):
       
     if callback:
       # PyQt5 always seems to add a checked argument for Action callbacks
-      self.triggered.connect(lambda checked, *args, **kw: callback(*args, **kw))
+      self.triggered.connect(lambda checked, *args, **kwds: callback(*args, **kwds))
     if toolTip:
       self.setToolTip(toolTip)
 

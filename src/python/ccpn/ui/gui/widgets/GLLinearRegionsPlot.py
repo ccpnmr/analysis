@@ -46,7 +46,7 @@ from PyQt5.QtCore import pyqtSlot
 #   The region can be dragged and is bounded by lines which can be dragged individually.
 #   """
 #
-#   def __init__(self, values=None, orientation='v', brush = None, colour = None, movable=True, bounds=None, **kw):
+#   def __init__(self, values=None, orientation='v', brush = None, colour = None, movable=True, bounds=None, **kwds):
 #     if orientation == 'v':
 #       orientation = LinearRegionItem.Vertical
 #     else:

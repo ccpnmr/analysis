@@ -41,8 +41,8 @@ from ccpn.util.Logging import getLogger
 
 
 class ShortcutsPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, title='Define User Shortcuts', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Define User Shortcuts', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = self.mainWindow.application
@@ -83,7 +83,7 @@ class ShortcutsPopup(CcpnDialog):
 
 class ShortcutWidget(ScrollableFrame):
 
-  # def __init__(self, parent, mainWindow, **kw):
+  # def __init__(self, parent, mainWindow, **kwds):
   def __init__(self, mainWindow=None, setLayout=True):           # ejb
     ScrollableFrame.__init__(self, setLayout=setLayout)
     from functools import partial

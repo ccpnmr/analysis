@@ -43,11 +43,11 @@ import sys
 
 
 class NmrResiduePopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, nmrResidue=None, nmrAtom=None, title='NmrResidue', **kw):
+    def __init__(self, parent=None, mainWindow=None, nmrResidue=None, nmrAtom=None, title='NmrResidue', **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application

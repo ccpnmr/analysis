@@ -27,6 +27,8 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 # Start of code
 #=========================================================================================
 
+import sys
+
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 
@@ -158,7 +160,7 @@ class _PulldownABC(PulldownListCompoundWidget):
         _tmp = getattr(self.current, self._currentAttributeName)
         if _tmp is not None and len(_tmp) > 0:
             obj = _tmp[0]
-        #print('>>> currentObject:', obj)
+        #sys.stderr.write('>>> currentObject:\n', obj)
         return obj
 
     def object2value(self, obj):
@@ -176,7 +178,6 @@ class _PulldownABC(PulldownListCompoundWidget):
             return None
         if self._useIds:
             value = self._shortClassName + ':' + value
-        #print('>>> value2object:', value)
         obj = self.project.getByPid(value)
         return obj
 
@@ -225,61 +226,43 @@ class _PulldownABC(PulldownListCompoundWidget):
 
     def _updatePulldownList(self, callbackDict=None):
         "Callback to update the pulldown list; triggered by object creation, deletion or renaming"
-        if DEBUG: print('>>> updatePulldownList')
+        if DEBUG: sys.stderr.write('>>> %s._updatePulldownList()\n' % self)
         pids = self._getPids()
         self.modifyTexts(pids)
-        if DEBUG: print('<<< Leaving updatePulldownList')
+        if DEBUG: sys.stderr.write('  < %s._updatePulldownList()\n' % self)
 
     def _updateFromCurrent(self, callbackDict=None):
         "Callback to update the selection from current change"
         obj = self.getCurrentObject()
-        if DEBUG: print('>>> updateFromCurrent "%s": %s' % (self._currentAttributeName, obj))
+        if DEBUG: sys.stderr.write('>>> %s._updateFromCurrent() "%s": %s\n' %
+                        (self, self._currentAttributeName, obj))
         self._updatePulldownList()
         if obj is not None:
             value = self.object2value(obj)
-            #print('...', value)
             self.select(value, blockSignals=True)
         else:
             self.setIndex(0, blockSignals=True)
-        if DEBUG: print('<<< Leaving updateFromCurrent')
+        if DEBUG: sys.stderr.write('  < %s._updateFromCurrent()\n' % self)
 
     def _callback(self, value):
         "Callback when selecting the pulldown"
-        if DEBUG: print('>>> callback selecting pulldown:', value)
+        if DEBUG: sys.stderr.write('>>> %s._callback() selecting pulldown: %s\n' %(self, value))
         if self._userCallback:
             value = self._userCallback(value)
         if self._setCurrent and value != SELECT and len(value) > 0:
             obj = self.value2object(value)
-            if DEBUG: print('>>> callback selecting pulldown: setting current.%s to %s' % (self._currentAttributeName, obj))
+            if DEBUG: sys.stderr.write('>>> %s._callback() selecting pulldown: setting current.%s to %s\n' %
+                            (self, self._currentAttributeName, obj))
             setattr(self.current, self._currentAttributeName, [obj])
-        if DEBUG: print('<<< Leaving callback selecting pulldown')
+        if DEBUG: sys.stderr.write('  < %s._callback() selecting pulldown\n' % self)
 
     def __str__(self):
         return '<%s>' % self.__class__.__name__
 
-    # def __repr__(self):
-    #     return '<%s at %s>' % (self.__class__.__name__, hex(id(self)))
-    #
-    # def close(self):
-    #     self.unRegister()
-    #     super().close()
-    #
-    # @staticmethod
-    # def _onDestroyed(notifiers=None):
-    #     print('>>> being destroyed:', notifiers)
-    #
-    # def __del__(self):
-    #     "cleanup; doesn't work"
-    #     print('__del__')
-    #     try:
-    #         if self._notifier1 is not None:
-    #             self._notifier1.unRegister()
-    #             del(self._notifier1)
-    #         if self._notifier2 is not None:
-    #             self._notifier2.unRegister()
-    #             del(self._notifier2)
-    #     except:
-    #         pass
+    @staticmethod
+    def onDestroyed(widget):
+        sys.stderr.write('>>> being destroyed:\n', widget)
+
 
 #==========================================================================================================
 # Implementations for the various V3 objects

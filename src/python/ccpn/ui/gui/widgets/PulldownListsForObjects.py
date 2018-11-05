@@ -30,6 +30,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 
+
 SELECT = '> Select <'
 UNDEFINED = '<Undefined>'
 
@@ -47,7 +48,6 @@ class _PulldownABC(PulldownListCompoundWidget):
     _shortClassName = None
     _attributeName = None
     _currentAttributeName = None
-
 
     def __init__(self, parent, project,
                  showBorder=False, orientation='left',
@@ -129,7 +129,7 @@ class _PulldownABC(PulldownListCompoundWidget):
                                        [Notifier.CURRENT],
                                        targetName=self._currentAttributeName,
                                        callback=self._updateFromCurrent
-                                      )
+                                       )
             self._notifier2.setDebug(DEBUG)
 
     @property
@@ -203,7 +203,7 @@ class _PulldownABC(PulldownListCompoundWidget):
     # Implementation
     #==============================================================================================
 
-    def _getPids(self)->list:
+    def _getPids(self) -> list:
         """Return a list of pids defined by 'self._attributeName' from project.
         """
         pids = [self.object2value(obj) for obj in getattr(self.project, self._attributeName)]
@@ -281,6 +281,7 @@ class _PulldownABC(PulldownListCompoundWidget):
     #     except:
     #         pass
 
+
 #==========================================================================================================
 # Implementations for the various V3 objects
 #==========================================================================================================
@@ -293,197 +294,262 @@ def _definedBy(klass):
 class AtomPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Atom's"
     from ccpn.core.Atom import Atom
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Atom)
     _currentAttributeName = None
+
 
 class CalculationStepPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for CalculationStep's"
     from ccpn.core.CalculationStep import CalculationStep
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(CalculationStep)
     _currentAttributeName = None
+
 
 class ChainPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Chain's"
     from ccpn.core.Chain import Chain
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Chain)
     _currentAttributeName = 'chains'
+
 
 class ChemicalShiftPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for ChemicalShift's"
     from ccpn.core.ChemicalShift import ChemicalShift
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(ChemicalShift)
     _currentAttributeName = 'chemicalShifts'
+
 
 class ChemicalShiftListPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for ChemicalShiftList's"
     from ccpn.core.ChemicalShiftList import ChemicalShiftList
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(ChemicalShiftList)
     _currentAttributeName = 'chemicalShiftLists'
+
 
 class ComplexPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Complex's"
     from ccpn.core.Complex import Complex
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Complex)
     _currentAttributeName = None
+
 
 class DataPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Data's"
     from ccpn.core.Data import Data
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Data)
     _currentAttributeName = None
+
 
 class DataSetPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for DataSet's"
     from ccpn.core.DataSet import DataSet
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(DataSet)
     _currentAttributeName = None
+
 
 class IntegralPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Integral's"
     from ccpn.core.Integral import Integral
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Integral)
     _currentAttributeName = 'integrals'
+
 
 class IntegralListPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for IntegralList's"
     from ccpn.core.IntegralList import IntegralList
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(IntegralList)
     _currentAttributeName = None
+
 
 class ModelPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Model's"
     from ccpn.core.Model import Model
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Model)
     _currentAttributeName = None
+
 
 class MultipletPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Multiplet's"
     from ccpn.core.Multiplet import Multiplet
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Multiplet)
     _currentAttributeName = 'multiplets'
+
 
 class MultipletListPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for MultipletList's"
     from ccpn.core.MultipletList import MultipletList
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(MultipletList)
     _currentAttributeName = None
+
 
 class NmrAtomPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for NmrAtom's"
     from ccpn.core.NmrAtom import NmrAtom
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(NmrAtom)
     _currentAttributeName = 'nmrAtoms'
+
 
 class NmrChainPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for NmrChain's"
     from ccpn.core.NmrChain import NmrChain
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(NmrChain)
     _currentAttributeName = 'nmrChains'
+
 
 class NmrResiduePulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for NmrResidue's"
     from ccpn.core.NmrResidue import NmrResidue
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(NmrResidue)
     _currentAttributeName = 'nmrResidues'
+
 
 class NotePulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Note's"
     from ccpn.core.Note import Note
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Note)
     _currentAttributeName = None
+
 
 class PeakPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Peak's"
     from ccpn.core.Peak import Peak
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Peak)
     _currentAttributeName = 'peaks'
+
 
 class PeakClusterPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for PeakCluster's"
     from ccpn.core.PeakCluster import PeakCluster
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(PeakCluster)
     _currentAttributeName = None
+
 
 class PeakListPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for PeakList's"
     from ccpn.core.PeakList import PeakList
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(PeakList)
     _currentAttributeName = None
+
 
 class PseudoDimensionPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for PseudoDimension's"
     from ccpn.core.PseudoDimension import PseudoDimension
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(PseudoDimension)
     _currentAttributeName = None
+
 
 class ResiduePulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Residue's"
     from ccpn.core.Residue import Residue
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Residue)
     _currentAttributeName = 'residues'
+
 
 class RestraintPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Restraint's"
     from ccpn.core.Restraint import Restraint
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Restraint)
     _currentAttributeName = None
+
 
 class RestraintContributionPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for RestraintContribution's"
     from ccpn.core.RestraintContribution import RestraintContribution
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(RestraintContribution)
     _currentAttributeName = None
+
 
 class RestraintListPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for RestraintList's"
     from ccpn.core.RestraintList import RestraintList
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(RestraintList)
     _currentAttributeName = None
+
 
 class SamplePulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Sample's"
     from ccpn.core.Sample import Sample
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Sample)
     _currentAttributeName = 'samples'
+
 
 class SampleComponentPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for SampleComponent's"
     from ccpn.core.SampleComponent import SampleComponent
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(SampleComponent)
     _currentAttributeName = None
+
 
 class SpectrumPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Spectrum's"
     from ccpn.core.Spectrum import Spectrum
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Spectrum)
     _currentAttributeName = None
+
 
 class SpectrumGroupPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for SpectrumGroup's"
     from ccpn.core.SpectrumGroup import SpectrumGroup
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(SpectrumGroup)
     _currentAttributeName = 'spectrumGroups'
+
 
 class SpectrumHitPulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for SpectrumHit's"
     from ccpn.core.SpectrumHit import SpectrumHit
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(SpectrumHit)
     _currentAttributeName = 'spectrumHits'
+
 
 class SpectrumReferencePulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for SpectrumReference's"
     from ccpn.core.SpectrumReference import SpectrumReference
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(SpectrumReference)
     _currentAttributeName = None
+
 
 class StructureEnsemblePulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for StructureEnsemble's"
     from ccpn.core.StructureEnsemble import StructureEnsemble
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(StructureEnsemble)
     _currentAttributeName = None
+
 
 class SubstancePulldown(_PulldownABC):
     "A PulldownListCompoundWidget class for Substance's"
     from ccpn.core.Substance import Substance
+
     _klass, _className, _shortClassName, _attributeName = _definedBy(Substance)
     _currentAttributeName = 'substances'

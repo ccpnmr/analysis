@@ -1047,7 +1047,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._key = 'A'
             event.accept()
             return True
-        return super(CcpnGLWidget, self).eventFilter(obj, event)
+        return super().eventFilter(obj, event)
 
     def _panSpectrum(self, event, movePercent=20):
         """Implements Arrows up,down, left, right to pan the spectrum """
@@ -1784,24 +1784,24 @@ class CcpnGLWidget(QOpenGLWidget):
         self.update()
 
     def keyReleaseEvent(self, ev: QtGui.QKeyEvent):
-        super(CcpnGLWidget, self).keyReleaseEvent(ev)
+        super().keyReleaseEvent(ev)
         self._clearAndUpdate()
         self._clearAfterRelease(ev)
 
     def enterEvent(self, ev: QtCore.QEvent):
-        super(CcpnGLWidget, self).enterEvent(ev)
+        super().enterEvent(ev)
         self._clearAndUpdate()
 
     def focusInEvent(self, ev: QtGui.QFocusEvent):
-        super(CcpnGLWidget, self).focusInEvent(ev)
+        super().focusInEvent(ev)
         self._clearAndUpdate()
 
     def focusOutEvent(self, ev: QtGui.QFocusEvent):
-        super(CcpnGLWidget, self).focusOutEvent(ev)
+        super().focusOutEvent(ev)
         self._clearAndUpdate()
 
     def leaveEvent(self, ev: QtCore.QEvent):
-        super(CcpnGLWidget, self).leaveEvent(ev)
+        super().leaveEvent(ev)
         self._clearAndUpdate()
 
     def mouseMoveEvent(self, event):

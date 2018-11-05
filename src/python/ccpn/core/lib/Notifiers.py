@@ -174,7 +174,7 @@ class Notifier(object):
         self._args = args
         self._kwargs = kwargs
 
-        self._debug = False  # ability to report on individual instances
+        self._debug = True  # ability to report on individual instances
 
         # some sanity checks
         if len(triggers) > 1 and Notifier.MONITOR in triggers:
@@ -302,6 +302,9 @@ class Notifier(object):
                 self._project.unRegisterNotifier(targetName, trigger, func)
         self._notifiers = []
         self._unregister = []
+        self._theObject = None
+        self._callback = None
+        self._triggers = None
 
     def setDebug(self, flag: bool):
         "Set debug output on/off"

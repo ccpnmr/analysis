@@ -1539,8 +1539,8 @@ QuickTable::item::selected {
         :param pullDownWidget:
         :return:
         """
-        self._initialiseTableNotifiers()
         self.clearTableNotifiers()
+        self._initialiseTableNotifiers()
 
         if tableClass:
             self._tableNotifier = Notifier(self.project,
@@ -1599,6 +1599,8 @@ QuickTable::item::selected {
                            }
 
     def setDefaultTableData(self):
+        """Populate an empty table data object
+        """
         self._tableData = {'updateFunc': None,
                            'changeFunc': None,
                            'tableSelection': None,
@@ -1614,6 +1616,8 @@ QuickTable::item::selected {
                            }
 
     def _initialiseTableNotifiers(self):
+        """Set the initial notifiers to empty
+        """
         self._tableNotifier = None
         self._rowNotifier = None
         self._cellNotifiers = []
@@ -1621,25 +1625,34 @@ QuickTable::item::selected {
         self._droppedNotifier = None
         self._searchNotifier = None
 
+    @staticmethod  # has to be a static method
+    def onDestroyed(widget):
+        print("DEBUG on destroyed:", widget)
+        widget.clearTableNotifiers()
+
     def clearTableNotifiers(self):
-        """
-        clean up the notifiers
+        """Clean up the notifiers
         """
         if self._tableNotifier is not None:
             self._tableNotifier.unRegister()
+            del(self._tableNotifier)
         if self._rowNotifier is not None:
             self._rowNotifier.unRegister()
+            del (self._rowNotifier)
         if self._cellNotifiers:
             for cell in self._cellNotifiers:
                 if cell is not None:
                     cell.unRegister()
-        self._cellNotifiers = []
+        del self._cellNotifiers
         if self._selectCurrentNotifier is not None:
             self._selectCurrentNotifier.unRegister()
+            del (self._selectCurrentNotifier)
         if self._droppedNotifier is not None:
             self._droppedNotifier.unRegister()
+            del (self._droppedNotifier)
         if self._searchNotifier is not None:
             self._searchNotifier.unRegister()
+            del (self._searchNotifier)
 
     # def dragEnterEvent(self, event):
     #   ccpnmrJsonData = 'ccpnmr-json'

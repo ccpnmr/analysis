@@ -251,12 +251,18 @@ class NmrResidueTableModule(CcpnModule):
         """
         self.nmrResidueTable._close()
         self.nmrResidueTableSettings._cleanupWidget()
-        super(NmrResidueTableModule, self)._closeModule()
+        super()._closeModule()
 
     def close(self):
         """Close the table from the commandline
         """
         self._closeModule()
+
+    @staticmethod  # has to be a static method
+    def onDestroyed(widget):
+        print("DEBUG on destroyed:", widget)
+        widget.self.nmrResidueTable._close()
+        widget.nmrResidueTableSettings._cleanupWidget()
 
     def paintEvent(self, event):
         event.ignore()

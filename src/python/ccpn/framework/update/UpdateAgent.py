@@ -232,9 +232,9 @@ class UpdateFile:
 
 class UpdateAgent(object):
 
-    def __init__(self, version, showError=None, showInfo=None, askPassword=None,
-                 serverUser=None, server=SERVER, serverDbRoot=SERVER_DB_ROOT, serverDbFile=SERVER_DB_FILE,
-                 serverDownloadScript=SERVER_DOWNLOAD_SCRIPT, serverUploadScript=SERVER_UPLOAD_SCRIPT):
+    def _init(self, version, showError=None, showInfo=None, askPassword=None,
+              serverUser=None, server=SERVER, serverDbRoot=SERVER_DB_ROOT, serverDbFile=SERVER_DB_FILE,
+              serverDownloadScript=SERVER_DOWNLOAD_SCRIPT, serverUploadScript=SERVER_UPLOAD_SCRIPT):
 
         if not showError:
             showError = MessageDialog.showError

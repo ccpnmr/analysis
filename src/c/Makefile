@@ -2,7 +2,7 @@ include environment.txt
 
 all: compile
 
-compile: contour peak inchicode
+compile: contour peak inchicode clibrary
 
 contour:
 	cd ccpnc/contour && $(MAKE)
@@ -13,7 +13,10 @@ peak:
 inchicode:
 	cd inchi && $(MAKE)
 
-clean: contour_clean peak_clean inchi_clean
+clibrary:
+	cd clibrary && $(MAKE)
+
+clean: contour_clean peak_clean inchi_clean clibrary_clean
 
 contour_clean:
 	cd ccpnc/contour && $(MAKE) clean
@@ -24,7 +27,10 @@ peak_clean:
 inchi_clean:
 	cd inchi && $(MAKE) clean
 
-realclean: contour_realclean peak_realclean inchi_realclean
+clibrary_clean:
+	cd clibrary && $(MAKE) clean
+
+realclean: contour_realclean peak_realclean inchi_realclean clibrary_realclean
 
 contour_realclean:
 	cd ccpnc/contour && $(MAKE) realclean
@@ -35,3 +41,5 @@ peak_realclean:
 inchi_realclean:
 	cd inchi && $(MAKE) realclean
 
+clibrary_realclean:
+	cd clibrary && $(MAKE) realclean

@@ -315,7 +315,7 @@ class IntegralTable(QuickTable):
     else:
       self.current.integrals = integrals
 
-  def _actionCallback(self, data, *kw):
+  def _actionCallback(self, data):
     """
     Notifier DoubleClick action on item in table
     """

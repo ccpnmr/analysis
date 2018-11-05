@@ -43,9 +43,9 @@ from ccpn.core.lib.CcpnSorting import stringSortKey
 #                                                       matchingNmrAtomsForDimensionOfPeaks)
 
 class ObjectAssigner(Widget):
-  def __init__(self, parent, mainWindow, dim, objects, opts, **kw):
+  def __init__(self, parent, mainWindow, dim, objects, opts, **kwds):
 
-    super().__init__(parent, **kw)
+    super().__init__(parent, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

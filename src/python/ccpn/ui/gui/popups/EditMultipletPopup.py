@@ -40,8 +40,8 @@ NEW = "Add New"
 PopupTitle = 'Multiplet Editor '
 
 class EditMultipletPopup(CcpnDialog):
-    def __init__(self, parent=None,  mainWindow=None, multiplet = None, spectrum = None, isNewMultipletList=False, title=PopupTitle, **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kw)
+    def __init__(self, parent=None,  mainWindow=None, multiplet = None, spectrum = None, isNewMultipletList=False, title=PopupTitle, **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kwds)
 
         self.project = None
 

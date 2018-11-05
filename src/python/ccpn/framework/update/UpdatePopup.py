@@ -39,8 +39,8 @@ from ccpn.util.Update import UpdateAgent
 
 
 class UpdatePopup(CcpnDialog, UpdateAgent):
-    def __init__(self, parent=None, mainWindow=None, title='Update CCPN code', **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    def __init__(self, parent=None, mainWindow=None, title='Update CCPN code', **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         # keep focus on this window
         self.setModal(True)

@@ -673,10 +673,10 @@ class DensityPlot(QtWidgets.QGraphicsView, Base):
 
   def __init__(self, parent, matrix, title='Density Plot', valLimit=None,
                xAxisName='X Axis', yAxisName='Y Axis', boxSize=25,
-               showGrid=True, showLegend=True, **kw):
+               showGrid=True, showLegend=True, **kwds):
       
     QtWidgets.QGraphicsView.__init__(self, parent)
-    Base.__init__(self, parent, **kw)
+    Base.__init__(self, parent, **kwds)
     
     self.parent = parent
     self.title = title

@@ -312,8 +312,7 @@ class GLExternalRegion(GLVertexArray):
     def _addRegion(self, values=None, axisCode=None, orientation=None,
                    brush=None, colour='blue',
                    movable=True, visible=True, bounds=None,
-                   obj=None, objectView=None,
-                   **kw):
+                   obj=None, objectView=None):
 
         if colour in REGION_COLOURS.keys() and not brush:
             brush = REGION_COLOURS[colour]
@@ -528,8 +527,7 @@ class GLIntegralRegion(GLExternalRegion):
     def _addRegion(self, values=None, axisCode=None, orientation=None,
                    brush=None, colour='blue',
                    movable=True, visible=True, bounds=None,
-                   obj=None, objectView=None,
-                   **kw):
+                   obj=None, objectView=None):
 
         if colour in REGION_COLOURS.keys() and not brush:
             brush = REGION_COLOURS[colour]

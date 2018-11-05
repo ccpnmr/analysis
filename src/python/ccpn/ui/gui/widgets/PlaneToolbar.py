@@ -135,7 +135,7 @@ class _StripLabel(Label):
         and allows changing of the cursor (cursor not changing properly in pyqt5) - ejb
         """
         if event.type() == QtCore.QEvent.MouseButtonPress:
-            self._mousePressEvent(event)                        # call the standard mouse event
+            self._mousePressEvent(event)  # call the standard mouse event
             return True
 
         # if event.type() == QtCore.QEvent.DragEnter:
@@ -243,9 +243,9 @@ class PlaneSelectorWidget(Widget):
 class PlaneToolbar(ToolBar):
     #TODO: undocumented and needs refactoring ;
     # GWV: Does not work as a Widget!?
-    def __init__(self, qtParent, strip, callbacks, **kw):
+    def __init__(self, qtParent, strip, callbacks, **kwds):
 
-        ToolBar.__init__(self, parent=qtParent, **kw)
+        ToolBar.__init__(self, parent=qtParent, **kwds)
 
         self.strip = strip
         self.planeLabels = []
@@ -255,7 +255,13 @@ class PlaneToolbar(ToolBar):
             self.prevPlaneButton.setFixedWidth(19)
             self.prevPlaneButton.setFixedHeight(19)
             planeLabel = DoubleSpinbox(self, showButtons=False)
-            planeLabel.setFixedHeight(19)
+            # planeLabel.setFixedHeight(19)
+
+            # force the minimum width of the planeLabel
+            planeLabel.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                     QtWidgets.QSizePolicy.MinimumExpanding)
+            planeLabel.setMinimumWidth(55)
+
             # below does not work because it allows wheel events to behave but not manual text entry (some Qt stupidity)
             # so instead use a wheelEvent to deal with the wheel events and editingFinished (in GuiStripNd) to do text
             #planeLabel.valueChanged.connect(partial(callbacks[2], i))
@@ -299,9 +305,9 @@ STRIPPOSITION_RIGHT = 'r'
 STRIPPOSITIONS = (STRIPPOSITION_LEFT, STRIPPOSITION_CENTRE, STRIPPOSITION_RIGHT)
 
 
-class StripHeader(Frame):
-    def __init__(self, parent, mainWindow, **kw):
-        super(StripHeader, self).__init__(parent=parent, **kw)
+class StripHeader(Widget):
+    def __init__(self, parent, mainWindow, **kwds):
+        super().__init__(parent=parent, **kwds)
 
         self.parent = parent
         self.mainWindow = mainWindow

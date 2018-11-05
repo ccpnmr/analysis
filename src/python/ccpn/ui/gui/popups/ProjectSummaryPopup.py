@@ -47,8 +47,8 @@ from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 
 
 class ProjectSummaryPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, title='Project Summary', modal=False, **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Project Summary', modal=False, **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

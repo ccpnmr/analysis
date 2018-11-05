@@ -64,7 +64,7 @@ class ExportDialog(CcpnDialog):
                  preferences=None,
                  selectFile=None,
                  filter='*',
-                 **kw):
+                 **kwds):
         """
         Initialise the widget
         """
@@ -93,11 +93,11 @@ class ExportDialog(CcpnDialog):
         #      'preferences': None,
         #      'selectFile': None,
         #      'filter': None}
-        # self.saveDict = {k: v for k, v in kw.items() if k in self.exportKeywords}
-        # filterKw = {k: v for k, v in kw.items() if (k not in self.exportKeywords and
+        # self.saveDict = {k: v for k, v in kwds.items() if k in self.exportKeywords}
+        # filterKw = {k: v for k, v in kwds.items() if (k not in self.exportKeywords and
         #                                             k not in self.userKeywords)}
 
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application

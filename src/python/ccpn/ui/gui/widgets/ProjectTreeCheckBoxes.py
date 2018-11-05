@@ -196,5 +196,5 @@ class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):
         # MultipletList._pluralLinkName,
         # ]
 
-    def __init__(self, parent=None, project=None, maxSize=(250, 300), **kw):
-        super(PrintTreeCheckBoxes, self).__init__(parent=parent, project=project, maxSize=maxSize, **kw)
+    def __init__(self, parent=None, project=None, maxSize=(250, 300), **kwds):
+        super(PrintTreeCheckBoxes, self).__init__(parent=parent, project=project, maxSize=maxSize, **kwds)

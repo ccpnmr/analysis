@@ -31,35 +31,24 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import pandas as pd
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.ui.gui.widgets.QuickTable import QuickTable, QuickTableFrame
-from ccpn.ui.gui.widgets.Column import Column, ColumnClass
+from ccpn.ui.gui.widgets.QuickTable import QuickTable
+from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.Blank import Blank
-from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, _getCurrentZoomRatio
+from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.Peak import Peak
-from PyQt5 import QtGui, QtWidgets, QtCore
-from pyqtgraph import dockarea
-from pyqtgraph.dockarea import DockArea
-from pyqtgraph.dockarea.DockArea import TempAreaWindow
+from PyQt5 import QtWidgets
 from ccpn.util.Logging import getLogger
-import numpy as np
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.StripPlot import StripPlot
 
 logger = getLogger()
@@ -292,8 +281,9 @@ class NmrResidueTable(QuickTable):
                  checkBoxCallback=None, nmrChain=None, multiSelect=False,
                  **kwds):
         """
-        Initialise the widgets for the module.
+        Initialise the widgets for the module. kwds passed to the scrollArea widget
         """
+
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
         if mainWindow:
@@ -310,7 +300,7 @@ class NmrResidueTable(QuickTable):
 
         # parent.getLayout().setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
 
-        # strange, need to do this when usong scrollArea, but not a Widget
+        # strange, need to do this when using scrollArea, but not a Widget
         parent.getLayout().setHorizontalSpacing(0)
 
         self._widgetScrollArea = ScrollArea(parent=parent, **kwds)

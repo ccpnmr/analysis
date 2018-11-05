@@ -31,10 +31,10 @@ class Slider(QtWidgets.QSlider, Base):
   def __init__(self, parent, startVal=0, endVal=100, value=None,
                direction='h', step=1, bigStep=None, callback=None,
                tracking=True, showNumber=True, tickInterval=None,
-               tickPosition=None, listener=None, spinbox=False, **kw):
+               tickPosition=None, listener=None, spinbox=False, **kwds):
 
     super().__init__(parent)
-    Base._init(self, **kw)
+    Base._init(self, **kwds)
 
     self.callback = callback
 

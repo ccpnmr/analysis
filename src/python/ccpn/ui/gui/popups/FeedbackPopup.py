@@ -63,8 +63,8 @@ SCRIPT_URL = ccpn2Url + '/cgi-bin/feedback/submitFeedback.py'
 
 class FeedbackPopup(CcpnDialog):
     # parent mandatory and that needs to have attribute application
-    def __init__(self, parent=None, title='Feedback Form', **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    def __init__(self, parent=None, title='Feedback Form', **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.setContentsMargins(5, 5, 5, 5)
         self._registrationDict = Register.loadDict()

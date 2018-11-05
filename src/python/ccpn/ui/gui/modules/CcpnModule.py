@@ -61,6 +61,7 @@ from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.SideBar import OpenObjAction, _openItemObject
+from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -161,7 +162,7 @@ class CcpnModule(Dock, DropBase):
 
         super().__init__(name=name, area=self.area,
                          autoOrientation=False,
-                         closable=closable)  #, **kwds)   # ejb
+                         closable=closable)
         DropBase._init(self, acceptDrops=True)
 
         self.hStyle = """
@@ -206,8 +207,10 @@ class CcpnModule(Dock, DropBase):
         # self._originalLabel = self.label
         # self._originalLabel.hide()
 
-        self.topLayout.removeWidget(self.label)  # remove old label, redefine
-        self.label.deleteLater()  # GWV: why??
+        # remove old label, so it can be redefined
+        self.topLayout.removeWidget(self.label)
+        del self.label
+
         self.label = CcpnModuleLabel(name, self,
                                      showCloseButton=closable, closeCallback=self._closeModule,
                                      showSettingsButton=self.includeSettingsWidget,
@@ -867,7 +870,9 @@ class CcpnModuleLabel(DockLabel):
 
         # Settings
         if showSettingsButton:
-            self.settingsButton = QtWidgets.QToolButton(self)
+            # self.settingsButton = QtWidgets.QToolButton(self)
+
+            self.settingsButton = ToolButton(self)
             self.settingsButton.setIcon(Icon('icons/settings'))
             self.settingsButton.setIconSize(QtCore.QSize(self.labelSize - 5, self.labelSize - 5))  # GWV hack to make it work
             # hardcoded because stylesheet appears not to work

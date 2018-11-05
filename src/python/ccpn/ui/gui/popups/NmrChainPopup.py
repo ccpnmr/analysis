@@ -36,11 +36,11 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 class NmrChainPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, nmrChain=None, title='Nmr Chains', **kw):
+  def __init__(self, parent=None, mainWindow=None, nmrChain=None, title='Nmr Chains', **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

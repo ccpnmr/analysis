@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -32,11 +32,12 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FillBetweenRegions import FillBetweenRegions
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 import pyqtgraph as pg
-import  numpy as np
+import numpy as np
 from pyqtgraph.graphicsItems.LinearRegionItem import LinearRegionItem
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.util.Logging import getLogger
 from PyQt5.QtCore import pyqtSlot
+
 
 # class GLLinearRegionsPlot(LinearRegionItem):
 #   """
@@ -71,225 +72,218 @@ from PyQt5.QtCore import pyqtSlot
 
 
 class GLTargetButtonSpinBoxes(Widget):
-  def __init__(self, parent, application=None, orientation = 'v', GLWidget=None, values=None, step=None,
-               colour = None, brush = None, movable=True, bounds=None, **kwds):
-    super().__init__(parent, setLayout=True, **kwds)
+    def __init__(self, parent, application=None, orientation='v', GLWidget=None, values=None, step=None,
+                 colour=None, brush=None, movable=True, bounds=None, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
 
-    self.parent = parent
-    self.GLWidget = GLWidget
-    self.application = application
+        self._parent = parent
+        self.GLWidget = GLWidget
+        self.application = application
 
-    self.movable = movable
-    self.brush = brush
-    self.colour = colour
-    self.orientation = orientation
+        self.movable = movable
+        self.brush = brush
+        self.colour = colour
+        self.orientation = orientation
 
-    self.toggleOnIcon = Icon('icons/target3+')
-    self.toggleOffIcon =  Icon('icons/target3a-')
+        self.toggleOnIcon = Icon('icons/target3+')
+        self.toggleOffIcon = Icon('icons/target3a-')
 
-    tipText = "Select a strip and Toggle to activate the lines"
-    self.pickOnSpectrumButton = Button(self, toggle=True,
-                                       tipText=tipText, grid=(0, 0),  hAlign='l', vAlign='l' )
-    self.pickOnSpectrumButton.setChecked(False)
-    if self.pickOnSpectrumButton.isChecked():
-      self.pickOnSpectrumButton.setIcon(self.toggleOnIcon)
-    elif not self.pickOnSpectrumButton.isChecked():
-      self.pickOnSpectrumButton.setIcon(self.toggleOffIcon)
-    self.pickOnSpectrumButton.toggled.connect(self._togglePicking)
+        tipText = "Select a strip and Toggle to activate the lines"
+        self.pickOnSpectrumButton = Button(self, toggle=True,
+                                           tipText=tipText, grid=(0, 0), hAlign='l', vAlign='l')
+        self.pickOnSpectrumButton.setChecked(False)
+        if self.pickOnSpectrumButton.isChecked():
+            self.pickOnSpectrumButton.setIcon(self.toggleOnIcon)
+        elif not self.pickOnSpectrumButton.isChecked():
+            self.pickOnSpectrumButton.setIcon(self.toggleOffIcon)
+        self.pickOnSpectrumButton.toggled.connect(self._togglePicking)
 
-    self.spinBoxes = []
-    self.values = values or [0,0]
-    self.bounds = bounds or [-1e10, 1e10]
-    self.pointBox1 = DoubleSpinbox(self, value=self.values[0], step=step, max=self.bounds[1], min=self.bounds[0],
-                                   grid=(0, 1), hAlign='l', vAlign='l' )
-    self.pointBox2 = DoubleSpinbox(self, value=self.values[1], step=step, max=self.bounds[1], min=self.bounds[0],
-                                   grid=(0, 2), hAlign='l', vAlign='l' )
-    self.spinBoxes.append(self.pointBox1)
-    self.spinBoxes.append(self.pointBox2)
+        self.spinBoxes = []
+        self.values = values or [0, 0]
+        self.bounds = bounds or [-1e10, 1e10]
+        self.pointBox1 = DoubleSpinbox(self, value=self.values[0], step=step, max=self.bounds[1], min=self.bounds[0],
+                                       grid=(0, 1), hAlign='l', vAlign='l')
+        self.pointBox2 = DoubleSpinbox(self, value=self.values[1], step=step, max=self.bounds[1], min=self.bounds[0],
+                                       grid=(0, 2), hAlign='l', vAlign='l')
+        self.spinBoxes.append(self.pointBox1)
+        self.spinBoxes.append(self.pointBox2)
 
-    self.pickOnSpectrumButton.setMaximumHeight(self.pointBox1.size().height()*1.2)
-    self.pickOnSpectrumButton.setMaximumWidth(50)
+        self.pickOnSpectrumButton.setMaximumHeight(int(self.pointBox1.size().height() * 1.2))
+        self.pickOnSpectrumButton.setMaximumWidth(50)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # TODO:ED change this is GLWidgetevents
-    # self.linearRegions = LinearRegionsPlot(values=self.values, orientation=self.orientation, bounds=self.bounds,
-    #                                        brush=self.brush, colour = self.colour, movable=self.movable)
-    #
-    # for line in self.linearRegions.lines:
-    #   line.sigPositionChanged.connect(self._lineMoved)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # TODO:ED change this is GLWidgetevents
+        # self.linearRegions = LinearRegionsPlot(values=self.values, orientation=self.orientation, bounds=self.bounds,
+        #                                        brush=self.brush, colour = self.colour, movable=self.movable)
+        #
+        # for line in self.linearRegions.lines:
+        #   line.sigPositionChanged.connect(self._lineMoved)
 
-    # for sb in self.spinBoxes:
-    #   sb.valueChanged.connect(self._setLinePosition)
+        # for sb in self.spinBoxes:
+        #   sb.valueChanged.connect(self._setLinePosition)
 
-    self.spinBoxes[0].valueChanged.connect(partial(self._setLinePosition, 0))
-    self.spinBoxes[1].valueChanged.connect(partial(self._setLinePosition, 1))
+        self.spinBoxes[0].valueChanged.connect(partial(self._setLinePosition, 0))
+        self.spinBoxes[1].valueChanged.connect(partial(self._setLinePosition, 1))
 
-    if self.GLWidget:
-      self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
-                                                    brush=self.brush, colour = self.colour, movable=self.movable)
-      self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
-    else:
-      self.GLlinearRegions = None
+        if self.GLWidget:
+            self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
+                                                                   brush=self.brush, colour=self.colour, movable=self.movable)
+            self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
+        else:
+            self.GLlinearRegions = None
 
-    #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    # if self.plotWidget is None:
-    #   self.pickOnSpectrumButton.setEnabled(False)
+        # if self.plotWidget is None:
+        #   self.pickOnSpectrumButton.setEnabled(False)
 
-  def setGLWidget(self, GLWidget):
-    self.GLWidget = GLWidget
-    self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
-                                                   brush=self.brush, colour=self.colour, movable=self.movable)
-    self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
-
-  def _togglePicking(self):
-
-    if self.application is not None:
-      self.current = self.application.current
-      self.strip = self.current.strip
-      if self.strip is not None:
-        try:
-          self.GLWidget = self.strip._CcpnGLWidget
-        except Exception as es:
-          getLogger().debugGL('OpenGL widget not instantiated')
-
-    if self.GLWidget:
-      if self.pickOnSpectrumButton.isChecked():
-        self.pickOnSpectrumButton.setIcon(self.toggleOnIcon)
-        self._turnOnPositionPicking()
-      elif not self.pickOnSpectrumButton.isChecked():
-        self.pickOnSpectrumButton.setIcon(self.toggleOffIcon)
-        self._turnOffPositionPicking()
-    else:
-      self.pickOnSpectrumButton.setChecked(False)
-      getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.strip)
-
-  def _turnOnPositionPicking(self):
-    # if self.plotWidget is not None:
-    #   self.plotWidget.addItem(self.linearRegions)
-
-    if not self.GLWidget and self.current.strip:
-      try:
-        self.setGLWidget(self.current.strip._CcpnGLWidget)
-      except Exception as es:
-        getLogger().debugGL('OpenGL widget not instantiated')
-
-    else:
-      if not self.GLlinearRegions:
-        self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation,
-                                                     bounds=self.bounds,
-                                                     brush=self.brush, colour=self.colour, movable=self.movable)
+    def setGLWidget(self, GLWidget):
+        self.GLWidget = GLWidget
+        self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation, bounds=self.bounds,
+                                                               brush=self.brush, colour=self.colour, movable=self.movable)
         self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
-      else:
-        self.GLlinearRegions.setVisible(True)
 
-  def _turnOffPositionPicking(self):
-    # if self.plotWidget is not None:
-    #   self.plotWidget.removeItem(self.linearRegions)
+    def _togglePicking(self):
 
-    if self.GLWidget:
-      if self.GLlinearRegions:
-        self.GLlinearRegions.setVisible(False)
-        self.GLWidget.removeExternalRegion(self.GLlinearRegions)
-        self.GLlinearRegions.valuesChanged.disconnect()
-        self.GLlinearRegions = None
+        if self.application is not None:
+            self.current = self.application.current
+            self.strip = self.current.strip
+            if self.strip is not None:
+                try:
+                    self.GLWidget = self.strip._CcpnGLWidget
+                except Exception as es:
+                    getLogger().debugGL('OpenGL widget not instantiated')
 
-  @pyqtSlot(list)
-  def _lineMoved(self, data):
-    """
-    Get the values from the GLwidget event; values are emitted via pyqtsignal, must be connected to.
-    :param data - a list containing [min, max] for the limits of the region:
-    """
+        if self.GLWidget:
+            if self.pickOnSpectrumButton.isChecked():
+                self.pickOnSpectrumButton.setIcon(self.toggleOnIcon)
+                self._turnOnPositionPicking()
+            elif not self.pickOnSpectrumButton.isChecked():
+                self.pickOnSpectrumButton.setIcon(self.toggleOffIcon)
+                self._turnOffPositionPicking()
+        else:
+            self.pickOnSpectrumButton.setChecked(False)
+            getLogger().debug('Error: OpenGL widget not instantiated for %s' % self.strip)
 
-    # set the spinboxes
-    self.pointBox1.setValue(min(data))
-    self.pointBox2.setValue(max(data))
+    def _turnOnPositionPicking(self):
+        # if self.plotWidget is not None:
+        #   self.plotWidget.addItem(self.linearRegions)
 
-    # set the current values
-    self.values = [min(data), max(data)]
+        if not self.GLWidget and self.current.strip:
+            try:
+                self.setGLWidget(self.current.strip._CcpnGLWidget)
+            except Exception as es:
+                getLogger().debugGL('OpenGL widget not instantiated')
 
-  def _setLinePosition(self, spinBoxNum):
-    """
-    respond to manual changes to the spin boxes
-    """
-    if self.spinBoxes[spinBoxNum].hasFocus():
-      values = []
-      for sb in self.spinBoxes:
-        values.append(sb.value())
+        else:
+            if not self.GLlinearRegions:
+                self.GLlinearRegions = self.GLWidget.addExternalRegion(values=self.values, orientation=self.orientation,
+                                                                       bounds=self.bounds,
+                                                                       brush=self.brush, colour=self.colour, movable=self.movable)
+                self.GLlinearRegions.valuesChanged.connect(self._lineMoved)
+            else:
+                self.GLlinearRegions.setVisible(True)
 
-      # pass changes to the GL widget
-      if self.GLlinearRegions:
-        self.GLlinearRegions.values = [min(values), max(values)]
-      else:
+    def _turnOffPositionPicking(self):
+        # if self.plotWidget is not None:
+        #   self.plotWidget.removeItem(self.linearRegions)
+
+        if self.GLWidget:
+            if self.GLlinearRegions:
+                self.GLlinearRegions.setVisible(False)
+                self.GLWidget.removeExternalRegion(self.GLlinearRegions)
+                self.GLlinearRegions.valuesChanged.disconnect()
+                self.GLlinearRegions = None
+
+    @pyqtSlot(list)
+    def _lineMoved(self, data):
+        """
+        Get the values from the GLwidget event; values are emitted via pyqtsignal, must be connected to.
+        :param data - a list containing [min, max] for the limits of the region:
+        """
+
+        # set the spinboxes
+        self.pointBox1.setValue(min(data))
+        self.pointBox2.setValue(max(data))
+
+        # set the current values
+        self.values = [min(data), max(data)]
+
+    def _setLinePosition(self, spinBoxNum):
+        """
+        respond to manual changes to the spin boxes
+        """
+        if self.spinBoxes[spinBoxNum].hasFocus():
+            values = []
+            for sb in self.spinBoxes:
+                values.append(sb.value())
+
+            # pass changes to the GL widget
+            if self.GLlinearRegions:
+                self.GLlinearRegions.values = [min(values), max(values)]
+            else:
+                self.values = [min(values), max(values)]
+
+    def get(self):
+        """
+        :return: positions displayed on the boxes
+        """
+        if len(self.spinBoxes) > 0:
+            return [sb.value() for sb in self.spinBoxes]
+        else:
+            return [0, 0]
+
+    def setValues(self, values):
+        """
+        set the values of the spinboxes and update the GL widget
+        :param values - list of [min, max]:
+        """
+        self.pointBox1.set(min(values))
+        self.pointBox2.set(max(values))
+
         self.values = [min(values), max(values)]
+        try:
+            if self.GLlinearRegions:
+                self.GLlinearRegions.values = [min(values), max(values)]
+        except Exception as e:
+            getLogger().warn(e)
 
-  def get(self):
-    """
-    :return: positions displayed on the boxes
-    """
-    if len(self.spinBoxes)>0:
-      return [sb.value() for sb in self.spinBoxes]
-    else:
-      return [0,0]
+    def destroy(self, bool_destroyWindow=True, bool_destroySubWindows=True):
+        self._turnOffPositionPicking()
+        self.destroy(bool_destroyWindow=bool_destroyWindow, bool_destroySubWindows=bool_destroySubWindows)
 
-  def setValues(self, values):
-    """
-    set the values of the spinboxes and update the GL widget
-    :param values - list of [min, max]:
-    """
-    self.pointBox1.set(min(values))
-    self.pointBox2.set(max(values))
-
-    self.values = [min(values), max(values)]
-    try:
-      if self.GLlinearRegions:
-        self.GLlinearRegions.values = [min(values), max(values)]
-    except Exception as e:
-      getLogger().warn(e)
-
-
-
-  # def _deleteLater(self):
-  #   'Remove the line from plotWidget if any'
-  #   self._turnOffPositionPicking()
-  #   self.deleteLater()
-
-  def destroy(self, bool_destroyWindow=True, bool_destroySubWindows=True):
-    self._turnOffPositionPicking()
-    self.destroy( bool_destroyWindow=bool_destroyWindow, bool_destroySubWindows=bool_destroySubWindows)
 
 if __name__ == '__main__':
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.popups.Dialog import CcpnDialog
-  app = TestApplication()
-
-  popup = CcpnDialog(windowTitle='Test ',)
-
-  cw = Widget(parent=popup, setLayout=True, grid=(0, 0))
-  pw3 = pg.PlotWidget()
-  cw.getLayout().addWidget(pw3)
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
-  curve = pw3.plot(np.random.normal(size=100) * 1e0, clickable=True)
-  y1 = [1]*100
-  # curve1 = pw3.plot(-np.random.normal(size=100) * 1e0, clickable=True)
-  # curve1 = pw3.plot(y1, clickable=True)
-  # d = curve.yData - y1
-  curveD = pw3.plot(y1, clickable=True)
-  brush = (100, 100, 255)
+    app = TestApplication()
 
+    popup = CcpnDialog(windowTitle='Test ', )
 
-  fills = [FillBetweenRegions(curveD,curve, brush=brush) ]
-  for f in fills:
-    pw3.addItem(f)
-  curve.curve.setClickable(True)
-  curve.setPen('w')  ## white pen
+    cw = Widget(parent=popup, setLayout=True, grid=(0, 0))
+    pw3 = pg.PlotWidget()
+    cw.getLayout().addWidget(pw3)
 
+    curve = pw3.plot(np.random.normal(size=100) * 1e0, clickable=True)
+    y1 = [1] * 100
+    # curve1 = pw3.plot(-np.random.normal(size=100) * 1e0, clickable=True)
+    # curve1 = pw3.plot(y1, clickable=True)
+    # d = curve.yData - y1
+    curveD = pw3.plot(y1, clickable=True)
+    brush = (100, 100, 255)
 
-  w = GLTargetButtonSpinBoxes(parent=popup, plotWidget=pw3, values= [1, 30], colour = 'yellow', step=0.02, orientation='h', grid=(1,0) )
+    fills = [FillBetweenRegions(curveD, curve, brush=brush)]
+    for f in fills:
+        pw3.addItem(f)
+    curve.curve.setClickable(True)
+    curve.setPen('w')  ## white pen
 
-  popup.show()
-  popup.raise_()
-  popup.resize(500,500)
-  app.start()
+    w = GLTargetButtonSpinBoxes(parent=popup, plotWidget=pw3, values=[1, 30], colour='yellow', step=0.02, orientation='h', grid=(1, 0))
+
+    popup.show()
+    popup.raise_()
+    popup.resize(500, 500)
+    app.start()

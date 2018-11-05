@@ -23,37 +23,39 @@ __date__ = "$Date$"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+from ccpn.util.Logging import getLogger
 
 
 class Blank(CcpnDialog):
-  def __init__(self, parent=None, title='Blank', **kwds):
-    super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
-    self.setWindowFlags(self.windowFlags() |
-                          QtCore.Qt.WindowMaximizeButtonHint |
-                          QtCore.Qt.WindowMinimizeButtonHint)
+    def __init__(self, parent=None, title='Blank', **kwds):
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
-  def changeEvent(self, event):
-    if event.type() == QtCore.QEvent.WindowStateChange:
-      if self.windowState() & QtCore.Qt.WindowMinimized:
-        print('>>>Blank changeEvent: Minimised')
-      elif event.oldState() & QtCore.Qt.WindowMinimized:
-        print('>>>Blank changeEvent: Normal/Maximised/FullScreen')
+        self.setWindowFlags(self.windowFlags() |
+                            QtCore.Qt.WindowMaximizeButtonHint |
+                            QtCore.Qt.WindowMinimizeButtonHint)
 
-        # TODO:ED update table from dataFrame
+    def changeEvent(self, event):
+        if event.type() == QtCore.QEvent.WindowStateChange:
+            if self.windowState() & QtCore.Qt.WindowMinimized:
+                getLogger().info('>>>Blank changeEvent: Minimised')
+            elif event.oldState() & QtCore.Qt.WindowMinimized:
+                getLogger().info('>>>Blank changeEvent: Normal/Maximised/FullScreen')
 
-    event.ignore()
+                # TODO:ED update table from dataFrame
+
+        event.ignore()
 
 
 if __name__ == '__main__':
-  from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.widgets.Application import TestApplication
 
-  app = TestApplication()
-  popup = Blank()
 
-  popup.show()
-  popup.raise_()
+    app = TestApplication()
+    popup = Blank()
 
-  app.start()
+    popup.show()
+    popup.raise_()
+
+    app.start()

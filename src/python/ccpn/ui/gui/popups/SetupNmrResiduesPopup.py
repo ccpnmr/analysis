@@ -37,8 +37,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 
 class SetupNmrResiduesPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None,
-               title='Setup nmrResidues', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+               title='Setup nmrResidues', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.parent = parent
     self.mainWindow = mainWindow

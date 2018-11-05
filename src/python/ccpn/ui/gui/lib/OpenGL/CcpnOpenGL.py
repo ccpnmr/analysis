@@ -2473,7 +2473,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def addInfiniteLine(self, values=None, axisCode=None, orientation=None,
                         brush=None, colour='blue',
                         movable=True, visible=True, bounds=None,
-                        obj=None, lineStyle='dashed', **kw):
+                        obj=None, lineStyle='dashed'):
 
         if colour in REGION_COLOURS.keys():
             if colour == 'highlight':
@@ -2540,12 +2540,12 @@ class CcpnGLWidget(QOpenGLWidget):
     def addExternalRegion(self, values=None, axisCode=None, orientation=None,
                           brush=None, colour='blue',
                           movable=True, visible=True, bounds=None,
-                          obj=None, **kw):
+                          obj=None, **kwds):
 
         newRegion = self._externalRegions._addRegion(values=values, axisCode=axisCode, orientation=orientation,
                                                      brush=brush, colour=colour,
                                                      movable=movable, visible=visible, bounds=bounds,
-                                                     obj=obj, **kw)
+                                                     obj=obj, **kwds)
 
         self._externalRegions.renderMode = GLRENDERMODE_REBUILD
         self.update()
@@ -2555,7 +2555,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def addRegion(self, values=None, axisCode=None, orientation=None,
                   brush=None, colour='blue',
                   movable=True, visible=True, bounds=None,
-                  obj=None, **kw):
+                  obj=None):
 
         if colour in REGION_COLOURS.keys():
             brush = REGION_COLOURS[colour]
@@ -2818,12 +2818,12 @@ class CcpnGLWidget(QOpenGLWidget):
             # GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
             # GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
 
-            if not self._updateVTrace:
-                GL.glVertex2d(newCoords[0], 1.0)
-                GL.glVertex2d(newCoords[0], 0.0)
-            if not self._updateHTrace:
-                GL.glVertex2d(0.0, newCoords[1])
-                GL.glVertex2d(1.0, newCoords[1])
+            # if not self._updateVTrace:
+            GL.glVertex2d(newCoords[0], 1.0)
+            GL.glVertex2d(newCoords[0], 0.0)
+            # if not self._updateHTrace:
+            GL.glVertex2d(0.0, newCoords[1])
+            GL.glVertex2d(1.0, newCoords[1])
 
             GL.glEnd()
 

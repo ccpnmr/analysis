@@ -422,8 +422,8 @@ if __name__ == '__main__':
 
   class MyTableModel(TableModel):
 
-    def __init__(self, *args, **kw):
-      TableModel.__init__(self, *args, **kw)
+    def __init__(self, *args, **kwds):
+      TableModel.__init__(self, *args, **kwds)
 
     def numberRows(self):
       return len(data)

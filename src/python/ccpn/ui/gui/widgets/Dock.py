@@ -29,8 +29,8 @@ from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 
 class CcpnDock(Dock):
-  def __init__(self, name, **kw):
-    super(CcpnDock, self).__init__(name=name, area=self)
+  def __init__(self, name):
+    super().__init__(name=name, area=self)
     self.label.hide()
     self.label = CcpnDockLabel(name.upper(), self)
     self.label.show()
@@ -52,7 +52,7 @@ class CcpnDock(Dock):
 class CcpnDockLabel(DockLabel):
 
     def __init__(self, *args):
-      super(CcpnDockLabel, self).__init__(showCloseButton=True, *args)
+      super().__init__(showCloseButton=True, *args)
       self.setFont(moduleLabelFont)
 
     def mousePressEvent(self, ev):

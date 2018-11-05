@@ -1274,10 +1274,10 @@ EXPORT_FORMATS = (TAB_FORMAT, COMMA_FORMAT)
 
 class ObjectTableExport(QtWidgets.QDialog, Base):
 
-  def __init__(self, table=None, **kw):
+  def __init__(self, table=None, **kwds):
 
     super().__init__(table)
-    Base._init(self, **kw)
+    Base._init(self, **kwds)
 
     self.setWindowFlags(QtCore.Qt.Tool)
     self.table = table
@@ -1290,8 +1290,8 @@ class ObjectTableExport(QtWidgets.QDialog, Base):
     self.setMaximumWidth(300)
 
 class ColumnViewSettingsPopup(CcpnDialog):
-  def __init__(self, table, parent=None, hideColumns=None, title='Column Settings', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, table, parent=None, hideColumns=None, title='Column Settings', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
     self.setContentsMargins(20, 20, 20, 20)
     self.table = table
     self.widgetColumnViewSettings = ColumnViewSettings(parent=self, table=table, hideColumns=hideColumns, grid=(0,0))
@@ -1311,8 +1311,8 @@ CheckboxTipText = 'Select column to be visible on the table.'
 class ColumnViewSettings(Widget):
   ''' hide show check boxes corresponding to the table columns '''
 
-  def __init__(self, table, parent=None, direction='v', hideColumns=None, **kw):
-    Widget.__init__(self, parent, setLayout=True, **kw)
+  def __init__(self, table, parent=None, direction='v', hideColumns=None, **kwds):
+    Widget.__init__(self, parent, setLayout=True, **kwds)
     self.direction=direction
     self.table = table
     self.checkBoxes = []
@@ -1395,8 +1395,8 @@ class ColumnViewSettings(Widget):
 
 class ObjectTableFilter(Widget):
 
-  def __init__(self, table, parent=None, **kw):
-    Widget.__init__(self, parent, setLayout=False, **kw)
+  def __init__(self, table, parent=None, **kwds):
+    Widget.__init__(self, parent, setLayout=False, **kwds)
     self.table = table
 
     self.origObjects = self.table.objects

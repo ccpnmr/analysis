@@ -218,11 +218,11 @@ class Pid(str):
             MO='Molecule'
     )
 
-    def __init__(self, string: str, **kw):
+    def __init__(self, string: str, **kwds):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
         Additional arguments are converted to string with disallowed characters changed to altCharacter
         """
-        super().__init__(**kw)  # GWV does not understand this
+        super().__init__(**kwds)  # GWV does not understand this
 
         # inlining this here is 1) faster, 2) guarantees that we never get invalid Pids.
         # We can then assume validity for the rest of the functions

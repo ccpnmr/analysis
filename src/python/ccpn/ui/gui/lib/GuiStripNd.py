@@ -137,7 +137,7 @@ class GuiStripNd(GuiStrip):
         :param spectrumDisplay: spectrumDisplay instance
         """
         #print('GuiStripNd>>', self.spectrumDisplay)
-        GuiStrip.__init__(self, spectrumDisplay, useOpenGL=True)
+        super().__init__(spectrumDisplay, useOpenGL=True)
 
         # the scene knows which items are in it but they are stored as a list and the below give fast access from API object to QGraphicsItem
         ###self.peakLayerDict = {}  # peakList --> peakLayer

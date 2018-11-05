@@ -33,11 +33,11 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
 class ChemicalShiftListPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, chemicalShiftList=None, title='Chemical Shift List', **kw):
+  def __init__(self, parent=None, mainWindow=None, chemicalShiftList=None, title='Chemical Shift List', **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(500,100), **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(500,100), **kwds)
 
     self.mainWindow = mainWindow
     self.project = None

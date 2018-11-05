@@ -78,7 +78,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   #sigClicked = QtCore.Signal(object, object)
 
-  #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None, region=None, **kw):
+  #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None, region=None, **kwds):
   def __init__(self):
     """ guiSpectrumDisplay is the parent
         apiSpectrumView is the (API) SpectrumView object

@@ -32,11 +32,11 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
 class IntegralListPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, integralList=None, title='IntegralList', **kw):
+  def __init__(self, parent=None, mainWindow=None, integralList=None, title='IntegralList', **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

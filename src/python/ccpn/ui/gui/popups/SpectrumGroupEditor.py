@@ -40,11 +40,11 @@ from ccpn.util.Logging import getLogger
 class SpectrumGroupEditor(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None
                , spectrumGroup=None, addNew=False, editorMode=False, spectra = None or []
-               , title='Spectrum Group Setup', **kw):
+               , title='Spectrum Group Setup', **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

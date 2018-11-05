@@ -45,11 +45,11 @@ Labelling = ['None','Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV','ILVA','IL
 class EditSampleComponentPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None
                , sample=None, sampleComponent=None, newSampleComponent=False
-               , title='Edit Sample Component', **kw):
+               , title='Edit Sample Component', **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

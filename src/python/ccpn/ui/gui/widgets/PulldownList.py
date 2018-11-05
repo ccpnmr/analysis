@@ -60,7 +60,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
     :param headerText: text of first item of the pullDown. E.g. '-- Select Item --'
     :param headerEnabled: True to be selectable, False to disable and be grayed out
     :param editable: If True: allows for editing the value
-    :param kw:
+    :param kwds:
     """
     super().__init__(parent)
     Base._init(self, **kwds)

@@ -31,8 +31,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
 class PPdimensionSelector(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, title='Select Dimension', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Select Dimension', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.buttons = ButtonList(self, texts=['Cancel',' 1D ', ' ND '],

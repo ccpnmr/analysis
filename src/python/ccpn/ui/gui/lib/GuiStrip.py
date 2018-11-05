@@ -44,6 +44,7 @@ from ccpn.ui.gui.widgets.LineEdit import FloatLineEdit
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel, StripHeader
 from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
@@ -86,7 +87,7 @@ class GuiStrip(Frame):
         self.current = self.application.current
 
         getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
-        Frame.__init__(self, parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
+        super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True,
                        acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                        )
 
@@ -103,12 +104,12 @@ class GuiStrip(Frame):
         self.layout().setSpacing(0)
 
         self.header = StripHeader(parent=self, mainWindow=self.mainWindow,
-                                  grid=(0, 0), gridSpan=(1, 2), setLayout=True, spacing=(0, 0),
-                                  showBorder=True)
+                                  grid=(0, 0), gridSpan=(1, 2), setLayout=True, spacing=(0, 0))
 
         self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
-        #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
         self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+
+        #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
         # GWV: plotWidget appears not to be responsive to contentsMargins
         # self.plotWidget.setContentsMargins(10, 30, 10, 30)
         # self.getLayout().addWidget(self.plotWidget, 1, 0)
@@ -262,9 +263,9 @@ class GuiStrip(Frame):
         self._droppedNotifier = GuiNotifier(self,
                                             [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                             self.spectrumDisplay._processDroppedItems)
-        self.moveEventNotifier = GuiNotifier(self,
-                                             [GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
-                                             self.spectrumDisplay._processDragEnterEvent)
+        self._moveEventNotifier = GuiNotifier(self,
+                                              [GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
+                                              self.spectrumDisplay._processDragEnterEvent)
 
         # set peakLabelling to the default from preferences or strip to the left
         if len(spectrumDisplay.strips) > 1:
@@ -471,8 +472,7 @@ class GuiStrip(Frame):
         popup._cleanupWidget()
 
     def makeStripPlot(self):
-        """
-        Make a atrip plot in the current spectrumDisplay
+        """Make a strip plot in the current spectrumDisplay
         """
         from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
 
@@ -482,25 +482,20 @@ class GuiStrip(Frame):
         popup._cleanupWidget()
 
     def _unregisterStrip(self):
+        """Unregister all notifiers
+        """
         self._stripNotifier.unRegister()
         self._peakNotifier.unRegister()
         self._integralNotifier.unRegister()
         self._multipletNotifier.unRegister()
         self._stripLabelNotifier.unRegister()
         self._droppedNotifier.unRegister()
+        self._moveEventNotifier.unRegister()
 
     def _updateDisplayedPeaks(self, data):
-        "Callback when peaks have changed"
-        # self.showPeaks(data['object'].peakList)
-
-        # from ccpn.util.CcpnOpenGL import GLNotifier
-        # GLSignals = GLNotifier(parent=self)
-        # GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKNOTIFY], targets=data)
-
-        # try:
+        """Callback when peaks have changed
+        """
         self._CcpnGLWidget._processPeakNotifier(data)
-        # except Exception as es:
-        #   getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     def _updateDisplayedMultiplets(self, data):
         """Callback when multiplets have changed
@@ -563,17 +558,9 @@ class GuiStrip(Frame):
                     self.navigateCursorMenu.setEnabled(False)
 
     def _updateDisplayedIntegrals(self, data):
-        "Callback when peaks have changed"
-        # self.showPeaks(data['object'].peakList)
-
-        # from ccpn.util.CcpnOpenGL import GLNotifier
-        # GLSignals = GLNotifier(parent=self)
-        # GLSignals.emitEvent(triggers=[GLNotifier.GLPEAKNOTIFY], targets=data)
-
-        # try:
+        """Callback when integrals have changed
+        """
         self._CcpnGLWidget._processIntegralNotifier(data)
-        # except Exception as es:
-        #   getLogger().debugGL('OpenGL widget not instantiated', strip=self)
 
     def _highlightCurrentStrip(self, data):
         "Callback to highlight the axes of current strip"

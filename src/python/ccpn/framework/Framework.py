@@ -182,19 +182,19 @@ class Arguments:
   skipUserPreferences = True
   projectPath = None
 
-  def __init__(self, projectPath=None, **kw):
+  def __init__(self, projectPath=None, **kwds):
 
     # Dummy values
     for component in ApplicationNames:
       setattr(self, 'include' + component, None)
 
     self.projectPath = projectPath
-    for tag, val in kw.items():
+    for tag, val in kwds.items():
       setattr(self, tag, val)
 
-def createFramework(projectPath=None, **kw):
+def createFramework(projectPath=None, **kwds):
 
-  args = Arguments(projectPath=projectPath, **kw)
+  args = Arguments(projectPath=projectPath, **kwds)
   result = Framework('CcpNmr', Version.applicationVersion, args)
   result.start()
   #

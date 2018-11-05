@@ -86,9 +86,9 @@ class Entry(QtWidgets.QLineEdit, Base):
 class IntEntry(Entry):
 
   def __init__(self, parent, text=0, callback=None,
-               minValue=-MAXINT, maxValue=MAXINT,  **kw):  
+               minValue=-MAXINT, maxValue=MAXINT,  **kwds):
     
-    Entry.__init__(self, parent, text, callback, **kw)
+    Entry.__init__(self, parent, text, callback, **kwds)
    
     valid = QtGui.QIntValidator(minValue, maxValue, self)
     self.setValidator(valid)
@@ -119,9 +119,9 @@ class FloatEntry(Entry):
   
   def __init__(self, parent, text=0.0, callback=None,
                minValue=-INFINITY, maxValue=INFINITY,
-               decimals=4, **kw):  
+               decimals=4, **kwds):
 
-    Entry.__init__(self, parent, text, callback, **kw)
+    Entry.__init__(self, parent, text, callback, **kwds)
     
     self.decimals = decimals
     self.setText(self.convertInput(text))
@@ -158,18 +158,18 @@ class FloatEntry(Entry):
 
 class RegExpEntry(Entry):
 
-  def __init__(self, parent, text='', callback=None, **kw):  
+  def __init__(self, parent, text='', callback=None, **kwds):
     
-    Entry.__init__(self, parent, text, callback, **kw)
+    Entry.__init__(self, parent, text, callback, **kwds)
     
     self.setValidator(QtGui.QRegExpValidator)
 
 
 class ArrayEntry(Entry):
 
-  def __init__(self, parent, text='', callback=None, **kw):  
+  def __init__(self, parent, text='', callback=None, **kwds):
     
-    Entry.__init__(self, parent, text, callback, **kw)
+    Entry.__init__(self, parent, text, callback, **kwds)
   
   def convertText(self, text):
   
@@ -182,9 +182,9 @@ class ArrayEntry(Entry):
 
 class IntArrayEntry(IntEntry):
 
-  def __init__(self, parent, text='', callback=None, **kw):  
+  def __init__(self, parent, text='', callback=None, **kwds):
     
-    IntEntry.__init__(self, parent, text, callback, **kw)
+    IntEntry.__init__(self, parent, text, callback, **kwds)
   
   def convertText(self, text):
   
@@ -199,9 +199,9 @@ class IntArrayEntry(IntEntry):
 
 class FloatArrayEntry(FloatEntry):
 
-  def __init__(self, parent, text='', callback=None, **kw):  
+  def __init__(self, parent, text='', callback=None, **kwds):
     
-    FloatEntry.__init__(self, parent, text, callback, **kw)
+    FloatEntry.__init__(self, parent, text, callback, **kwds)
   
   def convertText(self, text):
   
@@ -215,9 +215,9 @@ class FloatArrayEntry(FloatEntry):
 
 class LabelledEntry(Frame):
 
-  def __init__(self, parent, labelText, entryText='', callback=None, maxLength=32,  tipText=None, **kw):  
+  def __init__(self, parent, labelText, entryText='', callback=None, maxLength=32,  tipText=None, **kwds):
     
-    Frame.__init__(self, parent, tipText=tipText, **kw)
+    Frame.__init__(self, parent, tipText=tipText, **kwds)
   
     self.label = Label(self, labelText, tipText=tipText, grid=(0,0))
     self.entry = Entry(self, entryText, callback, maxLength,
@@ -242,9 +242,9 @@ class LabelledEntry(Frame):
 class LabelledIntEntry(LabelledEntry):
 
   def __init__(self, parent, labelText, entryText='', callback=None,
-               minValue=-MAXINT, maxValue=MAXINT,  tipText=None, **kw):  
+               minValue=-MAXINT, maxValue=MAXINT,  tipText=None, **kwds):
     
-    Frame.__init__(self, parent, tipText=tipText, **kw)
+    Frame.__init__(self, parent, tipText=tipText, **kwds)
   
     self.label = Label(self, labelText, tipText=tipText, grid=(0,0))
     self.entry = IntEntry(self, entryText, callback, minValue,
@@ -254,9 +254,9 @@ class LabelledIntEntry(LabelledEntry):
 class LabelledFloatEntry(LabelledEntry):
 
   def __init__(self, parent, labelText, entryText='', callback=None,
-               minValue=-MAXINT, maxValue=MAXINT, decimals=4, tipText=None, **kw):  
+               minValue=-MAXINT, maxValue=MAXINT, decimals=4, tipText=None, **kwds):
     
-    Frame.__init__(self, parent, tipText=tipText, **kw)
+    Frame.__init__(self, parent, tipText=tipText, **kwds)
   
     self.label = Label(self, labelText, tipText=tipText, grid=(0,0))
     self.entry = FloatEntry(self, entryText, callback, minValue,

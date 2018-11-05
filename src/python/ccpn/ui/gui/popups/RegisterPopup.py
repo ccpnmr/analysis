@@ -51,8 +51,8 @@ validEmailRegex = re.compile(r'^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-_]+\.)+[A-Za-z]{
 
 # class RegisterPopup(QtWidgets.QDialog):
 class RegisterPopup(CcpnDialog):
-  def __init__(self, parent=None, version='3', title='Register with CCPN', modal=False, **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, parent=None, version='3', title='Register with CCPN', modal=False, **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.version = version
     
@@ -117,7 +117,7 @@ This needs to be done once on every computer you use the programme on.
 
     entryBox.setPalette(palette)
 
-  def _toggledCheckBox(self, *args, **kw):
+  def _toggledCheckBox(self):
     self.registerButton.setEnabled(self.licenseCheckBox.isChecked())
 
   def _showLicense(self):

@@ -49,13 +49,13 @@ SEP = ', '
 
 
 class SubstancePropertiesPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None
-               , substance=None, sampleComponent=None, newSubstance=False
-               , title='Substance Properties', **kw):
+  def __init__(self, parent=None, mainWindow=None,
+               substance=None, sampleComponent=None, newSubstance=False,
+               title='Substance Properties', **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     # self.setModal(True)         # ejb - WHY????
 

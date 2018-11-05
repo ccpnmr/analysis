@@ -45,8 +45,8 @@ class PeakFindPopup(CcpnDialog):
   PeakFind for nD spectra
   This popup works only for nDs. (Should be renamed?)
   """
-  def __init__(self, parent=None, mainWindow=None, **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='', **kw)
+  def __init__(self, parent=None, mainWindow=None, **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle='', **kwds)
 
     self.mainWindow = mainWindow
     self.project = self.mainWindow.project

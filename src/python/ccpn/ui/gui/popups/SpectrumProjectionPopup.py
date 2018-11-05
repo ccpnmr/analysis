@@ -42,8 +42,8 @@ import os
 
 
 class SpectrumProjectionPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, title='Make Spectrum Projection', **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    def __init__(self, parent=None, mainWindow=None, title='Make Spectrum Projection', **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         self.project = self.mainWindow.project

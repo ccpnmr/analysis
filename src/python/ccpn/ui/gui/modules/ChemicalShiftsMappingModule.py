@@ -196,7 +196,7 @@ class ChemicalShiftsMapping(CcpnModule):
   settingsPosition = 'left'
   className = 'ChemicalShiftsMapping'
 
-  def __init__(self, mainWindow, name='Chemical Shift Mapping', nmrChain= None, **kw):
+  def __init__(self, mainWindow, name='Chemical Shift Mapping', nmrChain= None, **kwds):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name, settingButton=True)
 
     BarGraph.mouseClickEvent = self._mouseClickEvent

@@ -190,7 +190,7 @@ class GuiSpectrumDisplay(CcpnModule):
         else:
             self.spectrumUtilToolBar.hide()
 
-        self.stripFrame = Frame(setLayout=True, showBorder=True, spacing=(5, 0), stretch=(1, 1))
+        self.stripFrame = Frame(setLayout=True, showBorder=False, spacing=(5, 0), stretch=(1, 1))
         self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
         if useScrollArea:
@@ -670,6 +670,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 getLogger().debug2('unregistering strip: %s' % strip)
                 strip._unregisterStrip()
             self.droppedNotifier.unRegister()
+            self._toolbarNotifier.unRegister()
 
         finally:
             CcpnModule._closeModule(self)

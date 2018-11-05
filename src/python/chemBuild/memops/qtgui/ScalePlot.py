@@ -136,10 +136,10 @@ class ScalePlot(QtWidgets.QGraphicsView, Base):
 
   def __init__(self, parent, scalePoints,
                getColor=None, length=300, width=25, title='Scale Plot',
-               axisName='Scale', isVertical=False, showGrid=True, **kw):
+               axisName='Scale', isVertical=False, showGrid=True, **kwds):
       
     QtWidgets.QGraphicsView.__init__(self, parent)
-    Base.__init__(self, parent, **kw)
+    Base.__init__(self, parent, **kwds)
     
     self.getColor = getColor or self._defaultColor
     self.parent = parent

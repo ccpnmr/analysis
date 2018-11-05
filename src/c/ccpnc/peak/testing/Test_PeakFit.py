@@ -39,7 +39,7 @@ class PeakFitTest(CoreTesting):
   # Path of project to load (None for new project
   projectPath = 'CcpnCourse1a'
 
-  def Test_PeakFit(self, *args, **kw):
+  def Test_PeakFit(self, *args, **kwds):
     spectrum = self.nmrProject.findFirstExperiment(name='HSQC').findFirstDataSource()
     data = spectrum.getPlaneData()
     print('data.shape = %s' % (data.shape,))

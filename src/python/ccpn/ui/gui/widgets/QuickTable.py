@@ -140,7 +140,7 @@ QuickTable::item::selected {
         :param enableExport:
         :param enableDelete:
         :param hideIndex:
-        :param kw:
+        :param kwds:
         """
         super().__init__(parent)
         Base._init(self, **kwds)

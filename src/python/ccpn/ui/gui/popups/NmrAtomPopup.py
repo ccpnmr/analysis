@@ -16,11 +16,11 @@ from ccpn.util.Logging import getLogger
 ###from ccpn.framework.Framework import createFramework  # see note below
 
 class NmrAtomPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, nmrAtom=None, title='Nmr Atom', **kw):
+  def __init__(self, parent=None, mainWindow=None, nmrAtom=None, title='Nmr Atom', **kwds):
     """
     Initialise the widget
     """
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

@@ -106,7 +106,7 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 
 
-  def __init__(self, mainWindow, name=moduleName, pipes=None, templates=None, **kw):
+  def __init__(self, mainWindow, name=moduleName, pipes=None, templates=None, **kwds):
     super(GuiPipeline, self)
 
 
@@ -870,8 +870,8 @@ class GuiPipeline(CcpnModule, Pipeline):
 
 class FilterMethods(CcpnDialog):
 
-  def __init__(self, parent=None, mainWindow=None, title='Preferred Pipes', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, title='Preferred Pipes', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
 
     self.parent = parent
     self._setMainLayout()

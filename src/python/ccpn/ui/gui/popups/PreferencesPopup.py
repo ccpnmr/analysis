@@ -65,8 +65,8 @@ NotImplementedTipText = 'This option has not been implemented yet'
 
 
 class PreferencesPopup(CcpnDialog):
-    def __init__(self, parent=None, mainWindow=None, preferences=None, title='Preferences', **kw):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(300, 100), **kw)
+    def __init__(self, parent=None, mainWindow=None, preferences=None, title='Preferences', **kwds):
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(300, 100), **kwds)
 
         self.mainWindow = mainWindow
         if self.mainWindow:

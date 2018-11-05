@@ -41,11 +41,11 @@ class DeleteItemsPopup(CcpnDialog):
     i.e. (('Peaks', peakList), ('Multiplets',multipletList))
     """
 
-    def __init__(self, parent=None, mainWindow=None, title='Delete Items', items=None, **kw):
+    def __init__(self, parent=None, mainWindow=None, title='Delete Items', items=None, **kwds):
         """
         Initialise the widget
         """
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         self.application = mainWindow.application

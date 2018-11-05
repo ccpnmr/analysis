@@ -49,11 +49,11 @@ class ExportNefPopup(ExportDialog):
                  preferences=None,
                  selectFile=None,
                  filter='*',
-                 **kw):
+                 **kwds):
         super(ExportNefPopup, self).__init__(parent=parent, mainWindow=mainWindow, title=title,
                                              fileMode=fileMode, text=text, acceptMode=acceptMode,
                                              preferences=preferences, selectFile=selectFile,
-                                             filter=filter, **kw)
+                                             filter=filter, **kwds)
 
     def initialise(self, userFrame):
         self.buttonCCPN = CheckBox(userFrame, checked=True,

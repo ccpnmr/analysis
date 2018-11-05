@@ -351,7 +351,7 @@ class AbstractWrapperObject():
   # The function (e.g. Project.newMolecule), ... must create a new child object
   # AND ALL UNDERLYING DATA, taking in all parameters necessary to do so. 
   # This can be done by defining a function (not a method)
-  # def newMolecule( self, *args, **kw):
+  # def newMolecule( self, *args, **kwds):
   # and then doing Project.newMolecule = newMolecule
 
   # CCPN functions

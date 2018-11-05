@@ -38,8 +38,8 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialog      # ejb
 class SelectObjectsPopup(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None,
                dim=None, objects=None,
-               title='Select Objects', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+               title='Select Objects', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.project = self.mainWindow.project

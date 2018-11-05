@@ -347,7 +347,7 @@ class ListWidgetPair(Frame):
                  acceptDrops=False,
                  showMoveArrows=True,
                  showMoveText=False,
-                 title='Copy Items', **kw):
+                 title='Copy Items', **kwds):
         """
         Initialise the pair of listWidgets
         :param parent:
@@ -358,9 +358,9 @@ class ListWidgetPair(Frame):
         :param multiSelect:
         :param acceptDrops:
         :param pairName:
-        :param kw:
+        :param kwds:
         """
-        Frame.__init__(self, parent, **kw)
+        Frame.__init__(self, parent, **kwds)
 
         self.title = Label(self, text=title, setLayout=True, grid=(0, 0), gridSpan=(1, 7), hAlign='l')
         self.leftList = ListWidget(self, setLayout=True, grid=(1, 1), gridSpan=(5, 1), acceptDrops=True,
@@ -556,7 +556,7 @@ class ListWidgetSelector(Frame):
                  contextMenu=True,
                  multiSelect=True,
                  acceptDrops=False,
-                 title='Copy Items', **kw):
+                 title='Copy Items', **kwds):
         """
         Initialise the pair of listWidgets
         :param parent:
@@ -567,9 +567,9 @@ class ListWidgetSelector(Frame):
         :param multiSelect:
         :param acceptDrops:
         :param pairName:
-        :param kw:
+        :param kwds:
         """
-        Frame.__init__(self, parent, **kw)
+        Frame.__init__(self, parent, **kwds)
 
         self.title = Label(self, text=title, setLayout=True, grid=(0, 0), gridSpan=(1, 7), hAlign='l')
         self.leftList = ListWidget(self, setLayout=True, grid=(1, 1), gridSpan=(5, 1), acceptDrops=True,

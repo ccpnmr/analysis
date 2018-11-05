@@ -37,8 +37,8 @@ from ccpn.util.Logging import getLogger
 
 
 class MultipletListPropertiesPopup(CcpnDialog):
-  def __init__(self, parent=None, mainWindow=None, multipletList=None, title='Multiplet List Properties', **kw):
-    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+  def __init__(self, parent=None, mainWindow=None, multipletList=None, title='Multiplet List Properties', **kwds):
+    CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
     self.mainWindow = mainWindow
     self.application = mainWindow.application

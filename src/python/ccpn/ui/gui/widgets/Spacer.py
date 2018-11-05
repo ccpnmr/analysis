@@ -31,13 +31,13 @@ class Spacer(QtWidgets.QSpacerItem):
   """
   Widget used to put spaces into modules and popups.
   """
-  def __init__(self, parent=None, *args, **kw):
+  def __init__(self, parent=None, *args, **kwds):
     """
 
     :param parent:
     :param args:
-    :param kw:
+    :param kwds:
     """
     QtWidgets.QSpacerItem.__init__(self, *args)
 
-    parent.layout().addItem(self, kw['grid'][0], kw['grid'][1], kw['gridSpan'][0], kw['gridSpan'][1])
+    parent.layout().addItem(self, kwds['grid'][0], kwds['grid'][1], kwds['gridSpan'][0], kwds['gridSpan'][1])

@@ -1,4 +1,6 @@
 """Pid (Project ID) class for within-project unique ID strings.
+Version-3 Pid routines
+
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -8,7 +10,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -25,16 +27,13 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-"""
-Version 2/3 Pid routines
-"""
 
 from typing import List, Optional, Tuple
 
-try:
-  from cing import __version__
-except ImportError:
-  __version__ = '???'
+# try:
+#   from cing import __version__
+# except ImportError:
+#   __version__ = '???'
 
 # set separators
 PREFIXSEP = ':'
@@ -43,44 +42,47 @@ IDSEP = '.'
 # Set translation between IDSEP and alternative character
 altCharacter = '^'
 backupAltCharacter = '`'
-remapSeparators = str.maketrans(IDSEP,altCharacter)
+remapSeparators = str.maketrans(IDSEP, altCharacter)
 unmapSeparators = str.maketrans(altCharacter, IDSEP)
 
-def createPid(head:str, *args:str) -> 'Pid':
-  """make pid from head and list of successive keys.
-  Head may be an existing pid, or a naked string
-  Keys are converted to string, and illegal characters are converted to altCharacter
-  The head is  not checked - it should be either a valid pid or a class code"""
 
-  # map args to corrected strings
-  ll = [val.translate(remapSeparators) for val in args]
+def createPid(head: str, *args: str) -> 'Pid':
+    """make pid from head and list of successive keys.
+    Head may be an existing pid, or a naked string
+    Keys are converted to string, and illegal characters are converted to altCharacter
+    The head is  not checked - it should be either a valid pid or a class code"""
 
-  if head[-1] == PREFIXSEP:
-      sep = ''
-  elif PREFIXSEP in head:
-      sep = IDSEP
-  else:
-      sep = PREFIXSEP
-  #
-  return Pid(sep.join((head, IDSEP.join(ll))))
+    # map args to corrected strings
+    ll = [val.translate(remapSeparators) for val in args]
+
+    if head[-1] == PREFIXSEP:
+        sep = ''
+    elif PREFIXSEP in head:
+        sep = IDSEP
+    else:
+        sep = PREFIXSEP
+    #
+    return Pid(sep.join((head, IDSEP.join(ll))))
+
 
 def createId(*args) -> str:
-  """make id from list of successive keys.
-  Keys are converted to string, and illegal characters are converted to altCharacter"""
+    """make id from list of successive keys.
+    Keys are converted to string, and illegal characters are converted to altCharacter"""
 
-  # map args to corrected strings
-  return IDSEP.join(('' if val is None else str(val).translate(remapSeparators))
-                    for val in args)
+    # map args to corrected strings
+    return IDSEP.join(('' if val is None else str(val).translate(remapSeparators))
+                      for val in args)
+
 
 def splitId(idString) -> List[Optional[str]]:
-  """Split idString into tuple of component elements,
-  mapping altCharacter back to separator and replacing empty strings with None"""
+    """Split idString into tuple of component elements,
+    mapping altCharacter back to separator and replacing empty strings with None"""
 
-  # map args to corrected strings
-  return list((val.translate(unmapSeparators) or None) for val in idString.split(IDSEP))
+    # map args to corrected strings
+    return list((val.translate(unmapSeparators) or None) for val in idString.split(IDSEP))
 
 
-def decodePid(sourceObject, thePid:'Pid') -> 'Optional[Pid]':
+def decodePid(sourceObject, thePid: 'Pid') -> 'Optional[Pid]':
     """
     try to decode thePid relative to sourceObject
     return decoded pid object or None on not found or Error
@@ -111,7 +113,6 @@ def decodePid(sourceObject, thePid:'Pid') -> 'Optional[Pid]':
         except ValueError:
             io.error('decodePid: pid "{0}" is invalid', thePid)
 
-
         #end if
     #end if
 
@@ -121,7 +122,7 @@ def decodePid(sourceObject, thePid:'Pid') -> 'Optional[Pid]':
     #end if
 
     # check if thePid describes the source object
-    if hasattr(sourceObject,'asPid'):
+    if hasattr(sourceObject, 'asPid'):
         if sourceObject.asPid == thePid:
             return sourceObject
     #end if
@@ -141,7 +142,6 @@ def decodePid(sourceObject, thePid:'Pid') -> 'Optional[Pid]':
                  thePid.type, objType)
         return None
     return obj
-#end def
 
 
 class Pid(str):
@@ -212,13 +212,13 @@ class Pid(str):
     502 in pid.fields
     -> False    # all pid elements are strings
     """
-    
+
     # name mapping dictionary
     nameMap = dict(
-        MO = 'Molecule'
+            MO='Molecule'
     )
 
-    def __init__(self, string:str, **kw):
+    def __init__(self, string: str, **kw):
         """First argument ('string' must be a valid pid string with at least one, non-initial PREFIXSEP
         Additional arguments are converted to string with disallowed characters changed to altCharacter
         """
@@ -234,21 +234,21 @@ class Pid(str):
     @property
     def type(self) -> str:
         """return type part of pid"""
-        return self.split(PREFIXSEP,1)[0]
-    
+        return self.split(PREFIXSEP, 1)[0]
+
     @property
     def id(self) -> str:
         """return id part of pid"""
-        return self.split(PREFIXSEP,1)[1]
+        return self.split(PREFIXSEP, 1)[1]
 
     @property
     def fields(self) -> Tuple[str, ...]:
-      """id part of pid as a tuple of fields"""
-      return tuple(self._split()[1:])
+        """id part of pid as a tuple of fields"""
+        return tuple(self._split()[1:])
 
     @staticmethod
-    def isValid(text:str) -> bool:
-         return PREFIXSEP in text and text[0] != PREFIXSEP
+    def isValid(text: str) -> bool:
+        return PREFIXSEP in text and text[0] != PREFIXSEP
 
     # NBNB TODO function name 'str' confuses Sphinx documentation and is bad for, Change it?
     @property
@@ -268,7 +268,7 @@ class Pid(str):
         return result
 
     @staticmethod
-    def new( *args:object) -> 'Pid':
+    def new(*args: object) -> 'Pid':
         """
         Return Pid object from arguments
         Apply str() on all arguments
@@ -281,10 +281,10 @@ class Pid(str):
             #args = list(args) # don't know why I have to use the list operator
             args[0] = Pid.nameMap[args[0]]
         #end if
-        return Pid( Pid._join(*args) )
+        return Pid(Pid._join(*args))
 
     @staticmethod
-    def _join(*args:str) -> str:
+    def _join(*args: str) -> str:
         """Join args using the rules for constructing a pid
         """
 
@@ -294,7 +294,7 @@ class Pid(str):
         else:
             return ''
 
-    def modify(self, index:int, newId:object, newType:str=None) -> 'Pid':
+    def modify(self, index: int, newId: object, newType: str = None) -> 'Pid':
         """Return new pid with position index modified by newId or newType replaced
         """
         parts = self._split()
@@ -305,7 +305,7 @@ class Pid(str):
             idparts[index] = newId
         except IndexError:
             import cing.Libs.io as io
-            io.error('Pid.modify: invalid index ({0})\n', index+1)
+            io.error('Pid.modify: invalid index ({0})\n', index + 1)
         parts[1:] = idparts
 
         if newType is not None:
@@ -313,19 +313,19 @@ class Pid(str):
 
         return Pid.new(*parts)
 
-    def extend(self, *args:object):
-      """Make copy with additional fields """
-      return self._join(self._split() + [str(x) for x in args])
+    def extend(self, *args: object):
+        """Make copy with additional fields """
+        return self._join(self._split() + [str(x) for x in args])
 
-    def increment(self, index:str, value:int=1) -> 'Pid':
+    def increment(self, index: str, value: int = 1) -> 'Pid':
         """Return new pid with position index incremented by value
         Assumes integer valued id at position index
         """
         parts = self._split()
-        parts[index+1] = int(parts[index+1]) + value
+        parts[index + 1] = int(parts[index + 1]) + value
         return Pid.new(*parts)
 
-    def decrement(self, index:int, value:int=1) -> 'Pid':
+    def decrement(self, index: int, value: int = 1) -> 'Pid':
         """Return new pid with position index decremented by value
         Assumes integer valued id at position index
         """
@@ -338,3 +338,11 @@ class Pid(str):
         parts = self._split()
         return Pid.new(*parts)
 
+    def definesInstance(self, klass):
+        """Returns True if pid.type defines an instance of V3-object klass
+        """
+        if hasattr(klass, 'shortClassName') and self.type == klass.shortClassName:
+            return True
+        if hasattr(klass, 'className') and self.type == klass.className:
+            return True
+        return False

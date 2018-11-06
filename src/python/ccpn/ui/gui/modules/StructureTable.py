@@ -38,14 +38,14 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.QuickTable import QuickTable
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.PulldownListsForObjects import StructurePulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import StructureEnsemblePulldown
 from ccpn.ui.gui.widgets.Table import ObjectTable
 from ccpn.ui.gui.widgets.Column import Column, ColumnClass
 from PyQt5 import QtGui, QtWidgets, QtCore, QtOpenGL
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.StructureEnsemble import EnsembleData
-from ccpn.ui._implementation.Module import Module
+# from ccpn.ui._implementation.Module import Module
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -454,7 +454,7 @@ class StructureTable(QuickTableStructure):
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0), gridSpan=(1, 1))
-        self.stWidget = StructurePulldown(parent=self._widget,
+        self.stWidget = StructureEnsemblePulldown(parent=self._widget,
                                           project=self._project, default=0,  # first Structure in project (if present),
                                           grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                           showSelectName=True,

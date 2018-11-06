@@ -146,6 +146,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
   #
   #   return False
 
+  @property
+  def modules(self):
+    "Return tuple of modules currently displayed"
+    return tuple([m for m in self.moduleArea.modules.values()])
+
   def _activatedkeySequence(self, ev):
     key = ev.key()
     self.statusBar().showMessage('key: %s' % str(key))

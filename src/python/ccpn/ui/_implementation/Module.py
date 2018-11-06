@@ -195,13 +195,13 @@ def _newModule(self:Project, moduleType:str, title:str=None, window:Window=None,
 Project.newModule = _newModule
 del _newModule
 
-
-# Window.modules property
-def getter(window:Window):
-  ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiGenericModule)]
-  return tuple(window._project._data2Obj[x] for x in ll)
-Window.modules = property(getter, None, None, "Modules shown in Window")
-del getter
+# GWV commented 6/11/18 as it does not work
+# # Window.modules property
+# def getter(window:Window):
+#   ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiGenericModule)]
+#   return tuple(window._project._data2Obj[x] for x in ll)
+# Window.modules = property(getter, None, None, "Modules shown in Window")
+# del getter
 
 # Notifiers:
 

@@ -1587,15 +1587,11 @@ class Spectrum(AbstractWrapperObject):
                 pass
         return newSpectrum
 
+    @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
     def delete(self):
         """Delete Spectrum"""
         self._startCommandEchoBlock('delete')
         try:
-            # Check if there was a planedata cache, and if so, clear it
-            if hasattr(self,PLANEDATACACHE):
-                cache = getattr(self, PLANEDATACACHE)
-                cache.clear()
-
             specDisplays = []
             specViews = []
             for sp in self.spectrumViews:

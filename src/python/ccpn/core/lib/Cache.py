@@ -1,18 +1,24 @@
 """
-Cache object and cached decorator
+Cache object and cached / cached.clear decorators
 
 Typical usage:
 
-@cached('_myFuncCache', maxItems=100)
-def myFunc(obj, arg1, arg2, kwd1=True)
-    some action,
-    return result
+    @cached('_myFuncCache', maxItems=100)  # cache for 100 items gets created if it does not exist
+    def myFunc(obj, arg1, arg2, kwd1=True)
+        # some action here
+        return result
 
 On cleaning up:
 
-if hasattr(obj, '_myFuncCache'):
-    cache = getattr(obj, '_myFuncCache')
-    cache.clear()
+    @cached.clear('_myFuncCache')
+    def cleaningUp(self)
+        # action here
+
+or alternatively in your code:
+
+    if hasattr(obj, '_myFuncCache'):
+        cache = getattr(obj, '_myFuncCache')
+        cache.clear()
 
 """
 
@@ -44,6 +50,7 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import decorator
 import inspect
+import sys
 
 DEBUG = False
 
@@ -53,7 +60,8 @@ class Cache(object):
 
     - Retains (item, value) pairs; item must be a hash-able object (e.g. tuple)
     - Retains either maxItem or unlimited number of objects.
-    - Clearing cache is responsibility of the instantiating code
+    - Clearing cache is responsibility of the instantiating code; e.g. by decorating a cleanup function
+      with cached.clear(attributeName); see above in description for example.
     """
 
     def __init__(self, maxItems=None):
@@ -68,14 +76,14 @@ class Cache(object):
     def add(self, item, value):
         """add item,value to the cache
         """
-        if DEBUG: print('DEBUG> Adding to cache:', item)
+        if DEBUG: sys.stderr.write('DEBUG> Cache: Adding "%s"\n' % item)
         if self.hasItem(item):
             return   # item is already cached
 
         if self._maxItems and len(self._items) == self._maxItems:
             # need to remove one item first
             itm = self._items.pop(0)
-            if DEBUG: print('DEBUG> removing item from cache:', itm)
+            if DEBUG: sys.stderr.write('DEBUG> Cache: removing "%s"\n' % itm)
             del(self._cacheDict[itm])
 
         self._cacheDict[item] = value
@@ -84,7 +92,7 @@ class Cache(object):
     def get(self, item):
         """Get item from cache; return None if not present
         """
-        if DEBUG: print('DEBUG> getting from cache:', item)
+        if DEBUG: sys.stderr.write('DEBUG> Cache: getting "%s"\n' % item)
         if not self.hasItem(item):
             return None
         return self._cacheDict[item]
@@ -97,7 +105,7 @@ class Cache(object):
     def clear(self):
         """Clear all items from the cache
         """
-        if DEBUG: print('DEBUG> clearing cache')
+        if DEBUG: sys.stderr.write('DEBUG> Cache: clearing\n')
         self._cacheDict = {}
         self._items = []
 
@@ -107,6 +115,8 @@ def cached(attributeName, maxItems=0):
     A decorator for initiating cached function call
     Works on functions that pass an object as the first argument; e.g. self
     attributeName defines the cache object
+
+    cached.clear (defined below) is a decorator to clear the cache
     """
 
     @decorator.decorator
@@ -129,8 +139,6 @@ def cached(attributeName, maxItems=0):
         # convert to a string
         item = repr(item)
 
-        #print('Decorator>>>', item)
-
         if not hasattr(obj, attributeName):
             setattr(obj, attributeName, Cache(maxItems=maxItems))
         cache = getattr(obj, attributeName)
@@ -147,6 +155,31 @@ def cached(attributeName, maxItems=0):
         return result
 
     return decoratedFunc
+
+
+def _clear(attributeName):
+    """
+    cached.clear decorator; clear cache of object if it existed
+    """
+
+    @decorator.decorator
+    def decoratedFunc(*args, **kwds):
+        # def myFunc(obj, *args, **kwds):
+        # to avoid potential conflicts with potential 'func' named keywords
+        func = args[0]
+        args = args[1:]
+
+        obj = args[0]
+        # check attributeName for a cache instance, and if present, clear it
+        if hasattr(obj, attributeName):
+            cache = getattr(obj, attributeName)
+            if isinstance(cache, Cache):
+                cache.clear()
+        result = func(*args, **kwds)
+        return result
+    return decoratedFunc
+
+cached.clear = _clear
 
 
 if __name__ == "__main__":
@@ -166,6 +199,10 @@ if __name__ == "__main__":
         def add2(self, values, test=True):
             return [v.capitalize() for v in values]
 
+        @cached.clear('cache')
+        def doClear(self):
+            print('clearing')
+
     a = myclass()
     print(a.add('aap noot mies'.split()))
     print(a.add('aap noot mies'.split()))
@@ -174,4 +211,7 @@ if __name__ == "__main__":
 
     v = 'fijn zo'.split()
     print(a.add2(v))
+    print(a.add2(v, False))
+
+    a.doClear()
     print(a.add2(v, False))

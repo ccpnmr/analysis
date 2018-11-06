@@ -195,8 +195,8 @@ def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None
     spectrumDisplay.spectrumGroupToolBar.show()
     spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
     mainWindow.application.current.strip = spectrumDisplay.strips[0]
-    if spectrumGroup.spectra[0].dimensionCount == 1:
-      mainWindow.application.current.strip.plotWidget.autoRange()
+    if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
+      spectrumDisplay._maximiseRegions()
 
 def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
   """
@@ -460,13 +460,13 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
       else:
         # with progressManager(self.mainWindow, 'Loading data... ' + url):
-          try:
+          try: #  Why do we need this try?
             data = self.project.loadData(url)
-
-            objs.extend(data)
+            if data:
+              objs.extend(data)
           except Exception as es:
             getLogger().warning('loadData Error: %s' % str(es))
-        #   try:
+        # #   try:
 
           # except Exception as es:
           #   getLogger().warning('loadData Error: %s' % str(es))

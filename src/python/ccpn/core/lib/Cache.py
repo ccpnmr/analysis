@@ -1,6 +1,21 @@
 """
-Cache object
+Cache object and cached decorator
+
+Typical usage:
+
+@cached('_myFuncCache', maxItems=100)
+def myFunc(obj, arg1, arg2, kwd1=True)
+    some action,
+    return result
+
+On cleaning up:
+
+if hasattr(obj, '_myFuncCache'):
+    cache = getattr(obj, '_myFuncCache')
+    cache.clear()
+
 """
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -114,7 +129,7 @@ def cached(attributeName, maxItems=0):
         # convert to a string
         item = repr(item)
 
-        print('Decorator>>>', item)
+        #print('Decorator>>>', item)
 
         if not hasattr(obj, attributeName):
             setattr(obj, attributeName, Cache(maxItems=maxItems))

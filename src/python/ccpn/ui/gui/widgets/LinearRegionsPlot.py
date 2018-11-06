@@ -74,7 +74,7 @@ class TargetButtonSpinBoxes(Widget):
   def __init__(self, parent, application=None, orientation = 'v', plotWidget=None, values=None, step=None,
                colour = None, brush = None, movable=True, bounds=None, **kwds):
     super().__init__(parent, setLayout=True, **kwds)
-    self.parent = parent
+    self._parent = parent
     self.plotWidget = plotWidget
     self.application = application
 

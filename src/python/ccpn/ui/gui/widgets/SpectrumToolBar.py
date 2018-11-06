@@ -47,7 +47,7 @@ class SpectrumToolBar(ToolBar):
 
     super().__init__(parent=parent, **kwds)
     self.widget = widget
-    self.parent = parent
+    self._parent = parent
     self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     self.eventFilter = self._eventFilter
     self.installEventFilter(self)

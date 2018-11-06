@@ -71,7 +71,7 @@ class NoiseThresholdGuiPipe(GuiPipe):
   def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
     super(NoiseThresholdGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self.parent = parent
+    self._parent = parent
 
     self.estimateNoiseThresholdLabel = Label(self.pipeFrame, EstimateNoiseThreshold, grid=(0, 0))
     setattr(self, EstimateNoiseThreshold,

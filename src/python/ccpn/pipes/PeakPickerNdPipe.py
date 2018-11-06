@@ -73,7 +73,7 @@ class PeakPickerNdGuiPipe(GuiPipe):
   def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
     super(PeakPickerNdGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self.parent = parent
+    self._parent = parent
 
     row = 0
     self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))

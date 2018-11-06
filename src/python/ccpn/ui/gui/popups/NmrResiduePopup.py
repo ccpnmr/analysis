@@ -54,7 +54,7 @@ class NmrResiduePopup(CcpnDialog):
         self.project = mainWindow.application.project
         self.current = mainWindow.application.current
 
-        self.parent = parent
+        self._parent = parent
         self.nmrAtom = nmrAtom
 
         row = 0

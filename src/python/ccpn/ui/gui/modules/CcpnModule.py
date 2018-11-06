@@ -375,9 +375,9 @@ class CcpnModule(Dock, DropBase):
         self._allChildren = set()
 
     def setWidgetTransparency(self, transparent):
-
-        return
-
+        """Set the transparency of the mainWidgets, currently required because
+        dragMovevent is not propagated through all the widgets
+        """
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)
         if self.settingsWidget:
             self.settingsWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)

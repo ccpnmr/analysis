@@ -69,7 +69,7 @@ class CreateNmrChainPopup(CcpnDialog):
                , title='Create NmrChain', **kwds):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title,size=(200,300),  **kwds)
 
-    self.parent = parent
+    self._parent = parent
     self.mainWindow = mainWindow
     self.project = None
     if self.mainWindow:

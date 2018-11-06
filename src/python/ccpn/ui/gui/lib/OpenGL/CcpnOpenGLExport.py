@@ -98,7 +98,7 @@ class GLExporter():
         :param fileName - not required:
         :param params - parameter dict from the exporter dialog:
         """
-        self.parent = parent
+        self._parent = parent
         self.strip = strip
         self.project = self.strip.project
         self.filename = filename
@@ -115,11 +115,11 @@ class GLExporter():
         self._importFonts()
 
         # set default colours
-        # self.backgroundColour = colors.Color(*self.parent.background[0:3],
-        #                                      alpha=alphaClip(self.parent.background[3]))
+        # self.backgroundColour = colors.Color(*self._parent.background[0:3],
+        #                                      alpha=alphaClip(self._parent.background[3]))
         self.backgroundColour = colors.Color(*self.params[GLBACKGROUND], alpha=alphaClip(1.0))
-        # self.foregroundColour = colors.Color(*self.parent.foreground[0:3],
-        #                                      alpha=alphaClip(self.parent.foreground[3]))
+        # self.foregroundColour = colors.Color(*self._parent.foreground[0:3],
+        #                                      alpha=alphaClip(self._parent.foreground[3]))
         self.foregroundColour = colors.Color(*self.params[GLFOREGROUND], alpha=alphaClip(1.0))
 
         self.baseThickness = self.params[GLBASETHICKNESS]
@@ -137,7 +137,7 @@ class GLExporter():
             for strip in spectrumDisplay.orderedStrips:
                 # point to the correct strip
                 self.strip = strip
-                self.parent = strip._CcpnGLWidget
+                self._parent = strip._CcpnGLWidget
 
                 self._buildPage()
                 self._buildStrip()
@@ -145,7 +145,7 @@ class GLExporter():
         else:
             self.numStrips = 1
             self.strip = self.params[GLSTRIP]
-            self.parent = self.strip._CcpnGLWidget
+            self._parent = self.strip._CcpnGLWidget
 
             self._buildPage()
             self._buildStrip()
@@ -165,11 +165,11 @@ class GLExporter():
         foundFonts = matplotlib.font_manager.findSystemFonts()
 
         # load all system fonts to find matches with OpenGl fonts
-        for glFonts in self.parent.globalGL.fonts.values():
+        for glFonts in self._parent.globalGL.fonts.values():
             pdfmetrics.registerFont(TTFont(glFonts.fontName, os.path.join(fontsPath, 'open-sans', SUBSTITUTEFONT + '.ttf')))
 
         # set a default fontName
-        self.fontName = self.parent.globalGL.glSmallFont.fontName
+        self.fontName = self._parent.globalGL.glSmallFont.fontName
 
     def _buildPage(self):
         """Build the main sections of the pdf file from a drawing object
@@ -183,52 +183,52 @@ class GLExporter():
         self.margin = 2.0 * cm
 
         self.main = True
-        self.rAxis = self.parent._drawRightAxis
-        self.bAxis = self.parent._drawBottomAxis
+        self.rAxis = self._parent._drawRightAxis
+        self.bAxis = self._parent._drawBottomAxis
 
         if not self.rAxis and not self.bAxis:
             # no axes visible
-            self.mainH = self.parent.h
-            self.mainW = self.parent.w
+            self.mainH = self._parent.h
+            self.mainW = self._parent.w
             self.mainL = 0
             self.mainB = 0
 
         elif self.rAxis and not self.bAxis:
             # right axis visible
-            self.rAxisW = self.parent.AXIS_MARGINRIGHT
-            self.rAxisH = self.parent.h
-            self.rAxisL = self.parent.w - self.parent.AXIS_MARGINRIGHT
+            self.rAxisW = self._parent.AXIS_MARGINRIGHT
+            self.rAxisH = self._parent.h
+            self.rAxisL = self._parent.w - self._parent.AXIS_MARGINRIGHT
             self.rAxisB = 0
-            self.mainW = self.parent.w - self.parent.AXIS_MARGINRIGHT
-            self.mainH = self.parent.h
+            self.mainW = self._parent.w - self._parent.AXIS_MARGINRIGHT
+            self.mainH = self._parent.h
             self.mainL = 0
             self.mainB = 0
 
         elif not self.rAxis and self.bAxis:
             # bottom axis visible
-            self.bAxisW = self.parent.w
-            self.bAxisH = self.parent.AXIS_MARGINBOTTOM
+            self.bAxisW = self._parent.w
+            self.bAxisH = self._parent.AXIS_MARGINBOTTOM
             self.bAxisL = 0
             self.bAxisB = 0
-            self.mainW = self.parent.w
-            self.mainH = self.parent.h - self.parent.AXIS_MARGINBOTTOM
+            self.mainW = self._parent.w
+            self.mainH = self._parent.h - self._parent.AXIS_MARGINBOTTOM
             self.mainL = 0
-            self.mainB = self.parent.AXIS_MARGINBOTTOM
+            self.mainB = self._parent.AXIS_MARGINBOTTOM
 
         else:
             # both axes visible
-            self.rAxisW = self.parent.AXIS_MARGINRIGHT
-            self.rAxisH = self.parent.h - self.parent.AXIS_MARGINBOTTOM
-            self.rAxisL = self.parent.w - self.parent.AXIS_MARGINRIGHT
-            self.rAxisB = self.parent.AXIS_MARGINBOTTOM
-            self.bAxisW = self.parent.w - self.parent.AXIS_MARGINRIGHT
-            self.bAxisH = self.parent.AXIS_MARGINBOTTOM
+            self.rAxisW = self._parent.AXIS_MARGINRIGHT
+            self.rAxisH = self._parent.h - self._parent.AXIS_MARGINBOTTOM
+            self.rAxisL = self._parent.w - self._parent.AXIS_MARGINRIGHT
+            self.rAxisB = self._parent.AXIS_MARGINBOTTOM
+            self.bAxisW = self._parent.w - self._parent.AXIS_MARGINRIGHT
+            self.bAxisH = self._parent.AXIS_MARGINBOTTOM
             self.bAxisL = 0
             self.bAxisB = 0
-            self.mainW = self.parent.w - self.parent.AXIS_MARGINRIGHT
-            self.mainH = self.parent.h - self.parent.AXIS_MARGINBOTTOM
+            self.mainW = self._parent.w - self._parent.AXIS_MARGINRIGHT
+            self.mainH = self._parent.h - self._parent.AXIS_MARGINBOTTOM
             self.mainL = 0
-            self.mainB = self.parent.AXIS_MARGINBOTTOM
+            self.mainB = self._parent.AXIS_MARGINBOTTOM
 
         # stripFrame ratio
         frame = self.strip.spectrumDisplay.stripFrame
@@ -238,30 +238,30 @@ class GLExporter():
 
         self.pixHeight = self._report.doc.height - (2.0 * cm)
         self.pixWidth = self.pixHeight / frameRatio
-        # self.fontScale = 1.025 * self.pixHeight / self.parent.h
-        self.fontScale = self.pixHeight / self.parent.h
+        # self.fontScale = 1.025 * self.pixHeight / self._parent.h
+        self.fontScale = self.pixHeight / self._parent.h
 
         # strip axis ratio
-        ratio = self.parent.h / self.parent.w
+        ratio = self._parent.h / self._parent.w
 
         # translate to size of drawing Flowable
-        self.pixWidth = self._report.doc.width / (fw / self.parent.w)  #self.numStrips
+        self.pixWidth = self._report.doc.width / (fw / self._parent.w)  #self.numStrips
         self.pixHeight = self.pixWidth * ratio
 
         # scale fonts to appear the correct size
-        self.fontScale = 1.0 * self.pixWidth / self.parent.w            #   1.1
+        self.fontScale = 1.0 * self.pixWidth / self._parent.w            #   1.1
 
         # if too tall then flip the scaling
         if self.pixHeight > (self._report.doc.height - 2 * cm):
             self.pixHeight = self._report.doc.height - (2 * cm)
             self.pixWidth = self.pixHeight / ratio
-            self.fontScale = 1.0 * self.pixHeight / self.parent.h     # 1.025
+            self.fontScale = 1.0 * self.pixHeight / self._parent.h     # 1.025
 
         self.fontXOffset = 0.75
         self.fontYOffset = 3.0
 
         # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
-        self.displayScale = self.pixHeight / self.parent.h
+        self.displayScale = self.pixHeight / self._parent.h
 
         # don't think these are needed
         pixBottom = pageHeight - self.pixHeight - self.margin
@@ -313,7 +313,7 @@ class GLExporter():
         if self.params[GLSPECTRUMCONTOURS]: self._addSpectrumContours()
         if self.params[GLSPECTRUMBORDERS]: self._addSpectrumBoundaries()
 
-        if not self.parent._stackingMode:
+        if not self._parent._stackingMode:
             if self.params[GLINTEGRALSYMBOLS]: self._addIntegralAreas()
             if self.params[GLINTEGRALSYMBOLS]: self._addIntegralLines()
             if self.params[GLPEAKSYMBOLS]: self._addPeakSymbols()
@@ -338,7 +338,7 @@ class GLExporter():
         """
         if self.strip.gridVisible:
             colourGroups = OrderedDict()
-            self._appendIndexLineGroup(indArray=self.parent.gridList[0],
+            self._appendIndexLineGroup(indArray=self._parent.gridList[0],
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                                 PLOTBOTTOM: self.displayScale * self.mainB,
@@ -362,15 +362,15 @@ class GLExporter():
             if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS]:
 
                 if spectrumView.spectrum.dimensionCount > 1:
-                    if spectrumView in self.parent._spectrumSettings.keys():
+                    if spectrumView in self._parent._spectrumSettings.keys():
                         # self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                         #                                            1, GL.GL_FALSE,
                         #                                            self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
-                        mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
-                        # mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
+                        mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
+                        # mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
 
-                        thisSpec = self.parent._contourList[spectrumView]
+                        thisSpec = self._parent._contourList[spectrumView]
 
                         # drawVertexColor
                         # gr = Group()
@@ -387,7 +387,7 @@ class GLExporter():
                             colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=alphaClip(thisSpec.colors[ii0 * 4 + 3]))
                             colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
-                            newLine = self.parent.lineVisible(newLine,
+                            newLine = self._parent.lineVisible(newLine,
                                                               x=self.displayScale * self.mainL,
                                                               y=self.displayScale * self.mainB,
                                                               width=self.displayScale * self.mainW,
@@ -402,13 +402,13 @@ class GLExporter():
                 else:
 
                     # assume that the vertexArray is a GL_LINE_STRIP
-                    if spectrumView in self.parent._contourList.keys():
-                        if self.parent._stackingMode:
-                            mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
+                    if spectrumView in self._parent._contourList.keys():
+                        if self._parent._stackingMode:
+                            mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
                         else:
                             mat = None
 
-                        thisSpec = self.parent._contourList[spectrumView]
+                        thisSpec = self._parent._contourList[spectrumView]
 
                         # drawVertexColor
                         self._appendVertexLineGroup(indArray=thisSpec,
@@ -454,7 +454,7 @@ class GLExporter():
 
                 # generate the bounding box
                 newLine = [fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0, fx0, fy0]
-                newLine = self.parent.lineVisible(newLine,
+                newLine = self._parent.lineVisible(newLine,
                                                   x=self.displayScale * self.mainL,
                                                   y=self.displayScale * self.mainB,
                                                   width=self.displayScale * self.mainW,
@@ -474,7 +474,7 @@ class GLExporter():
         Add the peak symbols to the main drawing area.
         """
         colourGroups = OrderedDict()
-        self._appendIndexLineGroupFill(indArray=self.parent._GLPeaks._GLSymbols,
+        self._appendIndexLineGroupFill(indArray=self._parent._GLPeaks._GLSymbols,
                                        listView='peakList',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -491,7 +491,7 @@ class GLExporter():
         Add the multiplet symbols to the main drawing area.
         """
         colourGroups = OrderedDict()
-        self._appendIndexLineGroupFill(indArray=self.parent._GLMultiplets._GLSymbols,
+        self._appendIndexLineGroupFill(indArray=self._parent._GLMultiplets._GLSymbols,
                                        listView='multipletList',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -508,7 +508,7 @@ class GLExporter():
         Add the mark lines to the main drawing area.
         """
         colourGroups = OrderedDict()
-        self._appendIndexLineGroup(indArray=self.parent._marksList,
+        self._appendIndexLineGroup(indArray=self._parent._marksList,
                                    colourGroups=colourGroups,
                                    plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                             PLOTBOTTOM: self.displayScale * self.mainB,
@@ -522,7 +522,7 @@ class GLExporter():
         Add the integral lines to the main drawing area.
         """
         colourGroups = OrderedDict()
-        self._appendIndexLineGroupFill(indArray=self.parent._GLIntegrals._GLSymbols,
+        self._appendIndexLineGroupFill(indArray=self._parent._GLIntegrals._GLSymbols,
                                        listView='integralList',
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -546,27 +546,27 @@ class GLExporter():
             validIntegralListViews = [pp for pp in spectrumView.integralListViews
                                       if pp.isVisible()
                                       and spectrumView.isVisible()
-                                      and pp in self.parent._GLIntegrals._GLSymbols.keys()
+                                      and pp in self._parent._GLIntegrals._GLSymbols.keys()
                                       and pp.integralList.pid in self.params[GLSELECTEDPIDS]]
 
             for integralListView in validIntegralListViews:  # spectrumView.integralListViews:
                 mat = None
                 if spectrumView.spectrum.dimensionCount > 1:
-                    if spectrumView in self.parent._spectrumSettings.keys():
+                    if spectrumView in self._parent._spectrumSettings.keys():
                         # draw
                         pass
 
                 else:
 
                     # assume that the vertexArray is a GL_LINE_STRIP
-                    if spectrumView in self.parent._contourList.keys():
-                        if self.parent._stackingMode:
-                            mat = np.transpose(self.parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
+                    if spectrumView in self._parent._contourList.keys():
+                        if self._parent._stackingMode:
+                            mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
                         else:
                             mat = None
 
                 # draw the integralAreas if they exist
-                for integralArea in self.parent._GLIntegrals._GLSymbols[integralListView]._regions:
+                for integralArea in self._parent._GLIntegrals._GLSymbols[integralListView]._regions:
                     if hasattr(integralArea, '_integralArea'):
 
                         thisSpec = integralArea._integralArea
@@ -590,7 +590,7 @@ class GLExporter():
                             colourPath = 'spectrumViewIntegralFill%s%s%s%s%s' % (
                                 spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
-                            newLine = self.parent.lineVisible(newLine,
+                            newLine = self._parent.lineVisible(newLine,
                                                               x=self.displayScale * self.mainL,
                                                               y=self.displayScale * self.mainB,
                                                               width=self.displayScale * self.mainW,
@@ -607,7 +607,7 @@ class GLExporter():
         Add the regions to the main drawing area.
         """
         colourGroups = OrderedDict()
-        self._appendIndexLineGroup(indArray=self.parent._externalRegions,
+        self._appendIndexLineGroup(indArray=self._parent._externalRegions,
                                    colourGroups=colourGroups,
                                    plotDim={PLOTLEFT: self.displayScale * self.mainL,
                                             PLOTBOTTOM: self.displayScale * self.mainB,
@@ -628,11 +628,11 @@ class GLExporter():
             validPeakListViews = [pp for pp in spectrumView.peakListViews
                                   if pp.isVisible()
                                   and spectrumView.isVisible()
-                                  and pp in self.parent._GLPeaks._GLLabels.keys()
+                                  and pp in self._parent._GLPeaks._GLLabels.keys()
                                   and pp.peakList.pid in self.params[GLSELECTEDPIDS]]
 
             for peakListView in validPeakListViews:  # spectrumView.peakListViews:
-                for drawString in self.parent._GLPeaks._GLLabels[peakListView].stringList:
+                for drawString in self._parent._GLPeaks._GLLabels[peakListView].stringList:
 
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
@@ -642,7 +642,7 @@ class GLExporter():
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
-                    if self.parent.pointVisible(newLine,
+                    if self._parent.pointVisible(newLine,
                                                 x=self.displayScale * self.mainL,
                                                 y=self.displayScale * self.mainB,
                                                 width=self.displayScale * self.mainW,
@@ -674,11 +674,11 @@ class GLExporter():
             validIntegralListViews = [pp for pp in spectrumView.integralListViews
                                       if pp.isVisible()
                                       and spectrumView.isVisible()
-                                      and pp in self.parent._GLIntegrals._GLLabels.keys()
+                                      and pp in self._parent._GLIntegrals._GLLabels.keys()
                                       and pp.integralList.pid in self.params[GLSELECTEDPIDS]]
 
             for integralListView in validIntegralListViews:  # spectrumView.integralListViews:
-                for drawString in self.parent._GLIntegrals._GLLabels[integralListView].stringList:
+                for drawString in self._parent._GLIntegrals._GLLabels[integralListView].stringList:
 
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
@@ -688,7 +688,7 @@ class GLExporter():
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
-                    if self.parent.pointVisible(newLine,
+                    if self._parent.pointVisible(newLine,
                                                 x=self.displayScale * self.mainL,
                                                 y=self.displayScale * self.mainB,
                                                 width=self.displayScale * self.mainW,
@@ -720,11 +720,11 @@ class GLExporter():
             validMultipletListViews = [pp for pp in spectrumView.multipletListViews
                                        if pp.isVisible()
                                        and spectrumView.isVisible()
-                                       and pp in self.parent._GLMultiplets._GLLabels.keys()
+                                       and pp in self._parent._GLMultiplets._GLLabels.keys()
                                        and pp.multipletList.pid in self.params[GLSELECTEDPIDS]]
 
             for multipletListView in validMultipletListViews:  # spectrumView.multipletListViews:
-                for drawString in self.parent._GLMultiplets._GLLabels[multipletListView].stringList:
+                for drawString in self._parent._GLMultiplets._GLLabels[multipletListView].stringList:
 
                     col = drawString.colors[0]
                     if not isinstance(col, Iterable):
@@ -734,7 +734,7 @@ class GLExporter():
                         spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
-                    if self.parent.pointVisible(newLine,
+                    if self._parent.pointVisible(newLine,
                                                 x=self.displayScale * self.mainL,
                                                 y=self.displayScale * self.mainB,
                                                 width=self.displayScale * self.mainW,
@@ -759,7 +759,7 @@ class GLExporter():
         Add the mark labels to the main drawing area.
         """
         colourGroups = OrderedDict()
-        for drawString in self.parent._marksAxisCodes:
+        for drawString in self._parent._marksAxisCodes:
             # drawString.drawTextArray()
 
             col = drawString.colors[0]
@@ -769,7 +769,7 @@ class GLExporter():
             colourPath = 'projectMarks%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
             newLine = [drawString.attribs[0], drawString.attribs[1]]
-            if self.parent.pointVisible(newLine,
+            if self._parent.pointVisible(newLine,
                                         x=self.displayScale * self.mainL,
                                         y=self.displayScale * self.mainB,
                                         width=self.displayScale * self.mainW,
@@ -786,7 +786,7 @@ class GLExporter():
         Add the traces to the main drawing area.
         """
         colourGroups = OrderedDict()
-        for hTrace in self.parent._staticHTraces:
+        for hTrace in self._parent._staticHTraces:
             if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
                 # drawVertexColor
                 self._appendVertexLineGroup(indArray=hTrace,
@@ -796,9 +796,9 @@ class GLExporter():
                                                      PLOTWIDTH: self.displayScale * self.mainW,
                                                      PLOTHEIGHT: self.displayScale * self.mainH},
                                             name='hTrace%s' % hTrace.spectrumView.pid,
-                                            includeLastVertex=not self.parent.is1D)
+                                            includeLastVertex=not self._parent.is1D)
 
-        for vTrace in self.parent._staticVTraces:
+        for vTrace in self._parent._staticVTraces:
             if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
                 # drawVertexColor
                 self._appendVertexLineGroup(indArray=vTrace,
@@ -808,7 +808,7 @@ class GLExporter():
                                                      PLOTWIDTH: self.displayScale * self.mainW,
                                                      PLOTHEIGHT: self.displayScale * self.mainH},
                                             name='vTrace%s' % vTrace.spectrumView.pid,
-                                            includeLastVertex=not self.parent.is1D)
+                                            includeLastVertex=not self._parent.is1D)
 
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='traces')
 
@@ -817,17 +817,17 @@ class GLExporter():
         Add the infinite lines to the main drawing area.
         """
         colourGroups = OrderedDict()
-        for infLine in self.parent._infiniteLines:
+        for infLine in self._parent._infiniteLines:
             if infLine.visible:
                 colour = colors.Color(*infLine.brush[0:3], alpha=alphaClip(infLine.brush[3]))
                 colourPath = 'infiniteLines%s%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha, infLine.lineStyle)
 
                 if infLine.orientation == 'h':
-                    newLine = [self.parent.axisL, infLine.values[0], self.parent.axisR, infLine.values[0]]
+                    newLine = [self._parent.axisL, infLine.values[0], self._parent.axisR, infLine.values[0]]
                 else:
-                    newLine = [infLine.values[0], self.parent.axisT, infLine.values[0], self.parent.axisB]
+                    newLine = [infLine.values[0], self._parent.axisT, infLine.values[0], self._parent.axisB]
 
-                newLine = self.parent.lineVisible(newLine,
+                newLine = self._parent.lineVisible(newLine,
                                                   x=self.displayScale * self.mainL,
                                                   y=self.displayScale * self.mainB,
                                                   width=self.displayScale * self.mainW,
@@ -842,15 +842,15 @@ class GLExporter():
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='infiniteLines')
 
     def _scaleRatioToWindow(self, values):
-        return [values[0] * (self.parent.axisR - self.parent.axisL) + self.parent.axisL,
-                values[1] * (self.parent.axisT - self.parent.axisB) + self.parent.axisB]
+        return [values[0] * (self._parent.axisR - self._parent.axisL) + self._parent.axisL,
+                values[1] * (self._parent.axisT - self._parent.axisB) + self._parent.axisB]
 
     def _addOverlayText(self):
         """
         Add the overlay text to the main drawing area.
         """
         colourGroups = OrderedDict()
-        drawString = self.parent.stripIDString
+        drawString = self._parent.stripIDString
 
         colour = self.foregroundColour
         colourPath = 'overlayText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
@@ -858,10 +858,10 @@ class GLExporter():
         # newLine = [drawString.attribs[0], drawString.attribs[1]]
         # newLine = self._scaleRatioToWindow(drawString.attribs[0:2])
 
-        newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self.parent.deltaX),
-                                            drawString.attribs[1] + (self.fontYOffset * self.parent.deltaY)])
+        newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
+                                            drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
 
-        if self.parent.pointVisible(newLine,
+        if self._parent.pointVisible(newLine,
                                     x=self.displayScale * self.mainL,
                                     y=self.displayScale * self.mainB,
                                     width=self.displayScale * self.mainW,
@@ -926,11 +926,11 @@ class GLExporter():
             colourGroups = OrderedDict()
             if self.rAxis:
                 if self.params[GLAXISMARKS]:
-                    self._appendIndexLineGroup(indArray=self.parent.gridList[1],
+                    self._appendIndexLineGroup(indArray=self._parent.gridList[1],
                                                colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
+                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self._parent.AXIS_LINE),
                                                         PLOTBOTTOM: self.displayScale * self.mainB,
-                                                        PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
+                                                        PLOTWIDTH: self.displayScale * self._parent.AXIS_LINE,
                                                         PLOTHEIGHT: self.displayScale * self.mainH},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
@@ -947,9 +947,9 @@ class GLExporter():
 
                     self._appendIndexLineGroup(indArray=tempVertexArray,
                                                colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
+                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self._parent.AXIS_LINE),
                                                         PLOTBOTTOM: self.displayScale * self.mainB,
-                                                        PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
+                                                        PLOTWIDTH: self.displayScale * self._parent.AXIS_LINE,
                                                         PLOTHEIGHT: self.displayScale * self.mainH},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
@@ -959,12 +959,12 @@ class GLExporter():
 
             if self.bAxis:
                 if self.params[GLAXISMARKS]:
-                    self._appendIndexLineGroup(indArray=self.parent.gridList[2],
+                    self._appendIndexLineGroup(indArray=self._parent.gridList[2],
                                                colourGroups=colourGroups,
                                                plotDim={PLOTLEFT: 0.0,
                                                         PLOTBOTTOM: self.displayScale * self.mainB,
                                                         PLOTWIDTH: self.displayScale * self.mainW,
-                                                        PLOTHEIGHT: self.displayScale * self.parent.AXIS_LINE},
+                                                        PLOTHEIGHT: self.displayScale * self._parent.AXIS_LINE},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
                                                ratioLine=True)
@@ -980,9 +980,9 @@ class GLExporter():
 
                     self._appendIndexLineGroup(indArray=tempVertexArray,
                                                colourGroups=colourGroups,
-                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self.parent.AXIS_LINE),
+                                               plotDim={PLOTLEFT: self.displayScale * (self.mainW - self._parent.AXIS_LINE),
                                                         PLOTBOTTOM: self.displayScale * self.mainB,
-                                                        PLOTWIDTH: self.displayScale * self.parent.AXIS_LINE,
+                                                        PLOTWIDTH: self.displayScale * self._parent.AXIS_LINE,
                                                         PLOTHEIGHT: self.displayScale * self.mainH},
                                                name='gridAxes',
                                                setColour=self.foregroundColour,
@@ -1023,22 +1023,22 @@ class GLExporter():
         if self.rAxis or self.bAxis:
             colourGroups = OrderedDict()
             if self.rAxis:
-                for strNum, drawString in enumerate(self.parent._axisYLabelling):
+                for strNum, drawString in enumerate(self._parent._axisYLabelling):
 
                     # drawTextArray
                     colour = self.foregroundColour
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
                     # add (0, 3) to mid-point
-                    # mid = self.parent.axisL + (0 + drawString.attribs[0]) * (self.parent.axisR - self.parent.axisL) / self.parent.AXIS_MARGINRIGHT
-                    # newLine = [mid, drawString.attribs[1] + (3 * self.parent.pixelY)]
-                    # mid = self.parent.axisL + drawString.attribs[0] * (self.parent.axisR - self.parent.axisL) * self.parent.pixelX
-                    # newLine = [mid, drawString.attribs[1] + (3 * self.parent.deltaY)]
+                    # mid = self._parent.axisL + (0 + drawString.attribs[0]) * (self._parent.axisR - self._parent.axisL) / self._parent.AXIS_MARGINRIGHT
+                    # newLine = [mid, drawString.attribs[1] + (3 * self._parent.pixelY)]
+                    # mid = self._parent.axisL + drawString.attribs[0] * (self._parent.axisR - self._parent.axisL) * self._parent.pixelX
+                    # newLine = [mid, drawString.attribs[1] + (3 * self._parent.deltaY)]
 
-                    newLine = self._scaleRatioToWindow([(self.fontXOffset + drawString.attribs[0]) / self.parent.AXIS_MARGINRIGHT,
-                                                        drawString.attribs[1] + (self.fontYOffset * self.parent.deltaY)])
+                    newLine = self._scaleRatioToWindow([(self.fontXOffset + drawString.attribs[0]) / self._parent.AXIS_MARGINRIGHT,
+                                                        drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
 
-                    if self.parent.pointVisible(newLine,
+                    if self._parent.pointVisible(newLine,
                                                 x=self.displayScale * self.rAxisL,
                                                 y=self.displayScale * self.rAxisB,
                                                 width=self.displayScale * self.rAxisW,
@@ -1048,25 +1048,25 @@ class GLExporter():
 
                         # set box around the last 2 elements (name and dimensions)
                         self._addString(colourGroups, colourPath, drawString, newLine, colour,
-                                        boxed=False if strNum < len(self.parent._axisYLabelling) - 2 else True)
+                                        boxed=False if strNum < len(self._parent._axisYLabelling) - 2 else True)
 
             if self.bAxis:
-                for strNum, drawString in enumerate(self.parent._axisXLabelling):
+                for strNum, drawString in enumerate(self._parent._axisXLabelling):
 
                     # drawTextArray
                     colour = self.foregroundColour
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
                     # add (0, 3) to mid
-                    # mid = self.parent.axisB + (3 + drawString.attribs[1]) * (self.parent.axisT - self.parent.axisB) / self.parent.AXIS_MARGINBOTTOM
-                    # newLine = [drawString.attribs[0] + (0 * self.parent.pixelX), mid]
-                    # mid = self.parent.axisB + drawString.attribs[1] * (self.parent.axisT - self.parent.axisB)
-                    # newLine = [drawString.attribs[0] + (0 * self.parent.deltaX), mid]
+                    # mid = self._parent.axisB + (3 + drawString.attribs[1]) * (self._parent.axisT - self._parent.axisB) / self._parent.AXIS_MARGINBOTTOM
+                    # newLine = [drawString.attribs[0] + (0 * self._parent.pixelX), mid]
+                    # mid = self._parent.axisB + drawString.attribs[1] * (self._parent.axisT - self._parent.axisB)
+                    # newLine = [drawString.attribs[0] + (0 * self._parent.deltaX), mid]
 
-                    newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self.parent.deltaX),
-                                                        (self.fontYOffset + drawString.attribs[1]) / self.parent.AXIS_MARGINBOTTOM])
+                    newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
+                                                        (self.fontYOffset + drawString.attribs[1]) / self._parent.AXIS_MARGINBOTTOM])
 
-                    if self.parent.pointVisible(newLine,
+                    if self._parent.pointVisible(newLine,
                                                 x=self.displayScale * self.bAxisL,
                                                 y=self.displayScale * self.bAxisB,
                                                 width=self.displayScale * self.bAxisW,
@@ -1076,7 +1076,7 @@ class GLExporter():
 
                         # set box around the last 2 elements (name and dimensions)
                         self._addString(colourGroups, colourPath, drawString, newLine, colour,
-                                        boxed=False if strNum < len(self.parent._axisXLabelling) - 2 else True)
+                                        boxed=False if strNum < len(self._parent._axisXLabelling) - 2 else True)
 
             for colourGroup in colourGroups.values():
                 self._mainPlot.add(colourGroup)
@@ -1155,7 +1155,7 @@ class GLExporter():
                     cc[PDFSTROKE] = None
                     cc[PDFSTROKECOLOR] = None
 
-            newLine = self.parent.lineVisible(newLine,
+            newLine = self._parent.lineVisible(newLine,
                                               x=plotDim[PLOTLEFT],
                                               y=plotDim[PLOTBOTTOM],
                                               width=plotDim[PLOTWIDTH],
@@ -1184,8 +1184,8 @@ class GLExporter():
             for vv in ii0:
                 if ratioLine:
                     # convert ratio to axis coordinates
-                    # newLine.extend([self._scaleRatioToWindow(indArray.vertices[vv * 2], (self.parent.axisR - self.parent.axisL), self.parent.axisL),
-                    #                 self._scaleRatioToWindow(indArray.vertices[vv * 2 + 1], (self.parent.axisT - self.parent.axisB), self.parent.axisB)])
+                    # newLine.extend([self._scaleRatioToWindow(indArray.vertices[vv * 2], (self._parent.axisR - self._parent.axisL), self._parent.axisL),
+                    #                 self._scaleRatioToWindow(indArray.vertices[vv * 2 + 1], (self._parent.axisT - self._parent.axisB), self._parent.axisB)])
 
                     newLine.extend(self._scaleRatioToWindow(indArray.vertices[vv * 2:vv*2+2]))
                 else:
@@ -1213,7 +1213,7 @@ class GLExporter():
                     cc[PDFSTROKE] = None
                     cc[PDFSTROKECOLOR] = None
 
-            newLine = self.parent.lineVisible(newLine,
+            newLine = self._parent.lineVisible(newLine,
                                               x=plotDim[PLOTLEFT],
                                               y=plotDim[PLOTBOTTOM],
                                               width=plotDim[PLOTWIDTH],

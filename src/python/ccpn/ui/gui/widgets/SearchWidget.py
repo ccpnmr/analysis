@@ -60,8 +60,9 @@ from ccpn.util.Logging import getLogger
 class QuickTableFilter(Frame):
   def __init__(self, table, parent=None, **kwds):
     super().__init__(parent, setLayout=False, **kwds)
+
     self.table = table
-    self.parent = parent
+    self._parent = parent
 
     labelColumn = Label(self,'Search in',)
     self.columnOptions = PulldownList(self,)

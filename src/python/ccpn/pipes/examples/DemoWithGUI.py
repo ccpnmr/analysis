@@ -62,7 +62,7 @@ class DemoGuiPipe(GuiPipe):
   def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
     super(DemoGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self.parent = parent
+    self._parent = parent
 
     ## add widgets to pipeFrame using Base grid=(i,ii) or self.pipeLayout.addWidget(widgetName)
     ## suggested to use setattr to give the same variable name as the one used in the pipe _kwarg.

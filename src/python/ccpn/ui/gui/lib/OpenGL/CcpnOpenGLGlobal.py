@@ -47,7 +47,7 @@ FONTPATH = 'Fonts'
 class GLGlobalData(QtWidgets.QWidget):
     def __init__(self, parent=None, strip=None):
         super(GLGlobalData, self).__init__()
-        self.parent = parent
+        self._parent = parent
         self.strip = strip
 
         self.fonts = {}

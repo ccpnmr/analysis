@@ -245,7 +245,7 @@ class GeneralTab(Widget):
 
         super().__init__(parent, setLayout=True)  # ejb
 
-        self.parent = parent
+        self._parent = parent
         self.mainWindow = mainWindow
         self.application = self.mainWindow.application
         self.project = self.mainWindow.project
@@ -624,7 +624,7 @@ class GeneralTab(Widget):
         newColour = dialog.getColor()
         if newColour:
             addNewColour(newColour)
-            self.parent._fillPullDowns()  #fillColourPulldown(self.colourBox, allowAuto=False)
+            self._parent._fillPullDowns()  #fillColourPulldown(self.colourBox, allowAuto=False)
             self.colourBox.setCurrentText(spectrumColours[newColour.name()])
 
             self._changes['spectrumColour'] = partial(self._setSpectrumColour, spectrum, newColour)
@@ -650,7 +650,7 @@ class DimensionsTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, dimensions=None):
         super().__init__(parent, setLayout=True)  # ejb
 
-        self.parent = parent
+        self._parent = parent
         self.mainWindow = mainWindow
         self.spectrum = spectrum
         self.dimensions = dimensions
@@ -880,7 +880,7 @@ class ContoursTab(Widget):
 
         super().__init__(parent, setLayout=True)  # ejb
 
-        self.parent = parent
+        self._parent = parent
         self.mainWindow = mainWindow
         self.spectrum = spectrum
 
@@ -1098,7 +1098,7 @@ class ContoursTab(Widget):
         newColour = dialog.getColor()
         if newColour is not None:
             addNewColour(newColour)
-            self.parent._fillPullDowns()  #fillColourPulldown(self.positiveColourBox, allowAuto=False)
+            self._parent._fillPullDowns()  #fillColourPulldown(self.positiveColourBox, allowAuto=False)
             self.positiveColourBox.setCurrentText(spectrumColours[newColour.name()])
 
     def _queueChangeNegSpectrumColour(self, spectrum):
@@ -1106,7 +1106,7 @@ class ContoursTab(Widget):
         newColour = dialog.getColor()
         if newColour is not None:
             addNewColour(newColour)
-            self.parent._fillPullDowns()  #fillColourPulldown(self.positiveColourBox, allowAuto=False)
+            self._parent._fillPullDowns()  #fillColourPulldown(self.positiveColourBox, allowAuto=False)
             # fillColourPulldown(self.negativeColourBox, allowAuto=False)
             self.negativeColourBox.setCurrentText(spectrumColours[newColour.name()])
 
@@ -1419,7 +1419,7 @@ class ColourTab(Widget):
 
         super().__init__(parent, setLayout=True)  # ejb
 
-        self.parent = parent
+        self._parent = parent
         self.mainWindow = mainWindow
         self.application = self.mainWindow.application
         self.project = self.mainWindow.project
@@ -1473,7 +1473,7 @@ class ColourTab(Widget):
             # self.colourBox.setCurrentIndex(int(newIndex)-1)
 
             addNewColour(newColour)
-            self.parent._fillPullDowns()  #fillColourPulldown(self.colourBox, allowAuto=False)
+            self._parent._fillPullDowns()  #fillColourPulldown(self.colourBox, allowAuto=False)
             self.colourBox.setCurrentText(spectrumColours[newColour.name()])
 
             self._changes['spectrumColour'] = partial(self._setSpectrumColour, spectrum, newColour)

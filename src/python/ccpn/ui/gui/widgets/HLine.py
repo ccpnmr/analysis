@@ -39,7 +39,7 @@ class HLine(Widget):
     """
 
     super().__init__(parent, **kwds)
-    self.parent = parent
+    self._parent = parent
     self.style = style
     self.colour = colour
     self.height = height

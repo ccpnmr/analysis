@@ -80,7 +80,7 @@ class FindMultipletsGuiPipe(GuiPipe):
   def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
     super(FindMultipletsGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self.parent = parent
+    self._parent = parent
 
     row = 0
     # self.peakListLabel = Label(self.pipeFrame, ReferencePeakList, grid=(row, 0))

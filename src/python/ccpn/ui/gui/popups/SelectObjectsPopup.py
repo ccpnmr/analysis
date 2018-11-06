@@ -45,7 +45,7 @@ class SelectObjectsPopup(CcpnDialog):
     self.project = self.mainWindow.project
     self.application =  self.mainWindow.application
 
-    self.parent = parent
+    self._parent = parent
     if len(objects)>0:
       if self.project.getByPid(objects[0]._pluralLinkName) == 'spectra':
         objects = [spectrum.pid for spectrum in self.project.spectra if len(spectrum.axisCodes) >= dim]
@@ -65,6 +65,6 @@ class SelectObjectsPopup(CcpnDialog):
     self.objectListWidget.addItem(item)
 
   def _setObjects(self):
-    self.parent.objects = [self.objectListWidget.item(i).text() for i in range(self.objectListWidget.count())]
+    self._parent.objects = [self.objectListWidget.item(i).text() for i in range(self.objectListWidget.count())]
     self.accept()
     # return [self.objectListWidget.item(i).text() for i in range(self.objectListWidget.count())]

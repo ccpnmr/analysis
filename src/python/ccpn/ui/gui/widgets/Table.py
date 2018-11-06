@@ -173,7 +173,7 @@ class ObjectTable(QtWidgets.QTableView, Base):
     super().__init__(parent)
     Base._init(self, **kwds)
 
-    self.parent = parent
+    self._parent = parent
     self.graphPanel = None
     self.filterPanel = None
     self.model = None
@@ -320,8 +320,8 @@ class ObjectTable(QtWidgets.QTableView, Base):
     # If the table is connected to a qtgui Splitter it
     # should not resize unless it is specifically asked to.
     # This helps avoiding infinite repaint loops.
-    if not (isinstance(self.parent, Splitter) or self.parent.__class__.__name__ == Splitter.__name__) or \
-           self.parent.doResize == True:
+    if not (isinstance(self._parent, Splitter) or self._parent.__class__.__name__ == Splitter.__name__) or \
+           self._parent.doResize == True:
       return QtWidgets.QTableView.resizeEvent(self, event)
 
   def clearSelection(self):
@@ -659,7 +659,7 @@ class ObjectTable(QtWidgets.QTableView, Base):
     action = self.headerContextMenumenu.exec_(self.mapToGlobal(pos))
 
     if action == columnsSettings:
-      settingsPopup = ColumnViewSettingsPopup(parent=self.parent, hideColumns=self._hiddenColumns, table=self)
+      settingsPopup = ColumnViewSettingsPopup(parent=self._parent, hideColumns=self._hiddenColumns, table=self)
       settingsPopup.raise_()
       settingsPopup.exec_()  # exclusive control to the menu and return _hiddencolumns
 
@@ -668,11 +668,11 @@ class ObjectTable(QtWidgets.QTableView, Base):
 
   def _addSearchWidget(self):
     # TODO:Luca Add search option for any table
-    if self.parent is not None:
+    if self._parent is not None:
       parentLayout = None
-      if isinstance(self.parent, Base):
-      # if hasattr(self.parent, 'getLayout'):
-        parentLayout = self.parent.getLayout()
+      if isinstance(self._parent, Base):
+      # if hasattr(self._parent, 'getLayout'):
+        parentLayout = self._parent.getLayout()
 
       if isinstance(parentLayout, QtWidgets.QGridLayout):
         idx = parentLayout.indexOf(self)
@@ -1089,12 +1089,12 @@ class ObjectTableItemDelegate(QtWidgets.QStyledItemDelegate):
 
     QtWidgets.QStyledItemDelegate.__init__(self, parent)
     self.customWidget = None
-    self.parent = parent
+    self._parent = parent
 
   def createEditor(self, parentWidget, itemStyle, index): # returns the edit widget
 
     col = index.column()
-    objCol = self.parent.columns[col]
+    objCol = self._parent.columns[col]
 
     if objCol.editClass:
       widget = objCol.editClass(None, *objCol.editArgs, **objCol.editKw)
@@ -1103,7 +1103,7 @@ class ObjectTableItemDelegate(QtWidgets.QStyledItemDelegate):
       return widget
 
     else:
-      obj = self.parent.objects[index.row()]
+      obj = self._parent.objects[index.row()]
       editValue = objCol.getEditValue(obj)
 
       if isinstance(editValue, (list, tuple)):
@@ -1183,7 +1183,7 @@ class ObjectTableItemDelegate(QtWidgets.QStyledItemDelegate):
 
         else:
           pos = widget.mapToGlobal(cellRect.topLeft())
-          widget.setParent(self.parent, QtCore.Qt.Popup) # popup so not confined
+          widget.setParent(self._parent, QtCore.Qt.Popup) # popup so not confined
           widget.move(pos)
 
       else:

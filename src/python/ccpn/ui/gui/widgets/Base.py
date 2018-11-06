@@ -235,17 +235,23 @@ class Base(DropBase):
             col = 0
         return row, col
 
-    def dragMoveEvent(self, ev):
-        """drag move event that propagates through all the widgets
+    def getParent(self):
+        """A method to return the parent of a widget
         """
-        parList = []
-        par = self
-        try:
-            while par:
-                parList += [repr(par)]
-                par = par.parent()
-        finally:
-            pass
+        return self.parent()
 
-        par = repr(self.parent()) if self.parent() else None
-        print('>>>dragMoveEvent Base', repr(self), par)
+    # def dragMoveEvent(self, ev):
+    #     """drag move event that propagates through all the widgets
+    #     """
+    #     # parList = []
+    #     # par = self
+    #     # try:
+    #     #     while par:
+    #     #         parList += [repr(par)]
+    #     #         par = par.parent()
+    #     # finally:
+    #     #     pass
+    #     #
+    #     # par = repr(self.parent()) if self.parent() else None
+    #     print('>>>dragMoveEvent Base', repr(self))
+    #     ev.ignore()

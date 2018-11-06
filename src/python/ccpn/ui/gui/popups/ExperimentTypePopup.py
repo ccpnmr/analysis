@@ -59,7 +59,7 @@ class ExperimentTypePopup(CcpnDialog):
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
 
-        self.parent = parent
+        self._parent = parent
         spectra = self.project.spectra
         self.experimentTypes = self.project._experimentTypeMap
         self.spPulldowns = []

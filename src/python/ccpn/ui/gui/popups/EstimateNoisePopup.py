@@ -99,7 +99,7 @@ class NoiseTab(Widget):
     def __init__(self, parent=None, mainWindow=None, spectrum=None, strip=None, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
-        self.parent = parent
+        self._parent = parent
         self.mainWindow = mainWindow
         self.spectrum = spectrum
         self.strip = strip

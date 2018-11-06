@@ -74,7 +74,7 @@ class GLVertexArray():
                    GLContext=None,
                    clearArrays=True):
 
-        self.parent = GLContext
+        self._parent = GLContext
         self.renderMode = renderMode
         self.refreshMode = refreshMode
 

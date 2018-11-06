@@ -273,7 +273,7 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
     self.application = self.spectrumView.application
 
     strip.viewBox.addItem(self)
-    ###self.parent = parent
+    ###self._parent = parent
     # self.displayed = True
     # self.symbolColour = None
     # self.symbolStyle = None
@@ -799,7 +799,7 @@ class PeakNd(QtWidgets.QGraphicsItem):
     # self.panel = spectrumWindow.panel
     #self.peakList = peak._parent
     ##self.strip = strip
-    #self.parent = strip.plotWidget
+    #self._parent = strip.plotWidget
     #self.spectrum = self.peakList.spectrum
     #self.setCacheMode(self.NoCache)
     #self.setFlags(self.ItemIgnoresTransformations)
@@ -813,7 +813,7 @@ class PeakNd(QtWidgets.QGraphicsItem):
     ###self.peak = peak
     ###xPpm = peak.position[0]
     ###yPpm = peak.position[1]
-    # self.setPos(self.parent.viewBox.mapSceneToView
+    # self.setPos(self._parent.viewBox.mapSceneToView
     sz = peakListView.spectrumView.strip.viewBox.peakWidthPixels
     hz = sz/2.0
     # self.bbox = QtCore.QRectF(-hz, -hz, sz, sz)

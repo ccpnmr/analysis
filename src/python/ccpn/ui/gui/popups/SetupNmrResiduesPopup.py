@@ -40,7 +40,7 @@ class SetupNmrResiduesPopup(CcpnDialog):
                title='Setup nmrResidues', **kwds):
     CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
-    self.parent = parent
+    self._parent = parent
     self.mainWindow = mainWindow
     self.project = self.mainWindow.project
 

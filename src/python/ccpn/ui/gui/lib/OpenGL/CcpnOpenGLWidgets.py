@@ -73,7 +73,7 @@ class GLRegion(QtWidgets.QWidget):
 
         super(GLRegion, self).__init__(parent)
 
-        self.parent = parent
+        self._parent = parent
         self._glList = glList
         self._values = values
         self._axisCode = axisCode
@@ -141,18 +141,18 @@ class GLRegion(QtWidgets.QWidget):
         self._orientation = orientation
 
         if orientation == 'h':
-            self._axisCode = self.parent.axisCodes[1]
+            self._axisCode = self._parent.axisCodes[1]
         elif orientation == 'v':
-            self._axisCode = self.parent.axisCodes[0]
+            self._axisCode = self._parent.axisCodes[0]
         else:
             if not self._axisCode:
                 axisIndex = None
-                for ps, psCode in enumerate(self.parent.axisCodes[0:2]):
-                    if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+                for ps, psCode in enumerate(self._parent.axisCodes[0:2]):
+                    if self._parent._preferences.matchAxisCode == 0:  # default - match atom type
 
                         if self._axisCode[0] == psCode[0]:
                             axisIndex = ps
-                    elif self.parent._preferences.matchAxisCode == 1:  # match full code
+                    elif self._parent._preferences.matchAxisCode == 1:  # match full code
                         if self._axisCode == psCode:
                             axisIndex = ps
 
@@ -221,7 +221,7 @@ class GLRegion(QtWidgets.QWidget):
             intArea = self._integralArea = GLVertexArray(numLists=1,
                                                          renderMode=GLRENDERMODE_DRAW, blendMode=False,
                                                          drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
-                                                         dimension=2, GLContext=self.parent)
+                                                         dimension=2, GLContext=self._parent)
 
             intArea.numVertices = len(self._object._1Dregions[1]) * 2
             intArea.vertices = np.empty(intArea.numVertices * 2)
@@ -318,18 +318,18 @@ class GLExternalRegion(GLVertexArray):
             brush = REGION_COLOURS[colour]
 
         if orientation == 'h':
-            axisCode = self.parent._axisCodes[1]
+            axisCode = self._parent._axisCodes[1]
         elif orientation == 'v':
-            axisCode = self.parent._axisCodes[0]
+            axisCode = self._parent._axisCodes[0]
         else:
             if axisCode:
                 axisIndex = None
-                for ps, psCode in enumerate(self.parent._axisCodes[0:2]):
-                    if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+                for ps, psCode in enumerate(self._parent._axisCodes[0:2]):
+                    if self._parent._preferences.matchAxisCode == 0:  # default - match atom type
 
                         if axisCode[0] == psCode[0]:
                             axisIndex = ps
-                    elif self.parent._preferences.matchAxisCode == 1:  # match full code
+                    elif self._parent._preferences.matchAxisCode == 1:  # match full code
                         if axisCode == psCode:
                             axisIndex = ps
 
@@ -342,10 +342,10 @@ class GLExternalRegion(GLVertexArray):
                     getLogger().warning('Axis code %s not found in current strip' % axisCode)
                     return None
             else:
-                axisCode = self.parent._axisCodes[0]
+                axisCode = self._parent._axisCodes[0]
                 orientation = 'v'
 
-        self._regions.append(GLRegion(self.parent, self,
+        self._regions.append(GLRegion(self._parent, self,
                                       values=values,
                                       axisCode=axisCode,
                                       orientation=orientation,
@@ -358,12 +358,12 @@ class GLExternalRegion(GLVertexArray):
                                       objectView=objectView))
 
         axisIndex = 0
-        for ps, psCode in enumerate(self.parent.axisOrder[0:2]):
-            if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+        for ps, psCode in enumerate(self._parent.axisOrder[0:2]):
+            if self._parent._preferences.matchAxisCode == 0:  # default - match atom type
 
                 if axisCode[0] == psCode[0]:
                     axisIndex = ps
-            elif self.parent._preferences.matchAxisCode == 1:  # match full code
+            elif self._parent._preferences.matchAxisCode == 1:  # match full code
                 if axisCode == psCode:
                     axisIndex = ps
 
@@ -372,14 +372,14 @@ class GLExternalRegion(GLVertexArray):
             # vertical ruler
             pos0 = x0 = values[0]
             pos1 = x1 = values[1]
-            y0 = self.parent.axisT + self.parent.pixelY
-            y1 = self.parent.axisB - self.parent.pixelY
+            y0 = self._parent.axisT + self._parent.pixelY
+            y1 = self._parent.axisB - self._parent.pixelY
         else:
             # horizontal ruler
             pos0 = y0 = values[0]
             pos1 = y1 = values[1]
-            x0 = self.parent.axisL - self.parent.pixelX
-            x1 = self.parent.axisR + self.parent.pixelX
+            x0 = self._parent.axisL - self._parent.pixelX
+            x1 = self._parent.axisR + self._parent.pixelX
 
         colour = brush
         index = self.numVertices
@@ -409,12 +409,12 @@ class GLExternalRegion(GLVertexArray):
 
     def _rescale(self):
         vertices = self.numVertices
-        axisT = self.parent.axisT
-        axisB = self.parent.axisB
-        axisL = self.parent.axisL
-        axisR = self.parent.axisR
-        pixelX = self.parent.pixelX
-        pixelY = self.parent.pixelY
+        axisT = self._parent.axisT
+        axisB = self._parent.axisB
+        axisL = self._parent.axisL
+        axisR = self._parent.axisR
+        pixelX = self._parent.pixelX
+        pixelY = self._parent.pixelY
 
         if vertices:
             for pp in range(0, 2 * vertices, 8):
@@ -432,12 +432,12 @@ class GLExternalRegion(GLVertexArray):
                 self.vertices[pp:pp + 8] = offsets
 
     def _resize(self):
-        axisT = self.parent.axisT
-        axisB = self.parent.axisB
-        axisL = self.parent.axisL
-        axisR = self.parent.axisR
-        pixelX = self.parent.pixelX
-        pixelY = self.parent.pixelY
+        axisT = self._parent.axisT
+        axisB = self._parent.axisB
+        axisL = self._parent.axisL
+        axisR = self._parent.axisR
+        pixelX = self._parent.pixelX
+        pixelY = self._parent.pixelY
 
         pp = 0
         for reg in self._regions:
@@ -470,23 +470,23 @@ class GLExternalRegion(GLVertexArray):
             pp += 8
 
     def _rebuild(self, checkBuild=False):
-        axisT = self.parent.axisT
-        axisB = self.parent.axisB
-        axisL = self.parent.axisL
-        axisR = self.parent.axisR
-        pixelX = self.parent.pixelX
-        pixelY = self.parent.pixelY
+        axisT = self._parent.axisT
+        axisB = self._parent.axisB
+        axisL = self._parent.axisL
+        axisR = self._parent.axisR
+        pixelX = self._parent.pixelX
+        pixelY = self._parent.pixelY
 
         self.clearArrays()
         for reg in self._regions:
 
             axisIndex = 0
-            for ps, psCode in enumerate(self.parent.axisOrder[0:2]):
-                if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+            for ps, psCode in enumerate(self._parent.axisOrder[0:2]):
+                if self._parent._preferences.matchAxisCode == 0:  # default - match atom type
 
                     if reg.axisCode[0] == psCode[0]:
                         axisIndex = ps
-                elif self.parent._preferences.matchAxisCode == 1:  # match full code
+                elif self._parent._preferences.matchAxisCode == 1:  # match full code
                     if reg.axisCode == psCode:
                         axisIndex = ps
 
@@ -533,18 +533,18 @@ class GLIntegralRegion(GLExternalRegion):
             brush = REGION_COLOURS[colour]
 
         if orientation == 'h':
-            axisCode = self.parent._axisCodes[1]
+            axisCode = self._parent._axisCodes[1]
         elif orientation == 'v':
-            axisCode = self.parent._axisCodes[0]
+            axisCode = self._parent._axisCodes[0]
         else:
             if axisCode:
                 axisIndex = None
-                for ps, psCode in enumerate(self.parent._axisCodes[0:2]):
-                    if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+                for ps, psCode in enumerate(self._parent._axisCodes[0:2]):
+                    if self._parent._preferences.matchAxisCode == 0:  # default - match atom type
 
                         if axisCode[0] == psCode[0]:
                             axisIndex = ps
-                    elif self.parent._preferences.matchAxisCode == 1:  # match full code
+                    elif self._parent._preferences.matchAxisCode == 1:  # match full code
                         if axisCode == psCode:
                             axisIndex = ps
 
@@ -557,10 +557,10 @@ class GLIntegralRegion(GLExternalRegion):
                     getLogger().warning('Axis code %s not found in current strip' % axisCode)
                     return None
             else:
-                axisCode = self.parent._axisCodes[0]
+                axisCode = self._parent._axisCodes[0]
                 orientation = 'v'
 
-        self._regions.append(GLRegion(self.parent, self,
+        self._regions.append(GLRegion(self._parent, self,
                                       values=values,
                                       axisCode=axisCode,
                                       orientation=orientation,
@@ -573,12 +573,12 @@ class GLIntegralRegion(GLExternalRegion):
                                       objectView=objectView))
 
         axisIndex = 0
-        for ps, psCode in enumerate(self.parent.axisOrder[0:2]):
-            if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+        for ps, psCode in enumerate(self._parent.axisOrder[0:2]):
+            if self._parent._preferences.matchAxisCode == 0:  # default - match atom type
 
                 if axisCode[0] == psCode[0]:
                     axisIndex = ps
-            elif self.parent._preferences.matchAxisCode == 1:  # match full code
+            elif self._parent._preferences.matchAxisCode == 1:  # match full code
                 if axisCode == psCode:
                     axisIndex = ps
 
@@ -587,22 +587,22 @@ class GLIntegralRegion(GLExternalRegion):
             # vertical ruler
             pos0 = x0 = values[0]
             pos1 = x1 = values[1]
-            y0 = self.parent.axisT + self.parent.pixelY
-            y1 = self.parent.axisB - self.parent.pixelY
+            y0 = self._parent.axisT + self._parent.pixelY
+            y1 = self._parent.axisB - self._parent.pixelY
         else:
             # horizontal ruler
             pos0 = y0 = values[0]
             pos1 = y1 = values[1]
-            x0 = self.parent.axisL - self.parent.pixelX
-            x1 = self.parent.axisR + self.parent.pixelX
+            x0 = self._parent.axisL - self._parent.pixelX
+            x1 = self._parent.axisR + self._parent.pixelX
 
         # get the new added region
         newRegion = self._regions[-1]
 
-        if obj and obj in self.parent.current.integrals:
+        if obj and obj in self._parent.current.integrals:
 
             # draw integral bars if in the current list
-            colour = list(self.parent.highlightColour)
+            colour = list(self._parent.highlightColour)
             colour[3] = CCPNGLWIDGET_INTEGRALSHADE
 
             index = self.numVertices
@@ -631,12 +631,12 @@ class GLIntegralRegion(GLExternalRegion):
         return newRegion
 
     def _resize(self):
-        axisT = self.parent.axisT
-        axisB = self.parent.axisB
-        axisL = self.parent.axisL
-        axisR = self.parent.axisR
-        pixelX = self.parent.pixelX
-        pixelY = self.parent.pixelY
+        axisT = self._parent.axisT
+        axisB = self._parent.axisB
+        axisL = self._parent.axisL
+        axisR = self._parent.axisR
+        pixelX = self._parent.pixelX
+        pixelY = self._parent.pixelY
 
         for reg in self._regions:
             pp = reg._pp
@@ -674,23 +674,23 @@ class GLIntegralRegion(GLExternalRegion):
             self.attribs[pp + 7] = axis1
 
     def _rebuild(self, checkBuild=False):
-        axisT = self.parent.axisT
-        axisB = self.parent.axisB
-        axisL = self.parent.axisL
-        axisR = self.parent.axisR
-        pixelX = self.parent.pixelX
-        pixelY = self.parent.pixelY
+        axisT = self._parent.axisT
+        axisB = self._parent.axisB
+        axisL = self._parent.axisL
+        axisR = self._parent.axisR
+        pixelX = self._parent.pixelX
+        pixelY = self._parent.pixelY
 
         self.clearArrays()
         for reg in self._regions:
 
             axisIndex = 0
-            for ps, psCode in enumerate(self.parent.axisOrder[0:2]):
-                if self.parent._preferences.matchAxisCode == 0:  # default - match atom type
+            for ps, psCode in enumerate(self._parent.axisOrder[0:2]):
+                if self._parent._preferences.matchAxisCode == 0:  # default - match atom type
 
                     if reg.axisCode[0] == psCode[0]:
                         axisIndex = ps
-                elif self.parent._preferences.matchAxisCode == 1:  # match full code
+                elif self._parent._preferences.matchAxisCode == 1:  # match full code
                     if reg.axisCode == psCode:
                         axisIndex = ps
 
@@ -708,8 +708,8 @@ class GLIntegralRegion(GLExternalRegion):
                 x0 = axisL - pixelX
                 x1 = axisR + pixelX
 
-            if reg._object in self.parent.current.integrals:
-                solidColour = list(self.parent.highlightColour)
+            if reg._object in self._parent.current.integrals:
+                solidColour = list(self._parent.highlightColour)
                 solidColour[3] = CCPNGLWIDGET_INTEGRALSHADE
 
                 index = self.numVertices

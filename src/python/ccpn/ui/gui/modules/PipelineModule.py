@@ -873,7 +873,7 @@ class FilterMethods(CcpnDialog):
   def __init__(self, parent=None, mainWindow=None, title='Preferred Pipes', **kwds):
     CcpnDialog.__init__(self, parent, setLayout=False, windowTitle=title, **kwds)
 
-    self.parent = parent
+    self._parent = parent
     self._setMainLayout()
     self._setWidgets()
     self._addWidgetsToLayout()
@@ -898,7 +898,7 @@ class FilterMethods(CcpnDialog):
 
   def _addMethodCheckBoxes(self):
     self.allMethodCheckBoxes = []
-    for i, guiPipe in enumerate(self.parent.guiPipes):
+    for i, guiPipe in enumerate(self._parent.guiPipes):
         self.spectrumCheckBox = CheckBox(self.scrollAreaWidgetContents, text=str(guiPipe.pipeName), grid=(i + 1, 0))
         self.allMethodCheckBoxes.append(self.spectrumCheckBox)
     self.updateMethodCheckBoxes()
@@ -906,7 +906,7 @@ class FilterMethods(CcpnDialog):
 
   def updateMethodCheckBoxes(self):
 
-    for guiPipe in self.parent.guiPipes:
+    for guiPipe in self._parent.guiPipes:
       if guiPipe.preferredPipe:
         for cb in self.allMethodCheckBoxes:
           if cb.text() == guiPipe.pipeName:
@@ -932,14 +932,14 @@ class FilterMethods(CcpnDialog):
     pipes = []
     for cb in self.allMethodCheckBoxes:
       if cb.isChecked():
-        guiPipe =  self.parent._getGuiPipeClass(cb.text())
+        guiPipe =  self._parent._getGuiPipeClass(cb.text())
         guiPipe.preferredPipe = True
         pipes.append(guiPipe)
       else:
-        guiPipe = self.parent._getGuiPipeClass(cb.text())
+        guiPipe = self._parent._getGuiPipeClass(cb.text())
         guiPipe.preferredPipe = False
         pipes.append(guiPipe)
-    self.parent.guiPipes = pipes
+    self._parent.guiPipes = pipes
 
   def _setSelectionScrollArea(self):
     self.scrollArea = ScrollArea(self)
@@ -955,7 +955,7 @@ class FilterMethods(CcpnDialog):
 
   def _okButtonCallBack(self):
     self._setPreferredPipe()
-    self.parent._setDataPipesPulldown()
+    self._parent._setDataPipesPulldown()
     self.accept()
 
 

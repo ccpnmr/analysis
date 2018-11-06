@@ -49,7 +49,7 @@ class CompoundView(QGraphicsView, Base):
     self.setCacheMode(QGraphicsView.CacheBackground)
     # QtWidgets.QGraphicsView.__init__(self, parent)
 
-    self.parent = parent
+    self._parent = parent
     self.preferences = preferences
     if self.preferences is not None:
       self.colourScheme = self.preferences.general.colourScheme
@@ -355,8 +355,8 @@ class CompoundView(QGraphicsView, Base):
       self.resetCachedContent()
       self.variant = variant
       self.compound = variant.compound
-      self.parent.variant = variant
-      self.parent.compound = self.compound
+      self._parent.variant = variant
+      self._parent.compound = self.compound
 
       self.addGraphicsItems()
       self.centerView()

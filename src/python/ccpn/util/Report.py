@@ -61,7 +61,7 @@ class Report():
     """
 
     # set the class attributes
-    self.parent = parent
+    self._parent = parent
     self.project = project
     self.filename = filename
     self.canv = None

@@ -72,7 +72,7 @@ class PeakFilterNdGuiPipe(GuiPipe):
   def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
     super(PeakFilterNdGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self.parent = parent
+    self._parent = parent
 
     row = 0
     filterFactorLabel = Label(self.pipeFrame, text=FilterFactor, grid=(row, 0))

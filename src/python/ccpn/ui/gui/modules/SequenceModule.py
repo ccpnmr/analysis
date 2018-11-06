@@ -82,18 +82,18 @@ class SequenceModule():
     # super(SequenceModule, self).__init__(setLayout=True)
 
     self.moduleParent = moduleParent
-    self.parent = parent
+    self._parent = parent
     self.mainWindow = mainWindow
     self.project = mainWindow.application.project
     #self.label.hide()
 
     # self.setAcceptDrops(True)
-    self.parent.setAcceptDrops(True)
+    self._parent.setAcceptDrops(True)
 
     self.scrollArea = QtWidgets.QScrollArea()
     self.scrollArea.setWidgetResizable(True)
-    self.scrollArea.scene = QtWidgets.QGraphicsScene(self.parent)
-    self.scrollContents = QtWidgets.QGraphicsView(self.scrollArea.scene, self.parent)
+    self.scrollArea.scene = QtWidgets.QGraphicsScene(self._parent)
+    self.scrollContents = QtWidgets.QGraphicsView(self.scrollArea.scene, self._parent)
     self.scrollContents.setAcceptDrops(True)
     self.scrollContents.setInteractive(True)
 
@@ -109,7 +109,7 @@ class SequenceModule():
     self.residueCount = 0
 
     # self.mainWidget.layout().addWidget(self.scrollArea)
-    self.parent.layout().addWidget(self.scrollArea)
+    self._parent.layout().addWidget(self.scrollArea)
 
     # connect graphics scene dragMoveEvent to CcpnModule dragMoveEvent - required for drag-and-drop
     # assignment routines.
@@ -122,7 +122,7 @@ class SequenceModule():
     #GWV: removed fixed height restrictions but maximum height instead
     #self.setFixedHeight(2*self.widgetHeight)
     #self.scrollContents.setFixedHeight(2*self.widgetHeight)
-    # self.parent.setMaximumHeight(100)
+    # self._parent.setMaximumHeight(100)
     # self.scrollContents.setMaximumHeight(100)
 
     #GWV: explicit intialisation to prevent crashes

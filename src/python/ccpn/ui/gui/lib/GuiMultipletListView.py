@@ -275,7 +275,7 @@ class GuiMultipletListView(QtWidgets.QGraphicsItem):
         self.application = self.spectrumView.application
 
         strip.viewBox.addItem(self)
-        ###self.parent = parent
+        ###self._parent = parent
         # self.displayed = True
         # self.symbolColour = None
         # self.symbolStyle = None

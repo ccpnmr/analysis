@@ -40,7 +40,7 @@ class OrderedSpectrumViews(object):
     _spectrumViewIndex = None
 
     def __init__(self, parent=None):
-        self.parent = parent
+        self._parent = parent
         self.project = parent.project
         self.spectrumViews = parent.spectrumViews
 
@@ -49,10 +49,10 @@ class OrderedSpectrumViews(object):
         retrieve the indexing form the ccpnInternal database
         :return list of ints:
         """
-        if isinstance(self.parent._ccpnInternalData, dict) and \
-                SPECTRUMVIEWINDEX in self.parent._ccpnInternalData:
+        if isinstance(self._parent._ccpnInternalData, dict) and \
+                SPECTRUMVIEWINDEX in self._parent._ccpnInternalData:
 
-            return self.parent._ccpnInternalData[SPECTRUMVIEWINDEX]
+            return self._parent._ccpnInternalData[SPECTRUMVIEWINDEX]
         else:
             return None
 
@@ -60,11 +60,11 @@ class OrderedSpectrumViews(object):
         """
         store the indexing form the ccpnInternal database
         """
-        if isinstance(self.parent._ccpnInternalData, dict):
+        if isinstance(self._parent._ccpnInternalData, dict):
             # _wrappedData._ccpnInternalData won't flag for saving unless the dict changes
-            tempCcpn = self.parent._ccpnInternalData.copy()
+            tempCcpn = self._parent._ccpnInternalData.copy()
             tempCcpn[SPECTRUMVIEWINDEX] = spectrumViewIndex
-            self.parent._ccpnInternalData = tempCcpn
+            self._parent._ccpnInternalData = tempCcpn
 
     # def orderedSpectra(self) -> Optional[Tuple]:
     #     """
@@ -117,7 +117,7 @@ class OrderedSpectrumViews(object):
 
             index = self._retrieveOrderedSpectrumViewIndex()
             if index is None:
-                index = tuple(ii for ii in range(len(self.parent.spectrumViews)))
+                index = tuple(ii for ii in range(len(self._parent.spectrumViews)))
 
             self._spectrumViewIndex = index
             self._storeOrderedSpectrumViewIndex(index)
@@ -138,9 +138,9 @@ class OrderedSpectrumViews(object):
         Set the ordering of the spectrumViews attached to the strip/spectrumDisplay
         :param spectrumIndex - tuple of ints:
         """
-        # self.parent._startCommandEchoBlock("project.getByPid('%s').setOrderedSpectrumViewIndex(spectrumIndex=%s)" % \
-        #                                          (self.parent.pid, spectrumIndex))
-        self.parent._startCommandEchoBlock('setOrderedSpectrumViewIndex', spectrumIndex)
+        # self._parent._startCommandEchoBlock("project.getByPid('%s').setOrderedSpectrumViewIndex(spectrumIndex=%s)" % \
+        #                                          (self._parent.pid, spectrumIndex))
+        self._parent._startCommandEchoBlock('setOrderedSpectrumViewIndex', spectrumIndex)
 
         _undo = self.project._undo
         if _undo is not None:
@@ -150,7 +150,7 @@ class OrderedSpectrumViews(object):
             self._setOrderedSpectrumViews(spectrumIndex=spectrumIndex)
 
         finally:
-            self.parent._endCommandEchoBlock()
+            self._parent._endCommandEchoBlock()
         if _undo is not None:
             _undo.decreaseBlocking()
 
@@ -158,7 +158,7 @@ class OrderedSpectrumViews(object):
                           , undoArgs=(_oldSpectrumViews,), redoArgs=(spectrumIndex,))
 
         # notify that the order has been changed - parent is SpectrumDisplay
-        # self.parent._finaliseAction(action='change')
+        # self._parent._finaliseAction(action='change')
 
     # def appendSpectrumView(self, spectrumView):
     #     """

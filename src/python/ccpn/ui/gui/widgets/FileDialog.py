@@ -214,7 +214,7 @@ class NefFileDialog(QtWidgets.QFileDialog):
             return None
 
     def _setParent(self, parent, acceptFunc, rejectFunc):
-        self.parent = parent
+        self._parent = parent
         self.acceptFunc = acceptFunc
         self.rejectFunc = rejectFunc
 

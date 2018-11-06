@@ -62,7 +62,7 @@ class _StripLabel(Label):
         super().__init__(parent, text, **kwds)
         # The text of the label can be dragged; it will be passed on in the dict under key dragKey
 
-        self.parent = parent
+        self._parent = parent
         self._dragKey = dragKey
         self.setAcceptDrops(True)
         # self.setDragEnabled(True)           # not possible for Label

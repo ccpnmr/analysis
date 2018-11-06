@@ -149,11 +149,12 @@ class CcpnGLWidget(QOpenGLWidget):
     AXISLOCKEDBUTTON = True
     SPECTRUMXZOOM = 1.0e1
     SPECTRUMYZOOM = 1.0e1
+    SHOWSPECTRUMONPHASING = True
 
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
         # TODO:ED add documentation
 
-        super(CcpnGLWidget, self).__init__(strip)
+        super().__init__(parent=strip)
 
         # flag to display paintGL but keep an empty screen
         self._blankDisplay = False
@@ -271,6 +272,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._crossHairVisible = True
         self._axesVisible = True
         self._axisLocked = False
+        self._showSpectraOnPhasing = True
 
         self._drawRightAxis = True
         self._drawBottomAxis = True
@@ -2227,7 +2229,13 @@ class CcpnGLWidget(QOpenGLWidget):
                         # self._contourList[spectrumView].drawIndexArray()
                         self._contourList[spectrumView].drawIndexVBO(enableVBO=True)
                 else:
-                    if spectrumView in self._contourList.keys():
+
+                    # only draw the traces for the spectra that are visible
+                    specTraces = [trace.spectrumView for trace in self._staticHTraces]
+
+                    if spectrumView in self._contourList.keys() and \
+                            (spectrumView not in specTraces or self.SHOWSPECTRUMONPHASING):
+
                         if self._stackingMode:
                             # use the stacking matrix to offset the 1D spectra
                             self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
@@ -3031,6 +3039,19 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def toggleCrossHair(self):
         self._crossHairVisible = not self._crossHairVisible
+        self.update()
+
+    @property
+    def showSpectraOnPhasing(self):
+        return self._showSpectraOnPhasing
+
+    @showSpectraOnPhasing.setter
+    def showSpectraOnPhasing(self, visible):
+        self._showSpectraOnPhasing = visible
+        self.update()
+
+    def toggleShowSpectraOnPhasing(self):
+        self._showSpectraOnPhasing = not self._showSpectraOnPhasing
         self.update()
 
     @property

@@ -229,8 +229,9 @@ class CcpnModule(Dock, DropBase):
 
         # main widget area
         #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
-        self.mainWidget = Widget(parent=None, setLayout=True, acceptDrops=True)  #QtWidgets.QWidget(self)
+        self.mainWidget = Frame(parent=None, setLayout=True, acceptDrops=True)  #QtWidgets.QWidget(self)
 
+        print('>>>mainWidget ')
         #self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         # optional settings widget area
@@ -242,7 +243,10 @@ class CcpnModule(Dock, DropBase):
             #                                       minimumSizes=self.settingsMinimumSizes
             #                                      )
             self._settingsScrollArea = ScrollArea(parent=self.widgetArea)
-            self.settingsWidget = Frame(parent=None, showBorder=False)
+
+            # self.settingsWidget = Frame(parent=None, showBorder=False)
+            self.settingsWidget = Widget(parent=None, acceptDrops=True)
+
             # self.settingsWidget.setMinimumWidth(self.settingsMinimumSizes[0])
             # self.settingsWidget.setMinimumHeight(self.settingsMinimumSizes[1])
             self._settingsScrollArea.setWidget(self.settingsWidget)
@@ -371,6 +375,9 @@ class CcpnModule(Dock, DropBase):
         self._allChildren = set()
 
     def setWidgetTransparency(self, transparent):
+
+        return
+
         self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)
         if self.settingsWidget:
             self.settingsWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)
@@ -680,8 +687,10 @@ class CcpnModule(Dock, DropBase):
     #     """Method to pass drops"""
     #     self.mainWidget.setAcceptDrops(value)
 
-    def dragMoveEvent(self, *args):
-        DockDrop.dragMoveEvent(self, *args)
+    def dragMoveEvent(self, ev):
+        # DockDrop.dragMoveEvent(self, ev)
+        print('>>>dragMoveEvent CcpnModule', repr(self))
+        super().dragMoveEvent(ev)
 
     def dragLeaveEvent(self, *args):
         DockDrop.dragLeaveEvent(self, *args)

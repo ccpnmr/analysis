@@ -76,8 +76,7 @@ class ExcludeRegions(Widget):
 
   def __init__(self, parent=None, selectionLabel=selectionLabelDefault, labelAlign='c',  **kwds):
 
-    super().__init__(self, parent, setLayout=True, **kwds)
-
+    super().__init__(parent, setLayout=True, **kwds)
 
     self.pulldownSolvents = PulldownList(self, grid=(0, 1), headerText='-- Select --', hAlign=labelAlign)
     self.pulldownSolvents.select('Water')

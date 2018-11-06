@@ -162,6 +162,7 @@ class Gui1dWidget(CcpnGLWidget):
     SPECTRUMNEGCOLOUR = 'sliceColour'
     SPECTRUMXZOOM = 1.0e2
     SPECTRUMYZOOM = 1.0e6
+    SHOWSPECTRUMONPHASING = False
 
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
         super(Gui1dWidget, self).__init__(strip=strip,

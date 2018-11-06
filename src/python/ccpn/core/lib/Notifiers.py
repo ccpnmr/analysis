@@ -174,7 +174,7 @@ class Notifier(object):
         self._args = args
         self._kwargs = kwargs
 
-        self._debug = True  # ability to report on individual instances
+        self._debug = False  # ability to report on individual instances
 
         # some sanity checks
         if len(triggers) > 1 and Notifier.MONITOR in triggers:

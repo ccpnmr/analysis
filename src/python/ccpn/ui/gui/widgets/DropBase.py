@@ -52,7 +52,7 @@ class DropBase:
 
   def _init(self, acceptDrops=False, **kwds):
 
-    # print('DEBUG DropBase %r: acceptDrops=%s' % (self, acceptDrops))
+    print('DEBUG DropBase %r: acceptDrops=%s' % (self, acceptDrops))
 
     self._dropEventCallback = None
     self._enterEventCallback = None
@@ -77,12 +77,18 @@ class DropBase:
   def setDragEnterEventCallback(self, callback):
     self._enterEventCallback = callback
 
-  def dragMoveEvent(self, event):
-    dataDict = self.parseEvent(event)
-    if dataDict is not None and len(dataDict) > 1:
-      if self._dragMoveEventCallback is not None:
-        self._dragMoveEventCallback(dataDict)
-    event.accept()
+  # def dragMoveEvent(self, event):
+  #   dataDict = self.parseEvent(event)
+  #   if dataDict is not None and len(dataDict) > 1:
+  #     if self._dragMoveEventCallback is not None:
+  #       self._dragMoveEventCallback(dataDict)
+  #       event.accept()
+  #       return
+  #
+  #   event.ignore()
+  #   print('>>>dragMoveEvent')
+
+    # super().dragMoveEvent(event)
 
   def dropEvent(self, event):
     """

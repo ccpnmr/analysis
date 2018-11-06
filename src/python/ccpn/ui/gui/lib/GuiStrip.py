@@ -88,7 +88,7 @@ class GuiStrip(Frame):
 
         getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
         super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True,
-                       acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+                       acceptDrops=False  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                        )
 
         # it appears to be required to explicitly set these, otherwise
@@ -275,7 +275,8 @@ class GuiStrip(Frame):
             self.symbolThickness = spectrumDisplay.strips[0].symbolThickness
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
             self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
-
+            self.showSpectraOnPhasing = spectrumDisplay.strips[0].showSpectraOnPhasing
+            
             try:
                 self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
 
@@ -297,6 +298,7 @@ class GuiStrip(Frame):
             self.symbolThickness = self.application.preferences.general.symbolThickness
             self.gridVisible = self.application.preferences.general.showGrid
             self.crosshairVisible = self.application.preferences.general.showCrosshair
+            self.showSpectraOnPhasing = self.application.preferences.general.showSpectraOnPhasing
 
         self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
 
@@ -312,6 +314,10 @@ class GuiStrip(Frame):
         # self._stripLabel.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 
         # self.show()
+
+
+    def mouseMoveEvent(self, a0: QtGui.QMouseEvent):
+        print('>>>mouseMove')
 
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()
@@ -1038,6 +1044,41 @@ class GuiStrip(Frame):
         try:
             self.crosshairVisible = False
             self._CcpnGLWidget.crossHairVisible = False
+        except:
+            getLogger().debugGL('OpenGL widget not instantiated')
+
+    def _toggleShowSpectraOnPhasing(self):
+        " Toggles whether spectraOnPhasing is visible"
+        if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleSpectraOnPhasing:
+            self.plotWidget.spectraOnPhasing2.toggle()
+
+        try:
+            self.spectraOnPhasingVisible = not self.spectraOnPhasingVisible
+            self._CcpnGLWidget.spectraOnPhasingVisible = self.spectraOnPhasingVisible
+        except:
+            getLogger().debugGL('OpenGL widget not instantiated')
+
+    def _showSpectraOnPhasing(self):
+        "Displays spectraOnPhasing in strip"
+        # self.plotWidget.spectraOnPhasing1.show()
+        # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleSpectraOnPhasing:
+        #   self.plotWidget.spectraOnPhasing2.show()
+
+        try:
+            self.spectraOnPhasingVisible = True
+            self._CcpnGLWidget.spectraOnPhasingVisible = True
+        except:
+            getLogger().debugGL('OpenGL widget not instantiated')
+
+    def _hideSpectraOnPhasing(self):
+        "Hides spectraOnPhasing in strip."
+        # self.plotWidget.spectraOnPhasing1.hide()
+        # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleSpectraOnPhasing:
+        #   self.plotWidget.spectraOnPhasing2.hide()
+
+        try:
+            self.spectraOnPhasingVisible = False
+            self._CcpnGLWidget.spectraOnPhasingVisible = False
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 

@@ -63,6 +63,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.ui.gui.widgets.StripPlot import StripPlot
 
 
 AXIS_WIDTH = 30
@@ -131,7 +132,7 @@ class GuiSpectrumDisplay(CcpnModule):
     """
 
     # overide in specific module implementations
-    includeSettingsWidget = False
+    includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'top'
     settingsMinimumSizes = (250, 50)
@@ -163,6 +164,17 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.mainWidget will be the parent of all the subsequent widgets
         self.qtParent = self.mainWidget
 
+
+
+        # temporary settings widget
+        self._spectrumDisplaySettings = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
+                                                 includePeakLists=False,
+                                                 includeNmrChains=False,
+                                                 includeSpectrumTable=False,
+                                                 grid=(0, 0))
+
+
+
         # GWV: Not sure what the widget argument is for
         # LM: is the spectrumDisplay, used in the widget to set actions/callbacks to the buttons
         spectrumRow = 0
@@ -190,14 +202,14 @@ class GuiSpectrumDisplay(CcpnModule):
         else:
             self.spectrumUtilToolBar.hide()
 
-        self.stripFrame = Frame(setLayout=True, showBorder=False, spacing=(5, 0), stretch=(1, 1))
+        self.stripFrame = Frame(setLayout=True, showBorder=False, spacing=(5, 0), stretch=(1, 1), acceptDrops=True)
         self.stripFrame.layout().setContentsMargins(0, 0, 0, 0)
 
         if useScrollArea:
             # scroll area for strips
             # This took a lot of sorting-out; better leave as is or test thoroughly
             self._stripFrameScrollArea = ScrollArea(parent=self.qtParent, setLayout=True,
-                                                    acceptDrops=True
+                                                    acceptDrops=False               # True
                                                     )
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
@@ -213,7 +225,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         includeDirection = not self.is1D
         self.phasingFrame = PhasingFrame(parent=self.qtParent,
-                                         showBorder=True,
+                                         showBorder=False,
                                          includeDirection=includeDirection,
                                          callback=self._updatePhasing,
                                          returnCallback=self._updatePivot,
@@ -223,7 +235,9 @@ class GuiSpectrumDisplay(CcpnModule):
                                          margins=(0, 0, 0, 0), spacing=(0, 0))
         self.phasingFrame.setVisible(False)
 
-        self.stripFrame.setAcceptDrops(True)
+        # self.stripFrame.setAcceptDrops(True)
+
+        # notifier to respond to items being dropped onto the stripFrame
         self.droppedNotifier = GuiNotifier(self.stripFrame,
                                            [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                            self._processDroppedItems)

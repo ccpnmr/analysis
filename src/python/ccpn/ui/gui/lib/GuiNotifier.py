@@ -144,8 +144,8 @@ class GuiNotifier(object):
 
             elif trigger == GuiNotifier.DROPEVENT:
 
-                if not self._theObject.acceptDrops():
-                    raise RuntimeError('GuiNotifier.__init__: Widget "%s" does not accept drops' % self._theObject)
+                # if not self._theObject.acceptDrops():
+                #     raise RuntimeError('GuiNotifier.__init__: Widget "%s" does not accept drops' % self._theObject)
 
                 if targetName is not None:
                     for target in targetName:

@@ -14,7 +14,7 @@ inchicode:
 	cd inchi && $(MAKE)
 
 clibrary:
-	cd clibrary && $(MAKE)
+	cd ccpnc/clibrary && $(MAKE)
 
 clean: contour_clean peak_clean inchi_clean clibrary_clean
 
@@ -28,7 +28,7 @@ inchi_clean:
 	cd inchi && $(MAKE) clean
 
 clibrary_clean:
-	cd clibrary && $(MAKE) clean
+	cd ccpnc/clibrary && $(MAKE) clean
 
 realclean: contour_realclean peak_realclean inchi_realclean clibrary_realclean
 
@@ -42,4 +42,4 @@ inchi_realclean:
 	cd inchi && $(MAKE) realclean
 
 clibrary_realclean:
-	cd clibrary && $(MAKE) realclean
+	cd ccpnc/clibrary && $(MAKE) realclean

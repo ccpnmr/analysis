@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 class Widget(QtWidgets.QWidget, Base):
 
-    def __init__(self, parent=None, setLayout=False, acceptDrops=True, **kwds):
+    def __init__(self, parent=None, setLayout=False, acceptDrops=False, **kwds):
         """General widget; default accepts drops (for now)
         """
 

@@ -52,7 +52,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -76,205 +76,211 @@ from ccpn.ui.gui.widgets.Widget import Widget
 
 
 class Frame(QtWidgets.QFrame, Base):
+    FRAME_DICT = {
+        # Shadow
+        'plain': QtWidgets.QFrame.Plain,
+        'raised': QtWidgets.QFrame.Raised,
+        'sunken': QtWidgets.QFrame.Sunken,
+        # Shapes
+        'noFrame': QtWidgets.QFrame.NoFrame,
+        'box': QtWidgets.QFrame.Box,
+        'panel': QtWidgets.QFrame.Panel,
+        'styledPanel': QtWidgets.QFrame.StyledPanel,
+        'hLine': QtWidgets.QFrame.HLine,
+        'vLine': QtWidgets.QFrame.VLine,
+        }
 
-  FRAME_DICT = {
-      # Shadow
-      'plain':       QtWidgets.QFrame.Plain,
-      'raised':      QtWidgets.QFrame.Raised,
-      'sunken':      QtWidgets.QFrame.Sunken,
-      # Shapes
-      'noFrame':     QtWidgets.QFrame.NoFrame,
-      'box':         QtWidgets.QFrame.Box,
-      'panel':       QtWidgets.QFrame.Panel,
-      'styledPanel': QtWidgets.QFrame.StyledPanel,
-      'hLine':       QtWidgets.QFrame.HLine,
-      'vLine':       QtWidgets.QFrame.VLine,
-  }
+    def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
+                 setLayout=False, **kwds):
+        """
+        Initialise a Frame with optional border and layout
 
-  def __init__(self, parent=None, showBorder=False, fShape=None, fShadow=None,
-                     setLayout=False, **kwds):
-    """
-    Initialise a Frame with optional border and layout
+        :param fShape:   frame shape options: noFrame, box, styledPanel, hLine, vLine
+        :param fShadow:  frame shadow options: plain, raised, sunken
 
-    :param fShape:   frame shape options: noFrame, box, styledPanel, hLine, vLine
-    :param fShadow:  frame shadow options: plain, raised, sunken
+        """
 
-    """
+        super().__init__(parent)
+        Base._init(self, setLayout=setLayout, **kwds)
 
-    super().__init__(parent)
-    Base._init(self, setLayout=setLayout, **kwds)
+        self._thisparent = parent
 
-    #TODO: replace with proper stylesheet routines once inplemented
-    styleSheet = ''
-    if 'bgColor' in kwds:
-      #rgb = QtGui.QColor(kwds["bgColor"]).getRgb()[:3]
-      styleSheet += "background-color: rgb(%d, %d, %d); " % kwds["bgColor"]
-      del(kwds['bgColor'])
-    if 'fgColor' in kwds:
-      styleSheet += "foreground-color: rgb(%d, %d, %d); " % kwds["fgColor"]
-      del (kwds['fgColor'])
-    if showBorder:
-      styleSheet += "border: 1px solid black; "
-    else:
-      styleSheet += "border: 0px; "
-    if len(styleSheet) > 0:
-      #print('>>', styleSheet)
-      self.setStyleSheet('QFrame {' + styleSheet + '}')
+        #TODO: replace with proper stylesheet routines once inplemented
+        styleSheet = ''
+        if 'bgColor' in kwds:
+            #rgb = QtGui.QColor(kwds["bgColor"]).getRgb()[:3]
+            styleSheet += "background-color: rgb(%d, %d, %d); " % kwds["bgColor"]
+            del (kwds['bgColor'])
+        if 'fgColor' in kwds:
+            styleSheet += "foreground-color: rgb(%d, %d, %d); " % kwds["fgColor"]
+            del (kwds['fgColor'])
+        if showBorder:
+            styleSheet += "border: 1px solid black; "
+        else:
+            styleSheet += "border: 0px; "
+        if len(styleSheet) > 0:
+            #print('>>', styleSheet)
+            self.setStyleSheet('QFrame {' + styleSheet + '}')
 
-    self.setContentsMargins(0, 0, 0, 0)
+        self.setContentsMargins(0, 0, 0, 0)
 
-    # define frame styles
-    if fShape or fShadow:
-      """
-      Define frame properties:
-      """
-      #TODO:GEERTEN: routine is called but appears not to change much in the appearance on OSX
-      shape = self.FRAME_DICT.get(fShape, QtWidgets.QFrame.NoFrame)
-      shadow = self.FRAME_DICT.get(fShadow, 0)
-      #print('>>', shape, shadow)
-      #print('Frame.framestyle>', shape | shadow)
-      #self.setFrameStyle(shape | shadow)
-      self.setFrameShape(shape)
-      self.setFrameShadow(shadow)
-      #self.setLineWidth(3)
-      self.setMidLineWidth(3)
+        # define frame styles
+        if fShape or fShadow:
+            """
+            Define frame properties:
+            """
+            #TODO:GEERTEN: routine is called but appears not to change much in the appearance on OSX
+            shape = self.FRAME_DICT.get(fShape, QtWidgets.QFrame.NoFrame)
+            shadow = self.FRAME_DICT.get(fShadow, 0)
+            #print('>>', shape, shadow)
+            #print('Frame.framestyle>', shape | shadow)
+            #self.setFrameStyle(shape | shadow)
+            self.setFrameShape(shape)
+            self.setFrameShadow(shadow)
+            #self.setLineWidth(3)
+            self.setMidLineWidth(3)
+
+
+    def dragMoveEvent(self, ev):
+        print('>>>dragMoveEvent Frame', repr(self))
+        self._thisparent.dragMoveEvent(ev)
 
 class ScrollableFrame(Frame):
-  "A scrollable frame"
+    "A scrollable frame"
 
-  def __init__(self, parent=None,
-                     setLayout=False, showBorder=False, fShape=None, fShadow=None,
-                     minimumSizes=(50,50), scrollBarPolicies=('asNeeded','asNeeded'), **kwds):
+    def __init__(self, parent=None,
+                 setLayout=False, showBorder=False, fShape=None, fShadow=None,
+                 minimumSizes=(50, 50), scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
 
-    # define a scroll area; check kwds if these apply to gridding
-    kw1 = {}
-    for key in 'grid gridSpan stretch hAlign vAlign'.split():
-      if key in kwds:
-        kw1[key] = kwds[key]
-        del(kwds[key])
-    kw1['setLayout'] = True ## always assure a layout for the scrollarea
+        # define a scroll area; check kwds if these apply to gridding
+        kw1 = {}
+        for key in 'grid gridSpan stretch hAlign vAlign'.split():
+            if key in kwds:
+                kw1[key] = kwds[key]
+                del (kwds[key])
+        kw1['setLayout'] = True  ## always assure a layout for the scrollarea
 
-    self.scrollArea = ScrollArea(parent=parent,
-                                 scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
-                                 **kw1
-                                )
+        self.scrollArea = ScrollArea(parent=parent,
+                                     scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
+                                     **kw1
+                                     )
 
-    # initialise the frame
-    Frame.__init__(self, parent=self.scrollArea, setLayout=setLayout,
-                         showBorder=showBorder, fShape = fShape, fShadow = fShadow,
-                         **kwds
-                  )
-    # add it to the _sequenceGraphScrollArea
-    self.scrollArea.setWidget(self)
-    self.scrollArea.getLayout().addWidget(self)
+        # initialise the frame
+        Frame.__init__(self, parent=self.scrollArea, setLayout=setLayout,
+                       showBorder=showBorder, fShape=fShape, fShadow=fShadow,
+                       **kwds
+                       )
+        # add it to the _sequenceGraphScrollArea
+        self.scrollArea.setWidget(self)
+        self.scrollArea.getLayout().addWidget(self)
 
-    # configure the scroll area to allow all available space without margins
-    self.scrollArea.setContentsMargins(0, 0, 0, 0)
-    self.scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-    #self._sequenceGraphScrollArea.setWidgetResizable(True)
-    self.setScrollBarPolicies(scrollBarPolicies)
-    # GWV: tried for GuiSpectrumDisplay scrolling error on strip: no effect
-    # self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
-    self.show()
+        # configure the scroll area to allow all available space without margins
+        self.scrollArea.setContentsMargins(0, 0, 0, 0)
+        self.scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        #self._sequenceGraphScrollArea.setWidgetResizable(True)
+        self.setScrollBarPolicies(scrollBarPolicies)
+        # GWV: tried for GuiSpectrumDisplay scrolling error on strip: no effect
+        # self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
+        self.show()
 
-  def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded','asNeeded')):
-    "Set the scrolbar policy: always, never, asNeeded"
-    self.scrollArea.setScrollBarPolicies(scrollBarPolicies)
+    def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded', 'asNeeded')):
+        "Set the scrolbar policy: always, never, asNeeded"
+        self.scrollArea.setScrollBarPolicies(scrollBarPolicies)
 
-  def getScrollArea(self):
-    "Return the scrollbar widget; for external usage"
-    return self.scrollArea
+    def getScrollArea(self):
+        "Return the scrollbar widget; for external usage"
+        return self.scrollArea
 
 
 class ScrollableFrame2(Widget):
-  "A scrollable frame"
+    "A scrollable frame"
 
-  def __init__(self, parent=None,
-                     setLayout=False, showBorder=False, fShape=None, fShadow=None,
-                     minimumSizes=(50,50), scrollBarPolicies=('asNeeded','asNeeded'), **kwds):
+    def __init__(self, parent=None,
+                 setLayout=False, showBorder=False, fShape=None, fShadow=None,
+                 minimumSizes=(50, 50), scrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
 
-    # check kwds if these apply to gridding
-    kw1 = {}
-    for key in 'grid gridSpan stretch hAlign vAlign'.split():
-      if key in kwds:
-        kw1[key] = kwds[key]
-        del(kwds[key])
+        # check kwds if these apply to gridding
+        kw1 = {}
+        for key in 'grid gridSpan stretch hAlign vAlign'.split():
+            if key in kwds:
+                kw1[key] = kwds[key]
+                del (kwds[key])
 
-    Widget.__init__(self, parent=parent, **kw1)
+        Widget.__init__(self, parent=parent, **kw1)
 
-    # define a scroll area;
-    self._scrollArea = ScrollArea(parent=self, setLayout=True,
-                                  scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
-                                 )
+        # define a scroll area;
+        self._scrollArea = ScrollArea(parent=self, setLayout=True,
+                                      scrollBarPolicies=scrollBarPolicies, minimumSizes=minimumSizes,
+                                      )
 
-    # initialise a frame
-    self._frame = Frame(parent=self._scrollArea, setLayout=setLayout, grid=(0,0),
-                                       showBorder=showBorder, fShape = fShape, fShadow = fShadow,
-                                       **kwds
-                       )
+        # initialise a frame
+        self._frame = Frame(parent=self._scrollArea, setLayout=setLayout, grid=(0, 0),
+                            showBorder=showBorder, fShape=fShape, fShadow=fShadow,
+                            **kwds
+                            )
 
-    print('>>', self._frame)
-    # add it to the _sequenceGraphScrollArea
-    self._scrollArea.setWidget(self._frame)
-    # self._settingsScrollArea.setWidgetResizable(True)
+        print('>>', self._frame)
+        # add it to the _sequenceGraphScrollArea
+        self._scrollArea.setWidget(self._frame)
+        # self._settingsScrollArea.setWidgetResizable(True)
 
-    # configure the scroll area to allow all available space without margins
-    self._scrollArea.setContentsMargins(0, 0, 0, 0)
-    self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-    self.setScrollBarPolicies(scrollBarPolicies)
-    # self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
-    #self.show()
+        # configure the scroll area to allow all available space without margins
+        self._scrollArea.setContentsMargins(0, 0, 0, 0)
+        self._scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setScrollBarPolicies(scrollBarPolicies)
+        # self._sequenceGraphScrollArea.ensureWidgetVisible(self, xMargin=200, yMargin=200)
+        #self.show()
 
-  def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded','asNeeded')):
-    "Set the scrolbar policy: always, never, asNeeded"
-    self._scrollArea.setScrollBarPolicies(scrollBarPolicies)
+    def setScrollBarPolicies(self, scrollBarPolicies=('asNeeded', 'asNeeded')):
+        "Set the scrolbar policy: always, never, asNeeded"
+        self._scrollArea.setScrollBarPolicies(scrollBarPolicies)
 
-  def getScrollArea(self):
-    "Return the scrollbar widget; for external usage"
-    return self._scrollArea
+    def getScrollArea(self):
+        "Return the scrollbar widget; for external usage"
+        return self._scrollArea
 
-  def getFrame(self):
-    "Return the frame widget; for external usage"
-    return self._frame
+    def getFrame(self):
+        "Return the frame widget; for external usage"
+        return self._frame
 
 
 if __name__ == '__main__':
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    from ccpn.ui.gui.widgets.BasePopup import BasePopup
+    from ccpn.ui.gui.widgets.Label import Label
 
-  from ccpn.ui.gui.widgets.Application import TestApplication
-  from ccpn.ui.gui.widgets.BasePopup import BasePopup
-  from ccpn.ui.gui.widgets.Label import Label
 
-  class TestPopup(BasePopup):
-    def body(self, parent):
-      widget = Widget(parent, setLayout=True)
-      policyDict = dict(
-        hAlign='c',
-        stretch=(1,0),
-        #hPolicy = 'center',
-        #vPolicy = 'center'
-      )
+    class TestPopup(BasePopup):
+        def body(self, parent):
+            widget = Widget(parent, setLayout=True)
+            policyDict = dict(
+                    hAlign='c',
+                    stretch=(1, 0),
+                    #hPolicy = 'center',
+                    #vPolicy = 'center'
+                    )
 
-      #TODO: find the cause of the empty space between the widgets
-      #frame3 = ScrollableFrame(parent=parent, showBorder=True, bgColor=(255, 0, 255), grid=(2,0))
-      frame1 = Frame(parent=widget, setLayout=True, grid=(0,0), showBorder=False, bgColor=(255, 255, 0), **policyDict)
-      label1 = Label(parent=frame1, grid=(0,0), text="FRAME-1", bold=True,textColour='black', textSize='32')
+            #TODO: find the cause of the empty space between the widgets
+            #frame3 = ScrollableFrame(parent=parent, showBorder=True, bgColor=(255, 0, 255), grid=(2,0))
+            frame1 = Frame(parent=widget, setLayout=True, grid=(0, 0), showBorder=False, bgColor=(255, 255, 0), **policyDict)
+            label1 = Label(parent=frame1, grid=(0, 0), text="FRAME-1", bold=True, textColour='black', textSize='32')
 
-      frame2 = Frame(parent=widget, setLayout=True, grid=(1,0), showBorder=True, bgColor=(255, 0, 0),
-                     fShape='styledPanel', fShadow='raised', **policyDict)
-      label2 = Label(parent=frame2, grid=(0,0), text="FRAME-2", bold=True,textColour='black', textSize='32')
+            frame2 = Frame(parent=widget, setLayout=True, grid=(1, 0), showBorder=True, bgColor=(255, 0, 0),
+                           fShape='styledPanel', fShadow='raised', **policyDict)
+            label2 = Label(parent=frame2, grid=(0, 0), text="FRAME-2", bold=True, textColour='black', textSize='32')
 
- #     scroll4 = ScrollableFrame2(parent=widget, grid=(2,0), setLayout=True)
-      scroll4 = ScrollArea(scrollBarPolicies=('always','always'))
-      print(scroll4)
-      label4 = Label(
-                     text="ScrollableFrame",  bold=True,textColour='black', textSize='32',
-                     **policyDict,
-                   )
-      scroll4.setWidget(label4)
-      widget.getLayout().addWidget(scroll4, 2,0)
+            #     scroll4 = ScrollableFrame2(parent=widget, grid=(2,0), setLayout=True)
+            scroll4 = ScrollArea(scrollBarPolicies=('always', 'always'))
+            print(scroll4)
+            label4 = Label(
+                    text="ScrollableFrame", bold=True, textColour='black', textSize='32',
+                    **policyDict,
+                    )
+            scroll4.setWidget(label4)
+            widget.getLayout().addWidget(scroll4, 2, 0)
 
-  app = TestApplication()
-  popup = TestPopup(title='Test Frame')
-  popup.resize(200, 400)
-  app.start()
 
+    app = TestApplication()
+    popup = TestPopup(title='Test Frame')
+    popup.resize(200, 400)
+    app.start()

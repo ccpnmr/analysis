@@ -141,7 +141,7 @@ class _PipelineDropAreaOverlay(Widget):
     super().__init__(parent)
     self.dropArea = None
     self.hide()
-    self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+    # self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
 
   def setDropArea(self, area):
     self.dropArea = area

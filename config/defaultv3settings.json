@@ -40,7 +40,8 @@
         "aspectRatios": { "H": 1.0, "N": 4.0, "C": 16, "intensity": 10000000 },
         "defaultMarksColour": "#7a7a7a",
         "autoCorrectColours": false,
-        "multipletAveraging": 0
+        "multipletAveraging": 0,
+        "showSpectraOnPhasing": true
     },
 
     "externalPrograms": {

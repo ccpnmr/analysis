@@ -556,7 +556,7 @@ del _createSpectrumDisplay
 # Window.spectrumDisplays property
 def getter(window: Window):
     ll = [x for x in window._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
-    return tuple(window._project._data2Obj[x] for x in ll)
+    return tuple(window._project._data2Obj[x] for x in ll if x in window._project._data2Obj)
 
 
 Window.spectrumDisplays = property(getter, None, None,

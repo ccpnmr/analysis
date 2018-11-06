@@ -1,7 +1,7 @@
 /*
 ======================COPYRIGHT/LICENSE START==========================
 
-npy_other2d.c: Part of the CcpNmr Analysis program
+npy_clibrary2d.c: Part of the CcpNmr Analysis program
 
 Copyright (C) 2011 Wayne Boucher and Tim Stevens (University of Cambridge)
 
@@ -47,7 +47,7 @@ Development of a Software Pipeline. Proteins 59, 687 - 696.
 #include "npy_defns.h"
 
 /*
-  Module: Other2d
+  Module: Clibrary2d
 
   Function:
 
@@ -78,7 +78,7 @@ static appendFloatList(PyObject *list, double value)
     }
 }
 
-static PyObject *otherEntry(PyObject *self, PyObject *args)
+static PyObject *testReturnList(PyObject *self, PyObject *args)
 {
     PyArrayObject *data_obj, *levels_obj, *indices, *vertices, *colours;
     PyObject *returnObject;
@@ -95,8 +95,9 @@ static PyObject *otherEntry(PyObject *self, PyObject *args)
     appendFloatList(returnObject, 54.27);
     appendFloatList(returnObject, -2.6);
 
-    appendFloatList(colours, -2.6);
-    appendFloatList(colours, 52.6);
+    // Needs the array to be defined first
+//    appendFloatList(colours, -2.6);
+//    appendFloatList(colours, 52.6);
 
 
 /*    if (PyList_Append(returnObject, PyFloat_FromDouble((double) 126.45)) != 0)
@@ -118,11 +119,11 @@ static PyObject *otherEntry(PyObject *self, PyObject *args)
     return returnObject;
 }
 
-static char other_doc[] = "other functions";
+static char testReturnList_doc[] = "Return a list from a python c routine.";
 
-static struct PyMethodDef Other_type_methods[] =
+static struct PyMethodDef Clibrary_type_methods[] =
 {
-    { "other",      (PyCFunction) otherEntry,        METH_VARARGS,   other_doc },
+    { "testReturnList",      (PyCFunction) testReturnList,        METH_VARARGS,   testReturnList_doc },
     { NULL,         NULL,                       0,              NULL }
 };
 
@@ -132,22 +133,22 @@ struct module_state {
 
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "Other",
+        "Clibrary",
         NULL,
         sizeof(struct module_state),
-        Other_type_methods,
+        Clibrary_type_methods,
         NULL,
         NULL,
         NULL,
         NULL
 };
 
-PyObject *PyInit_Other(void)
+PyObject *PyInit_Clibrary(void)
 {
     PyObject *module;
 
 #ifdef WIN32
-    Other.ob_type = &PyType_Type;
+    Clibrary.ob_type = &PyType_Type;
 #endif
     /* create the module and add the functions */
     module = PyModule_Create(&moduledef);
@@ -155,7 +156,7 @@ PyObject *PyInit_Other(void)
     import_array();  /* needed for numpy, otherwise it crashes */
 
     /* create exception object and add to module */
-    ErrorObject = PyErr_NewException("OtherPy.error", NULL, NULL);
+    ErrorObject = PyErr_NewException("ClibraryPy.error", NULL, NULL);
     Py_INCREF(ErrorObject);
 
     PyModule_AddObject(module, "error", ErrorObject);
@@ -165,7 +166,7 @@ PyObject *PyInit_Other(void)
 
     struct module_state *st = (struct module_state*)PyModule_GetState(module);
 
-    st->error = PyErr_NewException("OtherPy.error", NULL, NULL);
+    st->error = PyErr_NewException("ClibraryPy.error", NULL, NULL);
     if (st->error == NULL) {
         Py_DECREF(module);
         return NULL;
@@ -173,7 +174,7 @@ PyObject *PyInit_Other(void)
 
     /* check for errors */
     if (PyErr_Occurred())
-        Py_FatalError("can't initialize module OtherPy");
+        Py_FatalError("can't initialize module ClibraryPy");
 
     return module;
 }

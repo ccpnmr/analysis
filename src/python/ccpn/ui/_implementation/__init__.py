@@ -16,7 +16,6 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
 
   |       Window
   |       Mark
-  |       Module
   |       SpectrumDisplay
   |       |       Strip
   |       |       |       Axis
@@ -54,7 +53,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # CCPNINTERNAL used in ccpn.core.__init__
 
 # Order to import ui implementation classes -
-_uiImportOrder = ('Window','Mark','SpectrumDisplay','Module','Strip',
+_uiImportOrder = ('Window','Mark','SpectrumDisplay','Strip',
                 'Axis','SpectrumView', 'PeakListView', 'MultipletListView', 'IntegralListView')
 
 # Necessary to ensure classes are always imported in the right order

@@ -148,7 +148,7 @@ class _PipelineDropAreaOverlay(Widget):
     if area is None:
       self.hide()
     else:
-      prgn = self.parent().rect()
+      prgn = self.getParent().rect()
       rgn = QtCore.QRect(prgn)
       w = min(10, prgn.width() / 3.)
       h = min(10, prgn.height() / 3.)

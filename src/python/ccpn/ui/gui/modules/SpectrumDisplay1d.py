@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -34,127 +34,123 @@ from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayProperties
 
 class SpectrumDisplay1d(GuiSpectrumDisplay):
 
-  def __init__(self, mainWindow, name):
-    # if not apiSpectrumDisplay1d.strips:
-    #   apiSpectrumDisplay1d.newStrip1d()
+    def __init__(self, mainWindow, name):
+        # if not apiSpectrumDisplay1d.strips:
+        #   apiSpectrumDisplay1d.newStrip1d()
 
-    GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name, useScrollArea=True)
-    self._fillToolBar()
-    # self.addSpinSystemSideLabel()
-    self.setAcceptDrops(True)
-    self.isGrouped = False
-    self.spectrumActionDict = {}
-    self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
-    # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
-    # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
-    ###self.inactivePeakItems = set() # contains unused peakItems
-    self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
+        GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name, useScrollArea=True)
+        self._fillToolBar()
+        # self.addSpinSystemSideLabel()
+        self.setAcceptDrops(True)
+        self.isGrouped = False
+        self.spectrumActionDict = {}
+        self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
+        # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
+        # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
+        ###self.inactivePeakItems = set() # contains unused peakItems
+        self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
 
-    # store the list of ordered spectrumViews
-    self._orderedSpectrumViews = None
+        # store the list of ordered spectrumViews
+        self._orderedSpectrumViews = None
 
-  def showPeaks(self, peakListView, peaks):
-    """
-    Displays specified peaks in all strips of the display using peakListView
-    """
+    def showPeaks(self, peakListView, peaks):
+        """
+        Displays specified peaks in all strips of the display using peakListView
+        """
 
-    # NB should not be imported at top of file to avoid potential cyclic imports
-    from ccpn.ui.gui.lib import GuiPeakListView
+        # NB should not be imported at top of file to avoid potential cyclic imports
+        from ccpn.ui.gui.lib import GuiPeakListView
 
-    viewBox = peakListView.spectrumView.strip.viewBox
-    activePeakItemDict = self.activePeakItemDict
-    peakItemDict = activePeakItemDict.setdefault(peakListView, {})
-    inactivePeakItemDict = self.inactivePeakItemDict
-    inactivePeakItems = inactivePeakItemDict.setdefault(peakListView, set())
-    ##inactivePeakItems = self.inactivePeakItems
-    existingApiPeaks = set(peakItemDict.keys())
-    unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
-    for apiPeak in unusedApiPeaks:
-      peakItem = peakItemDict.pop(apiPeak)
-      #viewBox.removeItem(peakItem)
-      inactivePeakItems.add(peakItem)
-      peakItem.setVisible(False)
-    for peak in peaks:
-      apiPeak = peak._wrappedData
-      if apiPeak in existingApiPeaks:
-        continue
-      if inactivePeakItems:
-        peakItem = inactivePeakItems.pop()
-        peakItem.setupPeakItem(peakListView, peak)
-        #viewBox.addItem(peakItem)
-        peakItem.setVisible(True)
-      else:
-        peakItem = GuiPeakListView.Peak1d(peak, peakListView)
-      peakItemDict[apiPeak] = peakItem
+        viewBox = peakListView.spectrumView.strip.viewBox
+        activePeakItemDict = self.activePeakItemDict
+        peakItemDict = activePeakItemDict.setdefault(peakListView, {})
+        inactivePeakItemDict = self.inactivePeakItemDict
+        inactivePeakItems = inactivePeakItemDict.setdefault(peakListView, set())
+        ##inactivePeakItems = self.inactivePeakItems
+        existingApiPeaks = set(peakItemDict.keys())
+        unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
+        for apiPeak in unusedApiPeaks:
+            peakItem = peakItemDict.pop(apiPeak)
+            #viewBox.removeItem(peakItem)
+            inactivePeakItems.add(peakItem)
+            peakItem.setVisible(False)
+        for peak in peaks:
+            apiPeak = peak._wrappedData
+            if apiPeak in existingApiPeaks:
+                continue
+            if inactivePeakItems:
+                peakItem = inactivePeakItems.pop()
+                peakItem.setupPeakItem(peakListView, peak)
+                #viewBox.addItem(peakItem)
+                peakItem.setVisible(True)
+            else:
+                peakItem = GuiPeakListView.Peak1d(peak, peakListView)
+            peakItemDict[apiPeak] = peakItem
 
+    def _fillToolBar(self):
+        """
+        Adds specific icons for 1d spectra to the spectrum utility toolbar.
+        """
+        spectrumUtilToolBar = self.spectrumUtilToolBar
+        #spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64)) # set in constructor
 
-  def _fillToolBar(self):
-    """
-    Adds specific icons for 1d spectra to the spectrum utility toolbar.
-    """
-    spectrumUtilToolBar = self.spectrumUtilToolBar
-    #spectrumUtilToolBar.setIconSize(QtCore.QSize(64, 64)) # set in constructor
+        # GWV: removed: GuiSpectrumDisplay._fillToolBar(self)
+        #TODO: See Nd case on how to do this better
 
-    # GWV: removed: GuiSpectrumDisplay._fillToolBar(self)
-    #TODO: See Nd case on how to do this better
+        # Disable add and remove strips, as they're broken
+        ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
+        ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
+        # spectrumUtilToolBar.actions()[0].setDisabled(True)
 
-    # Disable add and remove strips, as they're broken
-    ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
-    ###spectrumUtilToolBar.removeAction(spectrumUtilToolBar.actions()[0])
-    # spectrumUtilToolBar.actions()[0].setDisabled(True)
+        # Why does asking for the icon size fix it?  I don't know, but it does!
 
-    # Why does asking for the icon size fix it?  I don't know, but it does!
+        # ('Increase Strip Width', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripWidth),
+        # ('Decrease Strip Width', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripWidth),
+        increaseStripWidthAction = spectrumUtilToolBar.addAction("Increase Strip Width", self.increaseStripWidth)
+        increaseStripWidthIcon = Icon('icons/range-expand')
+        increaseStripWidthAction.setIcon(increaseStripWidthIcon)
+        decreaseStripWidthAction = spectrumUtilToolBar.addAction("Decrease Strip Width", self.decreaseStripWidth)
+        decreaseStripWidthIcon = Icon('icons/range-contract')
+        decreaseStripWidthAction.setIcon(decreaseStripWidthIcon)
 
-    # ('Increase Strip Width', 'icons/range-expand', 'Increase the width of strips in display', True, self.increaseStripWidth),
-    # ('Decrease Strip Width', 'icons/range-contract', 'Decrease the width of strips in display', True, self.decreaseStripWidth),
-    increaseStripWidthAction = spectrumUtilToolBar.addAction("Increase Strip Width", self.increaseStripWidth)
-    increaseStripWidthIcon = Icon('icons/range-expand')
-    increaseStripWidthAction.setIcon(increaseStripWidthIcon)
-    decreaseStripWidthAction = spectrumUtilToolBar.addAction("Decrease Strip Width", self.decreaseStripWidth)
-    decreaseStripWidthIcon = Icon('icons/range-contract')
-    decreaseStripWidthAction.setIcon(decreaseStripWidthIcon)
+        autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self.resetYZooms)
+        autoScaleActionIcon = Icon('icons/zoom-best-fit-1d')
+        # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
+        autoScaleAction.setIcon(autoScaleActionIcon)
+        # autoScaleAction.setText("AutoScale")
+        fullZoomAction = spectrumUtilToolBar.addAction("Full", self.resetXZooms)
+        fullZoomIcon = Icon('icons/zoom-full-1d')
+        fullZoomAction.setIcon(fullZoomIcon)
+        storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self._storeZoom)
+        storeZoomIcon = Icon('icons/zoom-store')
+        storeZoomAction.setIcon(storeZoomIcon)
+        storeZoomAction.setToolTip('Store Zoom')
+        restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self._restoreZoom)
+        restoreZoomIcon = Icon('icons/zoom-restore')
+        restoreZoomAction.setIcon(restoreZoomIcon)
+        restoreZoomAction.setToolTip('Restore Zoom')
 
-    autoScaleAction = spectrumUtilToolBar.addAction("AutoScale", self.resetYZooms)
-    autoScaleActionIcon = Icon('icons/zoom-best-fit-1d')
-    # autoScaleActionIcon.actualSize(QtCore.QSize(10, 10))
-    autoScaleAction.setIcon(autoScaleActionIcon)
-    # autoScaleAction.setText("AutoScale")
-    fullZoomAction = spectrumUtilToolBar.addAction("Full", self.resetXZooms)
-    fullZoomIcon = Icon('icons/zoom-full-1d')
-    fullZoomAction.setIcon(fullZoomIcon)
-    storeZoomAction = spectrumUtilToolBar.addAction("Store Zoom", self._storeZoom)
-    storeZoomIcon = Icon('icons/zoom-store')
-    storeZoomAction.setIcon(storeZoomIcon)
-    storeZoomAction.setToolTip('Store Zoom')
-    restoreZoomAction = spectrumUtilToolBar.addAction("Restore Zoom", self._restoreZoom)
-    restoreZoomIcon = Icon('icons/zoom-restore')
-    restoreZoomAction.setIcon(restoreZoomIcon)
-    restoreZoomAction.setToolTip('Restore Zoom')
+    def processSpectra(self, pids: Sequence[str], event):
+        """Display spectra defined by list of Pid strings"""
+        for ss in pids:
+            print('processing Spectrum', ss)
+        print(self.parent())
 
+    def _updatePlotColour(self, spectrum):
+        apiDataSource = spectrum._wrappedData
+        action = self.spectrumActionDict.get(apiDataSource)
+        if action:
+            for strip in self.strips:
+                for spectrumView in strip.spectrumViews:
+                    if spectrumView.spectrum is spectrum:
+                        spectrumView.plot.setPen(apiDataSource.sliceColour)
 
-
-  def processSpectra(self, pids:Sequence[str], event):
-    """Display spectra defined by list of Pid strings"""
-    for ss in pids:
-      print('processing Spectrum', ss)
-    print(self.parent())
-
-  def _updatePlotColour(self, spectrum):
-    apiDataSource = spectrum._wrappedData
-    action = self.spectrumActionDict.get(apiDataSource)
-    if action:
-      for strip in self.strips:
-        for spectrumView in strip.spectrumViews:
-          if spectrumView.spectrum is spectrum:
-            spectrumView.plot.setPen(apiDataSource.sliceColour)
-
-  def adjustContours(self):
-    # insert popup to modify contours
-    popup = SpectrumDisplayPropertiesPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
-                                             orderedSpectrumViews=self.orderedSpectrumViews(self.spectrumViews))
-    popup.exec_()
-    popup.raise_()
-
+    def adjustContours(self):
+        # insert popup to modify contours
+        popup = SpectrumDisplayPropertiesPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                                 orderedSpectrumViews=self.orderedSpectrumViews(self.spectrumViews))
+        popup.exec_()
+        popup.raise_()
 
 # Functions for notifiers
 
@@ -175,4 +171,3 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
 #     spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
 #     if spectrumDisplay.is1D:
 #       spectrumDisplay._updatePlotColour(spectrum)
-

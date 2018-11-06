@@ -102,7 +102,7 @@ class FeedbackPopup(CcpnDialog):
         if not feedback:
             return
 
-        application = self.parent().application
+        application = self.getParent().application
 
         if includeProject:
             # cannot use tempfile because that always hands back open object and tarfile needs actual path

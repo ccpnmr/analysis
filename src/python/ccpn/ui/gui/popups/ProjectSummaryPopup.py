@@ -242,7 +242,7 @@ class ProjectSummaryPopup(CcpnDialog):
     logger = Logging.getLogger()
     logger.info(message)
 
-    self.parent().statusBar().showMessage(message)
+    self.getParent().statusBar().showMessage(message)
 
   def _saveToPdf(self):
 

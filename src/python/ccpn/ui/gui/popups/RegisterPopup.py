@@ -121,7 +121,7 @@ This needs to be done once on every computer you use the programme on.
     self.registerButton.setEnabled(self.licenseCheckBox.isChecked())
 
   def _showLicense(self):
-    self.parent().application.showLicense()
+    self.getParent().application.showLicense()
 
   # def _toggleLicense(self):
   #

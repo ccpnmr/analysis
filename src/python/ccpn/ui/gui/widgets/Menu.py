@@ -45,7 +45,7 @@ class Menu(QtWidgets.QMenu, Base):
         self.setToolTipsVisible(True)
 
     def addItem(self, text, shortcut=None, callback=None, checked=True, checkable=False, icon=None, toolTip=None, **kwargs):
-        action = Action(self.parent(), text, callback=callback, shortcut=shortcut,
+        action = Action(self.getParent(), text, callback=callback, shortcut=shortcut,
                         checked=checked, checkable=checkable, icon=icon, toolTip=toolTip, isFloatWidget=self.isFloatWidget, **kwargs)
         self.addAction(action)
         return action

@@ -45,7 +45,7 @@ class BasePopup(Widget):
     if tipText:
       self.setToolTip(tipText)
 
-    parent = self.parent()
+    parent = self.getParent()
     if parent and not location:
       x = parent.x() + 50
       y = parent.y() + 50

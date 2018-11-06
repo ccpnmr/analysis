@@ -88,15 +88,15 @@ class SubmitMacroPopup(CcpnDialog):
 
     def _selectMacro(self):
 
-        dialog = FileDialog(parent=self.parent(), fileMode=FileDialog.ExistingFile, text='Select Macro',
-                            preferences=self.parent().application.preferences.general)
+        dialog = FileDialog(parent=self.getParent(), fileMode=FileDialog.ExistingFile, text='Select Macro',
+                            preferences=self.getParent().application.preferences.general)
         path = dialog.selectedFile()
         if path:
             self.pathEntry.set(path)
 
     def _submitMacro(self):
 
-        application = self.parent().application
+        application = self.getParent().application
         logger = application.project._logger
 
         filePath = self.pathEntry.get()

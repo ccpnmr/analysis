@@ -162,11 +162,11 @@ def _calibrateY(strip):
                     checkable=True, checked=False,
                     callback=strip.toggleCalibrateY, stripMethodName='calibrateYAction')
 
+
 def _calibrateXY(strip):
     return _SCMitem(name='Calibrate Spectra',
                     typeItem=ItemTypes.get(ITEM), toolTip='calibrate spectrum axes', checkable=True, checked=False,
                     callback=strip.toggleCalibrateXY, stripMethodName='calibrateXYAction')
-
 
 
 def _toggleHorizontalTraceItem(strip):
@@ -205,6 +205,7 @@ def _estimateNoise(strip):
     return _SCMitem(name='Estimate Noise',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate spectral noise in the visible region', shortcut='EN',
                     callback=strip.estimateNoise)
+
 
 def _makeStripPlot(strip):
     return _SCMitem(name='Make Strip Plot',
@@ -257,10 +258,12 @@ def _editPeakAssignmentItem(strip):
     return _SCMitem(name='Edit Peak',
                     typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignment', callback=strip.application.showPeakAssigner)
 
+
 def _refitPeakItem(strip):
     return _SCMitem(name='Refit Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Refit current peak(s)', shortcut='RP',
                     callback=strip.mainWindow.refitCurrentPeaks)
+
 
 def _newMultipletItem(strip):
     return _SCMitem(name='New Multiplet',
@@ -286,6 +289,13 @@ def _navigateToPeakPosItem(strip):
                     typeItem=ItemTypes.get(MENU), toolTip='Show this position in the selected strip ',
                     stripMethodName='navigateToPeakMenu',
                     callback=None)
+
+
+def _showSpectraOnPhasingItem(strip):
+    return _SCMitem(name='Show Spectra on Phasing',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Show Spectra while phasing traces are visible',
+                    checkable=True, checked=True, shortcut='CH',
+                    callback=strip._toggleShowSpectraOnPhasing, stripMethodName='spectraOnPhasingAction')
 
 
 # def _propagateAssignmentItem(strip):
@@ -414,6 +424,7 @@ def _get1dPhasingMenu(guiStrip1d) -> Menu:
         _addTraceItem(guiStrip1d),
         _removeAllTracesItem(guiStrip1d),
         _setPivotItem(guiStrip1d),
+        _showSpectraOnPhasingItem(guiStrip1d),
         _separator(),
         _exitPhasingConsoleItem(guiStrip1d),
         _separator(),

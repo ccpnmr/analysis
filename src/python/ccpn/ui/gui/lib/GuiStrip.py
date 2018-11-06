@@ -1049,36 +1049,25 @@ class GuiStrip(Frame):
 
     def _toggleShowSpectraOnPhasing(self):
         " Toggles whether spectraOnPhasing is visible"
-        if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleSpectraOnPhasing:
-            self.plotWidget.spectraOnPhasing2.toggle()
-
         try:
-            self.spectraOnPhasingVisible = not self.spectraOnPhasingVisible
-            self._CcpnGLWidget.spectraOnPhasingVisible = self.spectraOnPhasingVisible
+            self.showSpectraOnPhasing = not self.showSpectraOnPhasing
+            self._CcpnGLWidget.showSpectraOnPhasing = self.showSpectraOnPhasing
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _showSpectraOnPhasing(self):
         "Displays spectraOnPhasing in strip"
-        # self.plotWidget.spectraOnPhasing1.show()
-        # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleSpectraOnPhasing:
-        #   self.plotWidget.spectraOnPhasing2.show()
-
         try:
-            self.spectraOnPhasingVisible = True
-            self._CcpnGLWidget.spectraOnPhasingVisible = True
+            self.showSpectraOnPhasing = True
+            self._CcpnGLWidget.showSpectraOnPhasing = True
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def _hideSpectraOnPhasing(self):
         "Hides spectraOnPhasing in strip."
-        # self.plotWidget.spectraOnPhasing1.hide()
-        # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleSpectraOnPhasing:
-        #   self.plotWidget.spectraOnPhasing2.hide()
-
         try:
-            self.spectraOnPhasingVisible = False
-            self._CcpnGLWidget.spectraOnPhasingVisible = False
+            self.showSpectraOnPhasing = False
+            self._CcpnGLWidget.showSpectraOnPhasing = False
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 

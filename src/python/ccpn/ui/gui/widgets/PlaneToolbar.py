@@ -309,7 +309,7 @@ class StripHeader(Widget):
     def __init__(self, parent, mainWindow, **kwds):
         super().__init__(parent=parent, **kwds)
 
-        self.parent = parent
+        self._parent = parent
         self.mainWindow = mainWindow
 
         self._labels = {}

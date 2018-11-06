@@ -2234,7 +2234,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     specTraces = [trace.spectrumView for trace in self._staticHTraces]
 
                     if spectrumView in self._contourList.keys() and \
-                            (spectrumView not in specTraces or self.SHOWSPECTRUMONPHASING):
+                            (spectrumView not in specTraces or self.showSpectraOnPhasing):
 
                         if self._stackingMode:
                             # use the stacking matrix to offset the 1D spectra

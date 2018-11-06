@@ -140,10 +140,9 @@ class Frame(QtWidgets.QFrame, Base):
             #self.setLineWidth(3)
             self.setMidLineWidth(3)
 
-
-    def dragMoveEvent(self, ev):
-        print('>>>dragMoveEvent Frame', repr(self))
-        self._thisparent.dragMoveEvent(ev)
+    # def dragMoveEvent(self, ev):
+    #     print('>>>dragMoveEvent Frame', repr(self))
+    #     # self._thisparent.dragMoveEvent(ev)
 
 class ScrollableFrame(Frame):
     "A scrollable frame"

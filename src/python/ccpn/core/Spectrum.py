@@ -74,10 +74,12 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
+from ccpn.core.lib.Cache import cached
 
 from ccpn.util.Common import axisCodeMapping
 
 from ccpnmodel.ccpncore.lib.Io import Formats
+
 
 
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
@@ -110,6 +112,7 @@ def _arrayOfIndex(index, cumul):
 
     return np.array(array)
 
+PLANEDATACACHE = '_planeDataCache'  # Atrribute name for the planeData cache
 
 class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
@@ -1198,6 +1201,7 @@ class Spectrum(AbstractWrapperObject):
     def getSliceData(self, position=None, sliceDim: int = 1):
         return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 
+    @cached(PLANEDATACACHE, maxItems=64)
     def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
         """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
         return data array
@@ -1267,6 +1271,7 @@ class Spectrum(AbstractWrapperObject):
         xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
         while not done:
             # Using direct api getPlaneData call to reduce overhead; (all parameters have been checked)
+            # By-passes the caching
             planeData = self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
             yield (position, planeData)
             done, position = _nextPosition(position)
@@ -1586,6 +1591,11 @@ class Spectrum(AbstractWrapperObject):
         """Delete Spectrum"""
         self._startCommandEchoBlock('delete')
         try:
+            # Check if there was a planedata cache, and if so, clear it
+            if hasattr(self,PLANEDATACACHE):
+                cache = getattr(self, PLANEDATACACHE)
+                cache.clear()
+
             specDisplays = []
             specViews = []
             for sp in self.spectrumViews:

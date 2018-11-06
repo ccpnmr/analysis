@@ -276,6 +276,9 @@ class Notifier(object):
         """
         unregister the notifiers
         """
+        if not self.isRegistered():
+            return
+
         if self._debug:
             # logger.info # logger apears not to work
             sys.stderr.write('>>> unregister Notifier (%d): %r, triggers=%r, target=%r, callback=%r\n' % \
@@ -294,6 +297,7 @@ class Notifier(object):
 
     def isRegistered(self):
         "Return True if notifier is still registered; i.e. active"
+        return len(self._notifiers) > 0
 
     def setDebug(self, flag: bool):
         "Set debug output on/off"

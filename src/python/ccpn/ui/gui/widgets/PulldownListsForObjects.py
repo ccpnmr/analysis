@@ -35,7 +35,7 @@ from ccpn.core.lib.Notifiers import Notifier
 SELECT = '> Select <'
 UNDEFINED = '<Undefined>'
 
-DEBUG = True
+DEBUG = False
 
 
 class _PulldownABC(PulldownListCompoundWidget):

@@ -656,7 +656,7 @@ class GuiPipeline(CcpnModule, Pipeline):
   def _inputDataContextMenu(self):
     contextMenu = Menu('', self, isFloatWidget=True)
     contextMenu.addItem("Add data", callback=self._addSpectraPopup)
-    contextMenu.addItem("Clear Selection", callback=self.inputDataList.clearSelection)
+    contextMenu.addItem("Clear", callback=self.inputDataList.clear)
     return contextMenu
 
   def _createAllSettingWidgets(self):

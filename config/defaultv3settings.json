@@ -41,7 +41,9 @@
         "defaultMarksColour": "#7a7a7a",
         "autoCorrectColours": false,
         "multipletAveraging": 0,
-        "showSpectraOnPhasing": true
+        "showSpectraOnPhasing": false,
+        "xAxisUnits": 0,
+        "yAxisUnits": 0
     },
 
     "externalPrograms": {

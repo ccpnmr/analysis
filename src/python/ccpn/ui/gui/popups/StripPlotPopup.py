@@ -29,7 +29,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
-from ccpn.ui.gui.widgets.StripPlot import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES
+from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot, STRIPPLOT_PEAKS, STRIPPLOT_NMRRESIDUES
 from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
 

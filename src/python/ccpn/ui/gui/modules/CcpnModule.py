@@ -285,19 +285,19 @@ class CcpnModule(Dock, DropBase):
             self.layout.removeWidget(self.mainWidget)
 
             if self.settingsPosition == 'left':
-                self._splitter = Splitter(QtCore.Qt.Horizontal, setLayout=True)
+                self._splitter = Splitter(setLayout=True, horizontal=True)
                 self._splitter.addWidget(self._settingsScrollArea)
                 self._splitter.addWidget(self.mainWidget)
             elif self.settingsPosition == 'right':
-                self._splitter = Splitter(QtCore.Qt.Horizontal, setLayout=True)
+                self._splitter = Splitter(setLayout=True, horizontal=True)
                 self._splitter.addWidget(self.mainWidget)
                 self._splitter.addWidget(self._settingsScrollArea)
             elif self.settingsPosition == 'top':
-                self._splitter = Splitter(QtCore.Qt.Vertical, setLayout=True)
+                self._splitter = Splitter(setLayout=True, horizontal=False)
                 self._splitter.addWidget(self._settingsScrollArea)
                 self._splitter.addWidget(self.mainWidget)
             elif self.settingsPosition == 'bottom':
-                self._splitter = Splitter(QtCore.Qt.Vertical, setLayout=True)
+                self._splitter = Splitter(setLayout=True, horizontal=False)
                 self._splitter.addWidget(self.mainWidget)
                 self._splitter.addWidget(self._settingsScrollArea)
 

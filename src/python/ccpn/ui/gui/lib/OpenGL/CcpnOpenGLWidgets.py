@@ -230,8 +230,8 @@ class GLRegion(QtWidgets.QWidget):
             intArea.vertices[1::4] = self._object._1Dregions[0]
             intArea.vertices[3::4] = self._object._1Dregions[2]
 
-            if self._object and self._object in self._glList.parent.current.integrals:
-                solidColour = list(self._glList.parent.highlightColour)
+            if self._object and self._object in self._glList._parent.current.integrals:
+                solidColour = list(self._glList._parent.highlightColour)
             else:
                 solidColour = list(self._brush)
             solidColour[3] = 1.0

@@ -49,7 +49,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.StripPlot import StripPlot
+from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 
 logger = getLogger()
 ALL = '<all>'

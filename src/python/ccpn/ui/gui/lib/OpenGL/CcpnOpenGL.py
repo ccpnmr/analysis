@@ -202,6 +202,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.GLSignals.glMouseMoved.connect(self._glMouseMoved)
         self.GLSignals.glEvent.connect(self._glEvent)
         self.GLSignals.glAxisLockChanged.connect(self._glAxisLockChanged)
+        self.GLSignals.glAxisUnitsChanged.connect(self._glAxisUnitsChanged)
 
         # install handler to resize when moving between displays
         self.mainWindow.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
@@ -272,7 +273,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self._crossHairVisible = True
         self._axesVisible = True
         self._axisLocked = False
-        self._showSpectraOnPhasing = True
+        self._showSpectraOnPhasing = False
+        self._xUnits = 0
+        self._yUnits = 0
 
         self._drawRightAxis = True
         self._drawBottomAxis = True
@@ -384,6 +387,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.GLSignals.glMouseMoved.disconnect()
         self.GLSignals.glEvent.disconnect()
         self.GLSignals.glAxisLockChanged.disconnect()
+        self.GLSignals.glAxisUnitsChanged.disconnect()
 
     def threadUpdate(self):
         self.update()
@@ -2393,9 +2397,10 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
-                self._axisXLabelling.append(GLString(text='[ppm]',
+                xUnitsLabels = GLDefs.XAXISUNITS[self._xUnits]
+                self._axisXLabelling.append(GLString(text=xUnitsLabels,
                                                      font=self.globalGL.glSmallFont,
-                                                     x=1.0 - (self.deltaX * len('[ppm]') * self.globalGL.glSmallFont.width),
+                                                     x=1.0 - (self.deltaX * len(xUnitsLabels) * self.globalGL.glSmallFont.width),
                                                      y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
@@ -2430,7 +2435,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
-                self._axisYLabelling.append(GLString(text='[ppm]',
+                yUnitsLabels = GLDefs.YAXISUNITS[self._yUnits]
+                self._axisYLabelling.append(GLString(text=yUnitsLabels,
                                                      font=self.globalGL.glSmallFont,
                                                      x=self.AXIS_OFFSET,
                                                      y=1.0 * self.deltaY,
@@ -3915,6 +3921,19 @@ class CcpnGLWidget(QOpenGLWidget):
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
             self._axisLocked = aDict[GLNotifier.GLVALUES]
             self.update()
+
+    @pyqtSlot(dict)
+    def _glAxisUnitsChanged(self, aDict):
+        if self.strip.isDeleted:
+            return
+
+        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
+
+            # read values from dataDict and set units
+            self._xUnits = aDict[GLNotifier.GLVALUES]['xUnits']
+            self._yUnits = aDict[GLNotifier.GLVALUES]['yUnits']
+            self._axisLocked = aDict[GLNotifier.GLVALUES]['lockAspectRatio']
+            self._rescaleAllAxes()
 
     def setAxisPosition(self, axisCode, position, update=True):
         # if not self.glReady: return

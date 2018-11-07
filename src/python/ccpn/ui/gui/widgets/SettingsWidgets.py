@@ -26,10 +26,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSignal
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CheckBoxes import CheckBoxes
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -46,6 +48,91 @@ ALL = '<all>'
 
 STRIPPLOT_PEAKS = 'peaks'
 STRIPPLOT_NMRRESIDUES = 'nmrResidues'
+
+
+class SpectrumDisplaySettings(Widget):
+
+    settingsChanged = pyqtSignal(dict)
+
+    def __init__(self, parent=None,
+                 mainWindow=None,
+                 callback=None, returnCallback=None, applyCallback=None,
+                 xAxisUnits=0, xTexts=[],
+                 yAxisUnits=0, yTexts=[],
+                 lockAspect=False,
+                 **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
+
+        self._parent = parent
+
+        # Derive application, project, and current from mainWindow
+        self.mainWindow = mainWindow
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+            self.preferences = mainWindow.application.preferences
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
+            self.preferences = None
+
+        # store callbacks
+        self.callback = callback
+        self.returnCallback = returnCallback if returnCallback else self.doCallback
+        self.applyCallback = applyCallback
+
+        # insert widgets into the parent widget
+        row = 0
+        self.xAxisUnits = Label(parent, text="X Axis Units", grid=(row, 0))
+        self.xAxisUnitsButtons = RadioButtons(parent, texts=xTexts,
+                                              selectedInd=xAxisUnits,
+                                              callback=self._settingsChanged,
+                                              direction='h',
+                                              grid=(row, 1), hAlign='l',
+                                              tipTexts=None,
+                                              )
+
+        row += 1
+        self.yAxisUnits = Label(parent, text="Y Axis Units", grid=(row, 0))
+        self.yAxisUnitsButtons = RadioButtons(parent, texts=yTexts,
+                                              selectedInd=yAxisUnits,
+                                              callback=self._settingsChanged,
+                                              direction='h',
+                                              grid=(row, 1), hAlign='l',
+                                              tipTexts=None,
+                                              )
+
+        row += 1
+        self.lockAspect = Label(parent, text="Lock Aspect Ratio", grid=(row, 0))
+        self.lockAspectCheckBox = CheckBox(parent, grid=(row, 1), checked=lockAspect)
+        self.lockAspectCheckBox.toggled.connect(self._settingsChanged)
+
+        row += 1
+        self._spacer = Spacer(parent, 5, 5,
+                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+                              grid=(row, 2), gridSpan=(1, 1))
+
+        self._parent.setContentsMargins(5, 5, 5, 5)
+
+    def _settingsChanged(self):
+        """Handle changing the X axis units
+        """
+        self.settingsChanged.emit({'xUnits': self.xAxisUnitsButtons.getIndex(),
+                                   'yUnits': self.yAxisUnitsButtons.getIndex(),
+                                   'lockAspectRatio': self.lockAspectCheckBox.isChecked()})
+
+    def doCallback(self):
+        """Handle the user callback
+        """
+        if self.callback:
+            self.callback()
+
+    def _returnCallback(self):
+        """Handle the return from widget callback
+        """
+        pass
 
 
 class StripPlot(Widget):
@@ -164,7 +251,7 @@ class StripPlot(Widget):
             buttonTypes += [STRIPPLOT_NMRRESIDUES]
 
         self.listButtons = RadioButtons(self, texts=texts, tipTexts=tipTexts, callback=self._buttonClick,
-                                      grid=(row, 0), direction='v') if texts else None
+                                        grid=(row, 0), direction='v') if texts else None
         if self.listButtons:
             self.listButtons.buttonTypes = buttonTypes
 
@@ -172,7 +259,7 @@ class StripPlot(Widget):
 
         if includeSpectrumTable:
             # create row's of spectrum information
-            self._spectrRows = row+len(texts)
+            self._spectrRows = row + len(texts)
             self._fillSpectrumFrame()
 
         # add a spacer in the bottom-right corner to stop everything moving
@@ -400,10 +487,10 @@ class StripPlot(Widget):
         """Notifiers for responding to spectrumViews
         """
         self._spectrumViewNotifier = Notifier(self.project,
-                                            [Notifier.CREATE, Notifier.DELETE],
-                                            SpectrumView.__name__,
-                                            self._spectrumViewChanged,
-                                            onceOnly=True)
+                                              [Notifier.CREATE, Notifier.DELETE],
+                                              SpectrumView.__name__,
+                                              self._spectrumViewChanged,
+                                              onceOnly=True)
 
         self._registerMonitors()
 
@@ -469,6 +556,7 @@ class StripPlot(Widget):
         self._unRegisterNotifiers()
         self._unregisterMonitors()
 
+
 class _SpectrumRow(Frame):
     "Class to make a spectrum row"
 
@@ -497,6 +585,7 @@ class _SpectrumRow(Frame):
             self.spinBoxes.append(ds)
 
             ds.setEnabled(visible)
+
 
 if __name__ == '__main__':
     import os

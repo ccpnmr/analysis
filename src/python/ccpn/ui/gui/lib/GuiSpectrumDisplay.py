@@ -63,7 +63,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.core.lib.ContextManagers import undoBlock
-from ccpn.ui.gui.widgets.StripPlot import StripPlot
+from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 
 
 AXIS_WIDTH = 30
@@ -164,16 +164,10 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.mainWidget will be the parent of all the subsequent widgets
         self.qtParent = self.mainWidget
 
-
-
         # temporary settings widget
-        self._spectrumDisplaySettings = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
-                                                 includePeakLists=False,
-                                                 includeNmrChains=False,
-                                                 includeSpectrumTable=False,
-                                                 grid=(0, 0))
-
-
+        self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget, mainWindow=self.mainWindow, grid=(0, 0),
+                                                                xTexts=['ppm', 'Hz', 'pnts'], yTexts=['ppm', 'Hz', 'pnts'])
+        self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
 
         # GWV: Not sure what the widget argument is for
         # LM: is the spectrumDisplay, used in the widget to set actions/callbacks to the buttons
@@ -209,7 +203,7 @@ class GuiSpectrumDisplay(CcpnModule):
             # scroll area for strips
             # This took a lot of sorting-out; better leave as is or test thoroughly
             self._stripFrameScrollArea = ScrollArea(parent=self.qtParent, setLayout=True,
-                                                    acceptDrops=False               # True
+                                                    acceptDrops=False  # True
                                                     )
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
@@ -253,6 +247,21 @@ class GuiSpectrumDisplay(CcpnModule):
                                          [Notifier.CHANGE],
                                          'SpectrumDisplay',
                                          self._toolbarChange)
+
+    def _settingsChanged(self, dataDict):
+        """Handle changes that occur in the settings widget
+        dataDict is a dictionary of settingsWidget contents:
+            {
+            xUnits: range(0-number of options)
+            yUnits: range(0-number of options)
+            lockAspectRatio: True/False
+            }
+        """
+        # spawn a redraw of the GL windows
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=None)
+        GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict=dataDict)
 
     def resizeEvent(self, ev):
         # resize the contents of the stripFrame

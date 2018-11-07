@@ -36,7 +36,7 @@ from ccpn.core.lib.Notifiers import Notifier
 SELECT = '> Select <'
 UNDEFINED = '<Undefined>'
 
-DEBUG = True
+DEBUG = False
 
 
 class _PulldownABC(PulldownListCompoundWidget):
@@ -261,7 +261,7 @@ class _PulldownABC(PulldownListCompoundWidget):
 
     @staticmethod
     def onDestroyed(widget):
-        sys.stderr.write('>>> being destroyed:\n', widget)
+        if DEBUG: sys.stderr.write('>>> being destroyed:\n', widget)
 
 
 

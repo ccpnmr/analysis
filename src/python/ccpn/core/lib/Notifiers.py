@@ -272,23 +272,13 @@ class Notifier(object):
             raise RuntimeWarning('Notifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
                                  (theObject, targetName, triggers))
 
-    # GV: can't use __del__ at the moment as it crashes on closing the program (when used in python console)
-    # Improper destructor sequences?
-    #
-    # def __del__(self):
-    #   "del( notifier ) does not trigger this call immediately, as circular references exists"
-    #   print('__del__>', self)
-    #   self.unRegister()
-    #   self._theObject = None
-    #   self._callback = None
-    #   self._project = None
-    #   self._args = None
-    #   self._kwargs = None
-
     def unRegister(self):
         """
         unregister the notifiers
         """
+        if not self.isRegistered():
+            return
+
         if self._debug:
             # logger.info # logger apears not to work
             sys.stderr.write('>>> unregister Notifier (%d): %r, triggers=%r, target=%r, callback=%r\n' % \
@@ -300,11 +290,17 @@ class Notifier(object):
                 self._theObject.unRegisterNotify(func, targetName)
             else:
                 self._project.unRegisterNotifier(targetName, trigger, func)
+        self._theObject = None
+        self._callback = None
         self._notifiers = []
         self._unregister = []
         self._theObject = None
         self._callback = None
         self._triggers = None
+
+    def isRegistered(self):
+        "Return True if notifier is still registered; i.e. active"
+        return len(self._notifiers) > 0
 
     def setDebug(self, flag: bool):
         "Set debug output on/off"
@@ -314,6 +310,10 @@ class Notifier(object):
         """
         wrapper, accomodating the different triggers before firing the callback
         """
+        if not self.isRegistered():
+            logger.warning('Trigering unregistered notifier %s' % self)
+            return
+
         trigger, targetName, triggerForTheObject = notifier
 
         # CURRENT special case

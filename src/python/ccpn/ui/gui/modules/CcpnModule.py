@@ -75,6 +75,8 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, Chec
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 CommonWidgets = {
     CheckBox.__name__: (CheckBox.get, CheckBox.setChecked),
@@ -666,6 +668,21 @@ class CcpnModule(Dock, DropBase):
         try:
             if self.closeFunc:
                 self.closeFunc()
+        except:
+            pass
+
+        # Try de-registering any notifiers or object with unRegister() method for notifiers
+        try:
+            notifiers = [n for n in self.__dict__.values()
+                           if (isinstance(n, Notifier) or
+                               isinstance(n, GuiNotifier) or
+                               isinstance(n, _PulldownABC)
+                               )]
+            logger = getLogger()
+            logger.debug3('>>> notifiers of %s: %s' % (self, notifiers))
+            for notifier in notifiers:
+                logger.debug3('>>> unregistering: %s' % notifier)
+                notifier.unRegister()
         except:
             pass
 

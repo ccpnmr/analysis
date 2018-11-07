@@ -177,11 +177,24 @@ class GuiNotifier(object):
         """
         unregister the notifiers
         """
+        if not self.isRegistered():
+            return
+
         for trigger, targetName in self._unregister:
             if trigger == GuiNotifier.DROPEVENT:
                 self._theObject.setDropEventCallback(None)
+            elif trigger == GuiNotifier.ENTEREVENT:
+                self._theObject.setDragEnterEventCallback(None)
+            elif trigger == GuiNotifier.DRAGMOVEEVENT:
+                self._theObject.setDragMoveEventCallback(None)
+        self._theObject = None
+        self._callback = None
         self._notifiers = []
         self._unregister = []
+
+    def isRegistered(self):
+        "Return True if notifier is still registered; i.e. active"
+        return len(self._notifiers) > 0
 
     def setDebug(self, flag: bool):
         "Set debug output on/off"

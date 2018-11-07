@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, DoubleSpinbox
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 
 
@@ -54,6 +54,7 @@ DefaultReferenceRegion = (3.5, 2.5)
 EnginesVar = 'Engines'
 Engines = {'median': np.median, 'mode':stats.mode, 'mean':np.mean}
 DefaultEngine = 'median'
+NotAvailable = 'Not Available'
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -71,7 +72,7 @@ def _getShift(ref_x, ref_y, target_y):
   return (np.argmax(signal.correlate(ref_y, target_y)) - len(target_y)) * np.mean(np.diff(ref_x))
 
 
-def _alignSpectra(referenceSpectrum, spectra, referenceRegion=(3,2),intensityFactor=1.0, engine='median'):
+def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), intensityFactor=1.0, engine='median'):
   '''
 
   :param referenceSpectrum:
@@ -79,7 +80,7 @@ def _alignSpectra(referenceSpectrum, spectra, referenceRegion=(3,2),intensityFac
   :param referenceRegion:
   :param intensityFactor:
   :param engine: one of 'median', 'mode', 'mean'
-  :return:
+  :return: shift float and estimated intensity factor
   '''
 
   alignedSpectra = []
@@ -102,9 +103,8 @@ def _alignSpectra(referenceSpectrum, spectra, referenceRegion=(3,2),intensityFac
       shifts.append(shift)
 
   # get estimated IntensityFactor
-  mxValues = [max(maxYTargs), maxYRef]
-  eIf = abs(max(mxValues)/min(mxValues))*intensityFactor
-  eif = 10**len(str(int(eIf)))
+  # mxValues = [max(maxYTargs), maxYRef]
+  # eIf = abs(max(mxValues)/min(mxValues))*intensityFactor
   # get a common shift from all the shifts found
   if engine in Engines.keys():
     shift = Engines[engine](shifts)
@@ -113,20 +113,27 @@ def _alignSpectra(referenceSpectrum, spectra, referenceRegion=(3,2),intensityFac
 
   else: # default
     shift = np.median(shifts)
+  eif = _estimateFactor(shift)
 
-  # Apply the shift to all spectra
-  for sp in spectra:
-    if shift is not None:
-      sp.positions -= float(shift)/eif
-      alignedSpectra.append(sp)
-  return alignedSpectra
+  return float(shift), eif
 
+def _estimateFactor(shift):
+  """ a try to get a value between smaller than 1 decimal"""
+  shift = float(shift)
+  v = len(str(shift).split('.')[0])
+  if float(v) >= 1:
+    factor = 10*10**v
+    return factor
+  else:
+    return 10
 
-def addShiftToSpectra(spectra, shift):
+def addShiftToSpectra(spectra, shift, intensityFactor):
   alignedSpectra=[]
   for sp in spectra:
     if shift is not None:
-      sp.positions += float(shift)
+      appliedShift = float(shift)/intensityFactor
+      sp.positions -= appliedShift
+
       alignedSpectra.append(sp)
   return alignedSpectra
 
@@ -149,7 +156,7 @@ class AlignSpectraGuiPipe(GuiPipe):
     #  Reference Spectrum
     self.spectrumLabel = Label(self.pipeFrame, ReferenceSpectrum,  grid=(row,0))
     setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame, headerText=HeaderText,
-                                                  headerIcon=self._warningIcon, grid=(row,1)))
+                                                  headerIcon=self._warningIcon, callback=self._estimateShift, grid=(row,1)))
     row += 1
 
     # target region
@@ -160,16 +167,38 @@ class AlignSpectraGuiPipe(GuiPipe):
     row += 1
 
     # factor
-    self.factorLabel = Label(self.pipeFrame, IntensityFactor, grid=(row, 0))
-    setattr(self, IntensityFactor, ScientificDoubleSpinBox(self.pipeFrame, value=DefaultIntensityFactor,
-                                                 max = 1e20,min=0.01, grid=(row, 1)))
+    # self.factorLabel = Label(self.pipeFrame, IntensityFactor, grid=(row, 0))
+    # setattr(self, IntensityFactor, DoubleSpinbox(self.pipeFrame, value=DefaultIntensityFactor, callback=self._estimateShift,
+    #                                              max = 1e20,min=0.01, grid=(row, 1)))
 
     row += 1
     #  Engines
     self.enginesLabel = Label(self.pipeFrame, EnginesVar, grid=(row, 0))
     setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=list(Engines.keys()), grid=(row, 1)))
 
+    row += 1
+    estimateShiftLabel =  Label(self.pipeFrame, 'Estimated_shift', grid=(row, 0))
+    self.estimateShift = Label(self.pipeFrame, NotAvailable, grid=(row, 1))
+    row += 1
+
+
     self._updateWidgets()
+
+  def _estimateShift(self, *args):
+
+
+      referenceRegion= getattr(self, ReferenceRegion).get()
+      engine = getattr(self, EnginesVar).getText()
+      referenceSpectrum = getattr(self, ReferenceSpectrum).get()
+      if not isinstance(referenceSpectrum, str):
+        spectra = self.parent.inputData
+        shift, ef = _getShiftForSpectra(referenceSpectrum, spectra,
+                                        referenceRegion=referenceRegion, intensityFactor=1, engine=engine)
+        v = (shift/ef)
+        self.estimateShift.clear()
+        self.estimateShift.setText(str(v))
+
+
 
   def _updateWidgets(self):
     self._setDataReferenceSpectrum()
@@ -211,7 +240,7 @@ class AlignSpectra(SpectraPipe):
     :return: aligned spectra
     '''
     referenceRegion = self._kwargs[ReferenceRegion]
-    intensityFactor = self._kwargs[IntensityFactor]
+    # intensityFactor = self._kwargs[IntensityFactor]
     engine = self._kwargs[EnginesVar]
     if self.project is not None:
       referenceSpectrumPid = self._kwargs[ReferenceSpectrum]
@@ -219,8 +248,11 @@ class AlignSpectra(SpectraPipe):
       if referenceSpectrum is not None:
         spectra = [spectrum for spectrum in spectra if spectrum != referenceSpectrum]
         if spectra:
-          return _alignSpectra(referenceSpectrum, spectra,
-                               referenceRegion=referenceRegion,intensityFactor=intensityFactor,engine=engine)
+          shift, ef = _getShiftForSpectra(referenceSpectrum, spectra,
+                                                      referenceRegion=referenceRegion, intensityFactor=1, engine=engine)
+          alignedSpectra = addShiftToSpectra(spectra, shift, ef)
+          getLogger().info('Alignment: applied shift of %s' %shift)
+          return alignedSpectra
         else:
           getLogger().warning('Spectra not Aligned. Returned original spectra')
           return spectra

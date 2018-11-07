@@ -1749,7 +1749,7 @@ class GuiStrip(Frame):
 
             # move to widget store
             self.mainWindow._UndoWidgetStorage.layout().addWidget(self)
-            self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
+            # self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, True)
 
             _undo = self.project._undo
             if _undo is not None:
@@ -1796,7 +1796,7 @@ class GuiStrip(Frame):
                 currentIndex = self._getStripDeleteDict()
 
                 self.mainWindow._UndoWidgetStorage.layout().removeWidget(self)
-                self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
+                # self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, False)
 
                 # clear the layout and rebuild
                 self._widgets = []

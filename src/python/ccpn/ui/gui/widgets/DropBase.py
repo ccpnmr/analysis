@@ -14,7 +14,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -33,118 +33,207 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 from ccpn.core.lib.Pid import Pid
 from ccpn.util.Logging import getLogger
+from PyQt5 import QtGui
 
 
 class DropBase:
-  """
-  Class to implement drop and drag
-  Callback signature on drop: dropEventCallback(dataDict)
-  """
+    """
+    Class to implement drop and drag
+    Callback signature on drop: dropEventCallback(dataDict)
+    """
 
-  # drop targets
-  URLS = 'urls'
-  TEXT = 'text'
-  PIDS = 'pids'
-  IDS  = 'ids'
-  _dropTargets = (URLS, TEXT, PIDS, IDS)
+    # drop targets
+    URLS = 'urls'
+    TEXT = 'text'
+    PIDS = 'pids'
+    IDS = 'ids'
+    _dropTargets = (URLS, TEXT, PIDS, IDS)
 
-  from ccpn.util.Constants import ccpnmrJsonData as JSONDATA
+    from ccpn.util.Constants import ccpnmrJsonData as JSONDATA
 
-  def _init(self, acceptDrops=False, **kwds):
+    def _init(self, acceptDrops=False, **kwds):
 
-    print('DEBUG DropBase %r: acceptDrops=%s' % (self, acceptDrops))
+        print('DEBUG DropBase %r: acceptDrops=%s' % (self, acceptDrops))
 
-    self._dropEventCallback = None
-    self._enterEventCallback = None
-    self._dragMoveEventCallback = None
-    self.setAcceptDrops(acceptDrops)
+        self._dropEventCallback = None
+        self._enterEventCallback = None
+        self._dragMoveEventCallback = None
+        self.setAcceptDrops(acceptDrops)
 
-  def setDropEventCallback(self, callback):
-    "Set the callback function for drop event"
-    self._dropEventCallback = callback
+    def setDropEventCallback(self, callback):
+        "Set the callback function for drop event"
+        self._dropEventCallback = callback
 
-  def dragEnterEvent(self, event):
-    dataDict = self.parseEvent(event)
-    if dataDict is not None and len(dataDict) > 1:
-      event.accept()
-      if self._dragMoveEventCallback is not None:
-        self._dragMoveEventCallback(dataDict)
-    event.accept()
+    def dragEnterEvent(self, event):
+        dataDict = self.parseEvent(event)
+        if dataDict is not None and len(dataDict) > 1:
+            event.accept()
+            if self._dragMoveEventCallback is not None:
+                self._dragMoveEventCallback(dataDict)
+        event.accept()
 
-  def setDragMoveEventCallback(self, callback):
-    self._dragMoveEventCallback = callback
+    def setDragMoveEventCallback(self, callback):
+        self._dragMoveEventCallback = callback
 
-  def setDragEnterEventCallback(self, callback):
-    self._enterEventCallback = callback
+    def setDragEnterEventCallback(self, callback):
+        self._enterEventCallback = callback
 
-  # def dragMoveEvent(self, event):
-  #   dataDict = self.parseEvent(event)
-  #   if dataDict is not None and len(dataDict) > 1:
-  #     if self._dragMoveEventCallback is not None:
-  #       self._dragMoveEventCallback(dataDict)
-  #       event.accept()
-  #       return
-  #
-  #   event.ignore()
-  #   print('>>>dragMoveEvent')
+    # def dragMoveEvent(self, event):
+    #   dataDict = self.parseEvent(event)
+    #   if dataDict is not None and len(dataDict) > 1:
+    #     if self._dragMoveEventCallback is not None:
+    #       self._dragMoveEventCallback(dataDict)
+    #       event.accept()
+    #       return
+    #
+    #   event.ignore()
+    #   print('>>>dragMoveEvent')
 
     # super().dragMoveEvent(event)
 
-  def dropEvent(self, event):
-    """
-    Catch dropEvent and dispatch to processing callback
-    'Native' treatment of CcpnModule instances
-    """
+    def dropEvent(self, event):
+        """
+        Catch dropEvent and dispatch to processing callback
+        'Native' treatment of CcpnModule instances
+        """
 
-    # Needs to be here to prevent circular imports as CcpnModule imports several Widgets which import DropBase
-    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+        # Needs to be here to prevent circular imports as CcpnModule imports several Widgets which import DropBase
+        from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
-    if isinstance(self, CcpnModule):
-      CcpnModule.dropEvent(self, event)
-      return
+        inModuleOverlay = self._callModuleDrop(event)
 
-    if self.acceptDrops():
+        if inModuleOverlay:
+            inModuleOverlay.dropEvent(event)
+            self._clearOverlays()
+            return
 
-      dataDict = self.parseEvent(event)
-      getLogger().debug('Accepted drop with data:%s' % dataDict)
-      getLogger().debug('DropBase-event>: %s callback: %s data: %s' % (self, self._dropEventCallback, dataDict))
+        # if isinstance(self, CcpnModule):
+        #     CcpnModule.dropEvent(self, event)
+        #     return
 
-      if dataDict is not None and len(dataDict) > 1:
-        event.accept()
-        if self._dropEventCallback is not None:
-          self._dropEventCallback(dataDict)
+        if self.acceptDrops():
 
-    else:
-      getLogger().debug('Widget not droppable')
+            dataDict = self.parseEvent(event)
+            getLogger().debug('Accepted drop with data:%s' % dataDict)
+            getLogger().debug('DropBase-event>: %s callback: %s data: %s' % (self, self._dropEventCallback, dataDict))
 
-  def parseEvent(self, event) -> dict:
-    """ 
-    Interpret drop event; extract urls, text or JSONDATA dicts 
-    convert PIDS to Pid object's
-    return a dict with 
-      - event, source key,values pairs
-      - (type, data) key,value pairs,
-    """
-    data = dict(
-      event = event,
-      source = event.source()
-    )
-    mimeData = event.mimeData()
+            if dataDict is not None and len(dataDict) > 1:
+                event.accept()
+                if self._dropEventCallback is not None:
+                    self._dropEventCallback(dataDict)
 
-    if mimeData.hasFormat(DropBase.JSONDATA):
-      data['isCcpnJson'] = True
-      jsonData = json.loads(mimeData.text())
-      if jsonData != None and len(jsonData) > 0:
-        data.update(jsonData)
-      if self.PIDS in data:
-        newPids = [Pid(pid) for pid in data[self.PIDS]]
-        data[self.PIDS] = newPids
+        else:
+            getLogger().debug('Widget not droppable')
 
-    elif event.mimeData().hasUrls():
-      filePaths = [url.path() for url in event.mimeData().urls()]
-      data[self.URLS] = filePaths
+        # call to clear the overlays
+        self._clearOverlays()
 
-    elif event.mimeData().hasText():
-      data[self.TEXT] = event.mimeData().text()
+    def parseEvent(self, event) -> dict:
+        """
+        Interpret drop event; extract urls, text or JSONDATA dicts
+        convert PIDS to Pid object's
+        return a dict with
+          - event, source key,values pairs
+          - (type, data) key,value pairs,
+        """
+        data = dict(
+                event=event,
+                source=event.source()
+                )
+        mimeData = event.mimeData()
 
-    return data
+        if mimeData.hasFormat(DropBase.JSONDATA):
+            data['isCcpnJson'] = True
+            jsonData = json.loads(mimeData.text())
+            if jsonData != None and len(jsonData) > 0:
+                data.update(jsonData)
+            if self.PIDS in data:
+                newPids = [Pid(pid) for pid in data[self.PIDS]]
+                data[self.PIDS] = newPids
+
+        elif event.mimeData().hasUrls():
+            filePaths = [url.path() for url in event.mimeData().urls()]
+            data[self.URLS] = filePaths
+
+        elif event.mimeData().hasText():
+            data[self.TEXT] = event.mimeData().text()
+
+        return data
+
+    def dragMoveEvent(self, ev):
+        """drag move event that propagates through all the widgets
+        """
+        print('>>>dragMoveEvent DropBase', repr(self))
+
+        parentModule = self._findModule()
+        if parentModule:
+            p = parentModule.mapFromGlobal(QtGui.QCursor().pos())
+
+            ld = p.x()                              # ev.pos().x()
+            rd = parentModule.width() - ld
+            td = p.y()                              # ev.pos().y()
+            bd = parentModule.height() - td
+
+            mn = min(ld, rd, td, bd)
+            if mn > 30:
+                parentModule.dropArea = "center"
+            elif (ld == mn or td == mn) and mn > parentModule.height() / 3.:
+                parentModule.dropArea = "center"
+            elif (rd == mn or ld == mn) and mn > parentModule.width() / 3.:
+                parentModule.dropArea = "center"
+
+            elif rd == mn:
+                parentModule.dropArea = "right"
+            elif ld == mn:
+                parentModule.dropArea = "left"
+            elif td == mn:
+                parentModule.dropArea = "top"
+            elif bd == mn:
+                parentModule.dropArea = "bottom"
+
+            if ev.source() is parentModule and parentModule.dropArea == 'center':
+                #print "  no self-center"
+                parentModule.dropArea = None
+                # ev.ignore()
+
+            elif parentModule.dropArea not in parentModule.allowedAreas:
+                #print "  not allowed"
+                parentModule.dropArea = None
+                # ev.ignore()
+
+            # else:
+            #     #print "  ok"
+            #     ev.accept()
+            parentModule.overlay.setDropArea(parentModule.dropArea)
+
+    def _clearOverlays(self):
+        """Clear the overlays for the containing CcpnModule
+        """
+        par = self._findModule()
+        if par:
+            par.dragLeaveEvent(None)
+
+    def _callModuleDrop(self, ev):
+        """Return true if the containing CcpnModule has been activated in one of the dropAreas
+        """
+        par = self._findModule()
+        if par and par.dropArea:
+            return par
+
+    def dragLeaveEvent(self, ev):
+        """Clear the overlays when leaving the widgetArea
+        """
+        par = self._findModule()
+        if par:
+            par.dragLeaveEvent(ev)
+
+    def _findModule(self):
+        """Find the CcpnModule containing this widget
+        """
+        from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModule
+
+        par = self
+        while par:
+            par = par.parent()  # getParent() may be used for CCPN widgets, not for other QWidgets
+            if isinstance(par, CcpnModule):
+                return par

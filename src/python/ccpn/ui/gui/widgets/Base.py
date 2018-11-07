@@ -37,7 +37,6 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 
 from ccpn.util.Logging import getLogger
 
-
 HALIGN_DICT = {
     'left': QtCore.Qt.AlignLeft,
     'right': QtCore.Qt.AlignRight,
@@ -239,19 +238,3 @@ class Base(DropBase):
         """A method to return the parent of a widget
         """
         return self.parent()
-
-    # def dragMoveEvent(self, ev):
-    #     """drag move event that propagates through all the widgets
-    #     """
-    #     # parList = []
-    #     # par = self
-    #     # try:
-    #     #     while par:
-    #     #         parList += [repr(par)]
-    #     #         par = par.parent()
-    #     # finally:
-    #     #     pass
-    #     #
-    #     # par = repr(self.parent()) if self.parent() else None
-    #     print('>>>dragMoveEvent Base', repr(self))
-    #     ev.ignore()

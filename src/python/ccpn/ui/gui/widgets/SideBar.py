@@ -789,7 +789,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                 newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
                 newObjectItem.setText(0, "<New %s>" % classesInSideBar[shortClassName].className)
 
-            return
+            # return
 
 
         itemParent = self._typeToItem.get(shortClassName)
@@ -969,7 +969,6 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
     self.setProjectName(project)
 
-    #TODO: check that reversing the order of Spectrum and SpectrumGroup in the list works
     listOrder = [ky for ky in classesInSideBar.keys()]
     tempKy = listOrder[0]
     listOrder[0] = listOrder[1]

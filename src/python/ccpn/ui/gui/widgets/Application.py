@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -31,29 +31,29 @@ from PyQt5 import QtGui, QtWidgets
 
 class Application(QtWidgets.QApplication):
 
-  def __init__(self, applicationName, applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk'):
+    def __init__(self, applicationName, applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk'):
+        super().__init__([applicationName, ])
 
-    super().__init__([applicationName,])
+        self.setApplicationVersion(applicationVersion)
+        self.setOrganizationName(organizationName)
+        self.setOrganizationDomain(organizationDomain)
 
-    self.setApplicationVersion(applicationVersion)
-    self.setOrganizationName(organizationName)
-    self.setOrganizationDomain(organizationDomain)
+    def start(self):
+        self.exec_()
 
-  def start(self):
-    self.exec_()
 
 class TestApplication(Application):
-  
-  def __init__(self):
-    Application.__init__(self, 'testApplication', '1.0')
-    
+
+    def __init__(self):
+        Application.__init__(self, 'testApplication', '1.0')
+
+
 if __name__ == '__main__':
+    app = TestApplication()
+    w = QtWidgets.QWidget()
+    w.resize(250, 150)
+    w.move(300, 300)
+    w.setWindowTitle('testApplication')
+    w.show()
 
-  app = TestApplication()
-  w = QtWidgets.QWidget()
-  w.resize(250, 150)
-  w.move(300, 300)
-  w.setWindowTitle('testApplication')
-  w.show()
-
-  app.start()
+    app.start()

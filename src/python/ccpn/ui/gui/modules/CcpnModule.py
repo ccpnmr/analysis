@@ -334,7 +334,7 @@ class CcpnModule(Dock, DropBase):
             self.settingsWidget = None
             self.addWidget(self.mainWidget, 0, 0)
 
-        self.setWidgetTransparency(False)
+        # self.setWidgetTransparency(False)
 
         # add an event filter to handle transparency
         # and to check when the dock has been floated - it needs to have a callback
@@ -374,13 +374,15 @@ class CcpnModule(Dock, DropBase):
         # self._instances.add(ref(self))
         self._allChildren = set()
 
-    def setWidgetTransparency(self, transparent):
-        """Set the transparency of the mainWidgets, currently required because
-        dragMovevent is not propagated through all the widgets
-        """
-        self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)
-        if self.settingsWidget:
-            self.settingsWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)
+    # def setWidgetTransparency(self, transparent):
+    #     """Set the transparency of the mainWidgets, currently required because
+    #     dragMovevent is not propagated through all the widgets
+    #     """
+    #     return
+    #
+    #     self.mainWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)
+    #     if self.settingsWidget:
+    #         self.settingsWidget.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents, transparent)
 
     def _findChildren(self, widget):
         for i in widget.children():
@@ -518,37 +520,38 @@ class CcpnModule(Dock, DropBase):
         Modules become transparent when dragging to another module.
         Ensure that the dropAreas become active
         """
-        if isinstance(source, CcpnModule) or isinstance(source, SideBar):
-            if event.type() == QtCore.QEvent.DragEnter:
-                data = self.parseEvent(event)
-                if DropBase.PIDS in data and not isinstance(data['event'].source(), SideBar):
-                    self.setWidgetTransparency(False)
-                else:
 
-                    # make transparent to enable module dragging
-                    self.setWidgetTransparency(True)
-
-            elif event.type() == QtCore.QEvent.Leave:
-                self.setWidgetTransparency(False)
-
-            elif event.type() == QtCore.QEvent.Drop:
-                self.setWidgetTransparency(False)
-
-            elif event.type() == QtCore.QEvent.MouseButtonRelease:
-                self.setWidgetTransparency(False)
-
-        else:
-            if event.type() == QtCore.QEvent.DragLeave:
-                self.setWidgetTransparency(False)
-
-            if event.type() == QtCore.QEvent.Enter:
-                self.setWidgetTransparency(False)
-
-            if event.type() == QtCore.QEvent.Leave:
-                self.setWidgetTransparency(False)
-
-            elif event.type() == QtCore.QEvent.MouseButtonRelease:
-                self.setWidgetTransparency(False)
+        # if isinstance(source, CcpnModule) or isinstance(source, SideBar):
+        #     if event.type() == QtCore.QEvent.DragEnter:
+        #         data = self.parseEvent(event)
+        #         if DropBase.PIDS in data and not isinstance(data['event'].source(), SideBar):
+        #             self.setWidgetTransparency(False)
+        #         else:
+        #
+        #             # make transparent to enable module dragging
+        #             self.setWidgetTransparency(True)
+        #
+        #     elif event.type() == QtCore.QEvent.Leave:
+        #         self.setWidgetTransparency(False)
+        #
+        #     elif event.type() == QtCore.QEvent.Drop:
+        #         self.setWidgetTransparency(False)
+        #
+        #     elif event.type() == QtCore.QEvent.MouseButtonRelease:
+        #         self.setWidgetTransparency(False)
+        #
+        # else:
+        #     if event.type() == QtCore.QEvent.DragLeave:
+        #         self.setWidgetTransparency(False)
+        #
+        #     if event.type() == QtCore.QEvent.Enter:
+        #         self.setWidgetTransparency(False)
+        #
+        #     if event.type() == QtCore.QEvent.Leave:
+        #         self.setWidgetTransparency(False)
+        #
+        #     elif event.type() == QtCore.QEvent.MouseButtonRelease:
+        #         self.setWidgetTransparency(False)
 
         if event.type() == QtCore.QEvent.ParentChange and self._maximiseFunc:
             try:
@@ -687,10 +690,8 @@ class CcpnModule(Dock, DropBase):
     #     """Method to pass drops"""
     #     self.mainWidget.setAcceptDrops(value)
 
-    def dragMoveEvent(self, ev):
-        # DockDrop.dragMoveEvent(self, ev)
-        print('>>>dragMoveEvent CcpnModule', repr(self))
-        super().dragMoveEvent(ev)
+    def dragMoveEvent(self, *args):
+        DockDrop.dragMoveEvent(self, *args)
 
     def dragLeaveEvent(self, *args):
         DockDrop.dragLeaveEvent(self, *args)
@@ -762,7 +763,7 @@ class CcpnModule(Dock, DropBase):
                 DockDrop.dragEnterEvent(self, *args)
 
     def dropEvent(self, event):
-        self.setWidgetTransparency(False)
+        # self.setWidgetTransparency(False)
         if event:
             source = event.source()
             data = self.parseEvent(event)
@@ -831,13 +832,13 @@ class CcpnModule(Dock, DropBase):
         self.widgetArea.setStyleSheet(self.dragStyle)
         self.update()
 
-        self.drag.destroyed.connect(self._destroyed)
+        # self.drag.destroyed.connect(self._destroyed)
         action = self.drag.exec_()
         self.updateStyle()
 
-    def _destroyed(self, ev):
-        # print('>>>_destroyed')
-        self.mainWindow.moduleArea._dragFinished(ev)
+    # def _destroyed(self, ev):
+    #     # print('>>>_destroyed')
+    #     self.mainWindow.moduleArea._dragFinished(ev)
 
 
 class CcpnModuleLabel(DockLabel):

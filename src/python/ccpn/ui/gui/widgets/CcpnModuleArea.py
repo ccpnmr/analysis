@@ -108,17 +108,18 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
 
     # self.label.sigDragEntered.connect(self._dragEntered)
 
-  def _dragEntered(self, module):
-    # print('>>>sigDragEntered from:', module)
-    for mod in self.modules.values():
-      mod.setWidgetTransparency(True)
-
-    self.update()
-
-  def _dragFinished(self, ev):
-    # print('>>>sigDragFinished', self)
-    for mod in self.modules.values():
-      mod.setWidgetTransparency(False)
+  # def _dragEntered(self, module):
+  #   # print('>>>sigDragEntered from:', module)
+  #   # for mod in self.modules.values():
+  #   #   mod.setWidgetTransparency(True)
+  #
+  #   self.update()
+  #
+  # def _dragFinished(self, ev):
+  #   # print('>>>sigDragFinished', self)
+  #   # for mod in self.modules.values():
+  #   #   mod.setWidgetTransparency(False)
+  #   pass
 
   def dropEvent(self, event, *args):
     data = self.parseEvent(event)
@@ -341,7 +342,7 @@ class CcpnModuleArea(ModuleArea, DropBase):   #, DropBase):
     if self.mainWindow is not None:
       self.mainWindow.application.ccpnModules = self.ccpnModules
 
-    module.label.sigDragEntered.connect(self._dragEntered)
+    # module.label.sigDragEntered.connect(self._dragEntered)
     return module
 
   def getContainer(self, obj):

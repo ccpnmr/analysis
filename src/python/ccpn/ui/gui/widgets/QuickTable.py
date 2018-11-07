@@ -1620,7 +1620,6 @@ QuickTable::item::selected {
         self._selectCurrentNotifier = None
         self._droppedNotifier = None
         self._searchNotifier = None
-        self.ncWidget = None
 
     def clearTableNotifiers(self):
         """
@@ -1641,8 +1640,6 @@ QuickTable::item::selected {
             self._droppedNotifier.unRegister()
         if self._searchNotifier is not None:
             self._searchNotifier.unRegister()
-        if self.ncWidget is not None:
-            self.ncWidget.unRegister()
 
     # def dragEnterEvent(self, event):
     #   ccpnmrJsonData = 'ccpnmr-json'

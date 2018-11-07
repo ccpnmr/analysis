@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -25,49 +25,53 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
 
 from ccpn.ui.gui.widgets.Base import Base
 
+
 class Splitter(QtWidgets.QSplitter, Base):
+    "CcpNmr widgets: Splitter class"
 
-  def __init__(self, parent=None, **kw):
+    def __init__(self, parent=None, horizontal=True, **kwds):
 
-    super().__init__(parent)
-    Base._init(self, parent, **kw)
+        super().__init__(parent)
+        Base._init(self, parent, **kwds)
 
-    self.doResize = False
+        if horizontal:
+            self.setOrientation(QtCore.Qt.Horizontal)  #
+        else:
+            self.setOrientation(QtCore.Qt.Vertical)  #
 
-  def createHandle(self):
+        self.doResize = False
 
-    return SplitterHandle(self, self.orientation())
+    def createHandle(self):
 
-  def resizeEvent(self, event):
+        return SplitterHandle(self, self.orientation())
 
-    self.doResize = True
-    eventResult = QtWidgets.QSplitter.resizeEvent(self, event)
-    self.doResize = False
+    def resizeEvent(self, event):
+        "Catch resize event"
+        self.doResize = True
+        eventResult = QtWidgets.QSplitter.resizeEvent(self, event)
+        self.doResize = False
 
-    return eventResult
+        return eventResult
 
-  def mouseDoubleClickEvent(self, event):
-    # double-click to retrieve a lost splitter bar
-    self.setSizes([1, 1])
+    def mouseDoubleClickEvent(self, event):
+        "double-click to retrieve a lost splitter bar"
+        self.setSizes([1, 1])
+        event.accept()
 
-    event.accept()
 
 class SplitterHandle(QtWidgets.QSplitterHandle):
 
-  def __init__(self, parent, orientation):
+    def __init__(self, parent, orientation):
+        QtWidgets.QSplitterHandle.__init__(self, orientation, parent)
 
-    QtWidgets.QSplitterHandle.__init__(self, orientation, parent)
+    def mousePressEvent(self, event):
+        self.parent().doResize = True
+        return QtWidgets.QSplitter.mousePressEvent(self, event)
 
-  def mousePressEvent(self, event):
-
-    self.parent().doResize = True
-    return QtWidgets.QSplitter.mousePressEvent(self, event)
-
-  def mouseReleaseEvent(self, event):
-
-    self.parent().doResize = False
-    return QtWidgets.QSplitter.mouseReleaseEvent(self, event)
+    def mouseReleaseEvent(self, event):
+        self.parent().doResize = False
+        return QtWidgets.QSplitter.mouseReleaseEvent(self, event)

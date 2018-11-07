@@ -261,7 +261,7 @@ class _PulldownABC(PulldownListCompoundWidget):
 
     @staticmethod
     def onDestroyed(widget):
-        sys.stderr.write('>>> being destroyed:\n', widget)
+        if DEBUG: sys.stderr.write('>>> being destroyed:\n', widget)
 
 
 #==========================================================================================================

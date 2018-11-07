@@ -1620,6 +1620,7 @@ QuickTable::item::selected {
         self._selectCurrentNotifier = None
         self._droppedNotifier = None
         self._searchNotifier = None
+        self.ncWidget = None
 
     def clearTableNotifiers(self):
         """

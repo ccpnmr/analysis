@@ -128,6 +128,30 @@ class ListWidget(QtWidgets.QListWidget, Base):
     def getObjects(self):
         return list(self.objects)
 
+    def hideAllItems(self):
+        for i in range(self.count()):
+            item = self.item(i)
+            item.setHidden(True)
+
+    def showAllItems(self):
+        for i in range(self.count()):
+            item = self.item(i)
+            item.setHidden(False)
+
+    def showItems(self, items, select=False):
+        """ Shows specific items and hides the rest"""
+
+        for i in range(self.count()):
+            item = self.item(i)
+            if item.text() in items:
+                item.setHidden(False)
+                if select:
+                    item.setSelected(True)
+            else:
+                item.setHidden(True)
+                item.setSelected(False)
+
+
     def _getDroppedObjects(self, project):
         '''This will return obj if the items text is a ccpn pid. This is used when the objects inside a listWidget are being dragged and dropped across widgets'''
         items = []
@@ -213,6 +237,10 @@ class ListWidget(QtWidgets.QListWidget, Base):
         else:
             contextMenu.addItem("Remove", callback=self.contextCallback)
         return contextMenu
+
+    def setContextMenu(self, menu):
+        self.currentContextMenu = menu
+        return menu
 
     # TODO:ED these are not very generic yet
     def setSelectContextMenu(self):

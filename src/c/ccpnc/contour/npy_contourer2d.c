@@ -976,6 +976,7 @@ static fillContours(PyArrayObject *contours, PyArrayObject *lineColour)
             }
             indexPTR[indexCount-1] = endIndex;
         }
+        fromColour += 4;
     }
 }
 

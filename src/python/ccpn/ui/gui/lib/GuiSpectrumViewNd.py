@@ -902,13 +902,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             for position, dataArray in self._getPlaneData():
                 dataArrays += (dataArray,)
 
+            # call the c routine
+            # the colourArray must be 1d array which is colour*number of levels
             contourList = Contourer2d.contourerGLList(dataArrays,
                                                       posLevelsArray,
                                                       negLevelsArray,
-                                                      np.array(self.posColour, dtype=np.float32),
-                                                      np.array(self.negColour, dtype=np.float32))
-
-            # glList.clearArrays()
+                                                      np.array(self.posColour * len(posLevels), dtype=np.float32),
+                                                      np.array(self.negColour * len(negLevels), dtype=np.float32))
 
             if contourList and contourList[1] > 0:
                 glList.numVertices = contourList[1]

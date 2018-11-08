@@ -1136,7 +1136,11 @@ class Spectrum(AbstractWrapperObject):
 
         if self._intensities is None:
             # store the unscaled value internally so need to multiply the return value again
-            self._intensities = self.getSliceData() / self.scale
+            if self.getSliceData() is  None:
+                return np.array([0]*len(self.positions))
+            else:
+                self._intensities = self.getSliceData() / self.scale
+
 
             # OLD - below not needed any more since now scaled in getSliceData()
             # if self._intensities is not None:
@@ -1147,9 +1151,9 @@ class Spectrum(AbstractWrapperObject):
     @intensities.setter
     def intensities(self, value):
         self._intensities = value
-
-        # for spectrumView in self.spectrumViews:
-        #     spectrumView.refreshData()
+        # temporary hack for showing straight the result of intensities change
+        for spectrumView in self.spectrumViews:
+            spectrumView.refreshData()
 
     @property
     def positions(self) -> np.ndarray:
@@ -1170,6 +1174,9 @@ class Spectrum(AbstractWrapperObject):
     @positions.setter
     def positions(self, value):
         self._positions = value
+        # temporary hack for showing straight the result of intensities change
+        for spectrumView in self.spectrumViews:
+            spectrumView.refreshData()
 
     #------------------------------------------------------------------------------------------------------
     # Implementation functions

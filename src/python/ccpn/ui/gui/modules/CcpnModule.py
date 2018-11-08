@@ -152,6 +152,7 @@ class CcpnModule(Dock, DropBase):
     settingsPosition = 'top'
     settingsMinimumSizes = (100, 50)
     _restored = False
+    className = ''
 
     # _instances = set()
 

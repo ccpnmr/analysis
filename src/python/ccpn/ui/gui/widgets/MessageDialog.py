@@ -114,6 +114,9 @@ def showInfo(title, message, parent=None, iconPath=None):
   dialog.exec_()
   return 
 
+def showNotImplementedMessage():
+  showInfo('Not implemented yet!',
+           'This function has not been implemented in the current version')
 
 def showOkCancel(title, message, parent=None, iconPath=None):
 

@@ -136,6 +136,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
       self.hPhaseTrace = None
     
   def _updatePhasing(self):
+    print('_updatePhasing 1D')
     if not self.isVisible():
       return
       
@@ -146,6 +147,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
     position = [axis.position for axis in self.strip.orderedAxes]
     
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
+    phasingFrame.applyCallback = self._applyPhasing
+
+    phasingFrame.applyButton.setEnabled(True)
+
     ph0 = phasingFrame.slider0.value() if phasingFrame.isVisible() else 0
     ph1 = phasingFrame.slider1.value() if phasingFrame.isVisible() else 0
       
@@ -164,7 +169,23 @@ class GuiSpectrumView1d(GuiSpectrumView):
     inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, = self._getTraceParams(position)        
     if inRange:
       self._updateHTraceData(point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, trace, ph0, ph1, pivot)
-    
+
+  def _applyPhasing(self, phasingValues):
+      """apply the phasing values
+      phasingValues = { 'direction': 'horizontal',
+                        'horizontal': {'ph0': float,
+                                       'ph1': float,
+                                     'pivot': float}}
+      """
+      values = phasingValues.get('horizontal')
+      ph0 = values.get('ph0')
+      ph1 = values.get('ph1')
+      pivot = values.get('pivot')
+      spectrum = self.spectrum
+      intensities = Phasing.phaseRealData(spectrum.intensities, ph0, ph1, pivot)
+      spectrum.intensities = intensities
+      self.strip.spectrumDisplay.togglePhaseConsole()
+
   def _getTraceParams(self, position):
     # position is in ppm (intensity in y)
         
@@ -206,7 +227,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     viewRegion = plotWidget.viewRange()
     
     pointInt = [1+int(pnt+0.4999) for pnt in point]
-    data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
+    data = self.spectrum.intensities
     if ph0 is not None and ph1 is not None and pivot is not None:
       data0 = np.array(data)
       data = Phasing.phaseRealData(data, ph0, ph1, pivot)
@@ -262,8 +283,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
     # spawn a rebuild in the openGL strip
     self.buildContoursOnly = True
-
-    self.update()
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
+    # self.update()
 
   def setSliceColour(self):
     self.plot.curve.setPen(self.spectrum.sliceColour)

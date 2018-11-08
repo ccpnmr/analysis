@@ -26,73 +26,94 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.AnalysisScreen.gui.widgets import HitFinderWidgets as hw
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, DoubleSpinbox
+from ccpn.pipes.lib._new1Dspectrum import _create1DSpectrum
+
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
-from ccpn.pipes.lib._new1Dspectrum import _create1DSpectrum
+from scipy import signal
+import numpy as np
+from scipy import stats
+from ccpn.util.Logging import getLogger , _debug3
+from ccpn.util import Phasing
+
+
 ########################################################################################################################
 ###   Attributes:
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
+PipeName = 'Phasing Spectra'
+Ph0 = 'Ph0'
+Ph1 = 'Ph1'
+Pivot = 'Pivot'
+Auto = 'Automatic'
+DefaultAutoValue = False
+DefaultPh0=0.0
+DefaultPh1=0.0
+DefaultPivot=1.0
+_paramList = [(Ph0, DefaultPh0), (Ph1, DefaultPh1), (Pivot, DefaultPivot)]
 
-## Widget variables and/or _kwargs keys
-
-
-## defaults
-ReplaceInputData = 'Replace_Input_Data'
-DefaultReplaceInputData  = False
-
-
-## PipeName
-PipeName = 'Duplicate Spectra'
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
 
+def phasing1D(spectrum, ph0, ph1,pivot):
+  """
+
+  :param spectrum:
+  :param ph0: degrees
+  :param ph1:
+  :param pivot: in points
+  :return: intensities
+  """
+  data = spectrum.intensities
+  pivot = spectrum.mainSpectrumReferences[0].valueToPoint(pivot)
+  data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+  data1 = np.array(data)
+
+  return data1
 
 
+def autoPhasing(spectrum, engine='peak_minima'):
+  data = spectrum.intensities
+  data = Phasing.autoPhaseReal(data, engine)
+  return data
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
 
 
-class DuplicateSpectrumGuiPipe(GuiPipe):
+class PhasingSpectraGuiPipe(GuiPipe):
 
   preferredPipe = True
   pipeName = PipeName
-  _alreadyOpened = False
 
+  def __init__(self, name=pipeName, parent=None, project=None,   **kw):
+    super(PhasingSpectraGuiPipe, self)
+    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
+    self.parent = parent
+    i = 0
+    Label(self.pipeFrame, Auto, grid=(i, 0))
+    setattr(self, Auto, CheckBox(self.pipeFrame, checked=DefaultAutoValue, callback=self._toggleManualSettings,
+                                 grid=(i, 1)))
+    i += 1
+    for i, params in enumerate(_paramList):
+      i+=1
+      Label(self.pipeFrame, params[0], grid=(i, 0))
+      setattr(self, params[0], DoubleSpinbox(self.pipeFrame, value=params[1],
+                                                           max=1000, min=-1000,
+                                                           decimals=2, step=0.1,
+                                                           grid=(i, 1)))
 
-  def __init__(self, name=pipeName, parent=None, project=None, **kwds):
-    super(DuplicateSpectrumGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
-    DuplicateSpectrumGuiPipe._alreadyOpened = True
-
-    row = 0
-    tipText = 'Use the duplicated spectra as new inputData and remove the original spectra from the pipeline.'
-    self.replaceInputDataLabel = Label(self.pipeFrame, text=ReplaceInputData, grid=(row, 0))
-    setattr(self, ReplaceInputData, CheckBox(self.pipeFrame, text='', checked=DefaultReplaceInputData, tipText=tipText,
-                                             grid=(row, 1)))
-
-  def _updateWidgets(self):
-    pass
-
-
-  def _closeBox(self):
-    'reset alreadyOpened flag '
-    DuplicateSpectrumGuiPipe._alreadyOpened = False
-    self.closeBox()
-
-
-
+  def _toggleManualSettings(self):
+    for i, params in enumerate(_paramList):
+     w = getattr(self, params[0])
+     w.setEnabled(not w.isEnabled())
 
 ########################################################################################################################
 ##########################################       PIPE      #############################################################
@@ -101,39 +122,49 @@ class DuplicateSpectrumGuiPipe(GuiPipe):
 
 
 
-class DuplicateSpectrumPipe(SpectraPipe):
+class Phasing1DPipe(SpectraPipe):
+  """
+  Apply  phasing to all the spectra in the pipeline
+  """
 
-  guiPipe = DuplicateSpectrumGuiPipe
+  guiPipe = PhasingSpectraGuiPipe
   pipeName = PipeName
 
   _kwargs  =   {
-                ReplaceInputData:DefaultReplaceInputData
+                Ph0  :DefaultPh0,
+                Ph1: DefaultPh0,
+                Pivot: DefaultPivot,
+                Auto:DefaultAutoValue
                }
+
 
 
   def runPipe(self, spectra):
     '''
     :param spectra: inputData
-    :return: new spectra
+    :return: aligned spectra
     '''
-    newSpectra = set()
-    for spectrum in spectra:
-      newspectrum = spectrum._clone1D()
-      newSpectra.update([newspectrum])
-      newspectrum.spectrumGroups = ()
-
-    replaceInputData = self._kwargs[ReplaceInputData]
-    if replaceInputData:
-      self.pipeline.updateInputData = True
-      self.pipeline.inputData = newSpectra
-      return newSpectra
-    else:
-      spectra = set(spectra)
-      spectra.update(newSpectra)
-      return spectra
+    ph0 = self._kwargs[Ph0]
+    ph1 = self._kwargs[Ph1]
+    pivot = self._kwargs[Pivot]
+    auto = self._kwargs[Auto]
+    if self.project is not None:
+      if spectra:
+        for spectrum in spectra:
+          if spectrum:
+            if auto:
+              intensities = autoPhasing(spectrum)
+            else:
+              intensities = phasing1D(spectrum, ph0,ph1, pivot)
+            spectrum.intensities = intensities
 
 
+        getLogger().info('Phasing pipe completed. New spectra available on sidebar')
 
-DuplicateSpectrumPipe.register() # Registers the pipe in the pipeline
+        return spectra
+      else:
+        getLogger().warning('Spectra not phased. Returned original spectra')
+        return spectra
 
 
+Phasing1DPipe.register() # Registers the pipe in the pipeline

@@ -515,6 +515,17 @@ def lowess(x, y):
     return ynew
 
 
+def nmrGlueBaselineCorrector(data, wd=20):
+    """
+    :param data: 1D ndarray
+        One dimensional NMR data with real value (intensities)
+        wd : float  Median window size in pts.
+    :return: same as data
+    """
+    import nmrglue as ng
+    data = ng.process.proc_bl.baseline_corrector(data,wd=wd)
+    return data
+
 from typing import Tuple
 
 

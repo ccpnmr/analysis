@@ -44,6 +44,7 @@ from ccpn.core.Note import Note
 from ccpn.core.Sample import Sample
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.NmrChain import NmrChain
+from ccpn.core.Chain import Chain
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintList import RestraintList
 from ccpn.ui.gui.guiSettings import sidebarFont
@@ -68,7 +69,7 @@ from ccpn.ui.gui.popups.EditMultipletPopup import EditMultipletPopup
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager
+from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning, progressManager, showNotImplementedMessage
 from ccpn.util.Constants import ccpnmrJsonData
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
@@ -200,8 +201,8 @@ def _openSpectrumGroup(mainWindow, spectrumGroup, position=None, relativeTo=None
     spectrumDisplay.spectrumGroupToolBar.show()
     spectrumDisplay.spectrumGroupToolBar._addAction(spectrumGroup)
     mainWindow.application.current.strip = spectrumDisplay.strips[0]
-    if spectrumGroup.spectra[0].dimensionCount == 1:
-      mainWindow.application.current.strip.plotWidget.autoRange()
+    if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
+      spectrumDisplay._maximiseRegions()
 
 def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
   """
@@ -248,6 +249,10 @@ def _openNmrResidueTable(mainWindow, nmrChain, position=None, relativeTo=None):
   application = mainWindow.application
   application.showNmrResidueTable(nmrChain=nmrChain, position=position, relativeTo=relativeTo)
 
+def _openResidueTable(mainWindow, chain, position=None, relativeTo=None):
+  application = mainWindow.application
+  application.showResidueTable(chain=chain, position=position, relativeTo=relativeTo)
+
 def _openIntegralList(mainWindow, integralList, position=None, relativeTo=None):
   application = mainWindow.application
   application.showIntegralTable(integralList=integralList, position=position, relativeTo=relativeTo)
@@ -257,6 +262,7 @@ OpenObjAction = {
                   PeakList: _openPeakList,
                   MultipletList:_openMultipletList,
                   NmrChain: _openNmrResidueTable,
+                  Chain: _openResidueTable,
                   SpectrumGroup:_openSpectrumGroup,
                   Sample:_openSampleSpectra,
                   ChemicalShiftList:_openChemicalShiftList,
@@ -460,13 +466,13 @@ class SideBar(QtWidgets.QTreeWidget, Base):
 
       else:
         # with progressManager(self.mainWindow, 'Loading data... ' + url):
-          try:
+          try: #  Why do we need this try?
             data = self.project.loadData(url)
-
-            objs.extend(data)
+            if data:
+              objs.extend(data)
           except Exception as es:
             getLogger().warning('loadData Error: %s' % str(es))
-        #   try:
+        # #   try:
 
           # except Exception as es:
           #   getLogger().warning('loadData Error: %s' % str(es))

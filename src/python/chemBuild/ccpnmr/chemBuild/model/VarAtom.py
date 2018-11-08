@@ -819,27 +819,28 @@ class VarAtom:
       temporarySelfAdd = False
     
     neighbours = set(firstAtomInBranch.neighbours)
-    
-    while neighbours:
-      neighbour = neighbours.pop()
-      if neighbour == self or neighbour in atoms:
-        continue
-        
-      atoms.add(neighbour)
-      
-      if neighbour.element == 'H':
-        continue
-        
-      for neighbour2 in neighbour.neighbours:
-        if neighbour2 in atoms:
+    if len(neighbours):
+
+      while neighbours:
+        neighbour = neighbours.pop()
+        if neighbour == self or neighbour in atoms:
           continue
-          
-        atoms.add(neighbour2)
-        if neighbour2.element == 'H':
+
+        atoms.add(neighbour)
+
+        if neighbour.element == 'H':
           continue
-        
-        atoms.update(neighbour.findAtomsInBranch(neighbour2, atoms))
-        
+
+        for neighbour2 in neighbour.neighbours:
+          if neighbour2 in atoms:
+            continue
+
+          atoms.add(neighbour2)
+          if neighbour2.element == 'H':
+            continue
+
+          atoms.update(neighbour.findAtomsInBranch(neighbour2, atoms))
+
     if temporarySelfAdd:
       atoms.remove(self)
 

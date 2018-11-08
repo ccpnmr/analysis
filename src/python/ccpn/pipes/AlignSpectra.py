@@ -37,7 +37,7 @@ from scipy import signal
 import numpy as np
 from scipy import stats
 from ccpn.util.Logging import getLogger , _debug3
-
+from collections import OrderedDict
 
 ########################################################################################################################
 ###   Attributes:
@@ -50,9 +50,19 @@ HeaderText = '-- Select Spectrum --'
 IntensityFactor = 'Intensity_Factor'
 DefaultIntensityFactor = 10.0
 ReferenceRegion = 'Reference_Region'
-DefaultReferenceRegion = (3.5, 2.5)
+DefaultReferenceRegion = (0.5, -0.5)
 EnginesVar = 'Engines'
-Engines = {'median': np.median, 'mode':stats.mode, 'mean':np.mean}
+IndividualMode = 'individual'
+Median ='median'
+Mode = 'mode'
+Mean = 'mean'
+Engines = [IndividualMode, Mean, Mode,Median]
+EnginesCallables = OrderedDict([
+                    ('median',np.median),
+                    ('mode',stats.mode),
+                    ('mean',np.mean),
+                    ])
+
 DefaultEngine = 'median'
 NotAvailable = 'Not Available'
 ########################################################################################################################
@@ -90,31 +100,57 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), inte
   ref_x_filtered = np.where((xRef <= point1) & (xRef >= point2))
   ref_y_filtered = yRef[ref_x_filtered]
   maxYRef = max(ref_y_filtered)
+  boolsRefMax = yRef == maxYRef
+  refIndices = np.argwhere(boolsRefMax)
+  if len(refIndices) > 0:
+    refPos = float(xRef[refIndices[0]])
   #  find the shift for each spectrum
 
   maxYTargs = [0.01] # a non zero default
   for sp in spectra:
     xTarg, yTarg = sp.positions, sp.intensities
     x_TargetFilter = np.where((xTarg <= point1) & (xTarg >= point2))
+
     y_TargetValues = yTarg[x_TargetFilter]
+    maxYTarget = max(y_TargetValues)
+
+    boolsMax = yTarg == maxYTarget
+    indices = np.argwhere(boolsMax)
+    if len(indices)>0:
+      tarPos = float(xTarg[indices[0]])
+      shift =tarPos-refPos
+      sp.positions -= shift
+
+      print(sp.name, abs(tarPos-refPos))
+
+
+
+    # print('>>', sp.name, 'maxXRef',xRef[maxXRef], 'maxXtarget', xTarg[maxXtarget], )
+    # print('>>', spp.name, 'Shift', xRef[maxXRef]- xTarg[maxXtarget], )
+
+
     maxYTargs.append(max(y_TargetValues))
     shift = _getShift(ref_x_filtered, ref_y_filtered, y_TargetValues)
     if shift is not None:
+      if engine == IndividualMode:
+        eif = _estimateFactor(shift)
+        shift = shift / eif
+
       shifts.append(shift)
 
-  # get estimated IntensityFactor
-  # mxValues = [max(maxYTargs), maxYRef]
-  # eIf = abs(max(mxValues)/min(mxValues))*intensityFactor
+
+
   # get a common shift from all the shifts found
-  if engine in Engines.keys():
-    shift = Engines[engine](shifts)
+  if engine in EnginesCallables.keys():
+    shift = EnginesCallables[engine](shifts)
     if isinstance(shift, stats.stats.ModeResult):
       shift = shift.mode[0]
+
 
   else: # default
     shift = np.median(shifts)
   eif = _estimateFactor(shift)
-
+  shift = shift / eif
   return float(shift), eif
 
 def _estimateFactor(shift):
@@ -122,7 +158,7 @@ def _estimateFactor(shift):
   shift = float(shift)
   v = len(str(shift).split('.')[0])
   if float(v) >= 1:
-    factor = 10*10**v
+    factor = 10**v
     return factor
   else:
     return 10
@@ -174,7 +210,7 @@ class AlignSpectraGuiPipe(GuiPipe):
     row += 1
     #  Engines
     self.enginesLabel = Label(self.pipeFrame, EnginesVar, grid=(row, 0))
-    setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=list(Engines.keys()), grid=(row, 1)))
+    setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=Engines, grid=(row, 1)))
 
     row += 1
     estimateShiftLabel =  Label(self.pipeFrame, 'Estimated_shift', grid=(row, 0))
@@ -191,12 +227,12 @@ class AlignSpectraGuiPipe(GuiPipe):
       engine = getattr(self, EnginesVar).getText()
       referenceSpectrum = getattr(self, ReferenceSpectrum).get()
       if not isinstance(referenceSpectrum, str):
-        spectra = self.parent.inputData
+        spectra = [sp for sp in self.parent.inputData if sp != referenceSpectrum]
         shift, ef = _getShiftForSpectra(referenceSpectrum, spectra,
                                         referenceRegion=referenceRegion, intensityFactor=1, engine=engine)
-        v = (shift/ef)
+
         self.estimateShift.clear()
-        self.estimateShift.setText(str(v))
+        self.estimateShift.setText(str(shift))
 
 
 

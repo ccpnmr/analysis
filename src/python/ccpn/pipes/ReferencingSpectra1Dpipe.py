@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
+from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox,DoubleSpinbox
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 
 
@@ -44,9 +44,14 @@ from ccpn.util.Logging import getLogger , _debug3
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName = 'Shift Spectra'
+PipeName = 'Referencing Spectra'
 Shift = 'Shift'
-DefaultShift = 0.01
+Origin = 'Origin'
+Target = 'Target'
+
+DefaultOrigin = 0.10
+DefaultTarget = 0.00
+
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -55,9 +60,11 @@ DefaultShift = 0.01
 
 def addShiftToSpectra(spectra, shift):
   alignedSpectra=[]
+  print(spectra)
   for sp in spectra:
     if shift is not None:
-      sp.positions += float(shift)
+      sp.positions -= float(shift)
+      print(sp.name, shift)
       alignedSpectra.append(sp)
   return alignedSpectra
 
@@ -66,23 +73,25 @@ def addShiftToSpectra(spectra, shift):
 ########################################################################################################################
 
 
-class ShiftSpectraGuiPipe(GuiPipe):
+class ReferencingSpectraGuiPipe(GuiPipe):
 
   preferredPipe = True
   pipeName = PipeName
 
   def __init__(self, name=pipeName, parent=None, project=None,   **kw):
-    super(ShiftSpectraGuiPipe, self)
+    super(ReferencingSpectraGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
 
 
-    # factor
-    self.factorLabel = Label(self.pipeFrame, Shift, grid=(0, 0))
-    setattr(self, Shift, ScientificDoubleSpinBox(self.pipeFrame, value=DefaultShift,
-                                                 max = 1e20,min=0.01, grid=(0, 1)))
 
-
+    _paramList = [(Origin, DefaultOrigin), (Target, DefaultTarget)]
+    for i, params in enumerate(_paramList):
+      Label(self.pipeFrame, params[0], grid=(i, 0))
+      setattr(self, params[0], DoubleSpinbox(self.pipeFrame, value=params[1],
+                                             max=1000, min=-1000,
+                                             decimals=3, step=0.1,
+                                             grid=(i, 1)))
 
 
 ########################################################################################################################
@@ -92,16 +101,17 @@ class ShiftSpectraGuiPipe(GuiPipe):
 
 
 
-class ShiftSpectra(SpectraPipe):
+class ReferencingSpectra(SpectraPipe):
   """
   Add a shift value to all the spectra in the pipeline
   """
 
-  guiPipe = ShiftSpectraGuiPipe
+  guiPipe = ReferencingSpectraGuiPipe
   pipeName = PipeName
 
   _kwargs  =   {
-                Shift  :DefaultShift,
+                Origin  :DefaultOrigin,
+                Target  :DefaultTarget
                }
 
 
@@ -111,14 +121,16 @@ class ShiftSpectra(SpectraPipe):
     :param spectra: inputData
     :return: aligned spectra
     '''
-    shift = self._kwargs[Shift]
+    origin = self._kwargs[Origin]
+    target = self._kwargs[Target]
 
     if self.project is not None:
       if spectra:
+        shift = origin-target
         return addShiftToSpectra(spectra, shift)
       else:
         getLogger().warning('Spectra not Aligned. Returned original spectra')
         return spectra
 
 
-ShiftSpectra.register() # Registers the pipe in the pipeline
+ReferencingSpectra.register() # Registers the pipe in the pipeline

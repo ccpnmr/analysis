@@ -65,7 +65,7 @@ class ChemicalShiftTableModule(CcpnModule):
     """
     Initialise the Module widgets
     """
-    CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+    super().__init__(mainWindow=mainWindow, name=name)
 
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
@@ -186,19 +186,6 @@ class ChemicalShiftTable(QuickTable):
   """
   Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
   """
-  # columnDefs = [('#', lambda cs:cs.nmrAtom.serial, 'NmrAtom serial number', None),
-  #            ('NmrResidue', lambda cs:cs._key.rsplit('.', 1)[0], 'NmrResidue Id', None),
-  #            ('Name', lambda cs:cs._key.rsplit('.', 1)[-1], 'NmrAtom name', None),
-  #            ('Shift', lambda cs:'%8.3f' % ChemicalShiftTable._stLamFloat(cs, 'value'), 'Value of chemical shift, in selected ChemicalShiftList', None),
-  #            ('Std. Dev.', lambda cs:'%6.3f' % ChemicalShiftTable._stLamFloat(cs, 'valueError'), 'Standard deviation of chemical shift, in selected ChemicalShiftList', None),
-  #            ('Shift list peaks',
-  #             lambda cs:'%3d ' % ChemicalShiftTable._getShiftPeakCount(cs), 'Number of peaks assigned to this NmrAtom in PeakLists associated with this'
-  #                                                                                   'ChemicalShiftList', None),
-  #            ('All peaks',
-  #             lambda cs:'%3d ' % len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists', None),
-  #             ('Comment', lambda cs:ChemicalShiftTable._getCommentText(cs), 'Notes',
-  #                lambda cs, value:ChemicalShiftTable._setComment(cs, value))
-  #            ]
 
   className = 'ChemicalShiftListTable'
   attributeName = 'chemicalShiftLists'
@@ -209,6 +196,7 @@ class ChemicalShiftTable(QuickTable):
     """
     Initialise the widgets for the module.
     """
+
     # Derive application, project, and current from mainWindow
     self.mainWindow = mainWindow
     self.application = mainWindow.application
@@ -217,8 +205,6 @@ class ChemicalShiftTable(QuickTable):
     self.moduleParent=moduleParent
     self._widget = Widget(parent=parent, **kwds)
     self.chemicalShiftList = None
-
-    ChemicalShiftTable.project = self.project
 
     # create the column objects
     self.CScolumns = ColumnClass(
@@ -236,13 +222,25 @@ class ChemicalShiftTable(QuickTable):
                   lambda cs:'%3d ' % len(set(x for x in cs.nmrAtom.assignedPeaks)), 'Number of peaks assigned to this NmrAtom across all PeakLists', None),
                   ('Comment', lambda cs:ChemicalShiftTable._getCommentText(cs), 'Notes',
                      lambda cs, value:ChemicalShiftTable._setComment(cs, value))
-                 ])   #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
+                 ])
+    #[Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
     # create the table; objects are added later via the displayTableForNmrChain method
+    # initialise the table
+    super().__init__(   parent=parent,
+                        mainWindow=self.mainWindow,
+                        dataFrameObject=None,
+                        setLayout=True,
+                        autoResize=True,
+                        actionCallback=actionCallback if actionCallback else self._actionCallback,
+                        selectionCallback=selectionCallback if selectionCallback else self._selectionCallback,
+                        grid=(3, 0), gridSpan=(1, 6),
+                        )
+
     self.spacer = Spacer(self._widget, 5, 5
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(0, 0), gridSpan=(1, 1))
-    self.ncWidget = ChemicalShiftListPulldown(parent=self._widget,
+    self._chemicalShiftListPulldown = ChemicalShiftListPulldown(parent=self._widget,
                                      project=self.project, default=0,
                                      # first NmrChain in project (if present)
                                      grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
@@ -250,6 +248,7 @@ class ChemicalShiftTable(QuickTable):
                                      sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                      callback=self._selectionPulldownCallback
                                      )
+
     self.spacer = Spacer(self._widget, 5, 5
                          , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
                          , grid=(2, 0), gridSpan=(1, 1))
@@ -259,20 +258,6 @@ class ChemicalShiftTable(QuickTable):
     # initialise the currently attached dataFrame
     self._hiddenColumns = hiddenColumns
     self.dataFrameObject = None
-
-    # initialise the table
-    QuickTable.__init__(self, parent=parent,
-                        mainWindow=self.mainWindow,
-                        dataFrameObject=None,
-                        setLayout=True,
-                        autoResize=True,
-                        actionCallback=actionCallback if actionCallback else self._actionCallback,
-                        selectionCallback=selectionCallback if selectionCallback else self._selectionCallback,
-                        grid=(3, 0), gridSpan=(1, 6),
-                        )
-    # Notifier object to update the table if the nmrChain changes
-    # self._chemicalShiftListNotifier = None
-    # self._chemicalShiftNotifier = None
 
     # TODO: see how to handle peaks as this is too costly at present
     # Notifier object to update the table if the peaks change
@@ -298,7 +283,7 @@ class ChemicalShiftTable(QuickTable):
                            selectCurrentCallBack=None,
                            searchCallBack=NmrResidue)
 
-    self.droppedNotifier = GuiNotifier(self,
+    self._droppedNotifier = GuiNotifier(self,
                                        [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                        self._processDroppedItems)
 
@@ -307,7 +292,7 @@ class ChemicalShiftTable(QuickTable):
     CallBack for Drop events
     """
     pids = data.get('pids', [])
-    self._handleDroppedItems(pids, ChemicalShiftList, self.ncWidget)
+    self._handleDroppedItems(pids, ChemicalShiftList, self._chemicalShiftListPulldown)
 
   def addWidgetToTop(self, widget, col=2, colSpan=1):
     """
@@ -329,16 +314,16 @@ class ChemicalShiftTable(QuickTable):
         logger.warning('select: Object is not of type ChemicalShiftList')
         raise TypeError('select: Object is not of type ChemicalShiftList')
       else:
-        for widgetObj in self.ncWidget.textList:
+        for widgetObj in self._chemicalShiftListPulldown.textList:
           if chemicalShiftList.pid == widgetObj:
             self.chemicalShiftList = chemicalShiftList
-            self.ncWidget.select(self.chemicalShiftList.pid)
+            self._chemicalShiftListPulldown.select(self.chemicalShiftList.pid)
 
   def displayTableForChemicalShift(self, chemicalShiftList):
     """
     Display the table for all chemicalShift
     """
-    self.ncWidget.select(chemicalShiftList.pid)
+    self._chemicalShiftListPulldown.select(chemicalShiftList.pid)
     self._update(chemicalShiftList)
 
   def _updateCallback(self, data):
@@ -424,10 +409,10 @@ class ChemicalShiftTable(QuickTable):
     """
     Notifier Callback for selecting ChemicalShiftList from the pull down menu
     """
-    self.chemicalShiftList = self.project.getByPid(item)
+    self.chemicalShiftList = self._chemicalShiftListPulldown.getSelectedObject()
     logger.debug('>selectionPulldownCallback>', item, type(item), self.chemicalShiftList)
     if self.chemicalShiftList is not None:
-      self.displayTableForChemicalShift(self.chemicalShiftList)
+      self._update(self.chemicalShiftList)
     else:
       self.clearTable()
 
@@ -442,28 +427,6 @@ class ChemicalShiftTable(QuickTable):
     return (len(set(x for x in peaks
                     if x.peakList.chemicalShiftList is chemicalShiftList)))
 
-  # @staticmethod
-  # def _getCommentText(chemicalShift):
-  #   """
-  #   CCPN-INTERNAL: Get a comment from ObjectTable
-  #   """
-  #   try:
-  #     if chemicalShift.comment == '' or not chemicalShift.comment:
-  #       return ' '
-  #     else:
-  #       return chemicalShift.comment
-  #   except:
-  #     return ' '
-  #
-  # @staticmethod
-  # def _setComment(chemicalShift, value):
-  #   """
-  #   CCPN-INTERNAL: Insert a comment into ObjectTable
-  #   """
-  #   ChemicalShiftTable.project.blankNotification()
-  #   chemicalShift.comment = value
-  #   ChemicalShiftTable.project.unblankNotification()
-
   @staticmethod
   def _stLamFloat(row, name):
     """
@@ -474,36 +437,10 @@ class ChemicalShiftTable(QuickTable):
     except:
       return None
 
-  # def _setNotifiers(self):
-  #   """
-  #   Set a Notifier to call when an object is created/deleted/renamed/changed
-  #   rename calls on name
-  #   change calls on any other attribute
-  #   """
-  #   self._clearNotifiers()
-  #   self._chemicalShiftListNotifier = Notifier(self.project
-  #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-  #                                     , ChemicalShiftList.__name__
-  #                                     , self._updateCallback)
-  #   self._chemicalShiftNotifier = Notifier(self.project
-  #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
-  #                                     , ChemicalShift.__name__
-  #                                     , self._updateCallback
-  #                                     , onceOnly=True)
-
-  # def _clearNotifiers(self):
-  #   """
-  #   clean up the notifiers
-  #   """
-  #   if self._chemicalShiftListNotifier is not None:
-  #     self._chemicalShiftListNotifier.unRegister()
-  #   if self._chemicalShiftNotifier is not None:
-  #     self._chemicalShiftNotifier.unRegister()
-  #   if self._peaksNotifier is not None:
-  #     self._peaksNotifier.unRegister()
-
   def _close(self):
     """
     Cleanup the notifiers when the window is closed
     """
     self.clearTableNotifiers()
+    self._chemicalShiftListPulldown.unRegister()
+    self._droppedNotifier.unRegister()

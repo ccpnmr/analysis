@@ -440,7 +440,7 @@ class GLExporter():
                     fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
                     colour = colors.Color(*spectrumView.posColour[0:3], alpha=alphaClip(0.5))
                 else:
-                    fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
+                    fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
 
                     colour = spectrumView.sliceColour
                     colR = int(colour.strip('# ')[0:2], 16) / 255.0

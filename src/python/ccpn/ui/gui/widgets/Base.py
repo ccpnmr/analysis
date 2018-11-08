@@ -106,7 +106,7 @@ class Base(DropBase):
         :param isFloatWidget: indicates widget to be floating
         """
 
-        print('DEBUG Base %r: acceptDrops=%s, setLayout=%s' % (self, acceptDrops, setLayout))
+        # print('DEBUG Base %r: acceptDrops=%s, setLayout=%s' % (self, acceptDrops, setLayout))
 
         # define the 'droppable' methods
         # DropBase._init(self, acceptDrops=acceptDrops)
@@ -156,7 +156,8 @@ class Base(DropBase):
 
     @staticmethod  # has to be a static method
     def onDestroyed(widget):
-        print("DEBUG on destroyed:", widget)
+        # print("DEBUG on destroyed:", widget)
+        pass
 
     def setGridLayout(self, margins=(0, 0, 0, 0), spacing=(0, 0)):
         "Add a QGridlayout to self"

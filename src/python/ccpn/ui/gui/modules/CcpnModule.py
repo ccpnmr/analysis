@@ -233,7 +233,7 @@ class CcpnModule(Dock, DropBase):
         #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
         self.mainWidget = Frame(parent=None, setLayout=True, acceptDrops=True)  #QtWidgets.QWidget(self)
 
-        print('>>>mainWidget ')
+        # print('>>>mainWidget ')
         #self.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         # optional settings widget area

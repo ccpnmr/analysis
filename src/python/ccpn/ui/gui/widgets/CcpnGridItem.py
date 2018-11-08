@@ -104,7 +104,7 @@ class CcpnGridItem(UIGraphicsItem):
                     p2[ax] = p1[ax]
                     p1[bx] = ul[bx]
                     p2[bx] = br[bx]
-                    if p1[ax] < min(ul[ax], br[ax]) or p1[ax] > max(ul[ax], br[ax]):
+                    if p1[ax] < np.min(ul[ax], br[ax]) or p1[ax] > np.max(ul[ax], br[ax]):
                         continue
                     p.drawLine(QtCore.QPointF(p1[0], p1[1]), QtCore.QPointF(p2[0], p2[1]))
 

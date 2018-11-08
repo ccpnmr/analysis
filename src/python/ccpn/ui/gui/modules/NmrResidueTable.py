@@ -249,7 +249,7 @@ class NmrResidueTableModule(CcpnModule):
 
     @staticmethod  # has to be a static method
     def onDestroyed(widget):
-        print("DEBUG on destroyed:", widget)
+        # print("DEBUG on destroyed:", widget)
         widget.self.nmrResidueTable._close()
         widget.nmrResidueTableSettings._cleanupWidget()
 

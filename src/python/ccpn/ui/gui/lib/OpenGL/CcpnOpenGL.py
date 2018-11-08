@@ -68,6 +68,7 @@ __date__ = "$Date$"
 
 import sys
 import math
+import time
 # from threading import Thread
 # from queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -467,23 +468,15 @@ class CcpnGLWidget(QOpenGLWidget):
                                   0.2, 1.0, 0.4, 1.0,
                                   0.3, 0.1, 1.0, 1.0]
         currentShader.setGLUniformMatrix4fv('dataMatrix', 1, GL.GL_FALSE, self._dataMatrix)
-
         currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
         # map mouse coordinates to world coordinates - only needs to change on resize, move soon
         currentShader.setViewportMatrix(self._aMatrix, self.axisL, self.axisR, self.axisB,
                                         self.axisT, -1.0, 1.0)
 
-        # self.pInv = np.linalg.inv(self._uPMatrix.reshape((4, 4)))  # projection
-
         # calculate the screen to axes transform
         self.vInv = np.linalg.inv(self._uVMatrix.reshape((4, 4)))
         self.mouseTransform = np.matmul(self._aMatrix.reshape((4, 4)), self.vInv)
-
-        # try:
-        #     self.aInv = np.linalg.inv(self._aMatrix.reshape((4, 4)))  # axis scale
-        # except Exception as es:
-        #     pass
 
         self.modelViewMatrix = (GL.GLdouble * 16)()
         self.projectionMatrix = (GL.GLdouble * 16)()
@@ -607,8 +600,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         else:
             dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
-            # FIXME Check for Nones
-            fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
+
+            fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
             dyAF = fy0 - fy1
             yScale = dy * dyAF / 1.0
 
@@ -653,6 +646,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._minX = min(self._minX, fx1)
         self._maxY = max(self._maxY, fy0)
         self._minY = min(self._minY, fy1)
+
+        # print('>>>_rescale: %s, %s' % (self.strip.pid, (', '.join(['%.6f']*len(ttlist))+"]") % tuple(ttlist)))
 
     @pyqtSlot()
     def _screenChangedEvent(self, *args):
@@ -1040,14 +1035,11 @@ class CcpnGLWidget(QOpenGLWidget):
         if update:
             self.update()
 
-        # self.project._startCommandEchoBlock('_rescaleYAxis', quiet=True)
         try:
             self._orderedAxes[0].region = (self.axisL, self.axisR)
             self._orderedAxes[1].region = (self.axisT, self.axisB)
         except Exception as es:
             getLogger().debug('error setting viewbox XY-range')
-        # finally:
-        #     self.project._endCommandEchoBlock()
 
     def eventFilter(self, obj, event):
         self._key = '_'
@@ -1860,7 +1852,7 @@ class CcpnGLWidget(QOpenGLWidget):
             mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
             mouseMovedDict[AXIS_FULLATOMNAME][axisCode] = pos
 
-        self.current.cursorPosition = (xPos, yPos)  # TODO: is there a better place for this to be set?
+        self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict
 
         if event.buttons() & (Qt.LeftButton | Qt.RightButton):
@@ -1933,6 +1925,8 @@ class CcpnGLWidget(QOpenGLWidget):
                             # reg[0].renderMode = GLRENDERMODE_REBUILD
                             reg[0]._rebuildIntegral()
                 else:
+
+                    # Main mouse drag event - handle moving the axes with the mouse
                     self.axisL -= dx * self.pixelX
                     self.axisR -= dx * self.pixelX
                     self.axisT += dy * self.pixelY
@@ -2276,7 +2270,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             1].minAliasedFrequency
                         GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
                     else:
-                        fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
+                        fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
 
                         colour = spectrumView.sliceColour
                         colR = int(colour.strip('# ')[0:2], 16) / 255.0
@@ -3666,7 +3660,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
             else:
                 dy = self.sign(self.axisT - self.axisB)
-                fy0, fy1 = max(spectrumView.spectrum.intensities), min(spectrumView.spectrum.intensities)
+                fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
                 dyAF = fy0 - fy1
                 yScale = dy * dyAF / 1.0
 
@@ -4146,6 +4140,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if self._widthsChangedEnough([axisB, self.axisB], [axisT, self.axisT]) and \
                     self._widthsChangedEnough([axisL, self.axisL], [axisR, self.axisR]):
+
                 diff = (axisR - axisL) / 2.0
                 mid = (self.axisR + self.axisL) / 2.0
                 self.axisL = mid - diff

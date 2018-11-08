@@ -1627,7 +1627,7 @@ QuickTable::item::selected {
 
     @staticmethod  # has to be a static method
     def onDestroyed(widget):
-        print("DEBUG on destroyed:", widget)
+        # print("DEBUG on destroyed:", widget)
         widget.clearTableNotifiers()
 
     def clearTableNotifiers(self):

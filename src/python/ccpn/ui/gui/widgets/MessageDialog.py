@@ -268,7 +268,7 @@ class progressPopup(CcpnDialog):
     """
     Initialise the widget
     """
-    super().__init__(self, parent, setLayout=True, windowTitle='busy', **kwds)
+    super().__init__(parent, setLayout=True, windowTitle='busy', **kwds)
 
     # self.mainWindow = mainWindow
     # self.application = mainWindow.application

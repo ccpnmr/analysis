@@ -302,6 +302,7 @@ class CcpnModule(Dock, DropBase):
                 self._splitter.addWidget(self._settingsScrollArea)
 
             self.addWidget(self._splitter)
+            self._splitter.setStretchFactor(1, 5)
 
             # #another fix for the stylesheet
             # if hasattr(mainWindow, 'application') and mainWindow.application:

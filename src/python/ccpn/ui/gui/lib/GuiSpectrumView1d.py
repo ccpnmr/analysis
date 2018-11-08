@@ -262,8 +262,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
     # spawn a rebuild in the openGL strip
     self.buildContoursOnly = True
-
-    self.update()
+    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    GLSignals = GLNotifier(parent=self)
+    GLSignals.emitPaintEvent()
+    # self.update()
 
   def setSliceColour(self):
     self.plot.curve.setPen(self.spectrum.sliceColour)

@@ -1171,6 +1171,9 @@ class Spectrum(AbstractWrapperObject):
     @positions.setter
     def positions(self, value):
         self._positions = value
+        # temporary hack for showing straight the result of intensities change
+        for spectrumView in self.spectrumViews:
+            spectrumView.refreshData()
 
     #------------------------------------------------------------------------------------------------------
     # Implementation functions

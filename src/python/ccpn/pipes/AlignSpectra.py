@@ -194,7 +194,7 @@ class AlignSpectraGuiPipe(GuiPipe):
       engine = getattr(self, EnginesVar).getText()
       referenceSpectrum = getattr(self, ReferenceSpectrum).get()
       if not isinstance(referenceSpectrum, str):
-        spectra = [sp for sp in self.parent.inputData if sp != referenceSpectrum]
+        spectra = [sp for sp in self._parent.inputData if sp != referenceSpectrum]
         if engine == IndividualMode:
           self.estimateShift.clear()
           self.estimateShift.setText(str(NotAvailable))
@@ -211,7 +211,7 @@ class AlignSpectraGuiPipe(GuiPipe):
 
 
   def _setDataReferenceSpectrum(self):
-    data = list(self.parent.inputData)
+    data = list(self._parent.inputData)
 
     if len(data)>0:
       _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data, index=1,

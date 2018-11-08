@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #### GUI IMPORTS
 from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, DoubleSpinbox
 from ccpn.pipes.lib._new1Dspectrum import _create1DSpectrum
@@ -49,10 +50,13 @@ PipeName = 'Phasing Spectra'
 Ph0 = 'Ph0'
 Ph1 = 'Ph1'
 Pivot = 'Pivot'
-
+Auto = 'Automatic'
+DefaultAutoValue = False
 DefaultPh0=0.0
 DefaultPh1=0.0
 DefaultPivot=1.0
+_paramList = [(Ph0, DefaultPh0), (Ph1, DefaultPh1), (Pivot, DefaultPivot)]
+
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -75,15 +79,10 @@ def phasing1D(spectrum, ph0, ph1,pivot):
   return data1
 
 
-def _writeBruker(spectra, path):
-  from ccpn.AnalysisMetabolomics.lib.persistence import writeBruker, procs, bruker1dDict
-  for sp in spectra:
-    y = sp.intensities
-    FTSIZE = len(sp.positions)
-    SF = sp.spectrometerFrequencies[0]
-    procs = bruker1dDict(SF=SF, FTSIZE=FTSIZE)
-    writeBruker(path + sp.name, procs, y)
-
+def autoPhasing(spectrum, engine='peak_minima'):
+  data = spectrum.intensities
+  data = Phasing.autoPhaseReal(data, engine)
+  return data
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
@@ -98,16 +97,23 @@ class PhasingSpectraGuiPipe(GuiPipe):
     super(PhasingSpectraGuiPipe, self)
     GuiPipe.__init__(self, parent=parent, name=name, project=project, **kw )
     self.parent = parent
-
-    _paramList = [(Ph0, DefaultPh0), (Ph1, DefaultPh1), (Pivot,DefaultPivot)]
+    i = 0
+    Label(self.pipeFrame, Auto, grid=(i, 0))
+    setattr(self, Auto, CheckBox(self.pipeFrame, checked=DefaultAutoValue, callback=self._toggleManualSettings,
+                                 grid=(i, 1)))
+    i += 1
     for i, params in enumerate(_paramList):
+      i+=1
       Label(self.pipeFrame, params[0], grid=(i, 0))
       setattr(self, params[0], DoubleSpinbox(self.pipeFrame, value=params[1],
                                                            max=1000, min=-1000,
                                                            decimals=2, step=0.1,
                                                            grid=(i, 1)))
 
-
+  def _toggleManualSettings(self):
+    for i, params in enumerate(_paramList):
+     w = getattr(self, params[0])
+     w.setEnabled(not w.isEnabled())
 
 ########################################################################################################################
 ##########################################       PIPE      #############################################################
@@ -128,6 +134,7 @@ class Phasing1DPipe(SpectraPipe):
                 Ph0  :DefaultPh0,
                 Ph1: DefaultPh0,
                 Pivot: DefaultPivot,
+                Auto:DefaultAutoValue
                }
 
 
@@ -140,11 +147,15 @@ class Phasing1DPipe(SpectraPipe):
     ph0 = self._kwargs[Ph0]
     ph1 = self._kwargs[Ph1]
     pivot = self._kwargs[Pivot]
+    auto = self._kwargs[Auto]
     if self.project is not None:
       if spectra:
         for spectrum in spectra:
           if spectrum:
-            intensities = phasing1D(spectrum, ph0,ph1, pivot)
+            if auto:
+              intensities = autoPhasing(spectrum)
+            else:
+              intensities = phasing1D(spectrum, ph0,ph1, pivot)
             spectrum.intensities = intensities
 
 

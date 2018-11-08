@@ -61,5 +61,33 @@ def phaseComplexData(data:Sequence[complex], ph0:float=0.0, ph1:float=0.0,
   data *= multipliers
   
   return data
-  
+
+
+def autoPhaseReal(data, fn, p0=0.0, p1=0.0):
+  """
+  Automatic linear phase correction from NmrGlue
+  Parameters
+  ----------
+  data : ndarray
+      Array of NMR intensity data.
+  fn : str or function
+      Algorithm to use for phase scoring. Built in functions can be
+      specified by one of the following strings: "acme", "peak_minima"
+  p0 : float
+      Initial zero order phase in degrees.
+  p1 : float
+      Initial first order phase in degrees.
+
+  Returns
+  -------
+  ndata : ndarray
+      Phased NMR data.
+
+  """
+  import nmrglue as ng
+  data = signal.hilbert(data)  # convert real to complex data in best way possible
+  data = ng.proc_autophase.autops(data, fn, p0=p0, p1=p1)
+  data = data.real
+  return data
+
   

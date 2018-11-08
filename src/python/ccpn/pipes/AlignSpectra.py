@@ -83,7 +83,6 @@ def _getShift(ref_x, ref_y, target_y):
 
 def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engine='median'):
   '''
-
   :param referenceSpectrum:
   :param spectra:
   :param referenceRegion:
@@ -96,24 +95,23 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engi
   shifts = []
   point1, point2 = max(referenceRegion), min(referenceRegion)
   xRef, yRef = referenceSpectrum.positions, referenceSpectrum.intensities
-  ref_x_filtered = np.where((xRef <= point1) & (xRef >= point2))
+  ref_x_filtered = np.where((xRef <= point1) & (xRef >= point2)) #only the region of interest for the reference spectrum
+
   ref_y_filtered = yRef[ref_x_filtered]
-  maxYRef = max(ref_y_filtered)
+  maxYRef = max(ref_y_filtered) #Find the highest signal in the region of interest for the reference spectrum. All spectra will be aligned to this point.
   boolsRefMax = yRef == maxYRef
   refIndices = np.argwhere(boolsRefMax)
   if len(refIndices) > 0:
     refPos = float(xRef[refIndices[0]])
-  #  find the shift for each spectrum
 
-  maxYTargs = [0.01] # a non zero default
+  #  find the shift for each spectrum for the selected region
   for sp in spectra:
     xTarg, yTarg = sp.positions, sp.intensities
-    x_TargetFilter = np.where((xTarg <= point1) & (xTarg >= point2))
+    x_TargetFilter = np.where((xTarg <= point1) & (xTarg >= point2)) # filter only the region of interest for the target spectrum
 
     y_TargetValues = yTarg[x_TargetFilter]
     maxYTarget = max(y_TargetValues)
-
-    boolsMax = yTarg == maxYTarget
+    boolsMax = yTarg == maxYTarget  #Find the highest signal in the region of interest
     indices = np.argwhere(boolsMax)
     if len(indices)>0:
       tarPos = float(xTarg[indices[0]])
@@ -211,9 +209,11 @@ class AlignSpectraGuiPipe(GuiPipe):
 
 
   def _setDataReferenceSpectrum(self):
-    data = list(self.inputData)
+    data = list(self.parent.inputData)
+
     if len(data)>0:
-      _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data, headerText=HeaderText, headerIcon=self._warningIcon)
+      _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data, index=1,
+                                                      headerText=HeaderText, headerIcon=self._warningIcon)
     else:
       _getWidgetByAtt(self, ReferenceSpectrum)._clear()
 

@@ -3817,16 +3817,19 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 if self._ordering[0]:
 
+                    visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
+                    thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
+
                     # get the axis ordering from the spectrumDisplay and map to the strip
                     stripAxisCodes = self.strip.axisCodes
                     try:
-                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
                     except Exception as es:
-                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                     # map to a point
-                    axisLimitL = self._ordering[0].spectrum.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL) - 1
-                    axisLimitR = self._ordering[0].spectrum.mainSpectrumReferences[indices[0]].valueToPoint(self.axisR) - 1
+                    axisLimitL = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL) - 1
+                    axisLimitR = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisR) - 1
 
             # generate different axes depending on units - Y Axis
             if self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
@@ -3848,16 +3851,19 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 if self._ordering[0]:
 
+                    visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
+                    thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
+
                     # get the axis ordering from the spectrumDisplay and map to the strip
                     stripAxisCodes = self.strip.axisCodes
                     try:
-                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
                     except Exception as es:
-                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                     # map to a point
-                    axisLimitT = self._ordering[0].spectrum.mainSpectrumReferences[indices[1]].valueToPoint(self.axisT) - 1
-                    axisLimitB = self._ordering[0].spectrum.mainSpectrumReferences[indices[1]].valueToPoint(self.axisB) - 1
+                    axisLimitT = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisT) - 1
+                    axisLimitB = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisB) - 1
 
             # ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
             # br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])

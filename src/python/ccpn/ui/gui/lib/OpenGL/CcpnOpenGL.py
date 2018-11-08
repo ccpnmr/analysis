@@ -3105,13 +3105,118 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if refresh or self._widthsChangedEnough(self.cursorCoordinate, self._mouseCoords, tol=1e-10):
 
-            newCoords = self.mouseFormat % (self._axisOrder[0], self.cursorCoordinate[0],
-                                            self._axisOrder[1], self.cursorCoordinate[1])
+            if not self._drawDeltaOffset:
+                self._startCoordinate = self.cursorCoordinate
+
+            # generate different axes depending on units - X Axis
+            if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
+                cursorX = self.cursorCoordinate[0]
+                startX = self._startCoordinate[0]
+
+            elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
+                if self._ordering:
+
+                    thisSpec = self._ordering[0].spectrum
+
+                    if self.is1D:
+                        cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[0]
+                        startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[0]
+
+                    else:
+                        # get the axis ordering from the spectrumDisplay and map to the strip
+                        stripAxisCodes = self.strip.axisCodes
+                        try:
+                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
+                        except Exception as es:
+                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                        cursorX = self.cursorCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
+                        startX = self._startCoordinate[0] * thisSpec.spectrometerFrequencies[indices[0]]
+
+                else:
+                    # error trap all spectra deleted
+                    cursorX = self.cursorCoordinate[0]
+                    startX = self._startCoordinate[0]
+
+            else:
+                if self._ordering:
+
+                    visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
+                    thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
+
+                    if self.is1D:
+                        cursorX = int(thisSpec.mainSpectrumReferences[0].valueToPoint(self.cursorCoordinate[0]) - 1)
+                        startX = int(thisSpec.mainSpectrumReferences[0].valueToPoint(self._startCoordinate[0]) - 1)
+
+                    else:
+                        # get the axis ordering from the spectrumDisplay and map to the strip
+                        stripAxisCodes = self.strip.axisCodes
+                        try:
+                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
+                        except Exception as es:
+                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                        # map to a point
+                        cursorX = int(thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.cursorCoordinate[0]) - 1)
+                        startX = int(thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0]) - 1)
+
+                else:
+                    # error trap all spectra deleted
+                    cursorX = int(self.cursorCoordinate[0])
+                    startX = int(self._startCoordinate[0])
+
+            # generate different axes depending on units - Y Axis, always use first option for 1d
+            if self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM or self.is1D:
+                cursorY = self.cursorCoordinate[1]
+                startY = self._startCoordinate[1]
+
+            elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
+                if self._ordering:
+
+                    thisSpec = self._ordering[0].spectrum
+
+                    # get the axis ordering from the spectrumDisplay and map to the strip
+                    stripAxisCodes = self.strip.axisCodes
+                    try:
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
+                    except Exception as es:
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                    cursorY = self.cursorCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
+                    startY = self._startCoordinate[1] * thisSpec.spectrometerFrequencies[indices[1]]
+
+                else:
+                    # error trap all spectra deleted
+                    cursorY = self.cursorCoordinate[1]
+                    startY = self._startCoordinate[1]
+
+            else:
+                if self._ordering:
+
+                    visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
+                    thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
+
+                    # get the axis ordering from the spectrumDisplay and map to the strip
+                    stripAxisCodes = self.strip.axisCodes
+                    try:
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
+                    except Exception as es:
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                    # map to a point
+                    cursorY = int(thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.cursorCoordinate[1]) - 1)
+                    startY = int(thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1]) - 1)
+
+                else:
+                    # error trap all spectra deleted
+                    cursorY = int(self.cursorCoordinate[1])
+                    startY = int(self._startCoordinate[1])
+
+            newCoords = self.mouseFormat % (self._axisOrder[0], cursorX,
+                                            self._axisOrder[1], cursorY)
 
             self.mouseString = GLString(text=newCoords,
                                         font=self.globalGL.glSmallFont,
-                                        # x=self.cursorCoordinate[0],
-                                        # y=self.cursorCoordinate[1],
                                         x=valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR),
                                         y=valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT),
                                         color=self.foreground, GLContext=self,
@@ -3119,16 +3224,11 @@ class CcpnGLWidget(QOpenGLWidget):
             self._mouseCoords = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
             if self._drawDeltaOffset:
-                diffCoords = self.diffMouseFormat % (self._axisOrder[0], (self.cursorCoordinate[0] -
-                                                                          self._startCoordinate[0]),
-                                                     self._axisOrder[1], (self.cursorCoordinate[1] -
-                                                                          self._startCoordinate[1]))
+                diffCoords = self.diffMouseFormat % (self._axisOrder[0], (cursorX - startX),
+                                                     self._axisOrder[1], (cursorY - startY))
 
                 self.diffMouseString = GLString(text=diffCoords,
                                                 font=self.globalGL.glSmallFont,
-                                                # x=self.cursorCoordinate[0],
-                                                # y=self.cursorCoordinate[1] - (
-                                                #         self.globalGL.glSmallFont.height * 2.0 * self.pixelY),
                                                 x=valueToRatio(self.cursorCoordinate[0], self.axisL, self.axisR),
                                                 y=valueToRatio(self.cursorCoordinate[1], self.axisB, self.axisT) - (
                                                         self.globalGL.glSmallFont.height * 2.0 * self.deltaY),
@@ -3799,20 +3899,22 @@ class CcpnGLWidget(QOpenGLWidget):
             elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
                 if self._ordering:
 
+                    thisSpec = self._ordering[0].spectrum
+
                     if self.is1D:
-                        axisLimitL = self.axisL * self._ordering[0].spectrum.spectrometerFrequencies[0]
-                        axisLimitR = self.axisR * self._ordering[0].spectrum.spectrometerFrequencies[0]
+                        axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[0]
+                        axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[0]
 
                     else:
                         # get the axis ordering from the spectrumDisplay and map to the strip
                         stripAxisCodes = self.strip.axisCodes
                         try:
-                            indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
+                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
                         except Exception as es:
-                            indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
-                        axisLimitL = self.axisL * self._ordering[0].spectrum.spectrometerFrequencies[indices[0]]
-                        axisLimitR = self.axisR * self._ordering[0].spectrum.spectrometerFrequencies[indices[0]]
+                        axisLimitL = self.axisL * thisSpec.spectrometerFrequencies[indices[0]]
+                        axisLimitR = self.axisR * thisSpec.spectrometerFrequencies[indices[0]]
 
                 else:
                     # error trap all spectra deleted
@@ -3854,15 +3956,17 @@ class CcpnGLWidget(QOpenGLWidget):
             elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
                 if self._ordering:
 
+                    thisSpec = self._ordering[0].spectrum
+
                     # get the axis ordering from the spectrumDisplay and map to the strip
                     stripAxisCodes = self.strip.axisCodes
                     try:
-                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
                     except Exception as es:
-                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
-                    axisLimitT = self.axisT * self._ordering[0].spectrum.spectrometerFrequencies[indices[1]]
-                    axisLimitB = self.axisB * self._ordering[0].spectrum.spectrometerFrequencies[indices[1]]
+                    axisLimitT = self.axisT * thisSpec.spectrometerFrequencies[indices[1]]
+                    axisLimitB = self.axisB * thisSpec.spectrometerFrequencies[indices[1]]
 
                 else:
                     # error trap all spectra deleted

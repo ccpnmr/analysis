@@ -64,6 +64,7 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.ui.gui.lib.Strip import GuiStrip
 from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
+from ccpn.ui._implementation.SpectrumView import SpectrumView
 
 
 AXIS_WIDTH = 30
@@ -257,6 +258,65 @@ class GuiSpectrumDisplay(CcpnModule):
                                          [Notifier.CHANGE],
                                          'SpectrumDisplay',
                                          self._toolbarChange)
+
+        # register the spectrumView notifiers
+        self._registerNotifiers()
+
+    def _registerNotifiers(self):
+        """Notifiers for responding to spectrumViews
+        """
+        self._spectrumViewNotifier = Notifier(self.project,
+                                              [Notifier.CREATE, Notifier.DELETE],
+                                              SpectrumView.__name__,
+                                              self._spectrumViewChanged,
+                                              onceOnly=True)
+
+        self._registerMonitors()
+
+    def _unRegisterNotifiers(self):
+        """Unregister all notifiers
+        """
+        if self._spectrumViewNotifier:
+            self._spectrumViewNotifier.unRegister()
+
+    def _registerMonitors(self):
+        """Register monitors of spectrumView visibleChanged
+        """
+        self._spectrumMonitors = []
+
+        if self.strips:
+            for sv in self.strips[0].spectrumViews:
+                self._spectrumMonitors.append(sv)
+
+        for sv in self._spectrumMonitors:
+            sv.visibleChanged.connect(self._spectrumViewVisibleChanged)
+
+    def _unregisterMonitors(self):
+        """Unregister monitors of spectrumView visibleChanged
+        """
+        for sv in self._spectrumMonitors:
+            sv.visibleChanged.disconnect(self._spectrumViewVisibleChanged)
+
+    def _spectrumViewChanged(self, data):
+        """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
+        """
+        if data[Notifier.TRIGGER] == Notifier.DELETE:
+            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+            GLSignals = GLNotifier(parent=None)
+            GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
+
+        # clear the old monitors and reregister new ones
+        self._unregisterMonitors()
+        self._registerMonitors()
+
+    def _spectrumViewVisibleChanged(self):
+        """Respond to a visibleChanged in one of the spectrumViews, don't know which though
+        """
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
+        GLSignals = GLNotifier(parent=None)
+        GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
 
     def _settingsChanged(self, dataDict):
         """Handle changes that occur in the settings widget
@@ -704,6 +764,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 strip._unregisterStrip()
             self.droppedNotifier.unRegister()
             self._toolbarNotifier.unRegister()
+            self._unRegisterNotifiers()
+            self._unregisterMonitors()
 
         finally:
             CcpnModule._closeModule(self)

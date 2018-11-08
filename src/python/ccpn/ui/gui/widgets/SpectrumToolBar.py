@@ -76,7 +76,9 @@ class SpectrumToolBar(ToolBar):
 
     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
     GLSignals = GLNotifier(parent=None)
-    GLSignals.emitPaintEvent()
+
+    # GLSignals.emitPaintEvent()
+    GLSignals._emitAxisUnitsChanged(source=None, strip=self.widget.strips[0], dataDict={})
 
   def _addSubMenusToContext(self, contextMenu, button):
     dd = OrderedDict([(PeakList, PeakListView), (IntegralList, IntegralListView), (MultipletList, MultipletListView)])

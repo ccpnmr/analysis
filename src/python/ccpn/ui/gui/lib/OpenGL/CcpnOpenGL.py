@@ -3803,41 +3803,62 @@ class CcpnGLWidget(QOpenGLWidget):
                 axisLimitR = self.axisR
 
             elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
-                if self._ordering[0]:
+                if self._ordering:
 
-                    # get the axis ordering from the spectrumDisplay and map to the strip
-                    stripAxisCodes = self.strip.axisCodes
-                    try:
-                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
-                    except Exception as es:
-                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+                    if self.is1D:
+                        axisLimitL = self.axisL * self._ordering[0].spectrum.spectrometerFrequencies[0]
+                        axisLimitR = self.axisR * self._ordering[0].spectrum.spectrometerFrequencies[0]
 
-                    axisLimitL = self.axisL * self._ordering[0].spectrum.spectrometerFrequencies[indices[0]]
-                    axisLimitR = self.axisR * self._ordering[0].spectrum.spectrometerFrequencies[indices[0]]
+                    else:
+                        # get the axis ordering from the spectrumDisplay and map to the strip
+                        stripAxisCodes = self.strip.axisCodes
+                        try:
+                            indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
+                        except Exception as es:
+                            indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                        axisLimitL = self.axisL * self._ordering[0].spectrum.spectrometerFrequencies[indices[0]]
+                        axisLimitR = self.axisR * self._ordering[0].spectrum.spectrometerFrequencies[indices[0]]
+
+                else:
+                    # error trap all spectra deleted
+                    axisLimitL = self.axisL
+                    axisLimitR = self.axisR
+
             else:
-                if self._ordering[0]:
+                if self._ordering:
 
                     visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
                     thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
 
-                    # get the axis ordering from the spectrumDisplay and map to the strip
-                    stripAxisCodes = self.strip.axisCodes
-                    try:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
-                    except Exception as es:
-                        indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
+                    if self.is1D:
+                        axisLimitL = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisL) - 1
+                        axisLimitR = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisR) - 1
 
-                    # map to a point
-                    axisLimitL = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL) - 1
-                    axisLimitR = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisR) - 1
+                    else:
+                        # get the axis ordering from the spectrumDisplay and map to the strip
+                        stripAxisCodes = self.strip.axisCodes
+                        try:
+                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes)
+                        except Exception as es:
+                            indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
-            # generate different axes depending on units - Y Axis
-            if self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
+                        # map to a point
+                        axisLimitL = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL) - 1
+                        axisLimitR = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisR) - 1
+
+                else:
+                    # error trap all spectra deleted
+                    axisLimitL = self.axisL
+                    axisLimitR = self.axisR
+
+            # generate different axes depending on units - Y Axis, always use first option for 1d
+            if self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM or self.is1D:
                 axisLimitT = self.axisT
                 axisLimitB = self.axisB
 
             elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
-                if self._ordering[0]:
+                if self._ordering:
 
                     # get the axis ordering from the spectrumDisplay and map to the strip
                     stripAxisCodes = self.strip.axisCodes
@@ -3848,8 +3869,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     axisLimitT = self.axisT * self._ordering[0].spectrum.spectrometerFrequencies[indices[1]]
                     axisLimitB = self.axisB * self._ordering[0].spectrum.spectrometerFrequencies[indices[1]]
+
+                else:
+                    # error trap all spectra deleted
+                    axisLimitT = self.axisT
+                    axisLimitB = self.axisB
+
             else:
-                if self._ordering[0]:
+                if self._ordering:
 
                     visibleSpectra = [specView.spectrum for specView in self._ordering if specView.isVisible()]
                     thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
@@ -3864,6 +3891,11 @@ class CcpnGLWidget(QOpenGLWidget):
                     # map to a point
                     axisLimitT = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisT) - 1
                     axisLimitB = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisB) - 1
+
+                else:
+                    # error trap all spectra deleted
+                    axisLimitT = self.axisT
+                    axisLimitB = self.axisB
 
             # ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
             # br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])
@@ -4009,9 +4041,10 @@ class CcpnGLWidget(QOpenGLWidget):
         if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
 
             # read values from dataDict and set units
-            self._xUnits = aDict[GLNotifier.GLVALUES]['xUnits']
-            self._yUnits = aDict[GLNotifier.GLVALUES]['yUnits']
-            self._axisLocked = aDict[GLNotifier.GLVALUES]['lockAspectRatio']
+            if aDict[GLNotifier.GLVALUES]:
+                self._xUnits = aDict[GLNotifier.GLVALUES]['xUnits']
+                self._yUnits = aDict[GLNotifier.GLVALUES]['yUnits']
+                self._axisLocked = aDict[GLNotifier.GLVALUES]['lockAspectRatio']
             self._rescaleAllAxes()
 
     def setAxisPosition(self, axisCode, position, update=True):

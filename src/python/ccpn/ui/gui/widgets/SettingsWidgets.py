@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
@@ -42,6 +42,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from functools import partial
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
 
 ALL = '<all>'
@@ -56,14 +57,16 @@ class SpectrumDisplaySettings(Widget):
 
     def __init__(self, parent=None,
                  mainWindow=None,
+                 spectrumDisplay=None,
                  callback=None, returnCallback=None, applyCallback=None,
-                 xAxisUnits=0, xTexts=[],
-                 yAxisUnits=0, yTexts=[],
+                 xAxisUnits=0, xTexts=[], showXAxis=True,
+                 yAxisUnits=0, yTexts=[], showYAxis=True,
                  lockAspect=False,
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
         self._parent = parent
+        self._spectrumDisplay = spectrumDisplay
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
@@ -93,6 +96,8 @@ class SpectrumDisplaySettings(Widget):
                                               grid=(row, 1), hAlign='l',
                                               tipTexts=None,
                                               )
+        self.xAxisUnits.setVisible(showXAxis)
+        self.xAxisUnitsButtons.setVisible(showXAxis)
 
         row += 1
         self.yAxisUnits = Label(parent, text="Y Axis Units", grid=(row, 0))
@@ -103,6 +108,8 @@ class SpectrumDisplaySettings(Widget):
                                               grid=(row, 1), hAlign='l',
                                               tipTexts=None,
                                               )
+        self.yAxisUnits.setVisible(showYAxis)
+        self.yAxisUnitsButtons.setVisible(showYAxis)
 
         row += 1
         self.lockAspect = Label(parent, text="Lock Aspect Ratio", grid=(row, 0))
@@ -116,12 +123,23 @@ class SpectrumDisplaySettings(Widget):
 
         self._parent.setContentsMargins(5, 5, 5, 5)
 
+        # connect to the lock changed pyqtSignal
+        self._GLSignals = GLNotifier(parent=self._parent)
+        self._GLSignals.glAxisLockChanged.connect(self._lockAspectRatioChanged)
+
     def _settingsChanged(self):
         """Handle changing the X axis units
         """
         self.settingsChanged.emit({'xUnits': self.xAxisUnitsButtons.getIndex(),
                                    'yUnits': self.yAxisUnitsButtons.getIndex(),
                                    'lockAspectRatio': self.lockAspectCheckBox.isChecked()})
+
+    @pyqtSlot(dict)
+    def _lockAspectRatioChanged(self, aDict):
+        """respond to a change in the lock status of a strip
+        """
+        if aDict[GLNotifier.GLSPECTRUMDISPLAY] == self._spectrumDisplay:
+            self.lockAspectCheckBox.setChecked(aDict[GLNotifier.GLVALUES])
 
     def doCallback(self):
         """Handle the user callback

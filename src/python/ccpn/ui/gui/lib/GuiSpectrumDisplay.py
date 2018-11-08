@@ -67,7 +67,7 @@ from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 
 
 AXIS_WIDTH = 30
-
+AXISUNITS = ['ppm', 'Hz', 'pnts']
 
 class GuiSpectrumDisplay(CcpnModule):
     """
@@ -164,9 +164,19 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.mainWidget will be the parent of all the subsequent widgets
         self.qtParent = self.mainWidget
 
-        # temporary settings widget
-        self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget, mainWindow=self.mainWindow, grid=(0, 0),
-                                                                xTexts=['ppm', 'Hz', 'pnts'], yTexts=['ppm', 'Hz', 'pnts'])
+        # create settings widget
+        if not self.is1D:
+            self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
+                                                                    mainWindow=self.mainWindow, spectrumDisplay=self,
+                                                                    grid=(0, 0),
+                                                                    xTexts=AXISUNITS, yTexts=AXISUNITS)
+        else:
+            self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
+                                                                    mainWindow=self.mainWindow, spectrumDisplay=self,
+                                                                    grid=(0, 0),
+                                                                    xTexts=AXISUNITS, yTexts=[''],
+                                                                    showYAxis=False)
+
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
 
         # GWV: Not sure what the widget argument is for

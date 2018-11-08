@@ -28,6 +28,7 @@ import numpy as np
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
     GLRENDERMODE_REBUILD
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D
 import ccpn.util.Phasing as Phasing
 
 
@@ -163,6 +164,7 @@ class Gui1dWidget(CcpnGLWidget):
     SPECTRUMXZOOM = 1.0e2
     SPECTRUMYZOOM = 1.0e6
     SHOWSPECTRUMONPHASING = False
+    YAXES = YAXISUNITS1D
 
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
         super(Gui1dWidget, self).__init__(strip=strip,

@@ -157,14 +157,14 @@ class PeakListTableWidget(QuickTable):
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
 
-        QuickTable.__init__(self, parent=parent
-                            , mainWindow=self.mainWindow
-                            , dataFrameObject=None
-                            , setLayout=True
-                            , autoResize=True, multiSelect=True
-                            , actionCallback=actionCallback
-                            , selectionCallback=selectionCallback
-                            , grid=(3, 0), gridSpan=(1, 6))
+        QuickTable.__init__(self, parent=parent,
+                            mainWindow=self.mainWindow,
+                            dataFrameObject=None,
+                            setLayout=True,
+                            autoResize=True, multiSelect=True,
+                            actionCallback=actionCallback,
+                            selectionCallback=selectionCallback,
+                            grid=(3, 0), gridSpan=(1, 6))
 
         # self._selectOnTableCurrentPeaksNotifier = None
         # self._peakListDeleteNotifier = None
@@ -274,10 +274,10 @@ class PeakListTableWidget(QuickTable):
             if self._selectedPeakList:
 
                 self.project.blankNotification()
-                self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                                  , buildList=self._selectedPeakList.peaks
-                                                                  , colDefs=self._getTableColumns(self._selectedPeakList)
-                                                                  , hiddenColumns=self._hiddenColumns)
+                self._dataFrameObject = self.getDataFrameFromList(table=self,
+                                                                  buildList=self._selectedPeakList.peaks,
+                                                                  colDefs=self._getTableColumns(self._selectedPeakList),
+                                                                  hiddenColumns=self._hiddenColumns)
 
                 # populate from the Pandas dataFrame inside the dataFrameObject
                 self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
@@ -289,10 +289,10 @@ class PeakListTableWidget(QuickTable):
             if peaks:
                 if peakList:
                     self.project.blankNotification()
-                    self._dataFrameObject = self.getDataFrameFromList(table=self
-                                                                      , buildList=peaks
-                                                                      , colDefs=self._getTableColumns(peakList)
-                                                                      , hiddenColumns=self._hiddenColumns)
+                    self._dataFrameObject = self.getDataFrameFromList(table=self,
+                                                                      buildList=peaks,
+                                                                      colDefs=self._getTableColumns(peakList),
+                                                                      hiddenColumns=self._hiddenColumns)
 
                     # populate from the Pandas dataFrame inside the dataFrameObject
                     self.setTableFromDataFrameObject(dataFrameObject=self._dataFrameObject)
@@ -471,20 +471,20 @@ class PeakListTableWidget(QuickTable):
     #   rename calls on name
     #   change calls on any other attribute
     #   """
-    #   self._selectOnTableCurrentPeaksNotifier = Notifier(self.current
-    #                                                      , [Notifier.CURRENT]
-    #                                                      , targetName='peaks'
-    #                                                      , callback=self._selectOnTableCurrentPeaksNotifierCallback)
+    #   self._selectOnTableCurrentPeaksNotifier = Notifier(self.current,
+    #                                                       [Notifier.CURRENT],
+    #                                                       targetName='peaks',
+    #                                                       callback=self._selectOnTableCurrentPeaksNotifierCallback)
     #   # TODO set notifier to trigger only for the selected peakList.
     #
-    #   self._peakListDeleteNotifier = Notifier(self.project
-    #                                           , [Notifier.CREATE, Notifier.DELETE]
-    #                                           , 'PeakList'
-    #                                           , self._peakListNotifierCallback)
-    #   self._peakNotifier =  Notifier(self.project
-    #                                  , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
-    #                                  , 'Peak', self._peakNotifierNotifierCallback
-    #                                  , onceOnly=True)
+    #   self._peakListDeleteNotifier = Notifier(self.project,
+    #                                            [Notifier.CREATE, Notifier.DELETE],
+    #                                            'PeakList',
+    #                                            self._peakListNotifierCallback)
+    #   self._peakNotifier =  Notifier(self.project,
+    #                                   [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE],
+    #                                   'Peak', self._peakNotifierNotifierCallback,
+    #                                   onceOnly=True)
     #
     # def _clearNotifiers(self):
     #   """

@@ -150,6 +150,8 @@ class CcpnGLWidget(QOpenGLWidget):
     SPECTRUMXZOOM = 1.0e1
     SPECTRUMYZOOM = 1.0e1
     SHOWSPECTRUMONPHASING = True
+    XAXES = GLDefs.XAXISUNITS
+    YAXES = GLDefs.YAXISUNITS
 
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
         # TODO:ED add documentation
@@ -2374,13 +2376,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     self._axisXLabelling.append(GLString(text=axisXText,
                                                          font=self.globalGL.glSmallFont,
-                                                         # , angle=np.pi/2.0,
-                                                         # , x=axisX-(10.0*self.pixelX) #*len(str(axisX))),
-                                                         # , y=self.AXIS_MARGINBOTTOM-self.AXIS_LINE,
-
-                                                         # x=axisX - (
-                                                         #         0.4 * self.globalGL.glSmallFont.width * self.pixelX * len(
-                                                         #         axisXText)),  #*len(str(axisX))),
                                                          x=axisX - (0.4 * self.globalGL.glSmallFont.width * self.deltaX * len(
                                                                  axisXText)),
                                                          y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
@@ -2391,13 +2386,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 # append the axisCode
                 self._axisXLabelling.append(GLString(text=self.axisCodes[0],
                                                      font=self.globalGL.glSmallFont,
-                                                     # x=self.axisL + (GLDefs.AXISTEXTXOFFSET * self.pixelX),
                                                      x=GLDefs.AXISTEXTXOFFSET * self.deltaX,
                                                      y=self.AXIS_MARGINBOTTOM - GLDefs.TITLEYOFFSET * self.globalGL.glSmallFont.height,
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
-                xUnitsLabels = GLDefs.XAXISUNITS[self._xUnits]
+                xUnitsLabels = self.XAXES[self._xUnits]
                 self._axisXLabelling.append(GLString(text=xUnitsLabels,
                                                      font=self.globalGL.glSmallFont,
                                                      x=1.0 - (self.deltaX * len(xUnitsLabels) * self.globalGL.glSmallFont.width),
@@ -2435,7 +2429,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                                      color=labelColour, GLContext=self,
                                                      obj=None))
                 # and the axis dimensions
-                yUnitsLabels = GLDefs.YAXISUNITS[self._yUnits]
+                yUnitsLabels = self.YAXES[self._yUnits]
                 self._axisYLabelling.append(GLString(text=yUnitsLabels,
                                                      font=self.globalGL.glSmallFont,
                                                      x=self.AXIS_OFFSET,
@@ -3802,12 +3796,79 @@ class CcpnGLWidget(QOpenGLWidget):
         labelsChanged = False
 
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
-            dim = [self.width(), self.height()]
 
-            ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
-            br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])
+            # generate different axes depending on units - X Axis
+            if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
+                axisLimitL = self.axisL
+                axisLimitR = self.axisR
 
-            dim = [abs(self.axisL - self.axisR), abs(self.axisT - self.axisB)]
+            elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
+                if self._ordering[0]:
+
+                    # get the axis ordering from the spectrumDisplay and map to the strip
+                    stripAxisCodes = self.strip.axisCodes
+                    try:
+                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
+                    except Exception as es:
+                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                    axisLimitL = self.axisL * self._ordering[0].spectrum.spectrometerFrequencies[indices[0]]
+                    axisLimitR = self.axisR * self._ordering[0].spectrum.spectrometerFrequencies[indices[0]]
+            else:
+                if self._ordering[0]:
+
+                    # get the axis ordering from the spectrumDisplay and map to the strip
+                    stripAxisCodes = self.strip.axisCodes
+                    try:
+                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
+                    except Exception as es:
+                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                    # map to a point
+                    axisLimitL = self._ordering[0].spectrum.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL) - 1
+                    axisLimitR = self._ordering[0].spectrum.mainSpectrumReferences[indices[0]].valueToPoint(self.axisR) - 1
+
+            # generate different axes depending on units - Y Axis
+            if self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
+                axisLimitT = self.axisT
+                axisLimitB = self.axisB
+
+            elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
+                if self._ordering[0]:
+
+                    # get the axis ordering from the spectrumDisplay and map to the strip
+                    stripAxisCodes = self.strip.axisCodes
+                    try:
+                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
+                    except Exception as es:
+                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                    axisLimitT = self.axisT * self._ordering[0].spectrum.spectrometerFrequencies[indices[1]]
+                    axisLimitB = self.axisB * self._ordering[0].spectrum.spectrometerFrequencies[indices[1]]
+            else:
+                if self._ordering[0]:
+
+                    # get the axis ordering from the spectrumDisplay and map to the strip
+                    stripAxisCodes = self.strip.axisCodes
+                    try:
+                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes)
+                    except Exception as es:
+                        indices = self._ordering[0].spectrum.getByAxisCodes('indices', stripAxisCodes[0:2])
+
+                    # map to a point
+                    axisLimitT = self._ordering[0].spectrum.mainSpectrumReferences[indices[1]].valueToPoint(self.axisT) - 1
+                    axisLimitB = self._ordering[0].spectrum.mainSpectrumReferences[indices[1]].valueToPoint(self.axisB) - 1
+
+            # ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
+            # br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])
+
+            minX = min(axisLimitL, axisLimitR)
+            maxX = max(axisLimitL, axisLimitR)
+            minY = min(axisLimitT, axisLimitB)
+            maxY = max(axisLimitT, axisLimitB)
+            ul = np.array([minX, minY])
+            br = np.array([maxX, maxY])
+
             gridGLList.renderMode = GLRENDERMODE_DRAW
             labelsChanged = True
 
@@ -3846,11 +3907,18 @@ class CcpnGLWidget(QOpenGLWidget):
                             d[0] = self._round_sig(d[0], sig=4)
                             d[1] = self._round_sig(d[1], sig=4)
 
+                            # if '%.5f' % p1[0] == '%.5f' % p2[0]:  # easy to round off as strings
+                            #     labelling[str(ax)].append((i, ax, valueToRatio(p1[0], self.axisL, self.axisR),
+                            #                                p1[0], d[0]))
+                            # else:
+                            #     labelling[str(ax)].append((i, ax, valueToRatio(p1[1], self.axisB, self.axisT),
+                            #                                p1[1], d[1]))
+
                             if '%.5f' % p1[0] == '%.5f' % p2[0]:  # easy to round off as strings
-                                labelling[str(ax)].append((i, ax, valueToRatio(p1[0], self.axisL, self.axisR),
+                                labelling[str(ax)].append((i, ax, valueToRatio(p1[0], axisLimitL, axisLimitR),
                                                            p1[0], d[0]))
                             else:
-                                labelling[str(ax)].append((i, ax, valueToRatio(p1[1], self.axisB, self.axisT),
+                                labelling[str(ax)].append((i, ax, valueToRatio(p1[1], axisLimitB, axisLimitT),
                                                            p1[1], d[1]))
 
                         # append the new points to the end of nparray
@@ -3858,10 +3926,15 @@ class CcpnGLWidget(QOpenGLWidget):
 
                         # gridGLList.vertices = np.append(gridGLList.vertices, [p1[0], p1[1], p2[0], p2[1]])
 
-                        gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], self.axisL, self.axisR),
-                                                                              valueToRatio(p1[1], self.axisB, self.axisT),
-                                                                              valueToRatio(p2[0], self.axisL, self.axisR),
-                                                                              valueToRatio(p2[1], self.axisB, self.axisT)))
+                        # gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], self.axisL, self.axisR),
+                        #                                                       valueToRatio(p1[1], self.axisB, self.axisT),
+                        #                                                       valueToRatio(p2[0], self.axisL, self.axisR),
+                        #                                                       valueToRatio(p2[1], self.axisB, self.axisT)))
+
+                        gridGLList.vertices = np.append(gridGLList.vertices, (valueToRatio(p1[0], axisLimitL, axisLimitR),
+                                                                              valueToRatio(p1[1], axisLimitB, axisLimitT),
+                                                                              valueToRatio(p2[0], axisLimitL, axisLimitR),
+                                                                              valueToRatio(p2[1], axisLimitB, axisLimitT)))
 
                         alpha = min([1.0, c / transparency])
                         gridGLList.colors = np.append(gridGLList.colors, (r, g, b, alpha, r, g, b, alpha))

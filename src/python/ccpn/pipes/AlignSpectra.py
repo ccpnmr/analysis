@@ -103,6 +103,8 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engi
   refIndices = np.argwhere(boolsRefMax)
   if len(refIndices) > 0:
     refPos = float(xRef[refIndices[0]])
+  else:
+    return [0]*len(spectra) if engine == IndividualMode else 0 # cannot align without a reference intensity signal
 
   #  find the shift for each spectrum for the selected region
   for sp in spectra:

@@ -41,7 +41,6 @@ from ccpn.util import Colour
 from ccpn.util import Phasing
 
 from ccpnc.contour import Contourer2d
-# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLContours import _addContoursToGLList
 
 #from ccpn.ui.gui.modules import SpectrumDisplayNd
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView

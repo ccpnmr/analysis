@@ -68,7 +68,7 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 
 
 AXIS_WIDTH = 30
-AXISUNITS = ['ppm', 'Hz', 'pnts']
+AXISUNITS = ['ppm', 'Hz', 'points']
 
 class GuiSpectrumDisplay(CcpnModule):
     """

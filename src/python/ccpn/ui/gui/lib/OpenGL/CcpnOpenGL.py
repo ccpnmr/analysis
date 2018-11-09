@@ -2023,7 +2023,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # stop notifiers interfering with paint event
         self.project.blankNotification()
 
-        self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
@@ -2840,12 +2840,14 @@ class CcpnGLWidget(QOpenGLWidget):
             # GL.glVertex2d(self.axisL, self.cursorCoordinate[1])
             # GL.glVertex2d(self.axisR, self.cursorCoordinate[1])
 
-            # if not self._updateVTrace:
-            GL.glVertex2d(newCoords[0], 1.0)
-            GL.glVertex2d(newCoords[0], 0.0)
-            # if not self._updateHTrace:
-            GL.glVertex2d(0.0, newCoords[1])
-            GL.glVertex2d(1.0, newCoords[1])
+            phasingFrame = self.spectrumDisplay.phasingFrame
+            if not phasingFrame.isVisible():
+                if not self._updateVTrace:
+                    GL.glVertex2d(newCoords[0], 1.0)
+                    GL.glVertex2d(newCoords[0], 0.0)
+                if not self._updateHTrace:
+                    GL.glVertex2d(0.0, newCoords[1])
+                    GL.glVertex2d(1.0, newCoords[1])
 
             GL.glEnd()
 
@@ -3168,8 +3170,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
 
                     if self.is1D:
-                        cursorX = int(thisSpec.mainSpectrumReferences[0].valueToPoint(self.cursorCoordinate[0]) - 1)
-                        startX = int(thisSpec.mainSpectrumReferences[0].valueToPoint(self._startCoordinate[0]) - 1)
+                        cursorX = int(thisSpec.mainSpectrumReferences[0].valueToPoint(self.cursorCoordinate[0]))
+                        startX = int(thisSpec.mainSpectrumReferences[0].valueToPoint(self._startCoordinate[0]))
 
                     else:
                         # get the axis ordering from the spectrumDisplay and map to the strip
@@ -3180,8 +3182,8 @@ class CcpnGLWidget(QOpenGLWidget):
                             indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                         # map to a point
-                        cursorX = int(thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.cursorCoordinate[0]) - 1)
-                        startX = int(thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0]) - 1)
+                        cursorX = int(thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.cursorCoordinate[0]))
+                        startX = int(thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0]))
 
                 else:
                     # error trap all spectra deleted
@@ -3235,8 +3237,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                     # map to a point
-                    cursorY = int(thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.cursorCoordinate[1]) - 1)
-                    startY = int(thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1]) - 1)
+                    cursorY = int(thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.cursorCoordinate[1]))
+                    startY = int(thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1]))
 
                 else:
                     # error trap all spectra deleted
@@ -3377,21 +3379,22 @@ class CcpnGLWidget(QOpenGLWidget):
                                             dimension=2,
                                             GLContext=self))
 
+            # add extra vertices to give a horizontal line across the trace
+            x = np.append(x, (x[-1], x[0]))
+            y = np.append(y, (positionPixel[1], positionPixel[1]))
+
             numVertices = len(x)
             hSpectrum = tracesDict[-1]
             hSpectrum.indices = numVertices
-            hSpectrum.numVertices = numVertices + 2
+            hSpectrum.numVertices = numVertices
             hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
-            hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
-            hSpectrum.vertices = np.zeros(hSpectrum.numVertices * 2, dtype=np.float32)
-
-            x = np.append(x, (xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
-                              xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)))
-            y = np.append(y, (positionPixel[1], positionPixel[1]))
-            hSpectrum.colors = np.append(hSpectrum.colors, (colR, colG, colB, 1.0, colR, colG, colB, 1.0))
-
+            hSpectrum.vertices = np.empty(hSpectrum.numVertices * 2, dtype=np.float32)
             hSpectrum.vertices[::2] = x
             hSpectrum.vertices[1::2] = y
+            hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
+
+            # change to colour of the last 2 points to the spectrum colour
+            hSpectrum.colors[-8:] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
 
             # store the pre-phase data
             hSpectrum.data = data
@@ -3435,21 +3438,22 @@ class CcpnGLWidget(QOpenGLWidget):
                                             dimension=2,
                                             GLContext=self))
 
+            # add extra vertices to give a horizontal line across the trace
+            y = np.append(y, (y[-1], y[0]))
+            x = np.append(x, (positionPixel[0], positionPixel[0]))
+
             numVertices = len(x)
             vSpectrum = tracesDict[-1]
             vSpectrum.indices = numVertices
-            vSpectrum.numVertices = numVertices + 2
+            vSpectrum.numVertices = numVertices
             vSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
-            vSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
-            vSpectrum.vertices = np.zeros(vSpectrum.numVertices * 2, dtype=np.float32)
-
-            y = np.append(y, (yDataDim.primaryDataDimRef.pointToValue(yMaxFrequency + 1),
-                              yDataDim.primaryDataDimRef.pointToValue(yMinFrequency)))
-            x = np.append(x, (positionPixel[0], positionPixel[0]))
-            vSpectrum.colors = np.append(vSpectrum.colors, (colR, colG, colB, 1.0, colR, colG, colB, 1.0))
-
+            vSpectrum.vertices = np.empty(vSpectrum.numVertices * 2, dtype=np.float32)
             vSpectrum.vertices[::2] = x
             vSpectrum.vertices[1::2] = y
+            vSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
+
+            # change to colour of the last 2 points to the spectrum colour
+            vSpectrum.colors[-8:] = (colR, colG, colB, 1.0, colR, colG, colB, 1.0)
 
             # store the pre-phase data
             vSpectrum.data = data
@@ -3490,9 +3494,11 @@ class CcpnGLWidget(QOpenGLWidget):
             colR = int(col1.strip('# ')[0:2], 16) / 255.0
             colG = int(col1.strip('# ')[2:4], 16) / 255.0
             colB = int(col1.strip('# ')[4:6], 16) / 255.0
-            colRn = int(col2.strip('# ')[0:2], 16) / 255.0
-            colGn = int(col2.strip('# ')[2:4], 16) / 255.0
-            colBn = int(col2.strip('# ')[4:6], 16) / 255.0
+
+            # fade the trace to the negative colour
+            # colRn = int(col2.strip('# ')[0:2], 16) / 255.0
+            # colGn = int(col2.strip('# ')[2:4], 16) / 255.0
+            # colBn = int(col2.strip('# ')[4:6], 16) / 255.0
 
             if spectrumView not in tracesDict.keys():
                 tracesDict[spectrumView] = GLVertexArray(numLists=1,
@@ -3502,12 +3508,16 @@ class CcpnGLWidget(QOpenGLWidget):
                                                          dimension=2,
                                                          GLContext=self)
 
+            # add extra vertices to give a horizontal line across the trace
+            x = np.append(x, (x[-1], x[0]))
+            y = np.append(y, (positionPixel[1], positionPixel[1]))
+
             numVertices = len(x)
             hSpectrum = tracesDict[spectrumView]
             hSpectrum.indices = numVertices
             hSpectrum.numVertices = numVertices
             hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
-            hSpectrum.vertices = np.zeros(numVertices * 2, dtype=np.float32)
+            hSpectrum.vertices = np.empty(numVertices * 2, dtype=np.float32)
             hSpectrum.vertices[::2] = x
             hSpectrum.vertices[1::2] = y
             hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
@@ -3545,9 +3555,11 @@ class CcpnGLWidget(QOpenGLWidget):
             colR = int(col1.strip('# ')[0:2], 16) / 255.0
             colG = int(col1.strip('# ')[2:4], 16) / 255.0
             colB = int(col1.strip('# ')[4:6], 16) / 255.0
-            colRn = int(col2.strip('# ')[0:2], 16) / 255.0
-            colGn = int(col2.strip('# ')[2:4], 16) / 255.0
-            colBn = int(col2.strip('# ')[4:6], 16) / 255.0
+
+            # fade the trace to the negative colour
+            # colRn = int(col2.strip('# ')[0:2], 16) / 255.0
+            # colGn = int(col2.strip('# ')[2:4], 16) / 255.0
+            # colBn = int(col2.strip('# ')[4:6], 16) / 255.0
 
             if spectrumView not in tracesDict.keys():
                 tracesDict[spectrumView] = GLVertexArray(numLists=1,
@@ -3556,6 +3568,10 @@ class CcpnGLWidget(QOpenGLWidget):
                                                          drawMode=GL.GL_LINE_STRIP,
                                                          dimension=2,
                                                          GLContext=self)
+
+            # add extra vertices to give a vertical line across the trace
+            y = np.append(y, (y[-1], y[0]))
+            x = np.append(x, (positionPixel[0], positionPixel[0]))
 
             numVertices = len(x)
             vSpectrum = tracesDict[spectrumView]
@@ -3583,7 +3599,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         for spectrumView in self.strip.spectrumViews:
 
-            phasingFrame = self.strip.spectrumDisplay.phasingFrame
+            phasingFrame = self.spectrumDisplay.phasingFrame
             if phasingFrame.isVisible():
                 ph0 = phasingFrame.slider0.value()
                 ph1 = phasingFrame.slider1.value()
@@ -3629,14 +3645,14 @@ class CcpnGLWidget(QOpenGLWidget):
             # only add phasing trace for the visible spectra
             if spectrumView.isVisible():
 
-                phasingFrame = self.strip.spectrumDisplay.phasingFrame
+                phasingFrame = self.spectrumDisplay.phasingFrame
 
                 ph0 = phasingFrame.slider0.value()
                 ph1 = phasingFrame.slider1.value()
                 pivotPpm = phasingFrame.pivotEntry.get()
                 direction = phasingFrame.getDirection()
                 # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
-                # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+                # pivot = dataDim.primaryDataDimRef.(pivotPpm)
                 axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
                 pivot = spectrumView.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
 
@@ -3680,7 +3696,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def buildStaticTraces(self):
 
-        phasingFrame = self.strip.spectrumDisplay.phasingFrame
+        phasingFrame = self.spectrumDisplay.phasingFrame
         if phasingFrame.isVisible():
             ph0 = phasingFrame.slider0.value()
             ph1 = phasingFrame.slider1.value()
@@ -3750,7 +3766,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        phasingFrame = self.strip.spectrumDisplay.phasingFrame
+        phasingFrame = self.spectrumDisplay.phasingFrame
         if phasingFrame.isVisible():
 
             self.buildStaticTraces()
@@ -3994,8 +4010,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
 
                     if self.is1D:
-                        axisLimitL = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisL) - 1
-                        axisLimitR = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisR) - 1
+                        axisLimitL = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisL)
+                        axisLimitR = thisSpec.mainSpectrumReferences[0].valueToPoint(self.axisR)
 
                     else:
                         # get the axis ordering from the spectrumDisplay and map to the strip
@@ -4006,8 +4022,8 @@ class CcpnGLWidget(QOpenGLWidget):
                             indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                         # map to a point
-                        axisLimitL = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL) - 1
-                        axisLimitR = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisR) - 1
+                        axisLimitL = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisL)
+                        axisLimitR = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.axisR)
 
                 else:
                     # error trap all spectra deleted
@@ -4061,8 +4077,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                     # map to a point
-                    axisLimitT = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisT) - 1
-                    axisLimitB = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisB) - 1
+                    axisLimitT = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisT)
+                    axisLimitB = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.axisB)
 
                 else:
                     # error trap all spectra deleted
@@ -4208,7 +4224,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
+        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
             # match only the scale for the X axis
             axisL = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLLEFTAXISVALUE]
@@ -4226,7 +4242,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
+        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
             self._axisLocked = aDict[GLNotifier.GLVALUES]
             self.update()
 
@@ -4235,7 +4251,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
+        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
             # read values from dataDict and set units
             if aDict[GLNotifier.GLVALUES]:
@@ -4314,7 +4330,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
 
-        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
+        if aDict[GLNotifier.GLSOURCE] != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
             # match the Y axis
             axisB = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLBOTTOMAXISVALUE]
@@ -4333,7 +4349,7 @@ class CcpnGLWidget(QOpenGLWidget):
         sDisplay = aDict[GLNotifier.GLSPECTRUMDISPLAY]
         source = aDict[GLNotifier.GLSOURCE]
 
-        if source != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.strip.spectrumDisplay:
+        if source != self and aDict[GLNotifier.GLSPECTRUMDISPLAY] == self.spectrumDisplay:
 
             # match the values for the Y axis, and scale for the X axis
             axisB = aDict[GLNotifier.GLAXISVALUES][GLNotifier.GLBOTTOMAXISVALUE]
@@ -4490,11 +4506,11 @@ class CcpnGLWidget(QOpenGLWidget):
                         # self._processPeakNotifier(targets)
 
                     if GLNotifier.GLCLEARPHASING in triggers:
-                        if self.strip.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
+                        if self.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
                             self.clearStaticTraces()
 
                     if GLNotifier.GLADD1DPHASING in triggers:
-                        if self.strip.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
+                        if self.spectrumDisplay == aDict[GLNotifier.GLSPECTRUMDISPLAY]:
                             self.clearStaticTraces()
                             self.newTrace()
 

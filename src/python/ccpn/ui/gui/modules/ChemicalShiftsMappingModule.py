@@ -298,7 +298,7 @@ class ChemicalShiftsMapping(CcpnModule):
     self.barGraphWidget = None
 
     if self.application:
-      self.splitter = Splitter(QtCore.Qt.Vertical)
+      self.splitter = Splitter(horizontal=False)
 
       self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, grid = (1, 0))
       self.barGraphWidget.setViewBoxLimits(0,None,0,None)

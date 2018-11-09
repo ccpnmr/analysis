@@ -166,6 +166,6 @@ class PeakPicker1DPipe(SpectraPipe):
 
 
 
-PeakPicker1DPipe.register() # Registers the pipe in the pipeline
+# PeakPicker1DPipe.register() # Registers the pipe in the pipeline
 
 

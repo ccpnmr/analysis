@@ -2881,6 +2881,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def drawInfiniteLines(self):
         # draw the simulated infinite lines - using deprecated GL :)
 
+        GL.glLineWidth(2.0)
         GL.glDisable(GL.GL_BLEND)
         GL.glEnable(GL.GL_LINE_STIPPLE)
         for infLine in self._infiniteLines:
@@ -2908,6 +2909,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 GL.glEnd()
 
         GL.glDisable(GL.GL_LINE_STIPPLE)
+        GL.glLineWidth(1.0)
 
     def setStripID(self, name):
         self.stripIDLabel = name

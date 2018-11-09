@@ -80,7 +80,7 @@ class PeakDetector1DGuiPipe(GuiPipe):
 
     row += 1
     self.noiseLevelFactorLabel = Label(self.pipeFrame, text=NoiseLevelFactor, grid=(row, 0))
-    setattr(self, NoiseLevelFactor, DoubleSpinbox(self.pipeFrame, value=1.5, min=0.01, step=0.1, grid=(row, 1)))
+    setattr(self, NoiseLevelFactor, DoubleSpinbox(self.pipeFrame, value=0.5, min=0.01, step=0.1, grid=(row, 1)))
 
 
 

@@ -51,7 +51,7 @@ Ph0 = 'Ph0'
 Ph1 = 'Ph1'
 Pivot = 'Pivot'
 Auto = 'Automatic'
-DefaultAutoValue = False
+DefaultAutoValue = True
 DefaultPh0=0.0
 DefaultPh1=0.0
 DefaultPivot=1.0
@@ -99,7 +99,7 @@ class PhasingSpectraGuiPipe(GuiPipe):
     self.parent = parent
     i = 0
     Label(self.pipeFrame, Auto, grid=(i, 0))
-    setattr(self, Auto, CheckBox(self.pipeFrame, checked=DefaultAutoValue, callback=self._toggleManualSettings,
+    setattr(self, Auto, CheckBox(self.pipeFrame, checked=DefaultAutoValue, callback=None,
                                  grid=(i, 1)))
     i += 1
     for i, params in enumerate(_paramList):
@@ -159,7 +159,7 @@ class Phasing1DPipe(SpectraPipe):
             spectrum.intensities = intensities
 
 
-        getLogger().info('Phasing pipe completed. New spectra available on sidebar')
+        getLogger().info('Phasing pipe completed.')
 
         return spectra
       else:

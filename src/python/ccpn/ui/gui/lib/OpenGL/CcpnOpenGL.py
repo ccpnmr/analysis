@@ -3334,7 +3334,7 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glVertex2d(cursCoord[0], cursCoord[1])
             GL.glEnd()
 
-    @cached(TRACECACHE, maxItems=256, debug=True)
+    @cached(TRACECACHE, maxItems=256, debug=False)
     def _getSliceData(self, spectrumView, points, sliceDim, ph0, ph1, pivot):
         """Get the slice, phasing if needed.
         points as integer array, as this allows the cache to work best

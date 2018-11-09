@@ -163,7 +163,7 @@ class DropBase:
     def dragMoveEvent(self, ev):
         """drag move event that propagates through all the widgets
         """
-        print('>>>dragMoveEvent DropBase', repr(self))
+        # print('>>>dragMoveEvent DropBase', repr(self))
 
         parentModule = self._findModule()
         if parentModule:

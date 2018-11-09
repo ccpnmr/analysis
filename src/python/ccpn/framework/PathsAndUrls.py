@@ -57,6 +57,8 @@ shortcutsPath                   = os.path.join(ccpnCodePath, 'doc', 'static', 'A
 beginnersTutorialPath           = os.path.join(ccpnCodePath, 'tutorials', 'BeginnersTutorial.pdf')
 backboneAssignmentTutorialPath  = os.path.join(ccpnCodePath, 'tutorials', 'BackboneAssignmentTutorial.pdf')
 screenTutorialPath              = os.path.join(ccpnCodePath, 'tutorials', 'CcpNmr_AnalysisScreen_Tutorial_Beta2Release.pdf')
+cspTutorialPath                 = os.path.join(ccpnCodePath, 'tutorials', 'CSPtutorial.pdf')
+
 documentationPath               = os.path.join(ccpnCodePath, 'doc', 'build', 'html', 'index.html')
 licensePath                     = os.path.join(ccpnCodePath, 'LICENSE.txt')
 

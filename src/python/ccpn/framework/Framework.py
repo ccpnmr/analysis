@@ -1185,6 +1185,7 @@ class Framework:
         # Submenu
         ("Beginners Tutorial", self.showBeginnersTutorial),
         ("Backbone Tutorial", self.showBackboneTutorial),
+        ("CSP Tutorial", self.showCSPtutorial),
         ("More...", self.showTutorials)
       ])),
       ("Show Shortcuts", self.showShortcuts),
@@ -2497,6 +2498,10 @@ class Framework:
   def showBackboneTutorial(self):
     from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
     self._systemOpen(backboneAssignmentTutorialPath)
+
+  def showCSPtutorial(self):
+    from ccpn.framework.PathsAndUrls import cspTutorialPath
+    self._systemOpen(cspTutorialPath)
 
   def showScreenTutorial(self):
     from ccpn.framework.PathsAndUrls import screenTutorialPath

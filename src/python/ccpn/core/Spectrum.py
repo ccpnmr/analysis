@@ -1237,7 +1237,11 @@ class Spectrum(AbstractWrapperObject):
                 return self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim+1,
                                                    sliceDim=sliceDim)
 
-    @cached(PLANEDATACACHE, maxItems=64)
+    @cached(PLANEDATACACHE, maxItems=64, debug=False)
+    def _getPlaneData(self, position, xDim:int, yDim:int):
+        "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
+        return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
     def getPlaneData(self, position=None, xDim:int = 1, yDim:int = 2):
         """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
         Dimensionality must be >= 2
@@ -1262,17 +1266,17 @@ class Spectrum(AbstractWrapperObject):
                              (yDim, dims))
         if position is None:
             position = [1] * self.dimensionCount
-        else:
-            position = list(position)  # assure we have a list so we can assign below
-        # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
-        position[xDim-1] = 1  # position is 1-based
-        position[yDim-1] = 1
+
         for idx, p in enumerate(position):
             if not (1 <= p <= self.pointCounts[idx]):
                 raise ValueError('Spectrum.getPlaneData; invalid position[%d] "%d"; should be in range (%d,%d)' %
                                  (idx, p, 1, self.pointCounts[idx]))
 
-        return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        position = list(position)  # assure we have a list so we can assign below
+        # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
+        position[xDim-1] = 1  # position is 1-based
+        position[yDim-1] = 1
+        return self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
     def getPlane(self, axisCodes: tuple, position=None, exactMatch=True):
         """Get a plane defined by a tuple of two axisCodes, and a position vector ('1' based, defaults to first point)

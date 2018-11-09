@@ -3347,7 +3347,6 @@ class CcpnGLWidget(QOpenGLWidget):
         axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
         planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
 
-        # data = spectrumView.spectrum.getSliceData(points, sliceDim=sliceDim)
         data = spectrumView.spectrum._getSliceDataFromPlane(points,
                                     xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim)
         phasedData = data
@@ -3361,6 +3360,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         try:
             pointInt = [1 + int(pnt + 0.5) for pnt in point]
+            pointInt[xDataDim.dim-1] = 1  # To improve caching; points, dimensions are 1-based
             data, preData = self._getSliceData(spectrumView=spectrumView, points=pointInt, sliceDim=xDataDim.dim,
                                                ph0=ph0, ph1=ph1, pivot=pivot
                                                )
@@ -3421,6 +3421,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         try:
             pointInt = [1 + int(pnt + 0.5) for pnt in point]
+            pointInt[yDataDim.dim-1] = 1  # To improve caching; points, dimensions are 1-based
             data, preData = self._getSliceData(spectrumView=spectrumView, points=pointInt, sliceDim=yDataDim.dim,
                                                ph0=ph0, ph1=ph1, pivot=pivot
                                                )
@@ -3480,6 +3481,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         try:
             pointInt = [1 + int(pnt + 0.5) for pnt in point]
+            pointInt[xDataDim.dim-1] = 1  # To improve caching; points, dimensions are 1-based
             _tmp, data = self._getSliceData(spectrumView=spectrumView, points=pointInt, sliceDim=xDataDim.dim,
                                                ph0=ph0, ph1=ph1, pivot=pivot
                                                )
@@ -3541,6 +3543,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         try:
             pointInt = [1 + int(pnt + 0.5) for pnt in point]
+            pointInt[yDataDim.dim-1] = 1  # To improve caching; points, dimensions are 1-based
             _tmp, data = self._getSliceData(spectrumView=spectrumView, points=pointInt, sliceDim=yDataDim.dim,
                                                ph0=ph0, ph1=ph1, pivot=pivot
                                                )

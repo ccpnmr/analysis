@@ -95,9 +95,9 @@ class Cache(object):
     def get(self, item):
         """Get item from cache; return None if not present
         """
-        if self._debug: sys.stderr.write('DEBUG> %s: getting "%s"\n' % (self, item))
         if not item in self._items:  # not using hasItem() to save another call
             return None
+        if self._debug: sys.stderr.write('DEBUG> %s: Getting cached "%s"\n' % (self, item))
         return self._cacheDict[item]
 
     def hasItem(self, item):

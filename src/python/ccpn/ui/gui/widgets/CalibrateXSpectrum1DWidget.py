@@ -93,8 +93,8 @@ class CalibrateX1DWidgets(Frame):
         self.okButtons.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
 
         if self.GLWidget:
-            self.infiniteLine = self.GLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='solid')
-            self.originalPosInfiniteLine = self.GLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')
+            self.infiniteLine = self.GLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='solid', lineWidth=2.0)
+            self.originalPosInfiniteLine = self.GLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed', lineWidth=2.0)
 
             # openGL callbacks
             self.infiniteLine.valuesChanged.connect(self._newPositionLineCallback)

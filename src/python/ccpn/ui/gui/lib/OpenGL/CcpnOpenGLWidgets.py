@@ -69,7 +69,8 @@ class GLRegion(QtWidgets.QWidget):
     def __init__(self, parent, glList, values=(0, 0), axisCode=None, orientation='h',
                  brush=None, colour='blue',
                  movable=True, visible=True, bounds=None,
-                 obj=None, objectView=None, lineStyle='dashed', regionType=GLREGIONTYPE):
+                 obj=None, objectView=None, lineStyle='dashed', lineWidth=1.0,
+                 regionType=GLREGIONTYPE):
 
         super(GLRegion, self).__init__(parent)
 
@@ -85,7 +86,8 @@ class GLRegion(QtWidgets.QWidget):
         self._bounds = bounds
         self._object = obj
         self._objectView = objectView
-        self.lineStyle = lineStyle
+        self._lineStyle = lineStyle
+        self._lineWidth = lineWidth
         self.regionType = regionType
         self.pid = obj.pid if hasattr(obj, 'pid') else None
 
@@ -205,6 +207,30 @@ class GLRegion(QtWidgets.QWidget):
         self.GLSignals.emitPaintEvent()
 
     @property
+    def lineStyle(self):
+        return self._lineStyle
+
+    @lineStyle.setter
+    def lineStyle(self, style):
+        self._lineStyle = style
+        self._glList.renderMode = GLRENDERMODE_REBUILD
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
+
+    @property
+    def lineWidth(self):
+        return self._lineWidth
+
+    @lineWidth.setter
+    def lineWidth(self, width):
+        self._lineWidth = width
+        self._glList.renderMode = GLRENDERMODE_REBUILD
+
+        # emit notifiers to repaint the GL windows
+        self.GLSignals.emitPaintEvent()
+
+    @property
     def bounds(self):
         return self._bounds
 
@@ -245,12 +271,14 @@ class GLInfiniteLine(GLRegion):
     def __init__(self, parent, glList, values=(0, 0), axisCode=None, orientation='h',
                  brush=None, colour='blue',
                  movable=True, visible=True, bounds=None,
-                 obj=None, objectView=None, lineStyle='dashed', regionType=GLLINETYPE):
+                 obj=None, objectView=None, lineStyle='dashed', lineWidth=1.0,
+                 regionType=GLLINETYPE):
 
         super(GLInfiniteLine, self).__init__(parent, glList, values=values, axisCode=axisCode, orientation=orientation,
                                              brush=brush, colour=colour,
                                              movable=movable, visible=visible, bounds=bounds,
-                                             obj=obj, objectView=objectView, lineStyle=lineStyle, regionType=regionType)
+                                             obj=obj, objectView=objectView, lineStyle=lineStyle, lineWidth=lineWidth,
+                                             regionType=regionType)
 
     # same as GLRegion, but _values is a singular item
     @property

@@ -823,9 +823,9 @@ class GLExporter():
                 colourPath = 'infiniteLines%s%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha, infLine.lineStyle)
 
                 if infLine.orientation == 'h':
-                    newLine = [self._parent.axisL, infLine.values[0], self._parent.axisR, infLine.values[0]]
+                    newLine = [self._parent.axisL, infLine.values, self._parent.axisR, infLine.values]
                 else:
-                    newLine = [infLine.values[0], self._parent.axisT, infLine.values[0], self._parent.axisB]
+                    newLine = [infLine.values, self._parent.axisT, infLine.values, self._parent.axisB]
 
                 newLine = self._parent.lineVisible(newLine,
                                                   x=self.displayScale * self.mainL,
@@ -834,7 +834,7 @@ class GLExporter():
                                                   height=self.displayScale * self.mainH)
                 if newLine:
                     if colourPath not in colourGroups:
-                        colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5, PDFSTROKECOLOR: colour,
+                        colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5 * infLine.lineWidth, PDFSTROKECOLOR: colour,
                                                     PDFSTROKELINECAP: 1, PDFCLOSEPATH: False,
                                                     PDFSTROKEDASHARRAY: GLLINE_STYLES_ARRAY[infLine.lineStyle]}
                     colourGroups[colourPath][PDFLINES].append(newLine)

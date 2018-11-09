@@ -2495,7 +2495,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def addInfiniteLine(self, values=None, axisCode=None, orientation=None,
                         brush=None, colour='blue',
                         movable=True, visible=True, bounds=None,
-                        obj=None, lineStyle='dashed'):
+                        obj=None, lineStyle='dashed', lineWidth=1.0):
 
         if colour in REGION_COLOURS.keys():
             if colour == 'highlight':
@@ -2541,7 +2541,8 @@ class CcpnGLWidget(QOpenGLWidget):
                                                   visible=visible,
                                                   bounds=bounds,
                                                   obj=obj,
-                                                  lineStyle=lineStyle))
+                                                  lineStyle=lineStyle,
+                                                  lineWidth=lineWidth))
 
         self.update()
         return self._infiniteLines[-1]
@@ -2881,7 +2882,6 @@ class CcpnGLWidget(QOpenGLWidget):
     def drawInfiniteLines(self):
         # draw the simulated infinite lines - using deprecated GL :)
 
-        GL.glLineWidth(2.0)
         GL.glDisable(GL.GL_BLEND)
         GL.glEnable(GL.GL_LINE_STIPPLE)
         for infLine in self._infiniteLines:
@@ -2898,6 +2898,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 #     GL.glVertex2d(infLine.values[0], self.axisT)
                 #     GL.glVertex2d(infLine.values[0], self.axisB)
 
+                GL.glLineWidth(infLine.lineWidth)
                 GL.glBegin(GL.GL_LINES)
                 if infLine.orientation == 'h':
                     GL.glVertex2d(self.axisL, infLine.values)

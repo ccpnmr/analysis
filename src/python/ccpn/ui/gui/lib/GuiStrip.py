@@ -790,7 +790,7 @@ class GuiStrip(Frame):
 
         # TODO:ED remember direction
         self._newPosition = phasingFrame.pivotEntry.get()
-        self.pivotLine = self._CcpnGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed')
+        self.pivotLine = self._CcpnGLWidget.addInfiniteLine(colour='highlight', movable=True, lineStyle='dashed', lineWidth=2.0)
 
         if not self.pivotLine:
             getLogger().warning('no infiniteLine')

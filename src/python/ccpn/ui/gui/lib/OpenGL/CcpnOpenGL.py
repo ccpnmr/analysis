@@ -3473,6 +3473,8 @@ class CcpnGLWidget(QOpenGLWidget):
                           ph0=None, ph1=None, pivot=None):
 
         try:
+            print('>>>_updateHTraceData')
+
             pointInt = [1 + int(pnt + 0.5) for pnt in point]
             _tmp, data = self._getSliceData(spectrumView=spectrumView, points=pointInt, sliceDim=xDataDim.dim,
                                                ph0=ph0, ph1=ph1, pivot=pivot

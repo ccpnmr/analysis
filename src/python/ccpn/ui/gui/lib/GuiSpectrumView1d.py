@@ -113,7 +113,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     """
     # CCPN INTERNAL - called in newPhasingTrace methods of GuiWindow and GuiStrip
     """
-    
+    print('>>>_newPhasingTrace')
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible() and not self.hPhaseTrace:
       if not self.strip.haveSetHPhasingPivot:

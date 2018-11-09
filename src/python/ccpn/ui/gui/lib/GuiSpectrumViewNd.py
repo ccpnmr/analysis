@@ -327,6 +327,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         if not self.isVisible():
             return
 
+        print('>>>_updatePhasing')
         position = [axis.position for axis in self.strip.orderedAxes]
 
         phasingFrame = self.strip.spectrumDisplay.phasingFrame

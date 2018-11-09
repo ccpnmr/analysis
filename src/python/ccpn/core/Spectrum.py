@@ -1205,16 +1205,32 @@ class Spectrum(AbstractWrapperObject):
     def getPositionValue(self, position):
         return self._apiDataSource.getPositionValue(position)
 
+    def _getSliceDataFromPlane(self, position, xDim:int, yDim:int, sliceDim:int):
+        "Internal routine to get sliceData; optimised to use (buffered) getPlaneData"
+        if not (sliceDim==xDim or sliceDim==yDim):
+            raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' %(sliceDim, xDim, yDim))
+        slice = position[sliceDim-1]  # positions are 1-based
+        data = self.getPlaneData(position, xDim, yDim)
+        if sliceDim == xDim:
+            return data[slice:slice+1 , :]
+        elif sliceDim == yDim:
+            return data[: , slice:slice+1]
+
     def getSliceData(self, position=None, sliceDim: int = 1):
         return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 
     @cached(PLANEDATACACHE, maxItems=64)
     def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
         """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
-        return data array
+        Dimensionality must be >= 2
+
+        return 2D float32 NumPy array in order (y, x)
+
         NB: use getPlane method for axisCode based access
         """
-        #print('getPlaneData>>>', xDim, yDim, position)
+
+        if self.dimensionCount < 2:
+            raise ValueError('Spectrum.getPlaneData; dimensionCount must be >= 2')
         if xDim == yDim:
             raise ValueError('Spectrum.getPlaneData; must have xDim != yDim')
         dims = self.dimensions
@@ -1226,6 +1242,9 @@ class Spectrum(AbstractWrapperObject):
                              (yDim, dims))
         if position is None:
             position = [1] * self.dimensionCount
+        # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
+        position[xDim] = 1
+        position[yDim] = 1
         for idx, p in enumerate(position):
             if not (1 <= p <= self.pointCounts[idx]):
                 raise ValueError('Spectrum.getPlaneData; invalid position[%d] "%d"; should be in range (%d,%d)' %

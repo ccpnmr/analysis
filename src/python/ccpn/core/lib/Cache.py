@@ -52,7 +52,7 @@ import decorator
 import inspect
 import sys
 
-DEBUG = False
+DEBUG = False   # global debug
 
 class Cache(object):
     """
@@ -64,36 +64,39 @@ class Cache(object):
       with cached.clear(attributeName); see above in description for example.
     """
 
-    def __init__(self, maxItems=None):
+    def __init__(self, maxItems=None, debug=False):
         """
         Initialise the cache
         :param maxItems: maximum number of items to hold; unlimited for
                maxItems==0 or maxItems == None
+        :param debug: enable debug for this cache
         """
         self._maxItems = maxItems
-        self.clear()  # sets self._cacheDict and self._items
+        self._debug = DEBUG or debug
+        self._items = []
+        self._cacheDict = {}
 
     def add(self, item, value):
         """add item,value to the cache
         """
-        if DEBUG: sys.stderr.write('DEBUG> Cache: Adding "%s"\n' % item)
-        if self.hasItem(item):
+        if item in self._items:  # not using hasItem() to save another call
             return   # item is already cached
 
         if self._maxItems and len(self._items) == self._maxItems:
             # need to remove one item first
             itm = self._items.pop(0)
-            if DEBUG: sys.stderr.write('DEBUG> Cache: removing "%s"\n' % itm)
+            if self._debug: sys.stderr.write('DEBUG> %s: removing "%s"\n' % (self, itm))
             del(self._cacheDict[itm])
 
+        if self._debug: sys.stderr.write('DEBUG> %s: Adding "%s"\n' % (self, item))
         self._cacheDict[item] = value
         self._items.append(item)
 
     def get(self, item):
         """Get item from cache; return None if not present
         """
-        if DEBUG: sys.stderr.write('DEBUG> Cache: getting "%s"\n' % item)
-        if not self.hasItem(item):
+        if self._debug: sys.stderr.write('DEBUG> %s: getting "%s"\n' % (self, item))
+        if not item in self._items:  # not using hasItem() to save another call
             return None
         return self._cacheDict[item]
 
@@ -105,12 +108,15 @@ class Cache(object):
     def clear(self):
         """Clear all items from the cache
         """
-        if DEBUG: sys.stderr.write('DEBUG> Cache: clearing\n')
+        if self._debug: sys.stderr.write('DEBUG> %s: clearing\n' % self)
         self._cacheDict = {}
         self._items = []
 
+    def __str__(self):
+        return '<Cache (%d items, max=%d)>' % (len(self._items), self._maxItems)
 
-def cached(attributeName, maxItems=0):
+
+def cached(attributeName, maxItems=0, debug=False):
     """
     A decorator for initiating cached function call
     Works on functions that pass an object as the first argument; e.g. self
@@ -140,7 +146,7 @@ def cached(attributeName, maxItems=0):
         item = repr(item)
 
         if not hasattr(obj, attributeName):
-            setattr(obj, attributeName, Cache(maxItems=maxItems))
+            setattr(obj, attributeName, Cache(maxItems=maxItems, debug=debug))
         cache = getattr(obj, attributeName)
         if not isinstance(cache, Cache):
             raise RuntimeError('%s, %s is not a Cache object' % (obj, attributeName))

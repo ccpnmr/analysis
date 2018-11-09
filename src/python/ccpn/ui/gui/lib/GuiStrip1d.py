@@ -325,6 +325,18 @@ class GuiStrip1d(GuiStrip):
             self.calibrateY1DWidgets.setVisible(False)
             self.calibrateY1DWidgets._toggleLines()
 
+    def _getInitialOffset(self):
+        offSets = []
+        offSet = 0 # Default
+        for i, spectrumView in enumerate(self.spectrumViews):
+            sp = spectrumView.spectrum
+            y = sp.intensities
+            offSet = np.std(y)
+            offSets.append(offSet)
+        if len(offSets)>0:
+            offSet= np.mean(offSets)
+        return offSet
+
     def _toggleOffsetWidget(self):
         from ccpn.ui.gui.widgets.Stack1DWidget import Offset1DWidget
 
@@ -332,6 +344,8 @@ class GuiStrip1d(GuiStrip):
             sdWid = self.spectrumDisplay.mainWidget
             self.widgetIndex += 1
             self.offsetWidget = Offset1DWidget(sdWid, mainWindow=self.mainWindow, strip1D=self, grid=(self.widgetIndex, 0))
+            initialOffset = self._getInitialOffset()
+            self.offsetWidget.setValue(initialOffset)
             self.offsetWidget.setVisible(True)
         else:
             self.offsetWidget.setVisible(not self.offsetWidget.isVisible())

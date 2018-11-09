@@ -81,6 +81,13 @@ class ButtonList(Widget):
     self.buttons = []
     self.addButtons(texts, callbacks, icons, tipTexts)
 
+    # set focus always on the last button (which is usually the ok, or run button)
+    if len(self.buttons)>0:
+      lastButton = self.buttons[-1]
+      lastButton.setFocus()
+
+
+
   def addButtons(self, texts, callbacks, icons=None, tipTexts=None):
   
     if tipTexts is None:

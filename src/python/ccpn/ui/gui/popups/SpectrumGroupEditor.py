@@ -119,8 +119,8 @@ class SpectrumGroupEditor(CcpnDialog):
                                    callbacks=[self.reject, self._applyChanges, self._okButton],
                                    tipTexts=['', '', '', None], direction='h',
                                    hAlign='r')
-    if self.addNewSpectrumGroup:  # Restore button disabled
-      self.applyButtons.buttons[1].setEnabled(False)
+    # if self.addNewSpectrumGroup:  # Restore button disabled
+    #   self.applyButtons.buttons[1].setEnabled(False)
 
   def _addWidgetsToLayout(self):
     ###### Add left Widgets on Main layout ######

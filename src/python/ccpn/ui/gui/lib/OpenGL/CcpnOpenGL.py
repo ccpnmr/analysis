@@ -3338,12 +3338,18 @@ class CcpnGLWidget(QOpenGLWidget):
     def _getSliceData(self, spectrumView, points, sliceDim, ph0, ph1, pivot):
         """Get the slice, phasing if needed.
         points as integer array, as this allows the cache to work best
-        Separate routine to allow for caching
+        Separate routine to allow for caching,
+        uses Spectrum._getSliceDataFromPlane for efficient extraction of slices
 
         return (data, phasedData) tuple; phasedData == data if either of (ph0, ph1, pivot)
                                          are not defined
         """
-        data = spectrumView.spectrum.getSliceData(points, sliceDim=sliceDim)
+        axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
+        planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
+
+        # data = spectrumView.spectrum.getSliceData(points, sliceDim=sliceDim)
+        data = spectrumView.spectrum._getSliceDataFromPlane(points,
+                                    xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim)
         phasedData = data
         if ph0 is not None and ph1 is not None and pivot is not None:
             phasedData = Phasing.phaseRealData(data, ph0, ph1, pivot)

@@ -121,7 +121,7 @@ from ccpn.ui.gui.guiSettings import textFont, getColours, STRIPHEADER_BACKGROUND
 import json
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
-
+import re
 
 try:
     from OpenGL import GL, GLU, GLUT
@@ -136,6 +136,7 @@ UNITS_HZ = 'Hz'
 UNITS_POINT = 'point'
 UNITS = [UNITS_PPM, UNITS_HZ, UNITS_POINT]
 
+removeTrailingZero = re.compile(r'^(\d*[\d.]*?)\.?0*$')
 
 class CcpnGLWidget(QOpenGLWidget):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
@@ -2333,8 +2334,20 @@ class CcpnGLWidget(QOpenGLWidget):
                 # self._buildAxes(self.gridList[2], axisList=[0], scaleGrid=[1,0], r=0.2, g=1.0, b=0.3, transparency=32.0)
                 self.gridList[2].drawIndexArray()
 
-    def _eformat(self, f, prec):
-        s = "%.*e" % (prec, f)
+    def _floatFormat(self, f=0.0, prec=3):
+        """return a float string
+        """
+        return (('%.'+str(prec)+'f') % f).rstrip('0').rstrip('.')
+
+    def _intFormat(self, ii=0, prec=0):
+        """return an integer string
+        """
+        return '%i' % ii
+
+    def _eFormat(self, f=0.0, prec=4):
+        """return an exponential with trailing zeroes removed
+        """
+        s = '%.*e' % (prec, f)
         mantissa, exp = s.split('e')
         mantissa = mantissa.rstrip('0')
         if mantissa.endswith('.'):
@@ -2342,11 +2355,11 @@ class CcpnGLWidget(QOpenGLWidget):
         exp = exp.lstrip('0+')
         if exp:
             if exp.startswith('-'):
-                return "%se%d" % (mantissa, int(exp))
+                return '%se%d' % (mantissa, int(exp))
             else:
-                return "%se+%d" % (mantissa, int(exp))
+                return '%se+%d' % (mantissa, int(exp))
         else:
-            return "%s" % mantissa
+            return '%s' % mantissa
 
     def buildAxisLabels(self, refresh=False):
         # build axes labelling
@@ -2366,7 +2379,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     axisX = axLabel[2]
                     axisXLabel = axLabel[3]
 
-                    axisXText = str(int(axisXLabel)) if axLabel[4] >= 1 else str(axisXLabel)
+                    # axisXText = str(int(axisXLabel)) if axLabel[4] >= 1 else str(axisXLabel)
+                    axisXText = self._intFormat(axisXLabel) if axLabel[4] >= 1 else self.XMode(axisXLabel)
 
                     self._axisXLabelling.append(GLString(text=axisXText,
                                                          font=self.globalGL.glSmallFont,
@@ -2402,9 +2416,10 @@ class CcpnGLWidget(QOpenGLWidget):
                     axisYLabel = ayLabel[3]
 
                     if self.YAXISUSEEFORMAT:
-                        axisYText = self._eformat(axisYLabel, 4)
+                        axisYText = self.YMode(axisYLabel)
                     else:
-                        axisYText = str(int(axisYLabel)) if ayLabel[4] >= 1 else str(axisYLabel)
+                        # axisYText = str(int(axisYLabel)) if ayLabel[4] >= 1 else str(axisYLabel)
+                        axisYText = self._intFormat(axisYLabel) if ayLabel[4] >= 1 else self.YMode(axisYLabel)
 
                     self._axisYLabelling.append(GLString(text=axisYText,
                                                          font=self.globalGL.glSmallFont,
@@ -3226,8 +3241,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # newCoords = self.mouseFormat % (self._axisOrder[0], cursorX,
             #                                 self._axisOrder[1], cursorY)
-            newCoords = ' %s: %s\n %s: %s' % (self._axisOrder[0], self.XMode % cursorX,
-                                              self._axisOrder[1], self.YMode % cursorY)
+            newCoords = ' %s: %s\n %s: %s' % (self._axisOrder[0], self.XMode(cursorX),
+                                              self._axisOrder[1], self.YMode(cursorY))
 
             self.mouseString = GLString(text=newCoords,
                                         font=self.globalGL.glSmallFont,
@@ -3240,8 +3255,8 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._drawDeltaOffset:
                 # diffCoords = self.diffMouseFormat % (self._axisOrder[0], (cursorX - startX),
                 #                                      self._axisOrder[1], (cursorY - startY))
-                diffCoords = ' d%s: %s\n d%s: %s' % (self._axisOrder[0], self.XMode % (cursorX - startX),
-                                                     self._axisOrder[1], self.YMode % (cursorY - startY))
+                diffCoords = ' d%s: %s\n d%s: %s' % (self._axisOrder[0], self.XMode(cursorX - startX),
+                                                     self._axisOrder[1], self.YMode(cursorY - startY))
 
                 self.diffMouseString = GLString(text=diffCoords,
                                                 font=self.globalGL.glSmallFont,
@@ -3911,7 +3926,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if self.XAXES[self._xUnits] == GLDefs.AXISUNITSPPM:
                 axisLimitL = self.axisL
                 axisLimitR = self.axisR
-                self.XMode = '%.3f'
+                self.XMode = self._floatFormat
 
             elif self.XAXES[self._xUnits] == GLDefs.AXISUNITSHZ:
                 if self._ordering:
@@ -3937,7 +3952,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     # error trap all spectra deleted
                     axisLimitL = self.axisL
                     axisLimitR = self.axisR
-                self.XMode = '%.3f'
+                self.XMode = self._floatFormat
 
             else:
                 if self._ordering:
@@ -3965,18 +3980,18 @@ class CcpnGLWidget(QOpenGLWidget):
                     # error trap all spectra deleted
                     axisLimitL = self.axisL
                     axisLimitR = self.axisR
-                self.XMode = '%i'
+                self.XMode = self._intFormat
 
             # generate different axes depending on units - Y Axis, always use first option for 1d
             if self.is1D:
                 axisLimitT = self.axisT
                 axisLimitB = self.axisB
-                self.YMode = '%.6g'
+                self.YMode = self._eFormat          # '%.6g'
 
             elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
                 axisLimitT = self.axisT
                 axisLimitB = self.axisB
-                self.YMode = '%.3f'
+                self.YMode = self._floatFormat      # '%.3f'
 
             elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
                 if self._ordering:
@@ -3997,7 +4012,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     # error trap all spectra deleted
                     axisLimitT = self.axisT
                     axisLimitB = self.axisB
-                self.YMode = '%.3f'
+                self.YMode = self._floatFormat      # '%.3f'
 
             else:
                 if self._ordering:
@@ -4020,7 +4035,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     # error trap all spectra deleted
                     axisLimitT = self.axisT
                     axisLimitB = self.axisB
-                self.YMode = '%i'
+                self.YMode = self._intFormat        # '%i'
 
             # ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
             # br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])
@@ -4042,12 +4057,19 @@ class CcpnGLWidget(QOpenGLWidget):
                 dist = br - ul
                 nlTarget = 10. ** i
                 d = 10. ** np.floor(np.log10(abs(dist / nlTarget)) + 0.5)
+
                 ul1 = np.floor(ul / d) * d
                 br1 = np.ceil(br / d) * d
                 dist = br1 - ul1
                 nl = (dist / d) + 0.5
 
                 for ax in axisList:  #   range(0,2):  ## Draw grid for both axes
+
+                    # skip grid lines for point grids
+                    if d[0] < 0.1 and ax == 0 and self.XMode == self._intFormat:
+                        continue
+                    if d[1] < 0.1 and ax == 1 and self.YMode == self._intFormat:
+                        continue
 
                     c = 30.0 + (scaleOrder * 20)
 
@@ -4117,6 +4139,13 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     labelling['0'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
 
+            # clean up strings if in _intFormat
+            if self.XMode == self._intFormat:
+                for ll in labelling['0'][::-1]:
+                    if round(ll[3], 5) != int(ll[3]):
+                        # remove the item
+                        labelling['0'].remove(ll)
+
             while len(labelling['1']) > (self.h / 20.0):
                 #restrict Y axis labelling
                 lStrings = labelling['1']
@@ -4124,6 +4153,13 @@ class CcpnGLWidget(QOpenGLWidget):
                     labelling['1'] = lStrings[0::2]  # [ls for ls in lStrings if check(ls)]
                 else:
                     labelling['1'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
+
+            # clean up strings if in _intFormat
+            if self.YMode == self._intFormat:
+                for ll in labelling['1'][::-1]:
+                    if round(ll[3], 5) != int(ll[3]):
+                        # remove the item
+                        labelling['1'].remove(ll)
 
         return labelling, labelsChanged
 

@@ -3334,10 +3334,10 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glVertex2d(cursCoord[0], cursCoord[1])
             GL.glEnd()
 
-    @cached(TRACECACHE, maxItems=256, debug=False)
+    @cached(TRACECACHE, maxItems=256, debug=True)
     def _getSliceData(self, spectrumView, points, sliceDim, ph0, ph1, pivot):
         """Get the slice, phasing if needed.
-        points as integer array, as this allows the cache to work best
+        points as integer list, as this allows the cache to work best
         Separate routine to allow for caching,
         uses Spectrum._getSliceDataFromPlane for efficient extraction of slices
 

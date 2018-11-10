@@ -303,6 +303,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._gridVisible = self._preferences.showGrid
         self._updateHTrace = False
         self._updateVTrace = False
+        self._lastTracePoint = [-1, -1]
 
         self._applyXLimit = self._preferences.zoomXLimitApply
         self._applyYLimit = self._preferences.zoomYLimitApply
@@ -3573,6 +3574,29 @@ class CcpnGLWidget(QOpenGLWidget):
         except Exception as es:
             tracesDict[spectrumView].clearArrays()
 
+    def _tracesNeedUpdating(self):
+        """Check if traces need updating on _lastTracePoint, use first spectrumView to see
+        if cursor has moved sufficiently far to warrant an update of the traces
+        """
+        _tmp, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, \
+                     yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
+            = self.strip.spectrumViews[0]._getTraceParams(self.cursorCoordinate)
+        point = [int(p + 0.5) for p in point]
+        # print('updateTraces>>>', self._lastTracePoint, point)
+        if   self._updateHTrace and not self._updateVTrace and point[1] == self._lastTracePoint[1]:
+            # Only HTrace, an y-point has not changed
+            return False
+        elif not self._updateHTrace and self._updateVTrace and point[0] == self._lastTracePoint[0]:
+            # Only VTrace and x-point has not changed
+            return False
+        elif self._updateHTrace and self._updateVTrace and point[0] == self._lastTracePoint[0] \
+                                                       and point[1] == self._lastTracePoint[1]:
+            # both HTrace and Vtrace, both x-point an y-point have not changed
+            return False
+        # We need to update; save this point as the last point
+        self._lastTracePoint = point
+        return True
+
     def updateTraces(self):
         if self.strip.isDeleted:
             return
@@ -3583,37 +3607,44 @@ class CcpnGLWidget(QOpenGLWidget):
 
         positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        for spectrumView in self.strip.spectrumViews:
+        if self._tracesNeedUpdating():
+            for spectrumView in self.strip.spectrumViews:
 
-            phasingFrame = self.spectrumDisplay.phasingFrame
-            if phasingFrame.isVisible():
-                ph0 = phasingFrame.slider0.value()
-                ph1 = phasingFrame.slider1.value()
-                pivotPpm = phasingFrame.pivotEntry.get()
-                direction = phasingFrame.getDirection()
-                # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
-                # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
-                axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
-                pivot = spectrumView.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
-            else:
-                # ph0 = ph1 = direction = 0
-                # pivot = 1
-                direction = 0
-                ph0 = ph1 = pivot = None
+                phasingFrame = self.spectrumDisplay.phasingFrame
+                if phasingFrame.isVisible():
+                    ph0 = phasingFrame.slider0.value()
+                    ph1 = phasingFrame.slider1.value()
+                    pivotPpm = phasingFrame.pivotEntry.get()
+                    direction = phasingFrame.getDirection()
+                    # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
+                    # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+                    axisIndex = spectrumView._displayOrderSpectrumDimensionIndices[direction]
+                    pivot = spectrumView.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
+                else:
+                    # ph0 = ph1 = direction = 0
+                    # pivot = 1
+                    direction = 0
+                    ph0 = ph1 = pivot = None
 
-            inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
-                = spectrumView._getTraceParams(position)
+                inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, \
+                                yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
+                    = spectrumView._getTraceParams(position)
 
-            if direction == 0:
-                self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
-                                       xNumPoints, positionPixel, ph0, ph1, pivot)
-                self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency,
-                                       yNumPoints, positionPixel)
-            else:
-                self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
-                                       xNumPoints, positionPixel)
-                self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency,
-                                       yNumPoints, positionPixel, ph0, ph1, pivot)
+                if direction == 0:
+                    if self._updateHTrace:
+                        self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
+                                           xNumPoints, positionPixel, ph0, ph1, pivot)
+                    if self._updateVTrace:
+                        self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency,
+                                           yNumPoints, positionPixel)
+                else:
+                    if self._updateHTrace:
+                        self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
+                                           xNumPoints, positionPixel)
+                    if self._updateVTrace:
+                        self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency,
+                                           yNumPoints, positionPixel, ph0, ph1, pivot)
+
 
     def newTrace(self, position=None):
         position = position if position else [self.cursorCoordinate[0], self.cursorCoordinate[1]]  #list(cursorPosition)

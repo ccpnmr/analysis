@@ -157,8 +157,6 @@ class CcpnGLWidget(QOpenGLWidget):
     XAXES = GLDefs.XAXISUNITS
     YAXES = GLDefs.YAXISUNITS
 
-    TRACECACHE = '_traceCache'  # attribute to store the cached traces
-
     def __init__(self, strip=None, mainWindow=None, stripIDLabel=None):
         # TODO:ED add documentation
 
@@ -388,7 +386,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self._ordering = []
         self.glReady = True
 
-    @cached.clear(TRACECACHE)
     def close(self):
         self.GLSignals.glXAxisChanged.disconnect()
         self.GLSignals.glYAxisChanged.disconnect()
@@ -3334,42 +3331,34 @@ class CcpnGLWidget(QOpenGLWidget):
             GL.glVertex2d(cursCoord[0], cursCoord[1])
             GL.glEnd()
 
-    @cached(TRACECACHE, maxItems=256, debug=True)
-    def _getSliceData(self, spectrumView, points, sliceDim, ph0, ph1, pivot):
-        """Get the slice, phasing if needed.
-        points as integer list, as this allows the cache to work best
+    def _getSliceData(self, spectrumView, points, sliceDim):
+        """Get the slice along sliceDim, using spectrumView to get to spectrum
         Separate routine to allow for caching,
         uses Spectrum._getSliceDataFromPlane for efficient extraction of slices
 
-        return (data, phasedData) tuple; phasedData == data if either of (ph0, ph1, pivot)
-                                         are not defined
+        points as integer list, with points[sliceDim-1] set to 1, as this allows
+        the cached _getSliceFromPlane to work best
+
+        return sliceData numpy array
         """
         axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
         planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
-
-        data = spectrumView.spectrum._getSliceDataFromPlane(points,
+        pointInt = [1 + int(pnt + 0.5) for pnt in points]
+        pointInt[sliceDim - 1] = 1  # To improve caching; points, dimensions are 1-based
+        data = spectrumView.spectrum._getSliceDataFromPlane(pointInt,
                                     xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim)
-        phasedData = data
-        if ph0 is not None and ph1 is not None and pivot is not None:
-            phasedData = Phasing.phaseRealData(data, ph0, ph1, pivot)
-        return data, phasedData
+        return data
 
     def _newStaticHTraceData(self, spectrumView, tracesDict,
                              point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, position,
                              ph0=None, ph1=None, pivot=None):
 
         try:
-            pointInt = [1 + int(pnt + 0.5) for pnt in point]
-            pointInt[xDataDim.dim-1] = 1  # To improve caching; points, dimensions are 1-based
-            data, preData = self._getSliceData(spectrumView=spectrumView, points=pointInt, sliceDim=xDataDim.dim,
-                                               ph0=ph0, ph1=ph1, pivot=pivot
-                                               )
+            data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=xDataDim.dim)
 
-            # data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
-            # preData = data
-            #
-            # if ph0 is not None and ph1 is not None and pivot is not None:
-            #     preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
+            preData = data
+            if ph0 is not None and ph1 is not None and pivot is not None:
+                preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
             x = np.array(
                     [xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
@@ -3420,16 +3409,11 @@ class CcpnGLWidget(QOpenGLWidget):
                              ph0=None, ph1=None, pivot=None):
 
         try:
-            pointInt = [1 + int(pnt + 0.5) for pnt in point]
-            pointInt[yDataDim.dim-1] = 1  # To improve caching; points, dimensions are 1-based
-            data, preData = self._getSliceData(spectrumView=spectrumView, points=pointInt, sliceDim=yDataDim.dim,
-                                               ph0=ph0, ph1=ph1, pivot=pivot
-                                               )
-            # data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
-            # preData = data
-            #
-            # if ph0 is not None and ph1 is not None and pivot is not None:
-            #     preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
+            data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=yDataDim.dim)
+
+            preData = data
+            if ph0 is not None and ph1 is not None and pivot is not None:
+                preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
             y = np.array(
                     [yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
@@ -3480,15 +3464,10 @@ class CcpnGLWidget(QOpenGLWidget):
                           ph0=None, ph1=None, pivot=None):
 
         try:
-            pointInt = [1 + int(pnt + 0.5) for pnt in point]
-            pointInt[xDataDim.dim-1] = 1  # To improve caching; points, dimensions are 1-based
-            _tmp, data = self._getSliceData(spectrumView=spectrumView, points=pointInt, sliceDim=xDataDim.dim,
-                                               ph0=ph0, ph1=ph1, pivot=pivot
-                                               )
-            # data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
-            #
-            # if ph0 is not None and ph1 is not None and pivot is not None:
-            #     data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+            data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=xDataDim.dim)
+
+            if ph0 is not None and ph1 is not None and pivot is not None:
+                data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
             dataY = np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
             x = np.array(
@@ -3542,15 +3521,10 @@ class CcpnGLWidget(QOpenGLWidget):
                           ph0=None, ph1=None, pivot=None):
 
         try:
-            pointInt = [1 + int(pnt + 0.5) for pnt in point]
-            pointInt[yDataDim.dim-1] = 1  # To improve caching; points, dimensions are 1-based
-            _tmp, data = self._getSliceData(spectrumView=spectrumView, points=pointInt, sliceDim=yDataDim.dim,
-                                               ph0=ph0, ph1=ph1, pivot=pivot
-                                               )
-            # data = spectrumView.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
-            #
-            # if ph0 is not None and ph1 is not None and pivot is not None:
-            #     data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+            data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=yDataDim.dim)
+
+            if ph0 is not None and ph1 is not None and pivot is not None:
+                data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
             dataX = np.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
             y = np.array(

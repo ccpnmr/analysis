@@ -194,23 +194,19 @@ cached.clear = _clear
 if __name__ == "__main__":
 
     class myclass(object):
-        def __init__(self):
-            self.cache = Cache(maxItems=2)
 
-        def add(self, values):
-            result = self.cache.get(tuple(values))
-            if result is None:
-                result = [v.capitalize() for v in values]
-                self.cache.add(tuple(values), result)
-            return result
+        CACHE = 'cache'
 
-        @cached('cache')
-        def add2(self, values, test=True):
+        @cached(CACHE, maxItems=2, debug=True)
+        def add(self, values, test=True):
             return [v.capitalize() for v in values]
 
         @cached.clear('cache')
         def doClear(self):
             print('clearing')
+
+        def __str__(self):
+            return '<myclass>'
 
     a = myclass()
     print(a.add('aap noot mies'.split()))
@@ -219,8 +215,8 @@ if __name__ == "__main__":
     print(a.add('dag week'.split()))
 
     v = 'fijn zo'.split()
-    print(a.add2(v))
-    print(a.add2(v, False))
+    print(a.add(v))
+    print(a.add(v, False))
 
     a.doClear()
-    print(a.add2(v, False))
+    print(a.add(v, False))

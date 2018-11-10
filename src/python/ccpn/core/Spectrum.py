@@ -112,7 +112,6 @@ def _arrayOfIndex(index, cumul):
 
     return np.array(array)
 
-PLANEDATACACHE = '_planeDataCache'  # Atrribute name for the planeData cache
 
 class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
@@ -137,6 +136,9 @@ class Spectrum(AbstractWrapperObject):
     _referenceSpectrumHit = None
 
     MAXDIM = 4  # Maximum dimensionality
+
+    PLANEDATACACHE = '_planeDataCache'  # Attribute name for the planeData cache
+    SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
 
@@ -1205,6 +1207,7 @@ class Spectrum(AbstractWrapperObject):
     def getPositionValue(self, position):
         return self._apiDataSource.getPositionValue(position)
 
+    @cached(SLICEDATACACHE, maxItems=256, debug=False)
     def _getSliceDataFromPlane(self, position, xDim:int, yDim:int, sliceDim:int):
         """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
         CCPNINTERNAL: used in CcpnOpenGL
@@ -1226,10 +1229,10 @@ class Spectrum(AbstractWrapperObject):
         :param sliceDim: Dimension of the slice (1-based)
         :return: numpy data array
         """
-        # return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
         if self.dimensionCount==1:
             return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
         else:
+            position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
             if sliceDim > 1:
                 return self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
                                                    sliceDim=sliceDim)
@@ -1640,6 +1643,7 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     @cached.clear(PLANEDATACACHE)  # Check if there was a planedata cache, and if so, clear it
+    @cached.clear(SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
     def delete(self):
         """Delete Spectrum"""
         self._startCommandEchoBlock('delete')

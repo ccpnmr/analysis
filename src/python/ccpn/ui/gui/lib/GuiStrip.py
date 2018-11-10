@@ -315,7 +315,6 @@ class GuiStrip(Frame):
 
         # self.show()
 
-
     def mouseMoveEvent(self, a0: QtGui.QMouseEvent):
         print('>>>mouseMove')
 

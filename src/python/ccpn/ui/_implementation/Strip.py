@@ -224,6 +224,7 @@ class Strip(AbstractWrapperObject):
     def _delete(self):
         """delete the wrappedData
         """
+        # print("_implentation.stip>>> _delete")
         self._wrappedData.delete()
 
     def _storeStripDeleteDict(self, currentIndex):

@@ -120,7 +120,6 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engi
       shift =tarPos-refPos
       shifts.append(shift)
 
-
   if len(shifts) == len(spectra):
     if engine == IndividualMode:
       return shifts
@@ -252,18 +251,18 @@ class AlignSpectra(SpectraPipe):
       referenceSpectrumPid = self._kwargs[ReferenceSpectrum]
       referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
       if referenceSpectrum is not None:
-        spectra = [spectrum for spectrum in spectra if spectrum != referenceSpectrum]
-        if spectra:
+        spectraToAlign = [spectrum for spectrum in spectra if spectrum != referenceSpectrum]
+        if spectraToAlign:
           if engine == IndividualMode:
-            shifts =  _getShiftForSpectra(referenceSpectrum, spectra,
+            shifts =  _getShiftForSpectra(referenceSpectrum, spectraToAlign,
                                                       referenceRegion=referenceRegion,  engine=engine)
-            addIndividualShiftToSpectra(spectra, shifts)
+            addIndividualShiftToSpectra(spectraToAlign, shifts)
             getLogger().info('Alignment: applied individual shift to all spectra')
 
           else:
-            shift =  _getShiftForSpectra(referenceSpectrum, spectra,
+            shift =  _getShiftForSpectra(referenceSpectrum, spectraToAlign,
                                                       referenceRegion=referenceRegion,  engine=engine)
-            addShiftToSpectra(spectra, shift)
+            addShiftToSpectra(spectraToAlign, shift)
             getLogger().info('Alignment: applied shift to all spectra of %s' %shift)
 
           return spectra

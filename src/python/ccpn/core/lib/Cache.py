@@ -64,17 +64,18 @@ class Cache(object):
       with cached.clear(attributeName); see above in description for example.
     """
 
-    def __init__(self, maxItems=None, debug=False):
+    def __init__(self, maxItems=None, name='', debug=False):
         """
         Initialise the cache
         :param maxItems: maximum number of items to hold; unlimited for
                maxItems==0 or maxItems == None
         :param debug: enable debug for this cache
         """
-        self._maxItems = maxItems
-        self._debug = DEBUG or debug
-        self._items = []
-        self._cacheDict = {}
+        self._maxItems = maxItems  # maximum number of cached items
+        self._name = name  # name of the cache (main for debugging)
+        self._debug = DEBUG or debug  # debug flag for this cache instance
+        self._items = []   # List (FIFO stack) of items in the cache
+        self._cacheDict = {}  # cached (item, value) dict
 
     def add(self, item, value):
         """add item,value to the cache
@@ -85,19 +86,19 @@ class Cache(object):
         if self._maxItems and len(self._items) == self._maxItems:
             # need to remove one item first
             itm = self._items.pop(0)
-            if self._debug: sys.stderr.write('DEBUG> %s: removing "%s"\n' % (self, itm))
+            if self._debug: sys.stderr.write('DEBUG> %s ... removing "%s"\n' % (self, itm))
             del(self._cacheDict[itm])
 
-        if self._debug: sys.stderr.write('DEBUG> %s: Adding "%s"\n' % (self, item))
+        if self._debug: sys.stderr.write('DEBUG> %s ... Adding "%s"\n' % (self, item))
         self._cacheDict[item] = value
         self._items.append(item)
 
     def get(self, item):
         """Get item from cache; return None if not present
         """
-        if self._debug: sys.stderr.write('DEBUG> %s: getting "%s"\n' % (self, item))
         if not item in self._items:  # not using hasItem() to save another call
             return None
+        if self._debug: sys.stderr.write('DEBUG> %s ... Getting cached "%s"\n' % (self, item))
         return self._cacheDict[item]
 
     def hasItem(self, item):
@@ -108,12 +109,12 @@ class Cache(object):
     def clear(self):
         """Clear all items from the cache
         """
-        if self._debug: sys.stderr.write('DEBUG> %s: clearing\n' % self)
+        if self._debug: sys.stderr.write('DEBUG> %s ... clearing\n' % self)
         self._cacheDict = {}
         self._items = []
 
     def __str__(self):
-        return '<Cache (%d items, max=%d)>' % (len(self._items), self._maxItems)
+        return '<Cache %s; items:(%d,max:%d)>' % (self._name, len(self._items), self._maxItems)
 
 
 def cached(attributeName, maxItems=0, debug=False):
@@ -132,11 +133,12 @@ def cached(attributeName, maxItems=0, debug=False):
         func = args[0]
         args = args[1:]
 
+        obj = args[0]
+
+        # create an item hash from *args and **kwds, skipping the obj argument
         ba = inspect.signature(func).bind(*args, **kwds)
         ba.apply_defaults()
         allArgs = ba.arguments # ordered dict of (argument,value) pairs; first corresponds to object
-
-        obj = [v for v in allArgs.values()][0]
 
         argumentNames = [k for k in allArgs.keys()][1:]  # skip the first one which is the object
         # sort to maintain a consistent tuple of tuples item to cache
@@ -146,7 +148,8 @@ def cached(attributeName, maxItems=0, debug=False):
         item = repr(item)
 
         if not hasattr(obj, attributeName):
-            setattr(obj, attributeName, Cache(maxItems=maxItems, debug=debug))
+            name = '%s.%s' % (obj,attributeName)
+            setattr(obj, attributeName, Cache(maxItems=maxItems, name=name, debug=debug))
         cache = getattr(obj, attributeName)
         if not isinstance(cache, Cache):
             raise RuntimeError('%s, %s is not a Cache object' % (obj, attributeName))
@@ -191,23 +194,19 @@ cached.clear = _clear
 if __name__ == "__main__":
 
     class myclass(object):
-        def __init__(self):
-            self.cache = Cache(maxItems=2)
 
-        def add(self, values):
-            result = self.cache.get(tuple(values))
-            if result is None:
-                result = [v.capitalize() for v in values]
-                self.cache.add(tuple(values), result)
-            return result
+        CACHE = 'cache'
 
-        @cached('cache')
-        def add2(self, values, test=True):
+        @cached(CACHE, maxItems=2, debug=True)
+        def add(self, values, test=True):
             return [v.capitalize() for v in values]
 
         @cached.clear('cache')
         def doClear(self):
             print('clearing')
+
+        def __str__(self):
+            return '<myclass>'
 
     a = myclass()
     print(a.add('aap noot mies'.split()))
@@ -216,8 +215,8 @@ if __name__ == "__main__":
     print(a.add('dag week'.split()))
 
     v = 'fijn zo'.split()
-    print(a.add2(v))
-    print(a.add2(v, False))
+    print(a.add(v))
+    print(a.add(v, False))
 
     a.doClear()
-    print(a.add2(v, False))
+    print(a.add(v, False))

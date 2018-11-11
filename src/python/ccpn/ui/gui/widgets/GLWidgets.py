@@ -27,7 +27,7 @@ import sys
 import numpy as np
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
-    GLRENDERMODE_REBUILD
+    GLRENDERMODE_REBUILD, GLRENDERMODE_RESCALE
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D
 import ccpn.util.Phasing as Phasing
 
@@ -278,7 +278,7 @@ class Gui1dWidget(CcpnGLWidget):
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
             tracesDict.append(GLVertexArray(numLists=1,
-                                            renderMode=GLRENDERMODE_REBUILD,
+                                            renderMode=GLRENDERMODE_RESCALE,
                                             blendMode=False,
                                             drawMode=GL.GL_LINE_STRIP,
                                             dimension=2,
@@ -290,7 +290,7 @@ class Gui1dWidget(CcpnGLWidget):
             hSpectrum.numVertices = numVertices
             hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
-            hSpectrum.vertices = np.zeros(hSpectrum.numVertices * 2, dtype=np.float32)
+            hSpectrum.vertices = np.empty(hSpectrum.numVertices * 2, dtype=np.float32)
 
             # x = np.append(x, [xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
             #                   xDataDim.primaryDataDimRef.pointToValue(xMinFrequency)])

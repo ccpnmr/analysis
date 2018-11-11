@@ -98,7 +98,7 @@ class GLVertexArray():
 
     def __del__(self):
         if hasattr(self, 'VBOs'):
-            GL.glDeleteLists(3, self.VBOs)
+            GL.glDeleteBuffers(len(self.VBOs), self.VBOs)
 
     def clearArrays(self):
         # set everything to 32 bit for openGL VBOs, indices are ints, everything else is float
@@ -252,7 +252,7 @@ class GLVertexArray():
 
         # create the VBOs if they don't exist - reusing will just rewrite the buffers
         if not hasattr(self, 'VBOs'):
-            self.VBOs = GL.glGenBuffers(3)
+            self.VBOs = GL.glGenBuffers(2)
 
         sizeVertices = self.vertices.size * self.vertices.itemsize
         sizeColors = self.colors.size * self.colors.itemsize

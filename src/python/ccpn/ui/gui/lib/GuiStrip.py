@@ -771,8 +771,8 @@ class GuiStrip(Frame):
                 self._newConsoleDirection = 1
                 phasingFrame.directionList.setIndex(1)
 
-        for spectrumView in self.spectrumViews:
-            spectrumView._turnOnPhasing()
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView._turnOnPhasing()
 
         # # make sure that all traces are clear
         # from ccpn.util.CcpnOpenGL import GLNotifier
@@ -847,8 +847,8 @@ class GuiStrip(Frame):
 
         # change menu
         self._isPhasingOn = False
-        for spectrumView in self.spectrumViews:
-            spectrumView._turnOffPhasing()
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView._turnOffPhasing()
 
         # make sure that all traces are clear
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -918,8 +918,8 @@ class GuiStrip(Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        for spectrumView in self.spectrumViews:
-            spectrumView._changedPhasingDirection()
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView._changedPhasingDirection()
 
     def _updatePhasing(self):
 
@@ -2093,8 +2093,8 @@ def _axisRegionChanged(axis: 'Axis'):
         finally:
             strip.beingUpdated = False
 
-    if index == 1:  # ASSUMES that only do H phasing
-        strip._updatePhasing()
+    # if index == 1:  # ASSUMES that only do H phasing
+    #     strip._updatePhasing()
 
 
 # NB The following two notifiers could be replaced by wrapper notifiers on

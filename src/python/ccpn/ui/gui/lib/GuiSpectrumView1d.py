@@ -113,7 +113,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     """
     # CCPN INTERNAL - called in newPhasingTrace methods of GuiWindow and GuiStrip
     """
-    print('>>>_newPhasingTrace')
+    # print('>>>_newPhasingTrace')
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
     if phasingFrame.isVisible() and not self.hPhaseTrace:
       if not self.strip.haveSetHPhasingPivot:
@@ -136,7 +136,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
       self.hPhaseTrace = None
     
   def _updatePhasing(self):
-    print('_updatePhasing 1D')
+    # print('_updatePhasing 1D')
+    return
+
     if not self.isVisible():
       return
       
@@ -218,7 +220,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
     return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints
     
   def _updateHTraceData(self, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, hTrace, ph0=None, ph1=None, pivot=None):
-    
+    return
+
     # unfortunately it looks like we have to work in pixels, not ppm, yuck
     strip = self.strip
     plotWidget = strip.plotWidget

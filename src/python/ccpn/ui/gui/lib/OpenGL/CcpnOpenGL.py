@@ -125,6 +125,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 import re
 
+
 try:
     from OpenGL import GL, GLU, GLUT
 except ImportError:
@@ -139,6 +140,7 @@ UNITS_POINT = 'point'
 UNITS = [UNITS_PPM, UNITS_HZ, UNITS_POINT]
 
 removeTrailingZero = re.compile(r'^(\d*[\d.]*?)\.?0*$')
+
 
 class CcpnGLWidget(QOpenGLWidget):
     """Widget to handle all visible spectra/peaks/integrals/multiplets
@@ -399,7 +401,10 @@ class CcpnGLWidget(QOpenGLWidget):
     def threadUpdate(self):
         self.update()
 
-    def rescale(self):
+    def rescale(self, rescaleOverlayText=True, rescaleMarksRulers=True,
+                rescaleIntegralLists=True, rescaleRegions=True,
+                rescaleSpectra=True, rescaleStaticHTraces=True,
+                rescaleStaticVTraces=True):
         """Change to axes of the view, axis visibility, scale and rebuild matrices when necessary
         to improve display speed
         """
@@ -499,13 +504,28 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader.setGLUniform4fv('axisScale', 1, self._axisScale)
         currentShader.setGLUniform4fv('viewport', 1, self._view)
 
-        self._rescaleOverlayText()
-        self.rescaleMarksRulers()
+        if rescaleOverlayText:
+            self._rescaleOverlayText()
+
+        if rescaleMarksRulers:
+            self.rescaleMarksRulers()
+
         # self.rescaleIntegralLists()
-        self._GLIntegrals.rescaleIntegralLists()
-        self._rescaleRegions()
-        self.rescaleSpectra()
-        self.rescaleStaticTraces()
+
+        if rescaleIntegralLists:
+            self._GLIntegrals.rescaleIntegralLists()
+
+        if rescaleRegions:
+            self._rescaleRegions()
+
+        if rescaleSpectra:
+            self.rescaleSpectra()
+
+        if rescaleStaticHTraces:
+            self.rescaleStaticHTraces()
+
+        if rescaleStaticVTraces:
+            self.rescaleStaticVTraces()
 
     def setStackingValue(self, val):
         self._stackingValue = val
@@ -919,7 +939,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _rescaleXAxis(self, update=True):
         self._testAxisLimits()
-        self.rescale()
+        self.rescale(rescaleStaticHTraces=False)
 
         # spawn rebuild event for the grid
         if self.gridList:
@@ -945,7 +965,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _rescaleYAxis(self, update=True):
         self._testAxisLimits()
-        self.rescale()
+        self.rescale(rescaleStaticVTraces=False)
 
         # spawn rebuild event for the grid
         if self.gridList:
@@ -970,7 +990,7 @@ class CcpnGLWidget(QOpenGLWidget):
         #     self.project._endCommandEchoBlock()
 
     def _rebuildMarks(self, update=True):
-        self.rescale()
+        self.rescale(rescaleStaticHTraces=False, rescaleStaticVTraces=False)
 
         # spawn rebuild event for the grid
         for li in self.gridList:
@@ -1023,7 +1043,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def _rescaleAllAxes(self, update=True):
         self._testAxisLimits()
-        self.rescale()
+        self.rescale(rescaleStaticHTraces=False, rescaleStaticVTraces=False)
 
         # spawn rebuild event for the grid
         for li in self.gridList:
@@ -2071,8 +2091,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
-        if not self._drawSelectionBox:
-            self.drawTraces()
+        self.drawTraces()
 
         self.drawInfiniteLines()
 
@@ -2340,7 +2359,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _floatFormat(self, f=0.0, prec=3):
         """return a float string
         """
-        return (('%.'+str(prec)+'f') % f).rstrip('0').rstrip('.')
+        return (('%.' + str(prec) + 'f') % f).rstrip('0').rstrip('.')
 
     def _intFormat(self, ii=0, prec=0):
         """return an integer string
@@ -3011,12 +3030,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def setRightAxisVisible(self, axisVisible=True):
         self._drawRightAxis = axisVisible
-        self.rescale()
+        self.rescale(rescaleStaticHTraces=False)
         self.update()
 
     def setBottomAxisVisible(self, axisVisible=True):
         self._drawBottomAxis = axisVisible
-        self.rescale()
+        self.rescale(rescaleStaticVTraces=False)
         self.update()
 
     @property
@@ -3347,7 +3366,7 @@ class CcpnGLWidget(QOpenGLWidget):
         pointInt = [1 + int(pnt + 0.5) for pnt in points]
         pointInt[sliceDim - 1] = 1  # To improve caching; points, dimensions are 1-based
         data = spectrumView.spectrum._getSliceDataFromPlane(pointInt,
-                                    xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim)
+                                                            xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim)
         return data
 
     def _newStaticHTraceData(self, spectrumView, tracesDict,
@@ -3357,14 +3376,14 @@ class CcpnGLWidget(QOpenGLWidget):
         try:
             data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=xDataDim.dim)
 
-            preData = data
-            if ph0 is not None and ph1 is not None and pivot is not None:
-                preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
+            # preData = data
+            # if ph0 is not None and ph1 is not None and pivot is not None:
+            #     preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
             x = np.array(
                     [xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
-            y = positionPixel[1] + spectrumView._traceScale * (self.axisT - self.axisB) * \
-                np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
+            # y = positionPixel[1] + spectrumView._traceScale * (self.axisT - self.axisB) * \
+            #     np.array([preData[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
 
             colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
             colR = int(colour.strip('# ')[0:2], 16) / 255.0
@@ -3372,7 +3391,7 @@ class CcpnGLWidget(QOpenGLWidget):
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
             tracesDict.append(GLVertexArray(numLists=1,
-                                            renderMode=GLRENDERMODE_REBUILD,
+                                            renderMode=GLRENDERMODE_RESCALE,
                                             blendMode=False,
                                             drawMode=GL.GL_LINE_STRIP,
                                             dimension=2,
@@ -3380,7 +3399,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # add extra vertices to give a horizontal line across the trace
             x = np.append(x, (x[-1], x[0]))
-            y = np.append(y, (positionPixel[1], positionPixel[1]))
+            # y = np.append(y, (positionPixel[1], positionPixel[1]))
 
             numVertices = len(x)
             hSpectrum = tracesDict[-1]
@@ -3389,7 +3408,7 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             hSpectrum.vertices = np.empty(hSpectrum.numVertices * 2, dtype=np.float32)
             hSpectrum.vertices[::2] = x
-            hSpectrum.vertices[1::2] = y
+            # hSpectrum.vertices[1::2] = y
             hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
 
             # change to colour of the last 2 points to the spectrum colour
@@ -3412,14 +3431,14 @@ class CcpnGLWidget(QOpenGLWidget):
         try:
             data = self._getSliceData(spectrumView=spectrumView, points=point, sliceDim=yDataDim.dim)
 
-            preData = data
-            if ph0 is not None and ph1 is not None and pivot is not None:
-                preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
+            # preData = data
+            # if ph0 is not None and ph1 is not None and pivot is not None:
+            #     preData = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
             y = np.array(
                     [yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
-            x = positionPixel[0] + spectrumView._traceScale * (self.axisL - self.axisR) * \
-                np.array([preData[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
+            # x = positionPixel[0] + spectrumView._traceScale * (self.axisL - self.axisR) * \
+            #     np.array([preData[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
 
             colour = spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
             colR = int(colour.strip('# ')[0:2], 16) / 255.0
@@ -3427,7 +3446,7 @@ class CcpnGLWidget(QOpenGLWidget):
             colB = int(colour.strip('# ')[4:6], 16) / 255.0
 
             tracesDict.append(GLVertexArray(numLists=1,
-                                            renderMode=GLRENDERMODE_REBUILD,
+                                            renderMode=GLRENDERMODE_RESCALE,
                                             blendMode=False,
                                             drawMode=GL.GL_LINE_STRIP,
                                             dimension=2,
@@ -3435,15 +3454,15 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # add extra vertices to give a horizontal line across the trace
             y = np.append(y, (y[-1], y[0]))
-            x = np.append(x, (positionPixel[0], positionPixel[0]))
+            # x = np.append(x, (positionPixel[0], positionPixel[0]))
 
-            numVertices = len(x)
+            numVertices = len(y)
             vSpectrum = tracesDict[-1]
             vSpectrum.indices = numVertices
             vSpectrum.numVertices = numVertices
             vSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
             vSpectrum.vertices = np.empty(vSpectrum.numVertices * 2, dtype=np.float32)
-            vSpectrum.vertices[::2] = x
+            # vSpectrum.vertices[::2] = x
             vSpectrum.vertices[1::2] = y
             vSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
 
@@ -3514,6 +3533,8 @@ class CcpnGLWidget(QOpenGLWidget):
             hSpectrum.colors = np.array([colR, colG, colB, 1.0] * numVertices, dtype=np.float32)
             # hSpectrum.colors[dataY < 0] = [colRn, colGn, colBn, 1.0]
 
+            # push to VBO
+
         except Exception as es:
             tracesDict[spectrumView].clearArrays()
 
@@ -3579,18 +3600,18 @@ class CcpnGLWidget(QOpenGLWidget):
         if cursor has moved sufficiently far to warrant an update of the traces
         """
         _tmp, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, \
-                     yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
+        yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
             = self.strip.spectrumViews[0]._getTraceParams(self.cursorCoordinate)
         point = [int(p + 0.5) for p in point]
         # print('updateTraces>>>', self._lastTracePoint, point)
-        if   self._updateHTrace and not self._updateVTrace and point[1] == self._lastTracePoint[1]:
+        if self._updateHTrace and not self._updateVTrace and point[1] == self._lastTracePoint[1]:
             # Only HTrace, an y-point has not changed
             return False
         elif not self._updateHTrace and self._updateVTrace and point[0] == self._lastTracePoint[0]:
             # Only VTrace and x-point has not changed
             return False
         elif self._updateHTrace and self._updateVTrace and point[0] == self._lastTracePoint[0] \
-                                                       and point[1] == self._lastTracePoint[1]:
+                and point[1] == self._lastTracePoint[1]:
             # both HTrace and Vtrace, both x-point an y-point have not changed
             return False
         # We need to update; save this point as the last point
@@ -3627,24 +3648,23 @@ class CcpnGLWidget(QOpenGLWidget):
                     ph0 = ph1 = pivot = None
 
                 inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, \
-                                yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
+                yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
                     = spectrumView._getTraceParams(position)
 
                 if direction == 0:
                     if self._updateHTrace:
                         self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
-                                           xNumPoints, positionPixel, ph0, ph1, pivot)
+                                               xNumPoints, positionPixel, ph0, ph1, pivot)
                     if self._updateVTrace:
                         self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency,
-                                           yNumPoints, positionPixel)
+                                               yNumPoints, positionPixel)
                 else:
                     if self._updateHTrace:
                         self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
-                                           xNumPoints, positionPixel)
+                                               xNumPoints, positionPixel)
                     if self._updateVTrace:
                         self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency,
-                                           yNumPoints, positionPixel, ph0, ph1, pivot)
-
+                                               yNumPoints, positionPixel, ph0, ph1, pivot)
 
     def newTrace(self, position=None):
         position = position if position else [self.cursorCoordinate[0], self.cursorCoordinate[1]]  #list(cursorPosition)
@@ -3705,6 +3725,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
+    def rescaleStaticHTraces(self):
+        for hTrace in self._staticHTraces:
+            hTrace.renderMode = GLRENDERMODE_RESCALE
+
+    def rescaleStaticVTraces(self):
+        for vTrace in self._staticVTraces:
+            vTrace.renderMode = GLRENDERMODE_RESCALE
+
     def rebuildTraces(self):
         traces = self._currentTraces
         self.clearStaticTraces()
@@ -3731,6 +3759,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if hTrace.renderMode == GLRENDERMODE_RESCALE:
                     hTrace.renderMode = GLRENDERMODE_DRAW
 
+                    # print('>>>buildStaticTraces hTraces')
                     # [spectrumView._traceScale, point, yDataDim,
                     # yMinFrequency, yMaxFrequency,
                     # yNumPoints, positionPixel]
@@ -3738,6 +3767,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     values = hTrace.values
                     axisIndex = values[0]._displayOrderSpectrumDimensionIndices[direction]
                     pivot = values[0].spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
+                    positionPixel = values[6]
 
                     preData = Phasing.phaseRealData(hTrace.data, ph0, ph1, pivot)
 
@@ -3747,9 +3777,11 @@ class CcpnGLWidget(QOpenGLWidget):
                         y = values[6][1] + values[0]._traceScale * (self.axisT - self.axisB) * \
                             np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
 
-                        hTrace.vertices[1:-4:2] = y
+                        y = np.append(y, (positionPixel[1], positionPixel[1]))
+                        hTrace.vertices[1::2] = y
 
                     # build the VBOs here
+                    hTrace.defineVertexColorVBO(enableVBO=True)
 
             for dd in deleteHList:
                 self._staticHTraces.remove(dd)
@@ -3763,18 +3795,23 @@ class CcpnGLWidget(QOpenGLWidget):
                 if vTrace.renderMode == GLRENDERMODE_RESCALE:
                     vTrace.renderMode = GLRENDERMODE_DRAW
 
+                    # print('>>>buildStaticTraces vTraces')
+
                     values = vTrace.values
                     axisIndex = values[0]._displayOrderSpectrumDimensionIndices[direction]
                     pivot = values[0].spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
+                    positionPixel = values[6]
 
                     preData = Phasing.phaseRealData(vTrace.data, ph0, ph1, pivot)
 
                     x = values[6][0] + values[0]._traceScale * (self.axisL - self.axisR) * \
                         np.array([preData[p % values[5]] for p in range(values[3], values[4] + 1)])
 
-                    vTrace.vertices[:-4:2] = x
+                    x = np.append(x, (positionPixel[0], positionPixel[0]))
+                    vTrace.vertices[::2] = x
 
-                # build the VBOs here
+                    # build the VBOs here
+                    vTrace.defineVertexColorVBO(enableVBO=True)
 
             for dd in deleteVList:
                 self._staticVTraces.remove(dd)
@@ -3791,12 +3828,12 @@ class CcpnGLWidget(QOpenGLWidget):
             for hTrace in self._staticHTraces:
                 if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
                     # hTrace.drawVertexColor()
-                    hTrace.drawVertexColorVBO(enableVBO=False)
+                    hTrace.drawVertexColorVBO(enableVBO=True)
 
             for vTrace in self._staticVTraces:
                 if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
                     # vTrace.drawVertexColor()
-                    vTrace.drawVertexColorVBO(enableVBO=False)
+                    vTrace.drawVertexColorVBO(enableVBO=True)
 
         # only paint if mouse is in the window
         if self.underMouse():
@@ -4052,12 +4089,12 @@ class CcpnGLWidget(QOpenGLWidget):
             if self.is1D:
                 axisLimitT = self.axisT
                 axisLimitB = self.axisB
-                self.YMode = self._eFormat          # '%.6g'
+                self.YMode = self._eFormat  # '%.6g'
 
             elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSPPM:
                 axisLimitT = self.axisT
                 axisLimitB = self.axisB
-                self.YMode = self._floatFormat      # '%.3f'
+                self.YMode = self._floatFormat  # '%.3f'
 
             elif self.YAXES[self._yUnits] == GLDefs.AXISUNITSHZ:
                 if self._ordering:
@@ -4078,7 +4115,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     # error trap all spectra deleted
                     axisLimitT = self.axisT
                     axisLimitB = self.axisB
-                self.YMode = self._floatFormat      # '%.3f'
+                self.YMode = self._floatFormat  # '%.3f'
 
             else:
                 if self._ordering:
@@ -4101,7 +4138,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     # error trap all spectra deleted
                     axisLimitT = self.axisT
                     axisLimitB = self.axisB
-                self.YMode = self._intFormat        # '%i'
+                self.YMode = self._intFormat  # '%i'
 
             # ul = np.array([min(self.axisL, self.axisR), min(self.axisT, self.axisB)])
             # br = np.array([max(self.axisL, self.axisR), max(self.axisT, self.axisB)])

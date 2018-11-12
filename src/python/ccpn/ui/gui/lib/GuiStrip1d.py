@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtWidgets
 
 from ccpn.core.PeakList import PeakList
-
+from ccpn.util import Phasing
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, \
     IntegralMenu, MultipletMenu, PhasingMenu
 
@@ -133,6 +133,8 @@ class GuiStrip1d(GuiStrip):
         self.offsetWidget = None
         self.offsetValue = 0
         self.widgetIndex = 3  #start adding widgets from row 3
+        self.spectrumDisplay.phasingFrame.applyCallback = self._applyPhasing
+        self.spectrumDisplay.phasingFrame.applyButton.setEnabled(True)
 
     # def _get1dContextMenu(self) -> Menu:
     #   """
@@ -200,6 +202,23 @@ class GuiStrip1d(GuiStrip):
                                       strips=self.spectrumDisplay.strips,
                                       preferences=self.mainWindow.application.preferences.general)
         self.exportPdf.exec_()
+
+    def _applyPhasing(self, phasingValues):
+        """apply the phasing values
+        phasingValues = { 'direction': 'horizontal',
+                          'horizontal': {'ph0': float,
+                                         'ph1': float,
+                                       'pivot': float}}
+        """
+        values = phasingValues.get('horizontal')
+        ph0 = values.get('ph0')
+        ph1 = values.get('ph1')
+        pivot = values.get('pivot')
+        spectrumViews = self.spectrumViews
+        for spectrum in [view.spectrum for view in spectrumViews if view.isVisible()]:
+            intensities = Phasing.phaseRealData(spectrum.intensities, ph0, ph1, pivot)
+            spectrum.intensities = intensities
+        self.spectrumDisplay.togglePhaseConsole()
 
     def _maximiseRegions(self):
         try:

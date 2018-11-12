@@ -641,6 +641,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     def paint(self, painter, option, widget=None):
 
+        # deprecated
+
         if self.isDeleted or self.project.isDeleted or not self.isVisible():
             return
 
@@ -915,6 +917,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 glList.indices = contourList[2]
                 glList.vertices = contourList[3]
                 glList.colors = contourList[4]
+                # min1x = np.min(glList.vertices[::2])
+                # max1x = np.max(glList.vertices[::2])
+                # min1y = np.min(glList.vertices[1::2])
+                # max1y = np.max(glList.vertices[1::2])
+                # print('>>>min, max', min1x, max1x, min1y, max1y)
 
         else:
             for position, dataArray in self._getPlaneData():

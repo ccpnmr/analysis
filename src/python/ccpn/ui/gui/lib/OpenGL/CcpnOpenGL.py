@@ -2286,11 +2286,23 @@ class CcpnGLWidget(QOpenGLWidget):
                 if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
                     self._spectrumValues = spectrumView._getValues()
 
+                    spectrumReferences = spectrumView.spectrum.spectrumReferences
+
                     # get the bounding box of the spectra
-                    fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+                    # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+
+                    totalPointCountX = spectrumView.spectrum.totalPointCounts[0]
+                    fx0, fx1 = spectrumReferences[0].pointToValue(1), spectrumReferences[0].pointToValue(totalPointCountX)
+                    fx0, fx1 = max(fx0, fx1), min(fx0, fx1)
+
                     if spectrumView.spectrum.dimensionCount > 1:
-                        fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[
-                            1].minAliasedFrequency
+                        # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[
+                        #     1].minAliasedFrequency
+
+                        totalPointCountY = spectrumView.spectrum.totalPointCounts[1]
+                        fy0, fy1 = spectrumReferences[1].pointToValue(1), spectrumReferences[1].pointToValue(totalPointCountY)
+                        fy0, fy1 = max(fy0, fy1), min(fy0, fy1)
+
                         GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
                     else:
                         fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)

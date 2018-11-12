@@ -184,10 +184,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
       ph1 = values.get('ph1')
       pivot = values.get('pivot')
       spectrumViews = self.strip.spectrumViews
-      for spectrum in [view.spectrum for view in spectrumViews]:
+      for spectrum in [view.spectrum for view in spectrumViews if view.isVisible()]:
         intensities = Phasing.phaseRealData(spectrum.intensities, ph0, ph1, pivot)
         spectrum.intensities = intensities
-        self.strip.spectrumDisplay.togglePhaseConsole()
+      self.strip.spectrumDisplay.togglePhaseConsole()
 
   def _getTraceParams(self, position):
     # position is in ppm (intensity in y)

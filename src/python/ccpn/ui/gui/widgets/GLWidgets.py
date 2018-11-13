@@ -289,7 +289,12 @@ class Gui1dWidget(CcpnGLWidget):
             hSpectrum.indices = numVertices
             hSpectrum.numVertices = numVertices
             hSpectrum.indices = np.arange(numVertices, dtype=np.uint32)
-            hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
+
+            if self._showSpectraOnPhasing:
+                hSpectrum.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
+            else:
+                hSpectrum.colors = np.array((colR, colG, colB, 1.0) * numVertices, dtype=np.float32)
+
             hSpectrum.vertices = np.empty(hSpectrum.numVertices * 2, dtype=np.float32)
 
             # x = np.append(x, [xDataDim.primaryDataDimRef.pointToValue(xMaxFrequency + 1),
@@ -311,6 +316,36 @@ class Gui1dWidget(CcpnGLWidget):
         except Exception as es:
             print('>>>', str(es))
             tracesDict = []
+
+    @property
+    def showSpectraOnPhasing(self):
+        return self._showSpectraOnPhasing
+
+    @showSpectraOnPhasing.setter
+    def showSpectraOnPhasing(self, visible):
+        self._showSpectraOnPhasing = visible
+        self._updatePhasingColour()
+        self.update()
+
+    def toggleShowSpectraOnPhasing(self):
+        self._showSpectraOnPhasing = not self._showSpectraOnPhasing
+        self._updatePhasingColour()
+        self.update()
+
+    def _updatePhasingColour(self):
+        for trace in self._staticHTraces:
+            colour = trace.spectrumView._getColour(self.SPECTRUMPOSCOLOUR, '#aaaaaa')
+            colR = int(colour.strip('# ')[0:2], 16) / 255.0
+            colG = int(colour.strip('# ')[2:4], 16) / 255.0
+            colB = int(colour.strip('# ')[4:6], 16) / 255.0
+
+            numVertices = trace.numVertices
+            if self._showSpectraOnPhasing:
+                trace.colors = np.array(self._phasingTraceColour * numVertices, dtype=np.float32)
+            else:
+                trace.colors = np.array((colR, colG, colB, 1.0) * numVertices, dtype=np.float32)
+
+            trace.renderMode = GLRENDERMODE_RESCALE
 
     def buildSpectra(self):
         """set the GL flags to build spectrum contour lists

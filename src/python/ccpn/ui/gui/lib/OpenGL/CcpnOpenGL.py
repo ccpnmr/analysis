@@ -287,6 +287,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._drawRightAxis = True
         self._drawBottomAxis = True
+        self.modeDecimal = [False, False]
 
         # here for completeness, although they should be updated in rescale
         self._currentView = GLDefs.MAINVIEW
@@ -2289,19 +2290,19 @@ class CcpnGLWidget(QOpenGLWidget):
                     spectrumReferences = spectrumView.spectrum.spectrumReferences
 
                     # get the bounding box of the spectra
-                    # fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
+                    fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
 
-                    totalPointCountX = spectrumView.spectrum.totalPointCounts[0]
-                    fx0, fx1 = spectrumReferences[0].pointToValue(1), spectrumReferences[0].pointToValue(totalPointCountX)
-                    fx0, fx1 = max(fx0, fx1), min(fx0, fx1)
+                    # totalPointCountX = spectrumView.spectrum.totalPointCounts[0]
+                    # fx0, fx1 = spectrumReferences[0].pointToValue(1), spectrumReferences[0].pointToValue(totalPointCountX)
+                    # fx0, fx1 = max(fx0, fx1), min(fx0, fx1)
 
                     if spectrumView.spectrum.dimensionCount > 1:
-                        # fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[
-                        #     1].minAliasedFrequency
+                        fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[
+                            1].minAliasedFrequency
 
-                        totalPointCountY = spectrumView.spectrum.totalPointCounts[1]
-                        fy0, fy1 = spectrumReferences[1].pointToValue(1), spectrumReferences[1].pointToValue(totalPointCountY)
-                        fy0, fy1 = max(fy0, fy1), min(fy0, fy1)
+                        # totalPointCountY = spectrumView.spectrum.totalPointCounts[1]
+                        # fy0, fy1 = spectrumReferences[1].pointToValue(1), spectrumReferences[1].pointToValue(totalPointCountY)
+                        # fy0, fy1 = max(fy0, fy1), min(fy0, fy1)
 
                         GL.glColor4f(*spectrumView.posColour[0:3], 0.5)
                     else:
@@ -2369,14 +2370,15 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.gridList[2].drawIndexArray()
 
     def _floatFormat(self, f=0.0, prec=3):
-        """return a float string
+        """return a float string, remove trailing zeros after decimal
         """
         return (('%.' + str(prec) + 'f') % f).rstrip('0').rstrip('.')
 
     def _intFormat(self, ii=0, prec=0):
         """return an integer string
         """
-        return '%i' % ii
+        return self._floatFormat(ii, 1)
+        # return '%i' % ii
 
     def _eFormat(self, f=0.0, prec=4):
         """return an exponential with trailing zeroes removed
@@ -3202,8 +3204,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     thisSpec = visibleSpectra[0] if visibleSpectra else self._ordering[0].spectrum
 
                     if self.is1D:
-                        cursorX = int(thisSpec.mainSpectrumReferences[0].valueToPoint(self.cursorCoordinate[0]))
-                        startX = int(thisSpec.mainSpectrumReferences[0].valueToPoint(self._startCoordinate[0]))
+                        cursorX = thisSpec.mainSpectrumReferences[0].valueToPoint(self.cursorCoordinate[0])
+                        startX = thisSpec.mainSpectrumReferences[0].valueToPoint(self._startCoordinate[0])
 
                     else:
                         # get the axis ordering from the spectrumDisplay and map to the strip
@@ -3214,13 +3216,17 @@ class CcpnGLWidget(QOpenGLWidget):
                             indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                         # map to a point
-                        cursorX = int(thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.cursorCoordinate[0]))
-                        startX = int(thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0]))
+                        cursorX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self.cursorCoordinate[0])
+                        startX = thisSpec.mainSpectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0])
 
                 else:
                     # error trap all spectra deleted
-                    cursorX = int(self.cursorCoordinate[0])
-                    startX = int(self._startCoordinate[0])
+                    cursorX = self.cursorCoordinate[0]
+                    startX = self._startCoordinate[0]
+
+                # if self.modeDecimal[0]:
+                #     cursorX = int(cursorX)
+                #     startX = int(startX)
                 # XMode = '%i'
 
             # generate different axes depending on units - Y Axis, always use first option for 1d
@@ -3269,13 +3275,17 @@ class CcpnGLWidget(QOpenGLWidget):
                         indices = thisSpec.getByAxisCodes('indices', stripAxisCodes[0:2])
 
                     # map to a point
-                    cursorY = int(thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.cursorCoordinate[1]))
-                    startY = int(thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1]))
+                    cursorY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self.cursorCoordinate[1])
+                    startY = thisSpec.mainSpectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1])
 
                 else:
                     # error trap all spectra deleted
-                    cursorY = int(self.cursorCoordinate[1])
-                    startY = int(self._startCoordinate[1])
+                    cursorY = self.cursorCoordinate[1]
+                    startY = self._startCoordinate[1]
+
+                # if self.modeDecimal[1]:
+                #     cursorY = int(cursorY)
+                #     startY = int(startY)
                 # YMode = '%i'
 
             # newCoords = self.mouseFormat % (self._axisOrder[0], cursorX,
@@ -3377,6 +3387,8 @@ class CcpnGLWidget(QOpenGLWidget):
         planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
         pointInt = [1 + int(pnt + 0.5) for pnt in points]
         pointInt[sliceDim - 1] = 1  # To improve caching; points, dimensions are 1-based
+
+        print('>>>_getSliceData', pointInt)
         data = spectrumView.spectrum._getSliceDataFromPlane(pointInt,
                                                             xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim)
         return data
@@ -3501,6 +3513,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if ph0 is not None and ph1 is not None and pivot is not None:
                 data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
+            print('>>>positionPixel', positionPixel, point)
             dataY = np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
             x = np.array(
                     [xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
@@ -3615,7 +3628,6 @@ class CcpnGLWidget(QOpenGLWidget):
         yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
             = self.strip.spectrumViews[0]._getTraceParams(self.cursorCoordinate)
         point = [int(p + 0.5) for p in point]
-        # print('updateTraces>>>', self._lastTracePoint, point)
         if self._updateHTrace and not self._updateVTrace and point[1] == self._lastTracePoint[1]:
             # Only HTrace, an y-point has not changed
             return False
@@ -3627,6 +3639,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # both HTrace and Vtrace, both x-point an y-point have not changed
             return False
         # We need to update; save this point as the last point
+        print('updateTraces>>>', self._lastTracePoint, point)
         self._lastTracePoint = point
         return True
 
@@ -3663,20 +3676,24 @@ class CcpnGLWidget(QOpenGLWidget):
                 yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
                     = spectrumView._getTraceParams(position)
 
+                # intPositionPixel = [spectrumView.spectrum.mainSpectrumReferences[ax].pointToValue(pp) for ax, pp in enumerate(self._lastTracePoint[:2])]
+                ref = spectrumView.spectrum.mainSpectrumReferences
+
+                intPositionPixel = [ref[ax].pointToValue(int(ref[ax].valueToPoint(pp)+0.5)) for ax, pp in enumerate(positionPixel)]
                 if direction == 0:
                     if self._updateHTrace:
                         self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
-                                               xNumPoints, positionPixel, ph0, ph1, pivot)
+                                               xNumPoints, intPositionPixel, ph0, ph1, pivot)
                     if self._updateVTrace:
                         self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency,
-                                               yNumPoints, positionPixel)
+                                               yNumPoints, intPositionPixel)
                 else:
                     if self._updateHTrace:
                         self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,
-                                               xNumPoints, positionPixel)
+                                               xNumPoints, intPositionPixel)
                     if self._updateVTrace:
                         self._updateVTraceData(spectrumView, self._vTraces, point, yDataDim, yMinFrequency, yMaxFrequency,
-                                               yNumPoints, positionPixel, ph0, ph1, pivot)
+                                               yNumPoints, intPositionPixel, ph0, ph1, pivot)
 
     def newTrace(self, position=None):
         position = position if position else [self.cursorCoordinate[0], self.cursorCoordinate[1]]  #list(cursorPosition)
@@ -4021,13 +4038,11 @@ class CcpnGLWidget(QOpenGLWidget):
     def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
         """Build the grid
         """
-
         def check(ll):
             # check if a number ends in an even digit
             val = '%.0f' % (ll[3] / ll[4])
             if val[-1] in '02468':
                 return True
-            return False
 
         def valueToRatio(val, x0, x1):
             return (val - x0) / (x1 - x0)
@@ -4254,12 +4269,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     labelling['0'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
 
-            # clean up strings if in _intFormat
-            if self.XMode == self._intFormat:
-                for ll in labelling['0'][::-1]:
-                    if round(ll[3], 5) != int(ll[3]):
-                        # remove the item
-                        labelling['0'].remove(ll)
+            # # clean up strings if in _intFormat
+            # if self.XMode == self._intFormat:
+            #     for ll in labelling['0'][::-1]:
+            #         if round(ll[3], 5) != int(ll[3]):
+            #             # remove the item
+            #             labelling['0'].remove(ll)
 
             while len(labelling['1']) > (self.h / 20.0):
                 #restrict Y axis labelling
@@ -4269,12 +4284,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 else:
                     labelling['1'] = lStrings[1::2]  # [ls for ls in lStrings if check(ls)]
 
-            # clean up strings if in _intFormat
-            if self.YMode == self._intFormat:
-                for ll in labelling['1'][::-1]:
-                    if round(ll[3], 5) != int(ll[3]):
-                        # remove the item
-                        labelling['1'].remove(ll)
+            # # clean up strings if in _intFormat
+            # if self.YMode == self._intFormat:
+            #     for ll in labelling['1'][::-1]:
+            #         if round(ll[3], 5) != int(ll[3]):
+            #             # remove the item
+            #             labelling['1'].remove(ll)
 
         return labelling, labelsChanged
 

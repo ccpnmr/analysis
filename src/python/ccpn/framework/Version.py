@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: CCPN $"
 __dateModified__ = "$dateModified: 2017-07-07 16:32:36 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b3 $"
+__version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,7 +30,7 @@ try:
   revision = int(__version__.split()[1])
 except:
   revision = -1
-applicationVersion = '3.0.b3'
+applicationVersion = '3.0.b4'
 authors = __credits__
 projectName = 'CCPN'
 

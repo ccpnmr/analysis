@@ -3620,13 +3620,17 @@ class CcpnGLWidget(QOpenGLWidget):
         except Exception as es:
             tracesDict[spectrumView].clearArrays()
 
-    def _tracesNeedUpdating(self):
+    def _tracesNeedUpdating(self, spectrumView):
         """Check if traces need updating on _lastTracePoint, use first spectrumView to see
         if cursor has moved sufficiently far to warrant an update of the traces
         """
+        # _tmp, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, \
+        # yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
+        #     = self.strip.spectrumViews[0]._getTraceParams(self.cursorCoordinate)
         _tmp, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, \
         yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
-            = self.strip.spectrumViews[0]._getTraceParams(self.cursorCoordinate)
+            = spectrumView._getTraceParams(self.cursorCoordinate)
+
         point = [int(p + 0.5) for p in point]
         if self._updateHTrace and not self._updateVTrace and point[1] == self._lastTracePoint[1]:
             # Only HTrace, an y-point has not changed
@@ -3653,8 +3657,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        if self._tracesNeedUpdating():
-            for spectrumView in self.strip.spectrumViews:
+        # if self._tracesNeedUpdating():
+        for spectrumView in self.strip.spectrumViews:
+            if self._tracesNeedUpdating(spectrumView):
 
                 phasingFrame = self.spectrumDisplay.phasingFrame
                 if phasingFrame.isVisible():
@@ -3678,8 +3683,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 # intPositionPixel = [spectrumView.spectrum.mainSpectrumReferences[ax].pointToValue(pp) for ax, pp in enumerate(self._lastTracePoint[:2])]
                 ref = spectrumView.spectrum.mainSpectrumReferences
-
                 intPositionPixel = [ref[ax].pointToValue(int(ref[ax].valueToPoint(pp)+0.5)) for ax, pp in enumerate(positionPixel)]
+
                 if direction == 0:
                     if self._updateHTrace:
                         self._updateHTraceData(spectrumView, self._hTraces, point, xDataDim, xMinFrequency, xMaxFrequency,

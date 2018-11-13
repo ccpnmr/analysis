@@ -60,7 +60,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLWIDGET, GLPLOTBORDER, \
-    GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND
+    GLPAGETYPE, GLSPECTRUMDISPLAY, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
+    GLFOREGROUND, GLSHOWSPECTRAONPHASE
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
     PAGEPORTRAIT, PAGELANDSCAPE, PAGETYPES
 from ccpn.util.Logging import getLogger
@@ -249,13 +250,13 @@ class GLExporter():
         self.pixHeight = self.pixWidth * ratio
 
         # scale fonts to appear the correct size
-        self.fontScale = 1.0 * self.pixWidth / self._parent.w            #   1.1
+        self.fontScale = 1.0 * self.pixWidth / self._parent.w  #   1.1
 
         # if too tall then flip the scaling
         if self.pixHeight > (self._report.doc.height - 2 * cm):
             self.pixHeight = self._report.doc.height - (2 * cm)
             self.pixWidth = self.pixHeight / ratio
-            self.fontScale = 1.0 * self.pixHeight / self._parent.h     # 1.025
+            self.fontScale = 1.0 * self.pixHeight / self._parent.h  # 1.025
 
         self.fontXOffset = 0.75
         self.fontYOffset = 3.0
@@ -310,8 +311,13 @@ class GLExporter():
         if self.params[GLGRIDLINES]: self._addGridLines()
 
         # check parameters to decide what to print
-        if self.params[GLSPECTRUMCONTOURS]: self._addSpectrumContours()
-        if self.params[GLSPECTRUMBORDERS]: self._addSpectrumBoundaries()
+
+        if not self._parent.spectrumDisplay.is1D or \
+                not self._parent.spectrumDisplay.phasingFrame.isVisible() or \
+                self.params[GLSHOWSPECTRAONPHASE]:
+
+            if self.params[GLSPECTRUMCONTOURS]: self._addSpectrumContours()
+            if self.params[GLSPECTRUMBORDERS]: self._addSpectrumBoundaries()
 
         if not self._parent._stackingMode:
             if self.params[GLINTEGRALSYMBOLS]: self._addIntegralAreas()
@@ -324,7 +330,10 @@ class GLExporter():
             if self.params[GLINTEGRALLABELS]: self._addIntegralLabels()
             if self.params[GLMULTIPLETLABELS]: self._addMultipletLabels()
             if self.params[GLMARKLABELS]: self._addMarkLabels()
-            if self.params[GLTRACES]: self._addTraces()
+
+        if self.params[GLTRACES]: self._addTraces()
+
+        if not self._parent._stackingMode:
             if self.params[GLOTHERLINES]: self._addInfiniteLines()
         if self.params[GLSTRIPLABELLING]: self._addOverlayText()
 
@@ -388,10 +397,10 @@ class GLExporter():
                             colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                             newLine = self._parent.lineVisible(newLine,
-                                                              x=self.displayScale * self.mainL,
-                                                              y=self.displayScale * self.mainB,
-                                                              width=self.displayScale * self.mainW,
-                                                              height=self.displayScale * self.mainH)
+                                                               x=self.displayScale * self.mainL,
+                                                               y=self.displayScale * self.mainB,
+                                                               width=self.displayScale * self.mainW,
+                                                               height=self.displayScale * self.mainH)
                             if newLine:
                                 if colourPath not in colourGroups:
                                     colourGroups[colourPath] = {PDFLINES: [],
@@ -455,10 +464,10 @@ class GLExporter():
                 # generate the bounding box
                 newLine = [fx0, fy0, fx0, fy1, fx1, fy1, fx1, fy0, fx0, fy0]
                 newLine = self._parent.lineVisible(newLine,
-                                                  x=self.displayScale * self.mainL,
-                                                  y=self.displayScale * self.mainB,
-                                                  width=self.displayScale * self.mainW,
-                                                  height=self.displayScale * self.mainH)
+                                                   x=self.displayScale * self.mainL,
+                                                   y=self.displayScale * self.mainB,
+                                                   width=self.displayScale * self.mainW,
+                                                   height=self.displayScale * self.mainH)
                 if newLine:
                     if colourPath not in colourGroups:
                         colourGroups[colourPath] = {PDFLINES: [],
@@ -591,10 +600,10 @@ class GLExporter():
                                 spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
 
                             newLine = self._parent.lineVisible(newLine,
-                                                              x=self.displayScale * self.mainL,
-                                                              y=self.displayScale * self.mainB,
-                                                              width=self.displayScale * self.mainW,
-                                                              height=self.displayScale * self.mainH)
+                                                               x=self.displayScale * self.mainL,
+                                                               y=self.displayScale * self.mainB,
+                                                               width=self.displayScale * self.mainW,
+                                                               height=self.displayScale * self.mainH)
                             if newLine:
                                 if colourPath not in colourGroups:
                                     colourGroups[colourPath] = {PDFLINES: [], PDFFILLCOLOR: colour, PDFSTROKE: None, PDFSTROKECOLOR: None}
@@ -643,10 +652,10 @@ class GLExporter():
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
                     if self._parent.pointVisible(newLine,
-                                                x=self.displayScale * self.mainL,
-                                                y=self.displayScale * self.mainB,
-                                                width=self.displayScale * self.mainW,
-                                                height=self.displayScale * self.mainH):
+                                                 x=self.displayScale * self.mainL,
+                                                 y=self.displayScale * self.mainB,
+                                                 width=self.displayScale * self.mainW,
+                                                 height=self.displayScale * self.mainH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
                         textGroup = drawString.text.split('\n')
@@ -689,10 +698,10 @@ class GLExporter():
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
                     if self._parent.pointVisible(newLine,
-                                                x=self.displayScale * self.mainL,
-                                                y=self.displayScale * self.mainB,
-                                                width=self.displayScale * self.mainW,
-                                                height=self.displayScale * self.mainH):
+                                                 x=self.displayScale * self.mainL,
+                                                 y=self.displayScale * self.mainB,
+                                                 width=self.displayScale * self.mainW,
+                                                 height=self.displayScale * self.mainH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
                         textGroup = drawString.text.split('\n')
@@ -735,10 +744,10 @@ class GLExporter():
 
                     newLine = [drawString.attribs[0], drawString.attribs[1]]
                     if self._parent.pointVisible(newLine,
-                                                x=self.displayScale * self.mainL,
-                                                y=self.displayScale * self.mainB,
-                                                width=self.displayScale * self.mainW,
-                                                height=self.displayScale * self.mainH):
+                                                 x=self.displayScale * self.mainL,
+                                                 y=self.displayScale * self.mainB,
+                                                 width=self.displayScale * self.mainW,
+                                                 height=self.displayScale * self.mainH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
                         textGroup = drawString.text.split('\n')
@@ -770,10 +779,10 @@ class GLExporter():
 
             newLine = [drawString.attribs[0], drawString.attribs[1]]
             if self._parent.pointVisible(newLine,
-                                        x=self.displayScale * self.mainL,
-                                        y=self.displayScale * self.mainB,
-                                        width=self.displayScale * self.mainW,
-                                        height=self.displayScale * self.mainH):
+                                         x=self.displayScale * self.mainL,
+                                         y=self.displayScale * self.mainB,
+                                         width=self.displayScale * self.mainW,
+                                         height=self.displayScale * self.mainH):
                 if colourPath not in colourGroups:
                     colourGroups[colourPath] = Group()
                 self._addString(colourGroups, colourPath, drawString, newLine, colour, boxed=False)
@@ -789,6 +798,12 @@ class GLExporter():
         for hTrace in self._parent._staticHTraces:
             if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
                 # drawVertexColor
+
+                if self._parent._stackingMode:
+                    mat = np.transpose(self._parent._spectrumSettings[hTrace.spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
+                else:
+                    mat = None
+
                 self._appendVertexLineGroup(indArray=hTrace,
                                             colourGroups=colourGroups,
                                             plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -796,11 +811,18 @@ class GLExporter():
                                                      PLOTWIDTH: self.displayScale * self.mainW,
                                                      PLOTHEIGHT: self.displayScale * self.mainH},
                                             name='hTrace%s' % hTrace.spectrumView.pid,
-                                            includeLastVertex=not self._parent.is1D)
+                                            includeLastVertex=not self._parent.is1D,
+                                            mat=mat)
 
         for vTrace in self._parent._staticVTraces:
             if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
                 # drawVertexColor
+
+                if self._parent._stackingMode:
+                    mat = np.transpose(self._parent._spectrumSettings[vTrace.spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
+                else:
+                    mat = None
+
                 self._appendVertexLineGroup(indArray=vTrace,
                                             colourGroups=colourGroups,
                                             plotDim={PLOTLEFT: self.displayScale * self.mainL,
@@ -808,7 +830,8 @@ class GLExporter():
                                                      PLOTWIDTH: self.displayScale * self.mainW,
                                                      PLOTHEIGHT: self.displayScale * self.mainH},
                                             name='vTrace%s' % vTrace.spectrumView.pid,
-                                            includeLastVertex=not self._parent.is1D)
+                                            includeLastVertex=not self._parent.is1D,
+                                            mat=mat)
 
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='traces')
 
@@ -828,10 +851,10 @@ class GLExporter():
                     newLine = [infLine.values, self._parent.axisT, infLine.values, self._parent.axisB]
 
                 newLine = self._parent.lineVisible(newLine,
-                                                  x=self.displayScale * self.mainL,
-                                                  y=self.displayScale * self.mainB,
-                                                  width=self.displayScale * self.mainW,
-                                                  height=self.displayScale * self.mainH)
+                                                   x=self.displayScale * self.mainL,
+                                                   y=self.displayScale * self.mainB,
+                                                   width=self.displayScale * self.mainW,
+                                                   height=self.displayScale * self.mainH)
                 if newLine:
                     if colourPath not in colourGroups:
                         colourGroups[colourPath] = {PDFLINES: [], PDFSTROKEWIDTH: 0.5 * infLine.lineWidth, PDFSTROKECOLOR: colour,
@@ -862,10 +885,10 @@ class GLExporter():
                                             drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
 
         if self._parent.pointVisible(newLine,
-                                    x=self.displayScale * self.mainL,
-                                    y=self.displayScale * self.mainB,
-                                    width=self.displayScale * self.mainW,
-                                    height=self.displayScale * self.mainH):
+                                     x=self.displayScale * self.mainL,
+                                     y=self.displayScale * self.mainB,
+                                     width=self.displayScale * self.mainW,
+                                     height=self.displayScale * self.mainH):
             pass
 
         if colourPath not in colourGroups:
@@ -1025,6 +1048,10 @@ class GLExporter():
             if self.rAxis:
                 for strNum, drawString in enumerate(self._parent._axisYLabelling):
 
+                    # skip empty strings
+                    if not drawString.text:
+                        continue
+
                     # drawTextArray
                     colour = self.foregroundColour
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
@@ -1035,14 +1062,15 @@ class GLExporter():
                     # mid = self._parent.axisL + drawString.attribs[0] * (self._parent.axisR - self._parent.axisL) * self._parent.pixelX
                     # newLine = [mid, drawString.attribs[1] + (3 * self._parent.deltaY)]
 
-                    newLine = self._scaleRatioToWindow([(self.fontXOffset + drawString.attribs[0]) / self._parent.AXIS_MARGINRIGHT,
-                                                        drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
+                    attribPos = (0.0, 0.0) if drawString.attribs.size < 2 else drawString.attribs[0:2]
+                    newLine = self._scaleRatioToWindow([(self.fontXOffset + attribPos[0]) / self._parent.AXIS_MARGINRIGHT,
+                                                        attribPos[1] + (self.fontYOffset * self._parent.deltaY)])
 
                     if self._parent.pointVisible(newLine,
-                                                x=self.displayScale * self.rAxisL,
-                                                y=self.displayScale * self.rAxisB,
-                                                width=self.displayScale * self.rAxisW,
-                                                height=self.displayScale * self.rAxisH):
+                                                 x=self.displayScale * self.rAxisL,
+                                                 y=self.displayScale * self.rAxisB,
+                                                 width=self.displayScale * self.rAxisW,
+                                                 height=self.displayScale * self.rAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
 
@@ -1052,6 +1080,10 @@ class GLExporter():
 
             if self.bAxis:
                 for strNum, drawString in enumerate(self._parent._axisXLabelling):
+
+                    # skip empty strings
+                    if not drawString.text:
+                        continue
 
                     # drawTextArray
                     colour = self.foregroundColour
@@ -1063,14 +1095,15 @@ class GLExporter():
                     # mid = self._parent.axisB + drawString.attribs[1] * (self._parent.axisT - self._parent.axisB)
                     # newLine = [drawString.attribs[0] + (0 * self._parent.deltaX), mid]
 
-                    newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
-                                                        (self.fontYOffset + drawString.attribs[1]) / self._parent.AXIS_MARGINBOTTOM])
+                    attribPos = (0.0, 0.0) if drawString.attribs.size < 2 else drawString.attribs[0:2]
+                    newLine = self._scaleRatioToWindow([attribPos[0] + (self.fontXOffset * self._parent.deltaX),
+                                                        (self.fontYOffset + attribPos[1]) / self._parent.AXIS_MARGINBOTTOM])
 
                     if self._parent.pointVisible(newLine,
-                                                x=self.displayScale * self.bAxisL,
-                                                y=self.displayScale * self.bAxisB,
-                                                width=self.displayScale * self.bAxisW,
-                                                height=self.displayScale * self.bAxisH):
+                                                 x=self.displayScale * self.bAxisL,
+                                                 y=self.displayScale * self.bAxisB,
+                                                 width=self.displayScale * self.bAxisW,
+                                                 height=self.displayScale * self.bAxisH):
                         if colourPath not in colourGroups:
                             colourGroups[colourPath] = Group()
 
@@ -1156,10 +1189,10 @@ class GLExporter():
                     cc[PDFSTROKECOLOR] = None
 
             newLine = self._parent.lineVisible(newLine,
-                                              x=plotDim[PLOTLEFT],
-                                              y=plotDim[PLOTBOTTOM],
-                                              width=plotDim[PLOTWIDTH],
-                                              height=plotDim[PLOTHEIGHT])
+                                               x=plotDim[PLOTLEFT],
+                                               y=plotDim[PLOTBOTTOM],
+                                               width=plotDim[PLOTWIDTH],
+                                               height=plotDim[PLOTHEIGHT])
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 
@@ -1187,7 +1220,7 @@ class GLExporter():
                     # newLine.extend([self._scaleRatioToWindow(indArray.vertices[vv * 2], (self._parent.axisR - self._parent.axisL), self._parent.axisL),
                     #                 self._scaleRatioToWindow(indArray.vertices[vv * 2 + 1], (self._parent.axisT - self._parent.axisB), self._parent.axisB)])
 
-                    newLine.extend(self._scaleRatioToWindow(indArray.vertices[vv * 2:vv*2+2]))
+                    newLine.extend(self._scaleRatioToWindow(indArray.vertices[vv * 2:vv * 2 + 2]))
                 else:
                     newLine.extend([indArray.vertices[vv * 2], indArray.vertices[vv * 2 + 1]])
 
@@ -1214,10 +1247,10 @@ class GLExporter():
                     cc[PDFSTROKECOLOR] = None
 
             newLine = self._parent.lineVisible(newLine,
-                                              x=plotDim[PLOTLEFT],
-                                              y=plotDim[PLOTBOTTOM],
-                                              width=plotDim[PLOTWIDTH],
-                                              height=plotDim[PLOTHEIGHT])
+                                               x=plotDim[PLOTLEFT],
+                                               y=plotDim[PLOTBOTTOM],
+                                               width=plotDim[PLOTWIDTH],
+                                               height=plotDim[PLOTHEIGHT])
             if newLine:
                 colourGroups[colourPath][PDFLINES].append(newLine)
 

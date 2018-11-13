@@ -112,6 +112,9 @@ class GuiStrip1d(GuiStrip):
         # self.viewBox.menu = _get1dDefaultMenu(self)
         # self._defaultMenu = self.viewBox.menu
 
+        # keep a common stackItem for both menues
+        self._stackSpectraMenuItem = None
+
         self._defaultMenu = _get1dDefaultMenu(self)
         self._phasingMenu = _get1dPhasingMenu(self)
         self._peakMenu = _get1dPeakMenu(self)
@@ -192,6 +195,17 @@ class GuiStrip1d(GuiStrip):
     #   self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
     #   return self.contextMenu
     #
+
+    def _checkMenuItems(self):
+        """Update the menu check boxes from the strip
+        """
+        if self._defaultMenu:
+            item = self.mainWindow.getMenuAction('Stack Spectra', self._defaultMenu)
+            item.setChecked(self._CcpnGLWidget._stackingMode)
+
+        if self._phasingMenu:
+            item = self.mainWindow.getMenuAction('Stack Spectra', self._phasingMenu)
+            item.setChecked(self._CcpnGLWidget._stackingMode)
 
     def showExportDialog(self):
         """show the export strip to file dialog
@@ -374,6 +388,22 @@ class GuiStrip1d(GuiStrip):
         This vertically stacks the spectra for clarity
         """
         if self.stackAction.isChecked():
+            self._toggleOffsetWidget()
+            self._stack1DSpectra(self.offsetWidget.value())
+        else:
+            self._toggleOffsetWidget()
+            self._restoreStacked1DSpectra()
+
+            try:
+                self._CcpnGLWidget.setStackingMode(False)
+            except:
+                getLogger().debugGL('OpenGL widget not instantiated')
+
+    def toggleStackPhase(self):
+        """Toggle stacking mode for 1d spectra
+        This vertically stacks the spectra for clarity
+        """
+        if self.stackActionPhase.isChecked():
             self._toggleOffsetWidget()
             self._stack1DSpectra(self.offsetWidget.value())
         else:

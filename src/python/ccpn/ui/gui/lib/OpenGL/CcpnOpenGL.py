@@ -306,7 +306,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._gridVisible = self._preferences.showGrid
         self._updateHTrace = False
         self._updateVTrace = False
-        self._lastTracePoint = [-1, -1]
+        self._lastTracePoint = {}           # [-1, -1]
 
         self._applyXLimit = self._preferences.zoomXLimitApply
         self._applyYLimit = self._preferences.zoomYLimitApply
@@ -2093,6 +2093,7 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 
         self.drawTraces()
+        currentShader.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._IMatrix)
 
         self.drawInfiniteLines()
 
@@ -3388,7 +3389,6 @@ class CcpnGLWidget(QOpenGLWidget):
         pointInt = [1 + int(pnt + 0.5) for pnt in points]
         pointInt[sliceDim - 1] = 1  # To improve caching; points, dimensions are 1-based
 
-        print('>>>_getSliceData', pointInt)
         data = spectrumView.spectrum._getSliceDataFromPlane(pointInt,
                                                             xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim)
         return data
@@ -3513,7 +3513,6 @@ class CcpnGLWidget(QOpenGLWidget):
             if ph0 is not None and ph1 is not None and pivot is not None:
                 data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
-            print('>>>positionPixel', positionPixel, point)
             dataY = np.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
             x = np.array(
                     [xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
@@ -3620,31 +3619,32 @@ class CcpnGLWidget(QOpenGLWidget):
         except Exception as es:
             tracesDict[spectrumView].clearArrays()
 
-    def _tracesNeedUpdating(self, spectrumView):
-        """Check if traces need updating on _lastTracePoint, use first spectrumView to see
+    def _tracesNeedUpdating(self, spectrumView=None):
+        """Check if traces need updating on _lastTracePoint, use spectrumView to see
         if cursor has moved sufficiently far to warrant an update of the traces
         """
-        # _tmp, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, \
-        # yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
-        #     = self.strip.spectrumViews[0]._getTraceParams(self.cursorCoordinate)
         _tmp, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, \
         yDataDim, yMinFrequency, yMaxFrequency, yNumPoints \
             = spectrumView._getTraceParams(self.cursorCoordinate)
 
+        if spectrumView not in self._lastTracePoint:
+            self._lastTracePoint[spectrumView] = [-1, -1]
+
+        lastTrace = self._lastTracePoint[spectrumView]
+
         point = [int(p + 0.5) for p in point]
-        if self._updateHTrace and not self._updateVTrace and point[1] == self._lastTracePoint[1]:
+        if self._updateHTrace and not self._updateVTrace and point[1] == lastTrace[1]:
             # Only HTrace, an y-point has not changed
             return False
-        elif not self._updateHTrace and self._updateVTrace and point[0] == self._lastTracePoint[0]:
+        elif not self._updateHTrace and self._updateVTrace and point[0] == lastTrace[0]:
             # Only VTrace and x-point has not changed
             return False
-        elif self._updateHTrace and self._updateVTrace and point[0] == self._lastTracePoint[0] \
-                and point[1] == self._lastTracePoint[1]:
+        elif self._updateHTrace and self._updateVTrace and point[0] == lastTrace[0] \
+                and point[1] == lastTrace[1]:
             # both HTrace and Vtrace, both x-point an y-point have not changed
             return False
         # We need to update; save this point as the last point
-        print('updateTraces>>>', self._lastTracePoint, point)
-        self._lastTracePoint = point
+        self._lastTracePoint[spectrumView] = point
         return True
 
     def updateTraces(self):
@@ -3657,7 +3657,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         positionPixel = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
-        # if self._tracesNeedUpdating():
         for spectrumView in self.strip.spectrumViews:
             if self._tracesNeedUpdating(spectrumView):
 
@@ -3862,11 +3861,25 @@ class CcpnGLWidget(QOpenGLWidget):
             for hTrace in self._staticHTraces:
                 if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
                     # hTrace.drawVertexColor()
+
+                    if self._stackingMode:
+                        # use the stacking matrix to offset the 1D spectra
+                        self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
+                                                                            1, GL.GL_FALSE,
+                                                                            self._spectrumSettings[hTrace.spectrumView][
+                                                                                GLDefs.SPECTRUM_STACKEDMATRIX])
                     hTrace.drawVertexColorVBO(enableVBO=True)
 
             for vTrace in self._staticVTraces:
                 if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
                     # vTrace.drawVertexColor()
+
+                    if self._stackingMode:
+                        # use the stacking matrix to offset the 1D spectra
+                        self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
+                                                                            1, GL.GL_FALSE,
+                                                                            self._spectrumSettings[vTrace.spectrumView][
+                                                                                GLDefs.SPECTRUM_STACKEDMATRIX])
                     vTrace.drawVertexColorVBO(enableVBO=True)
 
         # only paint if mouse is in the window
@@ -4748,6 +4761,9 @@ class CcpnGLWidget(QOpenGLWidget):
             else:
                 _enableAllItems(ii)
                 strip._addItemsToNavigateToPeakMenu()
+
+            # check other menu items before raising menues
+            strip._checkMenuItems()
 
             # set the correct rightMouseMenu for the clicked object (must be selected)
             if self._mouseInPeak(xPosition, yPosition, firstOnly=True):

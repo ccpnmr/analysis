@@ -360,6 +360,19 @@ def _exitPhasingConsoleItem(strip):
                     shortcut='PC', callback=strip.spectrumDisplay.togglePhaseConsole, icon='icons/phase-console', )
 
 
+def _stackSpectraDefaultItem(strip):
+    return _SCMitem(name='Stack Spectra',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
+                    checkable=True, checked=strip._CcpnGLWidget._stackingMode,
+                    callback=strip.toggleStack, stripMethodName='stackAction')
+
+def _stackSpectraPhaseItem(strip):
+    return _SCMitem(name='Stack Spectra',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
+                    checkable=True, checked=strip._CcpnGLWidget._stackingMode,
+                    callback=strip.toggleStackPhase, stripMethodName='stackActionPhase')
+
+
 ########################################################################################################################
 #########################################      1D menus     ############################################################
 ########################################################################################################################
@@ -396,10 +409,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
                  checkable=True, checked=False,
                  callback=guiStrip1d.toggleCalibrateY, stripMethodName='calibrateYAction'),
 
-        _SCMitem(name='Stack Spectra',
-                 typeItem=ItemTypes.get(ITEM), toolTip='Stack Spectra',
-                 checkable=True, checked=False,
-                 callback=guiStrip1d.toggleStack, stripMethodName='stackAction'),
+        _stackSpectraDefaultItem(guiStrip1d),
         _separator(),
         _phasingConsoleItem(guiStrip1d),
         _separator(),
@@ -425,6 +435,7 @@ def _get1dPhasingMenu(guiStrip1d) -> Menu:
         _removeAllTracesItem(guiStrip1d),
         _setPivotItem(guiStrip1d),
         _showSpectraOnPhasingItem(guiStrip1d),
+        _stackSpectraPhaseItem(guiStrip1d),
         _separator(),
         _exitPhasingConsoleItem(guiStrip1d),
         _separator(),

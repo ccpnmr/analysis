@@ -59,6 +59,7 @@ from ccpn.util import Common as commonUtil
 from typing import Tuple, List, Any
 from functools import partial
 
+
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
 
 DefaultMenu = 'DefaultMenu'
@@ -88,8 +89,8 @@ class GuiStrip(Frame):
 
         getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
         super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True,
-                       acceptDrops=False  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
-                       )
+                         acceptDrops=False  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+                         )
 
         # it appears to be required to explicitly set these, otherwise
         # the Widget will not fill all available space
@@ -276,7 +277,7 @@ class GuiStrip(Frame):
             self.gridVisible = spectrumDisplay.strips[0].gridVisible
             self.crosshairVisible = spectrumDisplay.strips[0].crosshairVisible
             self.showSpectraOnPhasing = spectrumDisplay.strips[0].showSpectraOnPhasing
-            
+
             try:
                 self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
 
@@ -506,6 +507,12 @@ class GuiStrip(Frame):
         """Callback when multiplets have changed
         """
         self._CcpnGLWidget._processMultipletNotifier(data)
+
+    def _checkMenuItems(self):
+        """Update the menu check boxes from the strip
+        Subclass if options needed, e.g. stackSpectra item
+        """
+        pass
 
     def _addItemsToNavigateToPeakMenu(self):
         ''' Adds item to navigate to peak position from context menu'''
@@ -832,7 +839,7 @@ class GuiStrip(Frame):
     def _newPositionLineCallback(self):
         if not self.isDeleted:
             phasingFrame = self.spectrumDisplay.phasingFrame
-            self._newPosition = self.pivotLine.values               # [0]
+            self._newPosition = self.pivotLine.values  # [0]
             phasingFrame.pivotEntry.setValue(self._newPosition)
 
     def _newPositionPivotCallback(self, value):
@@ -1322,6 +1329,7 @@ class GuiStrip(Frame):
 
     def _setZoomPopup(self):
         from ccpn.ui.gui.popups.ZoomPopup import ZoomPopup
+
         popup = ZoomPopup(parent=self.mainWindow, mainWindow=self.mainWindow)
         popup.exec_()
 
@@ -1390,9 +1398,7 @@ class GuiStrip(Frame):
         # NBNB TBD 1) we should not always display all peak lists together
         # NBNB TBD 2) This should not be called for each strip
 
-
         # Redundant but still removing
-
 
         return
 
@@ -1487,7 +1493,7 @@ class GuiStrip(Frame):
         """Notifier function: Update strips etc. for when axis position or width changes
         """
         # axis = data[Notifier.OBJECT]
-        strip = self        #axis.strip
+        strip = self  #axis.strip
         if not strip: return
 
         position = axis.position
@@ -1506,7 +1512,6 @@ class GuiStrip(Frame):
                     strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
 
         strip.beingUpdated = False
-
 
     def moveTo(self, newIndex: int):
         """Move strip to index newIndex in orderedStrips
@@ -1777,7 +1782,6 @@ class GuiStrip(Frame):
         else:
             MessageDialog.showMessage('No Peak', 'Select a peak first')
 
-
     def _restoreToLayout(self):
         """Restore the current strip to the layout from the temporary undo area
         (currently contained in mainWindow)
@@ -1816,7 +1820,6 @@ class GuiStrip(Frame):
                 # if self not in ccpnStrip.spectrumDisplay.strips:
                 if self not in self.spectrumDisplay.strips:
                     for order, cStrip in enumerate(self._widgets):
-
                         # cStrip._wrappedData.__dict__['index'] = order  # this is the api creation of orderedStrips
                         cStrip._setStripIndex(order)
 
@@ -1998,6 +2001,7 @@ class GuiStrip(Frame):
     #         peak._finaliseAction('create')
     #     #
     #     return tuple(result)
+
 
 # Notifiers:
 def _updateDisplayedMarks(data):

@@ -328,8 +328,8 @@ class Framework:
     if not self.ui._checkRegistration():
       return
 
-    if not self.ui._checkUpdates():
-      return
+    # if not self.ui._checkUpdates():
+    #   return
 
     # Needed in case project load failed
     if not project:

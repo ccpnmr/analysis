@@ -67,7 +67,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXI
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, \
-    GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND
+    GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
+    GLSHOWSPECTRAONPHASE
 
 
 class ExportStripToFilePopup(ExportDialog):
@@ -115,6 +116,7 @@ class ExportStripToFilePopup(ExportDialog):
                          GLMARKLINES,
                          GLMARKLABELS,
                          GLTRACES,
+                         GLSHOWSPECTRAONPHASE,
                          GLOTHERLINES,
                          GLSTRIPLABELLING,
                          GLREGIONS,
@@ -470,6 +472,7 @@ class ExportStripToFilePopup(ExportDialog):
                            GLMARKLINES,
                            GLMARKLABELS,
                            GLTRACES,
+                           GLSHOWSPECTRAONPHASE,
                            GLOTHERLINES,
                            GLSTRIPLABELLING,
                            GLREGIONS,
@@ -479,8 +482,9 @@ class ExportStripToFilePopup(ExportDialog):
         if selectList is None:
             selectList = {GLSPECTRUMBORDERS: QtCore.Qt.Checked if self.application.preferences.general.showSpectrumBorder else QtCore.Qt.Unchecked,
                           GLSPECTRUMCONTOURS: QtCore.Qt.Checked,
-                          GLGRIDLINES: QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked
-                          }
+                          GLGRIDLINES: QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked,
+                          GLSHOWSPECTRAONPHASE: QtCore.Qt.Checked if self.strip._CcpnGLWidget._showSpectraOnPhasing else QtCore.Qt.Unchecked
+            }
         self.printList = []
 
         # add Print Options to the treeView

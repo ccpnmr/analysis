@@ -464,8 +464,8 @@ class StripPlot(Widget):
         # calculate the maximum number of axes
         self.maxLen, self.axisLabels, self.spectrumIndex, self.validSpectrumViews = self._getSpectraFromDisplays()
 
-        if not self.maxLen:
-            return
+        # if not self.maxLen:
+        #     return
 
         # modifier for atomCode
         spectraRow = 0
@@ -477,6 +477,9 @@ class StripPlot(Widget):
                                           callback=self._changeAxisCode, grid=(0, 1))
 
         self.axisCodeOptions.setCheckBoxes(texts=self.axisLabels, tipTexts=self.axisLabels)
+
+        if not self.maxLen:
+            return
 
         # put in a divider
         spectraRow += 1

@@ -1120,60 +1120,111 @@ class GuiSpectrumDisplay(CcpnModule):
     def _restoreZoom(self):
         """Restores last saved zoom of current strip."""
         try:
-            if not self.current.strip:
-                showWarning('Restore Zoom', 'No strip selected')
+            if not self.strips:
+                showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                            % self.pid)
                 return
+
             if self.current.strip not in self.strips:
-                showWarning('Restore Zoom', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-                            % (self.current.strip.pid, self.pid))
-                return
+                strip = self.strips[0]
             else:
-                self.current.strip._restoreZoom()
+                strip = self.current.strip
+
+            strip._restoreZoom()
+
+            # else:
+            #     self.current.strip._restoreZoom()
+
+            # if not self.current.strip:
+            #     showWarning('Restore Zoom', 'No strip selected')
+            #     return
+            # if self.current.strip not in self.strips:
+            #     showWarning('Restore Zoom', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+            #                 % (self.current.strip.pid, self.pid))
+            #     return
+            # else:
+            #     self.current.strip._restoreZoom()
         except:
             getLogger().warning('Error restoring zoom')
 
     def _storeZoom(self):
         """Saves zoomed region of current strip."""
         try:
-            if not self.current.strip:
-                showWarning('Store Zoom', 'No strip selected')
+            if not self.strips:
+                showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                            % self.pid)
                 return
+
             if self.current.strip not in self.strips:
-                showWarning('Store Zoom', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-                            % (self.current.strip.pid, self.pid))
-                return
+                strip = self.strips[0]
             else:
-                self.current.strip._storeZoom()
+                strip = self.current.strip
+
+            strip._storeZoom()
+
+            # if not self.current.strip:
+            #     showWarning('Store Zoom', 'No strip selected')
+            #     return
+            # if self.current.strip not in self.strips:
+            #     showWarning('Store Zoom', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+            #                 % (self.current.strip.pid, self.pid))
+            #     return
+            # else:
+            #     self.current.strip._storeZoom()
         except:
             getLogger().warning('Error storing zoom')
 
     def _zoomIn(self):
         """zoom in to the current strip."""
         try:
-            if not self.current.strip:
-                showWarning('Zoom In', 'No strip selected')
+            if not self.strips:
+                showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                            % self.pid)
                 return
+
             if self.current.strip not in self.strips:
-                showWarning('Zoom In', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-                            % (self.current.strip.pid, self.pid))
-                return
+                strip = self.strips[0]
             else:
-                self.current.strip._zoomIn()
+                strip = self.current.strip
+
+            strip._zoomIn()
+
+            # if not self.current.strip:
+            #     showWarning('Zoom In', 'No strip selected')
+            #     return
+            # if self.current.strip not in self.strips:
+            #     showWarning('Zoom In', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+            #                 % (self.current.strip.pid, self.pid))
+            #     return
+            # else:
+            #     self.current.strip._zoomIn()
         except:
             getLogger().warning('Error zooming in')
 
     def _zoomOut(self):
         """zoom out of current strip."""
         try:
-            if not self.current.strip:
-                showWarning('Zoom Out', 'No strip selected')
+            if not self.strips:
+                showWarning('Restore Zoom', 'SpectrumDisplay "%s" does not contain any strips' \
+                            % self.pid)
                 return
+
             if self.current.strip not in self.strips:
-                showWarning('Zoom Out', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
-                            % (self.current.strip.pid, self.pid))
-                return
+                strip = self.strips[0]
             else:
-                self.current.strip._zoomOut()
+                strip = self.current.strip
+
+            strip._zoomOut()
+
+            # if not self.current.strip:
+            #     showWarning('Zoom Out', 'No strip selected')
+            #     return
+            # if self.current.strip not in self.strips:
+            #     showWarning('Zoom Out', 'Selected strip "%s" is not part of SpectrumDisplay "%s"' \
+            #                 % (self.current.strip.pid, self.pid))
+            #     return
+            # else:
+            #     self.current.strip._zoomOut()
         except:
             getLogger().warning('Error zooming out')
 

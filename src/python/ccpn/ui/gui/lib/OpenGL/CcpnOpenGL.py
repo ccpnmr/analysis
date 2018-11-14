@@ -599,56 +599,88 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisT = max(axis.region[0], axis.region[1])
 
     def _buildSpectrumSetting(self, spectrumView, stackCount=0):
-        if spectrumView.spectrum.headerSize == 0:
-            return
+        # if spectrumView.spectrum.headerSize == 0:
+        #     return
 
         self._spectrumSettings[spectrumView] = {}
 
         self._spectrumValues = spectrumView._getValues()
-        # dx = self.sign(self._infiniteLineBR[0] - self._infiniteLineUL[0])
-        # dy = self.sign(self._infiniteLineUL[1] - self._infiniteLineBR[1])
 
-        # get the bounding box of the spectra
-        dx = -1.0 if self.INVERTXAXIS else -1.0  # self.sign(self.axisR - self.axisL)
-        fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
-        dxAF = fx0 - fx1
-        xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
+        # set defaults for undefined spectra
+        if not self._spectrumValues[0].totalPointCount:
+            dx = -1.0 if self.INVERTXAXIS else -1.0
+            fx0, fx1 = 1.0, -1.0
+            dxAF = fx0 - fx1
+            xScale = dx * dxAF
 
-        if spectrumView.spectrum.dimensionCount > 1:
-            dy = -1.0 if self.INVERTYAXIS else -1.0  # self.sign(self.axisT - self.axisB)
-            fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+            dy = -1.0 if self.INVERTYAXIS else -1.0
+            fy0, fy1 = 1.0, -1.0
             dyAF = fy0 - fy1
-            yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+            yScale = dy * dyAF
 
-            # set to nD limits to twice the width of the spectrum and a few data points
-            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / self._spectrumValues[0].totalPointCount)
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1))
             self._maxXRange = max(self._maxXRange, (fx0 - fx1))
-            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fy0 - fy1) / self._spectrumValues[1].totalPointCount)
+            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fy0 - fy1))
             self._maxYRange = max(self._maxYRange, (fy0 - fy1))
 
         else:
-            dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
 
-            fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
-            dyAF = fy0 - fy1
-            yScale = dy * dyAF / 1.0
+            # get the bounding box of the spectra
+            dx = -1.0 if self.INVERTXAXIS else -1.0  # self.sign(self.axisR - self.axisL)
+            fx0, fx1 = self._spectrumValues[0].maxAliasedFrequency, self._spectrumValues[0].minAliasedFrequency
 
-            # set to 1D limits to twice the width of the spectrum and the intensity limit
-            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / max(self._spectrumValues[0].totalPointCount, self.SPECTRUMXZOOM))
-            self._maxXRange = max(self._maxXRange, (fx0 - fx1))
-            # self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self.SPECTRUMYZOOM)
-            self._minYRange = min(self._minYRange, self._intensityLimit)
-            self._maxYRange = max(self._maxYRange, (fy0 - fy1))
+            # check tolerances
+            if not self._widthsChangedEnough((fx0, 0.0), (fx1, 0.0), tol=1e-10):
+                fx0, fx1 = 1.0, -1.0
 
-            if self._stackingMode:
-                st = stackCount * self._stackingValue
-                stackCount += 1
-                self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
+            dxAF = fx0 - fx1
+            xScale = dx * dxAF / self._spectrumValues[0].totalPointCount
 
-                self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
-                                                                                             0.0, 1.0, 0.0, 0.0,
-                                                                                             0.0, 0.0, 1.0, 0.0,
-                                                                                             0.0, st, 0.0, 1.0]
+            if spectrumView.spectrum.dimensionCount > 1:
+                dy = -1.0 if self.INVERTYAXIS else -1.0  # self.sign(self.axisT - self.axisB)
+                fy0, fy1 = self._spectrumValues[1].maxAliasedFrequency, self._spectrumValues[1].minAliasedFrequency
+
+                # check tolerances
+                if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):
+                    fy0, fy1 = 1.0, -1.0
+
+                dyAF = fy0 - fy1
+                yScale = dy * dyAF / self._spectrumValues[1].totalPointCount
+
+                # set to nD limits to twice the width of the spectrum and a few data points
+                self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / self._spectrumValues[0].totalPointCount)
+                self._maxXRange = max(self._maxXRange, (fx0 - fx1))
+                self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fy0 - fy1) / self._spectrumValues[1].totalPointCount)
+                self._maxYRange = max(self._maxYRange, (fy0 - fy1))
+
+            else:
+                dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
+
+                fy0, fy1 = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+
+                # check tolerances
+                if not self._widthsChangedEnough((fy0, 0.0), (fy1, 0.0), tol=1e-10):
+                    fy0, fy1 = 1.0, -1.0
+
+                dyAF = fy0 - fy1
+                yScale = dy * dyAF / 1.0
+
+                # set to 1D limits to twice the width of the spectrum and the intensity limit
+                self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fx0 - fx1) / max(self._spectrumValues[0].totalPointCount, self.SPECTRUMXZOOM))
+                self._maxXRange = max(self._maxXRange, (fx0 - fx1))
+                # self._minYRange = min(self._minYRange, 3.0 * (fy0 - fy1) / self.SPECTRUMYZOOM)
+                self._minYRange = min(self._minYRange, self._intensityLimit)
+                self._maxYRange = max(self._maxYRange, (fy0 - fy1))
+
+                if self._stackingMode:
+                    st = stackCount * self._stackingValue
+                    stackCount += 1
+                    self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
+
+                    self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX][0:16] = [1.0, 0.0, 0.0, 0.0,
+                                                                                                 0.0, 1.0, 0.0, 0.0,
+                                                                                                 0.0, 0.0, 1.0, 0.0,
+                                                                                                 0.0, st, 0.0, 1.0]
 
         self._rangeXDefined = True
         self._rangeYDefined = True
@@ -674,8 +706,6 @@ class CcpnGLWidget(QOpenGLWidget):
         self._minX = min(self._minX, fx1)
         self._maxY = max(self._maxY, fy0)
         self._minY = min(self._minY, fy1)
-
-        # print('>>>_rescale: %s, %s' % (self.strip.pid, (', '.join(['%.6f']*len(ttlist))+"]") % tuple(ttlist)))
 
     @pyqtSlot()
     def _screenChangedEvent(self, *args):

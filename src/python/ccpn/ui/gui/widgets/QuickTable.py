@@ -286,7 +286,6 @@ QuickTable::item::selected {
         else:
             self.doubleClicked.connect(self._defaultDoubleClick)
         if self._selectionCallback:
-            # self.cellClicked.connect(self._cellClicked)
             self.itemClicked.connect(self._cellClicked)
 
         # set the delegate for editing
@@ -572,10 +571,17 @@ QuickTable::item::selected {
         # data = OrderedDict()
         # data['OBJECT'] = return pid, key/values, row, col
 
+        print('>>>_selectionTableCallback')
+
         if not self._selectionCallback:
             return
 
+        print('>>>  _selectionTableCallback active')
+
         if not self._silenceCallback:
+
+            print('>>>  _selectionTableCallback not silenced')
+
             # if not self._mousePressed:
             objList = self.getSelectedObjects()
             # model = self.selectionModel()
@@ -1624,7 +1630,7 @@ QuickTable::item::selected {
         :param pullDownWidget:
         :return:
         """
-        self.clearTableNotifiers()
+        # self.clearTableNotifiers()
         self._initialiseTableNotifiers()
 
         if tableClass:

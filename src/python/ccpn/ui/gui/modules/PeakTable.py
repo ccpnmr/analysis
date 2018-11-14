@@ -50,9 +50,9 @@ UNITS = ['ppm', 'Hz', 'point']
 
 
 class PeakTableModule(CcpnModule):
-    '''
+    """
     This class implements the module by wrapping a PeakListTable instance
-    '''
+    """
 
     includeSettingsWidget = False
     maxSettingsState = 2
@@ -194,17 +194,18 @@ class PeakListTableWidget(QuickTable):
                                            self._processDroppedItems)
 
     def _processDroppedItems(self, data):
+        """CallBack for Drop events
         """
-        CallBack for Drop events
-        """
+        print('>>>_processDroppedItems')
+
         pids = data.get('pids', [])
         self._handleDroppedItems(pids, PeakList, self.pLwidget)
 
     def _getTableColumns(self, peakList):
-        '''Add default columns  plus the ones according with peakList.spectrum dimension
-         format of column = ( Header Name, value, tipText, editOption)
-         editOption allows the user to modify the value content by doubleclick
-         '''
+        """Add default columns  plus the ones according with peakList.spectrum dimension
+        format of column = ( Header Name, value, tipText, editOption)
+        editOption allows the user to modify the value content by doubleclick
+        """
 
         columnDefs = []
 
@@ -254,18 +255,21 @@ class PeakListTableWidget(QuickTable):
     ##################   Updates   ##################
 
     def _maximise(self):
-        """
-        refresh the table on a maximise event
+        """Refresh the table on a maximise event
         """
         self._updateTable()
 
     def _updateAllModule(self):
-        '''Updates the table and the settings widgets'''
+        """Updates the table and the settings widgets
+        """
         self._updateTable()
 
     def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
-        '''Display the peaks on the table for the selected PeakList.
-        Obviously, If the peak has not been previously deleted and flagged isDeleted'''
+        """Display the peaks on the table for the selected PeakList.
+        Obviously, If the peak has not been previously deleted and flagged isDeleted
+        """
+
+        print('>>>_updateTable')
 
         # self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
         self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
@@ -316,9 +320,10 @@ class PeakListTableWidget(QuickTable):
         #     self.setObjects([]) #if not peaks, make the table empty
 
     def _selectPeakList(self, peakList=None):
+        """Manually select a PeakList from the pullDown
         """
-        Manually select a PeakList from the pullDown
-        """
+        print('>>>_selectPeakList')
+
         if peakList is None:
             logger.warning('select: No PeakList selected')
             raise ValueError('select: No PeakList selected')
@@ -342,14 +347,19 @@ class PeakListTableWidget(QuickTable):
         self._updateTable()
 
     def displayTableForPeakList(self, peakList):
+        """Display the table for all NmrResidue's of nmrChain
         """
-        Display the table for all NmrResidue's of nmrChain
-        """
+        print('>>>displayTableForPeakList')
+
         self.pLwidget.select(peakList.pid)
         self._updateTable(peaks=peakList.peaks)
 
     def _actionCallback(self, data, *args):
-        ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
+        """If current strip contains the double clicked peak will navigateToPositionInStrip
+        """
+
+        print('>>>_actionCallback')
+
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
         peak = data[Notifier.OBJECT]
@@ -373,6 +383,7 @@ class PeakListTableWidget(QuickTable):
         """
         set as current the selected peaks on the table
         """
+        print('>>>_selectionCallback')
         peaks = data[Notifier.OBJECT]
         if peaks is None:
             self.current.clearPeaks()
@@ -386,6 +397,8 @@ class PeakListTableWidget(QuickTable):
         self._updateAllModule()
 
     def _pulldownPLcallback(self, data):
+        print('>>>_pulldownPLcallback')
+
         self._updateAllModule()
 
     def _copyPeaks(self):

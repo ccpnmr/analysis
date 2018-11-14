@@ -70,21 +70,27 @@ class NotesEditorModule(CcpnModule):
         self.current = mainWindow.application.current
         self.note = None
 
+        row = 0
         self.spacer = Spacer(self.mainWidget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(0, 0), gridSpan=(1, 1))
+                             grid=(row, 0), gridSpan=(1, 1))
+
+        row += 1
         self.noWidget = NotePulldown(parent=self.mainWidget,
                                      project=self.project, default=0,
-                                     grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                     grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      showSelectName=True,
                                      sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                      callback=self._selectionPulldownCallback)
+
+        row += 1
         self.spacer = Spacer(self.mainWidget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(2, 0), gridSpan=(1, 1))
+                             grid=(row, 0), gridSpan=(1, 1))
 
         #~~~~~~~~~~ define noteWidget box to contain man editing
-        self.noteWidget = Widget(self.mainWidget, grid=(3, 0), gridSpan=(4, 5), setLayout=True)
+        row += 1
+        self.noteWidget = Widget(self.mainWidget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
         self.noteWidget.hide()
 
         self.label1 = Label(self.noteWidget, text='Note name', grid=(1, 0), vAlign='centre', hAlign='right')
@@ -103,10 +109,11 @@ class NotesEditorModule(CcpnModule):
 
         #~~~~~~~~~~ end of noteWidget box
 
+        row += 1
         # this spacer is expanding, will fill the space when the textbox is invisible
         self.spacer = Spacer(self.mainWidget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-                             grid=(6, 4), gridSpan=(1, 1))
+                             grid=(row, 4), gridSpan=(1, 1))
 
         self.mainWidget.setContentsMargins(5, 5, 5, 5)
 

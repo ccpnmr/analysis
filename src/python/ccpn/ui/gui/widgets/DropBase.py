@@ -163,15 +163,21 @@ class DropBase:
     def dragMoveEvent(self, ev):
         """drag move event that propagates through all the widgets
         """
-        # print('>>>dragMoveEvent DropBase', repr(self))
-
         parentModule = self._findModule()
         if parentModule:
+            data = self.parseEvent(ev)
+
+            from ccpn.ui.gui.widgets.CcpnModuleArea import MODULEAREA_IGNORELIST
+
+            # ignore dropAreas if the source of the event is in the list
+            if isinstance(data['source'], MODULEAREA_IGNORELIST):
+                return
+
             p = parentModule.mapFromGlobal(QtGui.QCursor().pos())
 
-            ld = p.x()                              # ev.pos().x()
+            ld = p.x()  # ev.pos().x()
             rd = parentModule.width() - ld
-            td = p.y()                              # ev.pos().y()
+            td = p.y()  # ev.pos().y()
             bd = parentModule.height() - td
 
             mn = min(ld, rd, td, bd)

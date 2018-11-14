@@ -183,7 +183,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self.project = None
             self.current = None
 
-        self._preferences = self.strip.application.preferences.general
+        self._preferences = self.application.preferences.general
         self.globalGL = None
 
         # add a flag so that scaling cannot be done until the gl attributes are initialised
@@ -306,7 +306,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._gridVisible = self._preferences.showGrid
         self._updateHTrace = False
         self._updateVTrace = False
-        self._lastTracePoint = {}           # [-1, -1]
+        self._lastTracePoint = {}  # [-1, -1]
 
         self._applyXLimit = self._preferences.zoomXLimitApply
         self._applyYLimit = self._preferences.zoomYLimitApply
@@ -1392,7 +1392,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.viewports = GLViewports()
         # self._devicePixelRatio = QApplication.instance().devicePixelRatio()
-        self._devicePixelRatio = self._screenChanged()
+        self._screenChanged()
         self.viewports.setDevicePixelRatio(self._devicePixelRatio)
 
         # define the main viewports
@@ -1498,9 +1498,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def setBackgroundColour(self, col, silent=False):
         """
-    set all background colours in the shaders
-    :param col - vec4, 4 element list e.g.: [0.05, 0.05, 0.05, 1.0], very dark gray
-    """
+        set all background colours in the shaders
+        :param col - vec4, 4 element list e.g.: [0.05, 0.05, 0.05, 1.0], very dark gray
+        """
         self.makeCurrent()
         GL.glClearColor(*col)
         self.background = col
@@ -3715,7 +3715,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 # intPositionPixel = [spectrumView.spectrum.mainSpectrumReferences[ax].pointToValue(pp) for ax, pp in enumerate(self._lastTracePoint[:2])]
                 ref = spectrumView.spectrum.mainSpectrumReferences
-                intPositionPixel = [ref[ax].pointToValue(int(ref[ax].valueToPoint(pp)+0.5)) for ax, pp in enumerate(positionPixel)]
+                intPositionPixel = [ref[ax].pointToValue(int(ref[ax].valueToPoint(pp) + 0.5)) for ax, pp in enumerate(positionPixel)]
 
                 if direction == 0:
                     if self._updateHTrace:
@@ -4089,6 +4089,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _buildAxes(self, gridGLList, axisList=None, scaleGrid=None, r=0.0, g=0.0, b=0.0, transparency=256.0):
         """Build the grid
         """
+
         def check(ll):
             # check if a number ends in an even digit
             val = '%.0f' % (ll[3] / ll[4])

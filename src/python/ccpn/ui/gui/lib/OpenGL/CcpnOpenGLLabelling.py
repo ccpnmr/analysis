@@ -101,7 +101,7 @@ class GLLabelling():
         self.resizeGL = resizeGL
         self._threads = {}
         self._threadupdate = False
-        self.current = self.strip.current
+        self.current = self.strip.current if self.strip else None
 
         self._GLSymbols = {}
         self._GLLabels = {}

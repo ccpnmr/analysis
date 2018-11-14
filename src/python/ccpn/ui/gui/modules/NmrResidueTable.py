@@ -185,8 +185,7 @@ class NmrResidueTableModule(CcpnModule):
         self.nmrResidueTable._selectNmrChain(nmrChain)
 
     def _getDisplays(self):
-        """
-        Return list of displays to navigate - if needed
+        """Return list of displays to navigate - if needed
         """
         displays = []
         # check for valid displays
@@ -200,8 +199,7 @@ class NmrResidueTableModule(CcpnModule):
 
     # def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
     def navigateToNmrResidueCallBack(self, data):
-        """
-        Navigate in selected displays to nmrResidue; skip if none defined
+        """Navigate in selected displays to nmrResidue; skip if none defined
         """
         from ccpn.core.lib.CallBack import CallBack
 

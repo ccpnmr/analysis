@@ -69,6 +69,10 @@ class CheckBoxes(Widget):
             btn.deleteLater()
         self.checkBoxes = []
 
+        # exit if there are none to define
+        if not texts:
+            return
+
         # rebuild the checkBox list
         for i, text in enumerate(texts):
             if 'h' in direction:
@@ -151,6 +155,12 @@ class CheckBoxes(Widget):
             i.setChecked(True)
         self.checkBoxGroup.setExclusive(self.isExclusive)
 
+    def setChecked(self, value):
+
+        self.checkBoxGroup.setExclusive(False)
+        for i in self.checkBoxes:
+            i.setChecked(value)
+        self.checkBoxGroup.setExclusive(self.isExclusive)
 
     def setCallback(self, callback):
 

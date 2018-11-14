@@ -444,6 +444,3 @@ class ChemicalShiftTable(QuickTable):
         """
         self.clearTableNotifiers()
         self._chemicalShiftListPulldown.unRegister()
-
-        # check as this appears to be handled by QuickTable
-        self._droppedNotifier.unRegister()

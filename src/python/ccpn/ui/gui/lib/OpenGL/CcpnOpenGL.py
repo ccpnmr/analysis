@@ -238,10 +238,10 @@ class CcpnGLWidget(QOpenGLWidget):
         self.peakWidthPixels = 16
 
         # set initial axis limits - should be changed by strip.display..
-        self.axisL = 0.0
+        self.axisL = -1.0
         self.axisR = 1.0
         self.axisT = 1.0
-        self.axisB = 0.0
+        self.axisB = -1.0
         self.storedZooms = []
 
         self.base = None
@@ -599,6 +599,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisT = max(axis.region[0], axis.region[1])
 
     def _buildSpectrumSetting(self, spectrumView, stackCount=0):
+        if spectrumView.spectrum.headerSize == 0:
+            return
+
         self._spectrumSettings[spectrumView] = {}
 
         self._spectrumValues = spectrumView._getValues()

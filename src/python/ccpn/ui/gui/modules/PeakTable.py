@@ -42,6 +42,8 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 logger = getLogger()
@@ -61,7 +63,7 @@ class PeakTableModule(CcpnModule):
     className = 'PeakTableModule'
 
     def __init__(self, mainWindow=None, name='Peak Table', peakList=None):
-        CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+        super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
@@ -126,19 +128,25 @@ class PeakListTableWidget(QuickTable):
         self.settingWidgets = None
         self._selectedPeakList = None
         kwds['setLayout'] = True  ## Assure we have a layout with the widget
-        self._widget = Widget(parent=parent, **kwds)
 
-        ## create peakList table widget
-        # ObjectTable.__init__(self, parent=self._widget, setLayout=True, columns=[], objects=[],
-        #                      autoResize=True, multiSelect=True,
-        #                      actionCallback=self._actionCallback, selectionCallback=self._setCurrentSpectrumHit,
-        #                      grid=(1, 0), gridSpan=(1, 6))
+        # strange, need to do this when using scrollArea, but not a Widget
+        parent.getLayout().setHorizontalSpacing(0)
+        self._widgetScrollArea = ScrollArea(parent=parent, **kwds)
+        self._widgetScrollArea.setWidgetResizable(True)
+        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
+        self._widgetScrollArea.setWidget(self._widget)
+        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
-        ## create Pulldown for selection of peakList
+        row = 0
+        self.spacer = Spacer(self._widget, 5, 5,
+                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+                             grid=(row, 0), gridSpan=(1, 1))
+
+        row += 1
         gridHPos = 0
         self.pLwidget = PeakListPulldown(parent=self._widget,
                                          project=self.project,
-                                         grid=(0, gridHPos), gridSpan=(1, 1),
+                                         grid=(row, gridHPos), gridSpan=(1, 1),
                                          showSelectName=True,
                                          minimumWidths=(0, 100),
                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
@@ -146,11 +154,15 @@ class PeakListTableWidget(QuickTable):
 
         ## create widgets for selection of position units
         gridHPos += 1
-        self.posUnitPulldownLabel = Label(parent=self._widget, text=' Position Unit', grid=(0, gridHPos))
+        self.posUnitPulldownLabel = Label(parent=self._widget, text=' Position Unit', grid=(row, gridHPos))
         gridHPos += 1
-        self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(0, gridHPos))
+        self.posUnitPulldown = PulldownList(parent=self._widget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(row, gridHPos))
 
-        self._widget.setFixedHeight(30)  # needed for the correct sizing of the table
+        row += 1
+        self.spacer = Spacer(self._widget, 5, 5,
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+                             grid=(row, gridHPos+1), gridSpan=(1, 1))
+        self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
         self._hiddenColumns = ['Pid']
         self.dataFrameObject = None
@@ -165,11 +177,6 @@ class PeakListTableWidget(QuickTable):
                             actionCallback=actionCallback,
                             selectionCallback=selectionCallback,
                             grid=(3, 0), gridSpan=(1, 6))
-
-        # self._selectOnTableCurrentPeaksNotifier = None
-        # self._peakListDeleteNotifier = None
-        # self._peakNotifier = None
-        # self._setNotifiers()
 
         self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
 
@@ -187,7 +194,8 @@ class PeakListTableWidget(QuickTable):
                                tableSelection='_selectedPeakList',
                                pullDownWidget=self.pLwidget,
                                callBackClass=Peak,
-                               selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback)
+                               selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback,
+                               moduleParent=self.moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
@@ -269,7 +277,7 @@ class PeakListTableWidget(QuickTable):
         Obviously, If the peak has not been previously deleted and flagged isDeleted
         """
 
-        print('>>>_updateTable')
+        print('>>>PeakTable _updateTable', repr(self))
 
         # self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
         self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
@@ -322,7 +330,7 @@ class PeakListTableWidget(QuickTable):
     def _selectPeakList(self, peakList=None):
         """Manually select a PeakList from the pullDown
         """
-        print('>>>_selectPeakList')
+        print('>>>PeakTable _selectPeakList', repr(self))
 
         if peakList is None:
             logger.warning('select: No PeakList selected')
@@ -383,7 +391,7 @@ class PeakListTableWidget(QuickTable):
         """
         set as current the selected peaks on the table
         """
-        print('>>>_selectionCallback')
+        print('>>>PeakTable _selectionCallback', repr(self))
         peaks = data[Notifier.OBJECT]
         if peaks is None:
             self.current.clearPeaks()
@@ -397,7 +405,7 @@ class PeakListTableWidget(QuickTable):
         self._updateAllModule()
 
     def _pulldownPLcallback(self, data):
-        print('>>>_pulldownPLcallback')
+        print('>>>PeakTable _pulldownPLcallback', repr(self))
 
         self._updateAllModule()
 
@@ -444,6 +452,8 @@ class PeakListTableWidget(QuickTable):
         Callback from a notifier to highlight the peaks on the peak table
         :param data:
         """
+        print('>>>PeakTable _selectOnTableCurrentPeaksNotifierCallback', repr(self))
+
         currentPeaks = data['value']
         self._selectOnTableCurrentPeaks(currentPeaks)
 
@@ -452,6 +462,8 @@ class PeakListTableWidget(QuickTable):
         Highlight the list of peaks on the table
         :param currentPeaks:
         """
+        print('>>>PeakTable _selectOnTableCurrentPeaks', repr(self))
+
         if len(currentPeaks) > 0:
             self._highLightObjs(currentPeaks)
         else:

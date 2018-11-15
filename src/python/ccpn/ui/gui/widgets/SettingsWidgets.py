@@ -53,6 +53,7 @@ STRIPPLOT_NMRRESIDUES = 'nmrResidues'
 
 class SpectrumDisplaySettings(Widget):
 
+    # signal for parentWidgets to respond to changes in the widget
     settingsChanged = pyqtSignal(dict)
 
     def __init__(self, parent=None,
@@ -127,6 +128,7 @@ class SpectrumDisplaySettings(Widget):
         self._GLSignals = GLNotifier(parent=self._parent)
         self._GLSignals.glAxisLockChanged.connect(self._lockAspectRatioChanged)
 
+    @pyqtSlot()
     def _settingsChanged(self):
         """Handle changing the X axis units
         """

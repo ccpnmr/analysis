@@ -274,7 +274,9 @@ class RestraintTable(QuickTable):
                                tableSelection='restraintList',
                                pullDownWidget=self.RLcolumns,
                                callBackClass=Restraint,
-                               selectCurrentCallBack=None)
+                               selectCurrentCallBack=None,
+                               moduleParent=self.moduleParent)
+
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],
                                            self._processDroppedItems)

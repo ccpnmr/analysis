@@ -82,69 +82,10 @@ class NmrResidueTableModule(CcpnModule):
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
-            displayText = [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
         else:
             self.application = None
             self.project = None
             self.current = None
-            displayText = []
-
-        # # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
-        # # backBoneAssignment modules
-        # self._NTSwidget = Widget(self.settingsWidget, setLayout=True,
-        #                          grid=(0, 0), vAlign='top', hAlign='left')
-        # #self._NTSwidget = self.settingsWidget
-        #
-        # # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
-        # # underpinning the addNotifier call do not allow for it either
-        # row = 0
-        # colwidth = 140
-        # self.displaysWidget = ListCompoundWidget(self._NTSwidget,
-        #                                          grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-        #                                          vPolicy='minimal',
-        #                                          #minimumWidths=(colwidth, 0, 0),
-        #                                          fixedWidths=(colwidth, colwidth, colwidth),
-        #                                          orientation='left',
-        #                                          labelText='Display(s):',
-        #                                          tipText='SpectrumDisplay modules to respond to double-click',
-        #                                          texts=[ALL] + displayText)
-        # self.displaysWidget.setFixedHeights((None, None, 40))
-        # self.displaysWidget.pulldownList.set(ALL)
-        # self.displaysWidget.setPreSelect(self._fillDisplayWidget)
-        #
-        # row += 1
-        # self.sequentialStripsWidget = CheckBoxCompoundWidget(
-        #         self._NTSwidget,
-        #         grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-        #         #minimumWidths=(colwidth, 0),
-        #         fixedWidths=(colwidth, 30),
-        #         orientation='left',
-        #         labelText='Show sequential strips:',
-        #         checked=False
-        #         )
-        #
-        # row += 1
-        # self.markPositionsWidget = CheckBoxCompoundWidget(
-        #         self._NTSwidget,
-        #         grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-        #         #minimumWidths=(colwidth, 0),
-        #         fixedWidths=(colwidth, 30),
-        #         orientation='left',
-        #         labelText='Mark positions:',
-        #         checked=True
-        #         )
-        #
-        # row += 1
-        # self.autoClearMarksWidget = CheckBoxCompoundWidget(
-        #         self._NTSwidget,
-        #         grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-        #         #minimumWidths=(colwidth, 0),
-        #         fixedWidths=(colwidth, 30),
-        #         orientation='left',
-        #         labelText='Auto clear marks:',
-        #         checked=True
-        #         )
-        # row += 1
 
         self.nmrResidueTableSettings = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
                                                  includePeakLists=self.includePeakLists,
@@ -166,11 +107,6 @@ class NmrResidueTableModule(CcpnModule):
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
-        # self.mainWidget.layout().setVerticalSpacing(0)
-
-    # def _fillDisplayWidget(self):
-    #     list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-    #     self.displaysWidget.pulldownList.setData(texts=list)
 
     def _maximise(self):
         """
@@ -292,32 +228,15 @@ class NmrResidueTable(QuickTable):
             self.application = None
             self.project = None
             self.current = None
-
         self.moduleParent = moduleParent
-        # self._widget = Widget(parent=parent, **kwds)
-
-        # parent.getLayout().setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
 
         # strange, need to do this when using scrollArea, but not a Widget
         parent.getLayout().setHorizontalSpacing(0)
-
         self._widgetScrollArea = ScrollArea(parent=parent, **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
-        # self._widgetScrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        # self._widgetScrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-
         self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
         self._widgetScrollArea.setWidget(self._widget)
-        # self._widgetScrollArea.setGridLayout()
-
         self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
-
-        # # self._widget.setStyleSheet("""ScrollArea { border: 0px; }""")
-        # self._widget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
-        # self._widgetFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
-
-        # parent.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.MinimumExpanding)
-
 
         self._nmrChain = None
         if actionCallback is None:
@@ -344,7 +263,6 @@ class NmrResidueTable(QuickTable):
 
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
 
-        # GWV: Not sure why spaces are needed, as _setWidgetHeight will do fine
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0), gridSpan=(1, 1))
@@ -357,11 +275,8 @@ class NmrResidueTable(QuickTable):
                                          )
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(2, 50), gridSpan=(1, 1))
+                             grid=(2, 1), gridSpan=(1, 1))
         self._setWidgetHeight(35)
-        self.ncWidget.setFixedSize(self.ncWidget.sizeHint())
-        # self.ncWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
-        # self._widget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
 
         # initialise the currently attached dataFrame
         self._hiddenColumns = ['Pid']
@@ -380,17 +295,8 @@ class NmrResidueTable(QuickTable):
                             enableDelete=True
                             )
 
-        # Notifier object to update the table if the nmrChain changes
-        # self._chainNotifier = None
-        # self._residueNotifier = None
-        # self._atomNotifier = None
-        # self._selectOnTableCurrentNmrResiduesNotifier = None
-
-        # TODO: see how to handle peaks as this is too costly at present
         # Notifier object to update the table if the peaks change
         self._peakNotifier = None
-        # self._updateSilence = False  # flag to silence updating of the table
-        # self._setNotifiers()
 
         if nmrChain is not None:
             self._selectNmrChain(nmrChain)
@@ -405,7 +311,8 @@ class NmrResidueTable(QuickTable):
                                updateFunc=self._update,
                                pullDownWidget=self.ncWidget,
                                callBackClass=NmrResidue,
-                               selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback)
+                               selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback,
+                               moduleParent=self.moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],

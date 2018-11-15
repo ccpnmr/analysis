@@ -46,6 +46,8 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth, getMultipletPosition
 from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.Spacer import Spacer
 
 
 logger = getLogger()
@@ -54,10 +56,8 @@ MultipletPosUnits = ['ppm', 'Hz']
 
 
 class MultipletTableModule(CcpnModule):
-    '''
-    This class implements the module by wrapping a MultipletListTable instance
-    '''
-
+    """This class implements the module by wrapping a MultipletListTable instance
+    """
     includeSettingsWidget = False
     maxSettingsState = 2
     settingsPosition = 'top'
@@ -65,7 +65,7 @@ class MultipletTableModule(CcpnModule):
     className = 'MultipletTableModule'
 
     def __init__(self, mainWindow=None, name='Multiplet Table', multipletList=None):
-        CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+        super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
@@ -76,13 +76,14 @@ class MultipletTableModule(CcpnModule):
         # mainWidget
         self.peaksFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 1))
         self.peakListTableLabel = Label(self.peaksFrame, 'Peaks:', grid=(0, 0), )
-        self.peakListTableLabel.setFixedHeight(15)
+        self.peakListTableLabel.setFixedHeight(20)
 
         self.peakListTable = PeakListTableWidget(parent=self.peaksFrame,
                                                  mainWindow=self.mainWindow,
                                                  moduleParent=self,
                                                  setLayout=False,
                                                  grid=(1, 0))
+        self.peakListTable._widgetScrollArea.hide()
 
         self.multipletListTable = MultipletListTableWidget(parent=self.mainWidget, mainWindow=self.mainWindow,
                                                            moduleParent=self, setLayout=True,
@@ -93,7 +94,6 @@ class MultipletTableModule(CcpnModule):
 
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
-        self.peakListTable._widget.hide()
         self.splitter.addWidget(self.multipletListTable)
         self.splitter.addWidget(self.peaksFrame)
         self.mainWidget.getLayout().addWidget(self.splitter)
@@ -136,30 +136,47 @@ class MultipletListTableWidget(QuickTable):
     positionsUnit = MultipletPosUnits[0]  #default
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, multipletList=None, actionCallback=None, selectionCallback=None, **kwds):
+        """
+        Initialise the widgets for the module. kwds passed to the scrollArea widget
+        """
+
+        # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
         self.moduleParent = moduleParent
+
         self.peakListTable = self.moduleParent.peakListTable
         MultipletListTableWidget.project = self.project
 
         self.settingWidgets = None
         self._selectedMultipletList = None
         kwds['setLayout'] = True  ## Assure we have a layout with the widget
-        self._widget = Widget(parent=parent, **kwds)
 
-        ## create multipletList table widget
-        # ObjectTable.__init__(self, parent=self._widget, setLayout=True, columns=[], objects=[]
-        #                      , autoResize=True, multiSelect=True
-        #                      , actionCallback=self._actionCallback, selectionCallback=self._setCurrentSpectrumHit
-        #                      , grid=(1, 0), gridSpan=(1, 6))
+        # strange, need to do this when using scrollArea, but not a Widget
+        # parent.getLayout().setHorizontalSpacing(0)
+        self._widgetScrollArea = ScrollArea(parent=parent, **kwds)
+        self._widgetScrollArea.setWidgetResizable(True)
+        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
+        self._widgetScrollArea.setWidget(self._widget)
+        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
-        ## create Pulldown for selection of multipletList
+        row = 0
+        self.spacer = Spacer(self._widget, 5, 5,
+                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+                             grid=(row, 0), gridSpan=(1, 1))
+
+        row += 1
         gridHPos = 0
         self.mLwidget = MultipletListPulldown(parent=self._widget,
                                               project=self.project,
-                                              grid=(0, gridHPos), gridSpan=(1, 1),
+                                              grid=(row, gridHPos), gridSpan=(1, 1),
                                               showSelectName=True,
                                               minimumWidths=(0, 100),
                                               sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
@@ -167,11 +184,15 @@ class MultipletListTableWidget(QuickTable):
 
         ## create widgets for selection of position units
         gridHPos += 1
-        self.posUnitPulldownLabel = Label(parent=self._widget, text=' Position Unit', grid=(0, gridHPos))
+        self.posUnitPulldownLabel = Label(parent=self._widget, text=' Position Unit', grid=(row, gridHPos))
         gridHPos += 1
-        self.posUnitPulldown = PulldownList(parent=self._widget, texts=MultipletPosUnits, callback=self._pulldownUnitsCallback, grid=(0, gridHPos))
+        self.posUnitPulldown = PulldownList(parent=self._widget, texts=MultipletPosUnits, callback=self._pulldownUnitsCallback, grid=(row, gridHPos))
 
-        self._widget.setFixedHeight(30)  # needed for the correct sizing of the table
+        row += 1
+        self.spacer = Spacer(self._widget, 5, 5,
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+                             grid=(row, gridHPos+1), gridSpan=(1, 1))
+        self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
         self._hiddenColumns = ['Pid']
         self.dataFrameObject = None
@@ -187,15 +208,11 @@ class MultipletListTableWidget(QuickTable):
                             selectionCallback=selectionCallback,
                             grid=(3, 0), gridSpan=(1, 6))
 
-        # self._selectOnTableCurrentMultipletsNotifier = None
-        # self._multipletListDeleteNotifier = None
-        # self._multipletNotifier = None
-        # self._setNotifiers()
-
         # self.tableMenu.addAction('Copy Multiplets...', self._copyMultiplets)
         self.tableMenu.insertSeparator(self.tableMenu.actions()[0])
         a = self.tableMenu.addAction('Edit Multiplet...', self._editMultiplets)
         self.tableMenu.insertAction(self.tableMenu.actions()[0], a)
+
         ## populate the table if there are multipletlists in the project
         if multipletList is not None:
             self._selectMultipletList(multipletList)
@@ -210,7 +227,8 @@ class MultipletListTableWidget(QuickTable):
                                tableSelection='_selectedMultipletList',
                                pullDownWidget=self.mLwidget,
                                callBackClass=Multiplet,
-                               selectCurrentCallBack=self._selectOnTableCurrentMultipletsNotifierCallback)
+                               selectCurrentCallBack=self._selectOnTableCurrentMultipletsNotifierCallback,
+                               moduleParent=self.moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],

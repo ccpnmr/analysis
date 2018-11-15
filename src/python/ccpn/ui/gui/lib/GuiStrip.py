@@ -89,7 +89,7 @@ class GuiStrip(Frame):
 
         getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
         super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True,
-                         acceptDrops=False  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+                         acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                          )
 
         # it appears to be required to explicitly set these, otherwise
@@ -259,7 +259,7 @@ class GuiStrip(Frame):
         #self._stripNotifier.setDebug(True)
         #self._peakNotifier.setDebug(True)
 
-        # For now, all dropevents are not strip specific, use spectrumDisplay's
+        # For now, all dropEvents are not strip specific, use spectrumDisplay's
         # handling
         self._droppedNotifier = GuiNotifier(self,
                                             [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],

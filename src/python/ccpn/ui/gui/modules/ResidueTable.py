@@ -233,7 +233,8 @@ class ResidueTable(QuickTable):
                                updateFunc=self._update,
                                pullDownWidget=self.cWidget,
                                callBackClass=Residue,
-                               selectCurrentCallBack=self._selectOnTableCurrentResiduesNotifierCallback)
+                               selectCurrentCallBack=self._selectOnTableCurrentResiduesNotifierCallback,
+                               moduleParent=self.moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],

@@ -282,7 +282,8 @@ class ChemicalShiftTable(QuickTable):
                                pullDownWidget=self.CScolumns,
                                callBackClass=ChemicalShift,
                                selectCurrentCallBack=None,
-                               searchCallBack=NmrResidue)
+                               searchCallBack=NmrResidue,
+                               moduleParent=self.moduleParent)
 
         self._droppedNotifier = GuiNotifier(self,
                                             [GuiNotifier.DROPEVENT], [DropBase.PIDS],

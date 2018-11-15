@@ -68,7 +68,8 @@ from collections import OrderedDict
 
 from collections import OrderedDict
 from ccpn.util.Logging import getLogger
-
+from types import SimpleNamespace
+from contextlib import contextmanager
 
 # BG_COLOR = QtGui.QColor('#E0E0E0')
 # TODO:ED add some documentation here
@@ -97,6 +98,16 @@ def __sortByColumn__(self, col, newOrder):
     except Exception as es:
         print(str(es))
     print('>>>sorting')
+
+
+# define a simple class that can contains a simple id
+blankId = SimpleNamespace(className='notDefined', serial=0)
+
+MODULEIDS = {}
+
+
+def _moduleId(module):
+    return MODULEIDS[id(module)] if id(module) in MODULEIDS else -1
 
 
 # Exporters
@@ -221,6 +232,7 @@ QuickTable::item::selected {
 
         # initialise the internal data storage
         self._dataFrameObject = dataFrameObject
+        self._tableBlockingLevel = 0
 
         # set stylesheet
         self.colours = getColours()
@@ -280,7 +292,8 @@ QuickTable::item::selected {
         # enable callbacks
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
-        self._silenceCallback = False
+        #self._silenceCallback = False
+
         if self._actionCallback:
             self.doubleClicked.connect(self._doubleClickCallback)
         else:
@@ -316,7 +329,7 @@ QuickTable::item::selected {
         # set the minimum size the table can collapse to
         self.setMinimumSize(30, 30)
         self.searchWidget = None
-        self._parent.layout().setVerticalSpacing(0)
+        # self._parent.layout().setVerticalSpacing(0)
 
         self.setDefaultTableData()
 
@@ -326,6 +339,33 @@ QuickTable::item::selected {
         TableWidgetItem.__lt__ = __ltForTableWidgetItem__
 
         # TableWidget.sortByColumn = __sortByColumn__   #MethodType(__sortByColumn__, TableWidget)
+
+    @contextmanager
+    def _tableBlockSignals(self, callerId=''):
+        """Block all signals from the table
+        """
+        try:
+            # block on first entry
+            if self._tableBlockingLevel <= 0:
+                # self._tableBlockingLevel = 0
+                self.blockSignals(True)
+                self.setUpdatesEnabled(False)
+                self.project.blankNotification()
+
+            print(' '*self._tableBlockingLevel, '>>>INC', self._tableBlockingLevel, _moduleId(self.moduleParent), callerId)
+            self._tableBlockingLevel += 1
+            yield  # yield control to the main process
+
+        finally:
+            self._tableBlockingLevel -= 1
+            print(' '*self._tableBlockingLevel, '>>>DEC', self._tableBlockingLevel, _moduleId(self.moduleParent))
+
+            # unblock all signals on exit
+            if self._tableBlockingLevel <= 0:
+                # self._tableBlockingLevel = 0
+                self.project.unblankNotification()
+                self.setUpdatesEnabled(True)
+                self.blockSignals(False)
 
     def _preSort(self, *args):
         """
@@ -339,6 +379,8 @@ QuickTable::item::selected {
         """
         catch the click event on a header
         """
+        print('>>> %s _postSort' % _moduleId(self.moduleParent))
+
         self.resizeColumnsToContents()
 
     @staticmethod
@@ -439,6 +481,8 @@ QuickTable::item::selected {
                     _openItemObject(self.mainWindow, others)
 
     def _cellClicked(self, item):
+        print('>>> %s _cellClicked' % _moduleId(self.moduleParent))
+
         if item:
             if isinstance(item.value, bool):
                 self._checkBoxTableCallback(item)
@@ -453,9 +497,13 @@ QuickTable::item::selected {
         #
 
     def _checkBoxCallback(self, data):
+        print('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
+
         pass
 
     def _defaultDoubleClick(self, itemSelection):
+
+        print('>>> %s _defaultDoubleClick' % _moduleId(self.moduleParent))
 
         model = self.selectionModel()
 
@@ -476,51 +524,52 @@ QuickTable::item::selected {
 
     def _doubleClickCallback(self, itemSelection):
 
-        model = self.selectionModel()
+        with self._tableBlockSignals('_doubleClickCallback'):
+            model = self.selectionModel()
 
-        # selects all the items in the row
-        selection = model.selectedIndexes()
+            # selects all the items in the row
+            selection = model.selectedIndexes()
 
-        if selection:
-            row = itemSelection.row()
-            col = itemSelection.column()
-            # row = self._currentRow        # read from the cellClicked connect
-            # col = self._currentCol
+            if selection:
+                row = itemSelection.row()
+                col = itemSelection.column()
+                # row = self._currentRow        # read from the cellClicked connect
+                # col = self._currentCol
 
-            data = {}
-            for iSelect in selection:
-                colPid = iSelect.column()
-                colName = self.horizontalHeaderItem(colPid).text()
-                data[colName] = model.model().data(iSelect)
+                data = {}
+                for iSelect in selection:
+                    colPid = iSelect.column()
+                    colName = self.horizontalHeaderItem(colPid).text()
+                    data[colName] = model.model().data(iSelect)
 
-            objIndex = data['Pid']
-            # obj = self._dataFrameObject.indexList[objIndex]    # item.index needed
+                objIndex = data['Pid']
+                # obj = self._dataFrameObject.indexList[objIndex]    # item.index needed
 
-            obj = self.project.getByPid(objIndex)
+                obj = self.project.getByPid(objIndex)
 
-            if obj:
-                data = CallBack(theObject=self._dataFrameObject,
-                                object=obj,
-                                index=objIndex,
-                                targetName=obj.className,
-                                trigger=CallBack.DOUBLECLICK,
-                                row=row,
-                                col=col,
-                                rowItem=data)
+                if obj:
+                    data = CallBack(theObject=self._dataFrameObject,
+                                    object=obj,
+                                    index=objIndex,
+                                    targetName=obj.className,
+                                    trigger=CallBack.DOUBLECLICK,
+                                    row=row,
+                                    col=col,
+                                    rowItem=data)
 
-                if self._actionCallback and self._dataFrameObject and not \
-                        self._dataFrameObject.columnDefinitions.setEditValues[col]:    # ejb - editable fields don't actionCallback
-                    self._actionCallback(data)
-
-                elif self._dataFrameObject and self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
-                    item = self.item(row, col)
-                    item.setEditable(True)
-                    # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
-                    # item.textChanged.connect(partial(self._changeMe, item))
-                    self.editItem(item)  # enter the editing mode
-                else:
-                    if self._actionCallback:
+                    if self._actionCallback and self._dataFrameObject and not \
+                            self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback
                         self._actionCallback(data)
+
+                    elif self._dataFrameObject and self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
+                        item = self.item(row, col)
+                        item.setEditable(True)
+                        # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
+                        # item.textChanged.connect(partial(self._changeMe, item))
+                        self.editItem(item)  # enter the editing mode
+                    else:
+                        if self._actionCallback:
+                            self._actionCallback(data)
 
     @_defersort
     def setRow(self, row, vals):
@@ -571,16 +620,15 @@ QuickTable::item::selected {
         # data = OrderedDict()
         # data['OBJECT'] = return pid, key/values, row, col
 
-        print('>>>_selectionTableCallback')
+        with self._tableBlockSignals('_selectionTableCallback'):
+            if not self._selectionCallback:
+                return
 
-        if not self._selectionCallback:
-            return
+            print('>>> %s _selectionTableCallback__' % _moduleId(self.moduleParent))
 
-        print('>>>  _selectionTableCallback active')
-
-        if not self._silenceCallback:
-
-            print('>>>  _selectionTableCallback not silenced')
+            # # if not self._silenceCallback:
+            #
+            # print('>>> %s _selectionTableCallback 3' % _moduleId(self.moduleParent))
 
             # if not self._mousePressed:
             objList = self.getSelectedObjects()
@@ -618,41 +666,44 @@ QuickTable::item::selected {
                 self._selectionCallback(data)
 
     def _checkBoxTableCallback(self, itemSelection):
+        print('>>> %s _checkBoxTableCallback' % _moduleId(self.moduleParent))
+
         state = True if itemSelection.checkState() == 2 else False
         value = itemSelection.value
         if not state == value:
-            if not self._silenceCallback:
-                selectionModel = self.selectionModel()
-                selectionModel.clearSelection()
-                selectionModel.select(self.model().index(itemSelection.row(), 0)
-                                      , selectionModel.Select | selectionModel.Rows)
-                objList = self.getSelectedObjects()
+            # if not self._silenceCallback:
 
-                if objList:
-                    data = CallBack(theObject=self._dataFrameObject,
-                                    object=objList,
-                                    index=0,
-                                    targetName=objList[0].className,
-                                    trigger=CallBack.DOUBLECLICK,
-                                    row=itemSelection.row(),
-                                    col=itemSelection.column(),
-                                    rowItem=itemSelection,
-                                    checked=state)
-                    textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
-                    if textHeader:
-                        self._dataFrameObject.setObjAttr(textHeader, objList[0], state)
-                        # setattr(objList[0], textHeader, state)
-                else:
-                    data = CallBack(theObject=self._dataFrameObject,
-                                    object=None,
-                                    index=0,
-                                    targetName=None,
-                                    trigger=CallBack.DOUBLECLICK,
-                                    row=itemSelection.row(),
-                                    col=itemSelection.column(),
-                                    rowItem=itemSelection,
-                                    checked=state)
-                self._checkBoxCallback(data)
+            selectionModel = self.selectionModel()
+            selectionModel.clearSelection()
+            selectionModel.select(self.model().index(itemSelection.row(), 0),
+                                  selectionModel.Select | selectionModel.Rows)
+            objList = self.getSelectedObjects()
+
+            if objList:
+                data = CallBack(theObject=self._dataFrameObject,
+                                object=objList,
+                                index=0,
+                                targetName=objList[0].className,
+                                trigger=CallBack.DOUBLECLICK,
+                                row=itemSelection.row(),
+                                col=itemSelection.column(),
+                                rowItem=itemSelection,
+                                checked=state)
+                textHeader = self.horizontalHeaderItem(itemSelection.column()).text()
+                if textHeader:
+                    self._dataFrameObject.setObjAttr(textHeader, objList[0], state)
+                    # setattr(objList[0], textHeader, state)
+            else:
+                data = CallBack(theObject=self._dataFrameObject,
+                                object=None,
+                                index=0,
+                                targetName=None,
+                                trigger=CallBack.DOUBLECLICK,
+                                row=itemSelection.row(),
+                                col=itemSelection.column(),
+                                rowItem=itemSelection,
+                                checked=state)
+            self._checkBoxCallback(data)
 
     def showColumns(self, dataFrameObject):
         # show the columns in the list
@@ -714,7 +765,7 @@ QuickTable::item::selected {
             # stops the selection from the table when the right button is clicked
             event.accept()
         elif event.button() == QtCore.Qt.LeftButton:
-            self.clearSelection()
+            # self.clearSelection()
             # we are selecting from the table
             self._mousePressed = True
             event.ignore()
@@ -756,10 +807,14 @@ QuickTable::item::selected {
         self.customContextMenuRequested.connect(self._raiseTableContextMenu)
 
     def _raiseTableContextMenu(self, pos):
+        print('>>> %s _raiseTableContextMenu' % _moduleId(self.moduleParent))
+
         pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
         action = self.tableMenu.exec_(self.mapToGlobal(pos))
 
     def _raiseHeaderContextMenu(self, pos):
+        print('>>> %s _raiseHeaderContextMenu' % _moduleId(self.moduleParent))
+
         if self._enableSearch and self.searchWidget is None:
             if not attachSearchWidget(self._parent, self):
                 getLogger().warning('Search option not available')
@@ -798,12 +853,12 @@ QuickTable::item::selected {
                     thisProject._startCommandEchoBlock('application.table.deleteFromTable', [sI.pid for sI in selected])
 
                     # bug hunt
-                    self._silenceCallback = True
+                    #self._silenceCallback = True
                     for obj in selected:
                         if hasattr(obj, 'pid'):
                             # print ('>>> deleting', obj)
                             obj.delete()
-                    self._silenceCallback = False
+                    #self._silenceCallback = False
                     thisProject._endCommandEchoBlock()
 
                 else:
@@ -820,7 +875,7 @@ QuickTable::item::selected {
 
     def refreshHeaders(self):
         self.hide()
-        self._silenceCallback = True
+        #self._silenceCallback = True
         # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
         self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
@@ -830,7 +885,7 @@ QuickTable::item::selected {
         self.setColumnCount(self._dataFrameObject.numColumns)
 
         self.show()
-        self._silenceCallback = False
+        #self._silenceCallback = False
         self.resizeColumnsToContents()
 
         self.update()
@@ -873,7 +928,7 @@ QuickTable::item::selected {
 
         try:
             self.hide()
-            self._silenceCallback = True
+            #self._silenceCallback = True
             # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
             # self.setData(dataFrameObject.dataFrame.values)
@@ -898,60 +953,66 @@ QuickTable::item::selected {
                 self.resizeColumnsToContents()
 
             self.show()
-            self._silenceCallback = False
+            #self._silenceCallback = False
 
             # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
     def setTableFromDataFrameObject(self, dataFrameObject):
         # populate the table from the the Pandas dataFrame
-        self._dataFrameObject = dataFrameObject
-        #
-        # if dataFrameObject.dataFrame.empty:
-        #   self.clearTable()
-        # else:
-        #   with self._updateTable(self._dataFrameObject):
-        #     self.setData(dataFrameObject.dataFrame.values)
-        #
-        # return
 
-        self.hide()
-        self._silenceCallback = True
+        with self._tableBlockSignals('setTableFromDataFrameObject'):
 
-        # keep the original sorting method
-        sortOrder = self.horizontalHeader().sortIndicatorOrder()
-        sortColumn = self.horizontalHeader().sortIndicatorSection()
+            objs = self.getSelectedObjects()
 
-        if not dataFrameObject.dataFrame.empty:
-            # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+            self._dataFrameObject = dataFrameObject
+            #
+            # if dataFrameObject.dataFrame.empty:
+            #   self.clearTable()
+            # else:
+            #   with self._updateTable(self._dataFrameObject):
+            #     self.setData(dataFrameObject.dataFrame.values)
+            #
+            # return
 
-            self.setData(dataFrameObject.dataFrame.values)
-        else:
-            # set a dummy row of the correct length
-            self.setData([list(range(len(dataFrameObject.headings)))])
+            # self.hide()
+            #self._silenceCallback = True
 
-        # needed after setting the column headings
-        self.setHorizontalHeaderLabels(dataFrameObject.headings)
-        self.showColumns(dataFrameObject)
-        # self.resizeColumnsToContents()
-        # self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+            # keep the original sorting method
+            sortOrder = self.horizontalHeader().sortIndicatorOrder()
+            sortColumn = self.horizontalHeader().sortIndicatorSection()
 
-        # required to make the header visible
-        self.setColumnCount(dataFrameObject.numColumns)
+            if not dataFrameObject.dataFrame.empty:
+                # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
-        # re-sort the table
-        if sortColumn < self.columnCount():
-            self.sortByColumn(sortColumn, sortOrder)
+                self.setData(dataFrameObject.dataFrame.values)
+            else:
+                # set a dummy row of the correct length
+                self.setData([list(range(len(dataFrameObject.headings)))])
 
-        # clear the dummy row
-        if dataFrameObject.dataFrame.empty:
-            self.setRowCount(0)
+            # needed after setting the column headings
+            self.setHorizontalHeaderLabels(dataFrameObject.headings)
+            self.showColumns(dataFrameObject)
+            # self.resizeColumnsToContents()
+            # self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
 
-        self._silenceCallback = False
-        # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
-        self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
-        self.resizeColumnsToContents()
+            # required to make the header visible
+            self.setColumnCount(dataFrameObject.numColumns)
 
-        self.show()
+            # re-sort the table
+            if sortColumn < self.columnCount():
+                self.sortByColumn(sortColumn, sortOrder)
+
+            # clear the dummy row
+            if dataFrameObject.dataFrame.empty:
+                self.setRowCount(0)
+
+            #self._silenceCallback = False
+            # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
+            self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+            self.resizeColumnsToContents()
+
+            self._highLightObjs(objs)
+            # self.show()
 
     def getDataFrameFromList(self, table=None,
                              buildList=None,
@@ -1183,41 +1244,44 @@ QuickTable::item::selected {
         clear the current selection in the table
         and remove objects form the current list
         """
-        objList = self.getSelectedObjects()
-        selectionModel = self.selectionModel()
-        selectionModel.clearSelection()
+        with self._tableBlockSignals('clearSelection'):
 
-        # remove from the current list
-        # TODO:ED check whether this is robust
-        multiple = self._tableData['classCallBack']
-        if multiple:  # None if no table callback defined
-            singular = multiple[:-1]
-            multipleAttr = getattr(self.current, multiple)
-            singularAttr = getattr(self.current, singular)
-            if len(multipleAttr) > 0:
-                from ccpn.framework.Current import Remove
+            objList = self.getSelectedObjects()
+            selectionModel = self.selectionModel()
+            selectionModel.clearSelection()
 
-                for obj in multipleAttr:
-                    remove = getattr(self.current, Remove + obj.className)
-                    if remove:
-                        remove(obj)
-            # if self.multiSelect:
-            #   if isinstance(objList, Iterable):
-            #     for obj in objList:
-            #
-            #       # try:
-            #       #   multipleAttr.remove(obj)
-            #       # except:
-            #       #   getLogger().warning('%s not found in the list' % obj)
-            #   else:
-            #     if objList in multipleAttr:
-            #       multipleAttr.remove(objList)
-            #     # try:
-            #     #   multipleAttr.remove(objList)
-            #     # except:
-            #     #   getLogger().warning('%s not found in the list' % objList)
-            # else:
-            #   setattr(self.current, singular, None)
+            # remove from the current list
+            # TODO:ED check whether this is robust
+            multiple = self._tableData['classCallBack']
+            if multiple:  # None if no table callback defined
+                singular = multiple[:-1]
+                multipleAttr = getattr(self.current, multiple)
+                singularAttr = getattr(self.current, singular)
+                if len(multipleAttr) > 0:
+                    from ccpn.framework.Current import Remove
+
+                    for obj in multipleAttr:
+                        remove = getattr(self.current, Remove + obj.className)
+                        if remove:
+                            remove(obj)
+
+                # if self.multiSelect:
+                #   if isinstance(objList, Iterable):
+                #     for obj in objList:
+                #
+                #       # try:
+                #       #   multipleAttr.remove(obj)
+                #       # except:
+                #       #   getLogger().warning('%s not found in the list' % obj)
+                #   else:
+                #     if objList in multipleAttr:
+                #       multipleAttr.remove(objList)
+                #     # try:
+                #     #   multipleAttr.remove(objList)
+                #     # except:
+                #     #   getLogger().warning('%s not found in the list' % objList)
+                # else:
+                #   setattr(self.current, singular, None)
 
     def selectObjects(self, objList: list, setUpdatesEnabled: bool = False):
         """
@@ -1227,30 +1291,32 @@ QuickTable::item::selected {
         if not self._dataFrameObject:
             return
 
-        selectionModel = self.selectionModel()
+        with self._tableBlockSignals('selectObjects'):
 
-        if objList:
-            # disable callbacks while populating the table
+            selectionModel = self.selectionModel()
 
-            self._silenceCallback = True
-            # self.blockSignals(True)
-            self.setUpdatesEnabled(setUpdatesEnabled)
+            if objList:
+                # disable callbacks while populating the table
 
-            if not self._mousePressed:
-                selectionModel.clearSelection()  # causes a clear problem here
-                # strange tablewidget cmd/selection problem
+                #self._silenceCallback = True
+                # self.blockSignals(True)
+                self.setUpdatesEnabled(setUpdatesEnabled)
 
-            for obj in objList:
-                row = self._dataFrameObject.find(self, str(obj.pid))
-                if row is not None:
-                    selectionModel.select(self.model().index(row, 0),
-                                          selectionModel.Select | selectionModel.Rows)
+                if not self._mousePressed:
+                    selectionModel.clearSelection()  # causes a clear problem here
+                    # strange tablewidget cmd/selection problem
 
-            self.setUpdatesEnabled(True)
-            # self.blockSignals(False)
-            self._silenceCallback = False
+                for obj in objList:
+                    row = self._dataFrameObject.find(self, str(obj.pid))
+                    if row is not None:
+                        selectionModel.select(self.model().index(row, 0),
+                                              selectionModel.Select | selectionModel.Rows)
 
-            self.setFocus(QtCore.Qt.OtherFocusReason)
+                # self.setUpdatesEnabled(True)
+                # self.blockSignals(False)
+                #self._silenceCallback = False
+
+                # self.setFocus(QtCore.Qt.OtherFocusReason)
 
     def _highLightObjs(self, selection):
 
@@ -1258,48 +1324,51 @@ QuickTable::item::selected {
         if not self._dataFrameObject:
             return
 
-        selectionModel = self.selectionModel()
+        with self._tableBlockSignals('_highLightObjs'):
 
-        if selection:
-            uniqObjs = set(selection)
+            selectionModel = self.selectionModel()
 
-            rowObjs = []
-            for obj in uniqObjs:
-                if obj in self._dataFrameObject.objects:
-                    rowObjs.append(obj)
+            if selection:
+                uniqObjs = set(selection)
 
-            # disable callbacks while populating the table
-            self._silenceCallback = True
-            # self.blockSignals(True)
-            if not self._mousePressed:
-                selectionModel.clearSelection()  # causes a clear problem here
-                # strange tablewidget cmd/selection problem
-            self.setUpdatesEnabled(False)
+                rowObjs = []
+                for obj in uniqObjs:
+                    if obj in self._dataFrameObject.objects:
+                        rowObjs.append(obj)
 
-            for obj in rowObjs:
-                row = self._dataFrameObject.find(self, str(obj.pid))
-                if row is not None:
-                    selectionModel.select(self.model().index(row, 0)
-                                          , selectionModel.Select | selectionModel.Rows)
-                # selectionModel.setCurrentIndex(self.model().index(row, 0)
-                #                                , selectionModel.SelectCurrent | selectionModel.Rows)
+                # disable callbacks while populating the table
+                #self._silenceCallback = True
+                # self.blockSignals(True)
+                if not self._mousePressed:
+                    selectionModel.clearSelection()  # causes a clear problem here
+                    # strange tablewidget cmd/selection problem
+                # self.setUpdatesEnabled(False)
 
-            # self.scrollToSelectedIndex()
+                for obj in rowObjs:
+                    row = self._dataFrameObject.find(self, str(obj.pid))
+                    if row is not None:
+                        selectionModel.select(self.model().index(row, 0),
+                                              selectionModel.Select | selectionModel.Rows)
+                    # selectionModel.setCurrentIndex(self.model().index(row, 0)
+                    #                                , selectionModel.SelectCurrent | selectionModel.Rows)
 
-            self.setUpdatesEnabled(True)
-            # self.blockSignals(False)
-            self._silenceCallback = False
-            self.setFocus(QtCore.Qt.OtherFocusReason)
+                # self.scrollToSelectedIndex()
+
+                # self.setUpdatesEnabled(True)
+                # self.blockSignals(False)
+                #self._silenceCallback = False
+                # self.setFocus(QtCore.Qt.OtherFocusReason)
 
     def clearTable(self):
         "remove all objects from the table"
-        self.hide()
-        self._silenceCallback = True
+        # self.hide()
+        #self._silenceCallback = True
 
-        self.clearTableContents()
+        with self._tableBlockSignals('clearTable'):
+            self.clearTableContents()
 
-        self.show()
-        self._silenceCallback = False
+        # self.show()
+        #self._silenceCallback = False
         # self.resizeColumnsToContents()
         # self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
 
@@ -1362,57 +1431,61 @@ QuickTable::item::selected {
         """
         Notifier callback for updating the table
         """
-        # thisTableList = getattr(data[Notifier.THEOBJECT]
-        #                         , self._tableData['className'])   # get the table list
-        table = data[Notifier.OBJECT]
-        #
-        # self._silenceCallback = True
-        tableSelect = self._tableData['tableSelection']
 
-        currentTable = getattr(self, tableSelect) if tableSelect else None
+        with self._tableBlockSignals('_updateTableCallback'):
 
-        if currentTable and currentTable == table:
-            trigger = data[Notifier.TRIGGER]
+            # thisTableList = getattr(data[Notifier.THEOBJECT]
+            #                         , self._tableData['className'])   # get the table list
+            table = data[Notifier.OBJECT]
+            #
+            # #self._silenceCallback = True
+            tableSelect = self._tableData['tableSelection']
 
-            if trigger == Notifier.RENAME:
+            currentTable = getattr(self, tableSelect) if tableSelect else None
 
-                # keep the original sorting method
-                sortOrder = self.horizontalHeader().sortIndicatorOrder()
-                sortColumn = self.horizontalHeader().sortIndicatorSection()
+            if currentTable and currentTable == table:
+                trigger = data[Notifier.TRIGGER]
 
-                # self.displayTableForNmrTable(table)
-                self._tableData['changeFunc'](table)
+                if trigger == Notifier.RENAME:
 
-                # if tableSelect and getattr(self, tableSelect) in thisTableList:
-                #   trigger = data[Notifier.TRIGGER]
-                #
-                #   # keep the original sorting method
-                #   sortOrder = self.horizontalHeader().sortIndicatorOrder()
-                #   sortColumn = self.horizontalHeader().sortIndicatorSection()
-                #
-                #   if table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.DELETE:
-                #
-                #     self.clearTable()
-                #
-                #   elif table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.CHANGE:
-                #
-                #     # self.displayTableForNmrTable(table)
-                #     self._tableData['changeFunc'](table)
-                #
-                #   elif trigger == Notifier.RENAME:
-                #     if table == getattr(self, tableSelect):
-                #
-                #       # self.displayTableForNmrTable(table)
-                #       self._tableData['changeFunc'](table)
+                    # keep the original sorting method
+                    sortOrder = self.horizontalHeader().sortIndicatorOrder()
+                    sortColumn = self.horizontalHeader().sortIndicatorSection()
 
-                # re-sort the table
-                if sortColumn < self.columnCount():
-                    self.sortByColumn(sortColumn, sortOrder)
+                    # self.displayTableForNmrTable(table)
+                    self._tableData['changeFunc'](table)
 
-        # else:
-        #   self.clearTable()
+                    # if tableSelect and getattr(self, tableSelect) in thisTableList:
+                    #   trigger = data[Notifier.TRIGGER]
+                    #
+                    #   # keep the original sorting method
+                    #   sortOrder = self.horizontalHeader().sortIndicatorOrder()
+                    #   sortColumn = self.horizontalHeader().sortIndicatorSection()
+                    #
+                    #   if table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.DELETE:
+                    #
+                    #     self.clearTable()
+                    #
+                    #   elif table.pid == self._tableData['pullDownWidget'].getText() and trigger == Notifier.CHANGE:
+                    #
+                    #     # self.displayTableForNmrTable(table)
+                    #     self._tableData['changeFunc'](table)
+                    #
+                    #   elif trigger == Notifier.RENAME:
+                    #     if table == getattr(self, tableSelect):
+                    #
+                    #       # self.displayTableForNmrTable(table)
+                    #       self._tableData['changeFunc'](table)
 
-        self._silenceCallback = False
+                    # re-sort the table
+                    if sortColumn < self.columnCount():
+                        self.sortByColumn(sortColumn, sortOrder)
+
+            # else:
+            #   self.clearTable()
+
+            #self._silenceCallback = False
+
         getLogger().debug2('<updateTableCallback>', data['notifier'],
                            tableSelect,
                            data['trigger'], data['object'])
@@ -1425,104 +1498,106 @@ QuickTable::item::selected {
         # thisTableList = getattr(data[Notifier.THEOBJECT]
         #                         , self._tableData['className'])   # get the tableList
 
-        row = data[Notifier.OBJECT]
-        trigger = data[Notifier.TRIGGER]
+        with self._tableBlockSignals('_updateRowCallback'):
+            row = data[Notifier.OBJECT]
+            trigger = data[Notifier.TRIGGER]
 
-        if not self._dataFrameObject:
-            return
+            if not self._dataFrameObject:
+                return
 
-        self._silenceCallback = True
-        _update = False
-        # try:
+            #self._silenceCallback = True
 
-        # multiple delete from deleteObjFromTable messes with this
-        # if thisRow.pid == self._tableData['pullDownWidget'].getText():
+            _update = False
+            # try:
 
-        # is the row in the table
-        # TODO:ED move these into the table class
+            # multiple delete from deleteObjFromTable messes with this
+            # if thisRow.pid == self._tableData['pullDownWidget'].getText():
 
-        # keep the original sorting method
-        sortOrder = self.horizontalHeader().sortIndicatorOrder()
-        sortColumn = self.horizontalHeader().sortIndicatorSection()
+            # is the row in the table
+            # TODO:ED move these into the table class
 
-        if trigger == Notifier.DELETE:
+            # keep the original sorting method
+            sortOrder = self.horizontalHeader().sortIndicatorOrder()
+            sortColumn = self.horizontalHeader().sortIndicatorSection()
 
-            # remove item from self._dataFrameObject and table
+            if trigger == Notifier.DELETE:
 
-            if row in self._dataFrameObject._objects:
-                self._dataFrameObject.removeObject(row)
-                _update = True
+                # remove item from self._dataFrameObject and table
 
-        elif trigger == Notifier.CREATE:
-
-            # insert item into self._dataFrameObject
-
-            if self._tableData['tableSelection']:
-                tSelect = getattr(self, self._tableData['tableSelection'])
-                if tSelect:
-
-                    # check that the object created is in the list viewed in this table
-                    # e.g. row.peakList == tSelect then add
-                    if tSelect == getattr(row, self._tableData['tableName']):
-                        # add the row to the dataFrame and table
-                        self._dataFrameObject.appendObject(row)
-                        _update = True
-
-        elif trigger == Notifier.CHANGE:
-
-            # modify the line in the table
-            try:
-                _update = self._dataFrameObject.changeObject(row)
-
-                # TODO:ED it may not already be in the list - check indexing
-                if not _update:
-                    if self._tableData['tableSelection']:
-                        tSelect = getattr(self, self._tableData['tableSelection'])
-                        if tSelect:
-
-                            # check that the object created is in the list viewed in this table
-                            # e.g. row.peakList == tSelect then add
-                            if tSelect == getattr(row, self._tableData['tableName']):
-                                # add the row to the dataFrame and table
-
-                                # get the array containing the objects displayed in the table
-                                multiple = self._tableData['classCallBack']
-                                # print(tSelect, multiple)
-                                multipleAttr = getattr(tSelect, multiple)
-
-                                self._dataFrameObject.appendObject(row, multipleAttr=multipleAttr)
-                                _update = True
-
-            except:
-                getLogger().debug2('Error updating row in table')
-
-        elif trigger == Notifier.RENAME:
-            # get the old pid before the rename
-            oldPid = data[Notifier.OLDPID]
-
-            if row in self._dataFrameObject._objects:
-
-                # modify the oldPid in the objectList, change to newPid
-                _update = self._dataFrameObject.renameObject(row, oldPid)
-
-                # TODO:ED check whether the new object is still in the active list - remove otherwise
-                if self._tableData['tableSelection']:
-                    tSelect = getattr(self, self._tableData['tableSelection'])  # eg self.nmrChain
-                    if tSelect and not tSelect.isDeleted:  # eg self.nmrChain.nmrResidues
-                        objList = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
-
-                        if objList and row not in objList:
-                            # TODO:ED Check current deletion
-                            getLogger().debug2('>>> deleting spare object %s' % row, oldPid)
-                            self._dataFrameObject.removeObject(row)
-
-                        else:
-                            getLogger().debug2('>>> creating spare object %s' % row, oldPid)
-                            self._dataFrameObject.appendObject(row)
-                    else:
-                        self.clearTable()
-
+                if row in self._dataFrameObject._objects:
+                    self._dataFrameObject.removeObject(row)
                     _update = True
+
+            elif trigger == Notifier.CREATE:
+
+                # insert item into self._dataFrameObject
+
+                if self._tableData['tableSelection']:
+                    tSelect = getattr(self, self._tableData['tableSelection'])
+                    if tSelect:
+
+                        # check that the object created is in the list viewed in this table
+                        # e.g. row.peakList == tSelect then add
+                        if tSelect == getattr(row, self._tableData['tableName']):
+                            # add the row to the dataFrame and table
+                            self._dataFrameObject.appendObject(row)
+                            _update = True
+
+            elif trigger == Notifier.CHANGE:
+
+                # modify the line in the table
+                try:
+                    _update = self._dataFrameObject.changeObject(row)
+
+                    # TODO:ED it may not already be in the list - check indexing
+                    if not _update:
+                        if self._tableData['tableSelection']:
+                            tSelect = getattr(self, self._tableData['tableSelection'])
+                            if tSelect:
+
+                                # check that the object created is in the list viewed in this table
+                                # e.g. row.peakList == tSelect then add
+                                if tSelect == getattr(row, self._tableData['tableName']):
+                                    # add the row to the dataFrame and table
+
+                                    # get the array containing the objects displayed in the table
+                                    multiple = self._tableData['classCallBack']
+                                    # print(tSelect, multiple)
+                                    multipleAttr = getattr(tSelect, multiple)
+
+                                    self._dataFrameObject.appendObject(row, multipleAttr=multipleAttr)
+                                    _update = True
+
+                except:
+                    getLogger().debug2('Error updating row in table')
+
+            elif trigger == Notifier.RENAME:
+                # get the old pid before the rename
+                oldPid = data[Notifier.OLDPID]
+
+                if row in self._dataFrameObject._objects:
+
+                    # modify the oldPid in the objectList, change to newPid
+                    _update = self._dataFrameObject.renameObject(row, oldPid)
+
+                    # TODO:ED check whether the new object is still in the active list - remove otherwise
+                    if self._tableData['tableSelection']:
+                        tSelect = getattr(self, self._tableData['tableSelection'])  # eg self.nmrChain
+                        if tSelect and not tSelect.isDeleted:  # eg self.nmrChain.nmrResidues
+                            objList = getattr(tSelect, self._tableData['rowClass']._pluralLinkName)
+
+                            if objList and row not in objList:
+                                # TODO:ED Check current deletion
+                                getLogger().debug2('>>> deleting spare object %s' % row, oldPid)
+                                self._dataFrameObject.removeObject(row)
+
+                            else:
+                                getLogger().debug2('>>> creating spare object %s' % row, oldPid)
+                                self._dataFrameObject.appendObject(row)
+                        else:
+                            self.clearTable()
+
+                        _update = True
 
         if _update:
             # self.update()
@@ -1533,10 +1608,11 @@ QuickTable::item::selected {
             # # except Exception as es:
             # #   getLogger().warning(str(es)+str(data))
             #
-            # self._silenceCallback = False
+            # #self._silenceCallback = False
             getLogger().debug2('<updateRowCallback>', data['notifier'],
                                self._tableData['tableSelection'],
                                data['trigger'], data['object'])
+
         return _update
 
     def _updateCellCallback(self, attr, data):
@@ -1547,46 +1623,47 @@ QuickTable::item::selected {
         # thisTableList = getattr(data[Notifier.THEOBJECT]
         #                         , self._tableData['className'])   # get the tableList
 
-        cellData = data[Notifier.OBJECT]
-        # row = getattr(cell, self._tableData['rowName'])
-        # cells = getattr(cellData, attr)
-        cells = makeIterableList(cellData)
+        with self._tableBlockSignals('_updateCellCallback'):
+            cellData = data[Notifier.OBJECT]
+            # row = getattr(cell, self._tableData['rowName'])
+            # cells = getattr(cellData, attr)
+            cells = makeIterableList(cellData)
 
-        self._silenceCallback = True
-        _update = False
+            #self._silenceCallback = True
+            _update = False
 
-        for cell in cells:
-            callbacktypes = self._tableData['cellClassNames']
-            rowObj = None
-            if isinstance(callbacktypes, list):
-                for cBack in callbacktypes:
+            for cell in cells:
+                callbacktypes = self._tableData['cellClassNames']
+                rowObj = None
+                if isinstance(callbacktypes, list):
+                    for cBack in callbacktypes:
 
-                    # check if row is the correct type of class
-                    if isinstance(cell, cBack[OBJECT_CLASS]):
-                        rowObj = getattr(cell, cBack[OBJECT_PARENT])
-                        rowCallback = cBack[OBJECT_PARENT]
-                        break
-            else:
-                rowObj = getattr(cell, callbacktypes[OBJECT_PARENT])
-                rowCallback = callbacktypes[OBJECT_PARENT]
-
-            # concatenate the list - will always return a list
-            rowObjs = makeIterableList(rowObj)
-
-            # update the correct row by calling row handler
-            for rowObj in rowObjs:
-                newData = data.copy()
-                newData[Notifier.OBJECT] = rowObj
-                newData[Notifier.TRIGGER] = Notifier.CHANGE
-
-                # check whether we are the row object or still a cell object
-                cellType = self._tableData['rowClass']
-                if isinstance(rowObj, cellType):
-                    self._updateRowCallback(newData)
+                        # check if row is the correct type of class
+                        if isinstance(cell, cBack[OBJECT_CLASS]):
+                            rowObj = getattr(cell, cBack[OBJECT_PARENT])
+                            rowCallback = cBack[OBJECT_PARENT]
+                            break
                 else:
-                    self._updateCellCallback(rowCallback, newData)
+                    rowObj = getattr(cell, callbacktypes[OBJECT_PARENT])
+                    rowCallback = callbacktypes[OBJECT_PARENT]
 
-        self._silenceCallback = False
+                # concatenate the list - will always return a list
+                rowObjs = makeIterableList(rowObj)
+
+                # update the correct row by calling row handler
+                for rowObj in rowObjs:
+                    newData = data.copy()
+                    newData[Notifier.OBJECT] = rowObj
+                    newData[Notifier.TRIGGER] = Notifier.CHANGE
+
+                    # check whether we are the row object or still a cell object
+                    cellType = self._tableData['rowClass']
+                    if isinstance(rowObj, cellType):
+                        self._updateRowCallback(newData)
+                    else:
+                        self._updateCellCallback(rowCallback, newData)
+
+        #self._silenceCallback = False
         getLogger().debug2('<updateCellCallback>', data['notifier'],
                            self._tableData['tableSelection'],
                            data['trigger'], data['object'])
@@ -1595,6 +1672,8 @@ QuickTable::item::selected {
         """
         Callback to populate the search bar with the selected item
         """
+        print('>>> %s _searchCallBack' % _moduleId(self.moduleParent))
+
         value = getattr(data[CallBack.OBJECT], self._tableData['searchCallBack']._pluralLinkName, None)
         if value and self.searchWidget and self.searchWidget.isVisible():
             self.searchWidget.selectSearchOption(self, self._tableData['searchCallBack'], value[0].id)
@@ -1605,14 +1684,18 @@ QuickTable::item::selected {
         :param data:
         """
         # self._sortChanged(0, 0)
-        self._tableData['selectCurrentCallBack'](data)
+
+        if not self._tableBlockingLevel:
+            print('>>> %s _selectCurrentCallBack' % _moduleId(self.moduleParent))
+
+            self._tableData['selectCurrentCallBack'](data)
 
     def setTableNotifiers(self, tableClass=None, rowClass=None, cellClassNames=None,
                           tableName=None, rowName=None, className=None,
                           changeFunc=None, updateFunc=None,
                           tableSelection=None, pullDownWidget=None,
                           callBackClass=None, selectCurrentCallBack=None,
-                          searchCallBack=None):
+                          searchCallBack=None, moduleParent=blankId):
         """
         Set a Notifier to call when an object is created/deleted/renamed/changed
         rename calls on name
@@ -1686,8 +1769,13 @@ QuickTable::item::selected {
                            'className': className,
                            'classCallBack': callBackClass._pluralLinkName if callBackClass else None,
                            'selectCurrentCallBack': selectCurrentCallBack,
-                           'searchCallBack': searchCallBack
+                           'searchCallBack': searchCallBack,
+                           'moduleParent': moduleParent
                            }
+
+        # add a cleaner id to the opened quickTable list
+        self.moduleParent = moduleParent
+        MODULEIDS[id(moduleParent)] = len(MODULEIDS)
 
     def setDefaultTableData(self):
         """Populate an empty table data object
@@ -1703,7 +1791,8 @@ QuickTable::item::selected {
                            'className': None,
                            'classCallBack': None,
                            'selectCurrentCallBack': None,
-                           'searchCallBack': None
+                           'searchCallBack': None,
+                           'moduleParent': blankId
                            }
 
     def _initialiseTableNotifiers(self):
@@ -1726,7 +1815,7 @@ QuickTable::item::selected {
         """
         if self._tableNotifier is not None:
             self._tableNotifier.unRegister()
-            del(self._tableNotifier)
+            del (self._tableNotifier)
         if self._rowNotifier is not None:
             self._rowNotifier.unRegister()
             del (self._rowNotifier)

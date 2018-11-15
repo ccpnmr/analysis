@@ -69,7 +69,7 @@ NotAvailable = 'Not Available'
 
 
 def _getShift(ref_x, ref_y, target_y):
-  '''
+  """
   :param ref_x: X array of the reference spectra (positions)
   :param ref_y: Y array of the reference spectra (intensities)
   :param target_y: Y array of the target spectra (intensities)
@@ -77,28 +77,29 @@ def _getShift(ref_x, ref_y, target_y):
   Global alignment. This can give unpredictable results if the signal intensities are very different
   To align the target spectrum to its reference: add the shift to the x array.
   E.g. target_y += shift
-  '''
+  """
   return (np.argmax(signal.correlate(ref_y, target_y)) - len(target_y)) * np.mean(np.diff(ref_x))
 
 
+
 def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engine='median'):
-  '''
+  """
   :param referenceSpectrum:
   :param spectra:
-  :param referenceRegion:
+  :param referenceRegion: ppm regions
   :param intensityFactor:
   :param engine: one of 'median', 'mode', 'mean'
   :return: shift float
   alignment of spectra. It aligns based on a specified region of the reference spectrum
-  '''
+  """
 
   shifts = []
-  point1, point2 = max(referenceRegion), min(referenceRegion)
+  point1, point2 = np.max(referenceRegion), np.min(referenceRegion)
   xRef, yRef = referenceSpectrum.positions, referenceSpectrum.intensities
   ref_x_filtered = np.where((xRef <= point1) & (xRef >= point2)) #only the region of interest for the reference spectrum
 
   ref_y_filtered = yRef[ref_x_filtered]
-  maxYRef = max(ref_y_filtered) #Find the highest signal in the region of interest for the reference spectrum. All spectra will be aligned to this point.
+  maxYRef = np.max(ref_y_filtered) #Find the highest signal in the region of interest for the reference spectrum. All spectra will be aligned to this point.
   boolsRefMax = yRef == maxYRef
   refIndices = np.argwhere(boolsRefMax)
   if len(refIndices) > 0:
@@ -112,7 +113,7 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engi
     x_TargetFilter = np.where((xTarg <= point1) & (xTarg >= point2)) # filter only the region of interest for the target spectrum
 
     y_TargetValues = yTarg[x_TargetFilter]
-    maxYTarget = max(y_TargetValues)
+    maxYTarget = np.max(y_TargetValues)
     boolsMax = yTarg == maxYTarget  #Find the highest signal in the region of interest
     indices = np.argwhere(boolsMax)
     if len(indices)>0:

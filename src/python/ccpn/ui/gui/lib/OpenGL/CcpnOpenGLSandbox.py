@@ -90,10 +90,10 @@ __date__ = "$Date$"
   #
   #       index = ii*4
   #       indices = [index, index + 1, index + 2, index, index + 2, index + 3]
-  #       vertices = [x0, y0, self.mathFun(x0, y0)
-  #                   , x0, y1, self.mathFun(x0, y1)
-  #                   , x1, y1, self.mathFun(x1, y1)
-  #                   , x1, y0, self.mathFun(x1, y0)]
+  #       vertices = [x0, y0, self.mathFun(x0, y0),
+  #                    x0, y1, self.mathFun(x0, y1),
+  #                    x1, y1, self.mathFun(x1, y1),
+  #                    x1, y0, self.mathFun(x1, y0)]
   #       # texcoords = [[u0, v0], [u0, v1], [u1, v1], [u1, v0]]
   #       colors = [0.8745, 0.1608, 0.3137, 1.0] * 4
   #

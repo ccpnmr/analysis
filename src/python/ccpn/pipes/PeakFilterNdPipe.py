@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -34,21 +34,23 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
-from ccpn.util.Logging import getLogger , _debug3
+from ccpn.util.Logging import getLogger, _debug3
+
 
 ########################################################################################################################
 ###   Attributes:
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName =  'Peak Filter ND'
+PipeName = 'Peak Filter ND'
 
-FilterFactor = 'Filter_Factor' # NB Mock Paramater
-DeletePeaks    = 'Delete_Peaks' # NB Mock Paramater
+FilterFactor = 'Filter_Factor'  # NB Mock Paramater
+DeletePeaks = 'Delete_Peaks'  # NB Mock Paramater
 
 DefaultFilterFactor = 5.7
 DefaultPeakListIndex = -1
 DefaultDeletePeaks = False
+
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -63,24 +65,23 @@ DefaultDeletePeaks = False
 # This Pipe has not been implemented yet. Gui Mock type only
 
 
-
 class PeakFilterNdGuiPipe(GuiPipe):
+    preferredPipe = True
+    pipeName = PipeName
 
-  preferredPipe = True
-  pipeName = PipeName
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(PeakFilterNdGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
 
-  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
-    super(PeakFilterNdGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
+        row = 0
+        filterFactorLabel = Label(self.pipeFrame, text=FilterFactor, grid=(row, 0))
+        setattr(self, FilterFactor, DoubleSpinbox(self.pipeFrame, value=DefaultFilterFactor, min=0.01, step=0.1, grid=(row, 1)))
 
-    row = 0
-    filterFactorLabel = Label(self.pipeFrame, text=FilterFactor, grid=(row, 0))
-    setattr(self, FilterFactor, DoubleSpinbox(self.pipeFrame, value=DefaultFilterFactor, min=0.01, step=0.1, grid=(row, 1)))
+        row += 1
+        deletePeakLabel = Label(self.pipeFrame, text=DeletePeaks, grid=(row, 0))
+        setattr(self, DeletePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
 
-    row += 1
-    deletePeakLabel = Label(self.pipeFrame, text=DeletePeaks, grid=(row, 0))
-    setattr(self, DeletePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
 
 ########################################################################################################################
 ##########################################       PIPE      #############################################################
@@ -89,25 +90,18 @@ class PeakFilterNdGuiPipe(GuiPipe):
 # This Pipe has not been implemented yet. Gui Mock type only
 
 
-
 class PeakFilterNdPipe(SpectraPipe):
+    guiPipe = PeakFilterNdGuiPipe
+    pipeName = PipeName
 
-  guiPipe = PeakFilterNdGuiPipe
-  pipeName = PipeName
+    _kwargs = {
+        FilterFactor: DefaultFilterFactor,
+        DeletePeaks: DefaultDeletePeaks,
+        }
 
-  _kwargs =   {
-               FilterFactor: DefaultFilterFactor,
-               DeletePeaks : DefaultDeletePeaks,
-              }
+    def runPipe(self, spectra):
+        getLogger().warning('%s Has Not Been Implemented Yet' % PipeName)
 
-  def runPipe(self, spectra):
-
-    getLogger().warning('%s Has Not Been Implemented Yet' %PipeName)
-
-    return spectra
-
-
+        return spectra
 
 # PeakFilterNdPipe.register() # Registers the pipe in the pipeline
-
-

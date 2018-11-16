@@ -31,7 +31,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import MultipletListPulldown
-# from ccpn.ui.gui.widgets.Table import ObjectTable, Column , ColumnViewSettings,  ObjectTableFilter
+# from ccpn.ui.gui.widgets.Table import ObjectTable, Column, ColumnViewSettings,  ObjectTableFilter
 from ccpn.ui.gui.widgets.QuickTable import QuickTable
 from ccpn.ui.gui.widgets.Column import ColumnClass, Column
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -478,19 +478,6 @@ class MultipletListTableWidget(QuickTable):
             self.clearSelection()
             self.peakListTable.clear()
 
-    # @staticmethod
-    # def _getCommentText(multiplet):
-    #   if multiplet.comment == '' or not multiplet.comment:
-    #     return ' '
-    #   else:
-    #     return multiplet.comment
-    #
-    # @staticmethod
-    # def _setComment(multiplet, value):
-    #   MultipletListTableWidget.project.blankNotification()
-    #   multiplet.comment = value
-    #   MultipletListTableWidget.project.unblankNotification()
-
     def _setPositionUnit(self, value):
         if value in MultipletPosUnits:
             MultipletListTableWidget.positionsUnit = value
@@ -499,34 +486,3 @@ class MultipletListTableWidget(QuickTable):
         "Cleanup of self"
         self.clearTableNotifiers()
 
-    # def _setNotifiers(self):
-    #   """
-    #   Set a Notifier to call when an object is created/deleted/renamed/changed
-    #   rename calls on name
-    #   change calls on any other attribute
-    #   """
-    #   self._selectOnTableCurrentMultipletsNotifier = Notifier(self.current
-    #                                                      , [Notifier.CURRENT]
-    #                                                      , targetName='multiplets'
-    #                                                      , callback=self._selectOnTableCurrentMultipletsNotifierCallback)
-    #   # TODO set notifier to trigger only for the selected multipletList.
-    #
-    #   self._multipletListDeleteNotifier = Notifier(self.project
-    #                                           , [Notifier.CREATE, Notifier.DELETE]
-    #                                           , 'MultipletList'
-    #                                           , self._multipletListNotifierCallback)
-    #   self._multipletNotifier =  Notifier(self.project
-    #                                  , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
-    #                                  , 'Multiplet', self._multipletNotifierNotifierCallback
-    #                                  , onceOnly=True)
-    #
-    # def _clearNotifiers(self):
-    #   """
-    #   clean up the notifiers
-    #   """
-    #   if self._multipletListDeleteNotifier is not None:
-    #     self._multipletListDeleteNotifier.unRegister()
-    #   if self._multipletNotifier is not None:
-    #     self._multipletNotifier.unRegister()
-    #   if self._selectOnTableCurrentMultipletsNotifier is not None:
-    #     self._selectOnTableCurrentMultipletsNotifier.unRegister()

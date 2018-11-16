@@ -63,7 +63,7 @@ class GuiIntegralListView(QtWidgets.QGraphicsItem):
         # A big NONO!!!
         strip = self.spectrumView.strip
         scene = strip.plotWidget.scene()
-        QtWidgets.QGraphicsItem.__init__(self)  # ejb - need to remove , scene=scene from here
+        QtWidgets.QGraphicsItem.__init__(self)  # ejb - need to remove, scene=scene from here
         self.scene = scene
 
         ###self.strip = strip

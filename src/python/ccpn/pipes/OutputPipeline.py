@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -32,14 +32,13 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 
-
-
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.util.Hdf5 import convertDataToHdf5
 import pandas as pd
 from collections import OrderedDict
 import os
+
 
 ########################################################################################################################
 ###   Attributes:
@@ -55,8 +54,9 @@ TAB = 'Tab'
 XLSX = 'XLSX'
 Json = 'Json'
 DataSet = 'CCPN DataSet'
-Modes = [CSV,TAB, XLSX, Json, DataSet]
+Modes = [CSV, TAB, XLSX, Json, DataSet]
 DefaultPath = os.path.expanduser("~")
+
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -64,64 +64,64 @@ DefaultPath = os.path.expanduser("~")
 
 
 def _getPipelineOutputs(pipeline):
-  outputs = []
-  if pipeline is not None:
-    application = pipeline.application
-    if application is not None:
-      outputs.append(('Application Version', application.applicationName+' '+ application.applicationVersion))
-      outputs.append(('Pipeline: '+pipeline.pipelineName , pipeline._kwargs))
-      spectraNames = []
-      if pipeline.inputData:
-        for sp in pipeline.inputData:
-          if sp is not None:
-            spectraNames.append(sp.name)
-      outputs.append(('Output spectra:', spectraNames))
+    outputs = []
+    if pipeline is not None:
+        application = pipeline.application
+        if application is not None:
+            outputs.append(('Application Version', application.applicationName + ' ' + application.applicationVersion))
+            outputs.append(('Pipeline: ' + pipeline.pipelineName, pipeline._kwargs))
+            spectraNames = []
+            if pipeline.inputData:
+                for sp in pipeline.inputData:
+                    if sp is not None:
+                        spectraNames.append(sp.name)
+            outputs.append(('Output spectra:', spectraNames))
 
-      for pipe in pipeline.queue:
-        if pipe is not None:
-          outputs.append(('Pipe: '+pipe.pipeName,  pipe._kwargs))
+            for pipe in pipeline.queue:
+                if pipe is not None:
+                    outputs.append(('Pipe: ' + pipe.pipeName, pipe._kwargs))
 
-  return outputs
+    return outputs
+
 
 def _getOutPutDataFrame(outputList):
-  df = pd.DataFrame(outputList)
-  return df
+    df = pd.DataFrame(outputList)
+    return df
+
+
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
 
 
 class OutputPipelineGuiPipe(GuiPipe):
+    preferredPipe = True
+    pipeName = PipeName
 
-  preferredPipe = True
-  pipeName = PipeName
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(OutputPipelineGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
 
-  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
-    super(OutputPipelineGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
+        row = 0
+        self.saveAsHDF5Label = Label(self.pipeFrame, SaveHDF5, grid=(row, 0))
+        setattr(self, SaveHDF5, CheckBox(self.pipeFrame, checked=False, grid=(row, 1)))
 
-    row = 0
-    self.saveAsHDF5Label = Label(self.pipeFrame, SaveHDF5,  grid=(row,0))
-    setattr(self, SaveHDF5, CheckBox(self.pipeFrame, checked=False,  grid=(row,1)))
+        row += 1
+        self.modeLabel = Label(self.pipeFrame, SaveOutputMode, grid=(row, 0))
+        setattr(self, SaveOutputMode,
+                RadioButtons(self.pipeFrame, texts=Modes, direction='v', vAlign='c', selectedInd=1, grid=(row, 1)))
 
-    row += 1
-    self.modeLabel = Label(self.pipeFrame, SaveOutputMode, grid=(row, 0))
-    setattr(self, SaveOutputMode,
-            RadioButtons(self.pipeFrame, texts=Modes, direction='v', vAlign='c', selectedInd=1, grid=(row, 1)))
+        row += 1
+        self.savePathLabel = Label(self.pipeFrame, SavePath, grid=(row, 0))
+        setattr(self, SavePath,
+                LineEditButtonDialog(self.pipeFrame, fileMode=QtWidgets.QFileDialog.Directory, grid=(row, 1)))
+        self._setDefaultDataPath()
 
-    row += 1
-    self.savePathLabel = Label(self.pipeFrame, SavePath, grid=(row, 0))
-    setattr(self, SavePath,
-            LineEditButtonDialog(self.pipeFrame, fileMode=QtWidgets.QFileDialog.Directory,  grid=(row,1)))
-    self._setDefaultDataPath()
-
-
-
-  def _setDefaultDataPath(self):
-    'writes the default data path in the pipe lineEdit'
-    if self.application is not None:
-      getattr(self, SavePath).lineEdit.set(self.application.preferences.general.dataPath)
+    def _setDefaultDataPath(self):
+        'writes the default data path in the pipe lineEdit'
+        if self.application is not None:
+            getattr(self, SavePath).lineEdit.set(self.application.preferences.general.dataPath)
 
 
 ########################################################################################################################
@@ -130,58 +130,55 @@ class OutputPipelineGuiPipe(GuiPipe):
 
 
 class OutputSpectraPipe(SpectraPipe):
+    guiPipe = OutputPipelineGuiPipe
+    pipeName = PipeName
+    _kwargs = {
+        SavePath: DefaultPath,
+        SaveHDF5: False,
+        SaveOutputMode: ''
+        }
 
-  guiPipe = OutputPipelineGuiPipe
-  pipeName = PipeName
-  _kwargs = {
-            SavePath:DefaultPath,
-            SaveHDF5:False,
-            SaveOutputMode:''
-            }
+    def runPipe(self, spectra):
+        '''
 
-  def runPipe(self, spectra):
-    '''
+        '''
 
-    '''
+        outputs = _getPipelineOutputs(self.pipeline)
+        df = _getOutPutDataFrame(outputs)
 
-    outputs = _getPipelineOutputs(self.pipeline)
-    df = _getOutPutDataFrame(outputs)
+        path = self._kwargs[SavePath] + '/'
+        mode = self._kwargs['Save_Output_Mode']
+        saveHDF5 = self._kwargs[SaveHDF5]
 
-    path = self._kwargs[SavePath]+'/'
-    mode = self._kwargs['Save_Output_Mode']
-    saveHDF5 = self._kwargs[SaveHDF5]
+        if saveHDF5:
+            for spectrum in spectra:
+                if spectrum is not None:
+                    fullPath = str(path) + str(spectrum.name) + '.hdf5'
+                    convertDataToHdf5(spectrum=spectrum, outputPath=fullPath)
+        sucess = False
+        if df is not None:
+            if mode == CSV:
+                df.to_csv(path + self.pipeline.pipelineName)
+                sucess = True
+            if mode == TAB:
+                df.to_csv(path + self.pipeline.pipelineName, sep='\t')
+                sucess = True
+            if mode == Json:
+                df.to_json(path + self.pipeline.pipelineName + '.json', orient='split')
+                sucess = True
+            if mode == XLSX:
+                df.to_excel(path + self.pipeline.pipelineName + '.xlsx', sheet_name=self.pipeline.pipelineName,
+                            index=False, )
+                sucess = True
+            if mode == DataSet:
+                newDataSet = self.project.newDataSet(title=self.pipeline.pipelineName)
+                data = newDataSet.newData(name=self.pipeline.pipelineName)
+                data.setParameter(self.pipeline.pipelineName, df)
 
-    if saveHDF5:
-      for spectrum in spectra:
-        if spectrum is not None:
-          fullPath = str(path) + str(spectrum.name) + '.hdf5'
-          convertDataToHdf5(spectrum=spectrum, outputPath=fullPath)
-    sucess = False
-    if df is not None:
-      if mode == CSV:
-        df.to_csv(path+self.pipeline.pipelineName)
-        sucess = True
-      if mode == TAB:
-        df.to_csv(path+self.pipeline.pipelineName, sep='\t')
-        sucess = True
-      if mode == Json:
-        df.to_json(path+self.pipeline.pipelineName+'.json', orient = 'split')
-        sucess = True
-      if mode == XLSX:
-        df.to_excel(path+self.pipeline.pipelineName+'.xlsx', sheet_name=self.pipeline.pipelineName,
-                    index=False,)
-        sucess = True
-      if mode == DataSet:
-        newDataSet = self.project.newDataSet(title=self.pipeline.pipelineName)
-        data = newDataSet.newData(name = self.pipeline.pipelineName)
-        data.setParameter(self.pipeline.pipelineName, df)
+        if sucess:
+            self.project._logger.info("Pipeline Output saved in %s" % path)
 
-    if sucess:
-      self.project._logger.info("Pipeline Output saved in %s" %path)
-
-    return spectra
-
+        return spectra
 
 
 OutputSpectraPipe.register()
-

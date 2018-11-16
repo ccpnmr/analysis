@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -37,6 +37,7 @@ from ccpn.ui.gui.widgets.Label import Label
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 
+
 ########################################################################################################################
 ###   Attributes:
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
@@ -46,10 +47,10 @@ PipeName = 'Exclude Regions'
 Region = 'Region_'
 ExcludeRegions = 'Exclude_Regions'
 
+
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
-
 
 
 ########################################################################################################################
@@ -57,102 +58,93 @@ ExcludeRegions = 'Exclude_Regions'
 ########################################################################################################################
 
 
-
 class ExcludeRegionsGuiPipe(GuiPipe):
+    preferredPipe = True
+    pipeName = PipeName
 
-  preferredPipe = True
-  pipeName = PipeName
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(ExcludeRegionsGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
 
-  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
-    super(ExcludeRegionsGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
+        self.plusIcon = Icon('icons/plus')
+        self.minusIcon = Icon('icons/minus')
 
-    self.plusIcon = Icon('icons/plus')
-    self.minusIcon = Icon('icons/minus')
+        self.addRemoveLabel = Label(self.pipeFrame, text="", grid=(0, 0))
+        self.addRemoveButtons = ButtonList(self.pipeFrame, texts=['', ''], icons=[self.plusIcon, self.minusIcon],
+                                           callbacks=[self._addRegion, self._deleteRegions], grid=(0, 1))
+        self.addRemoveButtons.setMaximumHeight(20)
+        self.count = 1
 
-    self.addRemoveLabel = Label(self.pipeFrame, text="", grid=(0, 0))
-    self.addRemoveButtons = ButtonList(self.pipeFrame, texts=['', ''], icons=[self.plusIcon, self.minusIcon],
-                                       callbacks=[self._addRegion,self._deleteRegions], grid=(0, 1))
-    self.addRemoveButtons.setMaximumHeight(20)
-    self.count = 1
+        self.excludeRegion1Label = Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0))
+        setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
+                                                                        orientation='v', grid=(self.count, 1)))
+        self.count += 1
 
-    self.excludeRegion1Label = Label(self.pipeFrame, text=Region+str(self.count), grid=(self.count , 0))
-    setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
-                                                                    orientation='v', grid=(self.count, 1)))
-    self.count += 1
+    ############       Gui Callbacks      ###########
 
-  ############       Gui Callbacks      ###########
+    def _addRegion(self):
+        self.excludeRegionLabel = Label(self.pipeFrame, text=Region + str(self.count), grid=(self.count, 0))
+        setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
+                                                                        orientation='v', grid=(self.count, 1)))
 
-  def _addRegion(self):
-    self.excludeRegionLabel = Label(self.pipeFrame, text=Region+str(self.count), grid=(self.count, 0))
-    setattr(self, Region + str(self.count), GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
-                                                                  orientation='v', grid=(self.count , 1)))
+        self.count += 1
 
-    self.count+=1
+    def _deleteRegions(self):
+        '''  delete the widget from layout. '''
+        positions = []
+        for row in range(self.count):
+            positions.append((row, 0))
+            positions.append((row, 1))
+        if (len(positions)) > 1:
+            positions = positions[2:]
+            if len(positions) > 1:
+                positions = positions[-2:]
+                for position in positions:
+                    item = self.pipeFrame.getLayout().itemAtPosition(*position)
+                    if item:
+                        w = item.widget()
+                        if w:
+                            if isinstance(w, GLTargetButtonSpinBoxes):
+                                w._turnOffPositionPicking()
+                            w.deleteLater()
+                self.count -= 1
 
-  def _deleteRegions(self):
-    '''  delete the widget from layout. '''
-    positions = []
-    for row in range(self.count):
-      positions.append((row, 0))
-      positions.append((row, 1))
-    if (len(positions))>1:
-      positions = positions[2:]
-      if len(positions)>1:
-        positions = positions[-2:]
-        for position in positions:
-          item = self.pipeFrame.getLayout().itemAtPosition(*position)
-          if item:
-            w = item.widget()
-            if w:
-              if isinstance(w,GLTargetButtonSpinBoxes):
-                w._turnOffPositionPicking()
-              w.deleteLater()
-        self.count -= 1
+    def _closeBox(self):
+        'remove the lines from plotwidget if any'
+        for row in range(self.count - 1):
+            self._deleteRegions()
+        self.closeBox()
 
-  def _closeBox(self):
-    'remove the lines from plotwidget if any'
-    for row in range(self.count-1):
-      self._deleteRegions()
-    self.closeBox()
 
 ########################################################################################################################
 ##########################################       PIPE      #############################################################
 ########################################################################################################################
 
 
-
-
 class ExcludeRegionsPipe(SpectraPipe):
+    guiPipe = ExcludeRegionsGuiPipe
+    pipeName = PipeName
 
-  guiPipe = ExcludeRegionsGuiPipe
-  pipeName = PipeName
+    _kwargs = {
+        ExcludeRegions: [[], []]
+        }
 
-  _kwargs = {
-              ExcludeRegions: [[],[]]
-             }
+    def runPipe(self, spectra):
+        '''
+        get excluded region of the spectrum and add to the pipeline kwargs.
+        Spectra is not really needed for this pipe. But is essential for the base class pipe.
+        '''
+        regions = []
+        for i in self._kwargs.values():
+            if isinstance(i, list):
+                if len(i) == 2:
+                    regions.append(i)
 
+        self._kwargs = {ExcludeRegions: regions}
+        self.pipeline._kwargs.update(self._kwargs)
 
-  def runPipe(self, spectra):
-    '''
-    get excluded region of the spectrum and add to the pipeline kwargs.
-    Spectra is not really needed for this pipe. But is essential for the base class pipe.
-    '''
-    regions = []
-    for i in self._kwargs.values():
-      if isinstance(i, list):
-        if len(i) == 2:
-          regions.append(i)
-
-    self._kwargs = {ExcludeRegions: regions}
-    self.pipeline._kwargs.update(self._kwargs)
-
-    return spectra
+        return spectra
 
 
-
-
-ExcludeRegionsPipe.register() # Registers the pipe in the pipeline
-
-
+ExcludeRegionsPipe.register()  # Registers the pipe in the pipeline

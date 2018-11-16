@@ -234,36 +234,6 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
         """
         self._refreshTable()
 
-    # def _registerNotifiers(self):
-    #   # self.application.current.registerNotify(self._updateModuleCallback, 'nmrResidues')
-    #   # self.project.registerNotifier('NmrAtom', 'change', self._refreshTable)   # just refresh the table
-    #   # self.project.registerNotifier('Peak', 'change', self._refreshTable, onceOnly=True)
-    #
-    #   self._updateNotifier = Notifier(self.current
-    #                                   , triggers=[Notifier.CURRENT]
-    #                                   , targetName='nmrResidues'
-    #                                   , callback=self._updateModuleCallback)
-    #   self._nmrAtomNotifier = Notifier(self.project
-    #                                    , triggers=[Notifier.CHANGE]
-    #                                    , targetName='NmrAtom'
-    #                                    , callback=self._refreshTable)
-    #   self._peakNotifier = Notifier(self.project
-    #                                 , triggers=[Notifier.CHANGE]
-    #                                 , targetName='Peak'
-    #                                 , callback=self._refreshTable)
-    #
-    # def _unRegisterNotifiers(self):
-    #   # self.application.current.unRegisterNotify(self._updateModuleCallback, 'nmrResidues')
-    #   # self.project.unregisterNotifier('NmrAtom', 'change', self.assignedPeaksTable.update)   # just refresh the table
-    #   # self.project.unRegisterNotifier('Peak', 'change', self.assignedPeaksTable.update)
-    #
-    #   if self._updateNotifier:
-    #     self._updateNotifier.unRegister()
-    #   if self._nmrAtomNotifier:
-    #     self._nmrAtomNotifier.unRegister()
-    #   if self._peakNotifier:
-    #     self._peakNotifier.unRegister()
-
     def _refreshTable(self, *args):
         self.assignedPeaksTable.update()
 

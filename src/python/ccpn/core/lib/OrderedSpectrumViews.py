@@ -33,6 +33,7 @@ __date__ = "$Date$"
 
 from typing import Tuple, Optional, List
 
+
 SPECTRUMVIEWINDEX = '_spectrumViewIndex'
 
 
@@ -56,7 +57,7 @@ class OrderedSpectrumViews(object):
         else:
             return None
 
-    def _storeOrderedSpectrumViewIndex(self, spectrumViewIndex:Tuple[int]):
+    def _storeOrderedSpectrumViewIndex(self, spectrumViewIndex: Tuple[int]):
         """
         store the indexing form the ccpnInternal database
         """
@@ -106,7 +107,7 @@ class OrderedSpectrumViews(object):
 
         # return the reordered spectrumList
         return tuple(spectrumList[index] for index in self._spectrumViewIndex if index < len(spectrumList))
-                     # if not spectrumList[index].isDeleted or includeDeleted)
+        # if not spectrumList[index].isDeleted or includeDeleted)
 
     def getOrderedSpectrumViewsIndex(self) -> Optional[Tuple]:
         """
@@ -154,8 +155,8 @@ class OrderedSpectrumViews(object):
         if _undo is not None:
             _undo.decreaseBlocking()
 
-            _undo.newItem(self._undoOrderedSpectrumViews, self._setOrderedSpectrumViews
-                          , undoArgs=(_oldSpectrumViews,), redoArgs=(spectrumIndex,))
+            _undo.newItem(self._undoOrderedSpectrumViews, self._setOrderedSpectrumViews,
+                          undoArgs=(_oldSpectrumViews,), redoArgs=(spectrumIndex,))
 
         # notify that the order has been changed - parent is SpectrumDisplay
         # self._parent._finaliseAction(action='change')

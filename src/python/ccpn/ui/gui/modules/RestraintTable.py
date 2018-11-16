@@ -403,55 +403,6 @@ class RestraintTable(QuickTable):
         """
         pass
 
-    # @staticmethod
-    # def _getCommentText(chemicalShift):
-    #   """
-    #   CCPN-INTERNAL: Get a comment from ObjectTable
-    #   """
-    #   try:
-    #     if chemicalShift.comment == '' or not chemicalShift.comment:
-    #       return ''
-    #     else:
-    #       return chemicalShift.comment
-    #   except:
-    #     return ''
-    #
-    # @staticmethod
-    # def _setComment(chemicalShift, value):
-    #   """
-    #   CCPN-INTERNAL: Insert a comment into ObjectTable
-    #   """
-    #   RestraintTable.project.blankNotification()
-    #   chemicalShift.comment = value
-    #   RestraintTable.project.unblankNotification()
-    #
-    # def _setNotifiers(self):
-    #   """
-    #   Set a Notifier to call when an object is created/deleted/renamed/changed
-    #   rename calls on name
-    #   change calls on any other attribute
-    #   """
-    #   self._clearNotifiers()
-    #   self._restraintListNotifier = Notifier(self.project
-    #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-    #                                     , RestraintList.__name__
-    #                                     , self._updateCallback)
-    #   self._restraintNotifier = Notifier(self.project
-    #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
-    #                                     , Restraint.__name__
-    #                                     , self._updateCallback)
-    #
-    # def _clearNotifiers(self):
-    #   """
-    #   clean up the notifiers
-    #   """
-    #   if self._restraintListNotifier is not None:
-    #     self._restraintListNotifier.unRegister()
-    #   if self._restraintNotifier is not None:
-    #     self._restraintNotifier.unRegister()
-    #   if self._peaksNotifier is not None:
-    #     self._peaksNotifier.unRegister()
-
     def _close(self):
         """
         Cleanup the notifiers when the window is closed

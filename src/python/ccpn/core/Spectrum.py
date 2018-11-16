@@ -81,9 +81,9 @@ from ccpn.util.Common import axisCodeMapping
 from ccpnmodel.ccpncore.lib.Io import Formats
 
 
-
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
 INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
+
 
 def _cumulativeArray(array):
     """ get total size and strides array.
@@ -860,7 +860,7 @@ class Spectrum(AbstractWrapperObject):
         for i, v in enumerate(values):
             if v in check:
                 raise ValueError('axisCodes should be an unique sequence of strings; got duplicate entry axisCodes[%s]="%s"'
-                                 % (i,v))
+                                 % (i, v))
             else:
                 check[v] = i
         self._setExpDimRefAttribute('axisCode', values, mandatory=False)
@@ -1138,11 +1138,10 @@ class Spectrum(AbstractWrapperObject):
 
         if self._intensities is None:
             # store the unscaled value internally so need to multiply the return value again
-            if self.getSliceData() is  None:
-                return np.array([0]*len(self.positions))
+            if self.getSliceData() is None:
+                return np.array([0] * len(self.positions))
             else:
                 self._intensities = self.getSliceData() / self.scale
-
 
             # OLD - below not needed any more since now scaled in getSliceData()
             # if self._intensities is not None:
@@ -1208,28 +1207,28 @@ class Spectrum(AbstractWrapperObject):
         return self._apiDataSource.getPositionValue(position)
 
     @cached(SLICEDATACACHE, maxItems=256, debug=False)
-    def _getSliceDataFromPlane(self, position, xDim:int, yDim:int, sliceDim:int):
+    def _getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
         """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
         CCPNINTERNAL: used in CcpnOpenGL
         """
-        if not (sliceDim==xDim or sliceDim==yDim):
-            raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' %(sliceDim, xDim, yDim))
+        if not (sliceDim == xDim or sliceDim == yDim):
+            raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
         data = self.getPlaneData(position, xDim, yDim)
         if sliceDim == xDim:
             slice = position[yDim - 1] - 1  # position amd dimensions are 1-based
-            return data[slice , 0:]
+            return data[slice, 0:]
         elif sliceDim == yDim:
             slice = position[xDim - 1] - 1  # position amd dimensions are 1-based
-            return data[0: , slice]
+            return data[0:, slice]
 
-    def getSliceData(self, position=None, sliceDim:int = 1):
+    def getSliceData(self, position=None, sliceDim: int = 1):
         """
         Get a slice through position along sliceDim from the Spectrum
         :param position: A list/tuple of positions (1-based)
         :param sliceDim: Dimension of the slice (1-based)
         :return: numpy data array
         """
-        if self.dimensionCount==1:
+        if self.dimensionCount == 1:
             return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
         else:
             position[sliceDim - 1] = 1  # To improve caching; position, dimensions are 1-based
@@ -1237,15 +1236,15 @@ class Spectrum(AbstractWrapperObject):
                 return self._getSliceDataFromPlane(position=position, xDim=1, yDim=sliceDim,
                                                    sliceDim=sliceDim)
             else:
-                return self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim+1,
+                return self._getSliceDataFromPlane(position=position, xDim=sliceDim, yDim=sliceDim + 1,
                                                    sliceDim=sliceDim)
 
     @cached(PLANEDATACACHE, maxItems=64, debug=False)
-    def _getPlaneData(self, position, xDim:int, yDim:int):
+    def _getPlaneData(self, position, xDim: int, yDim: int):
         "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
         return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
-    def getPlaneData(self, position=None, xDim:int = 1, yDim:int = 2):
+    def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
         """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
         Dimensionality must be >= 2
 
@@ -1277,8 +1276,8 @@ class Spectrum(AbstractWrapperObject):
 
         position = list(position)  # assure we have a list so we can assign below
         # set the points of xDim, yDim to 1 as these do not matter (to improve caching)
-        position[xDim-1] = 1  # position is 1-based
-        position[yDim-1] = 1
+        position[xDim - 1] = 1  # position is 1-based
+        position[yDim - 1] = 1
         return self._getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
     def getPlane(self, axisCodes: tuple, position=None, exactMatch=True):
@@ -1513,7 +1512,7 @@ class Spectrum(AbstractWrapperObject):
 
             dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
 
-            return  dataArray, intRegion
+            return dataArray, intRegion
 
         # for loop fails so return empty arrays
         return np.array([]), np.array([])
@@ -1532,7 +1531,7 @@ class Spectrum(AbstractWrapperObject):
             for specAxis in self.axisCodes:
                 mapAxis = axisCodeMapping([axis], [specAxis])
                 if mapAxis:
-                    mappings.append(mapAxis[axis])       #[self.axisCodes.index(mapAxis[axis])] = ind
+                    mappings.append(mapAxis[axis])  #[self.axisCodes.index(mapAxis[axis])] = ind
                     break
             else:
                 # raise ValueError('Invalid axis: %s' % axis)

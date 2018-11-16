@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -41,6 +41,7 @@ PipeName = 'Exclude Solvent Regions'
 ExcludeRegions = 'Exclude_Regions'
 selectionLabel = "Select_Regions_or_solvents_to_exclude"
 
+
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -52,15 +53,14 @@ selectionLabel = "Select_Regions_or_solvents_to_exclude"
 ########################################################################################################################
 
 class ExcludeRegionsGuiPipe(GuiPipe):
+    preferredPipe = False
+    pipeName = PipeName
 
-  preferredPipe = False
-  pipeName = PipeName
-
-  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
-    super(ExcludeRegionsGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
-    setattr(self, ExcludeRegions , ER(self.pipeFrame, labelAlign='l', selectionLabel=selectionLabel, grid=(0,0)))
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(ExcludeRegionsGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
+        setattr(self, ExcludeRegions, ER(self.pipeFrame, labelAlign='l', selectionLabel=selectionLabel, grid=(0, 0)))
 
 
 ########################################################################################################################
@@ -69,25 +69,20 @@ class ExcludeRegionsGuiPipe(GuiPipe):
 
 
 class ExcludeRegionsPipe(SpectraPipe):
+    guiPipe = ExcludeRegionsGuiPipe
+    pipeName = PipeName
+    _kwargs = {
+        ExcludeRegions: [[], []]
+        }
 
-  guiPipe = ExcludeRegionsGuiPipe
-  pipeName =PipeName
-  _kwargs = {
-            ExcludeRegions: [[], []]
-            }
+    def runPipe(self, spectra):
+        '''
+        :get excluded region of the spectrum and add to the pipeline kwargs.
+        Spectra is not really needed for this pipe. But is essential for the base class pipe.
+        '''
 
-  def runPipe(self, spectra):
-    '''
-    :get excluded region of the spectrum and add to the pipeline kwargs.
-    Spectra is not really needed for this pipe. But is essential for the base class pipe.
-    '''
-
-    self.pipeline._kwargs.update(self._kwargs)
-    return spectra
-
+        self.pipeline._kwargs.update(self._kwargs)
+        return spectra
 
 
-
-ExcludeRegionsPipe.register() # Registers the pipe in the pipeline
-
-
+ExcludeRegionsPipe.register()  # Registers the pipe in the pipeline

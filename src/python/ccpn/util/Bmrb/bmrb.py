@@ -29,6 +29,7 @@ import copy
 import gzip
 import itertools
 
+
 # Determine if we are running in python3
 PY3 = (sys.version_info[0] == 3)
 
@@ -40,6 +41,8 @@ if PY3:
 else:
     from urllib2 import urlopen, HTTPError
     from cStringIO import StringIO
+
+
     BytesIO = StringIO
 
 # Local libraries
@@ -47,6 +50,7 @@ from ccpn.util.Bmrb.sans import STARLexer
 # from ccpn.util.Bmrb.sans import SansParser
 from ccpn.util.Bmrb.sans import DicParser as SansParser
 from ccpn.util.Bmrb.sans import ErrorHandler, ContentHandler
+
 
 #############################################
 #            Global Variables               #
@@ -62,12 +66,13 @@ skip_empty_loops = False
 # WARNING: str_conversion_dict cannot contain both booleans and 
 # arithmetic types. Attempting to use both will cause an issue since 
 # boolean True == 1 in python and False == 0.
-str_conversion_dict = { None:"." }
+str_conversion_dict = {None: "."}
 
 # Used internally
 standard_schema = None
 # Get the svn revision number of this file
 svn_revision = "".join(filter(str.isdigit, "$Revision$"))
+
 
 #############################################
 #             Module methods                #
@@ -78,14 +83,16 @@ svn_revision = "".join(filter(str.isdigit, "$Revision$"))
 def enableNEFDefaults():
     """ Sets the module variables such that our behavior matches the NEF standard. Specifically, suppress printing empty loops by default and convert True -> "true" and False -> "false" when printing."""
     global str_conversion_dict, skip_empty_loops
-    str_conversion_dict = { None:".", True:"true", False:"false" }
+    str_conversion_dict = {None: ".", True: "true", False: "false"}
     skip_empty_loops = True
+
 
 def enableBMRBDefaults():
     """ Sets the module variables such that our behavior matches the BMRB standard. This is the default behavior of this module. This method only exists to revert after calling enableNEFDefaults()."""
     global str_conversion_dict, skip_empty_loops
-    str_conversion_dict = { None:"." }
+    str_conversion_dict = {None: "."}
     skip_empty_loops = False
+
 
 def diff(entry1, entry2):
     """Prints the differences between two entries. Non-equal entries will always be detected, but specific differences detected depends on order of entries."""
@@ -95,6 +102,7 @@ def diff(entry1, entry2):
     for difference in diffs:
         print(difference)
 
+
 def validate(entry, schema=None):
     """Prints a validation report of an entry."""
     validation = entry.validate(schema)
@@ -102,6 +110,7 @@ def validate(entry, schema=None):
         print("No problems found during validation.")
     for err in validation:
         print(err)
+
 
 def cleanValue(value):
     """Automatically quotes the value in the appropriate way. Don't quote values you send to this method or they will show up in another set of quotes as part of the actual data. E.g.:
@@ -141,7 +150,7 @@ def cleanValue(value):
 
     # Put tags with newlines on their own ; delimited line
     if " " in value or "\t" in value or value.startswith("_") or "#" in value \
-     or (len(value) > 4 and (value.startswith("data_") or value.startswith("save_") or value.startswith("loop_") or value.startswith("stop_"))):
+            or (len(value) > 4 and (value.startswith("data_") or value.startswith("save_") or value.startswith("loop_") or value.startswith("stop_"))):
         if '"' in value:
             return "'%s'" % value
         elif "'" in value:
@@ -154,6 +163,7 @@ def cleanValue(value):
     # It's good to go
     return value
 
+
 # Internal use only methods
 
 def _formatCategory(value):
@@ -165,11 +175,13 @@ def _formatCategory(value):
             value = value[:value.index(".")]
     return value
 
+
 def _formatTag(value):
     """Strips anything before the '.'"""
     if '.' in value:
-        value = value[value.index('.')+1:]
+        value = value[value.index('.') + 1:]
     return value
+
 
 def _getSchema(passed_schema=None):
     """If passed a schema (not None) it returns it. If passed none, it checks if the default schema has been initialized. If not initialzed, it initializes it. Then it returns the default schema."""
@@ -182,6 +194,7 @@ def _getSchema(passed_schema=None):
         passed_schema = standard_schema
 
     return passed_schema
+
 
 def _interpretFile(the_file):
     """Helper method returns some sort of object with a read() method. the_file could be a URL, a file location, a file object, or a gzipped version of any of the above."""
@@ -215,6 +228,7 @@ def _interpretFile(the_file):
         star_buffer = StringIO(full_star.decode())
 
     return star_buffer
+
 
 #############################################
 #                Classes                    #
@@ -270,9 +284,9 @@ class _entryParser(ContentHandler, ErrorHandler):
         if verbose: print("Tag / value: %s : %s ( %d : %d ) d %s" % (tag, val, tagline, valline, delim))
 
         if delim == 13:
-            val = "$"+val
+            val = "$" + val
 
-        if inloop :
+        if inloop:
             # Update the columns and then add the data
             self.curloop.addColumn(tag, ignore_duplicates=True)
 
@@ -284,7 +298,7 @@ class _entryParser(ContentHandler, ErrorHandler):
                     raise ValueError("You cannot have two columns with the same name. Column name: %s" % tag)
                 else:
                     raise e
-        else :
+        else:
             self.curframe.addTag(tag, val)
 
     def error(self, line, msg):
@@ -376,11 +390,11 @@ class schema:
             return []
 
         if "VARCHAR" in valtype:
-            length = int(valtype[valtype.index("(")+1:valtype.index(")")])
+            length = int(valtype[valtype.index("(") + 1:valtype.index(")")])
             if len(str(value)) > length:
                 return ["Length of value '%d' is too long for VARCHAR(%d): '%s':'%s' on line '%s'." % (len(value), length, tag, value, linenum)]
         elif "CHAR" in valtype:
-            length = int(valtype[valtype.index("(")+1:valtype.index(")")])
+            length = int(valtype[valtype.index("(") + 1:valtype.index(")")])
             if len(str(value)) > length:
                 return ["Length of value '%d' is too long for CHAR(%d): '%s':'%s' on line '%s'." % (len(value), length, tag, value, linenum)]
         elif "FLOAT" in valtype:
@@ -394,6 +408,7 @@ class schema:
             except Exception:
                 return ["Value is not of type INTEGER.:'%s':'%s' on line '%s'." % (tag, value, linenum)]
         return []
+
 
 class entry:
     """An OO representation of a BMRB entry. You can initialize this object several ways; (e.g. from a file, from the official database, from scratch) see the classmethods."""
@@ -481,7 +496,8 @@ class entry:
                         if frame.name == key:
                             self.frame_list[pos] = item
                 else:
-                    raise KeyError("Saveframe with name '%s' does not exist and therefore cannot be written to. Use the addSaveframe method to add new saveframes." % key)
+                    raise KeyError(
+                        "Saveframe with name '%s' does not exist and therefore cannot be written to. Use the addSaveframe method to add new saveframes." % key)
         else:
             raise ValueError("You can only assign an entry to a saveframe splice.")
 
@@ -631,6 +647,7 @@ class entry:
             errors.extend(frame.validate(validation_schema=validation_schema))
         return errors
 
+
 class saveframe:
     """A saveframe. Use the classmethod fromScratch to create one."""
 
@@ -717,7 +734,7 @@ class saveframe:
                 self.addTag(tags[x], values[x])
             return
 
-        star_buffer = StringIO("data_1\n"+star_buffer.read())
+        star_buffer = StringIO("data_1\n" + star_buffer.read())
         tmp_entry = entry.fromScratch(0)
 
         # Load the BMRB entry from the file
@@ -775,14 +792,14 @@ class saveframe:
             if self.tag_prefix is None:
                 width = max([len(x[0]) for x in self.tags])
             else:
-                width = max([len(self.tag_prefix+"."+x[0]) for x in self.tags])
+                width = max([len(self.tag_prefix + "." + x[0]) for x in self.tags])
         else:
             if self.tag_prefix is None:
                 raise ValueError("The tag prefix was never set!")
 
             # Make sure this isn't a dummy saveframe before proceeding
             try:
-                width = max([len(self.tag_prefix+"."+x[0]) for x in self.tags])
+                width = max([len(self.tag_prefix + "." + x[0]) for x in self.tags])
             except ValueError:
                 return "\nsave_%s\n\nsave_\n" % self.name
 
@@ -797,18 +814,18 @@ class saveframe:
 
             if allow_v2_entries and self.tag_prefix is None:
                 if "\n" in cleanTag:
-                    ret_string +=  mstring % (each_tag[0], cleanTag)
+                    ret_string += mstring % (each_tag[0], cleanTag)
                 else:
-                    ret_string +=  pstring % (each_tag[0], cleanTag)
+                    ret_string += pstring % (each_tag[0], cleanTag)
             else:
                 if "\n" in cleanTag:
-                    ret_string +=  mstring % (self.tag_prefix+"."+each_tag[0], cleanTag)
+                    ret_string += mstring % (self.tag_prefix + "." + each_tag[0], cleanTag)
                 else:
-                    ret_string +=  pstring % (self.tag_prefix+"."+each_tag[0], cleanTag)
+                    ret_string += pstring % (self.tag_prefix + "." + each_tag[0], cleanTag)
 
         # Print any loops
         for loop in self.loops:
-            ret_string +=  str(loop)
+            ret_string += str(loop)
 
         # Close the saveframe
         ret_string += "save_\n"
@@ -819,7 +836,8 @@ class saveframe:
 
         if loop.category in self.loopDict() or str(loop.category).lower() in self.loopDict():
             if loop.category is None:
-                raise ValueError("You cannot have two loops with the same category in one saveframe. You are getting this error because you haven't yet set your loop categories.")
+                raise ValueError(
+                    "You cannot have two loops with the same category in one saveframe. You are getting this error because you haven't yet set your loop categories.")
             else:
                 raise ValueError("You cannot have two loops with the same category in one saveframe. Category: '%s'." % loop.category)
 
@@ -834,8 +852,9 @@ class saveframe:
                 if self.tag_prefix is None:
                     self.tag_prefix = prefix
                 elif self.tag_prefix != prefix:
-                    raise ValueError("One saveframe cannot have tags with different categories (or tags that don't match the set category)! '%s' vs '%s'." % (self.tag_prefix, prefix))
-                name = name[name.index(".")+1:]
+                    raise ValueError("One saveframe cannot have tags with different categories (or tags that don't match the set category)! '%s' vs '%s'." % (
+                    self.tag_prefix, prefix))
+                name = name[name.index(".") + 1:]
             else:
                 name = name[1:]
 
@@ -855,7 +874,7 @@ class saveframe:
         if verbose:
             print("Adding tag: '%s' with value '%s'" % (name, value))
 
-        self.tags.append([name,value])
+        self.tags.append([name, value])
 
     def addTags(self, tag_list, update=False):
         """Adds multiple tags to the list. Input should be a list of tuples that are either [key, value] or [key]. In the latter case the value will be set to ".".  Set update to true to update a tag if it exists rather than raise an exception."""
@@ -891,7 +910,8 @@ class saveframe:
                 diffs.append("\tTag prefix does not match: '%s' vs '%s'." % (self.tag_prefix, other.tag_prefix))
                 return diffs
             if len(self.tags) < len(other.tags):
-                diffs.append("\tNumber of tags does not match: '%d' vs '%d'. The compared entry has at least one tag this entry does not."  % (len(self.tags), len(other.tags)))
+                diffs.append("\tNumber of tags does not match: '%d' vs '%d'. The compared entry has at least one tag this entry does not." % (
+                len(self.tags), len(other.tags)))
             for tag in self.tags:
 
                 other_tag = other.getTag(tag[0])
@@ -899,7 +919,8 @@ class saveframe:
                     diffs.append("\tNo tag with name '%s.%s' in compared entry." % (self.tag_prefix, tag[0]))
                     continue
                 if tag[1] != other_tag[0]:
-                    diffs.append("\tMismatched tag values for tag '%s.%s': '%s' vs '%s'." % (self.tag_prefix, tag[0], str(tag[1]).replace("\n", "\\n"), str(other_tag[0]).replace("\n", "\\n")) )
+                    diffs.append("\tMismatched tag values for tag '%s.%s': '%s' vs '%s'." % (
+                    self.tag_prefix, tag[0], str(tag[1]).replace("\n", "\\n"), str(other_tag[0]).replace("\n", "\\n")))
 
             if len(self.loops) != len(other.loops):
                 diffs.append("\tNumber of children loops does not match: '%d' vs '%d'." % (len(self.loops), len(other.loops)))
@@ -909,7 +930,7 @@ class saveframe:
                 if loop.category.lower() in compare_loop_dict:
                     compare = loop.compare(compare_loop_dict[loop.category.lower()])
                     if len(compare) > 0:
-                        diffs.append("\tLoops do not match: '%s'." % loop.category )
+                        diffs.append("\tLoops do not match: '%s'." % loop.category)
                         diffs.extend(compare)
                 else:
                     diffs.append("\tNo loop with category '%s' in other entry." % (loop.category))
@@ -923,7 +944,7 @@ class saveframe:
         """Deletes a tag from the saveframe based on tag name."""
         tag = _formatTag(tag).lower()
 
-        for position,each_tag in enumerate(self.tags):
+        for position, each_tag in enumerate(self.tags):
             # If the tag is a match, remove it
             if each_tag[0].lower() == tag:
                 return self.tags.pop(position)
@@ -936,7 +957,7 @@ class saveframe:
         cwriter = csv.writer(csv_buffer)
         if header:
             if show_category:
-                cwriter.writerow([str(self.tag_prefix)+"."+str(x[0]) for x in self.tags])
+                cwriter.writerow([str(self.tag_prefix) + "." + str(x[0]) for x in self.tags])
             else:
                 cwriter.writerow([str(x[0]) for x in self.tags])
 
@@ -1028,7 +1049,7 @@ class saveframe:
         """Prints a summary, tree style, of the loops in the saveframe."""
         print(repr(self))
         for pos, loop in enumerate(self):
-            print("\t[%d] %s" % (pos , repr(loop)))
+            print("\t[%d] %s" % (pos, repr(loop)))
 
     def validate(self, validation_schema=None):
         """Validate a saveframe against a STAR schema. You can pass your own custom schema if desired, otherwise the schema will be fetched from the BMRB servers. Returns a list of errors found. 0-length list indicates no errors found."""
@@ -1044,6 +1065,7 @@ class saveframe:
             errors.extend(loop.validate(validation_schema=validation_schema, category=self.getTag("Sf_category")[0]))
 
         return errors
+
 
 class loop:
     """A BMRB loop object."""
@@ -1156,10 +1178,10 @@ class loop:
         # Print the columns
         pstring = "      %-s\n"
 
-
         # Check to make sure our category is set
         if self.category is None and not allow_v2_entries:
-            raise ValueError("The category was never set for this loop. Either add a column with the category intact, specify it when generating the loop, or set it using setCategory.")
+            raise ValueError(
+                "The category was never set for this loop. Either add a column with the category intact, specify it when generating the loop, or set it using setCategory.")
 
         # Print the categories
         if self.category is None:
@@ -1172,9 +1194,9 @@ class loop:
         if len(self.data) != 0:
             # The nightmare below creates a list of the maximum length of elements in each column in the self.data matrix
             #  Don't try to understand it. It's an imcomprehensible list comprehension.
-            title_widths = [max([len(str(x))+3 for x in col]) for col in [[row[x] for row in self.data] for x in range(0, len(self.data[0]))]]
+            title_widths = [max([len(str(x)) + 3 for x in col]) for col in [[row[x] for row in self.data] for x in range(0, len(self.data[0]))]]
             # Generate the format string
-            pstring = "     " + "%-*s"*len(self.columns) + " \n"
+            pstring = "     " + "%-*s" * len(self.columns) + " \n"
 
             # Print the data, with the columns sized appropriately
             for datum in copy.deepcopy(self.data):
@@ -1230,7 +1252,7 @@ class loop:
                     self.category = category
                 elif self.category.lower() != category.lower():
                     raise ValueError("One loop cannot have columns with different categories (or columns that don't match the set prefix)!")
-                name = name[name.index(".")+1:]
+                name = name[name.index(".") + 1:]
             else:
                 name = name[1:]
 
@@ -1264,7 +1286,8 @@ class loop:
 
         column_id = _formatTag(column_id).lower()
         if not column_id in [x.lower() for x in self.columns]:
-            raise ValueError("The column tag '%s' to which you are attempting to add data does not yet exist. Create the columns before adding data." % column_id)
+            raise ValueError(
+                "The column tag '%s' to which you are attempting to add data does not yet exist. Create the columns before adding data." % column_id)
         pos = [x.lower() for x in self.columns].index(column_id)
         if len(self.data) == 0:
             self.data.append([])
@@ -1346,7 +1369,7 @@ class loop:
 
         if header:
             if show_category:
-                cwriter.writerow([str(self.category)+"."+str(x) for x in self.columns])
+                cwriter.writerow([str(self.category) + "." + str(x) for x in self.columns])
             else:
                 cwriter.writerow([str(x) for x in self.columns])
 
@@ -1387,7 +1410,8 @@ class loop:
         # Strip the category if they provide it (also validate it during the process)
         for pos, item in enumerate([str(x) for x in tags]):
             if "." in item and _formatCategory(item).lower() != self.category.lower():
-                raise ValueError("Cannot fetch data with column '%s' because the category does not match the category of this loop '%s'." % (item, self.category))
+                raise ValueError(
+                    "Cannot fetch data with column '%s' because the category does not match the category of this loop '%s'." % (item, self.category))
             tags[pos] = _formatTag(item).lower()
 
         # Make a lower case copy of the columns
@@ -1408,7 +1432,7 @@ class loop:
 
         # Use a list comprehension to pull the correct tags out of the rows
         if whole_tag:
-            return [ [self.category+"."+self.columns[col_id], row[col_id]] for col_id in column_ids for row in self.data]
+            return [[self.category + "." + self.columns[col_id], row[col_id]] for col_id in column_ids for row in self.data]
         else:
             # If only returning one tag (the usual behavior) then don't wrap the results in a list
             if len(tags) == 1:
@@ -1444,7 +1468,8 @@ class loop:
 
         # Verify the renumbering column ID
         if renumber_column >= len(self.columns) or renumber_column < 0:
-            raise ValueError("The renumbering column ID you provided '%s' is too large or too small! Value column ids are 0-%d." % (index_tag, len(self.columns)-1))
+            raise ValueError(
+                "The renumbering column ID you provided '%s' is too large or too small! Value column ids are 0-%d." % (index_tag, len(self.columns) - 1))
 
         # Do nothing if we have no data
         if len(self.data) == 0:
@@ -1461,7 +1486,9 @@ class loop:
                     self.data[x][renumber_column] = int(self.data[x][renumber_column]) + offset
                 except ValueError:
                     self.data = data_copy
-                    raise ValueError("You can't renumber a row containing anything that can't be coerced into an integer using maintain_ordering. I.e. what am I suppose to renumber '%s' to?" % self.data[x][renumber_column])
+                    raise ValueError(
+                        "You can't renumber a row containing anything that can't be coerced into an integer using maintain_ordering. I.e. what am I suppose to renumber '%s' to?" %
+                        self.data[x][renumber_column])
 
         # Simple renumbering algorithm if we don't need to maintain the ordering
         else:
@@ -1515,7 +1542,8 @@ class loop:
 
             # Verify the renumbering column ID
             if renumber_column >= len(self.columns) or renumber_column < 0:
-                raise ValueError("The sorting column ID you provided '%s' is too large or too small! Value column ids are 0-%d." % (cur_tag, len(self.columns)-1))
+                raise ValueError(
+                    "The sorting column ID you provided '%s' is too large or too small! Value column ids are 0-%d." % (cur_tag, len(self.columns) - 1))
 
             sort_ordinals.append(renumber_column)
 
@@ -1524,12 +1552,12 @@ class loop:
             # Going through each column, first attempt to sort as integer. Then fallback to string sort.
             try:
                 if key is None:
-                    tmp_data = sorted(self.data, key=lambda x:float(x[column]))
+                    tmp_data = sorted(self.data, key=lambda x: float(x[column]))
                 else:
                     tmp_data = sorted(self.data, key=key)
             except ValueError:
                 if key is None:
-                    tmp_data = sorted(self.data, key=lambda x:x[column])
+                    tmp_data = sorted(self.data, key=lambda x: x[column])
                 else:
                     tmp_data = sorted(self.data, key=key)
             self.data = tmp_data
@@ -1548,19 +1576,25 @@ class loop:
             if len(row) != len(self.columns):
                 errors.append("Loop '%s' data width does not match it's column tag width on row '%d'." % (self.category, rownum))
             for pos, datum in enumerate(row):
-                errors.extend(my_schema.valType(self.category + "." + self.columns[pos], datum, category=category, linenum=str(rownum)+" column "+str(pos)))
+                errors.extend(my_schema.valType(self.category + "." + self.columns[pos], datum, category=category, linenum=str(rownum) + " column " + str(pos)))
 
         return errors
+
 
 # Allow using diff or validate if ran directly
 if __name__ == '__main__':
 
     from ccpn.util.Bmrb.unit_tests import bmrb_test
     import optparse
+
+
     # Specify some basic information about our command
-    parser = optparse.OptionParser(usage="usage: %prog", version="SVN_%s" % svn_revision, description="NMR-STAR handling python module. Usually you'll want to import this. When ran without arguments a unit test is performed.")
-    parser.add_option("--diff", metavar="FILE1 FILE2", action="store", dest="diff", default=None, type="string", nargs=2, help="Print a comparison of two entries.")
-    parser.add_option("--validate", metavar="FILE", action="store", dest="validate", default=None, type="string", help="Print the validation report for an entry.")
+    parser = optparse.OptionParser(usage="usage: %prog", version="SVN_%s" % svn_revision,
+                                   description="NMR-STAR handling python module. Usually you'll want to import this. When ran without arguments a unit test is performed.")
+    parser.add_option("--diff", metavar="FILE1 FILE2", action="store", dest="diff", default=None, type="string", nargs=2,
+                      help="Print a comparison of two entries.")
+    parser.add_option("--validate", metavar="FILE", action="store", dest="validate", default=None, type="string",
+                      help="Print the validation report for an entry.")
     # Options, parse 'em
     (options, cmd_input) = parser.parse_args()
 

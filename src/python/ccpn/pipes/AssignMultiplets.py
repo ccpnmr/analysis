@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -32,7 +32,8 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
 from ccpn.pipes.lib.AreaCalculation import _addAreaValuesToPeaks
-from ccpn.util.Logging import getLogger , _debug3
+from ccpn.util.Logging import getLogger, _debug3
+
 
 ########################################################################################################################
 ###   Attributes:
@@ -44,12 +45,12 @@ PipeName = 'Find Multiplets'
 ExcludeRegions = 'Exclude_Regions'
 ReferencePeakList = 'Reference_PeakList'
 NoiseThreshold = 'Noise_Threshold'
-NegativePeaks =  'Negative_Peaks'
-MinimalLineWidth =  'Minimal_LineWidth'
+NegativePeaks = 'Negative_Peaks'
+MinimalLineWidth = 'Minimal_LineWidth'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 
-DefaultMinimalLineWidth =  0.01
-DefaultReferencePeakList =  -1
+DefaultMinimalLineWidth = 0.01
+DefaultReferencePeakList = -1
 DefaultNoiseThreshold = [0.0, 0.0]
 DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 
@@ -62,35 +63,27 @@ INFO = "This Pipe will group existing peaks in Multiplets. Volume, lineWidths," 
 ########################################################################################################################
 
 
-
-
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
 ########################################################################################################################
 
 
-
-
 class FindMultipletsGuiPipe(GuiPipe):
+    preferredPipe = True
+    pipeName = PipeName
+    info = INFO
 
-  preferredPipe = True
-  pipeName = PipeName
-  info = INFO
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(FindMultipletsGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
 
-  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
-    super(FindMultipletsGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
-
-    row = 0
-    # self.peakListLabel = Label(self.pipeFrame, ReferencePeakList, grid=(row, 0))
-    # setattr(self, ReferencePeakList, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
-    # row += 1
-    self.peakListLabel = Label(self.pipeFrame, MinimalLineWidth, grid=(row, 0))
-    setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
-
-
-
+        row = 0
+        # self.peakListLabel = Label(self.pipeFrame, ReferencePeakList, grid=(row, 0))
+        # setattr(self, ReferencePeakList, Spinbox(self.pipeFrame, value=0, max=0, grid=(row, 1)))
+        # row += 1
+        self.peakListLabel = Label(self.pipeFrame, MinimalLineWidth, grid=(row, 0))
+        setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
 
 
 ########################################################################################################################
@@ -98,53 +91,47 @@ class FindMultipletsGuiPipe(GuiPipe):
 ########################################################################################################################
 
 
-
-
 class FindMultipletsPipe(SpectraPipe):
+    guiPipe = FindMultipletsGuiPipe
+    pipeName = PipeName
 
-  guiPipe  = FindMultipletsGuiPipe
-  pipeName = PipeName
+    _kwargs = {
 
-  _kwargs =       {
+        ExcludeRegions: DefaultExcludeRegions,
+        NoiseThreshold: DefaultNoiseThreshold,
+        NegativePeaks: False,
+        MinimalLineWidth: DefaultMinimalLineWidth,
+        }
 
-                    ExcludeRegions: DefaultExcludeRegions,
-                    NoiseThreshold: DefaultNoiseThreshold,
-                    NegativePeaks: False,
-                    MinimalLineWidth: DefaultMinimalLineWidth,
-                   }
+    def runPipe(self, spectra):
+        '''
+        :param data:
+        :return:
+        '''
+        if NoiseThreshold not in self._kwargs:
+            self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
 
+        positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
+        minimalLineWidth = self._kwargs[MinimalLineWidth]
 
-  def runPipe(self, spectra):
-    '''
-    :param data:
-    :return:
-    '''
-    if NoiseThreshold not in self._kwargs:
-      self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
+        for spectrum in spectra:
+            noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum, estimateNoiseThreshold_var=EstimateNoiseThreshold,
+                                                   noiseThreshold_var=NoiseThreshold)
+            if noiseThreshold and len(noiseThreshold) >= 1:
+                positiveNoiseThreshold = noiseThreshold[1]
 
-    positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
-    minimalLineWidth = self._kwargs[MinimalLineWidth]
+            peakListIndex = int(DefaultReferencePeakList)
+            if len(spectrum.peakLists) >= peakListIndex:
+                referencePeakList = spectrum.peakLists[peakListIndex]
+                if referencePeakList is not None:
+                    if referencePeakList.peaks:
+                        _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth=minimalLineWidth)
+                    else:
+                        getLogger().warning('Error: Found no peaks to assign a volume value. Pick peaks first.')
+            else:
+                getLogger().warning('Error: PeakLists not found. Add a new PeakList first')
 
-    for spectrum in spectra:
-      noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum, estimateNoiseThreshold_var=EstimateNoiseThreshold,
-                                             noiseThreshold_var=NoiseThreshold)
-      if noiseThreshold and len(noiseThreshold)>=1:
-        positiveNoiseThreshold = noiseThreshold[1]
-
-      peakListIndex = int(DefaultReferencePeakList)
-      if len(spectrum.peakLists) >= peakListIndex:
-        referencePeakList = spectrum.peakLists[peakListIndex]
-        if referencePeakList is not None:
-          if referencePeakList.peaks:
-            _addAreaValuesToPeaks(spectrum, referencePeakList, noiseThreshold=positiveNoiseThreshold, minimalLineWidth = minimalLineWidth)
-          else:
-            getLogger().warning('Error: Found no peaks to assign a volume value. Pick peaks first.')
-      else:
-        getLogger().warning('Error: PeakLists not found. Add a new PeakList first')
-
-    return spectra
+        return spectra
 
 
-FindMultipletsPipe.register() # Registers the pipe in the pipeline
-
-
+FindMultipletsPipe.register()  # Registers the pipe in the pipeline

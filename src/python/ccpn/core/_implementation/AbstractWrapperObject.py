@@ -501,7 +501,7 @@ class AbstractWrapperObject():
             return None
 
     def _allDescendants(self, descendantClasses):
-        """get all descendants of a given class , following descendantClasses down the data tree
+        """get all descendants of a given class, following descendantClasses down the data tree
         Implementation function, used to generate child and descendant links
         descendantClasses is a list of classes going down from the class of self down the data tree.
         E.g. if called on a chain with descendantClass == [Residue,Atom] the function returns

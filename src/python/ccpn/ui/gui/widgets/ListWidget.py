@@ -68,7 +68,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.setAcceptDrops(acceptDrops)
         self.contextMenu = contextMenu
         self.callback = callback
-        self.objects = list(objects or [])
+        self.objects = {id(obj):obj for obj in objects} if objects else {}     # list(objects) or [])
         self.items = list(objects or [])
         self.multiSelect = multiSelect
         self.dropSource = None
@@ -111,22 +111,22 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.clear()
         self.cleared.emit()
 
-        self.objects = list(objects)
+        self.objects = {id(obj):obj for obj in objects}     # list(objects)
         for obj in objects:
             if hasattr(obj, name):
                 item = QtWidgets.QListWidgetItem(getattr(obj, name), self)
-                # item.setData(QtCore.Qt.UserRole, obj)
+                item.setData(QtCore.Qt.UserRole, id(obj))
                 obj.item = item
                 self.addItem(item)
                 self.items.append(item)
 
             else:
                 item = QtWidgets.QListWidgetItem(str(obj))
-                # item.setData(QtCore.Qt.UserRole, obj)
+                item.setData(QtCore.Qt.UserRole, id(obj))
                 self.addItem(item)
 
     def getObjects(self):
-        return list(self.objects)
+        return list(self.objects.values())
 
     def hideAllItems(self):
         for i in range(self.count()):

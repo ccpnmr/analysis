@@ -34,123 +34,123 @@ from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 
 
 class ColumnViewSettingsPopup(CcpnDialog):
-  # def __init__(self, table=None, parent=None, hideColumns=None, title='Column Settings', **kwds):
-  def __init__(self, dataFrameObject=None, parent=None, hideColumns=None, title='Column Settings', **kwds):
-    super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
-    self.setContentsMargins(5, 5, 5, 5)
-    self.dataFrameObject = dataFrameObject
-    # self.widgetColumnViewSettings = ColumnViewSettings(parent=self, table=table, hideColumns=hideColumns, grid=(0,0))
-    self.widgetColumnViewSettings = ColumnViewSettings(parent=self, dataFrameObject=dataFrameObject, grid=(0,0))
-    buttons = ButtonList(self, texts=['Close'], callbacks=[self._close], grid=(1,0), hAlign='c')
-    self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+    # def __init__(self, table=None, parent=None, hideColumns=None, title='Column Settings', **kwds):
+    def __init__(self, dataFrameObject=None, parent=None, hideColumns=None, title='Column Settings', **kwds):
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
+        self.setContentsMargins(5, 5, 5, 5)
+        self.dataFrameObject = dataFrameObject
+        # self.widgetColumnViewSettings = ColumnViewSettings(parent=self, table=table, hideColumns=hideColumns, grid=(0,0))
+        self.widgetColumnViewSettings = ColumnViewSettings(parent=self, dataFrameObject=dataFrameObject, grid=(0, 0))
+        buttons = ButtonList(self, texts=['Close'], callbacks=[self._close], grid=(1, 0), hAlign='c')
+        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
-  def _close(self):
-    'Save the hidden columns to the table class. So it remembers when you open again the popup'
-    hiddenColumns = self.widgetColumnViewSettings._getHiddenColumns()
-    self.dataFrameObject.hiddenColumns = hiddenColumns
-    self.reject()
-    return hiddenColumns
+    def _close(self):
+        'Save the hidden columns to the table class. So it remembers when you open again the popup'
+        hiddenColumns = self.widgetColumnViewSettings._getHiddenColumns()
+        self.dataFrameObject.hiddenColumns = hiddenColumns
+        self.reject()
+        return hiddenColumns
 
 
-SEARCH_MODES = [ 'Literal','Case Sensitive Literal','Regular Expression' ]
+SEARCH_MODES = ['Literal', 'Case Sensitive Literal', 'Regular Expression']
 CheckboxTipText = 'Select column to be visible on the table.'
 
+
 class ColumnViewSettings(Widget):
-  ''' hide show check boxes corresponding to the table columns '''
+    ''' hide show check boxes corresponding to the table columns '''
 
-  def __init__(self, parent=None, dataFrameObject=None, direction='v', hideColumns=None, **kwds):
-    super().__init__(parent, setLayout=True, **kwds)
-    self.direction=direction
-    # self.table = table
-    self.dataFrameObject = dataFrameObject
-    self.checkBoxes = []
-    # self.hiddenColumns = []
-    # self.hideColumns = hideColumns or []      # list of column names
-    self._hideColumnWidths = {}
-    self.initCheckBoxes()
-    self.filterLabel =  Label(self, 'Display Columns', grid=(0,1), vAlign='t', hAlign='l')
+    def __init__(self, parent=None, dataFrameObject=None, direction='v', hideColumns=None, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
+        self.direction = direction
+        # self.table = table
+        self.dataFrameObject = dataFrameObject
+        self.checkBoxes = []
+        # self.hiddenColumns = []
+        # self.hideColumns = hideColumns or []      # list of column names
+        self._hideColumnWidths = {}
+        self.initCheckBoxes()
+        self.filterLabel = Label(self, 'Display Columns', grid=(0, 1), vAlign='t', hAlign='l')
 
-  def initCheckBoxes(self):
-    columns = self.dataFrameObject.headings   #   self.table._columns
-    hiddenColumns = self.dataFrameObject.hiddenColumns or []
+    def initCheckBoxes(self):
+        columns = self.dataFrameObject.headings  #   self.table._columns
+        hiddenColumns = self.dataFrameObject.hiddenColumns or []
 
-    if columns:
-      for i, colum in enumerate(columns):
+        if columns:
+            for i, colum in enumerate(columns):
 
-        # always ignore the special column
-        if colum != DATAFRAME_OBJECT:
-          if self.direction=='v':
-            i+=1
-            cb = CheckBox(self, text=colum, grid=(i, 1), callback=self.checkBoxCallBack
-                          , checked=True if colum not in hiddenColumns else False,
-                          hAlign='l',tipText= CheckboxTipText,)
-          else:
-            cb = CheckBox(self, text=colum, grid=(1, i), callback=self.checkBoxCallBack
-                          , checked=True if colum not in hiddenColumns else False,
-                          hAlign='l',tipText= CheckboxTipText,)
+                # always ignore the special column
+                if colum != DATAFRAME_OBJECT:
+                    if self.direction == 'v':
+                        i += 1
+                        cb = CheckBox(self, text=colum, grid=(i, 1), callback=self.checkBoxCallBack,
+                                      checked=True if colum not in hiddenColumns else False,
+                                      hAlign='l', tipText=CheckboxTipText, )
+                    else:
+                        cb = CheckBox(self, text=colum, grid=(1, i), callback=self.checkBoxCallBack,
+                                      checked=True if colum not in hiddenColumns else False,
+                                      hAlign='l', tipText=CheckboxTipText, )
 
-          cb.setMinimumSize(cb.sizeHint()*1.3)
+                    cb.setMinimumSize(cb.sizeHint() * 1.3)
 
-          self.checkBoxes.append(cb)
-          # if colum not in self.hideColumns:
-          #   self._showColumn(i, colum)
-          # else:
-          #   self._hideColumn(i, colum)
+                    self.checkBoxes.append(cb)
+                    # if colum not in self.hideColumns:
+                    #   self._showColumn(i, colum)
+                    # else:
+                    #   self._hideColumn(i, colum)
 
-  def _getHiddenColumns(self):
-    return self.dataFrameObject.hiddenColumns
+    def _getHiddenColumns(self):
+        return self.dataFrameObject.hiddenColumns
 
-  def checkBoxCallBack(self):
-    currentCheckBox = self.sender()
-    name = currentCheckBox.text()
-    # i = self.table._columns.index(name)
-    i = self.dataFrameObject.headings.index(name)
+    def checkBoxCallBack(self):
+        currentCheckBox = self.sender()
+        name = currentCheckBox.text()
+        # i = self.table._columns.index(name)
+        i = self.dataFrameObject.headings.index(name)
 
-    checkedBoxes = []
+        checkedBoxes = []
 
-    for checkBox in self.checkBoxes:
-      checkBox.setEnabled(True)
-      if checkBox.isChecked():
-        checkedBoxes.append(checkBox)
-    if len(checkedBoxes)>0:
-      if currentCheckBox.isChecked():
-        self._showColumn(i, name)
-      else:
-        self._hideColumn(i, name)
-    else: #always display at least one columns, disables the last checkbox
-      currentCheckBox.setEnabled(False)
-      currentCheckBox.setChecked(True)
+        for checkBox in self.checkBoxes:
+            checkBox.setEnabled(True)
+            if checkBox.isChecked():
+                checkedBoxes.append(checkBox)
+        if len(checkedBoxes) > 0:
+            if currentCheckBox.isChecked():
+                self._showColumn(i, name)
+            else:
+                self._hideColumn(i, name)
+        else:  #always display at least one columns, disables the last checkbox
+            currentCheckBox.setEnabled(False)
+            currentCheckBox.setChecked(True)
 
-  def updateWidgets(self, table):
-    self.table = table
-    if self.checkBoxes:
-      for cb in self.checkBoxes:
-        cb.deleteLater()
-    self.checkBoxes = []
-    self.initCheckBoxes()
+    def updateWidgets(self, table):
+        self.table = table
+        if self.checkBoxes:
+            for cb in self.checkBoxes:
+                cb.deleteLater()
+        self.checkBoxes = []
+        self.initCheckBoxes()
 
-  def _hideColumn(self, i, name):
-    self.dataFrameObject.table.hideColumn(i)            #self.table.getColumnInt(columnName=name))
-    # self._hideColumnWidths[name] = self.table.columnWidth(self.table.getColumnInt(columnName=name))
-    if name not in self.dataFrameObject.hiddenColumns:
-      self.dataFrameObject.hiddenColumns.append(name)
-    # self.hiddenColumns.append(name)
+    def _hideColumn(self, i, name):
+        self.dataFrameObject.table.hideColumn(i)  #self.table.getColumnInt(columnName=name))
+        # self._hideColumnWidths[name] = self.table.columnWidth(self.table.getColumnInt(columnName=name))
+        if name not in self.dataFrameObject.hiddenColumns:
+            self.dataFrameObject.hiddenColumns.append(name)
+        # self.hiddenColumns.append(name)
 
-  def _showColumn(self, i, name):
-    self.dataFrameObject.table.showColumn(i)            #self.table.getColumnInt(columnName=name))
-    # if name in self._hideColumnWidths:
-    #   self.table.setColumnWidth(self.table.getColumnInt(columnName=name), self._hideColumnWidths[name])
-    self.dataFrameObject.table.resizeColumnToContents(i)
-    if name in self.dataFrameObject.hiddenColumns:
-      self.dataFrameObject.hiddenColumns.remove(name)
+    def _showColumn(self, i, name):
+        self.dataFrameObject.table.showColumn(i)  #self.table.getColumnInt(columnName=name))
+        # if name in self._hideColumnWidths:
+        #   self.table.setColumnWidth(self.table.getColumnInt(columnName=name), self._hideColumnWidths[name])
+        self.dataFrameObject.table.resizeColumnToContents(i)
+        if name in self.dataFrameObject.hiddenColumns:
+            self.dataFrameObject.hiddenColumns.remove(name)
 
-  def showColumns(self):
-    # hide the columns in the list
-    columns = self.dataFrameObject.headings
+    def showColumns(self):
+        # hide the columns in the list
+        columns = self.dataFrameObject.headings
 
-    for i, colName in enumerate(columns):
-      if colName in self.dataFrameObject.hiddenColumns:
-        self._hideColumn(i, colName)
-      else:
-        self._showColumn(i, colName)
-
+        for i, colName in enumerate(columns):
+            if colName in self.dataFrameObject.hiddenColumns:
+                self._hideColumn(i, colName)
+            else:
+                self._showColumn(i, colName)

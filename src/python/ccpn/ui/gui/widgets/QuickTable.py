@@ -1327,28 +1327,14 @@ QuickTable::item::selected {
                     if obj in self._dataFrameObject.objects:
                         rowObjs.append(obj)
 
-                # disable callbacks while populating the table
-                #self._silenceCallback = True
-                # self.blockSignals(True)
                 if not self._mousePressed:
                     selectionModel.clearSelection()  # causes a clear problem here
-                    # strange tablewidget cmd/selection problem
-                # self.setUpdatesEnabled(False)
 
                 for obj in rowObjs:
                     row = self._dataFrameObject.find(self, str(obj.pid))
                     if row is not None:
                         selectionModel.select(self.model().index(row, 0),
                                               selectionModel.Select | selectionModel.Rows)
-                    # selectionModel.setCurrentIndex(self.model().index(row, 0)
-                    #                                , selectionModel.SelectCurrent | selectionModel.Rows)
-
-                # self.scrollToSelectedIndex()
-
-                # self.setUpdatesEnabled(True)
-                # self.blockSignals(False)
-                #self._silenceCallback = False
-                # self.setFocus(QtCore.Qt.OtherFocusReason)
 
     def clearTable(self):
         "remove all objects from the table"
@@ -1425,8 +1411,8 @@ QuickTable::item::selected {
 
         with self._tableBlockSignals('_updateTableCallback'):
 
-            # thisTableList = getattr(data[Notifier.THEOBJECT]
-            #                         , self._tableData['className'])   # get the table list
+            # thisTableList = getattr(data[Notifier.THEOBJECT],
+            #                          self._tableData['className'])   # get the table list
             table = data[Notifier.OBJECT]
             #
             # #self._silenceCallback = True
@@ -1486,8 +1472,8 @@ QuickTable::item::selected {
         Notifier callback for updating the table for change in nmrRows
         :param data:
         """
-        # thisTableList = getattr(data[Notifier.THEOBJECT]
-        #                         , self._tableData['className'])   # get the tableList
+        # thisTableList = getattr(data[Notifier.THEOBJECT],
+        #                          self._tableData['className'])   # get the tableList
 
         with self._tableBlockSignals('_updateRowCallback'):
             row = data[Notifier.OBJECT]
@@ -1611,8 +1597,8 @@ QuickTable::item::selected {
         Notifier callback for updating the table
         :param data:
         """
-        # thisTableList = getattr(data[Notifier.THEOBJECT]
-        #                         , self._tableData['className'])   # get the tableList
+        # thisTableList = getattr(data[Notifier.THEOBJECT],
+        #                          self._tableData['className'])   # get the tableList
 
         with self._tableBlockSignals('_updateCellCallback'):
             cellData = data[Notifier.OBJECT]

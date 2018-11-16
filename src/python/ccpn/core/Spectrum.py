@@ -82,9 +82,9 @@ from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.lib.Io import Formats
 
 
-
 INCLUDEPOSITIVECONTOURS = 'includePositiveContours'
 INCLUDENEGATIVECONTOURS = 'includeNegativeContours'
+
 
 def _cumulativeArray(array):
     """ get total size and strides array.
@@ -862,7 +862,7 @@ class Spectrum(AbstractWrapperObject):
         for i, v in enumerate(values):
             if v in check:
                 raise ValueError('axisCodes should be an unique sequence of strings; got duplicate entry axisCodes[%s]="%s"'
-                                 % (i,v))
+                                 % (i, v))
             else:
                 check[v] = i
         self._setExpDimRefAttribute('axisCode', values, mandatory=False)
@@ -1225,17 +1225,17 @@ class Spectrum(AbstractWrapperObject):
         """Internal routine to get sliceData; optimised to use (buffered) getPlaneData
         CCPNINTERNAL: used in CcpnOpenGL
         """
-        if not (sliceDim==xDim or sliceDim==yDim):
-            raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' %(sliceDim, xDim, yDim))
+        if not (sliceDim == xDim or sliceDim == yDim):
+            raise RuntimeError('sliceDim (%s) not in plane (%s,%s)' % (sliceDim, xDim, yDim))
         data = self.getPlaneData(position, xDim, yDim)
         if sliceDim == xDim:
             slice = position[yDim - 1] - 1  # position amd dimensions are 1-based
-            return data[slice , 0:]
+            return data[slice, 0:]
         elif sliceDim == yDim:
             slice = position[xDim - 1] - 1  # position amd dimensions are 1-based
-            return data[0: , slice]
+            return data[0:, slice]
 
-    def getSliceData(self, position=None, sliceDim:int = 1):
+    def getSliceData(self, position=None, sliceDim: int = 1):
         """
         Get a slice through position along sliceDim from the Spectrum
         :param position: A list/tuple of positions (1-based)
@@ -1262,11 +1262,11 @@ class Spectrum(AbstractWrapperObject):
         return result
 
     @cached(PLANEDATACACHE, maxItems=64, debug=False)
-    def _getPlaneData(self, position, xDim:int, yDim:int):
+    def _getPlaneData(self, position, xDim: int, yDim: int):
         "Internal routine to improve caching: Calling routine set the positions of xDim, yDim to 1 "
         return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
-    def getPlaneData(self, position=None, xDim:int = 1, yDim:int = 2):
+    def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
         """Get a plane defined by by xDim and yDim, and a position vector ('1' based)
         Dimensionality must be >= 2
 
@@ -1540,7 +1540,7 @@ class Spectrum(AbstractWrapperObject):
 
             dataArray, intRegion = dataSource.getRegionData(startPointBuffer, endPointBuffer)
 
-            return  dataArray, intRegion
+            return dataArray, intRegion
 
         # for loop fails so return empty arrays
         return np.array([]), np.array([])
@@ -1559,7 +1559,7 @@ class Spectrum(AbstractWrapperObject):
             for specAxis in self.axisCodes:
                 mapAxis = axisCodeMapping([axis], [specAxis])
                 if mapAxis:
-                    mappings.append(mapAxis[axis])       #[self.axisCodes.index(mapAxis[axis])] = ind
+                    mappings.append(mapAxis[axis])  #[self.axisCodes.index(mapAxis[axis])] = ind
                     break
             else:
                 # raise ValueError('Invalid axis: %s' % axis)

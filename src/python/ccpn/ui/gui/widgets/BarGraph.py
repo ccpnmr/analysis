@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -30,13 +30,14 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph.Point import Point
 
 from ccpn.ui.gui.lib.mouseEvents import \
-  leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
-  middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
-  rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
+    leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
+    middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
+    rightMouse, shiftRightMouse, controlRightMouse, controlShiftRightMouse
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
+
 
 current = []
 
@@ -44,450 +45,420 @@ current = []
 #TODO:LUCA: this is most likely yours; update with documentation and check for ViewBox __init__ as it has changed
 
 class BarGraph(pg.BarGraphItem):
-  def __init__(self,application = None, viewBox = None, xValues=None, yValues=None,
-               objects=None, brush=None, **kwds):
-    super().__init__(**kwds)
-    '''
-    This class allows top draw bars with or without objects.It Needs only xValues and yValues.
-    The bar width is by default set to 1.
-    The objects are linked to the bars through the label annotations (with setData).
-    '''
-    # TODO:
-    # setObjects in a more general way. Initially implemented only for NmrResidues objects.
+    def __init__(self, application=None, viewBox=None, xValues=None, yValues=None,
+                 objects=None, brush=None, **kwds):
+        super().__init__(**kwds)
+        '''
+        This class allows top draw bars with or without objects.It Needs only xValues and yValues.
+        The bar width is by default set to 1.
+        The objects are linked to the bars through the label annotations (with setData).
+        '''
+        # TODO:
+        # setObjects in a more general way. Initially implemented only for NmrResidues objects.
 
-    self.viewBox = viewBox
-    self.callback = None
-    self.trigger = QtCore.pyqtSignal()
-    self.xValues = xValues or []
-    self.yValues = yValues or []
-    self.brush = brush
-    self.clicked = None
-    self.objects = objects or []
-    self.application = application
-    # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+        self.viewBox = viewBox
+        self.callback = None
+        self.trigger = QtCore.pyqtSignal()
+        self.xValues = xValues or []
+        self.yValues = yValues or []
+        self.brush = brush
+        self.clicked = None
+        self.objects = objects or []
+        self.application = application
+        # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
-    self.opts = dict(                # setting for BarGraphItem
-                    x=self.xValues,
-                    x0=self.xValues,
-                    x1=self.xValues,
-                    height=self.yValues,
-                    width=1,
-                    pen=self.brush,
-                    brush=self.brush,
-                    pens=None,
-                    brushes=None,
-                    )
+        self.opts = dict(  # setting for BarGraphItem
+                x=self.xValues,
+                x0=self.xValues,
+                x1=self.xValues,
+                height=self.yValues,
+                width=1,
+                pen=self.brush,
+                brush=self.brush,
+                pens=None,
+                brushes=None,
+                )
 
-    self.opts.update(self.opts)
-    self.allValues = {}
-    self.getValueDict()
-    self.labels = []
-    self.drawLabels()
-    if self.objects:
+        self.opts.update(self.opts)
+        self.allValues = {}
+        self.getValueDict()
+        self.labels = []
+        self.drawLabels()
+        if self.objects:
+            self.setObjects(self.objects)
 
-      self.setObjects(self.objects)
+    def setValues(self, xValues, yValues):
+        opts = dict(  # setting for BarGraphItem
+                x=xValues,
+                x0=xValues,
+                x1=xValues,
+                height=yValues,
+                width=1,
+                pen=self.brush,
+                brush=self.brush,
+                pens=None,
+                brushes=None,
+                )
+        self.opts.update(opts)
 
+    def setObjects(self, objects):
 
+        for label in self.labels:
+            for object in objects:
+                if isinstance(object, NmrResidue):
+                    nmrResidue = object
+                    if hasattr(nmrResidue, 'sequenceCode'):
 
-  def setValues(self, xValues, yValues):
-      opts = dict(  # setting for BarGraphItem
-          x=xValues,
-          x0=xValues,
-          x1=xValues,
-          height=yValues,
-          width=1,
-          pen=self.brush,
-          brush=self.brush,
-          pens=None,
-          brushes=None,
-          )
-      self.opts.update(opts)
+                        if nmrResidue.residue:
+                            if nmrResidue.sequenceCode is not None:
+                                if str(nmrResidue.sequenceCode) == label.text():
+                                    label.setData(int(nmrResidue.sequenceCode), object)
 
-  def setObjects(self, objects):
+                        # if nmrResidue.sequenceCode is not None:
+                        #   ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)
+                        #   lbl = label.text()
+                        #   if str(ind) == lbl:
+                        #     label.setData(ind, object)
 
-    for label in self.labels:
-      for object in objects:
-        if isinstance(object, NmrResidue):
-          nmrResidue = object
-          if hasattr(nmrResidue, 'sequenceCode'):
+                # else:
+                # pass
+                # print('Impossible to set this object to its label. Function implemented only for NmrResidue')
 
-            if nmrResidue.residue:
-              if nmrResidue.sequenceCode is not None:
-                if str(nmrResidue.sequenceCode) == label.text():
-                  label.setData(int(nmrResidue.sequenceCode), object)
+    def getValueDict(self):
+        for x, y in zip(self.xValues, self.yValues):
+            self.allValues.update({x: y})
 
-            # if nmrResidue.sequenceCode is not None:
-            #   ind = nmrResidue.nmrChain.nmrResidues.index(nmrResidue)
-            #   lbl = label.text()
-            #   if str(ind) == lbl:
-            #     label.setData(ind, object)
+    def mouseClickEvent(self, event):
 
-        # else:
-          # pass
-          # print('Impossible to set this object to its label. Function implemented only for NmrResidue')
+        position = event.pos().x()
 
+        self.clicked = int(position)
+        if event.button() == QtCore.Qt.LeftButton:
+            for label in self.labels:
+                if label.text() == str(self.clicked):
+                    label.setSelected(True)
 
+            event.accept()
 
-  def getValueDict(self):
-    for x, y in zip(self.xValues, self.yValues):
-      self.allValues.update({x:y})
+    def mouseDoubleClickEvent(self, event):
 
+        position = event.pos().x()
 
-  def mouseClickEvent(self, event):
+        self.doubleclicked = int(position)
+        if event.button() == QtCore.Qt.LeftButton:
+            for label in self.labels:
+                if label.text() == str(self.doubleclicked):
+                    print(label.text(), label.data(self.doubleclicked))
 
-    position = event.pos().x()
+        event.accept()
 
-    self.clicked = int(position)
-    if event.button() == QtCore.Qt.LeftButton:
-      for label in self.labels:
-        if label.text() == str(self.clicked):
-          label.setSelected(True)
+    def drawLabels(self):
+        '''
 
-      event.accept()
+        The label Text is the str of the x values and is used to find and set an object to it.
+        NB, changing the text to any other str may not set the objects correctly!
 
-  def mouseDoubleClickEvent(self, event):
-
-    position = event.pos().x()
-
-    self.doubleclicked = int(position)
-    if event.button() == QtCore.Qt.LeftButton:
-      for label in self.labels:
-        if label.text() == str(self.doubleclicked):
-          print(label.text() , label.data(self.doubleclicked))
-
-    event.accept()
-
-  def drawLabels(self):
-    '''
-
-    The label Text is the str of the x values and is used to find and set an object to it.
-    NB, changing the text to any other str may not set the objects correctly!
-
-    '''
-    self.allLabelsShown = True
-    for key, value in self.allValues.items():
-      label = CustomLabel(text=str(key))
-      self.viewBox.addItem(label)
-      label.setPos(int(key), value)
-      self.labels.append(label)
-      label.setBrush( QtGui.QColor(self.brush))
-
-
-
-
+        '''
+        self.allLabelsShown = True
+        for key, value in self.allValues.items():
+            label = CustomLabel(text=str(key))
+            self.viewBox.addItem(label)
+            label.setPos(int(key), value)
+            self.labels.append(label)
+            label.setBrush(QtGui.QColor(self.brush))
 
 
 class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
-  """ A text annotation of a bar.
-      """
+    """ A text annotation of a bar.
+        """
 
-  def __init__(self, text, application=None):
+    def __init__(self, text, application=None):
 
-    QtWidgets.QGraphicsSimpleTextItem.__init__(self)
+        QtWidgets.QGraphicsSimpleTextItem.__init__(self)
 
-    self.setText(text)
+        self.setText(text)
 
-    font = self.font()
-    font.setPointSize(15)
-    self.setRotation(-75)
-    self.setFont(font)
-    self.setFlag(self.ItemIgnoresTransformations+self.ItemIsSelectable)
-    self.setToolTip(text)
-    self.isBelowThreshold = False
+        font = self.font()
+        font.setPointSize(15)
+        self.setRotation(-75)
+        self.setFont(font)
+        self.setFlag(self.ItemIgnoresTransformations + self.ItemIsSelectable)
+        self.setToolTip(text)
+        self.isBelowThreshold = False
 
-    self.customObject = self.data(int(self.text()))
-    # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+        self.customObject = self.data(int(self.text()))
+        # self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
-    self.application = application
+        self.application = application
 
+    def setCustomObject(self, obj):
+        self.customObject = obj
+        self.customObject.customLabel = self
 
-  def setCustomObject(self, obj):
-    self.customObject = obj
-    self.customObject.customLabel = self
+    def getCustomObject(self):
+        return self.customObject
 
-  def getCustomObject(self):
-    return self.customObject
+    def paint(self, painter, option, widget):
+        self._selectCurrentNmrResidue()
+        QtWidgets.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
 
-  def paint(self, painter, option, widget):
-    self._selectCurrentNmrResidue()
-    QtWidgets.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
+    def _selectCurrentNmrResidue(self):
 
-  def _selectCurrentNmrResidue(self):
+        if self.data(int(self.text())) is not None:
 
-    if self.data(int(self.text())) is not None:
+            if self.application is not None:
 
-      if self.application is not None:
-
-        if self.data(int(self.text())) in self.application.current.nmrResidues:
-
-          self.setSelected(True)
-
-
+                if self.data(int(self.text())) in self.application.current.nmrResidues:
+                    self.setSelected(True)
 
 
 class CustomViewBox(pg.ViewBox):
-  def __init__(self, application=None, *args, **kwds):
-    pg.ViewBox.__init__(self, *args, **kwds)
-    self.exportDialog = None
-    self.addSelectionBox()
-    self.application = application
-    self.allLabelsShown = True
-    self.showAboveThresholdOnly = False
-    self.lastRange = self.viewRange()
+    def __init__(self, application=None, *args, **kwds):
+        pg.ViewBox.__init__(self, *args, **kwds)
+        self.exportDialog = None
+        self.addSelectionBox()
+        self.application = application
+        self.allLabelsShown = True
+        self.showAboveThresholdOnly = False
+        self.lastRange = self.viewRange()
 
-    self.__xLine = pg.InfiniteLine(angle=0, movable=True, pen='b')
-    self.addItem(self.xLine)
+        self.__xLine = pg.InfiniteLine(angle=0, movable=True, pen='b')
+        self.addItem(self.xLine)
 
+    @property
+    def xLine(self):
+        return self.__xLine
 
-  @property
-  def xLine(self):
-    return self.__xLine
+    @xLine.getter
+    def xLine(self):
+        return self.__xLine
 
+    def addSelectionBox(self):
+        self.selectionBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)
+        self.selectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
+        self.selectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
+        self.selectionBox.setZValue(1e9)
+        self.addItem(self.selectionBox, ignoreBounds=True)
+        self.selectionBox.hide()
 
-  @xLine.getter
-  def xLine(self):
-    return self.__xLine
-
-
-  def addSelectionBox(self):
-    self.selectionBox = QtWidgets.QGraphicsRectItem(0, 0, 1, 1)
-    self.selectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
-    self.selectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
-    self.selectionBox.setZValue(1e9)
-    self.addItem(self.selectionBox, ignoreBounds=True)
-    self.selectionBox.hide()
-
-  def wheelEvent(self, ev, axis=None):
-    if (self.viewRange()[0][1] - self.viewRange()[0][0]) >= 10.001:
-      self.lastRange = self.viewRange()
-      super(CustomViewBox, self).wheelEvent(ev, axis)
-    if (self.viewRange()[0][1] - self.viewRange()[0][0]) < 10:
-      self.setRange(xRange=self.lastRange[0])
+    def wheelEvent(self, ev, axis=None):
+        if (self.viewRange()[0][1] - self.viewRange()[0][0]) >= 10.001:
+            self.lastRange = self.viewRange()
+            super(CustomViewBox, self).wheelEvent(ev, axis)
+        if (self.viewRange()[0][1] - self.viewRange()[0][0]) < 10:
+            self.setRange(xRange=self.lastRange[0])
 
 
-  def _getLimits(self,p1:float, p2:float):
+    def _getLimits(self,p1:float, p2:float):
+        r = QtCore.QRectF(p1, p2)
+        r = self.childGroup.mapRectFromParent(r)
+        self.selectionBox.setPos(r.topLeft())
+        self.selectionBox.resetTransform()
+        self.selectionBox.scale(r.width(), r.height())
+        minX = r.topLeft().x()
+        minY = r.topLeft().y()
+        maxX = minX + r.width()
+        maxY = minY + r.height()
+        return minX, maxX, minY, maxY
 
-    r = QtCore.QRectF(p1, p2)
-    r = self.childGroup.mapRectFromParent(r)
-    self.selectionBox.setPos(r.topLeft())
-    self.selectionBox.resetTransform()
-    self.selectionBox.scale(r.width(), r.height())
-    minX = r.topLeft().x()
-    minY = r.topLeft().y()
-    maxX = minX + r.width()
-    maxY = minY + r.height()
-    return minX, maxX, minY, maxY
+    def _updateSelectionBox(self,ev, p1:float, p2:float):
+        """
+        Updates drawing of selection box as mouse is moved.
+        """
+        r = QtCore.QRectF(p1, p2)
+        # print('PPP',dir(self.mapToParent(ev.buttonDownPos())))
 
-  def _updateSelectionBox(self,ev, p1:float, p2:float):
-    """
-    Updates drawing of selection box as mouse is moved.
-    """
-    r = QtCore.QRectF(p1, p2)
-    # print('PPP',dir(self.mapToParent(ev.buttonDownPos())))
+        r = self.mapRectFromParent(r)
+        self.selectionBox.setPos(self.mapToParent(ev.buttonDownPos()))
 
-    r = self.mapRectFromParent(r)
-    self.selectionBox.setPos(self.mapToParent(ev.buttonDownPos()))
-
-    self.selectionBox.resetTransform()
-    self.selectionBox.scale(r.width(), r.height())
-    self.selectionBox.show()
-
-
-
+        self.selectionBox.resetTransform()
+        self.selectionBox.scale(r.width(), r.height())
+        self.selectionBox.show()
 
   def mouseClickEvent(self, event):
 
-    if event.button() == QtCore.Qt.RightButton :
-      event.accept()
-      self._raiseContextMenu(event)
+        if event.button() == QtCore.Qt.RightButton:
+            event.accept()
+            self._raiseContextMenu(event)
 
-    elif event.button() == QtCore.Qt.LeftButton :
+        elif event.button() == QtCore.Qt.LeftButton:
 
-      event.accept()
-
-
+            event.accept()
 
 
-  def mouseDragEvent(self, event):
-    """
-    Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
-    drag events. Same as spectrum Display. Check Spectrum Display View Box for more documentation.
+    def mouseDragEvent(self, event):
+        """
+        Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
+        drag events. Same as spectrum Display. Check Spectrum Display View Box for more documentation.
 
-    """
+        """
 
-    selected = []
-    if leftMouse(event):
-      # Left-drag: Panning of the view
-      pg.ViewBox.mouseDragEvent(self, event)
-    elif controlLeftMouse(event):
-      self._updateSelectionBox(event, event.buttonDownPos(), event.pos())
-      event.accept()
-      if not event.isFinish():
-        self._updateSelectionBox(event, event.buttonDownPos(), event.pos())
+        selected = []
+        if leftMouse(event):
+            # Left-drag: Panning of the view
+            pg.ViewBox.mouseDragEvent(self, event)
+        elif controlLeftMouse(event):
+            self._updateSelectionBox(event, event.buttonDownPos(), event.pos())
+            event.accept()
+            if not event.isFinish():
+                self._updateSelectionBox(event, event.buttonDownPos(), event.pos())
 
-      else: ## the event is finished.
-        self._updateSelectionBox(event, event.buttonDownPos(), event.pos())
-        minX, maxX, minY, maxY = self._getLimits(event.buttonDownPos(), event.pos())
-        labels = [label for label in self.childGroup.childItems() if isinstance(label, CustomLabel)]
-        # Control(Cmd)+left drag: selects label
-        for label in labels:
-          if int(label.pos().x()) in range(int(minX), int(maxX)):
-            if self.inYRange(label.pos().y(), minY, maxY, ):
-              if self.application is not None:
-                obj = label.data(int(label.pos().x()))
-                selected.append(obj)
+            else:  ## the event is finished.
+                self._updateSelectionBox(event, event.buttonDownPos(), event.pos())
+                minX, maxX, minY, maxY = self._getLimits(event.buttonDownPos(), event.pos())
+                labels = [label for label in self.childGroup.childItems() if isinstance(label, CustomLabel)]
+                # Control(Cmd)+left drag: selects label
+                for label in labels:
+                    if int(label.pos().x()) in range(int(minX), int(maxX)):
+                        if self.inYRange(label.pos().y(), minY, maxY, ):
+                            if self.application is not None:
+                                obj = label.data(int(label.pos().x()))
+                                selected.append(obj)
 
-        self._resetBoxes()
+                self._resetBoxes()
 
-    else:
-      self._resetBoxes()
-      event.ignore()
+        else:
+            self._resetBoxes()
+            event.ignore()
 
-    if len(selected) > 0:
-      try:
-        currentObjs = setattr(self.application.current, selected[0]._pluralLinkName, selected)
-        self.updateSelectionFromCurrent()
-      except Exception as e:
-        getLogger().warning('Error in setting current objects. ' + str(e) )
-
-
-  def inYRange(self, yValue, y1, y2):
-    if round(y1,3) <= round(yValue,3) <= round(y2,3) :
-      return True
-    return False
-
-  def getLabels(self):
-    return [label for label in self.childGroup.childItems() if isinstance(label, CustomLabel)]
-
-  def updateSelectionFromCurrent(self):
-    if self.getLabels():
-       for label in self.getLabels():
-         for nmrResidue in self.application.current.nmrResidues:
-           if nmrResidue.sequenceCode is not None:
-             if label.data(int(nmrResidue.sequenceCode)):
-               label.setSelected(True)
-
-  def upDateSelections(self, positions):
-    if self.getLabels():
-      for label in self.getLabels():
-        for position in positions:
-          print('Not impl')
+        if len(selected) > 0:
+            try:
+                currentObjs = setattr(self.application.current, selected[0]._pluralLinkName, selected)
+                self.updateSelectionFromCurrent()
+            except Exception as e:
+                getLogger().warning('Error in setting current objects. ' + str(e))
 
 
-  def _resetBoxes(self):
-    "Reset/Hide the boxes "
-    self._successiveClicks = None
-    self.selectionBox.hide()
-    self.rbScaleBox.hide()
+    def inYRange(self, yValue, y1, y2):
+        if round(y1, 3) <= round(yValue, 3) <= round(y2, 3):
+            return True
+        return False
 
-  def _raiseContextMenu(self, ev):
+    def getLabels(self):
+        return [label for label in self.childGroup.childItems() if isinstance(label, CustomLabel)]
 
-    self.contextMenu = Menu('', None, isFloatWidget=True)
-    self.contextMenu.addAction('Reset View', self.autoRange)
+    def updateSelectionFromCurrent(self):
+        if self.getLabels():
+            for label in self.getLabels():
+                for nmrResidue in self.application.current.nmrResidues:
+                    if nmrResidue.sequenceCode is not None:
+                        if label.data(int(nmrResidue.sequenceCode)):
+                            label.setSelected(True)
 
-    ## ThresholdLine
-    self.thresholdLineAction = QtGui.QAction("Threshold Line", self, triggered=self._toggleThresholdLine, checkable=True, )
-    self._checkThresholdAction()
-    self.contextMenu.addAction(self.thresholdLineAction)
+    def upDateSelections(self, positions):
+        if self.getLabels():
+            for label in self.getLabels():
+                for position in positions:
+                    print('Not impl')
 
-    ## Labels: Show All
-    self.labelsAction = QtGui.QAction("Show Labels", self, triggered=self._toggleLabels, checkable=True, )
-    self.labelsAction.setChecked(self.allLabelsShown)
-    self.contextMenu.addAction(self.labelsAction)
+    def _resetBoxes(self):
+        "Reset/Hide the boxes "
+        self._successiveClicks = None
+        self.selectionBox.hide()
+        self.rbScaleBox.hide()
 
-    ## Labels: Show Above Threshold
-    self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self, triggered=self.showAboveThreshold)
-    self.contextMenu.addAction(self.showAboveThresholdAction)
+    def _raiseContextMenu(self, ev):
 
-    ## Selection: Select Above Threshold
-    self.selectAboveThresholdAction = QtGui.QAction("Select Items Above Threshold", self,
-                                                  triggered=self.selectAboveThreshold)
-    self.contextMenu.addAction(self.selectAboveThresholdAction)
+        self.contextMenu = Menu('', None, isFloatWidget=True)
+        self.contextMenu.addAction('Reset View', self.autoRange)
 
+        ## ThresholdLine
+        self.thresholdLineAction = QtGui.QAction("Threshold Line", self, triggered=self._toggleThresholdLine, checkable=True, )
+        self._checkThresholdAction()
+        self.contextMenu.addAction(self.thresholdLineAction)
 
-    self.contextMenu.addSeparator()
-    self.contextMenu.addAction('Export', self.showExportDialog)
-    self.contextMenu.exec_(ev.screenPos().toPoint())
+        ## Labels: Show All
+        self.labelsAction = QtGui.QAction("Show Labels", self, triggered=self._toggleLabels, checkable=True, )
+        self.labelsAction.setChecked(self.allLabelsShown)
+        self.contextMenu.addAction(self.labelsAction)
 
-  def _checkThresholdAction(self):
-    tl = self.xLine
-    if tl:
-      if tl.isVisible():
-        self.thresholdLineAction.setChecked(True)
-      else:
-        self.thresholdLineAction.setChecked(False)
+        ## Labels: Show Above Threshold
+        self.showAboveThresholdAction = QtGui.QAction("Show Labels Above Threshold", self, triggered=self.showAboveThreshold)
+        self.contextMenu.addAction(self.showAboveThresholdAction)
 
+        ## Selection: Select Above Threshold
+        self.selectAboveThresholdAction = QtGui.QAction("Select Items Above Threshold", self,
+                                                        triggered=self.selectAboveThreshold)
+        self.contextMenu.addAction(self.selectAboveThresholdAction)
 
-  def addLabelMenu(self):
-    self.labelMenu = Menu(parent=self.contextMenu, title='Label Menu')
-    self.labelMenu.addItem('Show All', callback=self.showAllLabels,
-                           checked=False, checkable=True, )
-    self.labelMenu.addItem('Hide All', callback=self.hideAllLabels,
-                           checked=False, checkable=True, )
-    self.labelMenu.addItem('Show Above Threshold', callback=self.showAboveThreshold,
-                           checked=False, checkable=True, )
+        self.contextMenu.addSeparator()
+        self.contextMenu.addAction('Export', self.showExportDialog)
+        self.contextMenu.exec_(ev.screenPos().toPoint())
 
-    self.contextMenu._addQMenu(self.labelMenu)
+    def _checkThresholdAction(self):
+        tl = self.xLine
+        if tl:
+            if tl.isVisible():
+                self.thresholdLineAction.setChecked(True)
+            else:
+                self.thresholdLineAction.setChecked(False)
 
-  def _toggleThresholdLine(self):
-    tl = self.xLine
-    if tl:
-     tl.setVisible(not tl.isVisible())
+    def addLabelMenu(self):
+        self.labelMenu = Menu(parent=self.contextMenu, title='Label Menu')
+        self.labelMenu.addItem('Show All', callback=self.showAllLabels,
+                               checked=False, checkable=True, )
+        self.labelMenu.addItem('Hide All', callback=self.hideAllLabels,
+                               checked=False, checkable=True, )
+        self.labelMenu.addItem('Show Above Threshold', callback=self.showAboveThreshold,
+                               checked=False, checkable=True, )
 
-  def _toggleLabels(self):
+        self.contextMenu._addQMenu(self.labelMenu)
 
-    if self.allLabelsShown:
-      self.hideAllLabels()
-    else:
-      self.showAllLabels()
+    def _toggleThresholdLine(self):
+        tl = self.xLine
+        if tl:
+            tl.setVisible(not tl.isVisible())
 
+    def _toggleLabels(self):
 
-  def getThreshouldLine(self):
-    if hasattr(self, 'xLine'):
-      return self.xLine
+        if self.allLabelsShown:
+            self.hideAllLabels()
+        else:
+            self.showAllLabels()
 
-  def hideAllLabels(self):
-    self.allLabelsShown = False
-    self.showAboveThresholdOnly = False
-    if self.getLabels():
-      for label in self.getLabels():
-        label.hide()
+    def getThreshouldLine(self):
+        if hasattr(self, 'xLine'):
+            return self.xLine
 
-  def showAllLabels(self):
-    self.allLabelsShown = True
-    self.showAboveThresholdOnly = False
-    if self.getLabels():
-      for label in self.getLabels():
-        label.show()
+    def hideAllLabels(self):
+        self.allLabelsShown = False
+        self.showAboveThresholdOnly = False
+        if self.getLabels():
+            for label in self.getLabels():
+                label.hide()
 
-  def showAboveThreshold(self):
-    self.allLabelsShown = False
-    self.showAboveThresholdOnly = True
-    if self.xLine:
-      yTlPos = self.xLine.pos().y()
-      if self.getLabels():
-        for label in self.getLabels():
-          if label.pos().y() >= yTlPos:
-            label.show()
-          else:
-            label.hide()
-            label.isBelowThreshold = True
-    else:
-      print('NOT FOUND')
+    def showAllLabels(self):
+        self.allLabelsShown = True
+        self.showAboveThresholdOnly = False
+        if self.getLabels():
+            for label in self.getLabels():
+                label.show()
 
-  def selectAboveThreshold(self):
-    '''Reimplement this in the module subclass'''
+    def showAboveThreshold(self):
+        self.allLabelsShown = False
+        self.showAboveThresholdOnly = True
+        if self.xLine:
+            yTlPos = self.xLine.pos().y()
+            if self.getLabels():
+                for label in self.getLabels():
+                    if label.pos().y() >= yTlPos:
+                        label.show()
+                    else:
+                        label.hide()
+                        label.isBelowThreshold = True
+        else:
+            print('NOT FOUND')
 
-    pass
+    def selectAboveThreshold(self):
+        '''Reimplement this in the module subclass'''
 
+        pass
 
-  def showExportDialog(self):
-    if self.exportDialog is None:
-      ### parent() is the graphicsScene
-      self.exportDialog = CustomExportDialog(self.scene(), titleName='Exporting')
-    self.exportDialog.show(self)
-
-
+    def showExportDialog(self):
+        if self.exportDialog is None:
+            ### parent() is the graphicsScene
+            self.exportDialog = CustomExportDialog(self.scene(), titleName='Exporting')
+        self.exportDialog.show(self)
 
 ######################################################################################################
 ###################################      Mock DATA    ################################################

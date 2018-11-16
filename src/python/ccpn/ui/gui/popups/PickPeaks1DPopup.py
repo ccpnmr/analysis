@@ -83,7 +83,7 @@ class ExcludeRegions(Widget):
     self.pulldownSolvents.activated[str].connect(self._addRegions)
     for solvent in sorted(self.solvents):
       self.pulldownSolvents.addItem(solvent)
-    self.SolventsLabel = Label(self, selectionLabel , grid=(0, 0), hAlign=labelAlign)
+    self.SolventsLabel = Label(self, selectionLabel, grid=(0, 0), hAlign=labelAlign)
     self.scrollArea = ScrollArea(self, setLayout=True, grid=(2, 0), gridSpan=(2,2))
     self.scrollArea.setWidgetResizable(True)
     self.scrollAreaWidgetContents = Frame(self, setLayout=True)

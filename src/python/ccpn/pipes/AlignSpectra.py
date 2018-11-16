@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -24,20 +24,20 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 
 #### GUI IMPORTS
-from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe , _getWidgetByAtt
+from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, _getWidgetByAtt
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox, DoubleSpinbox
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
-
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from scipy import signal
 import numpy as np
 from scipy import stats
-from ccpn.util.Logging import getLogger , _debug3
+from ccpn.util.Logging import getLogger, _debug3
 from collections import OrderedDict
+
 
 ########################################################################################################################
 ###   Attributes:
@@ -51,18 +51,20 @@ ReferenceRegion = 'Reference_Region'
 DefaultReferenceRegion = (0.5, -0.5)
 EnginesVar = 'Engines'
 IndividualMode = 'individual'
-Median ='median'
+Median = 'median'
 Mode = 'mode'
 Mean = 'mean'
-Engines = [IndividualMode, Mean, Mode,Median]
+Engines = [IndividualMode, Mean, Mode, Median]
 EnginesCallables = OrderedDict([
-                    ('median',np.median),
-                    ('mode',stats.mode),
-                    ('mean',np.mean),
-                    ])
+    ('median', np.median),
+    ('mode', stats.mode),
+    ('mean', np.mean),
+    ])
 
 DefaultEngine = 'median'
 NotAvailable = 'Not Available'
+
+
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -107,10 +109,10 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engi
   else:
     return [0]*len(spectra) if engine == IndividualMode else 0 # cannot align without a reference intensity signal
 
-  #  find the shift for each spectrum for the selected region
-  for sp in spectra:
-    xTarg, yTarg = sp.positions, sp.intensities
-    x_TargetFilter = np.where((xTarg <= point1) & (xTarg >= point2)) # filter only the region of interest for the target spectrum
+    #  find the shift for each spectrum for the selected region
+    for sp in spectra:
+        xTarg, yTarg = sp.positions, sp.intensities
+        x_TargetFilter = np.where((xTarg <= point1) & (xTarg >= point2))  # filter only the region of interest for the target spectrum
 
     y_TargetValues = yTarg[x_TargetFilter]
     maxYTarget = np.max(y_TargetValues)
@@ -121,31 +123,33 @@ def _getShiftForSpectra(referenceSpectrum, spectra, referenceRegion=(3, 2), engi
       shift =tarPos-refPos
       shifts.append(shift)
 
-  if len(shifts) == len(spectra):
-    if engine == IndividualMode:
-      return shifts
+    if len(shifts) == len(spectra):
+        if engine == IndividualMode:
+            return shifts
 
-  # get a common shift from all the shifts found
-  if engine in EnginesCallables.keys():
-    shift = EnginesCallables[engine](shifts)
-    if isinstance(shift, stats.stats.ModeResult):
-      shift = shift.mode[0]
-      return float(shift)
+    # get a common shift from all the shifts found
+    if engine in EnginesCallables.keys():
+        shift = EnginesCallables[engine](shifts)
+        if isinstance(shift, stats.stats.ModeResult):
+            shift = shift.mode[0]
+            return float(shift)
 
 
 def addIndividualShiftToSpectra(spectra, shifts):
-  alignedSpectra=[]
-  for sp, shift in zip(spectra, shifts):
-      sp.positions -= shift
-      alignedSpectra.append(sp)
-  return alignedSpectra
+    alignedSpectra = []
+    for sp, shift in zip(spectra, shifts):
+        sp.positions -= shift
+        alignedSpectra.append(sp)
+    return alignedSpectra
+
 
 def addShiftToSpectra(spectra, shift):
-  alignedSpectra=[]
-  for sp in spectra:
-      sp.positions -= shift
-      alignedSpectra.append(sp)
-  return alignedSpectra
+    alignedSpectra = []
+    for sp in spectra:
+        sp.positions -= shift
+        alignedSpectra.append(sp)
+    return alignedSpectra
+
 
 ########################################################################################################################
 ##########################################     GUI PIPE    #############################################################
@@ -153,72 +157,66 @@ def addShiftToSpectra(spectra, shift):
 
 
 class AlignSpectraGuiPipe(GuiPipe):
+    preferredPipe = True
+    pipeName = PipeName
 
-  preferredPipe = True
-  pipeName = PipeName
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(AlignSpectraGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
 
-  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
-    super(AlignSpectraGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
+        row = 0
+        #  Reference Spectrum
+        self.spectrumLabel = Label(self.pipeFrame, ReferenceSpectrum, grid=(row, 0))
+        setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame, headerText=HeaderText,
+                                                      headerIcon=self._warningIcon, callback=self._estimateShift, grid=(row, 1)))
+        row += 1
 
-    row = 0
-    #  Reference Spectrum
-    self.spectrumLabel = Label(self.pipeFrame, ReferenceSpectrum,  grid=(row,0))
-    setattr(self, ReferenceSpectrum, PulldownList(self.pipeFrame, headerText=HeaderText,
-                                                  headerIcon=self._warningIcon, callback=self._estimateShift, grid=(row,1)))
-    row += 1
+        # target region
+        self.tregionLabel = Label(self.pipeFrame, text=ReferenceRegion, grid=(row, 0))
+        setattr(self, ReferenceRegion, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
+                                                               values=DefaultReferenceRegion, orientation='v',
+                                                               grid=(row, 1)))
 
-    # target region
-    self.tregionLabel = Label(self.pipeFrame, text=ReferenceRegion, grid=(row, 0))
-    setattr(self, ReferenceRegion, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
-                                                                    values=DefaultReferenceRegion, orientation='v',
-                                                                    grid=(row, 1)))
+        row += 1
+        #  Engines
+        self.enginesLabel = Label(self.pipeFrame, EnginesVar, grid=(row, 0))
+        setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=Engines, grid=(row, 1)))
 
-    row += 1
-    #  Engines
-    self.enginesLabel = Label(self.pipeFrame, EnginesVar, grid=(row, 0))
-    setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=Engines, grid=(row, 1)))
+        row += 1
+        estimateShiftLabel = Label(self.pipeFrame, 'Estimated_shift', grid=(row, 0))
+        self.estimateShift = Label(self.pipeFrame, NotAvailable, grid=(row, 1))
+        row += 1
 
-    row += 1
-    estimateShiftLabel =  Label(self.pipeFrame, 'Estimated_shift', grid=(row, 0))
-    self.estimateShift = Label(self.pipeFrame, NotAvailable, grid=(row, 1))
-    row += 1
+        self._updateWidgets()
 
+    def _estimateShift(self, *args):
+        '''Only to show on the Gui pipe '''
+        referenceRegion = getattr(self, ReferenceRegion).get()
+        engine = getattr(self, EnginesVar).getText()
+        referenceSpectrum = getattr(self, ReferenceSpectrum).get()
+        if not isinstance(referenceSpectrum, str):
+            spectra = [sp for sp in self._parent.inputData if sp != referenceSpectrum]
+            if engine == IndividualMode:
+                self.estimateShift.clear()
+                self.estimateShift.setText(str(NotAvailable))
+            else:
+                shift = _getShiftForSpectra(referenceSpectrum, spectra,
+                                            referenceRegion=referenceRegion, engine=engine)
+                self.estimateShift.clear()
+                self.estimateShift.setText(str(shift))
 
-    self._updateWidgets()
+    def _updateWidgets(self):
+        self._setDataReferenceSpectrum()
 
-  def _estimateShift(self, *args):
-      '''Only to show on the Gui pipe '''
-      referenceRegion= getattr(self, ReferenceRegion).get()
-      engine = getattr(self, EnginesVar).getText()
-      referenceSpectrum = getattr(self, ReferenceSpectrum).get()
-      if not isinstance(referenceSpectrum, str):
-        spectra = [sp for sp in self._parent.inputData if sp != referenceSpectrum]
-        if engine == IndividualMode:
-          self.estimateShift.clear()
-          self.estimateShift.setText(str(NotAvailable))
+    def _setDataReferenceSpectrum(self):
+        data = list(self._parent.inputData)
+
+        if len(data) > 0:
+            _getWidgetByAtt(self, ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data, index=1,
+                                                             headerText=HeaderText, headerIcon=self._warningIcon)
         else:
-          shift = _getShiftForSpectra(referenceSpectrum, spectra,
-                                          referenceRegion=referenceRegion, engine=engine)
-          self.estimateShift.clear()
-          self.estimateShift.setText(str(shift))
-
-
-
-  def _updateWidgets(self):
-    self._setDataReferenceSpectrum()
-
-
-  def _setDataReferenceSpectrum(self):
-    data = list(self._parent.inputData)
-
-    if len(data)>0:
-      _getWidgetByAtt(self,ReferenceSpectrum).setData(texts=[sp.pid for sp in data], objects=data, index=1,
-                                                      headerText=HeaderText, headerIcon=self._warningIcon)
-    else:
-      _getWidgetByAtt(self, ReferenceSpectrum)._clear()
-
+            _getWidgetByAtt(self, ReferenceSpectrum)._clear()
 
 
 ########################################################################################################################
@@ -226,52 +224,48 @@ class AlignSpectraGuiPipe(GuiPipe):
 ########################################################################################################################
 
 
-
-
 class AlignSpectra(SpectraPipe):
+    guiPipe = AlignSpectraGuiPipe
+    pipeName = PipeName
 
-  guiPipe = AlignSpectraGuiPipe
-  pipeName = PipeName
+    _kwargs = {
+        ReferenceSpectrum: 'spectrum.pid',
+        ReferenceRegion: DefaultReferenceRegion,
+        EnginesVar: DefaultEngine
+        }
 
-  _kwargs  =   {
-               ReferenceSpectrum: 'spectrum.pid',
-               ReferenceRegion  :DefaultReferenceRegion,
-               EnginesVar       :DefaultEngine
-               }
+    def runPipe(self, spectra):
+        '''
+        :param spectra: inputData
+        :return: aligned spectra
+        '''
+        referenceRegion = self._kwargs[ReferenceRegion]
+        engine = self._kwargs[EnginesVar]
+        if self.project is not None:
+            referenceSpectrumPid = self._kwargs[ReferenceSpectrum]
+            referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
+            if referenceSpectrum is not None:
+                spectraToAlign = [spectrum for spectrum in spectra if spectrum != referenceSpectrum]
+                if spectraToAlign:
+                    if engine == IndividualMode:
+                        shifts = _getShiftForSpectra(referenceSpectrum, spectraToAlign,
+                                                     referenceRegion=referenceRegion, engine=engine)
+                        addIndividualShiftToSpectra(spectraToAlign, shifts)
+                        getLogger().info('Alignment: applied individual shift to all spectra')
+
+                    else:
+                        shift = _getShiftForSpectra(referenceSpectrum, spectraToAlign,
+                                                    referenceRegion=referenceRegion, engine=engine)
+                        addShiftToSpectra(spectraToAlign, shift)
+                        getLogger().info('Alignment: applied shift to all spectra of %s' % shift)
+
+                    return spectra
+                else:
+                    getLogger().warning('Spectra not Aligned. Returned original spectra')
+                    return spectra
+            else:
+                getLogger().warning('Spectra not Aligned. Returned original spectra')
+                return spectra
 
 
-
-  def runPipe(self, spectra):
-    '''
-    :param spectra: inputData
-    :return: aligned spectra
-    '''
-    referenceRegion = self._kwargs[ReferenceRegion]
-    engine = self._kwargs[EnginesVar]
-    if self.project is not None:
-      referenceSpectrumPid = self._kwargs[ReferenceSpectrum]
-      referenceSpectrum = self.project.getByPid(referenceSpectrumPid)
-      if referenceSpectrum is not None:
-        spectraToAlign = [spectrum for spectrum in spectra if spectrum != referenceSpectrum]
-        if spectraToAlign:
-          if engine == IndividualMode:
-            shifts =  _getShiftForSpectra(referenceSpectrum, spectraToAlign,
-                                                      referenceRegion=referenceRegion,  engine=engine)
-            addIndividualShiftToSpectra(spectraToAlign, shifts)
-            getLogger().info('Alignment: applied individual shift to all spectra')
-
-          else:
-            shift =  _getShiftForSpectra(referenceSpectrum, spectraToAlign,
-                                                      referenceRegion=referenceRegion,  engine=engine)
-            addShiftToSpectra(spectraToAlign, shift)
-            getLogger().info('Alignment: applied shift to all spectra of %s' %shift)
-
-          return spectra
-        else:
-          getLogger().warning('Spectra not Aligned. Returned original spectra')
-          return spectra
-      else:
-        getLogger().warning('Spectra not Aligned. Returned original spectra')
-        return spectra
-
-AlignSpectra.register() # Registers the pipe in the pipeline
+AlignSpectra.register()  # Registers the pipe in the pipeline

@@ -249,7 +249,7 @@ def als(y, lam=10 ** 2, p=0.001, nIter=10):
     y = signal
     lam = smoothness, 10**2 ≤ λ ≤ 10**9.
     p = asymmetry, 0.001 ≤ p ≤ 0.1 is a good choice for a signal with positive peaks.
-    niter = Number of iteration , default 10.
+    niter = Number of iteration, default 10.
 
     """
 
@@ -274,7 +274,7 @@ Whittaker Smooth algorithm
 
 def WhittakerSmooth(y, w, lambda_, differences=1):
     '''
-    no licence , source from web
+    no licence, source from web
     Penalized least squares algorithm for background fitting
 
     input
@@ -307,7 +307,7 @@ airPLS algorithm
 
 def airPLS(y, lambda_=100, porder=1, itermax=15):
     '''
-    no licence , source from web
+    no licence, source from web
     Adaptive iteratively reweighted penalized least squares for baseline fitting
 
     input
@@ -523,8 +523,10 @@ def nmrGlueBaselineCorrector(data, wd=20):
     :return: same as data
     """
     import nmrglue as ng
-    data = ng.process.proc_bl.baseline_corrector(data,wd=wd)
+
+    data = ng.process.proc_bl.baseline_corrector(data, wd=wd)
     return data
+
 
 from typing import Tuple
 

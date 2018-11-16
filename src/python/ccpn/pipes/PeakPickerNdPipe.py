@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -34,24 +34,27 @@ from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
-from ccpn.util.Logging import getLogger , _debug3
+from ccpn.util.Logging import getLogger, _debug3
+
 
 ########################################################################################################################
 ###   Attributes:
 ###   Used in setting the dictionary keys on _kwargs either in GuiPipe and Pipe
 ########################################################################################################################
 
-PipeName =  'Peak Picker ND'
+PipeName = 'Peak Picker ND'
 
-NoiseThreshold   = 'Noise_Threshold'
+NoiseThreshold = 'Noise_Threshold'
 DropFactor = 'Drop_Factor'
-NegativePeaks    = 'Negative_Peaks'
+NegativePeaks = 'Negative_Peaks'
 ExcludeRegions = 'Exclude_Regions'
 
 DefaultDropFactor = 0.1
 DefaultExcludeRegions = [[0.0, 0.0], [0.0, 0.0]]
 DefaultPeakListIndex = -1
 DefaultNegativePeaks = False
+
+
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
@@ -63,26 +66,22 @@ DefaultNegativePeaks = False
 ########################################################################################################################
 
 
-
-
 class PeakPickerNdGuiPipe(GuiPipe):
+    preferredPipe = True
+    pipeName = PipeName
 
-  preferredPipe = True
-  pipeName = PipeName
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(PeakPickerNdGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
 
-  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
-    super(PeakPickerNdGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
+        row = 0
+        self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
+        setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
 
-    row = 0
-    self.pickNegativeLabel = Label(self.pipeFrame, text=NegativePeaks, grid=(row, 0))
-    setattr(self, NegativePeaks, CheckBox(self.pipeFrame, text='', checked=True, grid=(row, 1)))
-
-    row += 1
-    self.noiseLevelFactorLabel = Label(self.pipeFrame, text=DropFactor, grid=(row, 0))
-    setattr(self, DropFactor, DoubleSpinbox(self.pipeFrame, value=DefaultDropFactor, min=0.01, step=0.1, grid=(row, 1)))
-
+        row += 1
+        self.noiseLevelFactorLabel = Label(self.pipeFrame, text=DropFactor, grid=(row, 0))
+        setattr(self, DropFactor, DoubleSpinbox(self.pipeFrame, value=DefaultDropFactor, min=0.01, step=0.1, grid=(row, 1)))
 
 
 ########################################################################################################################
@@ -90,38 +89,32 @@ class PeakPickerNdGuiPipe(GuiPipe):
 ########################################################################################################################
 
 
-
-
 class PeakPickerNdPipe(SpectraPipe):
+    guiPipe = PeakPickerNdGuiPipe
+    pipeName = PipeName
 
-  guiPipe = PeakPickerNdGuiPipe
-  pipeName = PipeName
+    _kwargs = {
+        DropFactor: DefaultDropFactor,
+        NegativePeaks: DefaultNegativePeaks,
 
-  _kwargs =   {
-               DropFactor    : DefaultDropFactor,
-               NegativePeaks : DefaultNegativePeaks,
+        }
 
-              }
+    def runPipe(self, spectra):
+        '''
+        :param data:
+        :return:
+        '''
 
-  def runPipe(self, spectra):
-    '''
-    :param data:
-    :return:
-    '''
+        negativePeaks = self._kwargs[NegativePeaks]
+        dropFactor = self._kwargs[DropFactor]
 
-    negativePeaks = self._kwargs[NegativePeaks]
-    dropFactor = self._kwargs[DropFactor]
+        for spectrum in self.inputData:
+            if len(spectrum.peakLists) > 0:
+                spectrum.peakLists[DefaultPeakListIndex].pickPeaksNd(minDropfactor=dropFactor, doNeg=negativePeaks)
+            else:
+                getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
 
-    for spectrum in self.inputData:
-      if len(spectrum.peakLists) > 0:
-        spectrum.peakLists[DefaultPeakListIndex].pickPeaksNd(minDropfactor = dropFactor, doNeg=negativePeaks)
-      else:
-        getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
-
-    return spectra
-
+        return spectra
 
 
-PeakPickerNdPipe.register() # Registers the pipe in the pipeline
-
-
+PeakPickerNdPipe.register()  # Registers the pipe in the pipeline

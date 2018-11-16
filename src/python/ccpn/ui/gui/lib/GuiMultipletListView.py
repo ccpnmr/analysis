@@ -34,6 +34,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.Logging import getLogger
 from ccpn.core.IntegralList import IntegralList
 
+
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import AbstractPeakDimContrib as ApiAbstractPeakDimContrib
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
@@ -208,7 +209,7 @@ def _getScreenPeakAnnotation(peak, useShortCode=False):
                                     label = item.name
                                 else:
                                     label = chainLabel(item) + shortCode(
-                                        item) + item.nmrResidue.sequenceCode + item.name
+                                            item) + item.nmrResidue.sequenceCode + item.name
                                 resLabel.append(label)
                         except:
                             resLabel.append('-')
@@ -265,7 +266,7 @@ class GuiMultipletListView(QtWidgets.QGraphicsItem):
         # A big NONO!!!
         strip = self.spectrumView.strip
         scene = strip.plotWidget.scene()
-        QtWidgets.QGraphicsItem.__init__(self)  # ejb - need to remove , scene=scene from here
+        QtWidgets.QGraphicsItem.__init__(self)  # ejb - need to remove, scene=scene from here
         self.scene = scene
 
         ###self.strip = strip
@@ -409,8 +410,10 @@ class GuiMultipletListView(QtWidgets.QGraphicsItem):
         # repaint all displays - this is called for each spectrumView in the spectrumDisplay
         # all are attached to the same click
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
+
 
 # Notifiers for assignment annotation change
 # Needed for:

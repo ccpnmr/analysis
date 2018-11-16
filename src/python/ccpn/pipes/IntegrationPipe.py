@@ -6,7 +6,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -29,11 +29,11 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 
-
 #### NON GUI IMPORTS
 from ccpn.framework.lib.Pipe import SpectraPipe
 from ccpn.pipes.lib._getNoiseLevel import _getNoiseLevelForPipe
-from ccpn.util.Logging import getLogger , _debug3
+from ccpn.util.Logging import getLogger, _debug3
+
 
 ########################################################################################################################
 ###   Attributes:
@@ -47,16 +47,15 @@ MinimalLineWidth = 'Minimal_LineWidth'
 FindPeak = 'Find_peak'
 EstimateNoiseThreshold = 'Estimate_Noise_Threshold'
 
-DefaultMinimalLineWidth =  0.01
+DefaultMinimalLineWidth = 0.01
 DefaultNoiseThreshold = [0.0, 0.0]
 DefaultIntegralListIndex = -1
 DefaultFindPeak = True
 
+
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
 ########################################################################################################################
-
-
 
 
 ########################################################################################################################
@@ -64,28 +63,23 @@ DefaultFindPeak = True
 ########################################################################################################################
 
 
-
-
 class CalculateAreaGuiPipe(GuiPipe):
+    preferredPipe = True
+    pipeName = PipeName
 
-  preferredPipe = True
-  pipeName = PipeName
+    def __init__(self, name=pipeName, parent=None, project=None, **kwds):
+        super(CalculateAreaGuiPipe, self)
+        GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
+        self._parent = parent
 
-  def __init__(self, name=pipeName, parent=None, project=None,   **kwds):
-    super(CalculateAreaGuiPipe, self)
-    GuiPipe.__init__(self, parent=parent, name=name, project=project, **kwds)
-    self._parent = parent
+        row = 0
 
-    row = 0
+        self.mlwLabel = Label(self.pipeFrame, MinimalLineWidth, grid=(row, 0))
+        setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
 
-    self.mlwLabel = Label(self.pipeFrame, MinimalLineWidth, grid=(row, 0))
-    setattr(self, MinimalLineWidth, DoubleSpinbox(self.pipeFrame, value=DefaultMinimalLineWidth, grid=(row, 1)))
-    
-    row += 1
-    self.peakLabel = Label(self.pipeFrame, FindPeak, grid=(row, 0))
-    setattr(self, FindPeak, CheckBox(self.pipeFrame, checked=DefaultFindPeak, grid=(row, 1)))
-
-
+        row += 1
+        self.peakLabel = Label(self.pipeFrame, FindPeak, grid=(row, 0))
+        setattr(self, FindPeak, CheckBox(self.pipeFrame, checked=DefaultFindPeak, grid=(row, 1)))
 
 
 ########################################################################################################################
@@ -93,55 +87,48 @@ class CalculateAreaGuiPipe(GuiPipe):
 ########################################################################################################################
 
 
-
-
 class CalculateAreaPipe(SpectraPipe):
+    guiPipe = CalculateAreaGuiPipe
+    pipeName = PipeName
 
-  guiPipe = CalculateAreaGuiPipe
-  pipeName = PipeName
+    _kwargs = {
+        NoiseThreshold: DefaultNoiseThreshold,
+        MinimalLineWidth: DefaultMinimalLineWidth,
+        EstimateNoiseThreshold: True,
+        FindPeak: DefaultFindPeak
+        }
 
-  _kwargs =       {
-                    NoiseThreshold: DefaultNoiseThreshold,
-                    MinimalLineWidth: DefaultMinimalLineWidth,
-                    EstimateNoiseThreshold: True,
-                    FindPeak: DefaultFindPeak
-                   }
+    def runPipe(self, spectra):
+        '''
+        :param data:
+        :return:
+        '''
 
+        if NoiseThreshold not in self._kwargs:
+            self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
 
-  def runPipe(self, spectra):
-    '''
-    :param data:
-    :return:
-    '''
+        minimalLineWidth = self._kwargs[MinimalLineWidth]
+        positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
+        findPeak = self._kwargs[FindPeak]
 
-    if NoiseThreshold not in self._kwargs:
-      self._kwargs.update({NoiseThreshold: DefaultNoiseThreshold})
+        for spectrum in spectra:
+            noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum,
+                                                   estimateNoiseThreshold_var=EstimateNoiseThreshold,
+                                                   noiseThreshold_var=NoiseThreshold)
+            if noiseThreshold:
+                positiveNoiseThreshold = noiseThreshold[1]
 
-    minimalLineWidth = self._kwargs[MinimalLineWidth]
-    positiveNoiseThreshold = max(self._kwargs[NoiseThreshold])
-    findPeak = self._kwargs[FindPeak]
+            if len(spectrum.integralLists) > 0:
+                spectrum.integralLists[DefaultIntegralListIndex].automaticIntegral1D(minimalLineWidth=float(minimalLineWidth),
+                                                                                     noiseThreshold=positiveNoiseThreshold,
+                                                                                     findPeak=findPeak)
 
-    for spectrum in spectra:
-      noiseThreshold = _getNoiseLevelForPipe(cls=self, spectrum=spectrum,
-                                             estimateNoiseThreshold_var=EstimateNoiseThreshold,
-                                             noiseThreshold_var=NoiseThreshold)
-      if noiseThreshold:
-        positiveNoiseThreshold = noiseThreshold[1]
+            else:
+                integralList = spectrum.newIntegralList()
+                integralList.automaticIntegral1D(minimalLineWidth=float(minimalLineWidth), noiseThreshold=positiveNoiseThreshold,
+                                                 findPeak=findPeak)
 
-
-      if len(spectrum.integralLists) > 0:
-        spectrum.integralLists[DefaultIntegralListIndex].automaticIntegral1D(minimalLineWidth=float(minimalLineWidth),
-                                                                             noiseThreshold=positiveNoiseThreshold,
-                                                                             findPeak = findPeak)
-
-      else:
-        integralList = spectrum.newIntegralList()
-        integralList.automaticIntegral1D(minimalLineWidth=float(minimalLineWidth),noiseThreshold=positiveNoiseThreshold,
-                                         findPeak=findPeak)
-
-    return spectra
+        return spectra
 
 
-CalculateAreaPipe.register() # Registers the pipe in the pipeline
-
-
+CalculateAreaPipe.register()  # Registers the pipe in the pipeline

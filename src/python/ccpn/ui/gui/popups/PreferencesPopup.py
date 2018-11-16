@@ -386,7 +386,7 @@ class PreferencesPopup(CcpnDialog):
         # row += 1
         # Spacer(parent, row, 1,
         #         QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
-        #         grid=(row , 0), gridSpan=(row, 1))
+        #         grid=(row, 0), gridSpan=(row, 1))
 
         # row += 1
         # self.symbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))

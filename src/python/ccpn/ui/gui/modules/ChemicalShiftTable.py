@@ -238,9 +238,9 @@ class ChemicalShiftTable(QuickTable):
                          grid=(3, 0), gridSpan=(1, 6),
                          )
 
-        self.spacer = Spacer(self._widget, 5, 5
-                             , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                             , grid=(0, 0), gridSpan=(1, 1))
+        self.spacer = Spacer(self._widget, 5, 5,
+                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+                             grid=(0, 0), gridSpan=(1, 1))
         self._chemicalShiftListPulldown = ChemicalShiftListPulldown(parent=self._widget,
                                                                     project=self.project, default=0,
                                                                     # first NmrChain in project (if present)
@@ -250,9 +250,9 @@ class ChemicalShiftTable(QuickTable):
                                                                     callback=self._selectionPulldownCallback
                                                                     )
 
-        self.spacer = Spacer(self._widget, 5, 5
-                             , QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
-                             , grid=(2, 0), gridSpan=(1, 1))
+        self.spacer = Spacer(self._widget, 5, 5,
+                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+                             grid=(2, 0), gridSpan=(1, 1))
 
         self._widget.setFixedHeight(30)
 

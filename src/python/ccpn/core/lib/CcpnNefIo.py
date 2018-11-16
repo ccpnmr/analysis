@@ -4739,7 +4739,7 @@ def _testNefIo(path: str, skipPrefixes: Sequence[str] = ()):
 if __name__ == '__main__':
     # Explanation:
     # _exportToNef will read a project from path and export the corresponding NEF file
-    # skipPrefixes=('ccpn' ,) means 'remove all ccpn-specific tags from the output';
+    # skipPrefixes=('ccpn', ) means 'remove all ccpn-specific tags from the output';
     # default is to leave them in. Note that path may also be a NEF file,
     # which will then be imported and re-exported
     #
@@ -4753,9 +4753,9 @@ if __name__ == '__main__':
         path = sys.argv[1]
         nefpath = _exportToNef(path)
 
-    # _testNefIo(path, skipPrefixes=('ccpn' ,))
+    # _testNefIo(path, skipPrefixes=('ccpn', ))
     # _testNefIo(path)
     # _testNefIo(nefpath)
-    # nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
-    # _testNefIo(nefpath, skipPrefixes=('ccpn',))
+    # nefpath = _exportToNef(path, skipPrefixes=('ccpn', ))
+    # _testNefIo(nefpath, skipPrefixes=('ccpn', ))
     # print(_extractVariantsTable(path))

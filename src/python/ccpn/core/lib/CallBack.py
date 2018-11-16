@@ -31,49 +31,50 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 
 from ccpn.util.Logging import getLogger
 
+
 logger = getLogger()
 
 
 class CallBack(OrderedDict):
-  # callback keywords
-  CLICK = 'click'
-  DOUBLECLICK = 'doubleclick'
-  CURRENT = 'current'
+    # callback keywords
+    CLICK = 'click'
+    DOUBLECLICK = 'doubleclick'
+    CURRENT = 'current'
 
-  THEOBJECT = 'theObject'
-  OBJECT = 'object'
-  INDEX = 'index'
-  TARGETNAME = 'targetName'
-  TRIGGER = 'trigger'
-  ROW = 'row'
-  COL = 'col'
-  ROWITEM = 'rowItem'
+    THEOBJECT = 'theObject'
+    OBJECT = 'object'
+    INDEX = 'index'
+    TARGETNAME = 'targetName'
+    TRIGGER = 'trigger'
+    ROW = 'row'
+    COL = 'col'
+    ROWITEM = 'rowItem'
 
-  _callbackwords = (CLICK, DOUBLECLICK, CURRENT)
+    _callbackwords = (CLICK, DOUBLECLICK, CURRENT)
 
-  def __init__(self, theObject: Any=None
-               , object: Any=None
-               , index: int=None
-               , targetName: str=None
-               , trigger: list=None
-               , row: int=None
-               , col: int=None
-               , rowItem: dict=None
-               # , callback: Callable[..., str]
-               , *args, **kwargs):
-    """
-    Create CallBack object
-    an object for passing to the callback function
-    """
-    super(CallBack, self).__init__(*args, **kwargs)
+    def __init__(self, theObject: Any = None,
+                 object: Any = None,
+                 index: int = None,
+                 targetName: str = None,
+                 trigger: list = None,
+                 row: int = None,
+                 col: int = None,
+                 rowItem: dict = None,
+                 # callback: Callable[..., str],
+                 *args, **kwargs):
+        """
+        Create CallBack object
+        an object for passing to the callback function
+        """
+        super(CallBack, self).__init__(*args, **kwargs)
 
-    _dict = {}
-    _dict[self.THEOBJECT] = theObject
-    _dict[self.OBJECT] = object
-    _dict[self.INDEX] = index
-    _dict[self.TARGETNAME] = targetName
-    _dict[self.TRIGGER] = trigger
-    _dict[self.ROW] = row
-    _dict[self.COL] = col
-    _dict[self.ROWITEM] = rowItem
-    self.update(_dict)
+        _dict = {}
+        _dict[self.THEOBJECT] = theObject
+        _dict[self.OBJECT] = object
+        _dict[self.INDEX] = index
+        _dict[self.TARGETNAME] = targetName
+        _dict[self.TRIGGER] = trigger
+        _dict[self.ROW] = row
+        _dict[self.COL] = col
+        _dict[self.ROWITEM] = rowItem
+        self.update(_dict)

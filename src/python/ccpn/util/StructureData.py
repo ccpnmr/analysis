@@ -675,7 +675,7 @@ class EnsembleData(pd.DataFrame):
       if containingObject is not None:
         undo.decreaseBlocking()
 
-  def deleteCol(self, columnName):    # ejb - , *args, **kwargs):
+  def deleteCol(self, columnName):    # ejb -, *args, **kwargs):
     """
     Delete a named column from the table, the columnName must be a string and exist in the table.
 

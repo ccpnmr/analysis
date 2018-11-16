@@ -166,7 +166,6 @@ class ListWidget(QtWidgets.QListWidget, Base):
                 item.setHidden(True)
                 item.setSelected(False)
 
-
     def _getDroppedObjects(self, project):
         '''This will return obj if the items text is a ccpn pid. This is used when the objects inside a listWidget are being dragged and dropped across widgets'''
         items = []
@@ -662,19 +661,19 @@ class ListWidgetSelector(Frame):
         # self.leftIcon = Icon('icons/yellow-arrow-left')
         # self.rightIcon = Icon('icons/yellow-arrow-right')
         #
-        # self.buttons = ButtonList(self, texts=['move left', 'move right']
-        #                          , icons=[self.leftIcon, self.rightIcon]
-        #                          , callbacks=[self._moveLeft, self._moveRight]
-        #                          , direction='v'
-        #                          , grid=(3,3), hAlign='c')
+        # self.buttons = ButtonList(self, texts=['move left', 'move right'],
+        #                          icons=[self.leftIcon, self.rightIcon],
+        #                          callbacks=[self._moveLeft, self._moveRight],
+        #                          direction='v',
+        #                          grid=(3,3), hAlign='c')
         # self.buttons.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         # transparentStyle = "background-color: transparent; border: 0px solid transparent"
         # self.buttons.setStyleSheet(transparentStyle)
 
-        # self.button = Button(self, text=''
-        #                          , icon=self.rightIcon
-        #                          , callback=self._copyRight
-        #                          , grid=(3,3))
+        # self.button = Button(self, text='',
+        #                          icon=self.rightIcon,
+        #                          callback=self._copyRight,
+        #                          grid=(3,3)),
         # self.button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
         self.spacer1 = Spacer(self, 5, 5,

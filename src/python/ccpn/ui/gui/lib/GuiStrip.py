@@ -1252,7 +1252,7 @@ class GuiStrip(Frame):
     # def setZoomLimits(self, xLimits, yLimits, factor=5):
     #   '''
     #
-    #   :param xLimits: List [min, max] , e.g ppm [0,15]
+    #   :param xLimits: List [min, max], e.g ppm [0,15]
     #   :param yLimits:  List [min, max]  eg. intensities [-300,2500]
     #   :param factor:
     #   :return: Limits the viewBox from zooming in too deeply(crashing the program) to zooming out too far.
@@ -1273,7 +1273,7 @@ class GuiStrip(Frame):
     #                            xMax=max(xLimits) * factor,
     #                            yMin=-abs(min(yLimits)) * factor,
     #                            yMax=max(yLimits) * factor,
-    #                            minXRange=((max(xLimits) - min(xLimits))/max(xLimits)) ,
+    #                            minXRange=((max(xLimits) - min(xLimits))/max(xLimits)),
     #                            maxXRange=max(xLimits) * factor,
     #                            minYRange=(((max(yLimits) - min(yLimits))/max(yLimits)))*ratio,
     #                            maxYRange=max(yLimits) * factor

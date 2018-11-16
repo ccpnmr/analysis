@@ -71,9 +71,9 @@ class QuickTableFilter(Frame):
     self.searchLabel = Label(self,'Search for',)
     self.edit = LineEdit(self,)
     # self.searchButtons = ButtonList(self, texts=['Close','Reset','Search'], tipTexts=['Close Search','Restore Table','Search'],
-    #                                callbacks=[self.hideSearch
-    #                                           , partial(self.restoreTable, self.table)
-    #                                           , partial(self.findOnTable, self.table)])
+    #                                callbacks=[self.hideSearch,
+    #                                            partial(self.restoreTable, self.table),
+    #                                            partial(self.findOnTable, self.table)])
     self.searchButtons = ButtonList(self, texts=['Search','Reset','Close'], tipTexts=['Search','Restore Table','Close Search'],
                                    callbacks=[partial(self.findOnTable, self.table),
                                               partial(self.restoreTable, self.table),

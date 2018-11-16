@@ -315,7 +315,7 @@ class SubstancePropertiesPopup(CcpnDialog):
     return {
       self._renameLabelSubstance: str(self.nameSubstance.text()),   # ejb - swap for the next two
       # self._changeNameSubstance: str(self.nameSubstance.text()),
-      # self._labellingChanged:str(self.labelling.text()) ,
+      # self._labellingChanged:str(self.labelling.text()),
       self._chemicalNameChanged: [name.strip() for name in self.chemicalName.text().split(SEP.strip()) if name.strip()],
       self._smilesChanged: str(self.smilesLineEdit.text()),
       self._empiricalFormulaChanged: str(self.empiricalFormula.text()),

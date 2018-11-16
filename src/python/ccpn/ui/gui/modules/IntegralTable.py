@@ -410,61 +410,6 @@ class IntegralTable(QuickTable):
                 if limits:
                     return float(min(limits))
 
-    # @staticmethod
-    # def _getCommentText(integral):
-    #   """
-    #   CCPN-INTERNAL: Get a comment from ObjectTable
-    #   """
-    #   try:
-    #     if integral.comment == '' or not integral.comment:
-    #       return ''
-    #     else:
-    #       return integral.comment
-    #   except:
-    #     return ''
-    #
-    # @staticmethod
-    # def _setComment(integral, value):
-    #   """
-    #   CCPN-INTERNAL: Insert a comment into ObjectTable
-    #   """
-    #   IntegralTable.project.blankNotification()
-    #   integral.comment = value
-    #   IntegralTable.project.unblankNotification()
-    #
-    # def _setNotifiers(self):
-    #   """
-    #   Set a Notifier to call when an object is created/deleted/renamed/changed
-    #   rename calls on name
-    #   change calls on any other attribute
-    #   """
-    #   # self._clearNotifiers()
-    #   self._selectOnTableCurrentIntegralsNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='integrals',
-    #                                                          callback=self._selectOnTableCurrentIntegralsNotifierCallback)
-    #
-    #   self._integralListNotifier = Notifier(self.project
-    #                                          , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-    #                                          , IntegralList.__name__
-    #                                          , self._updateCallback)
-    #   self._integralNotifier = Notifier(self.project
-    #                                      , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
-    #                                      , Integral.__name__
-    #                                      , self._updateCallback)
-    #
-    #
-    #
-    #
-    # def _clearNotifiers(self):
-    #   """
-    #   clean up the notifiers
-    #   """
-    #   if self._integralListNotifier is not None:
-    #     self._integralListNotifier.unRegister()
-    #   if self._integralNotifier is not None:
-    #     self._integralNotifier.unRegister()
-    #   if self._selectOnTableCurrentIntegralsNotifier is not None:
-    #     self._selectOnTableCurrentIntegralsNotifier.unRegister()
-
     def _close(self):
         """
         Cleanup the notifiers when the window is closed

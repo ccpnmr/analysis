@@ -687,7 +687,9 @@ class Project(AbstractWrapperObject):
                     executeNotifications.append((notifier, notification[2:]))
             #
             for notifier, params in reversed(executeNotifications):
-                notifier(*params)
+                if not getattr(self, '_apiBlanking', 0):
+                    # notifier(*params)
+                    self._notifierAction(notifier, *params)
 
     # Standard notified functions.
     # RESTRICTED. Use in core classes ONLY
@@ -869,7 +871,8 @@ class Project(AbstractWrapperObject):
         else:
             for dd in iterator:
                 for notifier in dd:
-                    notifier(self)
+                    # notifier(self)
+                    self._notifierAction(notifier, self)
 
     # Library functions
 

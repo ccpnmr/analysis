@@ -354,13 +354,13 @@ QuickTable::item::selected {
                 self.setUpdatesEnabled(False)
                 self.project.blankNotification()
 
-            print(' ' * self._tableBlockingLevel, '>>>INC', self._tableBlockingLevel, _moduleId(self.moduleParent), callerId)
+            print(' ' * self._tableBlockingLevel, '>>>INC', _moduleId(self.moduleParent), self._tableBlockingLevel, callerId)
             self._tableBlockingLevel += 1
             yield  # yield control to the main process
 
         finally:
             self._tableBlockingLevel -= 1
-            # print(' ' * self._tableBlockingLevel, '>>>DEC', self._tableBlockingLevel, _moduleId(self.moduleParent))
+            # print(' ' * self._tableBlockingLevel, '>>>DEC', _moduleId(self.moduleParent), self._tableBlockingLevel)
 
             # unblock all signals on exit
             if self._tableBlockingLevel <= 0:

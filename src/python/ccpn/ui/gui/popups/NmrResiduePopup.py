@@ -104,7 +104,7 @@ class NmrResiduePopup(CcpnDialog):
             remainingResidues = [x for x in CCP_CODES if x not in predictedTypes and not currentNmrResidue.residueType]
             possibilities = [currentNmrResidue.residueType] + preds1 + remainingResidues
         else:
-            possibilities = ('',) + CCP_CODES,
+            possibilities = ('',) + CCP_CODES
         self.residueType.modifyTexts(possibilities)
 
     def _applyChanges(self):

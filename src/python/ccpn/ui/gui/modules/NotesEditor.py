@@ -38,6 +38,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 
 logger = getLogger()
@@ -57,26 +58,32 @@ class NotesEditorModule(CcpnModule):
     def __init__(self, mainWindow=None, name='Notes Editor', note=None):
         """
         Initialise the widgets for the module.
-        :param mainWindow: required
-        :param name: optional
-        :param note: leave as None to let window handle item selection
         """
-        CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+        super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
         self.note = None
 
+        self._widgetScrollArea = ScrollArea(parent=self.mainWidget, grid=(0,0), scrollBarPolicies=('never', 'never'))
+        self._widgetScrollArea.setWidgetResizable(True)
+        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
+
         row = 0
-        self.spacer = Spacer(self.mainWidget, 5, 5,
+        self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, 0), gridSpan=(1, 1))
 
         row += 1
-        self.noWidget = NotePulldown(parent=self.mainWidget,
+        self.noWidget = NotePulldown(parent=self._widget,
                                      project=self.project, default=0,
                                      grid=(row, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
                                      showSelectName=True,
@@ -84,13 +91,13 @@ class NotesEditorModule(CcpnModule):
                                      callback=self._selectionPulldownCallback)
 
         row += 1
-        self.spacer = Spacer(self.mainWidget, 5, 5,
+        self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, 0), gridSpan=(1, 1))
 
         #~~~~~~~~~~ define noteWidget box to contain man editing
         row += 1
-        self.noteWidget = Widget(self.mainWidget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
+        self.noteWidget = Widget(self._widget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
         self.noteWidget.hide()
 
         self.label1 = Label(self.noteWidget, text='Note name', grid=(1, 0), vAlign='centre', hAlign='right')
@@ -111,11 +118,14 @@ class NotesEditorModule(CcpnModule):
 
         row += 1
         # this spacer is expanding, will fill the space when the textbox is invisible
-        self.spacer = Spacer(self.mainWidget, 5, 5,
+        self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                              grid=(row, 4), gridSpan=(1, 1))
 
-        self.mainWidget.setContentsMargins(5, 5, 5, 5)
+        self._widget.setContentsMargins(5, 5, 5, 5)
+
+        self._widgetScrollArea.setWidget(self._widget)
+        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
         self._noteNotifier = None
         self.droppedNotifier = None

@@ -74,7 +74,7 @@ class NmrResidueTableModule(CcpnModule):
         """
         Initialise the Module widgets
         """
-        CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+        super().__init__( mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow

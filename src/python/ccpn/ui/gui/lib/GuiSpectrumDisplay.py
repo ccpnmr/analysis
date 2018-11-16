@@ -214,12 +214,10 @@ class GuiSpectrumDisplay(CcpnModule):
             # scroll area for strips
             # This took a lot of sorting-out; better leave as is or test thoroughly
             self._stripFrameScrollArea = ScrollArea(parent=self.qtParent, setLayout=True,
-                                                    acceptDrops=False  # True
-                                                    )
+                                                    acceptDrops=False,  # True
+                                                    scrollBarPolicies = ('asNeeded', 'never'))
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
-            self._stripFrameScrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-            self._stripFrameScrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
             self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, stripRow, 0, 1, 7)
             self._stripFrameScrollArea.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                                      QtWidgets.QSizePolicy.Expanding)

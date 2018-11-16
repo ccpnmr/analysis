@@ -233,7 +233,7 @@ QuickTable::item::selected {
         # initialise the internal data storage
         self._dataFrameObject = dataFrameObject
         self._tableBlockingLevel = 0
-
+                
         # set stylesheet
         self.colours = getColours()
         styleSheet = self.styleSheet % self.colours
@@ -293,13 +293,13 @@ QuickTable::item::selected {
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
         #self._silenceCallback = False
-
+        
         if self._actionCallback:
             self.doubleClicked.connect(self._doubleClickCallback)
         else:
             self.doubleClicked.connect(self._defaultDoubleClick)
-        if self._selectionCallback:
-            self.itemClicked.connect(self._cellClicked)
+        # if self._selectionCallback:
+        #     self.itemClicked.connect(self._cellClicked)
 
         # set the delegate for editing
         delegate = QuickTableDelegate(self)
@@ -349,22 +349,24 @@ QuickTable::item::selected {
             if self._tableBlockingLevel <= 0:
                 # self._tableBlockingLevel = 0
                 self.blockSignals(True)
+                self.selectionModel().blockSignals(True)
                 self.setUpdatesEnabled(False)
                 self.project.blankNotification()
 
-            print(' '*self._tableBlockingLevel, '>>>INC', self._tableBlockingLevel, _moduleId(self.moduleParent), callerId)
+            print(' ' * self._tableBlockingLevel, '>>>INC', self._tableBlockingLevel, _moduleId(self.moduleParent), callerId)
             self._tableBlockingLevel += 1
             yield  # yield control to the main process
 
         finally:
             self._tableBlockingLevel -= 1
-            print(' '*self._tableBlockingLevel, '>>>DEC', self._tableBlockingLevel, _moduleId(self.moduleParent))
+            # print(' ' * self._tableBlockingLevel, '>>>DEC', self._tableBlockingLevel, _moduleId(self.moduleParent))
 
             # unblock all signals on exit
             if self._tableBlockingLevel <= 0:
                 # self._tableBlockingLevel = 0
                 self.project.unblankNotification()
                 self.setUpdatesEnabled(True)
+                self.selectionModel().blockSignals(False)
                 self.blockSignals(False)
 
     def _preSort(self, *args):
@@ -760,7 +762,11 @@ QuickTable::item::selected {
         # verticalHeader->setDefaultSectionSize(24);
 
     def mousePressEvent(self, event):
-        # handle a mouse button press to popup context menu
+        """handle mouse press events
+        Clicking is handled on the mouse release
+        """
+        self._lastClick = 'click'
+
         if event.button() == QtCore.Qt.RightButton:
             # stops the selection from the table when the right button is clicked
             event.accept()
@@ -776,9 +782,32 @@ QuickTable::item::selected {
 
     def mouseReleaseEvent(self, event):
         self._mousePressed = False
+
+        # print('>>>mouseReleaseEvent', self._lastClick)
+        if self._lastClick == "click":
+            QtCore.QTimer.singleShot(QtWidgets.QApplication.instance().doubleClickInterval(),
+                                     partial(self._handleCellClicked, event))
+
         super(QuickTable, self).mouseReleaseEvent(event)
 
+    def _handleCellClicked(self, event):
+        """handle a single click event, but ignore double click events
+        """
+        if self._lastClick == "click":
+            pos = QtCore.QPoint(event.pos())
+            item = self.itemAt(pos)
+
+            self._cellClicked(item)
+
+    def mouseDoubleClickEvent(self, event):
+        """set the doubleClick flag
+        """
+        self._lastClick = 'doubleClick'
+        super(QuickTable, self).mouseDoubleClickEvent(event)
+
     def _setHeaderContextMenu(self):
+        """Set up the context menu for the table header
+        """
         headers = self.horizontalHeader()
         headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
@@ -1240,8 +1269,7 @@ QuickTable::item::selected {
             return None
 
     def clearSelection(self):
-        """
-        clear the current selection in the table
+        """Clear the current selection in the table
         and remove objects form the current list
         """
         with self._tableBlockSignals('clearSelection'):
@@ -1251,41 +1279,16 @@ QuickTable::item::selected {
             selectionModel.clearSelection()
 
             # remove from the current list
-            # TODO:ED check whether this is robust
             multiple = self._tableData['classCallBack']
             if multiple:  # None if no table callback defined
-                singular = multiple[:-1]
                 multipleAttr = getattr(self.current, multiple)
-                singularAttr = getattr(self.current, singular)
                 if len(multipleAttr) > 0:
-                    from ccpn.framework.Current import Remove
 
-                    for obj in multipleAttr:
-                        remove = getattr(self.current, Remove + obj.className)
-                        if remove:
-                            remove(obj)
-
-                # if self.multiSelect:
-                #   if isinstance(objList, Iterable):
-                #     for obj in objList:
-                #
-                #       # try:
-                #       #   multipleAttr.remove(obj)
-                #       # except:
-                #       #   getLogger().warning('%s not found in the list' % obj)
-                #   else:
-                #     if objList in multipleAttr:
-                #       multipleAttr.remove(objList)
-                #     # try:
-                #     #   multipleAttr.remove(objList)
-                #     # except:
-                #     #   getLogger().warning('%s not found in the list' % objList)
-                # else:
-                #   setattr(self.current, singular, None)
+                    # need to remove objList from multipleAttr - fires only one current change
+                    setattr(self.current, multiple, tuple(set(multipleAttr)-set(objList)))
 
     def selectObjects(self, objList: list, setUpdatesEnabled: bool = False):
-        """
-        Selection the object in the table
+        """Select the object in the table
         """
         # skip if the table is empty
         if not self._dataFrameObject:
@@ -1294,13 +1297,7 @@ QuickTable::item::selected {
         with self._tableBlockSignals('selectObjects'):
 
             selectionModel = self.selectionModel()
-
             if objList:
-                # disable callbacks while populating the table
-
-                #self._silenceCallback = True
-                # self.blockSignals(True)
-                self.setUpdatesEnabled(setUpdatesEnabled)
 
                 if not self._mousePressed:
                     selectionModel.clearSelection()  # causes a clear problem here
@@ -1311,12 +1308,6 @@ QuickTable::item::selected {
                     if row is not None:
                         selectionModel.select(self.model().index(row, 0),
                                               selectionModel.Select | selectionModel.Rows)
-
-                # self.setUpdatesEnabled(True)
-                # self.blockSignals(False)
-                #self._silenceCallback = False
-
-                # self.setFocus(QtCore.Qt.OtherFocusReason)
 
     def _highLightObjs(self, selection):
 
@@ -1729,7 +1720,9 @@ QuickTable::item::selected {
                                          [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
                                          rowClass.__name__,
                                          self._updateRowCallback,
-                                         onceOnly=False)  # should be True, be doesn't work
+                                         onceOnly=True)  # should be True, but doesn't work
+            self._rowNotifier.setDebug(True)
+
             # for 'i-1' nmrResidues
         if isinstance(cellClassNames, list):
             for cellClass in cellClassNames:

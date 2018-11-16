@@ -160,7 +160,7 @@ class ResidueTable(QuickTable):
 
         self.moduleParent = moduleParent
         parent.getLayout().setHorizontalSpacing(0)
-        self._widgetScrollArea = ScrollArea(parent=parent, **kwds)
+        self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
         self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
         self._widgetScrollArea.setWidget(self._widget)

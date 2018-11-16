@@ -242,6 +242,7 @@ class GuiStrip(Frame):
                                                      Notifier.DELETE,
                                                      Notifier.CHANGE], 'Peak', self._updateDisplayedPeaks,
                                       onceOnly=True)
+        self._peakNotifier.setDebug(True)
 
         # Notifier for updating the integrals
         self._integralNotifier = Notifier(self.project, [Notifier.CREATE,
@@ -253,6 +254,7 @@ class GuiStrip(Frame):
         self._multipletNotifier = Notifier(self.project, [Notifier.CREATE,
                                                           Notifier.DELETE,
                                                           Notifier.CHANGE], 'Multiplet', self._updateDisplayedMultiplets)
+        self._multipletNotifier.setDebug(True)
 
         # Notifier for change of stripLabel
         self._stripLabelNotifier = Notifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)

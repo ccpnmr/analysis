@@ -37,7 +37,7 @@ from ccpn.core.PeakList import PeakList
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
-from typing import Optional, Tuple, Union, Sequence, TypeVar
+from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
 
 
 class Peak(AbstractWrapperObject):
@@ -170,12 +170,33 @@ class Peak(AbstractWrapperObject):
 
     @position.setter
     def position(self, value: Sequence):
+        """set the position of the peak
+        """
+        def undo():
+            """preredo/postundo function, needed for undo/redo"""
+            self.project.blankNotification()
+
+        def redo():
+            """preundo/postredo function, needed for undo/redo, and fire single change notifier"""
+            self.project.unblankNotification()
+            self._finaliseAction('change')
+            for mt in self.multiplets:
+                mt._finaliseAction('change')
+
         self._startCommandEchoBlock('position', value, propertySetter=True)
+        _undo = self.project._undo
+
+        _undo.newItem(redo, undo)
+        undo()
         try:
+            # call api changes
             for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
                 peakDim.value = value[ii]
                 peakDim.realValue = None
         finally:
+            redo()
+            _undo.newItem(undo, redo)
+
             self._endCommandEchoBlock()
 
     @property
@@ -377,6 +398,16 @@ class Peak(AbstractWrapperObject):
     # alternativeNames
     assignments = assignedNmrAtoms
     assignmentsByDimensions = dimensionNmrAtoms
+
+    @property
+    def multiplets(self) -> Optional[Tuple[Any]]:
+        """List of multiplets that the peak belongs to
+        """
+        try:
+            return tuple([self._project._data2Obj[mt] for mt in self._wrappedData.sortedMultiplets()])
+        except:
+            return None
+
 
     def _linkPeaks(self, peaks):
         """

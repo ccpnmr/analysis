@@ -151,7 +151,7 @@ class Gui(Ui):
         #                                 , targetName='NmrAtom'
         #                                 , callback=GuiPeakListView._editAssignmentsNmrAtom)
 
-        project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition)
+        project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition, onceOnly=True)
 
         # API notifiers - see functions for comments on why this is done this way
         project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,

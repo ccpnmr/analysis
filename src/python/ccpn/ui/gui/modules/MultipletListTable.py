@@ -161,7 +161,7 @@ class MultipletListTableWidget(QuickTable):
 
         # strange, need to do this when using scrollArea, but not a Widget
         # parent.getLayout().setHorizontalSpacing(0)
-        self._widgetScrollArea = ScrollArea(parent=parent, **kwds)
+        self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
         self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
         self._widgetScrollArea.setWidget(self._widget)

@@ -1288,11 +1288,11 @@ class CcpnNefWriter:
         #
         return result
 
-    # def exportProject(self, expandSelection:bool=False
-    #                   , pidList:list=None
-    #                   , exclusionDict:dict=None) -> typing.Optional[StarIo.NmrDataBlock]:
-    def exportProject(self, expandSelection: bool = False
-                      , pidList: list = None) -> typing.Optional[StarIo.NmrDataBlock]:
+    # def exportProject(self, expandSelection:bool=False,
+    #                   pidList:list=None,
+    #                   exclusionDict:dict=None) -> typing.Optional[StarIo.NmrDataBlock]:
+    def exportProject(self, expandSelection: bool = False,
+                      pidList: list = None) -> typing.Optional[StarIo.NmrDataBlock]:
         """
     Get project and all contents as NEF object tree for export
     """

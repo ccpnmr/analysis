@@ -1331,12 +1331,12 @@ class ColumnViewSettings(Widget):
 
         if self.direction=='v':
           i+=1
-          cb = CheckBox(self, text=colum.heading, grid=(i, 1), callback=self.checkBoxCallBack
-                        , checked=True if colum.heading not in self.hideColumns else False,
+          cb = CheckBox(self, text=colum.heading, grid=(i, 1), callback=self.checkBoxCallBack,
+                        checked=True if colum.heading not in self.hideColumns else False,
                         hAlign='l',tipText= CheckboxTipText,)
         else:
-          cb = CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack
-                        , checked=True if colum.heading not in self.hideColumns else False,
+          cb = CheckBox(self, text=colum.heading, grid=(1, i), callback=self.checkBoxCallBack,
+                        checked=True if colum.heading not in self.hideColumns else False,
                         hAlign='l',tipText= CheckboxTipText,)
 
         cb.setMinimumSize(cb.sizeHint()*1.3)

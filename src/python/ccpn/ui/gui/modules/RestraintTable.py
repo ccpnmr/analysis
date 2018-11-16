@@ -83,10 +83,10 @@ class RestraintTableModule(CcpnModule):
 
         # settings
         self._RTwidget = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
-                                                 includePeakLists=self.includePeakLists,
-                                                 includeNmrChains=self.includeNmrChains,
-                                                 includeSpectrumTable=self.includeSpectrumTable,
-                                                 grid=(0, 0))
+                                   includePeakLists=self.includePeakLists,
+                                   includeNmrChains=self.includeNmrChains,
+                                   includeSpectrumTable=self.includeSpectrumTable,
+                                   grid=(0, 0))
 
         # main window
         self.restraintTable = RestraintTable(parent=self.mainWidget,
@@ -212,7 +212,7 @@ class RestraintTable(QuickTable):
         row += 1
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, gridHPos+1), gridSpan=(1, 1))
+                             grid=(row, gridHPos + 1), gridSpan=(1, 1))
         self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
         # initialise the currently attached dataFrame

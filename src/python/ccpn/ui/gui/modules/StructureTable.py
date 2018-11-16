@@ -97,12 +97,12 @@ class StructureTableModule(CcpnModule):
         #   self.ensemble = self.project.newStructureEnsemble()
         #   self.data = self.ensemble.data
         #
-        #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-        #     , 'CB', 'HB1', 'HB2', 'HB3'
-        #     , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-        #     , 'CE', 'HE1', 'HE2', 'HE3'
-        #     , 'CG', 'HG1', 'HG2', 'HG3'
-        #     , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+        #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
+        #      'CB', 'HB1', 'HB2', 'HB3',
+        #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
+        #      'CE', 'HE1', 'HE2', 'HE3',
+        #      'CG', 'HG1', 'HG2', 'HG3',
+        #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
         #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
         #                                                                                                  'VAL'] * 8
         #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
@@ -121,12 +121,12 @@ class StructureTableModule(CcpnModule):
         #   self.ensemble = self.project.newStructureEnsemble()
         #   self.data = self.ensemble.data
         #
-        #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H'
-        #     , 'CB', 'HB1', 'HB2', 'HB3'
-        #     , 'CE', 'HE1', 'HE2', 'HE3'
-        #     , 'CG', 'HG1', 'HG2', 'HG3'
-        #     , 'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23'
-        #     , 'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+        #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
+        #      'CB', 'HB1', 'HB2', 'HB3',
+        #      'CE', 'HE1', 'HE2', 'HE3',
+        #      'CG', 'HG1', 'HG2', 'HG3',
+        #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
+        #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
         #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
         #                                                                                                  'VAL'] * 8
         #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
@@ -159,10 +159,10 @@ class StructureTableModule(CcpnModule):
 
         # settings
         self._STwidget = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
-                                                 includePeakLists=self.includePeakLists,
-                                                 includeNmrChains=self.includeNmrChains,
-                                                 includeSpectrumTable=self.includeSpectrumTable,
-                                                 grid=(0, 0))
+                                   includePeakLists=self.includePeakLists,
+                                   includeNmrChains=self.includeNmrChains,
+                                   includeSpectrumTable=self.includeSpectrumTable,
+                                   grid=(0, 0))
 
         # main window
         self.structureTable = StructureTable(parent=self.mainWidget,
@@ -415,11 +415,11 @@ class StructureTable(QuickTableStructure):
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0), gridSpan=(1, 1))
         self.stWidget = StructureEnsemblePulldown(parent=self._widget,
-                                          project=self._project, default=0,  # first Structure in project (if present),
-                                          grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                          showSelectName=True,
-                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                          callback=self._selectionPulldownCallback)
+                                                  project=self._project, default=0,  # first Structure in project (if present),
+                                                  grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                                  showSelectName=True,
+                                                  sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                                  callback=self._selectionPulldownCallback)
         self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'average'],
                                       selectedInd=1,
                                       callback=self._selectionButtonCallback,
@@ -678,8 +678,8 @@ class StructureTable(QuickTableStructure):
             # newArraydata = np.array( [(1, 1.6, 'x'),
             #       (3, 5.4, 'y'),
             #       (8, 12.5, 'z'),
-            #       (443, 1e-12, 'w')]
-            #                          , dtype=[('Index', np.uint),
+            #       (443, 1e-12, 'w')],
+            #                          dtype=[('Index', np.uint),
             #                                       ('modelNumber', np.float32),
             #                                       ('chainCode', np.str)])
 

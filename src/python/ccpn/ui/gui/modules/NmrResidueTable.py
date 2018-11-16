@@ -51,6 +51,7 @@ from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 
+
 logger = getLogger()
 ALL = '<all>'
 
@@ -74,7 +75,7 @@ class NmrResidueTableModule(CcpnModule):
         """
         Initialise the Module widgets
         """
-        super().__init__( mainWindow=mainWindow, name=name)
+        super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
@@ -256,7 +257,7 @@ class NmrResidueTable(QuickTable):
             ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None),
             ('NmrAtoms', lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None),
             ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue),
-              'Number of peaks assigned to NmrResidue', None),
+             'Number of peaks assigned to NmrResidue', None),
             ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes',
              lambda nmr, value: NmrResidueTable._setComment(nmr, value))
             ])
@@ -615,32 +616,32 @@ class NmrResidueTable(QuickTable):
     #   change calls on any other attribute
     #   """
     #   self._clearNotifiers()
-    #   self._chainNotifier = Notifier(self.project
-    #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-    #                                     , NmrChain.__name__
-    #                                     , self._updateChainCallback)
-    #   self._residueNotifier = Notifier(self.project
-    #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE]
-    #                                     , NmrResidue.__name__
-    #                                     , self._updateResidueCallback
-    #                                     , onceOnly=True)
-    #   self._atomNotifier = Notifier(self.project
-    #                                     , [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME]
-    #                                     , NmrAtom.__name__
-    #                                     , self._updateAtomCallback
-    #                                     , onceOnly=True)
+    #   self._chainNotifier = Notifier(self.project,
+    #                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+    #                                      NmrChain.__name__,
+    #                                      self._updateChainCallback)
+    #   self._residueNotifier = Notifier(self.project,
+    #                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
+    #                                      NmrResidue.__name__,
+    #                                      self._updateResidueCallback,
+    #                                      onceOnly=True)
+    #   self._atomNotifier = Notifier(self.project,
+    #                                      [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
+    #                                      NmrAtom.__name__,
+    #                                      self._updateAtomCallback,
+    #                                      onceOnly=True)
     #   # very slow
-    #   # self._peakNotifier = Notifier(self.project
-    #   #                               , [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE]
-    #   #                               , 'Peak'
-    #   #                               , self._updateCallback
-    #   #                               , onceOnly = True
+    #   # self._peakNotifier = Notifier(self.project,
+    #   #                                [Notifier.DELETE, Notifier.CREATE, Notifier.CHANGE],
+    #   #                                'Peak',
+    #   #                                self._updateCallback,
+    #   #                                onceOnly = True
     #   #                               )
     #
-    #   self._selectOnTableCurrentNmrResiduesNotifier = Notifier(self.current
-    #                                                      , [Notifier.CURRENT]
-    #                                                      , targetName='nmrResidues'
-    #                                                      , callback=self._selectOnTableCurrentNmrResiduesNotifierCallback)
+    #   self._selectOnTableCurrentNmrResiduesNotifier = Notifier(self.current,
+    #                                                       [Notifier.CURRENT],
+    #                                                       targetName='nmrResidues',
+    #                                                       callback=self._selectOnTableCurrentNmrResiduesNotifierCallback)
     #
     # def _clearNotifiers(self):
     #   """

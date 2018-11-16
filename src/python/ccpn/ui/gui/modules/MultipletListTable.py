@@ -191,7 +191,7 @@ class MultipletListTableWidget(QuickTable):
         row += 1
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, gridHPos+1), gridSpan=(1, 1))
+                             grid=(row, gridHPos + 1), gridSpan=(1, 1))
         self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
         self._hiddenColumns = ['Pid']

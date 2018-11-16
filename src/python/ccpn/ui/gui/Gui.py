@@ -142,14 +142,14 @@ class Gui(Ui):
         #                          GuiMultipletListView.GuiMultipletListView._changedMultipletListView)
 
         # TODO:ED need to unregister these notifiers on close
-        self._updateNotifier1 = Notifier(project
-                                         , triggers=[Notifier.RENAME]
-                                         , targetName='NmrAtom'
-                                         , callback=GuiPeakListView._updateAssignmentsNmrAtom)
-        # self._updateNotifier2 = Notifier(project
-        #                                 , triggers=[Notifier.CREATE]
-        #                                 , targetName='NmrAtom'
-        #                                 , callback=GuiPeakListView._editAssignmentsNmrAtom)
+        self._updateNotifier1 = Notifier(project,
+                                         triggers=[Notifier.RENAME],
+                                         targetName='NmrAtom',
+                                         callback=GuiPeakListView._updateAssignmentsNmrAtom)
+        # self._updateNotifier2 = Notifier(project,
+        #                                 triggers=[Notifier.CREATE],
+        #                                 targetName='NmrAtom',
+        #                                 callback=GuiPeakListView._editAssignmentsNmrAtom)
 
         project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition, onceOnly=True)
 
@@ -209,7 +209,7 @@ class Gui(Ui):
 
         # check valid internet connection first
         if not Register.checkInternetConnection():
-            showError('Registration','Could not connect to the registration server, please check your internet connection.')
+            showError('Registration', 'Could not connect to the registration server, please check your internet connection.')
             sys.exit(0)
 
         else:
@@ -291,6 +291,7 @@ class Gui(Ui):
         updatePopup = UpdatePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
         self.mainWindow.show()
         updatePopup.exec_()
+
 
 #######################################################################################
 #
@@ -405,7 +406,6 @@ class StripDisplay1d(coreClass, _SpectrumDisplay1d):
             # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
             self.application.ui.mainWindow.moduleArea.addModule(self, position='right',
                                                                 relativeTo=self.application.ui.mainWindow.moduleArea)
-
 
 
 from ccpn.ui.gui.modules.SpectrumDisplayNd import SpectrumDisplayNd as _SpectrumDisplayNd

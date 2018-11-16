@@ -73,7 +73,7 @@ class NotesEditorModule(CcpnModule):
             self.current = None
         self.note = None
 
-        self._widgetScrollArea = ScrollArea(parent=self.mainWidget, grid=(0,0), scrollBarPolicies=('never', 'never'))
+        self._widgetScrollArea = ScrollArea(parent=self.mainWidget, grid=(0, 0), scrollBarPolicies=('never', 'never'))
         self._widgetScrollArea.setWidgetResizable(True)
         self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
 

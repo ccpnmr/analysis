@@ -336,7 +336,7 @@ class Multiplet(AbstractWrapperObject):
         defaults = collections.OrderedDict(
                 (('peaks', None),
                  )
-        )
+                )
         undo = self._project._undo
         self._startCommandEchoBlock('addPeaks', values=locals(), defaults=defaults,
                                     parName='addPeaks')
@@ -369,7 +369,7 @@ class Multiplet(AbstractWrapperObject):
         defaults = collections.OrderedDict(
                 (('peaks', None),
                  )
-        )
+                )
         undo = self._project._undo
         self._startCommandEchoBlock('removePeaks', values=locals(), defaults=defaults,
                                     parName='removePeaks')
@@ -450,4 +450,4 @@ del _newMultiplet
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'peak.multiplets', 'action': 'change'},
          Nmr.PeakDim._metaclass.qualifiedName(), '')
-)
+        )

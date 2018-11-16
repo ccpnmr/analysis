@@ -1437,8 +1437,8 @@ class Framework:
       # NBNB TBD I assume here that path is either a string or a list lf string paths.
       # NBNB #FIXME if incorrect
       dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
-                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general
-                          , filter=filter)
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
+                          filter=filter)
       path = dialog.selectedFile()
       if not path:
         return
@@ -2179,8 +2179,8 @@ class Framework:
   #   #FIXME:ED - sometimes crashes
   #   if not relativeTo:
   #     relativeTo = mainWindow.moduleArea      # ejb
-  #   self.structureTableModule = StructureTableModule(mainWindow=mainWindow
-  #                                               , structureEnsemble=structureEnsemble)
+  #   self.structureTableModule = StructureTableModule(mainWindow=mainWindow,
+  #                                               structureEnsemble=structureEnsemble)
   #   mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
   #
   #   mainWindow.pythonConsole.writeConsoleCommand("application.showStructureTable()")
@@ -2258,13 +2258,13 @@ class Framework:
     #FIXME:ED - sometimes crashes
     if not relativeTo:
       relativeTo = mainWindow.moduleArea      # ejb
-    self.structureTableModule = StructureTableModule(mainWindow=mainWindow
-                                                , structureEnsemble=structureEnsemble)
+    self.structureTableModule = StructureTableModule(mainWindow=mainWindow,
+                                                structureEnsemble=structureEnsemble)
 
-    # self.project.newModule(moduleType=self.structureTableModule.className
-    #                        , title=None
-    #                        , window=mainWindow
-    #                        , comment='')
+    # self.project.newModule(moduleType=self.structureTableModule.className,
+    #                        title=None,
+    #                        window=mainWindow,
+    #                        comment='')
 
     mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)
 

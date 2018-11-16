@@ -369,16 +369,16 @@ if __name__ == '__main__':
 
   # pluginModule = PluginModule(plugin)       # ejb - original line
 
-  # pluginModule = PluginModule(plugin=plugin
-  #                             , application=application
-  #                             , mainWindow=application.mainWindow)
+  # pluginModule = PluginModule(plugin=plugin,
+  #                             application=application,
+  #                             mainWindow=application.mainWindow)
 
   qtTestHarness.qtMainWindow.project = None             # ejb - test
   qtTestHarness.qtMainWindow.application = application
 
-  pluginModule = PluginModule(mainWindow=qtTestHarness.qtMainWindow
-                              , plugin=plugin
-                              , application=application)
+  pluginModule = PluginModule(mainWindow=qtTestHarness.qtMainWindow,
+                               plugin=plugin,
+                               application=application),
   qtTestHarness.showWidget(pluginModule)
 
   # pluginModule.show()

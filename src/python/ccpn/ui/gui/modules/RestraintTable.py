@@ -41,6 +41,8 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 
 
 logger = getLogger()
@@ -55,6 +57,10 @@ class RestraintTableModule(CcpnModule):
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
 
+    includePeakLists = False
+    includeNmrChains = False
+    includeSpectrumTable = False
+
     className = 'RestraintTableModule'
 
     # we are subclassing this Module, hence some more arguments to the init
@@ -62,82 +68,38 @@ class RestraintTableModule(CcpnModule):
         """
         Initialise the Module widgets
         """
-        CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+        super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
 
-        # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
-        # backBoneAssignment modules
-        self._RTwidget = Widget(self.settingsWidget, setLayout=True,
-                                grid=(0, 0), vAlign='top', hAlign='left')
+        # settings
+        self._RTwidget = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
+                                                 includePeakLists=self.includePeakLists,
+                                                 includeNmrChains=self.includeNmrChains,
+                                                 includeSpectrumTable=self.includeSpectrumTable,
+                                                 grid=(0, 0))
 
-        # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
-        # underpinning the addNotifier call do not allow for it either
-
-        #FIXME:ED - need to check label text and function of these
-        colwidth = 140
-        self.displaysWidget = ListCompoundWidget(self._RTwidget,
-                                                 grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                 vPolicy='minimal',
-                                                 #minimumWidths=(colwidth, 0, 0),
-                                                 fixedWidths=(colwidth, 2 * colwidth, None),
-                                                 orientation='left',
-                                                 labelText='Display(s):',
-                                                 tipText='SpectrumDisplay modules to respond to double-click',
-                                                 texts=[ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-                                                 )
-        self.displaysWidget.setPreSelect(self._fillDisplayWidget)
-        self.displaysWidget.setFixedHeights((None, None, 40))
-
-        self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                self._RTwidget,
-                grid=(1, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Show sequential strips:',
-                checked=False
-                )
-
-        self.markPositionsWidget = CheckBoxCompoundWidget(
-                self._RTwidget,
-                grid=(2, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Mark positions:',
-                checked=True
-                )
-        self.autoClearMarksWidget = CheckBoxCompoundWidget(
-                self._RTwidget,
-                grid=(3, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Auto clear marks:',
-                checked=True
-                )
-
+        # main window
         self.restraintTable = RestraintTable(parent=self.mainWidget,
                                              mainWindow=self.mainWindow,
                                              moduleParent=self,
                                              setLayout=True,
                                              grid=(0, 0))
-        # settingsWidget
 
         if restraintList is not None:
             self.selectRestraintList(restraintList)
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
-
-    def _fillDisplayWidget(self):
-        list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-        self.displaysWidget.pulldownList.setData(texts=list)
 
     def _maximise(self):
         """
@@ -195,14 +157,26 @@ class RestraintTable(QuickTable):
         """
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
+
         self.moduleParent = moduleParent
+        parent.getLayout().setHorizontalSpacing(0)
+        self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
+        self._widgetScrollArea.setWidgetResizable(True)
+        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
+        self._widgetScrollArea.setWidget(self._widget)
+        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+
         RestraintTable.project = self.project
 
         kwds['setLayout'] = True  ## Assure we have a layout with the widget
-        self._widget = Widget(parent=parent, **kwds)
         self.restraintList = None
 
         # create the column objects
@@ -222,21 +196,24 @@ class RestraintTable(QuickTable):
                                        lambda restraint, value: RestraintTable._setComment(restraint, value))
                                       ])  # [Column(colName, func, tipText=tipText, setEditValue=editValue) for colName, func, tipText, editValue in self.columnDefs]
 
-        # create the table; objects are added later via the displayTableForRestraints method
+        row = 0
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(0, 0), gridSpan=(1, 1))
+                             grid=(row, 0), gridSpan=(1, 1))
+
+        row += 1
+        gridHPos = 0
         self.rtWidget = RestraintPulldown(parent=self._widget,
                                           project=self.project, default=0,
-                                          grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                          grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
                                           showSelectName=True,
                                           sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                           callback=self._selectionPulldownCallback)
+        row += 1
         self.spacer = Spacer(self._widget, 5, 5,
-                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(2, 0), gridSpan=(1, 1))
-
-        self._widget.setFixedHeight(30)
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+                             grid=(row, gridHPos+1), gridSpan=(1, 1))
+        self._widgetScrollArea.setFixedHeight(35)  # needed for the correct sizing of the table
 
         # initialise the currently attached dataFrame
         self._hiddenColumns = ['Pid']
@@ -252,15 +229,7 @@ class RestraintTable(QuickTable):
                             actionCallback=self._actionCallback,
                             grid=(3, 0), gridSpan=(1, 6))
 
-        # self._restraintListNotifier = None
-        # self._restraintNotifier = None
-        #
-        # #TODO: see how to handle peaks as this is too costly at present
-        # # Notifier object to update the table if the peaks change
-        # self._peaksNotifier = None
-        # self._updateSilence = False  # flag to silence updating of the table
-        # self._setNotifiers()
-
+        ## populate the table if there are restraintLists in the project
         if restraintList is not None:
             self._selectRestraintList(restraintList)
 

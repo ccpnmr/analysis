@@ -49,6 +49,8 @@ from ccpn.core.StructureEnsemble import EnsembleData
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 
 
 ALL = '<all>'
@@ -62,6 +64,10 @@ class StructureTableModule(CcpnModule):
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
 
+    includePeakLists = False
+    includeNmrChains = False
+    includeSpectrumTable = False
+
     className = 'StructureTableModule'
 
     # we are subclassing this Module, hence some more arguments to the init
@@ -69,13 +75,18 @@ class StructureTableModule(CcpnModule):
         """
         Initialise the Module widgets
         """
-        CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
+        super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
 
         # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
         # # add test structure Ensembles
@@ -147,57 +158,11 @@ class StructureTableModule(CcpnModule):
         #   pass
 
         # settings
-        # Put all of the NmrTable settings in a widget, as there will be more added in the PickAndAssign, and
-        # backBoneAssignment modules
-        self._STwidget = Widget(self.settingsWidget, setLayout=True,
-                                grid=(0, 0), vAlign='top', hAlign='left')
-
-        # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
-        # underpinning the addNotifier call do not allow for it either
-
-        #FIXME:ED - need to check label text and function of these
-        colwidth = 140
-        self.displaysWidget = ListCompoundWidget(self._STwidget,
-                                                 grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                 vPolicy='minimal',
-                                                 #minimumWidths=(colwidth, 0, 0),
-                                                 fixedWidths=(colwidth, 2 * colwidth, None),
-                                                 orientation='left',
-                                                 labelText='Display(s):',
-                                                 tipText='SpectrumDisplay modules to respond to double-click',
-                                                 texts=[ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-                                                 )
-        self.displaysWidget.setPreSelect(self._fillDisplayWidget)
-        self.displaysWidget.setFixedHeights((None, None, 40))
-
-        self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                self._STwidget,
-                grid=(1, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Show sequential strips:',
-                checked=False
-                )
-
-        self.markPositionsWidget = CheckBoxCompoundWidget(
-                self._STwidget,
-                grid=(2, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Mark positions:',
-                checked=True
-                )
-        self.autoClearMarksWidget = CheckBoxCompoundWidget(
-                self._STwidget,
-                grid=(3, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                #minimumWidths=(colwidth, 0),
-                fixedWidths=(colwidth, 30),
-                orientation='left',
-                labelText='Auto clear marks:',
-                checked=True
-                )
+        self._STwidget = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
+                                                 includePeakLists=self.includePeakLists,
+                                                 includeNmrChains=self.includeNmrChains,
+                                                 includeSpectrumTable=self.includeSpectrumTable,
+                                                 grid=(0, 0))
 
         # main window
         self.structureTable = StructureTable(parent=self.mainWidget,
@@ -208,10 +173,6 @@ class StructureTableModule(CcpnModule):
 
         if structureEnsemble is not None:
             self.selectStructureEnsemble(structureEnsemble)
-
-    def _fillDisplayWidget(self):
-        list = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-        self.displaysWidget.pulldownList.setData(texts=list)
 
     def selectStructureEnsemble(self, structureEnsemble=None):
         """
@@ -318,7 +279,7 @@ class QuickTableStructure(QuickTable):
         super(QuickTableStructure, self).__init__(*args, **kwargs)
 
     def _selectionTableCallback(self, itemSelection):
-        if not self._silenceCallback:
+        with self._tableBlockSignals('_selectionTableCallback'):
 
             rowList = self.getSelectedRows()
             dataTable = {}
@@ -395,26 +356,25 @@ class StructureTable(QuickTableStructure):
     TABLE = 'table'
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, structureEnsemble=None, **kwds):
-        """
-        Initialise the widgets for the module.
-        :param parent: parent widget
-        :param application: needed
-        :param moduleParent: module area to insert module
-        :param itemPid: should be None
-        :param kwds:
-        """
-
         # Derive application, project, and current from mainWindow
         self._mainWindow = mainWindow
-        self._application = mainWindow.application
-        self._project = mainWindow.application.project
-        self._current = mainWindow.application.current
-        self.moduleParent = moduleParent
+        if mainWindow:
+            self._application = mainWindow.application
+            self._project = mainWindow.application.project
+            self._current = mainWindow.application.current
+        else:
+            self._application = None
+            self._project = None
+            self._current = None
 
-        # self._application = application
-        # self._project = application.project
-        # self._current = application.current
-        self._widget = Widget(parent=parent, **kwds)
+        self.moduleParent = moduleParent
+        parent.getLayout().setHorizontalSpacing(0)
+        self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
+        self._widgetScrollArea.setWidgetResizable(True)
+        self._widget = Widget(parent=self._widgetScrollArea, setLayout=True)
+        self._widgetScrollArea.setWidget(self._widget)
+        self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
+
         self.thisObj = None
         self.thisDataSet = None
 
@@ -467,10 +427,9 @@ class StructureTable(QuickTableStructure):
                                       tipTexts=None,
                                       grid=(1, 2), gridSpan=(1, 3))
         self.spacer = Spacer(self._widget, 5, 5,
-                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(2, 0), gridSpan=(1, 1))
-
-        self._widget.setFixedHeight(30)
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+                             grid=(2, 5), gridSpan=(1, 1))
+        self._widgetScrollArea.setFixedHeight(35)
 
         # self._columnNames = [header.headerText for header in self.STcolumns]
         self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']

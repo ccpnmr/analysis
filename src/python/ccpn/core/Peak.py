@@ -175,11 +175,17 @@ class Peak(AbstractWrapperObject):
 
         def undo():
             """preredo/postundo function, needed for undo/redo"""
-            self.project.blankNotification()
+            # self.project.blankNotification()
+
+            if not hasattr(self.project, '_apiBlanking'):
+                self.project._apiBlanking = 0
+            self.project._apiBlanking += 1
 
         def redo():
             """preundo/postredo function, needed for undo/redo, and fire single change notifier"""
-            self.project.unblankNotification()
+            # self.project.unblankNotification()
+            self.project._apiBlanking = max(0, self.project._apiBlanking-1)
+
             self._finaliseAction('change')
             for mt in self.multiplets:
                 mt._finaliseAction('change')

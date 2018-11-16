@@ -717,7 +717,8 @@ class AbstractWrapperObject():
             else:
                 for dd in iterator:
                     for notifier in dd:
-                        notifier(self, oldPid)
+                        # notifier(self, oldPid)
+                        self._notifierAction(notifier, self, oldPid)
 
             for obj in self._getDirectChildren():
                 obj._finaliseAction('rename')
@@ -735,7 +736,12 @@ class AbstractWrapperObject():
                         # GWV: Maybe only at the highest debug level
                         self._project._logger.debug('Notifier: %s; %s; %s'
                                                     % (action, self, notifier))
-                        notifier(self)
+                        # notifier(self)
+                        self._notifierAction(notifier, self)
+
+    def _notifierAction(self, notifier, *args, **kwds):
+        if not getattr(self.project, '_apiBlanking', 0):
+            notifier(*args, **kwds)
 
     def resetSerial(self, newSerial: int):
         """ADVANCED Reset serial of object to newSerial, resetting parent link

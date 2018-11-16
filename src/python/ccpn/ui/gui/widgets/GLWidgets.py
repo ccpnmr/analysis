@@ -124,6 +124,9 @@ class GuiNdWidget(CcpnGLWidget):
                     yAxis = spectrumIndices[1]
 
                     for multiplet in multipletList.multiplets:
+                        if not multiplet.position:
+                            continue
+
                         if len(multiplet.axisCodes) > 2 and zPositions is not None:
 
                             zAxis = spectrumIndices[2]

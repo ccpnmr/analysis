@@ -63,7 +63,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         super().__init__(parent)
         Base._init(self, acceptDrops=acceptDrops, **kwds)
 
-        self.setDragDropMode(QtWidgets.QAbstractItemView.DragDrop)
+        self.setDragDropMode(self.DragDrop)
 
         self.setAcceptDrops(acceptDrops)
         self.contextMenu = contextMenu
@@ -115,14 +115,14 @@ class ListWidget(QtWidgets.QListWidget, Base):
         for obj in objects:
             if hasattr(obj, name):
                 item = QtWidgets.QListWidgetItem(getattr(obj, name), self)
-                item.setData(QtCore.Qt.UserRole, obj)
+                # item.setData(QtCore.Qt.UserRole, obj)
                 obj.item = item
                 self.addItem(item)
                 self.items.append(item)
 
             else:
                 item = QtWidgets.QListWidgetItem(str(obj))
-                item.setData(QtCore.Qt.UserRole, obj)
+                # item.setData(QtCore.Qt.UserRole, obj)
                 self.addItem(item)
 
     def getObjects(self):

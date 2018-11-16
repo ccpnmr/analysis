@@ -384,9 +384,9 @@ class PreferencesPopup(CcpnDialog):
         ## self.showDoubleCursorBox.toggled.connect(partial(self._toggleGeneralOptions, 'showDoubleCursor'))
 
         # row += 1
-        # Spacer(parent, row, 1
-        #        , QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding
-        #        , grid=(row , 0), gridSpan=(row, 1))
+        # Spacer(parent, row, 1,
+        #         QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+        #         grid=(row , 0), gridSpan=(row, 1))
 
         # row += 1
         # self.symbolsLabel = Label(parent, text="Peak Symbols", grid=(row, 0))
@@ -400,8 +400,8 @@ class PreferencesPopup(CcpnDialog):
         #                                 )
         # row += 1
         # self.symbolSizeLabel = Label(parent, text="Peak Symbol Size (ppm)", grid=(row, 0))
-        # self.symbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01
-        #                                         , min=0.01, max=1.0, grid=(row, 1), hAlign='l')
+        # self.symbolSizeData = DoubleSpinbox(parent, decimals=3, step=0.01,
+        #                                         min=0.01, max=1.0, grid=(row, 1), hAlign='l')
         # self.symbolSizeData.setMinimumWidth(LineEditsMinimumWidth)
         # symbolSize = self.preferences.general.symbolSize
         # self.symbolSizeData.setValue(float('%.3f' % symbolSize))
@@ -409,8 +409,8 @@ class PreferencesPopup(CcpnDialog):
         #
         # row += 1
         # self.symbolThicknessLabel = Label(parent, text="Peak Symbol Thickness (point)", grid=(row, 0))
-        # self.symbolThicknessData = Spinbox(parent, step=1
-        #                                         , min=1, max=20, grid=(row, 1), hAlign='l')
+        # self.symbolThicknessData = Spinbox(parent, step=1,
+        #                                         min=1, max=20, grid=(row, 1), hAlign='l')
         # self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         # symbolThickness = self.preferences.general.symbolThickness
         # self.symbolThicknessData.setValue(int(symbolThickness))

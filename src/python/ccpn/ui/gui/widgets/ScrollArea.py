@@ -41,7 +41,6 @@ class ScrollArea(QtWidgets.QScrollArea, Base):
 
     def __init__(self, parent, scrollBarPolicies=('asNeeded', 'asNeeded'),
                  setLayout=True, minimumSizes=(50, 50), **kwds):
-
         super().__init__(parent)
 
         # kwds['setLayout'] = True  # A scrollable area always needs a layout to function

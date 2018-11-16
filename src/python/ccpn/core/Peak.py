@@ -172,6 +172,7 @@ class Peak(AbstractWrapperObject):
     def position(self, value: Sequence):
         """set the position of the peak
         """
+
         def undo():
             """preredo/postundo function, needed for undo/redo"""
             self.project.blankNotification()
@@ -407,7 +408,6 @@ class Peak(AbstractWrapperObject):
             return tuple([self._project._data2Obj[mt] for mt in self._wrappedData.sortedMultiplets()])
         except:
             return None
-
 
     def _linkPeaks(self, peaks):
         """

@@ -229,6 +229,7 @@ QuickTable::item::selected {
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
+        self.moduleParent = None
 
         # initialise the internal data storage
         self._dataFrameObject = dataFrameObject
@@ -1283,9 +1284,8 @@ QuickTable::item::selected {
             if multiple:  # None if no table callback defined
                 multipleAttr = getattr(self.current, multiple)
                 if len(multipleAttr) > 0:
-
                     # need to remove objList from multipleAttr - fires only one current change
-                    setattr(self.current, multiple, tuple(set(multipleAttr)-set(objList)))
+                    setattr(self.current, multiple, tuple(set(multipleAttr) - set(objList)))
 
     def selectObjects(self, objList: list, setUpdatesEnabled: bool = False):
         """Select the object in the table

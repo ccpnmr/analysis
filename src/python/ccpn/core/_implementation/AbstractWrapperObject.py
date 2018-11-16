@@ -740,8 +740,8 @@ class AbstractWrapperObject():
                         self._notifierAction(notifier, self)
 
     def _notifierAction(self, notifier, *args, **kwds):
-        if not getattr(self.project, '_apiBlanking', 0):
-            notifier(*args, **kwds)
+        # if not getattr(self.project, '_apiBlanking', 0):
+        notifier(*args, **kwds)
 
     def resetSerial(self, newSerial: int):
         """ADVANCED Reset serial of object to newSerial, resetting parent link

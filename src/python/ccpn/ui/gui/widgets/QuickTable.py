@@ -566,37 +566,11 @@ QuickTable::item::selected {
         # data['OBJECT'] = return pid, key/values, row, col
 
         with self._tableBlockSignals('_selectionTableCallback'):
-            if not self._selectionCallback:
-                return
+            # if not self._selectionCallback:
+            #     return
 
             print('>>> %s _selectionTableCallback__' % _moduleId(self.moduleParent))
-
-            # # if not self._silenceCallback:
-            #
-            # print('>>> %s _selectionTableCallback 3' % _moduleId(self.moduleParent))
-
-            # if not self._mousePressed:
             objList = self.getSelectedObjects()
-            # model = self.selectionModel()
-            #
-            # # selects all the items in the row
-            # selection = model.selectedIndexes()
-            #
-            # if selection:
-            # row = itemSelection.row()
-            # col = itemSelection.column()
-            #
-            #   data = {}
-            #   objList = []
-            #   for iSelect in selection:
-            #     col = iSelect.column()
-            #     colName = self.horizontalHeaderItem(col).text()
-            #     data[colName] = model.model().data(iSelect)
-            #
-            #     objIndex = data['Pid']
-            #     obj = self.project.getByPid(objIndex)
-            #     if obj:
-            #       objList.append(obj)
 
             if objList:
                 data = CallBack(theObject=self._dataFrameObject,
@@ -608,7 +582,11 @@ QuickTable::item::selected {
                                 col=0,
                                 rowItem=None)
 
-                self._selectionCallback(data)
+                if self._selectionCallback:
+                    self._selectionCallback(data)
+
+            else:
+                self.clearSelection()
 
     def _checkBoxTableCallback(self, itemSelection):
         print('>>> %s _checkBoxTableCallback' % _moduleId(self.moduleParent))
@@ -1189,7 +1167,7 @@ QuickTable::item::selected {
 
     def clearSelection(self):
         """Clear the current selection in the table
-        and remove objects form the current list
+        and remove objects from the current list
         """
         with self._tableBlockSignals('clearSelection'):
 
@@ -1199,11 +1177,14 @@ QuickTable::item::selected {
 
             # remove from the current list
             multiple = self._tableData['classCallBack']
+
+            tableObjs = self._dataFrameObject.objects
+
             if multiple:  # None if no table callback defined
                 multipleAttr = getattr(self.current, multiple)
                 if len(multipleAttr) > 0:
                     # need to remove objList from multipleAttr - fires only one current change
-                    setattr(self.current, multiple, tuple(set(multipleAttr) - set(objList)))
+                    setattr(self.current, multiple, tuple(set(multipleAttr) - set(tableObjs)))
 
     def selectObjects(self, objList: list, setUpdatesEnabled: bool = False):
         """Select the object in the table

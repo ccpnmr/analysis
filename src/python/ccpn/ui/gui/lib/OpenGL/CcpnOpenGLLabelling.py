@@ -321,6 +321,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     def _appendLabel(self, spectrumView, objListView, stringList, obj):
         """Append a new label to the end of the list
         """
+        if not obj.position:
+            return
+
         spectrum = spectrumView.spectrum
         spectrumFrequency = spectrum.spectrometerFrequencies
         # pls = peakListView.peakList

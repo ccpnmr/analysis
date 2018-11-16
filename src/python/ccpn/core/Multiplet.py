@@ -234,8 +234,7 @@ class Multiplet(AbstractWrapperObject):
     @property
     def axisCodes(self) -> Tuple[str, ...]:
         """Spectrum axis codes in dimension order matching position."""
-        if self.peaks:
-            return self.peaks[0].peakList.spectrum.axisCodes
+        return self.multipletList.spectrum.axisCodes
 
     @property
     def peaks(self) -> Optional[Tuple[Any]]:

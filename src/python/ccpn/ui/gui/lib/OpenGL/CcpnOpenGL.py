@@ -4926,6 +4926,9 @@ class CcpnGLWidget(QOpenGLWidget):
                     yAxis = spectrumIndices[1]
 
                     for multiplet in multipletList.multiplets:
+                        if not multiplet.position:
+                            continue
+
                         if (xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1]
                                 and yPositions[0] < float(multiplet.position[yAxis]) < yPositions[1]):
                             if len(multiplet.axisCodes) > 2 and zPositions is not None:

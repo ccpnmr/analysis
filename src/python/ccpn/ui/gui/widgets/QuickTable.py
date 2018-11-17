@@ -1526,6 +1526,14 @@ QuickTable::item::selected {
                                     self._dataFrameObject.appendObject(row, multipleAttr=multipleAttr)
                                     _update = True
 
+                    # else:
+                    #
+                    #     # delete from the table?
+                    #     if row in self._dataFrameObject._objects:
+                    #         self._dataFrameObject.removeObject(row)
+                    #         _update = True
+
+
                 except:
                     getLogger().debug2('Error updating row in table')
 
@@ -1587,6 +1595,7 @@ QuickTable::item::selected {
             # cells = getattr(cellData, attr)
             cells = makeIterableList(cellData)
 
+            print('      >>>', cells, data[Notifier.TRIGGER])
             #self._silenceCallback = True
             _update = False
 
@@ -1697,14 +1706,14 @@ QuickTable::item::selected {
                                                     [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
                                                     cellClass[OBJECT_CLASS].__name__,
                                                     partial(self._updateCellCallback, cellClass[OBJECT_PARENT]),
-                                                    onceOnly=False))
+                                                    onceOnly=True))
         else:
             if cellClassNames:
                 self._cellNotifiers.append(Notifier(self.project,
                                                     [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
                                                     cellClassNames[OBJECT_CLASS].__name__,
                                                     partial(self._updateCellCallback, cellClassNames[OBJECT_PARENT]),
-                                                    onceOnly=False))
+                                                    onceOnly=True))
 
         if selectCurrentCallBack:
             self._selectCurrentNotifier = Notifier(self.current,

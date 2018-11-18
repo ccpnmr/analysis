@@ -702,6 +702,21 @@ class CcpnGLWidget(QOpenGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XSCALE] = xScale
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YSCALE] = yScale
 
+        if spectrumView.spectrum.dimensionCount > 1:
+            # get the ordering of the strip axisCodes in the spectrum
+            try:
+                indices = spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes,
+                                                               exactMatch=(self._preferences.matchAxisCode == 1))
+            except Exception as es:
+
+                # spectrum possibly no compatible here, may be 2d overlaid onto Nd
+                indices = spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes[0:2],
+                                                               exactMatch=(self._preferences.matchAxisCode == 1))
+        else:
+            indices = spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes)
+
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
+
         self._maxX = max(self._maxX, fx0)
         self._minX = min(self._minX, fx1)
         self._maxY = max(self._maxY, fy0)
@@ -2096,13 +2111,11 @@ class CcpnGLWidget(QOpenGLWidget):
         self.drawSpectra()
 
         if not self._stackingMode:
-            self._GLPeaks.drawSymbols()
-            self._GLMultiplets.drawSymbols()
+            self._GLPeaks.drawSymbols(self._spectrumSettings)
+            self._GLMultiplets.drawSymbols(self._spectrumSettings)
+            self._GLIntegrals.drawSymbols(self._spectrumSettings)
 
             self.drawMarksRulers()
-            # self.drawIntegralLists()
-            self._GLIntegrals.drawSymbols()
-
             self.drawRegions()
 
         # change to the text shader
@@ -2117,9 +2130,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.enableTexture()
 
         if not self._stackingMode:
-            self._GLPeaks.drawLabels()
-            self._GLMultiplets.drawLabels()
-            self._GLIntegrals.drawLabels()
+            self._GLPeaks.drawLabels(self._spectrumSettings)
+            self._GLMultiplets.drawLabels(self._spectrumSettings)
+            self._GLIntegrals.drawLabels(self._spectrumSettings)
 
             self.drawMarksAxisCodes()
 

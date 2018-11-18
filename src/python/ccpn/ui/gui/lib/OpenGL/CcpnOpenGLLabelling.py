@@ -210,13 +210,18 @@ class GLpeakListMethods():
 
         return False
 
-    def extraIndicesCount(self, multiplet):
+    def extraIndicesCount(self, obj):
         """Calculate how many indices to add
         """
         return 0
 
     def appendExtraIndices(self, drawList, index, obj):
         """Add extra indices to the index list
+        """
+        return 0
+
+    def extraVerticesCount(self, obj):
+        """Calculate how many vertices to add
         """
         return 0
 
@@ -228,6 +233,7 @@ class GLpeakListMethods():
 
 def _fillNdLabel(self, spectrumView, objListView, obj):
     self._fillLabel(self, spectrumView, objListView, obj)
+
 
 class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     """Class to handle symbol and symbol labelling for Nd displays
@@ -527,6 +533,214 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             drawList.pids[pp + 7] -= indexOffset
             pp += GLDefs.LENPID
 
+    def _insertSymbolItem(self, strip, obj, listCol, indexList, r, w,
+                          spectrumFrequency, symbolType, drawList, spectrumView,
+                          buildIndex):
+        """insert a single symbol to the end of the symbol list
+        """
+        index = indexList[0]
+        indexPtr = indexList[1]
+        objNum = buildIndex[0]
+        vertexPtr = buildIndex[1]
+
+        _isInPlane = self.objIsInPlane(strip, obj)
+        if not _isInPlane:
+            _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
+            fade = GLDefs.FADE_FACTOR
+        else:
+            _isInFlankingPlane = None
+            fade = 1.0
+
+        # ignore if not visible
+        if not _isInPlane and not _isInFlankingPlane:
+            return
+
+        if self._isSelected(obj):
+            cols = self._GLParent.highlightColour[:3]
+        else:
+            cols = listCol
+
+        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+
+        p0 = (obj.position[pIndex[0]], obj.position[pIndex[1]])
+        lineWidths = (obj.lineWidths[pIndex[0]], obj.lineWidths[pIndex[1]])
+        frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+
+        if None in p0:
+            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+            return
+
+        if not pIndex:
+            # if axisCount != 2:
+            getLogger().debug('Bad axisCodes: %s - %s' % (obj.pid, obj.axisCodes))
+        else:
+            if symbolType == 0:
+
+                # draw a cross
+                # keep the cross square at 0.1ppm
+
+                _selected = False
+                # unselected
+                if _isInPlane or _isInFlankingPlane:
+                    if self._isSelected(obj):
+                        _selected = True
+                        drawList.indices[indexPtr:indexPtr + 12] = (index, index + 1, index + 2, index + 3,
+                                                                    index, index + 2, index + 2, index + 1,
+                                                                    index, index + 3, index + 3, index + 1)
+                    else:
+                        drawList.indices[indexPtr:indexPtr + 4] = (index, index + 1, index + 2, index + 3)
+
+                # add extra indices for the peak
+                extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
+
+                drawList.vertices[vertexPtr:vertexPtr + 8](p0[0] - r, p0[1] - w,
+                                                     p0[0] + r, p0[1] + w,
+                                                     p0[0] + r, p0[1] - w,
+                                                     p0[0] - r, p0[1] + w)
+                drawList.colors[2 * vertexPtr:2 * vertexPtr + 16](*cols, fade) * GLDefs.LENCOLORS
+                drawList.attribs[vertexPtr:vertexPtr + 8] = (p0[0], p0[1],
+                                                       p0[0], p0[1],
+                                                       p0[0], p0[1],
+                                                       p0[0], p0[1])
+
+                # add extra vertices for the multiplet
+                extraVertices = self.appendExtraVertices(drawList, obj, p0, (*cols, fade), fade)
+
+                # keep a pointer to the obj
+                drawList.pids[objNum:objNum+GLDefs.LENPID] = (obj, drawList.numVertices, (4 + extraVertices),
+                                                          _isInPlane, _isInFlankingPlane, _selected,
+                                                          indexPtr, len(drawList.indices))
+
+                indexList[0] += (4 + extraIndices)
+                indexList[1] = len(drawList.indices)
+                drawList.numVertices += (4 + extraVertices)
+                buildIndex[0] += 1
+                buildIndex[1] += (2*(4 + extraVertices))
+
+            elif symbolType == 1:  # draw an ellipse at lineWidth
+
+                if lineWidths[0] and lineWidths[1]:
+                    # draw 24 connected segments
+                    r = 0.5 * lineWidths[0] / frequency[0]
+                    w = 0.5 * lineWidths[1] / frequency[1]
+                    numPoints = 24
+                    angPlus = 2.0 * np.pi
+                    skip = 1
+                else:
+                    # draw 12 disconnected segments (dotted)
+                    # r = symbolWidth
+                    # w = symbolWidth
+                    numPoints = 12
+                    angPlus = np.pi
+                    skip = 2
+
+                np2 = 2 * numPoints
+                ang = list(range(numPoints))
+                _selected = False
+
+                if _isInPlane or _isInFlankingPlane:
+                    drawList.indices[indexPtr:indexPtr+np2] = tuple((index + (2 * an), index + (2 * an) + 1) for an in ang)
+
+                    if self._isSelected(obj):
+                        _selected = True
+                        drawList.indices[indexPtr+np2:indexPtr+np2+8] = (index + np2, index + np2 + 2,
+                                                                        index + np2 + 2, index + np2 + 1,
+                                                                        index + np2, index + np2 + 3,
+                                                                        index + np2 + 3, index + np2 + 1)
+
+                # add extra indices for the multiplet
+                extraIndices = 0  #self.appendExtraIndices(drawList, index + np2, obj)
+
+                # draw an ellipse at lineWidth
+                drawList.vertices[vertexPtr:vertexPtr+2*np2] = np.append(drawList.vertices, tuple((p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                                        p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                                        p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                                                        p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))
+                                                                       for an in ang))
+                drawList.vertices[vertexPtr+2*np2:vertexPtr+2*np2+10] = (p0[0] - r, p0[1] - w,
+                                                                  p0[0] + r, p0[1] + w,
+                                                                  p0[0] + r, p0[1] - w,
+                                                                  p0[0] - r, p0[1] + w,
+                                                                  p0[0], p0[1])
+
+                drawList.colors[2*vertexPtr:2*vertexPtr+4*np2+20] = (*cols, fade) * (np2 + 5)
+                drawList.attribs[vertexPtr+2*np2:vertexPtr+2*np2+10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.offsets[vertexPtr+2*np2:vertexPtr+2*np2+10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.lineWidths = (r, w)
+
+                # add extra vertices for the multiplet
+                extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
+
+                # keep a pointer to the obj
+                drawList.pids[objNum:objNum+GLDefs.LENPID] = (obj, drawList.numVertices, (numPoints + extraVertices),
+                                                          _isInPlane, _isInFlankingPlane, _selected,
+                                                          indexPtr, len(drawList.indices))
+
+                indexList[0] += ((np2 + 5) + extraIndices)
+                indexList[1] = len(drawList.indices)
+                drawList.numVertices += ((np2 + 5) + extraVertices)
+                buildIndex[0] += 1
+                buildIndex[1] += (2*((np2 + 5) + extraVertices))
+
+            elif symbolType == 2:  # draw a filled ellipse at lineWidth
+
+                if lineWidths[0] and lineWidths[1]:
+                    # draw 24 connected segments
+                    r = 0.5 * lineWidths[0] / frequency[0]
+                    w = 0.5 * lineWidths[1] / frequency[1]
+                    numPoints = 24
+                    angPlus = 2 * np.pi
+                    skip = 1
+                else:
+                    # draw 12 disconnected segments (dotted)
+                    # r = symbolWidth
+                    # w = symbolWidth
+                    numPoints = 12
+                    angPlus = 1.0 * np.pi
+                    skip = 2
+
+                np2 = 2 * numPoints
+                ang = list(range(numPoints))
+                _selected = False
+
+                if _isInPlane or _isInFlankingPlane:
+                    drawList.indices[indexPtr:indexPtr+3*numPoints] = tuple((index + (2 * an), index + (2 * an) + 1, index + np2 + 4) for an in ang)
+
+                # add extra indices for the multiplet
+                extraIndices = 0  #self.appendExtraIndices(drawList, index + np2 + 4, obj)
+
+                # draw an ellipse at lineWidth
+                drawList.vertices[vertexPtr:vertexPtr+2*np2] = tuple((p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                                        p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                                        p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                                                        p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))
+                                                                       for an in ang)
+                drawList.vertices[vertexPtr+2*np2:vertexPtr+2*np2+10] = (p0[0] - r, p0[1] - w,
+                                                                  p0[0] + r, p0[1] + w,
+                                                                  p0[0] + r, p0[1] - w,
+                                                                  p0[0] - r, p0[1] + w,
+                                                                  p0[0], p0[1])
+
+                drawList.colors[2*vertexPtr:2*vertexPtr+4*np2+20] = (*cols, fade) * (np2 + 5)
+                drawList.attribs[vertexPtr+2*np2:vertexPtr+2*np2+10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.offsets[vertexPtr+2*np2:vertexPtr+2*np2+10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.lineWidths = (r, w)
+
+                # add extra vertices for the multiplet
+                extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
+
+                # keep a pointer to the obj
+                drawList.pids[objNum:objNum+GLDefs.LENPID] = (obj, drawList.numVertices, (numPoints + extraVertices),
+                                                          _isInPlane, _isInFlankingPlane, _selected,
+                                                          indexPtr, len(drawList.indices))
+                # indexPtr = len(drawList.indices)
+
+                indexList[0] += ((np2 + 5) + extraIndices)
+                indexList[1] = len(drawList.indices)
+                drawList.numVertices += ((np2 + 5) + extraVertices)
+                buildIndex[0] += 1
+                buildIndex[1] += (2*((np2 + 5) + extraVertices))
+
     def _appendSymbolItem(self, strip, obj, listCol, indexList, r, w,
                           spectrumFrequency, symbolType, drawList, spectrumView):
         """append a single symbol to the end of the symbol list
@@ -584,7 +798,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             return
 
         if not pIndex:
-        # if axisCount != 2:
+            # if axisCount != 2:
             getLogger().debug('Bad axisCodes: %s - %s' % (obj.pid, obj.axisCodes))
         else:
             if symbolType == 0:
@@ -1136,189 +1350,55 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     # Building
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _buildSymbolsCountItem(self, strip, obj, listCol, indexList, r, w,
-                          spectrumFrequency, symbolType, drawList, spectrumView):
+    def _buildSymbolsCountItem(self, strip, obj, symbolType):
         """return the number of indices and vertices for the object
         """
-        index = indexList[0]
-        indexPtr = indexList[1]
-
         _isInPlane = self.objIsInPlane(strip, obj)
         if not _isInPlane:
             _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-            fade = GLDefs.FADE_FACTOR
         else:
             _isInFlankingPlane = None
-            fade = 1.0
 
         # if not visible, object has no size
         if not _isInPlane and not _isInFlankingPlane:
             return 0, 0
 
-        if symbolType == 0:
-
-            _selected = False
-            # unselected
+        if symbolType == 0:  # draw a cross
             if self._isSelected(obj):
-                _selected = True
                 ind = 12
-                # drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
-                #                                                 index, index + 2, index + 2, index + 1,
-                #                                                 index, index + 3, index + 3, index + 1))
             else:
                 ind = 4
-                # drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3))
-
-            # add extra indices for the multiplet
-            # extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
 
             ind += self.extraIndicesCount(obj)
 
-            drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
-                                                              p0[0] + r, p0[1] + w,
-                                                              p0[0] + r, p0[1] - w,
-                                                              p0[0] - r, p0[1] + w))
-            drawList.colors = np.append(drawList.colors, (*cols, fade) * GLDefs.LENCOLORS)
-            drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1],
-                                                            p0[0], p0[1],
-                                                            p0[0], p0[1],
-                                                            p0[0], p0[1]))
-
-            # add extra vertices for the multiplet
-            extraVertices = self.appendExtraVertices(drawList, obj, p0, (*cols, fade), fade)
-
-            # keep a pointer to the obj
-            drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (4 + extraVertices),
-                                                      _isInPlane, _isInFlankingPlane, _selected,
-                                                      indexPtr, len(drawList.indices)))
-            # indexPtr = len(drawList.indices)
-
-            indexList[0] += (4 + extraIndices)
-            indexList[1] = len(drawList.indices)
-            drawList.numVertices += (4 + extraVertices)
+            extraVertices = self.extraVerticesCount(obj)
+            vert = (4 + extraVertices)
+            return ind, vert
 
         elif symbolType == 1:  # draw an ellipse at lineWidth
 
-            if lineWidths[0] and lineWidths[1]:
-                # draw 24 connected segments
-                r = 0.5 * lineWidths[0] / frequency[0]
-                w = 0.5 * lineWidths[1] / frequency[1]
+            if obj.lineWidths[0] and obj.lineWidths[1]:
                 numPoints = 24
-                angPlus = 2.0 * np.pi
-                skip = 1
             else:
-                # draw 12 disconnected segments (dotted)
-                # r = symbolWidth
-                # w = symbolWidth
                 numPoints = 12
-                angPlus = np.pi
-                skip = 2
 
             np2 = 2 * numPoints
-            ang = list(range(numPoints))
-            _selected = False
-
-            if _isInPlane or _isInFlankingPlane:
-                drawList.indices = np.append(drawList.indices, tuple((index + (2 * an), index + (2 * an) + 1) for an in ang))
-
-                if self._isSelected(obj):
-                    _selected = True
-                    drawList.indices = np.append(drawList.indices, (index + np2, index + np2 + 2,
-                                                                    index + np2 + 2, index + np2 + 1,
-                                                                    index + np2, index + np2 + 3,
-                                                                    index + np2 + 3, index + np2 + 1))
-
-            # add extra indices for the multiplet
-            extraIndices = 0  #self.appendExtraIndices(drawList, index + np2, obj)
-
-            # draw an ellipse at lineWidth
-            drawList.vertices = np.append(drawList.vertices, tuple((p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                    p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                    p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                    p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))
-                                                                   for an in ang))
-            drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
-                                                              p0[0] + r, p0[1] + w,
-                                                              p0[0] + r, p0[1] - w,
-                                                              p0[0] - r, p0[1] + w,
-                                                              p0[0], p0[1]))
-
-            drawList.colors = np.append(drawList.colors, (*cols, fade) * (np2 + 5))
-            drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1]) * (np2 + 5))
-            drawList.offsets = np.append(drawList.offsets, (p0[0], p0[1]) * (np2 + 5))
-            drawList.lineWidths = (r, w)
-
-            # add extra vertices for the multiplet
-            extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
-
-            # keep a pointer to the obj
-            drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (numPoints + extraVertices),
-                                                      _isInPlane, _isInFlankingPlane, _selected,
-                                                      indexPtr, len(drawList.indices)))
-            # indexPtr = len(drawList.indices)
-
-            indexList[0] += ((np2 + 5) + extraIndices)
-            indexList[1] = len(drawList.indices)
-            drawList.numVertices += ((np2 + 5) + extraVertices)
+            ind = np2
+            if self._isSelected(obj):
+                ind += 8
+            vert = (np2 + 5)
+            return ind, vert
 
         elif symbolType == 2:  # draw a filled ellipse at lineWidth
 
-            if lineWidths[0] and lineWidths[1]:
-                # draw 24 connected segments
-                r = 0.5 * lineWidths[0] / frequency[0]
-                w = 0.5 * lineWidths[1] / frequency[1]
+            if obj.lineWidths[0] and obj.lineWidths[1]:
                 numPoints = 24
-                angPlus = 2 * np.pi
-                skip = 1
             else:
-                # draw 12 disconnected segments (dotted)
-                # r = symbolWidth
-                # w = symbolWidth
                 numPoints = 12
-                angPlus = 1.0 * np.pi
-                skip = 2
 
-            np2 = 2 * numPoints
-            ang = list(range(numPoints))
-            _selected = False
-
-            if _isInPlane or _isInFlankingPlane:
-                drawList.indices = np.append(drawList.indices,
-                                             tuple((index + (2 * an), index + (2 * an) + 1, index + np2 + 4) for an in
-                                                   ang))
-
-            # add extra indices for the multiplet
-            extraIndices = 0  #self.appendExtraIndices(drawList, index + np2 + 4, obj)
-
-            # draw an ellipse at lineWidth
-            drawList.vertices = np.append(drawList.vertices, tuple((p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                    p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                    p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                    p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))
-                                                                   for an in ang))
-            drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
-                                                              p0[0] + r, p0[1] + w,
-                                                              p0[0] + r, p0[1] - w,
-                                                              p0[0] - r, p0[1] + w,
-                                                              p0[0], p0[1]))
-
-            drawList.colors = np.append(drawList.colors, (*cols, fade) * (np2 + 5))
-            drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1]) * (np2 + 5))
-            drawList.offsets = np.append(drawList.offsets, (p0[0], p0[1]) * (np2 + 5))
-            drawList.lineWidths = (r, w)
-
-            # add extra vertices for the multiplet
-            extraVertices = 0  #self.appendExtraVertices(drawList, obj, p0, [*cols, fade], fade)
-
-            # keep a pointer to the obj
-            drawList.pids = np.append(drawList.pids, (obj, drawList.numVertices, (numPoints + extraVertices),
-                                                      _isInPlane, _isInFlankingPlane, _selected,
-                                                      indexPtr, len(drawList.indices)))
-            # indexPtr = len(drawList.indices)
-
-            indexList[0] += ((np2 + 5) + extraIndices)
-            indexList[1] = len(drawList.indices)
-            drawList.numVertices += ((np2 + 5) + extraVertices)
+            ind = 3 * numPoints
+            vert = ((2 * numPoints) + 5)
+            return ind, vert
 
     def _buildSymbolsCount(self, spectrumView, objListView):
         """count the number of indices and vertices for the label list
@@ -1327,10 +1407,21 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         pls = self.objectList(objListView)
 
+        indCount = 0
+        vertCount = 0
         for tcount, obj in enumerate(self.objects(pls)):
-            ind,vert = self._BuildSymbolsCountItem(strip, obj, listCol, indexing, r, w,
-                                       spectrumFrequency, symbolType, drawList,
-                                       spectrumView)
+            ind, vert = self._buildSymbolsCountItem(self.strip, obj, self.strip.symbolType)
+            indCount += ind
+            vertCount += vert
+
+        self.indices = np.empty(indCount, dtype=np.uint32)
+        self.vertices = np.empty(vertCount * 2, dtype=np.float32)
+        self.colors = np.empty(vertCount * 4, dtype=np.float32)
+        self.attribs = np.empty(vertCount * 2, dtype=np.float32)
+        self.offsets = np.empty(vertCount * 2, dtype=np.float32)
+        self.pids = np.empty(tcount * GLDefs.LENPID, dtype=np.object_)
+
+        return indCount, vertCount
 
     def _buildSymbols(self, spectrumView, objListView):
         spectrum = spectrumView.spectrum
@@ -1398,6 +1489,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # index = 0
             # indexPtr = 0
             indexing = [0, 0]
+            buildIndex = [0, 0]
 
             pls = self.objectList(objListView)
 
@@ -1411,15 +1503,17 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             tk = time.time() - times[0]
             times.append('_col:' + str(tk))
 
+            ind, vert = self._buildSymbolsCount(spectrumView, objListView)
+
             tsum = 0
             for tcount, obj in enumerate(self.objects(pls)):
-                self._appendSymbolItem(strip, obj, listCol, indexing, r, w,
+                self._insertSymbolItem(strip, obj, listCol, indexing, r, w,
                                        spectrumFrequency, symbolType, drawList,
-                                       spectrumView)
+                                       spectrumView, buildIndex)
                 tsum += (time.time() - times[0])
 
-            times.append('_sym:'+str(tsum/tcount))
-            times.append('_t:'+str(tcount))
+            times.append('_sym:' + str(tsum / tcount))
+            times.append('_t:' + str(tcount))
 
             drawList.defineIndexVBO(enableVBO=False)
 
@@ -2185,6 +2279,11 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
 
         self.autoColour = self._GLParent.SPECTRUMNEGCOLOUR
 
+    def extraVerticesCount(self, multiplet):
+        """Calculate how many vertices to add
+        """
+        return 2 * multiplet.peaks
+
     def appendExtraVertices(self, drawList, multiplet, p0, colour, fade):
         """Add extra vertices to the vertex list
         """
@@ -2238,6 +2337,11 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
         super(GLmultiplet1dLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
 
         self.autoColour = self._GLParent.SPECTRUMNEGCOLOUR
+
+    def extraVerticesCount(self, multiplet):
+        """Calculate how many vertices to add
+        """
+        return 2 * multiplet.peaks
 
     def appendExtraVertices(self, drawList, multiplet, p0, colour, fade):
         """Add extra vertices to the vertex list

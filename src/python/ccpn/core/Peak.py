@@ -169,8 +169,8 @@ class Peak(AbstractWrapperObject):
         return tuple(x.value for x in self._wrappedData.sortedPeakDims())
 
     @position.setter
-    @notify('change')
-    @undo
+    # @notify('change')
+    # @undo
     def position(self, value: Sequence):
         """set the position of the peak
         """

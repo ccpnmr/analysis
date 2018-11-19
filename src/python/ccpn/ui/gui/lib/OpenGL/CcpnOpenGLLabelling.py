@@ -83,6 +83,13 @@ except ImportError:
     sys.exit(1)
 
 POINTCOLOURS = 4
+OBJ_ISINPLANE = 0
+OBJ_ISINFLANKINGPLANE = 1
+OBJ_LINEWIDTHS = 2
+OBJ_SPECTRALFREQUENCIES = 3
+OBJ_OTHER = 4
+OBJ_STORELEN = 5
+
 
 _totalTime = 0.0
 _timeCount = 0
@@ -103,6 +110,7 @@ class GLLabelling():
         self._threads = {}
         self._threadupdate = False
         self.current = self.strip.current if self.strip else None
+        self._objectStore = {}
 
         self._GLSymbols = {}
         self._GLLabels = {}
@@ -167,25 +175,28 @@ class GLpeakListMethods():
 
         return text
 
-    def objIsInVisiblePlanes(self, spectrumView, strip, peak):
+    def objIsInVisiblePlanes(self, spectrumView, peak):
         """Return whether in plane or adjacent
         """
         displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-        orderedAxes = strip.orderedAxes[2:]
 
         for ii, displayIndex in enumerate(displayIndices[2:]):
             if displayIndex is not None:
                 # If no axis matches the index may be None
                 zPosition = peak.position[displayIndex]
                 if not zPosition:
-                    return False, False
+                    return False, False, 1.0
                 zPlaneSize = 0.
+                orderedAxes = spectrumView.strip.orderedAxes[2:]
                 zRegion = orderedAxes[ii].region
-                zWidth = orderedAxes[ii].width
                 if not(zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize):
-                    return True, False
-                if zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize:
-                    return False, True
+                    return True, False, 1.0
+
+                zWidth = orderedAxes[ii].width
+                if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
+                    return False, True, GLDefs.FADE_FACTOR
+
+        return False, False, 1.0
 
     def objIsInPlane(self, strip, peak) -> bool:
         """is peak in currently displayed planes for strip?"""
@@ -303,7 +314,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             spectrum = pls.spectrum
 
             for objListView in self.listViews(pls):
-                if objListView in self._GLLabels.keys():
+                if objListView in self._GLSymbols.keys():
                     for spectrumView in spectrum.spectrumViews:
                         if spectrumView in self.strip.spectrumViews:
                             self._removeSymbol(spectrumView, objListView, obj)
@@ -398,16 +409,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         if axisCount == 2:
 
-            # TODO:ED display the required peaks
-            strip = spectrumView.strip
-            _isInPlane = self.objIsInPlane(strip, obj)
-            if not _isInPlane:
-                _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-                fade = GLDefs.FADE_FACTOR
-            else:
-                _isInFlankingPlane = None
-                fade = 1.0
+            # get visible/plane status
+            _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
+            # skip if not visible
             if not _isInPlane and not _isInFlankingPlane:
                 return
 
@@ -443,6 +448,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         symbolWidth = self.strip.symbolSize / 2.0
 
+        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        p0 = (obj.position[pIndex[0]], obj.position[pIndex[1]])
+        lineWidths = (obj.lineWidths[pIndex[0]], obj.lineWidths[pIndex[1]])
+        frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+
         p0 = [0.0] * 2  # len(self.axisOrder)
         lineWidths = [None] * 2  # len(self.axisOrder)
         frequency = [0.0] * 2  # len(self.axisOrder)
@@ -476,17 +486,13 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             r = symbolWidth
             w = symbolWidth
 
-        if axisCount == 2:
+        # if axisCount == 2:
+        if pIndex:
 
-            strip = spectrumView.strip
-            _isInPlane = self.objIsInPlane(strip, obj)
-            if not _isInPlane:
-                _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-                fade = GLDefs.FADE_FACTOR
-            else:
-                _isInFlankingPlane = None
-                fade = 1.0
+            # get visible/plane status
+            _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
+            # skip if not visible
             if not _isInPlane and not _isInFlankingPlane:
                 return
 
@@ -540,6 +546,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 drawList.indices = np.delete(drawList.indices, np.s_[indexStart:indexEnd])
                 drawList.vertices = np.delete(drawList.vertices, np.s_[2 * offset:2 * (offset + numPoints)])
                 drawList.attribs = np.delete(drawList.attribs, np.s_[2 * offset:2 * (offset + numPoints)])
+                drawList.offsets = np.delete(drawList.offsets, np.s_[2 * offset:2 * (offset + numPoints)])
                 drawList.colors = np.delete(drawList.colors, np.s_[4 * offset:4 * (offset + numPoints)])
                 drawList.pids = np.delete(drawList.pids, np.s_[pp:pp + GLDefs.LENPID])
                 drawList.numVertices -= numPoints
@@ -570,15 +577,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         times.append(('_col:', time.time()))
 
-        _isInPlane = self.objIsInPlane(strip, obj)
-        if not _isInPlane:
-            _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-            fade = GLDefs.FADE_FACTOR
-        else:
-            _isInFlankingPlane = None
-            fade = 1.0
+        # get visible/plane status
+        _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
-        # ignore if not visible
+        # skip if not visible
         if not _isInPlane and not _isInFlankingPlane:
             return
 
@@ -797,15 +799,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         index = indexList[0]
         indexPtr = indexList[1]
 
-        _isInPlane = self.objIsInPlane(strip, obj)
-        if not _isInPlane:
-            _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-            fade = GLDefs.FADE_FACTOR
-        else:
-            _isInFlankingPlane = None
-            fade = 1.0
+        # get visible/plane status
+        _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
-        # ignore if not visible
+        # skip if not visible
         if not _isInPlane and not _isInFlankingPlane:
             return
 
@@ -813,28 +810,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             cols = self._GLParent.highlightColour[:3]
         else:
             cols = listCol
-
-        # # get the correct coordinates based on the axisCodes
-        # p0 = [0.0] * 2  # len(self.axisOrder)
-        # lineWidths = [None] * 2  # len(self.axisOrder)
-        # frequency = [0.0] * 2  # len(self.axisOrder)
-        # axisCount = 0
-        # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-        #     for pp, ppCode in enumerate(obj.axisCodes):
-        #
-        #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-        #             if ppCode[0] == psCode[0]:
-        #                 p0[ps] = obj.position[pp]
-        #                 lineWidths[ps] = obj.lineWidths[pp]
-        #                 frequency[ps] = spectrumFrequency[pp]
-        #                 axisCount += 1
-        #
-        #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-        #             if ppCode == psCode:
-        #                 p0[ps] = obj.position[pp]
-        #                 lineWidths[ps] = obj.lineWidths[pp]
-        #                 frequency[ps] = spectrumFrequency[pp]
-        #                 axisCount += 1
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
 
@@ -1084,6 +1059,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                spectrumFrequency, symbolType, drawList, spectrumView)
 
     def _updateHighlightedLabels(self, spectrumView, objListView):
+        if objListView not in self._GLLabels:
+            return
+
         drawList = self._GLLabels[objListView]
         strip = self.strip
 
@@ -1098,14 +1076,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             obj = drawStr.object
 
             if obj and not obj.isDeleted:
-                # _selected = False
-                _isInPlane = self.objIsInPlane(strip, obj)
-                if not _isInPlane:
-                    _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-                    fade = GLDefs.FADE_FACTOR
-                else:
-                    _isInFlankingPlane = None
-                    fade = 1.0
+                # get visible/plane status
+                _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                 if _isInPlane or _isInFlankingPlane:
 
@@ -1168,13 +1140,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                 if not obj.isDeleted:
                     _selected = False
-                    _isInPlane = self.objIsInPlane(strip, obj)
-                    if not _isInPlane:
-                        _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-                        fade = GLDefs.FADE_FACTOR
-                    else:
-                        _isInFlankingPlane = None
-                        fade = 1.0
+
+                    # get visible/plane status
+                    _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
                         if self._isSelected(obj):
@@ -1213,13 +1181,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     ang = list(range(numPoints))
 
                     _selected = False
-                    _isInPlane = self.objIsInPlane(strip, obj)
-                    if not _isInPlane:
-                        _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-                        fade = GLDefs.FADE_FACTOR
-                    else:
-                        _isInFlankingPlane = None
-                        fade = 1.0
+                    # get visible/plane status
+                    _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
                         drawList.indices = np.append(drawList.indices, tuple((index + (2 * an), index + (2 * an) + 1) for an in ang))
@@ -1256,13 +1219,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     ang = list(range(numPoints))
 
                     _selected = False
-                    _isInPlane = self.objIsInPlane(strip, obj)
-                    if not _isInPlane:
-                        _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-                        fade = GLDefs.FADE_FACTOR
-                    else:
-                        _isInFlankingPlane = None
-                        fade = 1.0
+                    # get visible/plane status
+                    _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
                     if _isInPlane or _isInFlankingPlane:
                         drawList.indices = np.append(drawList.indices, tuple((index + (2 * an), index + (2 * an) + 1, index + np2 + 4)
@@ -1318,8 +1276,12 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
             for pp in range(0, len(drawList.pids), GLDefs.LENPID):
                 index = 2 * drawList.pids[pp + 1]
-                drawList.vertices[index:index + 8] = drawList.attribs[index:index + 8] + offsets
+                try:
+                    drawList.vertices[index:index + 8] = drawList.attribs[index:index + 8] + offsets
+                except:
+                    pass
 
+            pass
 
         elif symbolType == 1:  # an ellipse
             numPoints = 12
@@ -1399,16 +1361,13 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     # Building
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _buildSymbolsCountItem(self, strip, obj, symbolType):
+    def _buildSymbolsCountItem(self, strip, spectrumView, obj, symbolType):
         """return the number of indices and vertices for the object
         """
-        _isInPlane = self.objIsInPlane(strip, obj)
-        if not _isInPlane:
-            _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-        else:
-            _isInFlankingPlane = None
+        # get visible/plane status
+        _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
-        # if not visible, object has no size
+        # skip if not visible
         if not _isInPlane and not _isInFlankingPlane:
             return 0, 0
 
@@ -1456,22 +1415,28 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         pls = self.objectList(objListView)
 
+        # reset the object pointers
+        self._objectStore = {}
+
         indCount = 0
         vertCount = 0
         objCount = 0
         for tcount, obj in enumerate(self.objects(pls)):
-            ind, vert = self._buildSymbolsCountItem(self.strip, obj, self.strip.symbolType)
+            ind, vert = self._buildSymbolsCountItem(self.strip, spectrumView, obj, self.strip.symbolType)
             indCount += ind
             vertCount += vert
             if ind:
                 objCount += 1
 
+        # set up arrays
         drawList.indices = np.empty(indCount, dtype=np.uint32)
         drawList.vertices = np.empty(vertCount * 2, dtype=np.float32)
         drawList.colors = np.empty(vertCount * 4, dtype=np.float32)
         drawList.attribs = np.empty(vertCount * 2, dtype=np.float32)
         drawList.offsets = np.empty(vertCount * 2, dtype=np.float32)
         drawList.pids = np.empty(objCount * GLDefs.LENPID, dtype=np.object_)
+        drawList.numindices = 0
+        drawList.numVertices = 0
 
         return indCount, vertCount
 
@@ -1556,16 +1521,17 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             # times.append('_col:' + str(tk))
 
             ind, vert = self._buildSymbolsCount(spectrumView, objListView, drawList)
+            if ind:
 
-            # tsum = 0
-            for tcount, obj in enumerate(self.objects(pls)):
-                self._insertSymbolItem(strip, obj, listCol, indexing, r, w,
-                                       spectrumFrequency, symbolType, drawList,
-                                       spectrumView, buildIndex)
-                # tsum += (time.time() - times[0])
+                # tsum = 0
+                for tcount, obj in enumerate(self.objects(pls)):
+                    self._insertSymbolItem(strip, obj, listCol, indexing, r, w,
+                                           spectrumFrequency, symbolType, drawList,
+                                           spectrumView, buildIndex)
+                    # tsum += (time.time() - times[0])
 
-            # times.append('_sym:' + str((time.time() - times[0])))
-            # times.append('_t:' + str(tcount))
+                # times.append('_sym:' + str((time.time() - times[0])))
+                # times.append('_t:' + str(tcount))
 
             drawList.defineIndexVBO(enableVBO=False)
 
@@ -1873,22 +1839,25 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                 except Exception as es:
                     pass
 
-                # get the correct coordinates based on the axisCodes
-                p0 = [0.0] * 2  #len(self.axisOrder)
-                for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-                    for pp, ppCode in enumerate(obj.axisCodes):
+                pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+                p0 = (obj.position[pIndex[0]], obj.height)
 
-                        if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-                            if ppCode[0] == psCode[0]:
-                                p0[ps] = obj.position[pp]
-                            else:
-                                p0[ps] = obj.height
-
-                        elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-                            if ppCode == psCode:
-                                p0[ps] = obj.position[pp]
-                            else:
-                                p0[ps] = obj.height
+                # # get the correct coordinates based on the axisCodes
+                # p0 = [0.0] * 2  #len(self.axisOrder)
+                # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+                #     for pp, ppCode in enumerate(obj.axisCodes):
+                #
+                #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+                #             if ppCode[0] == psCode[0]:
+                #                 p0[ps] = obj.position[pp]
+                #             else:
+                #                 p0[ps] = obj.height
+                #
+                #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+                #             if ppCode == psCode:
+                #                 p0[ps] = obj.position[pp]
+                #             else:
+                #                 p0[ps] = obj.height
 
                 if None in p0:
                     getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -2013,33 +1982,33 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                                         getColours()[CCPNGLWIDGET_FOREGROUND])
 
         strip = spectrumView.strip
-        _isInPlane = self.objIsInPlane(strip, obj)
-        if not _isInPlane:
-            _isInFlankingPlane = self.objIsInFlankingPlane(strip, obj)
-        else:
-            _isInFlankingPlane = None
+        # get visible/plane status
+        _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
         else:
             cols = listCol
 
-        # get the correct coordinates based on the axisCodes
-        p0 = [0.0] * 2  # len(self.axisOrder)
-        for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-            for pp, ppCode in enumerate(obj.axisCodes):
+        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        p0 = (obj.position[pIndex[0]], obj.height)
 
-                if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-                    if ppCode[0] == psCode[0]:
-                        p0[ps] = obj.position[pp]
-                    else:
-                        p0[ps] = obj.height
-
-                elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-                    if ppCode == psCode:
-                        p0[ps] = obj.position[pp]
-                    else:
-                        p0[ps] = obj.height
+        # # get the correct coordinates based on the axisCodes
+        # p0 = [0.0] * 2  # len(self.axisOrder)
+        # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+        #     for pp, ppCode in enumerate(obj.axisCodes):
+        #
+        #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+        #             if ppCode[0] == psCode[0]:
+        #                 p0[ps] = obj.position[pp]
+        #             else:
+        #                 p0[ps] = obj.height
+        #
+        #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+        #             if ppCode == psCode:
+        #                 p0[ps] = obj.position[pp]
+        #             else:
+        #                 p0[ps] = obj.height
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -2334,7 +2303,7 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
     def extraVerticesCount(self, multiplet):
         """Calculate how many vertices to add
         """
-        return 2 * multiplet.peaks
+        return 2 * len(multiplet.peaks)
 
     def appendExtraVertices(self, drawList, multiplet, p0, colour, fade):
         """Add extra vertices to the vertex list
@@ -2393,7 +2362,7 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
     def extraVerticesCount(self, multiplet):
         """Calculate how many vertices to add
         """
-        return 2 * multiplet.peaks
+        return 2 * len(multiplet.peaks)
 
     def appendExtraVertices(self, drawList, multiplet, p0, colour, fade):
         """Add extra vertices to the vertex list

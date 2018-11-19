@@ -195,7 +195,9 @@ class GLpeakListMethods():
                 if zRegion[0] - zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1] + zWidth:
                     return False, True, GLDefs.FADE_FACTOR
 
-        return False, False, 1.0
+                return False, False, 1.0
+
+        return True, False, 1.0
 
     def objIsInPlane(self, strip, peak) -> bool:
         """is peak in currently displayed planes for strip?"""
@@ -373,26 +375,31 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         symbolWidth = self.strip.symbolSize / 2.0
 
-        p0 = [0.0] * 2  # len(self.axisOrder)
-        lineWidths = [None] * 2  # len(self.axisOrder)
-        frequency = [0.0] * 2  # len(self.axisOrder)
-        axisCount = 0
-        for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-            for pp, ppCode in enumerate(obj.axisCodes):
+        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        p0 = (obj.position[pIndex[0]], obj.position[pIndex[1]])
+        lineWidths = (obj.lineWidths[pIndex[0]], obj.lineWidths[pIndex[1]])
+        frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
 
-                if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-                    if ppCode[0] == psCode[0]:
-                        p0[ps] = obj.position[pp]
-                        lineWidths[ps] = obj.lineWidths[pp]
-                        frequency[ps] = spectrumFrequency[pp]
-                        axisCount += 1
-
-                elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-                    if ppCode == psCode:
-                        p0[ps] = obj.position[pp]
-                        lineWidths[ps] = obj.lineWidths[pp]
-                        frequency[ps] = spectrumFrequency[pp]
-                        axisCount += 1
+        # p0 = [0.0] * 2  # len(self.axisOrder)
+        # lineWidths = [None] * 2  # len(self.axisOrder)
+        # frequency = [0.0] * 2  # len(self.axisOrder)
+        # axisCount = 0
+        # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+        #     for pp, ppCode in enumerate(obj.axisCodes):
+        #
+        #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+        #             if ppCode[0] == psCode[0]:
+        #                 p0[ps] = obj.position[pp]
+        #                 lineWidths[ps] = obj.lineWidths[pp]
+        #                 frequency[ps] = spectrumFrequency[pp]
+        #                 axisCount += 1
+        #
+        #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+        #             if ppCode == psCode:
+        #                 p0[ps] = obj.position[pp]
+        #                 lineWidths[ps] = obj.lineWidths[pp]
+        #                 frequency[ps] = spectrumFrequency[pp]
+        #                 axisCount += 1
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -406,8 +413,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             r = symbolWidth
             w = symbolWidth
 
-        if axisCount == 2:
-
+        # if axisCount == 2:
+        if pIndex:
             # get visible/plane status
             _isInPlane, _isInFlankingPlane, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
@@ -452,26 +459,26 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         lineWidths = (obj.lineWidths[pIndex[0]], obj.lineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
 
-        p0 = [0.0] * 2  # len(self.axisOrder)
-        lineWidths = [None] * 2  # len(self.axisOrder)
-        frequency = [0.0] * 2  # len(self.axisOrder)
-        axisCount = 0
-        for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-            for pp, ppCode in enumerate(obj.axisCodes):
-
-                if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-                    if ppCode[0] == psCode[0]:
-                        p0[ps] = obj.position[pp]
-                        lineWidths[ps] = obj.lineWidths[pp]
-                        frequency[ps] = spectrumFrequency[pp]
-                        axisCount += 1
-
-                elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-                    if ppCode == psCode:
-                        p0[ps] = obj.position[pp]
-                        lineWidths[ps] = obj.lineWidths[pp]
-                        frequency[ps] = spectrumFrequency[pp]
-                        axisCount += 1
+        # p0 = [0.0] * 2  # len(self.axisOrder)
+        # lineWidths = [None] * 2  # len(self.axisOrder)
+        # frequency = [0.0] * 2  # len(self.axisOrder)
+        # axisCount = 0
+        # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+        #     for pp, ppCode in enumerate(obj.axisCodes):
+        #
+        #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+        #             if ppCode[0] == psCode[0]:
+        #                 p0[ps] = obj.position[pp]
+        #                 lineWidths[ps] = obj.lineWidths[pp]
+        #                 frequency[ps] = spectrumFrequency[pp]
+        #                 axisCount += 1
+        #
+        #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+        #             if ppCode == psCode:
+        #                 p0[ps] = obj.position[pp]
+        #                 lineWidths[ps] = obj.lineWidths[pp]
+        #                 frequency[ps] = spectrumFrequency[pp]
+        #                 axisCount += 1
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))

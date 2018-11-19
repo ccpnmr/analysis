@@ -1784,24 +1784,24 @@ QuickTable::item::selected {
         """
         if self._tableNotifier is not None:
             self._tableNotifier.unRegister()
-            del (self._tableNotifier)
+            # del (self._tableNotifier)
         if self._rowNotifier is not None:
             self._rowNotifier.unRegister()
-            del (self._rowNotifier)
+            # del (self._rowNotifier)
         if self._cellNotifiers:
             for cell in self._cellNotifiers:
                 if cell is not None:
                     cell.unRegister()
-        del self._cellNotifiers
+        # del self._cellNotifiers
         if self._selectCurrentNotifier is not None:
             self._selectCurrentNotifier.unRegister()
-            del (self._selectCurrentNotifier)
+            # del (self._selectCurrentNotifier)
         if self._droppedNotifier is not None:
             self._droppedNotifier.unRegister()
-            del (self._droppedNotifier)
+            # del (self._droppedNotifier)
         if self._searchNotifier is not None:
             self._searchNotifier.unRegister()
-            del (self._searchNotifier)
+            # del (self._searchNotifier)
 
     # def dragEnterEvent(self, event):
     #   ccpnmrJsonData = 'ccpnmr-json'

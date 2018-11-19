@@ -235,6 +235,9 @@ class Gui1dWidget(CcpnGLWidget):
                     multipletList = multipletListView.multipletList
 
                     for multiplet in multipletList.multiplets:
+                        if not multiplet.position:
+                            continue
+
                         if (xPositions[0] < float(multiplet.position[0]) < xPositions[1]
                                 and yPositions[0] < float(multiplet.height) < yPositions[1]):
 

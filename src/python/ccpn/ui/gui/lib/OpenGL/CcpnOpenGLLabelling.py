@@ -90,7 +90,6 @@ OBJ_SPECTRALFREQUENCIES = 3
 OBJ_OTHER = 4
 OBJ_STORELEN = 5
 
-
 _totalTime = 0.0
 _timeCount = 0
 _numTimes = 12
@@ -189,7 +188,7 @@ class GLpeakListMethods():
                 zPlaneSize = 0.
                 orderedAxes = spectrumView.strip.orderedAxes[2:]
                 zRegion = orderedAxes[ii].region
-                if not(zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize):
+                if not (zPosition < zRegion[0] - zPlaneSize or zPosition > zRegion[1] + zPlaneSize):
                     return True, False, 1.0
 
                 zWidth = orderedAxes[ii].width
@@ -658,7 +657,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 times.append(('_pids:', time.time()))
 
                 indexList[0] += (4 + extraIndices)
-                indexList[1] += iCount  # len(drawList.indices)
+                indexList[1] += (iCount + extraIndices)                # len(drawList.indices)
                 drawList.numVertices += (4 + extraVertices)
                 buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2 * (4 + extraVertices))
@@ -685,26 +684,29 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 _selected = False
 
                 if _isInPlane or _isInFlankingPlane:
-                    drawList.indices[indexPtr:indexPtr + np2] = tuple((index + (2 * an), index + (2 * an) + 1) for an in ang)
+                    drawList.indices[indexPtr:indexPtr + np2] = tuple(val for an in ang
+                                                                      for val in (index + (2 * an), index + (2 * an) + 1))
 
+                    iCount = np2
                     if self._isSelected(obj):
                         _selected = True
                         drawList.indices[indexPtr + np2:indexPtr + np2 + 8] = (index + np2, index + np2 + 2,
                                                                                index + np2 + 2, index + np2 + 1,
                                                                                index + np2, index + np2 + 3,
                                                                                index + np2 + 3, index + np2 + 1)
+                        iCount += 8
 
                 # add extra indices for the multiplet
                 extraIndices = 0  #self.appendExtraIndices(drawList, index + np2, obj)
 
                 # draw an ellipse at lineWidth
-                drawList.vertices[vertexPtr:vertexPtr + 2 * np2] = np.append(drawList.vertices, tuple((p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                                                       p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                                                       p0[0] - r * math.sin(
-                                                                                                           (skip * an + 1) * angPlus / numPoints),
-                                                                                                       p0[1] - w * math.cos(
-                                                                                                           (skip * an + 1) * angPlus / numPoints))
-                                                                                                      for an in ang))
+                drawList.vertices[vertexPtr:vertexPtr + 2 * np2] = tuple(val for an in ang
+                                                                         for val in (p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                                                     p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                                                     p0[0] - r * math.sin(
+                                                                                             (skip * an + 1) * angPlus / numPoints),
+                                                                                     p0[1] - w * math.cos(
+                                                                                             (skip * an + 1) * angPlus / numPoints)))
                 drawList.vertices[vertexPtr + 2 * np2:vertexPtr + 2 * np2 + 10] = (p0[0] - r, p0[1] - w,
                                                                                    p0[0] + r, p0[1] + w,
                                                                                    p0[0] + r, p0[1] - w,
@@ -712,8 +714,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                                                                    p0[0], p0[1])
 
                 drawList.colors[2 * vertexPtr:2 * vertexPtr + 4 * np2 + 20] = (*cols, fade) * (np2 + 5)
-                drawList.attribs[vertexPtr + 2 * np2:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
-                drawList.offsets[vertexPtr + 2 * np2:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.attribs[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.offsets[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
                 drawList.lineWidths = (r, w)
 
                 # add extra vertices for the multiplet
@@ -725,7 +727,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                                                 indexPtr, len(drawList.indices))
 
                 indexList[0] += ((np2 + 5) + extraIndices)
-                indexList[1] = len(drawList.indices)
+                indexList[1] += (iCount + extraIndices)                  # len(drawList.indices)
                 drawList.numVertices += ((np2 + 5) + extraVertices)
                 buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2 * ((np2 + 5) + extraVertices))
@@ -752,17 +754,19 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 _selected = False
 
                 if _isInPlane or _isInFlankingPlane:
-                    drawList.indices[indexPtr:indexPtr + 3 * numPoints] = tuple((index + (2 * an), index + (2 * an) + 1, index + np2 + 4) for an in ang)
+                    drawList.indices[indexPtr:indexPtr + 3 * numPoints] = tuple(val for an in ang
+                                                                                for val in (index + (2 * an), index + (2 * an) + 1, index + np2 + 4))
+                    iCount = 3 * numPoints
 
                 # add extra indices for the multiplet
                 extraIndices = 0  #self.appendExtraIndices(drawList, index + np2 + 4, obj)
 
                 # draw an ellipse at lineWidth
-                drawList.vertices[vertexPtr:vertexPtr + 2 * np2] = tuple((p0[0] - r * math.sin(skip * an * angPlus / numPoints),
-                                                                          p0[1] - w * math.cos(skip * an * angPlus / numPoints),
-                                                                          p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
-                                                                          p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints))
-                                                                         for an in ang)
+                drawList.vertices[vertexPtr:vertexPtr + 2 * np2] = tuple(val for an in ang
+                                                                         for val in (p0[0] - r * math.sin(skip * an * angPlus / numPoints),
+                                                                                     p0[1] - w * math.cos(skip * an * angPlus / numPoints),
+                                                                                     p0[0] - r * math.sin((skip * an + 1) * angPlus / numPoints),
+                                                                                     p0[1] - w * math.cos((skip * an + 1) * angPlus / numPoints)))
                 drawList.vertices[vertexPtr + 2 * np2:vertexPtr + 2 * np2 + 10] = (p0[0] - r, p0[1] - w,
                                                                                    p0[0] + r, p0[1] + w,
                                                                                    p0[0] + r, p0[1] - w,
@@ -770,8 +774,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                                                                    p0[0], p0[1])
 
                 drawList.colors[2 * vertexPtr:2 * vertexPtr + 4 * np2 + 20] = (*cols, fade) * (np2 + 5)
-                drawList.attribs[vertexPtr + 2 * np2:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
-                drawList.offsets[vertexPtr + 2 * np2:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.attribs[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
+                drawList.offsets[vertexPtr:vertexPtr + 2 * np2 + 10] = (p0[0], p0[1]) * (np2 + 5)
                 drawList.lineWidths = (r, w)
 
                 # add extra vertices for the multiplet
@@ -784,7 +788,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 # indexPtr = len(drawList.indices)
 
                 indexList[0] += ((np2 + 5) + extraIndices)
-                indexList[1] = len(drawList.indices)
+                indexList[1] += (iCount + extraIndices)                  # len(drawList.indices)
                 drawList.numVertices += ((np2 + 5) + extraVertices)
                 buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2 * ((np2 + 5) + extraVertices))

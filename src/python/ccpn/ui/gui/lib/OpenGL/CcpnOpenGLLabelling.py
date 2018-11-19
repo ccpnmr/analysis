@@ -538,10 +538,17 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                           buildIndex):
         """insert a single symbol to the end of the symbol list
         """
+
+        tk = time.time()
+        times = [('_', tk)]
+
+
         index = indexList[0]
         indexPtr = indexList[1]
         objNum = buildIndex[0]
         vertexPtr = buildIndex[1]
+
+        times.append(('_col:', time.time()))
 
         _isInPlane = self.objIsInPlane(strip, obj)
         if not _isInPlane:
@@ -562,9 +569,14 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
 
+        times.append(('_sym:', time.time()))
+
         p0 = (obj.position[pIndex[0]], obj.position[pIndex[1]])
         lineWidths = (obj.lineWidths[pIndex[0]], obj.lineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+
+        times.append(('_p0:', time.time()))
+
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -587,17 +599,25 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                         drawList.indices[indexPtr:indexPtr + 12] = (index, index + 1, index + 2, index + 3,
                                                                     index, index + 2, index + 2, index + 1,
                                                                     index, index + 3, index + 3, index + 1)
+                        iCount = 12
                     else:
-                        drawList.indices[indexPtr:indexPtr + 4] = (index, index + 1, index + 2, index + 3)
+                        try:
+                            drawList.indices[indexPtr:indexPtr + 4] = (index, index + 1, index + 2, index + 3)
+                            iCount = 4
+
+                        except Exception as es:
+                            pass
+
+                times.append(('_ind:', time.time()))
 
                 # add extra indices for the peak
                 extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
 
-                drawList.vertices[vertexPtr:vertexPtr + 8](p0[0] - r, p0[1] - w,
+                drawList.vertices[vertexPtr:vertexPtr + 8] = (p0[0] - r, p0[1] - w,
                                                      p0[0] + r, p0[1] + w,
                                                      p0[0] + r, p0[1] - w,
                                                      p0[0] - r, p0[1] + w)
-                drawList.colors[2 * vertexPtr:2 * vertexPtr + 16](*cols, fade) * GLDefs.LENCOLORS
+                drawList.colors[2 * vertexPtr:2 * vertexPtr + 16] = (*cols, fade) * GLDefs.LENCOLORS
                 drawList.attribs[vertexPtr:vertexPtr + 8] = (p0[0], p0[1],
                                                        p0[0], p0[1],
                                                        p0[0], p0[1],
@@ -606,15 +626,21 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 # add extra vertices for the multiplet
                 extraVertices = self.appendExtraVertices(drawList, obj, p0, (*cols, fade), fade)
 
-                # keep a pointer to the obj
-                drawList.pids[objNum:objNum+GLDefs.LENPID] = (obj, drawList.numVertices, (4 + extraVertices),
-                                                          _isInPlane, _isInFlankingPlane, _selected,
-                                                          indexPtr, len(drawList.indices))
+                try:
+                    # keep a pointer to the obj
+                    drawList.pids[objNum:objNum+GLDefs.LENPID] = (obj, drawList.numVertices, (4 + extraVertices),
+                                                              _isInPlane, _isInFlankingPlane, _selected,
+                                                              indexPtr, len(drawList.indices))
+                except Exception as es:
+                    pass
+
+                times.append(('_pids:', time.time()))
+
 
                 indexList[0] += (4 + extraIndices)
-                indexList[1] = len(drawList.indices)
+                indexList[1] += iCount           # len(drawList.indices)
                 drawList.numVertices += (4 + extraVertices)
-                buildIndex[0] += 1
+                buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2*(4 + extraVertices))
 
             elif symbolType == 1:  # draw an ellipse at lineWidth
@@ -679,7 +705,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 indexList[0] += ((np2 + 5) + extraIndices)
                 indexList[1] = len(drawList.indices)
                 drawList.numVertices += ((np2 + 5) + extraVertices)
-                buildIndex[0] += 1
+                buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2*((np2 + 5) + extraVertices))
 
             elif symbolType == 2:  # draw a filled ellipse at lineWidth
@@ -738,8 +764,11 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 indexList[0] += ((np2 + 5) + extraIndices)
                 indexList[1] = len(drawList.indices)
                 drawList.numVertices += ((np2 + 5) + extraVertices)
-                buildIndex[0] += 1
+                buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2*((np2 + 5) + extraVertices))
+
+        times.append(('_sym:', time.time()))
+        print(', '.join([str(t[0]+str(t[1]-tk)) for t in times]))
 
     def _appendSymbolItem(self, strip, obj, listCol, indexList, r, w,
                           spectrumFrequency, symbolType, drawList, spectrumView):
@@ -1400,7 +1429,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             vert = ((2 * numPoints) + 5)
             return ind, vert
 
-    def _buildSymbolsCount(self, spectrumView, objListView):
+    def _buildSymbolsCount(self, spectrumView, objListView, drawList):
         """count the number of indices and vertices for the label list
         """
         spectrum = spectrumView.spectrum
@@ -1409,17 +1438,20 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         indCount = 0
         vertCount = 0
+        objCount = 0
         for tcount, obj in enumerate(self.objects(pls)):
             ind, vert = self._buildSymbolsCountItem(self.strip, obj, self.strip.symbolType)
             indCount += ind
             vertCount += vert
+            if ind:
+                objCount += 1
 
-        self.indices = np.empty(indCount, dtype=np.uint32)
-        self.vertices = np.empty(vertCount * 2, dtype=np.float32)
-        self.colors = np.empty(vertCount * 4, dtype=np.float32)
-        self.attribs = np.empty(vertCount * 2, dtype=np.float32)
-        self.offsets = np.empty(vertCount * 2, dtype=np.float32)
-        self.pids = np.empty(tcount * GLDefs.LENPID, dtype=np.object_)
+        drawList.indices = np.empty(indCount, dtype=np.uint32)
+        drawList.vertices = np.empty(vertCount * 2, dtype=np.float32)
+        drawList.colors = np.empty(vertCount * 4, dtype=np.float32)
+        drawList.attribs = np.empty(vertCount * 2, dtype=np.float32)
+        drawList.offsets = np.empty(vertCount * 2, dtype=np.float32)
+        drawList.pids = np.empty(objCount * GLDefs.LENPID, dtype=np.object_)
 
         return indCount, vertCount
 
@@ -1445,9 +1477,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
 
-            times = [time.time(), self]
+            # times = [time.time(), self]
 
-            drawList.clearArrays()
+            # drawList.clearArrays()
 
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
@@ -1500,25 +1532,25 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             spectrumFrequency = spectrum.spectrometerFrequencies
             strip = spectrumView.strip
 
-            tk = time.time() - times[0]
-            times.append('_col:' + str(tk))
+            # tk = time.time() - times[0]
+            # times.append('_col:' + str(tk))
 
-            ind, vert = self._buildSymbolsCount(spectrumView, objListView)
+            ind, vert = self._buildSymbolsCount(spectrumView, objListView, drawList)
 
-            tsum = 0
+            # tsum = 0
             for tcount, obj in enumerate(self.objects(pls)):
                 self._insertSymbolItem(strip, obj, listCol, indexing, r, w,
                                        spectrumFrequency, symbolType, drawList,
                                        spectrumView, buildIndex)
-                tsum += (time.time() - times[0])
+                # tsum += (time.time() - times[0])
 
-            times.append('_sym:' + str(tsum / tcount))
-            times.append('_t:' + str(tcount))
+            # times.append('_sym:' + str((time.time() - times[0])))
+            # times.append('_t:' + str(tcount))
 
             drawList.defineIndexVBO(enableVBO=False)
 
-            times.append('_def:' + str(time.time() - times[0]))
-            print(', '.join([str(t) for t in times]))
+            # times.append('_def:' + str(time.time() - times[0]))
+            # print(', '.join([str(t) for t in times]))
 
     def buildSymbols(self):
         if self.strip.isDeleted:

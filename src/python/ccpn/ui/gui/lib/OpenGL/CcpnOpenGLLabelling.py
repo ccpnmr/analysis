@@ -1783,9 +1783,9 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         if drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             self._rescaleSymbols(spectrumView=spectrumView, objListView=objListView)
-            self._rescaleLabels(spectrumView=spectrumView,
-                                objListView=objListView,
-                                drawList=self._GLLabels[objListView])
+            # self._rescaleLabels(spectrumView=spectrumView,
+            #                     objListView=objListView,
+            #                     drawList=self._GLLabels[objListView])
 
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode

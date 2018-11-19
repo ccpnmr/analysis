@@ -713,7 +713,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 indices = spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes[0:2],
                                                                exactMatch=(self._preferences.matchAxisCode == 1))
         else:
-            indices = spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes)
+            indices = (0,)              # spectrumView.spectrum.getByAxisCodes('indices', self.strip.axisCodes)
 
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX] = indices
 

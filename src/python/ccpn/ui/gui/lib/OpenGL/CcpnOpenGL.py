@@ -4929,6 +4929,9 @@ class CcpnGLWidget(QOpenGLWidget):
                     xAxis = 0
 
                     for multiplet in multipletList.multiplets:
+                        if not multiplet.position:
+                            continue
+
                         height = multiplet.height  # * scale # TBD: is the scale already taken into account in multiplet.height???
                         if xPositions[0] < float(multiplet.position[xAxis]) < xPositions[1] and y0 < height < y1:
                             multiplets.append(multiplet)

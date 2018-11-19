@@ -263,6 +263,15 @@ class GLpeakListMethods():
         """
         return 0
 
+    def insertExtraIndices(self, *args):
+        """Insert extra indices into the vertex list
+        """
+        return 0, 0
+
+    def insertExtraVertices(self, *args):
+        """Insert extra vertices into the vertex list
+        """
+        return 0
 
 def _fillNdLabel(self, spectrumView, objListView, obj):
     self._fillLabel(self, spectrumView, objListView, obj)
@@ -638,7 +647,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 times.append(('_ind:', time.time()))
 
                 # add extra indices for the peak
-                extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
+                # extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
+                extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexPtr + 4, index + 4, obj)
 
                 drawList.vertices[vertexPtr:vertexPtr + 8] = (p0[0] - r, p0[1] - w,
                                                               p0[0] + r, p0[1] + w,
@@ -651,7 +661,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                                              p0[0], p0[1])
 
                 # add extra vertices for the multiplet
-                extraVertices = self.appendExtraVertices(drawList, obj, p0, (*cols, fade), fade)
+                extraVertices = self.insertExtraVertices(drawList, vertexPtr+8, pIndex, obj, p0, (*cols, fade), fade)
 
                 try:
                     # keep a pointer to the obj
@@ -663,8 +673,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
                 times.append(('_pids:', time.time()))
 
-                indexList[0] += (4 + extraIndices)
-                indexList[1] += (iCount + extraIndices)                # len(drawList.indices)
+                indexList[0] += (4 + extraIndexCount)
+                indexList[1] += (iCount + extraIndices)  # len(drawList.indices)
                 drawList.numVertices += (4 + extraVertices)
                 buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2 * (4 + extraVertices))
@@ -734,7 +744,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                                                 indexPtr, len(drawList.indices))
 
                 indexList[0] += ((np2 + 5) + extraIndices)
-                indexList[1] += (iCount + extraIndices)                  # len(drawList.indices)
+                indexList[1] += (iCount + extraIndices)  # len(drawList.indices)
                 drawList.numVertices += ((np2 + 5) + extraVertices)
                 buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2 * ((np2 + 5) + extraVertices))
@@ -795,7 +805,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 # indexPtr = len(drawList.indices)
 
                 indexList[0] += ((np2 + 5) + extraIndices)
-                indexList[1] += (iCount + extraIndices)                  # len(drawList.indices)
+                indexList[1] += (iCount + extraIndices)  # len(drawList.indices)
                 drawList.numVertices += ((np2 + 5) + extraVertices)
                 buildIndex[0] += GLDefs.LENPID
                 buildIndex[1] += (2 * ((np2 + 5) + extraVertices))
@@ -1851,6 +1861,8 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                     pass
 
                 pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+                if not obj.position:
+                    return
                 p0 = (obj.position[pIndex[0]], obj.height)
 
                 # # get the correct coordinates based on the axisCodes
@@ -2002,6 +2014,8 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             cols = listCol
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        if not obj.position:
+            return
         p0 = (obj.position[pIndex[0]], obj.height)
 
         # # get the correct coordinates based on the axisCodes
@@ -2126,22 +2140,27 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             w = symbolWidth
             r = symbolWidth * x / y
 
-        # get the correct coordinates based on the axisCodes
-        p0 = [0.0] * 2  # len(self.axisOrder)
-        for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-            for pp, ppCode in enumerate(obj.axisCodes):
+        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        if not obj.position:
+            return
+        p0 = (obj.position[pIndex[0]], obj.height)
 
-                if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-                    if ppCode[0] == psCode[0]:
-                        p0[ps] = obj.position[pp]
-                    else:
-                        p0[ps] = obj.height
-
-                elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-                    if ppCode == psCode:
-                        p0[ps] = obj.position[pp]
-                    else:
-                        p0[ps] = obj.height
+        # # get the correct coordinates based on the axisCodes
+        # p0 = [0.0] * 2  # len(self.axisOrder)
+        # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+        #     for pp, ppCode in enumerate(obj.axisCodes):
+        #
+        #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+        #             if ppCode[0] == psCode[0]:
+        #                 p0[ps] = obj.position[pp]
+        #             else:
+        #                 p0[ps] = obj.height
+        #
+        #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+        #             if ppCode == psCode:
+        #                 p0[ps] = obj.position[pp]
+        #             else:
+        #                 p0[ps] = obj.height
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -2299,6 +2318,17 @@ class GLmultipletListMethods():
         drawList.indices = np.append(drawList.indices, tuple((index, 1 + index + ii) for ii in range(len(multiplet.peaks))))
         return len(multiplet.peaks) + 1
 
+    def insertExtraIndices(self, drawList, indexPTR, index, multiplet):
+        """insert extra indices into the index list
+        """
+        if not multiplet.peaks:
+            return 0
+
+        insertNum = len(multiplet.peaks)
+        drawList.indices[indexPTR:indexPTR + 2 * insertNum] = tuple(val for ii in range(insertNum)
+                                                                    for val in (index, 1 + index + ii))
+        return 2 * insertNum, insertNum+1
+
 
 class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
     """Class to handle symbol and symbol labelling for Nd displays
@@ -2355,6 +2385,55 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
         drawList.vertices = np.append(drawList.vertices, posList)
         drawList.colors = np.append(drawList.colors, (*cols, fade) * numVertices)
         drawList.attribs = np.append(drawList.attribs, p0 * numVertices)
+
+        return numVertices
+
+    def insertExtraVertices(self, drawList, vertexPTR, pIndex, multiplet, p0, colour, fade):
+        """insert extra vertices into the vertex list
+        """
+        if not multiplet.peaks:
+            return 0
+
+        # cols = getColours()[CCPNGLWIDGET_MULTIPLETLINK][:3]
+        cols = getAutoColourRgbRatio(multiplet.multipletList.lineColour, multiplet.multipletList.spectrum, self.autoColour,
+                                     getColours()[CCPNGLWIDGET_MULTIPLETLINK])
+
+        posList = [p0]
+
+        for peak in multiplet.peaks:
+            # get the correct coordinates based on the axisCodes
+
+            p1 = (peak.position[pIndex[0]], peak.position[pIndex[1]])
+
+            # p1 = [0.0] * 2  # len(self.axisOrder)
+            # axisCount = 0
+            # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
+            #     for pp, ppCode in enumerate(peak.axisCodes):
+            #
+            #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
+            #             if ppCode[0] == psCode[0]:
+            #                 p1[ps] = peak.position[pp]
+            #                 axisCount += 1
+            #
+            #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
+            #             if ppCode == psCode:
+            #                 p1[ps] = peak.position[pp]
+            #                 axisCount += 1
+            #
+            # if None in p1:
+            #     getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
+            #     continue
+
+            posList.append(p1)
+
+        numVertices = len(posList)
+        # drawList.vertices = np.append(drawList.vertices, posList)
+        # drawList.colors = np.append(drawList.colors, (*cols, fade) * numVertices)
+        # drawList.attribs = np.append(drawList.attribs, p0 * numVertices)
+
+        drawList.vertices[vertexPTR:vertexPTR+2*numVertices] = posList
+        drawList.colors[2*vertexPTR:2*vertexPTR+4*numVertices] = (*cols, fade) * numVertices
+        drawList.attribs[vertexPTR:vertexPTR+2*numVertices] = p0 * numVertices
 
         return numVertices
 
@@ -2472,6 +2551,16 @@ class GLintegralListMethods():
 
     def appendExtraVertices(self, drawList, obj, p0, colour, fade):
         """Add extra vertices to the vertex list
+        """
+        return 0
+
+    def insertExtraIndices(self, *args):
+        """Insert extra indices into the vertex list
+        """
+        return 0, 0
+
+    def insertExtraVertices(self, *args):
+        """Insert extra vertices into the vertex list
         """
         return 0
 

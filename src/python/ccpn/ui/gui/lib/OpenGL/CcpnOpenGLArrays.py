@@ -81,7 +81,7 @@ class GLVertexArray():
         if clearArrays:
             self.clearArrays()
 
-        self.lineWidths = [0.0, 0.0]
+        # self.lineWidths = [0.0, 0.0]
         self.color = None
         self.posColour = None
         self.negColour = None
@@ -102,17 +102,17 @@ class GLVertexArray():
 
     def clearArrays(self):
         # set everything to 32 bit for openGL VBOs, indices are ints, everything else is float
-        self.indices = np.empty(0, dtype=np.uint32)
-        self.vertices = np.empty(0, dtype=np.float32)
-        self.colors = np.empty(0, dtype=np.float32)
-        self.texcoords = np.empty(0, dtype=np.float32)
-        self.attribs = np.empty(0, dtype=np.float32)
-        self.offsets = np.empty(0, dtype=np.float32)
-        self.pids = np.empty(0, dtype=np.object_)
+        self.indices = np.array([], dtype=np.uint32)
+        self.vertices = np.array([], dtype=np.float32)
+        self.colors = np.array([], dtype=np.float32)
+        self.texcoords = np.array([], dtype=np.float32)
+        self.attribs = np.array([], dtype=np.float32)
+        self.offsets = np.array([], dtype=np.float32)
+        self.pids = np.array([], dtype=np.object_)
         self.numVertices = 0
 
     def clearVertices(self):
-        self.vertices = np.empty(0, dtype=np.float32)
+        self.vertices = np.array([], dtype=np.float32)
         self.numVertices = 0
 
     def drawIndexArray(self):

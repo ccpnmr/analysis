@@ -2851,6 +2851,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if self.buildMarks:
             self._marksList.renderMode = GLRENDERMODE_REBUILD
+            self.buildMarks = False
 
         self.buildMarksRulers()
         self._marksList.drawIndexArray()

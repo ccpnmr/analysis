@@ -429,18 +429,18 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         if symbolType == 1:
             if lineWidths[0] and lineWidths[1]:
-                r = 0.7 * (0.5 * lineWidths[0] / frequency[0])
-                w = 0.7 * (0.5 * lineWidths[1] / frequency[1])
+                r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
+                w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
             else:
-                r = 0.7 * r
-                w = 0.7 * w
+                r = 0.8 * r
+                w = 0.8 * w
         elif symbolType == 2:
             if lineWidths[0] and lineWidths[1]:
-                r = 0.7 * (0.5 * lineWidths[0] / frequency[0])
-                w = 0.7 * (0.5 * lineWidths[1] / frequency[1])
+                r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
+                w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
             else:
-                r = 0.7 * r
-                w = 0.7 * w
+                r = 0.8 * r
+                w = 0.8 * w
 
         # if axisCount == 2:
         if pIndex:
@@ -505,19 +505,19 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         if symbolType == 1:
             if lineWidths[0] and lineWidths[1]:
-                r = 0.7 * (0.5 * lineWidths[0] / frequency[0])
-                w = 0.7 * (0.5 * lineWidths[1] / frequency[1])
+                r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
+                w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
             else:
-                r = 0.7 * r
-                w = 0.7 * w
+                r = 0.8 * r
+                w = 0.8 * w
 
         elif symbolType == 2:
             if lineWidths[0] and lineWidths[1]:
-                r = 0.7 * (0.5 * lineWidths[0] / frequency[0])
-                w = 0.7 * (0.5 * lineWidths[1] / frequency[1])
+                r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
+                w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
             else:
-                r = 0.7 * r
-                w = 0.7 * w
+                r = 0.8 * r
+                w = 0.8 * w
 
         # if axisCount == 2:
         if pIndex:
@@ -1359,30 +1359,55 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         symbolType = self.strip.symbolType
         symbolWidth = self.strip.symbolSize / 2.0
 
+        x = abs(self._GLParent.pixelX)
+        y = abs(self._GLParent.pixelY)
+        if x <= y:
+            r = symbolWidth
+            w = symbolWidth * y / x
+        else:
+            w = symbolWidth
+            r = symbolWidth * x / y
+
         if symbolType == 0:  # a cross
-
-            x = abs(self._GLParent.pixelX)
-            y = abs(self._GLParent.pixelY)
-            if x <= y:
-                r = symbolWidth
-                w = symbolWidth * y / x
-            else:
-                w = symbolWidth
-                r = symbolWidth * x / y
-
             for drawStr in drawList.stringList:
                 drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
 
         elif symbolType == 1:
+            pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+            spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
+            frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+
             for drawStr in drawList.stringList:
-                r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
-                drawStr.setStringOffset((r, w))
-                # drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+                lineWidths = (drawStr.object.lineWidths[pIndex[0]], drawStr.object.lineWidths[pIndex[1]])
+
+                if lineWidths[0] and lineWidths[1]:
+                    r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
+                    w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+                else:
+                    r = 0.8 * r
+                    w = 0.8 * w
+
+                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
 
         elif symbolType == 2:
+            pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+            spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
+            frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+
             for drawStr in drawList.stringList:
-                r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
-                drawStr.setStringOffset((r, w))
+                lineWidths = (drawStr.object.lineWidths[pIndex[0]], drawStr.object.lineWidths[pIndex[1]])
+
+                if lineWidths[0] and lineWidths[1]:
+                    r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
+                    w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+                else:
+                    r = 0.8 * r
+                    w = 0.8 * w
+
+                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+
+                # r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
+                # drawStr.setStringOffset((r, w))
                 # drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1480,9 +1505,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             self._rescaleSymbols(spectrumView=spectrumView, objListView=objListView)
-            # self._rescaleLabels(spectrumView=spectrumView,
-            #                     objListView=objListView,
-            #                     drawList=self._GLLabels[objListView])
+            self._rescaleLabels(spectrumView=spectrumView,
+                                objListView=objListView,
+                                drawList=self._GLLabels[objListView])
 
             drawList.defineIndexVBO(enableVBO=False)
 
@@ -1806,9 +1831,9 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         if drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             self._rescaleSymbols(spectrumView=spectrumView, objListView=objListView)
-            # self._rescaleLabels(spectrumView=spectrumView,
-            #                     objListView=objListView,
-            #                     drawList=self._GLLabels[objListView])
+            self._rescaleLabels(spectrumView=spectrumView,
+                                objListView=objListView,
+                                drawList=self._GLLabels[objListView])
 
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode

@@ -1260,13 +1260,14 @@ QuickTable::item::selected {
             # remove from the current list
             multiple = self._tableData['classCallBack']
 
-            tableObjs = self._dataFrameObject.objects
+            if self._dataFrameObject:
+                tableObjs = self._dataFrameObject.objects
 
-            if multiple:  # None if no table callback defined
-                multipleAttr = getattr(self.current, multiple)
-                if len(multipleAttr) > 0:
-                    # need to remove objList from multipleAttr - fires only one current change
-                    setattr(self.current, multiple, tuple(set(multipleAttr) - set(tableObjs)))
+                if multiple:  # None if no table callback defined
+                    multipleAttr = getattr(self.current, multiple)
+                    if len(multipleAttr) > 0:
+                        # need to remove objList from multipleAttr - fires only one current change
+                        setattr(self.current, multiple, tuple(set(multipleAttr) - set(tableObjs)))
 
     def selectObjects(self, objList: list, setUpdatesEnabled: bool = False):
         """Select the object in the table

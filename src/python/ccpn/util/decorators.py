@@ -6,6 +6,7 @@ import sys
 import os
 import linecache
 import functools
+import cProfile
 
 def trace(f):
     def globaltrace(frame, why, arg):
@@ -59,3 +60,19 @@ def singleton(cls):
     cls.__init_original__ = cls.__init__
     cls.__init__ = object.__init__
     return cls
+
+
+def profile(func):
+    @functools.wraps(func)
+    def profileWrapper(*args, **kwargs):
+        # path = ''
+        profiler = cProfile.Profile()
+        try:
+            profiler.enable()
+            ret = func(*args, **kwargs)
+            profiler.disable()
+            return ret
+        finally:
+            filename = os.path.expanduser(os.path.join('~', func.__name__ + '.pstat'))
+            profiler.dump_stats(filename)
+    return profileWrapper

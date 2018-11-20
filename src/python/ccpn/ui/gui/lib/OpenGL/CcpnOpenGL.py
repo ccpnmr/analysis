@@ -2131,7 +2131,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if not self._stackingMode:
             self._GLPeaks.drawLabels(self._spectrumSettings)
-            # self._GLMultiplets.drawLabels(self._spectrumSettings)
+            self._GLMultiplets.drawLabels(self._spectrumSettings)
             self._GLIntegrals.drawLabels(self._spectrumSettings)
 
             self.drawMarksAxisCodes()

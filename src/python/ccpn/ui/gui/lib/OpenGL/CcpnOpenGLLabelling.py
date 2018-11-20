@@ -2307,6 +2307,7 @@ class GLmultipletListMethods():
 
     def extraIndicesCount(self, multiplet):
         """Calculate how many indices to add
+        Returns the size of array needed to hold the indices, see insertExtraIndices
         """
         return 2 * len(multiplet.peaks)
 
@@ -2317,6 +2318,7 @@ class GLmultipletListMethods():
 
     def appendExtraIndices(self, drawList, index, multiplet):
         """Add extra indices to the index list
+        Returns the number of unique indices NOT the length of the appended list
         """
         if not multiplet.peaks:
             return 0
@@ -2328,6 +2330,9 @@ class GLmultipletListMethods():
 
     def insertExtraIndices(self, drawList, indexPTR, index, multiplet):
         """insert extra indices into the index list
+        Returns (len, ind)
+            len: length of the inserted array
+            ind: number of unique indices
         """
         if not multiplet.peaks:
             return 0

@@ -393,27 +393,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         lineWidths = (obj.lineWidths[pIndex[0]], obj.lineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
 
-        # p0 = [0.0] * 2  # len(self.axisOrder)
-        # lineWidths = [None] * 2  # len(self.axisOrder)
-        # frequency = [0.0] * 2  # len(self.axisOrder)
-        # axisCount = 0
-        # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-        #     for pp, ppCode in enumerate(obj.axisCodes):
-        #
-        #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-        #             if ppCode[0] == psCode[0]:
-        #                 p0[ps] = obj.position[pp]
-        #                 lineWidths[ps] = obj.lineWidths[pp]
-        #                 frequency[ps] = spectrumFrequency[pp]
-        #                 axisCount += 1
-        #
-        #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-        #             if ppCode == psCode:
-        #                 p0[ps] = obj.position[pp]
-        #                 lineWidths[ps] = obj.lineWidths[pp]
-        #                 frequency[ps] = spectrumFrequency[pp]
-        #                 axisCount += 1
-
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
@@ -428,6 +407,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             r = symbolWidth * x / y
 
         if symbolType == 1:
+            # put to the top-right corner of the lineWidth
             if lineWidths[0] and lineWidths[1]:
                 r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
                 w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
@@ -435,6 +415,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 r = 0.8 * r
                 w = 0.8 * w
         elif symbolType == 2:
+            # put to the top-right corner of the lineWidth
             if lineWidths[0] and lineWidths[1]:
                 r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
                 w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
@@ -1383,11 +1364,10 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if lineWidths[0] and lineWidths[1]:
                     r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
                     w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+                    drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
                 else:
-                    r = 0.8 * r
-                    w = 0.8 * w
+                    drawStr.setStringOffset((0.8 * r * np.sign(self._GLParent.pixelX), 0.8 * w * np.sign(self._GLParent.pixelY)))
 
-                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
 
         elif symbolType == 2:
             pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
@@ -1400,11 +1380,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 if lineWidths[0] and lineWidths[1]:
                     r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
                     w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+                    drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
                 else:
-                    r = 0.8 * r
-                    w = 0.8 * w
-
-                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+                    drawStr.setStringOffset((0.8 * r * np.sign(self._GLParent.pixelX), 0.8 * w * np.sign(self._GLParent.pixelY)))
 
                 # r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
                 # drawStr.setStringOffset((r, w))

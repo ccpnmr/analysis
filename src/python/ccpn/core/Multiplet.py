@@ -59,14 +59,20 @@ def _calculateCenterOfMass(multiplet):
     if len(multiplet.peaks) > 0:
         position = ()
         dim = multiplet.multipletList.spectrum.dimensionCount
-        for d in range(dim):
-            peakPositions = [peak.position[d] for peak in multiplet.peaks]
-            peakIntensities = [peak.height or 1 for peak in multiplet.peaks]
-            numerator = []
-            for p, i in zip(peakPositions, peakIntensities):
-                numerator.append(p * i)
-            centerOfMass = sum(numerator) / sum(peakIntensities)
-            position += (centerOfMass,)
+        if dim > 1:
+            for d in range(dim):
+                peakPositions = [peak.position[d] for peak in multiplet.peaks]
+                # peakIntensities = [peak.height or 1 for peak in multiplet.peaks]
+                # numerator = []
+                # for p, i in zip(peakPositions, peakIntensities):
+                #     numerator.append(p * i)
+                # centerOfMass = sum(numerator) / sum(peakIntensities)
+                # position += (centerOfMass,)
+
+                position += (sum(peakPositions) / len(multiplet.peaks),)
+        else:
+            position = (sum([peak.position[0] for peak in multiplet.peaks]) / len(multiplet.peaks),
+                        sum([peak.height for peak in multiplet.peaks]) / len(multiplet.peaks))
         return position
 
 

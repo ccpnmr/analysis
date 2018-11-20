@@ -445,16 +445,17 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
             text = self.getLabelling(obj, self.strip.peakLabelling)
 
-            stringList.append(GLString(text=text,
-                                       font=self._GLParent.globalGL.glSmallFont if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
-                                       x=p0[0], y=p0[1],
-                                       ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
-                                       # ox=r, oy=w,
-                                       # x=self._screenZero[0], y=self._screenZero[1]
-                                       color=(*listCol, fade),
-                                       GLContext=self._GLParent,
-                                       obj=obj, clearArrays=False))
-            stringList[-1].stringOffset = stringOffset
+            newString = GLString(text=text,
+                                 font=self._GLParent.globalGL.glSmallFont if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 x=p0[0], y=p0[1],
+                                 ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
+                                 # ox=r, oy=w,
+                                 # x=self._screenZero[0], y=self._screenZero[1]
+                                 color=(*listCol, fade),
+                                 GLContext=self._GLParent,
+                                 obj=obj, clearArrays=False)
+            newString.stringOffset = stringOffset
+            stringList.append(newString)
 
     def _fillLabels(self, spectrumView, objListView, pls, objectList):
         """Append all labels to the new list
@@ -480,7 +481,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
 
-        stringOffset = None
         x = abs(self._GLParent.pixelX)
         y = abs(self._GLParent.pixelY)
         if x <= y:
@@ -490,6 +490,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             w = symbolWidth
             r = symbolWidth * x / y
 
+        stringOffset = None
         if symbolType == 1:
             if lineWidths[0] and lineWidths[1]:
                 r = GLDefs.STRINGSCALE * (0.5 * lineWidths[0] / frequency[0])
@@ -527,13 +528,13 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
             text = self.getLabelling(obj, self.strip.peakLabelling)
 
-            outString =  GLString(text=text,
-                            font=self._GLParent.globalGL.glSmallFont if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
-                            x=p0[0], y=p0[1],
-                            ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
-                            color=(*listCol, fade),
-                            GLContext=self._GLParent,
-                            obj=obj, clearArrays=False)
+            outString = GLString(text=text,
+                                 font=self._GLParent.globalGL.glSmallFont if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
+                                 x=p0[0], y=p0[1],
+                                 ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
+                                 color=(*listCol, fade),
+                                 GLContext=self._GLParent,
+                                 obj=obj, clearArrays=False)
             outString.stringOffset = stringOffset
             return outString
 
@@ -1366,9 +1367,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         elif symbolType == 1:
             for drawStr in drawList.stringList:
                 if drawStr.stringOffset:
-                    r, w = drawStr.stringOffset
-                    drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX),
-                                             w * np.sign(self._GLParent.pixelY)))
+                    lr, lw = drawStr.stringOffset
+                    drawStr.setStringOffset((lr * np.sign(self._GLParent.pixelX),
+                                             lw * np.sign(self._GLParent.pixelY)))
                 else:
                     drawStr.setStringOffset((GLDefs.STRINGSCALE * r * np.sign(self._GLParent.pixelX),
                                              GLDefs.STRINGSCALE * w * np.sign(self._GLParent.pixelY)))
@@ -1390,9 +1391,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         elif symbolType == 2:
             for drawStr in drawList.stringList:
                 if drawStr.stringOffset:
-                    r, w = drawStr.stringOffset
-                    drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX),
-                                             w * np.sign(self._GLParent.pixelY)))
+                    lr, lw = drawStr.stringOffset
+                    drawStr.setStringOffset((lr * np.sign(self._GLParent.pixelX),
+                                             lw * np.sign(self._GLParent.pixelY)))
                 else:
                     drawStr.setStringOffset((GLDefs.STRINGSCALE * r * np.sign(self._GLParent.pixelX),
                                              GLDefs.STRINGSCALE * w * np.sign(self._GLParent.pixelY)))
@@ -1411,9 +1412,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             #     else:
             #         drawStr.setStringOffset((0.8 * r * np.sign(self._GLParent.pixelX), 0.8 * w * np.sign(self._GLParent.pixelY)))
 
-                # r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
-                # drawStr.setStringOffset((r, w))
-                # drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+            # r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
+            # drawStr.setStringOffset((r, w))
+            # drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Building
@@ -2208,15 +2209,17 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
         text = self.getLabelling(obj, self.strip.peakLabelling)
 
-        stringList.append(GLString(text=text,
-                                   font=self._GLParent.globalGL.glSmallFont,
-                                   x=p0[0], y=p0[1],
-                                   ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
-                                   # ox=symbolWidth, oy=symbolWidth,
-                                   # x=self._screenZero[0], y=self._screenZero[1]
-                                   color=(*listCol, 1.0),
-                                   GLContext=self._GLParent,
-                                   obj=obj))
+        newString = GLString(text=text,
+                             font=self._GLParent.globalGL.glSmallFont,
+                             x=p0[0], y=p0[1],
+                             ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
+                             # ox=symbolWidth, oy=symbolWidth,
+                             # x=self._screenZero[0], y=self._screenZero[1]
+                             color=(*listCol, 1.0),
+                             GLContext=self._GLParent,
+                             obj=obj)
+        newString.stringOffset = None
+        stringList.append(newString)
 
     def _rescaleLabels(self, spectrumView=None, objListView=None, drawList=None):
         """Rescale all labels to the new dimensions of the screen
@@ -2406,7 +2409,7 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLpeakNdLabelling):
 
             posList += p1
 
-        numVertices = len(posList)
+        numVertices = len(multiplet.peaks) + 1  # len(posList)
         drawList.vertices = np.append(drawList.vertices, posList)
         drawList.colors = np.append(drawList.colors, (*cols, fade) * numVertices)
         drawList.attribs = np.append(drawList.attribs, p0 * numVertices)
@@ -2483,7 +2486,7 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
 
             posList += p1
 
-        numVertices = len(posList)
+        numVertices = len(multiplet.peaks) + 1
         drawList.vertices = np.append(drawList.vertices, posList)
         drawList.colors = np.append(drawList.colors, (*cols, fade) * numVertices)
         drawList.attribs = np.append(drawList.attribs, p0 * numVertices)

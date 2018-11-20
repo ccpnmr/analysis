@@ -1090,7 +1090,8 @@ class GuiStrip(Frame):
             getLogger().debugGL('OpenGL widget not instantiated')
 
     def cyclePeakLabelling(self):
-        "Toggles whether peak labelling is minimal is visible in the strip."
+        """Toggles whether peak labelling is minimal is visible in the strip
+        """
         self.peakLabelling += 1
         if self.peakLabelling > 2:
             self.peakLabelling = 0
@@ -1109,7 +1110,8 @@ class GuiStrip(Frame):
             GLSignals.emitPaintEvent()
 
     def cyclePeakSymbols(self):
-        "Toggles whether peak labelling is minimal is visible in the strip."
+        """Cycle through peak symbol types
+        """
         self.symbolType += 1
         if self.symbolType > 2:
             self.symbolType = 0
@@ -1119,10 +1121,11 @@ class GuiStrip(Frame):
 
                 for peakListView in sV.peakListViews:
                     peakListView.buildSymbols = True
-                    # peakListView.buildLabels = True
+                    peakListView.buildLabels = True
 
                 for multipletListView in sV.multipletListViews:
                     multipletListView.buildSymbols = True
+                    multipletListView.buildLabels = True
 
             # spawn a redraw of the GL windows
             from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier

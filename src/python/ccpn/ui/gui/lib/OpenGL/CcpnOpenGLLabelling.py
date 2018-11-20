@@ -431,11 +431,16 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             if lineWidths[0] and lineWidths[1]:
                 r = 0.7 * (0.5 * lineWidths[0] / frequency[0])
                 w = 0.7 * (0.5 * lineWidths[1] / frequency[1])
-
+            else:
+                r = 0.7 * r
+                w = 0.7 * w
         elif symbolType == 2:
             if lineWidths[0] and lineWidths[1]:
                 r = 0.7 * (0.5 * lineWidths[0] / frequency[0])
                 w = 0.7 * (0.5 * lineWidths[1] / frequency[1])
+            else:
+                r = 0.7 * r
+                w = 0.7 * w
 
         # if axisCount == 2:
         if pIndex:
@@ -502,11 +507,17 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             if lineWidths[0] and lineWidths[1]:
                 r = 0.7 * (0.5 * lineWidths[0] / frequency[0])
                 w = 0.7 * (0.5 * lineWidths[1] / frequency[1])
+            else:
+                r = 0.7 * r
+                w = 0.7 * w
 
         elif symbolType == 2:
             if lineWidths[0] and lineWidths[1]:
                 r = 0.7 * (0.5 * lineWidths[0] / frequency[0])
                 w = 0.7 * (0.5 * lineWidths[1] / frequency[1])
+            else:
+                r = 0.7 * r
+                w = 0.7 * w
 
         # if axisCount == 2:
         if pIndex:
@@ -1364,13 +1375,15 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         elif symbolType == 1:
             for drawStr in drawList.stringList:
-                r, w = 0.7 * drawStr.stringOffset[0], 0.7 * drawStr.stringOffset[1]
-                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+                r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
+                drawStr.setStringOffset((r, w))
+                # drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
 
         elif symbolType == 2:
             for drawStr in drawList.stringList:
-                r, w = 0.7 * drawStr.stringOffset[0], 0.7 * drawStr.stringOffset[1]
-                drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+                r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
+                drawStr.setStringOffset((r, w))
+                # drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Building

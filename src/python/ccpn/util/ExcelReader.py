@@ -28,6 +28,7 @@ from os.path import isfile, join
 import pathlib
 import pandas as pd
 from ccpn.util.Logging import getLogger , _debug3
+from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 
 ################################       Excel Headers Warning      ######################################################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
@@ -123,15 +124,15 @@ class ExcelReader(object):
     self.pandasFile = pd.ExcelFile(self.excelPath)
     self.sheets = self._getSheets(self.pandasFile)
     self.dataframes = self._getDataFrameFromSheets(self.sheets)
+    with suspendSideBarNotifications(self._project):
+      self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
+      self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
+      self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
 
-    self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
-    self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
-    self.spectrumGroups = self._createSpectrumGroups(self.dataframes)
-
-    self._dispatchAttrsToObjs(self.substancesDicts)
-    self._loadSpectraForSheet(self.substancesDicts)
-    self._dispatchAttrsToObjs(self.samplesDicts)
-    self._loadSpectraForSheet(self.samplesDicts)
+      self._dispatchAttrsToObjs(self.substancesDicts)
+      self._loadSpectraForSheet(self.substancesDicts)
+      self._dispatchAttrsToObjs(self.samplesDicts)
+      self._loadSpectraForSheet(self.samplesDicts)
 
 
 
@@ -318,6 +319,7 @@ class ExcelReader(object):
     :obj: obj to link the spectrum to. E.g. Sample or Substance,
     '''
     data = self._project.loadData(filePath)
+    # data = self._project._wrappedData.loadDataSource(filePath, 'Bruker')
     if data is not None:
       if len(data) > 0:
         self._linkSpectrumToObj(obj, data[0], dct)

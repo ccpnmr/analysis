@@ -321,7 +321,7 @@ class GLString(GLVertexArray):
         self.numVertices = len(self.vertices) // 2
         self.attribs = np.array((x + ox, y + oy) * self.numVertices, dtype=np.float32)
         self.offsets = np.array((x, y) * self.numVertices, dtype=np.float32)
-        self.stringOffset = (ox, oy)
+        self.stringOffset = None        # (ox, oy)
 
         # total width of text - probably don't need
         # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
@@ -338,5 +338,5 @@ class GLString(GLVertexArray):
         self.colors = np.array(col * self.numVertices, dtype=np.float32)
 
     def setStringOffset(self, attrib):
-        self.stringOffset = attrib
         self.attribs = self.offsets + np.array(attrib * self.numVertices, dtype=np.float32)
+        # self.stringOffset = attrib

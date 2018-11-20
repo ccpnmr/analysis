@@ -406,22 +406,26 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             w = symbolWidth
             r = symbolWidth * x / y
 
+        stringOffset = None
         if symbolType == 1:
             # put to the top-right corner of the lineWidth
             if lineWidths[0] and lineWidths[1]:
-                r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
-                w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+                r = GLDefs.STRINGSCALE * (0.5 * lineWidths[0] / frequency[0])
+                w = GLDefs.STRINGSCALE * (0.5 * lineWidths[1] / frequency[1])
+                stringOffset = (r, w)
             else:
-                r = 0.8 * r
-                w = 0.8 * w
+                r = GLDefs.STRINGSCALE * r
+                w = GLDefs.STRINGSCALE * w
+
         elif symbolType == 2:
             # put to the top-right corner of the lineWidth
             if lineWidths[0] and lineWidths[1]:
-                r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
-                w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+                r = GLDefs.STRINGSCALE * (0.5 * lineWidths[0] / frequency[0])
+                w = GLDefs.STRINGSCALE * (0.5 * lineWidths[1] / frequency[1])
+                stringOffset = (r, w)
             else:
-                r = 0.8 * r
-                w = 0.8 * w
+                r = GLDefs.STRINGSCALE * r
+                w = GLDefs.STRINGSCALE * w
 
         # if axisCount == 2:
         if pIndex:
@@ -450,6 +454,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                        color=(*listCol, fade),
                                        GLContext=self._GLParent,
                                        obj=obj, clearArrays=False))
+            stringList[-1].stringOffset = stringOffset
 
     def _fillLabels(self, spectrumView, objListView, pls, objectList):
         """Append all labels to the new list
@@ -475,6 +480,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
 
+        stringOffset = None
         x = abs(self._GLParent.pixelX)
         y = abs(self._GLParent.pixelY)
         if x <= y:
@@ -486,19 +492,21 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
         if symbolType == 1:
             if lineWidths[0] and lineWidths[1]:
-                r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
-                w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+                r = GLDefs.STRINGSCALE * (0.5 * lineWidths[0] / frequency[0])
+                w = GLDefs.STRINGSCALE * (0.5 * lineWidths[1] / frequency[1])
+                stringOffset = (r, w)
             else:
-                r = 0.8 * r
-                w = 0.8 * w
+                r = GLDefs.STRINGSCALE * r
+                w = GLDefs.STRINGSCALE * w
 
         elif symbolType == 2:
             if lineWidths[0] and lineWidths[1]:
-                r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
-                w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+                r = GLDefs.STRINGSCALE * (0.5 * lineWidths[0] / frequency[0])
+                w = GLDefs.STRINGSCALE * (0.5 * lineWidths[1] / frequency[1])
+                stringOffset = (r, w)
             else:
-                r = 0.8 * r
-                w = 0.8 * w
+                r = GLDefs.STRINGSCALE * r
+                w = GLDefs.STRINGSCALE * w
 
         # if axisCount == 2:
         if pIndex:
@@ -519,13 +527,15 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
 
             text = self.getLabelling(obj, self.strip.peakLabelling)
 
-            return GLString(text=text,
+            outString =  GLString(text=text,
                             font=self._GLParent.globalGL.glSmallFont if _isInPlane else self._GLParent.globalGL.glSmallTransparentFont,
                             x=p0[0], y=p0[1],
                             ox=r * np.sign(self._GLParent.pixelX), oy=w * np.sign(self._GLParent.pixelY),
                             color=(*listCol, fade),
                             GLContext=self._GLParent,
                             obj=obj, clearArrays=False)
+            outString.stringOffset = stringOffset
+            return outString
 
     def _removeSymbol(self, spectrumView, objListView, delObj):
         """Remove a symbol from the list
@@ -1354,35 +1364,52 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                 drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
 
         elif symbolType == 1:
-            pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-            spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
-            frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
-
             for drawStr in drawList.stringList:
-                lineWidths = (drawStr.object.lineWidths[pIndex[0]], drawStr.object.lineWidths[pIndex[1]])
-
-                if lineWidths[0] and lineWidths[1]:
-                    r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
-                    w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
-                    drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+                if drawStr.stringOffset:
+                    r, w = drawStr.stringOffset
+                    drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX),
+                                             w * np.sign(self._GLParent.pixelY)))
                 else:
-                    drawStr.setStringOffset((0.8 * r * np.sign(self._GLParent.pixelX), 0.8 * w * np.sign(self._GLParent.pixelY)))
+                    drawStr.setStringOffset((GLDefs.STRINGSCALE * r * np.sign(self._GLParent.pixelX),
+                                             GLDefs.STRINGSCALE * w * np.sign(self._GLParent.pixelY)))
 
+            # pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+            # spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
+            # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+            #
+            # for drawStr in drawList.stringList:
+            #     lineWidths = (drawStr.object.lineWidths[pIndex[0]], drawStr.object.lineWidths[pIndex[1]])
+            #
+            #     if lineWidths[0] and lineWidths[1]:
+            #         r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
+            #         w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+            #         drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+            #     else:
+            #         drawStr.setStringOffset((0.8 * r * np.sign(self._GLParent.pixelX), 0.8 * w * np.sign(self._GLParent.pixelY)))
 
         elif symbolType == 2:
-            pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-            spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
-            frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
-
             for drawStr in drawList.stringList:
-                lineWidths = (drawStr.object.lineWidths[pIndex[0]], drawStr.object.lineWidths[pIndex[1]])
-
-                if lineWidths[0] and lineWidths[1]:
-                    r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
-                    w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
-                    drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+                if drawStr.stringOffset:
+                    r, w = drawStr.stringOffset
+                    drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX),
+                                             w * np.sign(self._GLParent.pixelY)))
                 else:
-                    drawStr.setStringOffset((0.8 * r * np.sign(self._GLParent.pixelX), 0.8 * w * np.sign(self._GLParent.pixelY)))
+                    drawStr.setStringOffset((GLDefs.STRINGSCALE * r * np.sign(self._GLParent.pixelX),
+                                             GLDefs.STRINGSCALE * w * np.sign(self._GLParent.pixelY)))
+
+            # pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+            # spectrumFrequency = spectrumView.spectrum.spectrometerFrequencies
+            # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+            #
+            # for drawStr in drawList.stringList:
+            #     lineWidths = (drawStr.object.lineWidths[pIndex[0]], drawStr.object.lineWidths[pIndex[1]])
+            #
+            #     if lineWidths[0] and lineWidths[1]:
+            #         r = 0.8 * (0.5 * lineWidths[0] / frequency[0])
+            #         w = 0.8 * (0.5 * lineWidths[1] / frequency[1])
+            #         drawStr.setStringOffset((r * np.sign(self._GLParent.pixelX), w * np.sign(self._GLParent.pixelY)))
+            #     else:
+            #         drawStr.setStringOffset((0.8 * r * np.sign(self._GLParent.pixelX), 0.8 * w * np.sign(self._GLParent.pixelY)))
 
                 # r, w = drawStr.stringOffset[0], drawStr.stringOffset[1]
                 # drawStr.setStringOffset((r, w))
@@ -1483,9 +1510,9 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             self._rescaleSymbols(spectrumView=spectrumView, objListView=objListView)
-            self._rescaleLabels(spectrumView=spectrumView,
-                                objListView=objListView,
-                                drawList=self._GLLabels[objListView])
+            # self._rescaleLabels(spectrumView=spectrumView,
+            #                     objListView=objListView,
+            #                     drawList=self._GLLabels[objListView])
 
             drawList.defineIndexVBO(enableVBO=False)
 
@@ -1809,9 +1836,9 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         if drawList.renderMode == GLRENDERMODE_RESCALE:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
             self._rescaleSymbols(spectrumView=spectrumView, objListView=objListView)
-            self._rescaleLabels(spectrumView=spectrumView,
-                                objListView=objListView,
-                                drawList=self._GLLabels[objListView])
+            # self._rescaleLabels(spectrumView=spectrumView,
+            #                     objListView=objListView,
+            #                     drawList=self._GLLabels[objListView])
 
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode

@@ -511,8 +511,6 @@ class CcpnGLWidget(QOpenGLWidget):
         if rescaleMarksRulers:
             self.rescaleMarksRulers()
 
-        # self.rescaleIntegralLists()
-
         if rescaleIntegralLists:
             self._GLIntegrals.rescaleIntegralLists()
             self._GLIntegrals.rescale()

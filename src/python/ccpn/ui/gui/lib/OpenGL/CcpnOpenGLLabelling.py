@@ -647,12 +647,8 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                                                                     index, index + 3, index + 3, index + 1)
                         iCount = 12
                     else:
-                        try:
-                            drawList.indices[indexPtr:indexPtr + 4] = (index, index + 1, index + 2, index + 3)
-                            iCount = 4
-
-                        except Exception as es:
-                            pass
+                        drawList.indices[indexPtr:indexPtr + 4] = (index, index + 1, index + 2, index + 3)
+                        iCount = 4
 
                 times.append(('_ind:', time.time()))
 

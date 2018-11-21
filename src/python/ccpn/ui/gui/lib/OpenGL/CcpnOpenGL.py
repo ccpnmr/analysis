@@ -515,6 +515,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if rescaleIntegralLists:
             self._GLIntegrals.rescaleIntegralLists()
+            self._GLIntegrals.rescale()
 
         if rescaleRegions:
             self._rescaleRegions()

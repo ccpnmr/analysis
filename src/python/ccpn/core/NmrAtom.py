@@ -123,7 +123,7 @@ class NmrAtom(AbstractWrapperObject):
     def comment(self, value: str):
         self._wrappedData.details = value
 
-    #from ccpn.core.Atom import Atom
+    #from ccpn.core.Atom import Atom: This will break the import sequence
     @property
     def atom(self) -> 'Atom':
         """Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom"""
@@ -366,6 +366,7 @@ class NmrAtom(AbstractWrapperObject):
 #=========================================================================================
 
 
+#GWV 20181122: moved to Atom class
 # def getter(self: Atom) -> Optional[NmrAtom]:
 #     try:
 #         return self._project.getNmrAtom(self._id)
@@ -550,5 +551,4 @@ for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
              )
     )
 
-# NB Atom<->NmrAtom link depends solely on the NmrAtom name.
-# So no notifiers on the link - notify on the NmrAtom rename instead.
+

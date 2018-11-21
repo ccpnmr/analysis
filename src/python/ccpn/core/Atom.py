@@ -176,10 +176,14 @@ class Atom(AbstractWrapperObject):
     project = self._project
     project._wrappedData.molSystem.newGenericBond(atoms=(self._wrappedData, atom._wrappedData))
 
-  #from ccpn.core.NmrAtom import NmrAtom
+  #from ccpn.core.NmrAtom import NmrAtom: This will break the import sequence
   @property
   def nmrAtom(self) -> typing.Optional['NmrAtom']:
-    "NmrAtom to which Atom is assigned"
+    """NmrAtom to which Atom is assigned
+
+    NB  Atom<->NmrAtom link depends solely on the NmrAtom name.
+        So no notifiers on the link - notify on the NmrAtom rename instead.
+    """
     try:
         return self._project.getNmrAtom(self._id)
     except:

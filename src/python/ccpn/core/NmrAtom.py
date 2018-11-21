@@ -29,7 +29,6 @@ import operator
 from typing import Union, Tuple, Optional
 
 from ccpn.core.Residue import Residue
-from ccpn.core.Atom import Atom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project
@@ -124,13 +123,14 @@ class NmrAtom(AbstractWrapperObject):
     def comment(self, value: str):
         self._wrappedData.details = value
 
+    #from ccpn.core.Atom import Atom
     @property
-    def atom(self) -> Atom:
+    def atom(self) -> 'Atom':
         """Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom"""
         return self._project.getAtom(self._id)
 
     @atom.setter
-    def atom(self, value: Atom):
+    def atom(self, value: 'Atom'):
         if value is None:
             self.deassign()
         else:
@@ -366,29 +366,29 @@ class NmrAtom(AbstractWrapperObject):
 #=========================================================================================
 
 
-def getter(self: Atom) -> Optional[NmrAtom]:
-    try:
-        return self._project.getNmrAtom(self._id)
-    except:
-        return None
-
-
-def setter(self: Atom, value: NmrAtom):
-    oldValue = self.nmrAtom
-    if oldValue is value:
-        return
-    elif value is None:
-        raise ValueError("Cannot set Atom.nmrAtom to None")
-    elif oldValue is not None:
-        raise ValueError("New assignment of Atom clashes with existing assignment")
-    else:
-        value.atom = self
-
-
-Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
-
-del getter
-del setter
+# def getter(self: Atom) -> Optional[NmrAtom]:
+#     try:
+#         return self._project.getNmrAtom(self._id)
+#     except:
+#         return None
+#
+#
+# def setter(self: Atom, value: NmrAtom):
+#     oldValue = self.nmrAtom
+#     if oldValue is value:
+#         return
+#     elif value is None:
+#         raise ValueError("Cannot set Atom.nmrAtom to None")
+#     elif oldValue is not None:
+#         raise ValueError("New assignment of Atom clashes with existing assignment")
+#     else:
+#         value.atom = self
+#
+#
+# Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
+#
+# del getter
+# del setter
 
 
 def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,

@@ -131,22 +131,21 @@ class NmrChain(AbstractWrapperObject):
   def comment(self, value:str):
     self._wrappedData.details = value
 
-
   @property
   def chain(self) -> Chain:
     """Chain to which NmrChain is assigned"""
     return self._project.getChain(self._id)
 
-  @chain.setter
-  def chain(self, value:Chain):
-    if value is None:
-      if self.chain is None:
-        return
-      else:
-        self.deassign()
-    else:
-      # NB The API code will throw ValueError if there is already an NmrChain with that code
-      self.rename(value._wrappedData.code)
+  # @chain.setter
+  # def chain(self, value:Chain):
+  #   if value is None:
+  #     if self.chain is None:
+  #       return
+  #     else:
+  #       self.deassign()
+  #   else:
+  #     # NB The API code will throw ValueError if there is already an NmrChain with that code
+  #     self.rename(value._wrappedData.code)
 
   def rename(self, value:str):
     """Rename NmrChain, changing its shortName and Pid.
@@ -325,6 +324,9 @@ class NmrChain(AbstractWrapperObject):
         self._project._logger.warning("Only %s nmrResidues found in range %s to %s"
                                       % (len(changedNmrResidues), start, stop))
 
+  #=========================================================================================
+  # Implementation functions
+  #=========================================================================================
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
@@ -332,21 +334,22 @@ class NmrChain(AbstractWrapperObject):
     return parent._wrappedData.sortedNmrChains()
 
 
-def getter(self:Chain) -> typing.Optional[NmrChain]:
-  try:
-    return self._project.getNmrChain(self._id)
-  except:
-    return None
-
-def setter(self:Chain, value:NmrChain):
-  if value is None:
-     raise ValueError("nmrChain cannot be set to None")
-  else:
-     value.chain = self
-Chain.nmrChain = property(getter, setter, None, "NmrChain to which Chain is assigned")
-
-del getter
-del setter
+# GWV 20181122: moved to Chain class
+# def getter(self:Chain) -> typing.Optional[NmrChain]:
+#   try:
+#     return self._project.getNmrChain(self._id)
+#   except:
+#     return None
+#
+# def setter(self:Chain, value:NmrChain):
+#   if value is None:
+#      raise ValueError("nmrChain cannot be set to None")
+#   else:
+#      value.chain = self
+# Chain.nmrChain = property(getter, setter, None, "NmrChain to which Chain is assigned")
+#
+# del getter
+# del setter
 
 def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label:str='?',
                 comment:str=None) -> NmrChain:

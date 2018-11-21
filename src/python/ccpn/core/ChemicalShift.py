@@ -136,13 +136,14 @@ class ChemicalShift(AbstractWrapperObject):
 
 # Connections to parents:
 
-def getter(self:NmrAtom) -> Tuple[ChemicalShift, ...]:
-  getDataObj = self._project._data2Obj.get
-  return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
-
-NmrAtom.chemicalShifts = property(getter, None, None, "Returns ChemicalShift objects connected to NmrAtom")
-
-del getter
+# GWV 20181122: Moved to NmrAtom class
+# def getter(self:NmrAtom) -> Tuple[ChemicalShift, ...]:
+#   getDataObj = self._project._data2Obj.get
+#   return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
+#
+# NmrAtom.chemicalShifts = property(getter, None, None, "Returns ChemicalShift objects connected to NmrAtom")
+#
+# del getter
 
 def _newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                      valueError:float=0.0, figureOfMerit:float=1.0,

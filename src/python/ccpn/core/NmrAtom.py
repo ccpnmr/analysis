@@ -244,7 +244,7 @@ class NmrAtom(AbstractWrapperObject):
                 (('chainCode', None), ('sequenceCode', None),
                  ('residueType', None), ('name', None), ('mergeToExisting', False)
                  )
-                )
+        )
 
         oldPid = self.longPid
         clearUndo = False
@@ -338,15 +338,24 @@ class NmrAtom(AbstractWrapperObject):
         #
         return result
 
+    @property
+    def chemicalShifts(self) -> Tuple:
+        "Returns ChemicalShift objects connected to NmrAtom"
+        getDataObj = self._project._data2Obj.get
+        return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
+
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: NmrResidue) -> list:
         """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue"""
         return parent._wrappedData.sortedResonances()
 
-    def _finaliseAction(self, action:str):
+    def _finaliseAction(self, action: str):
         """Subclassed to handle associated ChemicalShift instances"""
-        print('>>> NmrAtom._finaliseAction')
+        #print('>>> NmrAtom._finaliseAction')
         super()._finaliseAction(action=action)
         # propagate the rename to associated ChemcialShift instances
         if action == 'rename':
@@ -354,11 +363,14 @@ class NmrAtom(AbstractWrapperObject):
                 cs._finaliseAction(action=action)
 
 
-def getter(self:Atom) -> Optional[NmrAtom]:
-  try:
-    return self._project.getNmrAtom(self._id)
-  except:
-    return None
+#=========================================================================================
+
+
+def getter(self: Atom) -> Optional[NmrAtom]:
+    try:
+        return self._project.getNmrAtom(self._id)
+    except:
+        return None
 
 
 def setter(self: Atom, value: NmrAtom):
@@ -427,7 +439,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
                     except ValueError:
                         self.project._logger.warning(
                                 "Could not reset serial of %s to %s - keeping original value" % (previous, serial)
-                                )
+                        )
                     previous._finaliseAction('rename')
 
     dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': isotopeCode}
@@ -536,7 +548,7 @@ for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
             (('_modifiedLink', {'classNames': ('NmrAtom', 'Peak')}, className, 'create'),
              ('_modifiedLink', {'classNames': ('NmrAtom', 'Peak')}, className, 'delete'),
              )
-            )
+    )
 
 # NB Atom<->NmrAtom link depends solely on the NmrAtom name.
 # So no notifiers on the link - notify on the NmrAtom rename instead.

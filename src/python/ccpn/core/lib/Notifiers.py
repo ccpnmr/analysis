@@ -1,10 +1,13 @@
 """
 Notifier extensions, wrapping it into a class that also acts as the called 
 function, displatching the 'user' callback if required.
-The Notifier can be defined relative to any valid V3 core object and the current
+
+The Notifier can be defined relative to any valid V3 core object, as well as the current
 object as it first checks if the triggered signature is valid.
+
 The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature,
-preventing unnecessary code duplication.
+preventing unnecessary code duplication. They are translated into multiple notifiers
+of the 'Project V3-machinery' (i.e., the Rasmus callbacks)
 
 The callback function is passed a callback dictionary with relevant info (see
 docstring of Notifier class. This idea was copied from the Traitlets package.
@@ -12,7 +15,6 @@ docstring of Notifier class. This idea was copied from the Traitlets package.
 April 2017: First design by Geerten Vuister
 
 """
-#TODO: test implementation for current
 
 #=========================================================================================
 # Licence, Reference and Credits
@@ -87,7 +89,7 @@ class Notifier(object):
                                               targetName,               (any for project instances)
                                               trigger, notifier         targetName==None: monitor theObject itself
 
-     Notifier.MONITOR   attributeName         theObject,targetName      targetName: valid attribute name of theObject
+     Notifier.OBSERVE   attributeName         theObject,targetName      targetName: valid attribute name of theObject
                                               value, previousValue,     NB: should only be used in isolation; i.e. not
                                               trigger, notifier         combined with other triggers
 
@@ -101,6 +103,7 @@ class Notifier(object):
       Uses current notifier system from Project and Current;filters for child objects of type targetName in theObject.
       TargetName does need to denote a valid child-class or attribute of theObject, except for Project instances
       which can be triggered by all classes (see Table).
+
       The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if
       defined in the instantiation of the Notifier object. (idea following the Trailtlets concept).
       Note that this dict also contains a reference to the Notifier object itself; this way it can be used
@@ -114,7 +117,7 @@ class Notifier(object):
     DELETE = 'delete'
     RENAME = 'rename'
     CHANGE = 'change'
-    MONITOR = 'monitor'
+    OBSERVE = 'observe'
     CURRENT = 'current'
 
     NOTIFIER = 'notifier'
@@ -127,13 +130,14 @@ class Notifier(object):
     PREVIOUSVALUE = 'previousValue'
     TARGETNAME = 'targetName'
 
-    _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, MONITOR, CURRENT)
+    _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, OBSERVE, CURRENT)
 
     def __init__(self, theObject: Any,
                  triggers: list,
                  targetName: str,
                  callback: Callable[..., str],
                  onceOnly=False,
+                 debug=False,
                  *args, **kwargs):
         """
         Create Notifier object;
@@ -143,9 +147,11 @@ class Notifier(object):
         :param triggers: list of trigger keywords callback
         :param targetName: valid className, attributeName or None
         :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
+        :param debug: set debug
         :param *args: optional arguments to callback
         :param **kwargs: optional keyword,value arguments to callback
         """
+        #print('Notifier.__init__>>>', theObject, triggers, targetName, callback)
         self._index = Notifier._currentIndex
         Notifier._currentIndex += 1
 
@@ -164,7 +170,7 @@ class Notifier(object):
         else:
             raise RuntimeError('Invalid object (%s)', theObject)
 
-        self._value = None  # used to store the value of attribute to monitor for change
+        self._value = None  # used to store the value of attribute to observe for change
         triggerForTheObject = False  # flag to denote if triggers are firing for theObject, not children
 
         self._notifiers = []  # list of tuples defining Notifier call signature; used for __str__
@@ -174,11 +180,11 @@ class Notifier(object):
         self._args = args
         self._kwargs = kwargs
 
-        self._debug = False  # ability to report on individual instances
+        self._debug = debug  # ability to report on individual instances
 
         # some sanity checks
-        if len(triggers) > 1 and Notifier.MONITOR in triggers:
-            raise RuntimeError('Notifier: trigger "%s" only to be used in isolation' % Notifier.MONITOR)
+        if len(triggers) > 1 and Notifier.OBSERVE in triggers:
+            raise RuntimeError('Notifier: trigger "%s" only to be used in isolation' % Notifier.OBSERVE)
         if len(triggers) > 1 and Notifier.CURRENT in triggers:
             raise RuntimeError('Notifier.__init__: trigger "%s" only to be used in isolation' % Notifier.CURRENT)
         if triggers[0] == Notifier.CURRENT and not self._isCurrent:
@@ -217,9 +223,9 @@ class Notifier(object):
                                      (self._index, self._theObject, trigger, tName, self._callback)
                                     )
 
-            # MONITOR special case, as the current underpinning implementation does not allow this directly
+            # OBSERVE special case, as the current underpinning implementation does not allow this directly
             # Hence, we track all changes to the object class, filtering those that apply
-            elif trigger == Notifier.MONITOR:
+            elif trigger == Notifier.OBSERVE:
                 if not hasattr(theObject, targetName):
                     raise RuntimeWarning(
                             'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
@@ -310,75 +316,57 @@ class Notifier(object):
         """
         wrapper, accomodating the different triggers before firing the callback
         """
+
         if not self.isRegistered():
             logger.warning('Trigering unregistered notifier %s' % self)
             return
 
         trigger, targetName, triggerForTheObject = notifier
 
+        if self._debug:
+            sys.stderr.write('>>> Notifier.__call__: %s, notifier=%s, obj=%r parameter2=%r\n' % \
+                             (self, notifier, obj, parameter2)
+            )
+
+        callbackDict = dict(
+                notifier=self,
+                trigger=trigger,
+                theObject=self._theObject,
+                object=obj,
+                targetName=targetName,
+                previousValue=None,
+                value=None,
+        )
+
         # CURRENT special case
         if trigger == Notifier.CURRENT:
             value = getattr(self._theObject, targetName)
             if value != self._value:
-                if self._debug:
-                    #logger.info
-                    sys.stderr.write('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r\n' % \
-                                    (self._index, self._theObject, notifier, self._callback, obj, parameter2)
-                                    )
-                callbackDict = dict(
-                        notifier=self,
-                        trigger=trigger,
-                        theObject=self._theObject,
-                        object=self._theObject,  # triggerForTheObject is True
-                        value=value,
-                        targetName=targetName,
-                        previousValue=self._value
-                        )
+                callbackDict[self.OBJECT] = self._theObject  # triggerForTheObject is True
+                callbackDict[self.PREVIOUSVALUE] = self._value
+                callbackDict[self.VALUE] = value
                 self._callback(callbackDict, *self._args, **self._kwargs)
                 self._value = value
 
-        # MONITOR special case
-        elif trigger == Notifier.MONITOR:
-            if (triggerForTheObject and obj.id == self._theObject.id):
-                value = getattr(self._theObject, targetName)
-                if value != self._value:
-                    if self._debug:
-                        # logger.info
-                        sys.stderr.write('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r\n' % \
-                                        (self._index, self._theObject, notifier, self._callback, obj, parameter2)
-                                        )
-                    callbackDict = dict(
-                            notifier=self,
-                            trigger=trigger,
-                            theObject=self._theObject,
-                            object=self._theObject,  # triggerForTheObject is True
-                            value=value,
-                            targetName=targetName,
-                            previousValue=self._value
-                            )
-                    self._callback(callbackDict, *self._args, **self._kwargs)
-                    self._value = value
+        # OBSERVE special case
+        elif trigger == Notifier.OBSERVE:
+            value = getattr(self._theObject, targetName)
+            # The check below catches all changes to obj that do not involve targetName, as only when it has changed
+            # its value will we trigger the callback
+            if obj.pid == self._theObject.pid and value != self._value:
+                callbackDict[self.OBJECT] = self._theObject  # triggerForTheObject is True
+                callbackDict[self.PREVIOUSVALUE] = self._value
+                callbackDict[self.VALUE] = value
+                self._callback(callbackDict, *self._args, **self._kwargs)
+                self._value = value
 
         # check if the trigger applies for all other cases
         elif self._isProject \
                 or (triggerForTheObject and obj.id == self._theObject.id) \
                 or obj._parent.id == self._theObject.id:
 
-            if self._debug:
-                # logger.info
-                sys.stderr.write('>>> Notifier (%d): obj=%r  callback for %r: %r obj=%r parameter2=%r\n' % \
-                                (self._index, self._theObject, notifier, self._callback, obj, parameter2)
-                                )
-
-            callbackDict = dict(
-                    notifier=self,
-                    trigger=trigger,
-                    theObject=self._theObject,
-                    object=obj,
-                    targetName=targetName,
-                    )
             if trigger == self.RENAME and parameter2 is not None:
-                callbackDict['oldPid'] = parameter2
+                callbackDict[self.OLDPID] = parameter2
             self._callback(callbackDict, *self._args, **self._kwargs)
 
         return
@@ -426,6 +414,15 @@ class Notifier(object):
                         for grandchild in Notifier._getChildObjects(child, recursion=True):
                             children.append(grandchild)
         return children
+
+
+# def currentNotifier(attributeName, callback, onlyOnce=False, debug=False):
+#     """Convienience method: Return a Notifier instance for current.attributeName
+#     """
+#     app = getApplication()
+#     notifier = Notifier(app.current, [Notifier.CURRENT], targetName=attributeName,
+#                         callback=callback, onlyOnce=onlyOnce, debug=debug)
+#     return notifier
 
 #=============================================================================================================
 # adjust V3 classes by patching AbstractWrapperObject (just a hack for trying)
@@ -548,7 +545,7 @@ class Notifier(object):
 #   n0 = r.setNotifier([Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'NmrAtom', print)
 #   n1 = r.setNotifier([Notifier.RENAME], None, print, 'renaming')
 #   n2 = project.setNotifier([Notifier.CREATE, Notifier.DELETE], 'NmrAtom', print)
-#   n4 = r.setNotifier([Notifier.MONITOR], 'comment', print)
+#   n4 = r.setNotifier([Notifier.OBSERVE], 'comment', print)
 #
 #   a = r.newNmrAtom()
 #   project.deleteObjects(a)

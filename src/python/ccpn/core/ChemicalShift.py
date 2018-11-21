@@ -166,7 +166,8 @@ ChemicalShiftList.newChemicalShift = _newChemicalShift
 del _newChemicalShift
 
 # Notifiers:
-# rename chemicalShifts when atom is renamed
-NmrAtom._setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
-                          {'pathToObject':'chemicalShifts', 'action':'rename'})
-# NB The link to NmrAtom is immutable - does need a link notifier
+# GWV 20181122: refactored as explicit call in NmrAtom._finalise
+# # rename chemicalShifts when atom is renamed
+# NmrAtom._setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
+#                           {'pathToObject':'chemicalShifts', 'action':'rename'})
+# # NB The link to NmrAtom is immutable - does need a link notifier

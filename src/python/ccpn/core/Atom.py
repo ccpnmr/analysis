@@ -189,17 +189,18 @@ class Atom(AbstractWrapperObject):
     except:
         return None
 
-  @nmrAtom.setter
-  def nmrAtom(self, value:'NmrAtom'):
-    oldValue = self.nmrAtom
-    if oldValue is value:
-      return
-    elif value is None:
-      raise ValueError("Cannot set Atom.nmrAtom to None")
-    elif oldValue is not None:
-      raise ValueError("New assignment of Atom clashes with existing assignment")
-    else:
-      value.atom = self
+  # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
+  # @nmrAtom.setter
+  # def nmrAtom(self, value:'NmrAtom'):
+  #   oldValue = self.nmrAtom
+  #   if oldValue is value:
+  #     return
+  #   elif value is None:
+  #     raise ValueError("Cannot set Atom.nmrAtom to None")
+  #   elif oldValue is not None:
+  #     raise ValueError("New assignment of Atom clashes with existing assignment")
+  #   else:
+  #     value.atom = self
 
   @property
   def isAssigned(self) -> bool:

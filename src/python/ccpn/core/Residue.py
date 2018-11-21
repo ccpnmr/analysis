@@ -340,6 +340,60 @@ class Residue(AbstractWrapperObject):
     pass
 
   @property
+  def nmrResidue(self) -> typing.Optional['NmrResidue']:
+    "NmrResidue to which Residue is assigned"
+    try:
+      return self._project.getNmrResidue(self._id)
+    except:
+      return None
+
+  # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
+  # @nmrResidue.setter
+  # def nmrResidue(self, value:'NmrResidue'):
+  #   oldValue = self.nmrResidue
+  #   if oldValue is value:
+  #     return
+  #   elif oldValue is not None:
+  #     oldValue.assignTo()
+  #   #
+  #   if value is not None:
+  #     value.residue = self
+
+  @property
+  def allNmrResidues(self)-> typing.Tuple['NmrResidue']:
+    """AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)
+    NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.
+    """
+    result = []
+
+    nmrChain = self.chain.nmrChain
+    if nmrChain is not None:
+      nmrResidue = self.nmrResidue
+      if nmrResidue is not None:
+        result = [nmrResidue]
+
+      for offset in set(x.relativeOffset for x in nmrChain.nmrResidues):
+        if offset is not None:
+          residue = self
+          if offset > 0:
+            for ii in range(offset):
+              residue = residue.previousResidue
+              if residue is None:
+                break
+          elif offset < 0:
+            for ii in range(-offset):
+              residue = residue.nextResidue
+              if residue is None:
+                break
+          #
+          if residue is not None:
+            sequenceCode = '%s%+d' % (residue.sequenceCode, offset)
+            ll = [x for x in nmrChain.nmrResidues if x.sequenceCode == sequenceCode]
+            if ll:
+              result.extend(ll)
+    return tuple(sorted(result))
+
+  @property
   def hasAssignedAtoms(self) -> bool:
     """
     :return: True if any of its atoms have an assignment

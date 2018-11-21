@@ -129,6 +129,22 @@ class Chain(AbstractWrapperObject):
     compoundName = self.compoundName
     return tuple(x for x in self.project.sampleComponents if x.name == compoundName)
 
+  @property
+  def nmrChain(self) ->typing.Optional['NmrChain']:
+    "NmrChain to which Chain is assigned"
+    try:
+      return self._project.getNmrChain(self._id)
+    except:
+      return None
+
+  # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
+  # @property.setter
+  # def nmrChain(self, value: 'NmrChain'):
+  #   if value is None:
+  #     raise ValueError("nmrChain cannot be set to None")
+  #   else:
+  #     value.chain = self
+
   # CCPN functions
   def clone(self, shortName:str=None):
     """Make copy of chain."""
@@ -294,7 +310,9 @@ class Chain(AbstractWrapperObject):
     except Exception as e:
       self.project._logger.warning("Error in creating an NmrChain from Chain: %s"
                                     % e)
-
+  #=========================================================================================
+  # Implementation functions
+  #=========================================================================================
 
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
@@ -304,6 +322,8 @@ class Chain(AbstractWrapperObject):
       return []
     else:
       return molSystem.sortedChains()
+
+#=========================================================================================
 
 def _validateName(attrib:str, value:str, includeWhitespace:bool=False):
   from ccpn.util.Common import contains_whitespace

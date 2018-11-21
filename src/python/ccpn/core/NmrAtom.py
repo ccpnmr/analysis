@@ -129,12 +129,13 @@ class NmrAtom(AbstractWrapperObject):
         """Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom"""
         return self._project.getAtom(self._id)
 
-    @atom.setter
-    def atom(self, value: 'Atom'):
-        if value is None:
-            self.deassign()
-        else:
-            self._wrappedData.atom = value._wrappedData
+    # # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
+    # @atom.setter
+    # def atom(self, value: 'Atom'):
+    #     if value is None:
+    #         self.deassign()
+    #     else:
+    #         self._wrappedData.atom = value._wrappedData
 
     @property
     def isotopeCode(self) -> str:

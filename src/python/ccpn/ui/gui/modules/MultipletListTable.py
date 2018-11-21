@@ -96,11 +96,11 @@ class MultipletTableModule(CcpnModule):
 
         self.splitter.addWidget(self.multipletListTable)
         self.splitter.addWidget(self.peaksFrame)
-        self.mainWidget.getLayout().addWidget(self.splitter)
 
         # it is beyond explanation how stretchFactor works :)
         self.splitter.setStretchFactor(1, 1)
-        self.splitter.setStretchFactor(0, 5)
+        self.splitter.setStretchFactor(0, 1)
+        self.mainWidget.getLayout().addWidget(self.splitter)
 
     def _maximise(self):
         """

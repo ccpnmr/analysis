@@ -781,8 +781,8 @@ class Framework:
           self._storedState = self.ui.mainWindow.sideBar._saveExpandedState()
 
       undo.increaseWaypointBlocking()
-    if not self._echoBlocking:
 
+    if not self._echoBlocking:
       self.project.suspendNotification()
 
       # Get list of command strings
@@ -814,7 +814,11 @@ class Framework:
     getLogger().debug('echoBlocking=%s' % self._echoBlocking)
     undo = self.project._undo
 
-    self.project.resumeNotification()
+    if self._echoBlocking > 0:
+      self._echoBlocking -= 1
+
+    if not self._echoBlocking:
+      self.project.resumeNotification()
 
     if undo is not None:                # ejb - changed from if undo:
       undo.decreaseWaypointBlocking()
@@ -823,10 +827,10 @@ class Framework:
         if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
           self.ui.mainWindow.sideBar._restoreExpandedState(self._storedState)
 
-    if self._echoBlocking > 0:
-      # If statement should always be True, but to avoid weird behaviour in error situations we check
-      self._echoBlocking -= 1
-    # self.project.resumeNotification()
+    # if self._echoBlocking > 0:
+    #   # If statement should always be True, but to avoid weird behaviour in error situations we check
+    #   self._echoBlocking -= 1
+    # # self.project.resumeNotification()
 
   def addApplicationMenuSpec(self, spec, position=3):
     """Add an entirely new menu at specified position"""

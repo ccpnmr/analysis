@@ -758,7 +758,6 @@ class Project(AbstractWrapperObject):
         """ call object-has-changed notifiers
         """
         obj = self._data2Obj[wrappedData]
-        print('>>>_modifiedApiObject', obj)
         obj._finaliseAction('change')
 
     def _finaliseApiDelete(self, wrappedData):

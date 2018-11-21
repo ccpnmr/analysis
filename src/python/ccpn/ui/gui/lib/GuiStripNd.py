@@ -730,17 +730,17 @@ class GuiStripNd(GuiStrip):
         zAxis.width = value * planeLabel.singleStep()
         self._rebuildStripContours()
 
-    def nextZPlane(self, n: int = 0):
+    def nextZPlane(self, n: int = 0, *args):
         """
         Increases z ppm position by one plane
         """
         self.changeZPlane(n, planeCount=-1)  # -1 because ppm units are backwards
         self._rebuildStripContours()
 
-        self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
-        getLogger().info("application.getByGid(%r).nextZPlane()" % self.pid)
+        # self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
+        # getLogger().info("application.getByGid(%r).nextZPlane()" % self.pid)
 
-    def prevZPlane(self, n: int = 0):
+    def prevZPlane(self, n: int = 0, *args):
         """
         Decreases z ppm position by one plane
         """

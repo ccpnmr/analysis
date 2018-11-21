@@ -167,9 +167,11 @@ class ListWidget(QtWidgets.QListWidget, Base):
         indexes = self.selectedIndexes()
         objects = []
         for item in indexes:
-            obj = item.data(QtCore.Qt.UserRole)
-            if obj is not None:
-                objects.append(obj)
+            objId = item.data(QtCore.Qt.UserRole)
+            if objId in self.objects:
+                obj = self.objects[objId]
+                if obj is not None:
+                    objects.append(obj)
         return objects
 
     def select(self, name):

@@ -42,25 +42,29 @@ from ccpn.util.Logging import getLogger
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
                 parName=None, propertySetter=False, **objectParameters):
-    project = obj._project
+    try:
+        project = obj._project
+    except:
+        project = obj.project
+
     parameterString = coreUtil.commandParameterString(*params, values=values, defaults=defaults)
 
     if obj is project:
-      if propertySetter:
-        if parameterString:
-          command = "project.%s = %s" % (funcName, parameterString)
+        if propertySetter:
+            if parameterString:
+                command = "project.%s = %s" % (funcName, parameterString)
+            else:
+                command = "project.%s" % funcName
         else:
-          command = "project.%s" % funcName
-      else:
-        command = "project.%s(%s)" % (funcName, parameterString)
+            command = "project.%s(%s)" % (funcName, parameterString)
     else:
-      if propertySetter:
-        if parameterString:
-          command = "project.getByPid('%s').%s = %s" % (obj.pid, funcName, parameterString)
+        if propertySetter:
+            if parameterString:
+                command = "project.getByPid('%s').%s = %s" % (obj.pid, funcName, parameterString)
+            else:
+                command = "project.getByPid('%s').%s" % (obj.pid, funcName)
         else:
-          command = "project.getByPid('%s').%s" % (obj.pid, funcName)
-      else:
-        command = "project.getByPid('%s').%s(%s)" % (obj.pid, funcName, parameterString)
+            command = "project.getByPid('%s').%s(%s)" % (obj.pid, funcName, parameterString)
 
     if parName:
         command = ''.join((parName, ' = ', command))
@@ -68,19 +72,20 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
     # Get list of command strings to follow the main command
     commands = []
     for parameter, value in sorted(objectParameters.items()):
-      if value is not None:
-        if not isinstance(value, str):
-          value = value.pid
-        commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
+        if value is not None:
+            if not isinstance(value, str):
+                value = value.pid
+            commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
     commands.append(command)
 
-    obj._appBase.ui.echoCommands(commands)
+    if not project.application._echoBlocking:
+        project.application.ui.echoCommands(commands)
     getLogger().debug('_enterEchoCommand: command=%s' % commands[0])
 
     try:
         # transfer control to the calling function
         yield
-        
+
     finally:
         getLogger().debug('_exitEchoCommand')
 
@@ -89,20 +94,20 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
 def undoBlock(obj):
     # usually called from application
     undo = obj.project._undo
-    if undo is not None:                # ejb - changed from if undo:
-      undo.newWaypoint()                # DO NOT CHANGE
+    if undo is not None:  # ejb - changed from if undo:
+        undo.newWaypoint()  # DO NOT CHANGE
 
-      if not obj.project._blockSideBar and not undo._blocked:
-        if undo._waypointBlockingLevel < 1 and obj.ui and obj.ui.mainWindow:
-          obj._storedState = obj.ui.mainWindow.sideBar._saveExpandedState()
+        if not obj.project._blockSideBar and not undo._blocked:
+            if undo._waypointBlockingLevel < 1 and obj.ui and obj.ui.mainWindow:
+                obj._storedState = obj.ui.mainWindow.sideBar._saveExpandedState()
 
-      undo.increaseWaypointBlocking()
+        undo.increaseWaypointBlocking()
 
     if not obj._echoBlocking:
-      obj.project.suspendNotification()
+        obj.project.suspendNotification()
 
     obj._echoBlocking += 1
-    
+
     getLogger().debug('_enterUndoBlock')
 
     try:
@@ -112,7 +117,11 @@ def undoBlock(obj):
     finally:
         undo = obj.project._undo
 
-        obj.project.resumeNotification()
+        if obj._echoBlocking > 0:
+            obj._echoBlocking -= 1
+
+        if not obj._echoBlocking:
+            obj.project.resumeNotification()
 
         if undo is not None:
             undo.decreaseWaypointBlocking()
@@ -120,10 +129,6 @@ def undoBlock(obj):
             if not obj.project._blockSideBar and not undo._blocked:
                 if undo._waypointBlockingLevel < 1 and obj.ui and obj.ui.mainWindow:
                     obj.ui.mainWindow.sideBar._restoreExpandedState(obj._storedState)
-
-        if obj._echoBlocking > 0:
-            # If statement should always be True, but to avoid weird behaviour in error situations we check
-            obj._echoBlocking -= 1
 
         getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % obj._echoBlocking)
 
@@ -136,53 +141,51 @@ def blankNotification(obj, message, *args, **kwargs):
     finally:
         print('Done', message)
 
-
-
-  # def _startCommandBlock(self, command:str, quiet:bool=False, **objectParameters):
-  #   """Start block for command echoing, set undo waypoint, and echo command to ui and logger
-  #
-  #   MUST be paired with _endCommandBlock call - use try ... finally to ensure both are called
-  #
-  #   Set keyword:value objectParameters to point to the relevant objects in setup commands,
-  #   and pass setup commands and command proper to ui for echoing
-  #
-  #   Example calls:
-  #
-  #   _startCommandBlock("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
-  #
-  #   _startCommandBlock(
-  #      "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
-  #      peak=peakOrPid)"""
-  #
-  #   undo = self.project._undo
-  #   if undo is not None:                # ejb - changed from if undo:
-  #     # set undo step
-  #     undo.newWaypoint()                # DO NOT CHANGE
-  #
-  #     if not self.project._blockSideBar and not undo._blocked:
-  #       if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-  #         self._storedState = self.ui.mainWindow.sideBar._saveExpandedState()
-  #
-  #     undo.increaseWaypointBlocking()
-  #   if not self._echoBlocking:
-  #
-  #     self.project.suspendNotification()
-  #
-  #     # Get list of command strings
-  #     commands = []
-  #     for parameter, value in sorted(objectParameters.items()):
-  #       if value is not None:
-  #         if not isinstance(value, str):
-  #           value = value.pid
-  #         commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
-  #     commands.append(command)    # ED: newLine NOT needed here
-  #
-  #     # echo command strings
-  #     # added 'quiet' mode to keep full functionality to 'startCommandEchoBLock'
-  #     # but without the screen output
-  #     if not quiet:
-  #       self.ui.echoCommands(commands)
-  #
-  #   self._echoBlocking += 1
-  #   getLogger().debug('command=%s, echoBlocking=%s, undo.blocking=%s'
-  #                              % (command, self._echoBlocking, undo.blocking))
+# def _startCommandBlock(self, command:str, quiet:bool=False, **objectParameters):
+#   """Start block for command echoing, set undo waypoint, and echo command to ui and logger
+#
+#   MUST be paired with _endCommandBlock call - use try ... finally to ensure both are called
+#
+#   Set keyword:value objectParameters to point to the relevant objects in setup commands,
+#   and pass setup commands and command proper to ui for echoing
+#
+#   Example calls:
+#
+#   _startCommandBlock("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
+#
+#   _startCommandBlock(
+#      "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
+#      peak=peakOrPid)"""
+#
+#   undo = self.project._undo
+#   if undo is not None:                # ejb - changed from if undo:
+#     # set undo step
+#     undo.newWaypoint()                # DO NOT CHANGE
+#
+#     if not self.project._blockSideBar and not undo._blocked:
+#       if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
+#         self._storedState = self.ui.mainWindow.sideBar._saveExpandedState()
+#
+#     undo.increaseWaypointBlocking()
+#   if not self._echoBlocking:
+#
+#     self.project.suspendNotification()
+#
+#     # Get list of command strings
+#     commands = []
+#     for parameter, value in sorted(objectParameters.items()):
+#       if value is not None:
+#         if not isinstance(value, str):
+#           value = value.pid
+#         commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
+#     commands.append(command)    # ED: newLine NOT needed here
+#
+#     # echo command strings
+#     # added 'quiet' mode to keep full functionality to 'startCommandEchoBLock'
+#     # but without the screen output
+#     if not quiet:
+#       self.ui.echoCommands(commands)
+#
+#   self._echoBlocking += 1
+#   getLogger().debug('command=%s, echoBlocking=%s, undo.blocking=%s'
+#                              % (command, self._echoBlocking, undo.blocking))

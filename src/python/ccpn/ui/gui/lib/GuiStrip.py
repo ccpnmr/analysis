@@ -318,8 +318,8 @@ class GuiStrip(Frame):
 
         # self.show()
 
-    def mouseMoveEvent(self, a0: QtGui.QMouseEvent):
-        print('>>>mouseMove')
+    # def mouseMoveEvent(self, a0: QtGui.QMouseEvent):
+    #     print('>>>mouseMove')
 
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()
@@ -2071,15 +2071,15 @@ def _axisRegionChanged(axis: 'Axis'):
                 strip.viewBox.setYRange(*region, padding=padding)
             else:
                 # One of the Z axes
-                strip._updateTraces()
-                for spectrumView in strip.spectrumViews:
-                    spectrumView.update()
-                    if spectrumView.isVisible():
-                        for peakListView in spectrumView.peakListViews:
-                            if peakListView.isVisible():
-                                peakList = peakListView.peakList
-                                peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak) or strip.peakIsInFlankingPlane(peak)]
-                                strip.spectrumDisplay.showPeaks(peakListView, peaks)
+                # strip._updateTraces()
+                # for spectrumView in strip.spectrumViews:
+                #     spectrumView.update()
+                #     if spectrumView.isVisible():
+                #         for peakListView in spectrumView.peakListViews:
+                #             if peakListView.isVisible():
+                #                 peakList = peakListView.peakList
+                #                 peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak) or strip.peakIsInFlankingPlane(peak)]
+                #                 strip.spectrumDisplay.showPeaks(peakListView, peaks)
 
                 if len(strip.axisOrder) > 2:
                     n = index - 2
@@ -2089,15 +2089,15 @@ def _axisRegionChanged(axis: 'Axis'):
                         planeLabel.setValue(position)
                         strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
 
-            if index >= 2:
-                spectrumDisplay = strip.spectrumDisplay
-                if hasattr(spectrumDisplay, 'activePeakItemDict'):  # ND display
-                    activePeakItemDict = spectrumDisplay.activePeakItemDict
-                    for spectrumView in strip.spectrumViews:
-                        for peakListView in spectrumView.peakListViews:
-                            peakItemDict = activePeakItemDict.get(peakListView, {})
-                            for peakItem in peakItemDict.values():
-                                peakItem._stripRegionUpdated()
+            # if index >= 2:
+            #     spectrumDisplay = strip.spectrumDisplay
+            #     if hasattr(spectrumDisplay, 'activePeakItemDict'):  # ND display
+            #         activePeakItemDict = spectrumDisplay.activePeakItemDict
+            #         for spectrumView in strip.spectrumViews:
+            #             for peakListView in spectrumView.peakListViews:
+            #                 peakItemDict = activePeakItemDict.get(peakListView, {})
+            #                 for peakItem in peakItemDict.values():
+            #                     peakItem._stripRegionUpdated()
 
         finally:
             strip.beingUpdated = False

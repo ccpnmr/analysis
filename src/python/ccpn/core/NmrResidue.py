@@ -1285,8 +1285,10 @@ class NmrResidue(AbstractWrapperObject):
   #   finally:
   #     self._endCommandEchoBlock()
 
-
+  #=========================================================================================
   # Implementation functions
+  #=========================================================================================
+
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""

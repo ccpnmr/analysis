@@ -337,7 +337,27 @@ class Residue(AbstractWrapperObject):
       finally:
         self._endCommandEchoBlock()
 
-    pass
+  @property
+  def nextResidue(self) -> 'Residue':
+    "Next sequentially connected Residue"
+    apiResidue = self._wrappedData
+    nextApiMolResidue = apiResidue.molResidue.nextMolResidue
+    if nextApiMolResidue is None:
+      return None
+    else:
+      return self._project._data2Obj.get(
+              apiResidue.chain.findFirstResidue(seqId=nextApiMolResidue.serial))
+
+  @property
+  def previousResidue(self) -> 'Residue':
+    "Previous sequentially connected Residue"
+    apiResidue = self._wrappedData
+    previousApiMolResidue = apiResidue.molResidue.previousMolResidue
+    if previousApiMolResidue is None:
+      return None
+    else:
+      return self._project._data2Obj.get(
+              apiResidue.chain.findFirstResidue(seqId=previousApiMolResidue.serial))
 
   @property
   def nmrResidue(self) -> typing.Optional['NmrResidue']:
@@ -400,6 +420,10 @@ class Residue(AbstractWrapperObject):
     """
     return any([a.isAssigned for a in self.atoms])
 
+  #=========================================================================================
+  # Implementation functions
+  #=========================================================================================
+
   @classmethod
   def _getAllWrappedData(cls, parent: Chain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
@@ -409,28 +433,31 @@ class Residue(AbstractWrapperObject):
     # for substances
     return parent._apiChain.sortedResidues()
 
+#=========================================================================================
 
-def getter(self:Residue) -> Residue:
-  apiResidue = self._wrappedData
-  nextApiMolResidue = apiResidue.molResidue.nextMolResidue
-  if nextApiMolResidue is None:
-    return None
-  else:
-    return self._project._data2Obj.get(
-      apiResidue.chain.findFirstResidue(seqId=nextApiMolResidue.serial))
-Residue.nextResidue = property(getter, None, None, "Next sequentially connected Residue")
+# GWV 20181122: Moved into class
+# def getter(self:Residue) -> Residue:
+#   apiResidue = self._wrappedData
+#   nextApiMolResidue = apiResidue.molResidue.nextMolResidue
+#   if nextApiMolResidue is None:
+#     return None
+#   else:
+#     return self._project._data2Obj.get(
+#       apiResidue.chain.findFirstResidue(seqId=nextApiMolResidue.serial))
+# Residue.nextResidue = property(getter, None, None, "Next sequentially connected Residue")
 
-def getter(self:Residue) -> Residue:
-  apiResidue = self._wrappedData
-  previousApiMolResidue = apiResidue.molResidue.previousMolResidue
-  if previousApiMolResidue is None:
-    return None
-  else:
-    return self._project._data2Obj.get(
-      apiResidue.chain.findFirstResidue(seqId=previousApiMolResidue.serial))
-Residue.previousResidue = property(getter, None, None, "Previous sequentially connected Residue")
-
-del getter
+# GWV 20181122: Moved into class
+# def getter(self:Residue) -> Residue:
+#   apiResidue = self._wrappedData
+#   previousApiMolResidue = apiResidue.molResidue.previousMolResidue
+#   if previousApiMolResidue is None:
+#     return None
+#   else:
+#     return self._project._data2Obj.get(
+#       apiResidue.chain.findFirstResidue(seqId=previousApiMolResidue.serial))
+# Residue.previousResidue = property(getter, None, None, "Previous sequentially connected Residue")
+#
+# del getter
     
 # Connections to parents:
 

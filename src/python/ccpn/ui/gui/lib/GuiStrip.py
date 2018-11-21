@@ -89,7 +89,7 @@ class GuiStrip(Frame):
 
         getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
         super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True,
-                         acceptDrops=False  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
+                         acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                          )
 
         # it appears to be required to explicitly set these, otherwise

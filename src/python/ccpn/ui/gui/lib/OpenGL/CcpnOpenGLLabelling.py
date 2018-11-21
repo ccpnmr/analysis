@@ -1824,6 +1824,60 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
 
                 index += numPoints
 
+    def _insertSymbolItem(self, strip, obj, listCol, indexList, r, w,
+                          spectrumFrequency, symbolType, drawList, spectrumView,
+                          buildIndex):
+        """insert a single symbol to the end of the symbol list
+        """
+        index = indexList[0]
+        indexPtr = indexList[1]
+        objNum = buildIndex[0]
+        vertexPtr = buildIndex[1]
+
+        p0 = (obj.position[0], obj.height)
+        if None in p0:
+            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+            return
+
+        if self._isSelected(obj):
+            _selected = True
+            cols = self._GLParent.highlightColour[:3]
+            drawList.indices[indexPtr:indexPtr + 12] = (index, index + 1, index + 2, index + 3,
+                                                        index, index + 2, index + 2, index + 1,
+                                                        index, index + 3, index + 3, index + 1)
+            iCount = 12
+        else:
+            _selected = False
+            cols = listCol
+            drawList.indices[indexPtr:indexPtr + 4] = (index, index + 1, index + 2, index + 3)
+            iCount = 4
+
+        # add extra indices for the peak
+        # extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
+        extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexPtr + iCount, index + 4, obj)
+
+        drawList.vertices[vertexPtr:vertexPtr + 8] = (p0[0] - r, p0[1] - w,
+                                                      p0[0] + r, p0[1] + w,
+                                                      p0[0] + r, p0[1] - w,
+                                                      p0[0] - r, p0[1] + w)
+        drawList.colors[2 * vertexPtr:2 * vertexPtr + 16] = (*cols, 1.0) * GLDefs.LENCOLORS
+        drawList.attribs[vertexPtr:vertexPtr + 8] = (p0[0], p0[1]) * 4
+        # drawList.offsets[vertexPtr:vertexPtr + 8] = (p0[0]+r, p0[1]+w) * 4
+
+        # add extra vertices for the multiplet
+        extraVertices = self.insertExtraVertices(drawList, vertexPtr + 8, 0, obj, p0, (*cols, 1.0), 1.0)
+
+        # keep a pointer to the obj
+        drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (4 + extraVertices),
+                                                        True, True, _selected,
+                                                        indexPtr, len(drawList.indices))
+
+        indexList[0] += (4 + extraIndexCount)
+        indexList[1] += (iCount + extraIndices)  # len(drawList.indices)
+        drawList.numVertices += (4 + extraVertices)
+        buildIndex[0] += GLDefs.LENPID
+        buildIndex[1] += (2 * (4 + extraVertices))
+
     def _buildSymbols(self, spectrumView, objListView):
         spectrum = spectrumView.spectrum
 
@@ -1841,17 +1895,19 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             #                     objListView=objListView,
             #                     drawList=self._GLLabels[objListView])
 
+            drawList.defineIndexVBO(enableVBO=False)
+
         elif drawList.renderMode == GLRENDERMODE_REBUILD:
             drawList.renderMode = GLRENDERMODE_DRAW  # back to draw mode
 
             # drawList.refreshMode = GLRENDERMODE_DRAW
 
-            drawList.clearArrays()
+            # drawList.clearArrays()
 
             # find the correct scale to draw square pixels
             # don't forget to change when the axes change
 
-            symbolType = self.strip.symbolType
+            # symbolType = self.strip.symbolType
             symbolWidth = self.strip.symbolSize / 2.0
             # lineThickness = self._preferences.symbolThickness / 2.0
 
@@ -1864,102 +1920,70 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                 w = symbolWidth
                 r = symbolWidth * x / y
 
-            if symbolType is not None:  #== 0:  # a cross
-
-                # change the ratio on resize
-                drawList.refreshMode = GLREFRESHMODE_REBUILD
-                drawList.drawMode = GL.GL_LINES
-                drawList.fillMode = None
+            # change the ratio on resize
+            drawList.refreshMode = GLREFRESHMODE_REBUILD
+            drawList.drawMode = GL.GL_LINES
+            drawList.fillMode = None
 
             # build the peaks VBO
-            index = 0
-            indexPtr = 0
+            # index = 0
+            # indexPtr = 0
+            indexing = [0, 0]
+            buildIndex = [0, 0]
 
-            # pls = peakListView.peakList
             pls = self.objectList(objListView)
 
             listCol = getAutoColourRgbRatio(pls.symbolColour, pls.spectrum,
                                             self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])
 
-            # for obj in pls.peaks:
-            for obj in self.objects(pls):
+            spectrumFrequency = spectrum.spectrometerFrequencies
+            strip = spectrumView.strip
 
-                strip = spectrumView.strip
-                if self._isSelected(obj):
-                    cols = self._GLParent.highlightColour[:3]
-                else:
-                    cols = listCol
+            ind, vert = self._buildSymbolsCount(spectrumView, objListView, drawList)
+            if ind:
+                for tcount, obj in enumerate(self.objects(pls)):
+                    self._insertSymbolItem(strip, obj, listCol, indexing, r, w,
+                                           spectrumFrequency, 0, drawList,
+                                           spectrumView, buildIndex)
 
-                # test axisCodes
-                try:
-                    ax = obj.axisCodes
-                except Exception as es:
-                    pass
+            drawList.defineIndexVBO(enableVBO=False)
 
-                pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-                if not obj.position:
-                    return
-                p0 = (obj.position[pIndex[0]], obj.height)
-
-                # # get the correct coordinates based on the axisCodes
-                # p0 = [0.0] * 2  #len(self.axisOrder)
-                # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-                #     for pp, ppCode in enumerate(obj.axisCodes):
+                # if symbolType is not None:  #== 0:
                 #
-                #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-                #             if ppCode[0] == psCode[0]:
-                #                 p0[ps] = obj.position[pp]
-                #             else:
-                #                 p0[ps] = obj.height
+                #     # draw a cross
+                #     _selected = False
+                #     if self._isSelected(obj):
+                #         # if hasattr(obj, '_isSelected') and obj._isSelected:
+                #         _selected = True
+                #         drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
+                #                                                         index, index + 2, index + 2, index + 1,
+                #                                                         index, index + 3, index + 3, index + 1))
+                #     else:
+                #         drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3))
                 #
-                #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-                #             if ppCode == psCode:
-                #                 p0[ps] = obj.position[pp]
-                #             else:
-                #                 p0[ps] = obj.height
-
-                if None in p0:
-                    getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
-                    continue
-
-                if symbolType is not None:  #== 0:
-
-                    # draw a cross
-                    # keep the cross square at 0.1ppm
-
-                    _selected = False
-                    if self._isSelected(obj):
-                        # if hasattr(obj, '_isSelected') and obj._isSelected:
-                        _selected = True
-                        drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
-                                                                        index, index + 2, index + 2, index + 1,
-                                                                        index, index + 3, index + 3, index + 1))
-                    else:
-                        drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3))
-
-                    # add extra indices for the multiplet
-                    extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
-
-                    drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
-                                                                      p0[0] + r, p0[1] + w,
-                                                                      p0[0] + r, p0[1] - w,
-                                                                      p0[0] - r, p0[1] + w))
-                    drawList.colors = np.append(drawList.colors, (*cols, 1.0) * GLDefs.LENCOLORS)
-                    drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1]) * 4)
-                    # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * 4)
-
-                    # add extra vertices for the multiplet
-                    extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, 1.0), 1.0)
-
-                    # keep a pointer to the obj
-                    drawList.pids = np.append(drawList.pids, (obj, index, (4 + extraVertices),
-                                                              True, True, _selected,
-                                                              indexPtr, len(drawList.indices)))
-                    indexPtr = len(drawList.indices)
-
-                    index += (4 + extraIndices)
-                    drawList.numVertices += (4 + extraVertices)
+                #     # add extra indices for the multiplet
+                #     extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
+                #
+                #     drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
+                #                                                       p0[0] + r, p0[1] + w,
+                #                                                       p0[0] + r, p0[1] - w,
+                #                                                       p0[0] - r, p0[1] + w))
+                #     drawList.colors = np.append(drawList.colors, (*cols, 1.0) * GLDefs.LENCOLORS)
+                #     drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1]) * 4)
+                #     # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * 4)
+                #
+                #     # add extra vertices for the multiplet
+                #     extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, 1.0), 1.0)
+                #
+                #     # keep a pointer to the obj
+                #     drawList.pids = np.append(drawList.pids, (obj, index, (4 + extraVertices),
+                #                                               True, True, _selected,
+                #                                               indexPtr, len(drawList.indices)))
+                #     indexPtr = len(drawList.indices)
+                #
+                #     index += (4 + extraIndices)
+                #     drawList.numVertices += (4 + extraVertices)
 
     def _rescaleSymbols(self, spectrumView, objListView):
         """rescale symbols when the screen dimensions change
@@ -2053,23 +2077,6 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
             return
         p0 = (obj.position[pIndex[0]], obj.height)
 
-        # # get the correct coordinates based on the axisCodes
-        # p0 = [0.0] * 2  # len(self.axisOrder)
-        # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-        #     for pp, ppCode in enumerate(obj.axisCodes):
-        #
-        #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-        #             if ppCode[0] == psCode[0]:
-        #                 p0[ps] = obj.position[pp]
-        #             else:
-        #                 p0[ps] = obj.height
-        #
-        #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-        #             if ppCode == psCode:
-        #                 p0[ps] = obj.position[pp]
-        #             else:
-        #                 p0[ps] = obj.height
-
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
@@ -2077,8 +2084,6 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         if symbolType is not None:  #== 0:
 
             # draw a cross
-            # keep the cross square at 0.1ppm
-
             _selected = False
             drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3))
 
@@ -2509,7 +2514,7 @@ class GLmultiplet1dLabelling(GLmultipletListMethods, GLpeak1dLabelling):
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
 
-            p1 = (peak.position[pIndex[0]], peak.height)
+            p1 = (peak.position[pIndex], peak.height)
 
             if None in p1:
                 getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))

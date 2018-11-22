@@ -95,10 +95,10 @@ class PeakTableModule(CcpnModule):
         """
         self.peakListTable._selectPeakList(peakList)
 
-    def _closeModule(self):
-        """Re-implementation of closeModule function from CcpnModule to unregister notification """
-        self.peakListTable.destroy()
-        super(PeakTableModule, self)._closeModule()
+    # def _closeModule(self):
+    #     """Re-implementation of closeModule function from CcpnModule to unregister notification """
+    #     # self.peakListTable.destroy()
+    #     super()._closeModule()
 
     def close(self):
         """
@@ -485,9 +485,9 @@ class PeakListTableWidget(QuickTable):
         if value in UNITS:
             PeakListTableWidget.positionsUnit = value
 
-    def destroy(self):
-        "Cleanup of self"
-        self.clearTableNotifiers()
+    # def destroy(self):
+    #     "Cleanup of self"
+    #     self.clearTableNotifiers()
 
     # def _setNotifiers(self):
     #   """

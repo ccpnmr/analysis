@@ -2090,6 +2090,9 @@ class CcpnGLWidget(QOpenGLWidget):
         self.project.blankNotification()
 
         self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        self._GLPeaks.setListViews(self._ordering)
+        self._GLIntegrals.setListViews(self._ordering)
+        self._GLMultiplets.setListViews(self._ordering)
 
         currentShader = self.globalGL._shaderProgram1.makeCurrent()
 

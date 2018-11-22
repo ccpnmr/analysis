@@ -930,11 +930,11 @@ class StructureTable(QuickTableStructure):
     #   if self._ensembleNotifier is not None:
     #     self._ensembleNotifier.unRegister()
 
-    def _close(self):
-        """
-        Cleanup the notifiers when the window is closed
-        """
-        self.clearTableNotifiers()
+    # def _close(self):
+    #     """
+    #     Cleanup the notifiers when the window is closed
+    #     """
+    #     self.clearTableNotifiers()
 
     # def resizeEvent(self, event):
     #   getLogger().info('table.resize '+str(self.resizeCount))

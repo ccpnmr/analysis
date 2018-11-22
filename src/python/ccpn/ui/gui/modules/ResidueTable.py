@@ -390,11 +390,11 @@ class ResidueTable(QuickTable):
         l1 = [peak for atom in residue.atoms for peak in atom.assignedPeaks]
         return len(set(l1))
 
-    def _close(self):
-        """
-        Cleanup the notifiers when the window is closed
-        """
-        self.clearTableNotifiers()
+    # def _close(self):
+    #     """
+    #     Cleanup the notifiers when the window is closed
+    #     """
+    #     self.clearTableNotifiers()
 
     def _getPullDownSelection(self):
         return self.cWidget.getText()

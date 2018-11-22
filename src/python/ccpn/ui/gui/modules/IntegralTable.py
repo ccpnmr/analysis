@@ -414,5 +414,5 @@ class IntegralTable(QuickTable):
         """
         Cleanup the notifiers when the window is closed
         """
-        self.clearTableNotifiers()
+        # self.clearTableNotifiers()
         self._clearRegions()

@@ -1179,29 +1179,9 @@ class Spectrum(AbstractWrapperObject):
         for spectrumView in self.spectrumViews:
             spectrumView.refreshData()
 
-    #------------------------------------------------------------------------------------------------------
-    # Implementation functions
-    #------------------------------------------------------------------------------------------------------
-
-    def rename(self, value: str):
-        """Rename Spectrum, changing its name and Pid"""
-        if value:
-            self._startCommandEchoBlock('rename', value)
-            try:
-                self._wrappedData.name = value
-            finally:
-                self._endCommandEchoBlock()
-        else:
-            raise ValueError("Spectrum name must be set")
-
-    @classmethod
-    def _getAllWrappedData(cls, parent: Project) -> list:
-        """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
-        return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
-
-    #------------------------------------------------------------------------------------------------------
+    #=========================================================================================
     # Library functions
-    #------------------------------------------------------------------------------------------------------
+    #=========================================================================================
 
     def getPositionValue(self, position):
         return self._apiDataSource.getPositionValue(position)
@@ -1675,6 +1655,38 @@ class Spectrum(AbstractWrapperObject):
         if self._wrappedData.experiment:
             self._wrappedData.experiment.temperature = value
 
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Project) -> list:
+        """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
+        return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
+
+    def rename(self, value: str):
+        """Rename Spectrum, changing its name and Pid"""
+        if value:
+            self._startCommandEchoBlock('rename', value)
+            try:
+                self._wrappedData.name = value
+            finally:
+                self._endCommandEchoBlock()
+        else:
+            raise ValueError("Spectrum name must be set")
+
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated spectrumViews instances
+        """
+        super()._finaliseAction(action=action)
+        # propagate the rename to associated spectrumViews
+        if action in ['change']:
+            for specView in self.spectrumViews:
+                specView._finaliseAction(action=action)
+
+#=========================================================================================
+# CCPN functions
+#=========================================================================================
 
 def _newSpectrum(self: Project, name: str) -> Spectrum:
     """Creation of new Spectrum NOT IMPLEMENTED.

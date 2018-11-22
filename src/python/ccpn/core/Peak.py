@@ -577,7 +577,9 @@ class Peak(AbstractWrapperObject):
 
         LibPeak.fitPositionHeightLineWidths(self._apiPeak)
 
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
 
     @classmethod
     def _getAllWrappedData(cls, parent: PeakList) -> Tuple[Nmr.Peak, ...]:
@@ -605,6 +607,9 @@ class Peak(AbstractWrapperObject):
             raise TypeError('Error setting integral')
         finally:
             self._endCommandEchoBlock()
+
+
+#=========================================================================================
 
 
 # Connections to parents:

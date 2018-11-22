@@ -82,7 +82,7 @@ class PeakView(AbstractWrapperObject):
     return self._wrappedData.textOffset
 
   @textOffset.setter
-  def experimentType(self, value:tuple):
+  def textOffset(self, value:tuple):
     self._wrappedData.textOffset = value
 
   @property

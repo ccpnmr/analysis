@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -40,156 +40,163 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 
 
 class PeakListView(AbstractWrapperObject):
-  """Peak List View for 1D or nD PeakList"""
-  
-  #: Short class name, for PID.
-  shortClassName = 'GL'
-  # Attribute it necessary as subclasses must use superclass className
-  className = 'PeakListView'
+    """Peak List View for 1D or nD PeakList"""
 
-  _parentClass = SpectrumView
+    #: Short class name, for PID.
+    shortClassName = 'GL'
+    # Attribute it necessary as subclasses must use superclass className
+    className = 'PeakListView'
 
-  #: Name of plural link to instances of class
-  _pluralLinkName = 'peakListViews'
-  
-  #: List of child classes.
-  _childClasses = []
+    _parentClass = SpectrumView
 
-  # Qualified name of matching API class
-  _apiClassQualifiedName = ApiStripPeakListView._metaclass.qualifiedName()
+    #: Name of plural link to instances of class
+    _pluralLinkName = 'peakListViews'
 
-  # CCPN properties  
-  @property
-  def _apiPeakListView(self) -> ApiStripPeakListView:
-    """ CCPN PeakListView matching PeakListView"""
-    return self._wrappedData
-    
-  @property
-  def _parent(self) -> SpectrumView:
-    """SpectrumView containing PeakListView."""
-    return self._project._data2Obj.get(self._wrappedData.stripSpectrumView)
+    #: List of child classes.
+    _childClasses = []
 
-  spectrumView = _parent
+    # Qualified name of matching API class
+    _apiClassQualifiedName = ApiStripPeakListView._metaclass.qualifiedName()
 
-  def delete(self):
-    """PeakListViews cannot be deleted, except as a byproduct of deleting other things"""
-    raise Exception("PeakListViews cannot be deleted directly")
+    # CCPN properties
+    @property
+    def _apiPeakListView(self) -> ApiStripPeakListView:
+        """ CCPN PeakListView matching PeakListView"""
+        return self._wrappedData
 
-  @property
-  def _key(self) -> str:
-    """id string - """
-    return str(self._wrappedData.peakListView.peakListSerial)
+    @property
+    def _parent(self) -> SpectrumView:
+        """SpectrumView containing PeakListView."""
+        return self._project._data2Obj.get(self._wrappedData.stripSpectrumView)
 
-  @property
-  def _localCcpnSortKey(self) -> typing.Tuple:
-    """Local sorting key, in context of parent."""
-    return(self._wrappedData.peakListView.peakListSerial,)
+    spectrumView = _parent
 
-  @property
-  def symbolStyle(self) -> str:
-    """Symbol style for displayed peak markers.
+    def delete(self):
+        """PeakListViews cannot be deleted, except as a byproduct of deleting other things"""
+        raise Exception("PeakListViews cannot be deleted directly")
 
-    If not set for PeakListView gives you the value for PeakList.
-    If set for PeakListView overrides PeakList value.
-    Set PeakListView value to None to return to non-local value"""
-    wrappedData = self._wrappedData.peakListView
-    result = wrappedData.symbolStyle
-    if result is None:
-      obj = wrappedData.peakList
-      result = obj and obj.symbolStyle
-    return result
+    @property
+    def _key(self) -> str:
+        """id string - """
+        return str(self._wrappedData.peakListView.peakListSerial)
 
-  @symbolStyle.setter
-  def symbolStyle(self, value:str):
-    if self.symbolStyle != value:
-      self._wrappedData.peakListView.symbolStyle = value
+    @property
+    def _localCcpnSortKey(self) -> typing.Tuple:
+        """Local sorting key, in context of parent."""
+        return (self._wrappedData.peakListView.peakListSerial,)
 
-  @property
-  def symbolColour(self) -> str:
-    """Symbol style for displayed peak markers.
+    @property
+    def symbolStyle(self) -> str:
+        """Symbol style for displayed peak markers.
 
-    If not set for PeakListView gives you the value for PeakList.
-    If set for PeakListView overrides PeakList value.
-    Set PeakListView value to None to return to non-local value"""
-    wrappedData = self._wrappedData.peakListView
-    result = wrappedData.symbolColour
-    if result is None:
-      obj = wrappedData.peakList
-      result = obj and obj.symbolColour
-    return result
+        If not set for PeakListView gives you the value for PeakList.
+        If set for PeakListView overrides PeakList value.
+        Set PeakListView value to None to return to non-local value"""
+        wrappedData = self._wrappedData.peakListView
+        result = wrappedData.symbolStyle
+        if result is None:
+            obj = wrappedData.peakList
+            result = obj and obj.symbolStyle
+        return result
 
-  @symbolColour.setter
-  def symbolColour(self, value:str):
-    if self.symbolColour != value:
-      self._wrappedData.peakListView.symbolColour = value
+    @symbolStyle.setter
+    def symbolStyle(self, value: str):
+        if self.symbolStyle != value:
+            self._wrappedData.peakListView.symbolStyle = value
 
-  @property
-  def textColour(self) -> str:
-    """Symbol style for displayed peak markers.
+    @property
+    def symbolColour(self) -> str:
+        """Symbol style for displayed peak markers.
 
-    If not set for PeakListView gives you the value for PeakList.
-    If set for PeakListView overrides PeakList value.
-    Set PeakListView value to None to return to non-local value"""
-    wrappedData = self._wrappedData.peakListView
-    result = wrappedData.textColour
-    if result is None:
-      obj = wrappedData.peakList
-      result = obj and obj.textColour
-    return result
+        If not set for PeakListView gives you the value for PeakList.
+        If set for PeakListView overrides PeakList value.
+        Set PeakListView value to None to return to non-local value"""
+        wrappedData = self._wrappedData.peakListView
+        result = wrappedData.symbolColour
+        if result is None:
+            obj = wrappedData.peakList
+            result = obj and obj.symbolColour
+        return result
 
-  @textColour.setter
-  def textColour(self, value:str):
-    if self.textColour != value:
-      self._wrappedData.peakListView.textColour = value
+    @symbolColour.setter
+    def symbolColour(self, value: str):
+        if self.symbolColour != value:
+            self._wrappedData.peakListView.symbolColour = value
 
-  @property
-  def isSymbolDisplayed(self) -> bool:
-    """True if the peak marker symbol is displayed."""
-    return self._wrappedData.peakListView.isSymbolDisplayed
+    @property
+    def textColour(self) -> str:
+        """Symbol style for displayed peak markers.
 
-  @isSymbolDisplayed.setter
-  def isSymbolDisplayed(self, value:bool):
-    self._wrappedData.peakListView.isSymbolDisplayed = value
+        If not set for PeakListView gives you the value for PeakList.
+        If set for PeakListView overrides PeakList value.
+        Set PeakListView value to None to return to non-local value"""
+        wrappedData = self._wrappedData.peakListView
+        result = wrappedData.textColour
+        if result is None:
+            obj = wrappedData.peakList
+            result = obj and obj.textColour
+        return result
 
-  @property
-  def isTextDisplayed(self) -> bool:
-    """True if the peak annotation is displayed?"""
-    return self._wrappedData.peakListView.isTextDisplayed
+    @textColour.setter
+    def textColour(self, value: str):
+        if self.textColour != value:
+            self._wrappedData.peakListView.textColour = value
 
-  @isTextDisplayed.setter
-  def isTextDisplayed(self, value:bool):
-    self._wrappedData.peakListView.isTextDisplayed = value
+    @property
+    def isSymbolDisplayed(self) -> bool:
+        """True if the peak marker symbol is displayed."""
+        return self._wrappedData.peakListView.isSymbolDisplayed
 
-  @property
-  def peakList(self) -> PeakList:
-    """PeakList that PeakListView refers to"""
-    return self._project._data2Obj.get(self._wrappedData.peakListView.peakList)
+    @isSymbolDisplayed.setter
+    def isSymbolDisplayed(self, value: bool):
+        self._wrappedData.peakListView.isSymbolDisplayed = value
 
-  @property
-  def _childClass(self):
-    """Ccpn core obj that PeakListView refers to"""
-    return self.peakList
+    @property
+    def isTextDisplayed(self) -> bool:
+        """True if the peak annotation is displayed?"""
+        return self._wrappedData.peakListView.isTextDisplayed
 
-  # Implementation functions
-  @classmethod
-  def _getAllWrappedData(cls, parent:SpectrumView)-> typing.Optional[list]:
-    """get wrappedData (ccpnmr.gui.Task.PeakListView) in serial number order"""
-    if hasattr(parent._wrappedData, 'stripPeakListViews'):
-      return sorted(parent._wrappedData.stripPeakListViews,
-                  key=operator.attrgetter('peakListView.peakListSerial'))
-    else:
-      return None
+    @isTextDisplayed.setter
+    def isTextDisplayed(self, value: bool):
+        self._wrappedData.peakListView.isTextDisplayed = value
 
-  #CCPN functions
+    @property
+    def peakList(self) -> PeakList:
+        """PeakList that PeakListView refers to"""
+        return self._project._data2Obj.get(self._wrappedData.peakListView.peakList)
+
+    @property
+    def _childClass(self):
+        """Ccpn core obj that PeakListView refers to"""
+        return self.peakList
+
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: SpectrumView) -> typing.Optional[list]:
+        """get wrappedData (ccpnmr.gui.Task.PeakListView) in serial number order"""
+        if hasattr(parent._wrappedData, 'stripPeakListViews'):
+            return sorted(parent._wrappedData.stripPeakListViews,
+                          key=operator.attrgetter('peakListView.peakListSerial'))
+        else:
+            return None
+
+#=========================================================================================
+# CCPN functions
+#========================================================================================
 
 # newPeakListView functions: None
 
 # PeakList.peakListViews property
-def getter(peakList:PeakList) -> typing.Tuple[PeakListView, ...]:
-  data2ObjDict = peakList._project._data2Obj
-  return tuple(data2ObjDict[y]
-               for x in peakList._wrappedData.sortedPeakListViews()
-               for y in x.sortedStripPeakListViews() if not x.isDeleted)
+def getter(peakList: PeakList) -> typing.Tuple[PeakListView, ...]:
+    data2ObjDict = peakList._project._data2Obj
+    return tuple(data2ObjDict[y]
+                 for x in peakList._wrappedData.sortedPeakListViews()
+                 for y in x.sortedStripPeakListViews() if not x.isDeleted)
+
+
 PeakList.peakListViews = property(getter, None, None,
                                   "PeakListViews showing Spectrum")
 del getter
@@ -209,25 +216,31 @@ del getter
 # Notifiers:
 # TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
-  ('_notifyRelatedApiObject', {'pathToObject':'stripPeakListViews', 'action':'change'},
-   ApiStripPeakListView._metaclass.qualifiedName(), '')
-)
+        ('_notifyRelatedApiObject', {'pathToObject': 'stripPeakListViews', 'action': 'change'},
+         ApiStripPeakListView._metaclass.qualifiedName(), '')
+        )
 
+#EJB 20181122: moved to PeakList
 # Notify PeakListView change when PeakList changes
-PeakList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-                          {'pathToObject':'peakListViews', 'action':'change'})
+# PeakList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+#                             {'pathToObject': 'peakListViews', 'action': 'change'})
 
 
-def _peakListAddPeakListViews(project:Project, apiPeakList:Nmr.PeakList):
-  """Add ApiPeakListView when ApiPeakList is created"""
-  for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
-    apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+def _peakListAddPeakListViews(project: Project, apiPeakList: Nmr.PeakList):
+    """Add ApiPeakListView when ApiPeakList is created"""
+    for apiSpectrumView in apiPeakList.dataSource.spectrumViews:
+        apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+
+
 #
 Project._setupApiNotifier(_peakListAddPeakListViews, Nmr.PeakList, 'postInit')
 
-def _spectrumViewAddPeakListViews(project:Project, apiSpectrumView:ApiSpectrumView):
-  """Add ApiPeakListView when ApiSpectrumView is created"""
-  for apiPeakList in apiSpectrumView.dataSource.peakLists:
-    apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+
+def _spectrumViewAddPeakListViews(project: Project, apiSpectrumView: ApiSpectrumView):
+    """Add ApiPeakListView when ApiSpectrumView is created"""
+    for apiPeakList in apiSpectrumView.dataSource.peakLists:
+        apiSpectrumView.newPeakListView(peakListSerial=apiPeakList.serial, peakList=apiPeakList)
+
+
 #
 Project._setupApiNotifier(_spectrumViewAddPeakListViews, ApiSpectrumView, 'postInit')

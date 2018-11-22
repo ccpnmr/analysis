@@ -92,14 +92,15 @@ class SpectrumView(AbstractWrapperObject):
         finally:
             self._endCommandEchoBlock()
 
-    @property
-    def experimentType(self) -> str:
-        """Experiment type of attached experiment - used for reconnecting to correct spectrum"""
-        return self._wrappedData.spectrumView.experimentType
-
-    @experimentType.setter
-    def experimentType(self, value: str):
-        self._wrappedData.spectrumView.experimentType = value
+    #EJB 20181122: why????
+    # @property
+    # def experimentType(self) -> str:
+    #     """Experiment type of attached experiment - used for reconnecting to correct spectrum"""
+    #     return self._wrappedData.spectrumView.experimentType
+    #
+    # @experimentType.setter
+    # def experimentType(self, value: str):
+    #     self._wrappedData.spectrumView.experimentType = value
 
     @property
     def isDisplayed(self) -> bool:
@@ -347,14 +348,20 @@ class SpectrumView(AbstractWrapperObject):
         ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in apiStrip.axisOrder)
         return tuple(None if not x else x - 1 for x in ll)
 
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: Strip) -> list:
-        """get wrappedData (ccpnmr.gui.Task.SpectrumView) in serial number order"""
+        """get wrappedData (ccpnmr.gui.Task.SpectrumView) in serial number order
+        """
         return sorted(parent._wrappedData.stripSpectrumViews,
                       key=operator.attrgetter('spectrumView.spectrumName'))
 
-    #CCPN functions
+#=========================================================================================
+# CCPN functions
+#=========================================================================================
 
 
 # newSpectrumView functions: None
@@ -402,12 +409,13 @@ Project._apiNotifiers.append(
          ApiSpectrumView._metaclass.qualifiedName(), '')
         )
 
+#EJB 20181122: moved to Spectrum
 # Notify SpectrumView change when Spectrum changes
 # Bloody hell: as far as GWV understands the effect of this: a 'change' to a Spectrum object triggers
 # a _finaliseAction('change') on each of the spectrum.spectrumViews objects, which then calls all
 # ('SpectrumView','change') notifiers
-Spectrum._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-                            {'pathToObject': 'spectrumViews', 'action': 'change'})
+# Spectrum._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+#                             {'pathToObject': 'spectrumViews', 'action': 'change'})
 
 # Links to SpectrumView and Spectrum are fixed after creation - any link notifiers should be put in
 # create/destroy instead

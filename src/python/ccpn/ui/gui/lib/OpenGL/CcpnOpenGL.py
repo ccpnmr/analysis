@@ -3168,6 +3168,33 @@ class CcpnGLWidget(QOpenGLWidget):
         self._axisCodes = axisCodes
 
     @property
+    def xUnits(self):
+        return self._xUnits
+
+    @xUnits.setter
+    def xUnits(self, xUnits):
+        self._xUnits = xUnits
+        self._rescaleAllAxes()
+
+    @property
+    def yUnits(self):
+        return self._yUnits
+
+    @yUnits.setter
+    def yUnits(self, yUnits):
+        self._yUnits = yUnits
+        self._rescaleAllAxes()
+
+    @property
+    def axisLocked(self):
+        return self._axisLocked
+
+    @axisLocked.setter
+    def axisLocked(self, axisLocked):
+        self._axisLocked = axisLocked
+        self._rescaleAllAxes()
+
+    @property
     def orderedAxes(self):
         return self._orderedAxes
 
@@ -4401,9 +4428,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # read values from dataDict and set units
             if aDict[GLNotifier.GLVALUES]:
-                self._xUnits = aDict[GLNotifier.GLVALUES]['xUnits']
-                self._yUnits = aDict[GLNotifier.GLVALUES]['yUnits']
-                self._axisLocked = aDict[GLNotifier.GLVALUES]['lockAspectRatio']
+                self._xUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISXUNITS]
+                self._yUnits = aDict[GLNotifier.GLVALUES][GLDefs.AXISYUNITS]
+                self._axisLocked = aDict[GLNotifier.GLVALUES][GLDefs.AXISLOCKASPECTRATIO]
             self._rescaleAllAxes()
 
     def setAxisPosition(self, axisCode, position, update=True):

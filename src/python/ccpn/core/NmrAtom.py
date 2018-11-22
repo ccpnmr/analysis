@@ -351,12 +351,13 @@ class NmrAtom(AbstractWrapperObject):
 
     @classmethod
     def _getAllWrappedData(cls, parent: NmrResidue) -> list:
-        """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue"""
+        """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue
+        """
         return parent._wrappedData.sortedResonances()
 
     def _finaliseAction(self, action: str):
-        """Subclassed to handle associated ChemicalShift instances"""
-        #print('>>> NmrAtom._finaliseAction')
+        """Subclassed to handle associated ChemicalShift instances
+        """
         super()._finaliseAction(action=action)
         # propagate the rename to associated ChemcialShift instances
         if action == 'rename':

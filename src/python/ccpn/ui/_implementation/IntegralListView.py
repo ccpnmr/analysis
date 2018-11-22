@@ -170,7 +170,10 @@ class IntegralListView(AbstractWrapperObject):
         """IntegralList that IntegralListView refers to"""
         return self._project._data2Obj.get(self._wrappedData.integralListView.integralList)
 
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: SpectrumView) -> typing.Optional[list]:
         """get wrappedData (ccpnmr.gui.Task.IntegralListView) in serial number order"""
@@ -180,7 +183,9 @@ class IntegralListView(AbstractWrapperObject):
         else:
             return None
 
-    #CCPN functions
+#=========================================================================================
+# CCPN functions
+#=========================================================================================
 
 
 # newIntegralListView functions: None
@@ -194,20 +199,20 @@ def getter(integralList: IntegralList) -> typing.Tuple[IntegralListView, ...]:
 
 
 IntegralList.integralListViews = property(getter, None, None,
-                                  "IntegralListViews showing Spectrum")
+                                          "IntegralListViews showing Spectrum")
 del getter
-
 
 # Notifiers:
 # TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'stripIntegralListViews', 'action': 'change'},
          ApiStripIntegralListView._metaclass.qualifiedName(), '')
-)
+        )
 
+#EJB 20181122: moved to IntegralList
 # Notify IntegralListView change when IntegralList changes
-IntegralList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-                            {'pathToObject': 'integralListViews', 'action': 'change'})
+# IntegralList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+#                                 {'pathToObject': 'integralListViews', 'action': 'change'})
 
 
 def _integralListAddIntegralListViews(project: Project, apiIntegralList: Nmr.IntegralList):

@@ -58,6 +58,7 @@ from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from ccpn.util import Common as commonUtil
 from typing import Tuple, List, Any
 from functools import partial
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -271,6 +272,7 @@ class GuiStrip(Frame):
                                               self.spectrumDisplay._processDragEnterEvent)
 
         # set peakLabelling to the default from preferences or strip to the left
+        settings = spectrumDisplay.getSettings()
         if len(spectrumDisplay.strips) > 1:
             self.peakLabelling = spectrumDisplay.strips[0].peakLabelling
             self.symbolType = spectrumDisplay.strips[0].symbolType
@@ -282,7 +284,6 @@ class GuiStrip(Frame):
 
             try:
                 self._CcpnGLWidget._axisLocked = spectrumDisplay.strips[0]._CcpnGLWidget._axisLocked
-
                 # self._CcpnGLWidget._updateHTrace = spectrumDisplay.strips[0]._CcpnGLWidget._updateHTrace
                 # self._CcpnGLWidget._updateVTrace = spectrumDisplay.strips[0]._CcpnGLWidget._updateVTrace
                 # self.hTraceAction.setChecked(self._CcpnGLWidget._updateHTrace)
@@ -309,6 +310,10 @@ class GuiStrip(Frame):
 
         try:
             self._CcpnGLWidget.gridVisible = self.application.preferences.general.showGrid
+            # set the axis units from the current settings
+            self._CcpnGLWidget.xUnits = settings[AXISXUNITS]
+            self._CcpnGLWidget.yUnits = settings[AXISYUNITS]
+            self._CcpnGLWidget.axisLocked = settings[AXISLOCKASPECTRATIO]
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated')
 

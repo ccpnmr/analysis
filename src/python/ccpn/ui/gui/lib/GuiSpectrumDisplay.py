@@ -70,6 +70,7 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 AXIS_WIDTH = 30
 AXISUNITS = ['ppm', 'Hz', 'points']
 
+
 class GuiSpectrumDisplay(CcpnModule):
     """
     Main spectrum display Module object.
@@ -215,7 +216,7 @@ class GuiSpectrumDisplay(CcpnModule):
             # This took a lot of sorting-out; better leave as is or test thoroughly
             self._stripFrameScrollArea = ScrollArea(parent=self.qtParent, setLayout=True,
                                                     acceptDrops=False,  # True
-                                                    scrollBarPolicies = ('asNeeded', 'never'))
+                                                    scrollBarPolicies=('asNeeded', 'never'))
             self._stripFrameScrollArea.setWidget(self.stripFrame)
             self._stripFrameScrollArea.setWidgetResizable(True)
             self.qtParent.getLayout().addWidget(self._stripFrameScrollArea, stripRow, 0, 1, 7)
@@ -264,49 +265,24 @@ class GuiSpectrumDisplay(CcpnModule):
         """Notifiers for responding to spectrumViews
         """
         self._spectrumViewNotifier = Notifier(self.project,
-                                              [Notifier.CREATE, Notifier.DELETE],
-                                              SpectrumView.__name__,
+                                              [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                                              SpectrumView.className,
                                               self._spectrumViewChanged,
                                               onceOnly=True)
 
-        self._registerMonitors()
-
     def _unRegisterNotifiers(self):
-        """Unregister all notifiers
+        """Unregister notifiers
         """
         if self._spectrumViewNotifier:
             self._spectrumViewNotifier.unRegister()
 
-    def _registerMonitors(self):
-        """Register monitors of spectrumView visibleChanged
-        """
-        self._spectrumMonitors = []
-
-        if self.strips:
-            for sv in self.strips[0].spectrumViews:
-                self._spectrumMonitors.append(sv)
-
-        for sv in self._spectrumMonitors:
-            sv.visibleChanged.connect(self._spectrumViewVisibleChanged)
-
-    def _unregisterMonitors(self):
-        """Unregister monitors of spectrumView visibleChanged
-        """
-        for sv in self._spectrumMonitors:
-            sv.visibleChanged.disconnect(self._spectrumViewVisibleChanged)
-
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
         """
-        if data[Notifier.TRIGGER] == Notifier.DELETE:
-            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-            GLSignals = GLNotifier(parent=None)
-            GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
-
-        # clear the old monitors and reregister new ones
-        self._unregisterMonitors()
-        self._registerMonitors()
+        GLSignals = GLNotifier(parent=None)
+        GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict={})
 
     def _spectrumViewVisibleChanged(self):
         """Respond to a visibleChanged in one of the spectrumViews, don't know which though
@@ -330,6 +306,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
         GLSignals = GLNotifier(parent=None)
         GLSignals._emitAxisUnitsChanged(source=None, strip=self.strips[0], dataDict=dataDict)
+
+    def getSettings(self):
+        """get the settings dict from the settingsWidget
+        """
+        return self._spectrumDisplaySettings.getValues()
 
     def resizeEvent(self, ev):
         # resize the contents of the stripFrame
@@ -763,7 +744,6 @@ class GuiSpectrumDisplay(CcpnModule):
             self.droppedNotifier.unRegister()
             self._toolbarNotifier.unRegister()
             self._unRegisterNotifiers()
-            self._unregisterMonitors()
 
         finally:
             CcpnModule._closeModule(self)
@@ -1421,6 +1401,9 @@ class GuiSpectrumDisplay(CcpnModule):
                 showWarning(str(self.windowTitle()), str(es))
             finally:
                 self.project._endCommandEchoBlock()
+
+
+#=========================================================================================
 
 
 def _deletedPeak(peak: Peak):

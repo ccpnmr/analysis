@@ -8,7 +8,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
@@ -38,234 +38,258 @@ from scipy.integrate import trapz
 
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 
+
 # moved on peakUtil ####################################################################
 def _createIntersectingLine(x, y):
-  '''create a straight line with x values like the original spectrum and y value from the estimated noise level'''
-  return [_oldEstimateNoiseLevel1D(x, y)] * len(x)
-def _getIntersectionPoints(x, y, line):
-  '''
-  :param line: x points of line to intersect y points
-  :return: list of intersecting points
-  '''
-  z = y - line
-  dx = x[1:] - x[:-1]
-  cross = np.sign(z[:-1] * z[1:])
+    '''create a straight line with x values like the original spectrum and y value from the estimated noise level'''
+    return [_oldEstimateNoiseLevel1D(x, y)] * len(x)
 
-  x_intersect = x[:-1] - dx / (z[1:] - z[:-1]) * z[:-1]
-  negatives = np.where(cross < 0)
-  points = x_intersect[negatives]
-  return points
+
+def _getIntersectionPoints(x, y, line):
+    '''
+    :param line: x points of line to intersect y points
+    :return: list of intersecting points
+    '''
+    z = y - line
+    dx = x[1:] - x[:-1]
+    cross = np.sign(z[:-1] * z[1:])
+
+    x_intersect = x[:-1] - dx / (z[1:] - z[:-1]) * z[:-1]
+    negatives = np.where(cross < 0)
+    points = x_intersect[negatives]
+    return points
+
+
 def _pairIntersectionPoints(intersectionPoints):
-  """ Yield successive pair chunks from list of intersectionPoints """
-  for i in range(0, len(intersectionPoints), 2):
-    pair = intersectionPoints[i:i + 2]
-    if len(pair) == 2:
-      yield pair
+    """ Yield successive pair chunks from list of intersectionPoints """
+    for i in range(0, len(intersectionPoints), 2):
+        pair = intersectionPoints[i:i + 2]
+        if len(pair) == 2:
+            yield pair
+
+
 def _getPeaksLimits(x, y, intersectingLine=None):
-  '''Get the limits of each peak of the spectrum given an intersecting line. If
-   intersectingLine is None, it is calculated by the STD of the spectrum'''
-  if intersectingLine is  None:
-    intersectingLine = _createIntersectingLine(x, y)
-  limits = _getIntersectionPoints(x, y, intersectingLine)
-  limitsPairs = list(_pairIntersectionPoints(limits))
-  return limitsPairs
+    '''Get the limits of each peak of the spectrum given an intersecting line. If
+     intersectingLine is None, it is calculated by the STD of the spectrum'''
+    if intersectingLine is None:
+        intersectingLine = _createIntersectingLine(x, y)
+    limits = _getIntersectionPoints(x, y, intersectingLine)
+    limitsPairs = list(_pairIntersectionPoints(limits))
+    return limitsPairs
+
+
 ########################################################################################################################################
 
 
-
-
 class IntegralList(AbstractWrapperObject):
-  """An object containing Integrals. Note: the object is not a (subtype of a) Python list.
-  To access all Integral objects, use integralList.integrals."""
-  
-  #: Short class name, for PID.
-  shortClassName = 'IL'
-  # Attribute it necessary as subclasses must use superclass className
-  className = 'IntegralList'
+    """An object containing Integrals. Note: the object is not a (subtype of a) Python list.
+    To access all Integral objects, use integralList.integrals."""
 
-  _parentClass = Spectrum
+    #: Short class name, for PID.
+    shortClassName = 'IL'
+    # Attribute it necessary as subclasses must use superclass className
+    className = 'IntegralList'
 
-  #: Name of plural link to instances of class
-  _pluralLinkName = 'integralLists'
-  
-  #: List of child classes.
-  _childClasses = []
+    _parentClass = Spectrum
 
-  # Qualified name of matching API class - NB shared with PeakList
-  _apiClassQualifiedName = ApiIntegralList._metaclass.qualifiedName()
+    #: Name of plural link to instances of class
+    _pluralLinkName = 'integralLists'
 
-  # Special error-raising functions for people who think PeakList is a list
-  def __iter__(self):
-    raise TypeError("IntegralList object is not iterable -"
-                    "for a list of integrals use IntegralList.integrals")
+    #: List of child classes.
+    _childClasses = []
 
-  def __getitem__(self, index):
-    raise TypeError("IntegralList object does not support indexing -"
-                    " for a list of integrals use IntegralList.integrals")
+    # Qualified name of matching API class - NB shared with PeakList
+    _apiClassQualifiedName = ApiIntegralList._metaclass.qualifiedName()
 
-  def __len__(self):
-    raise TypeError("IntegralList object has no length - "
-                    "for a list of integrals use IntegralList.integrals")
+    # Special error-raising functions for people who think PeakList is a list
+    def __iter__(self):
+        raise TypeError("IntegralList object is not iterable -"
+                        "for a list of integrals use IntegralList.integrals")
 
-  # CCPN properties  
-  @property
-  def _apiIntegralList(self) -> ApiIntegralList:
-    """ API peakLists matching IntegralList"""
-    return self._wrappedData
-    
-  @property
-  def _key(self) -> str:
-    """id string - serial number converted to string"""
-    return str(self._wrappedData.serial)
+    def __getitem__(self, index):
+        raise TypeError("IntegralList object does not support indexing -"
+                        " for a list of integrals use IntegralList.integrals")
 
-  @property
-  def serial(self) -> int:
-    """serial number of IntegralList, used in Pid and to identify the IntegralList. """
-    return self._wrappedData.serial
-    
-  @property
-  def _parent(self) -> Optional[Spectrum]:
-    """Spectrum containing IntegralList."""
-    return  self._project._data2Obj[self._wrappedData.dataSource]
-  
-  spectrum = _parent
-  
-  @property
-  def title(self) -> str:
-    """title of IntegralList (not used in PID)."""
-    return self._wrappedData.name
-    
-  @title.setter
-  def title(self, value:str):
-    self._wrappedData.name = value
+    def __len__(self):
+        raise TypeError("IntegralList object has no length - "
+                        "for a list of integrals use IntegralList.integrals")
 
-  @property
-  def symbolColour(self) -> str:
-    """Symbol colour for integral annotation display"""
-    return self._wrappedData.symbolColour
+    # CCPN properties
+    @property
+    def _apiIntegralList(self) -> ApiIntegralList:
+        """ API peakLists matching IntegralList"""
+        return self._wrappedData
 
-  @symbolColour.setter
-  def symbolColour(self, value:str):
-    self._wrappedData.symbolColour = value
+    @property
+    def _key(self) -> str:
+        """id string - serial number converted to string"""
+        return str(self._wrappedData.serial)
 
-  @property
-  def textColour(self) -> str:
-    """Text colour for integral annotation display"""
-    return self._wrappedData.textColour
+    @property
+    def serial(self) -> int:
+        """serial number of IntegralList, used in Pid and to identify the IntegralList. """
+        return self._wrappedData.serial
 
-  @textColour.setter
-  def textColour(self, value:str):
-    self._wrappedData.textColour = value
-  
-  @property
-  def comment(self) -> str:
-    """Free-form text comment"""
-    return self._wrappedData.details
-    
-  @comment.setter
-  def comment(self, value:str):
-    self._wrappedData.details = value
+    @property
+    def _parent(self) -> Optional[Spectrum]:
+        """Spectrum containing IntegralList."""
+        return self._project._data2Obj[self._wrappedData.dataSource]
 
-  # Implementation functions
-  @classmethod
-  def _getAllWrappedData(cls, parent: Spectrum)-> Tuple[ApiIntegralList, ...]:
-    """get wrappedData (PeakLists) for all IntegralList children of parent Spectrum"""
-    return parent._wrappedData.sortedIntegralLists()
+    spectrum = _parent
 
-  # Library functions
+    @property
+    def title(self) -> str:
+        """title of IntegralList (not used in PID)."""
+        return self._wrappedData.name
 
-  def automaticIntegral1D(self, minimalLineWidth=0.01,deltaFactor=1.5, findPeak=False, noiseThreshold=None) -> List['Integral']:
-    """
-    minimalLineWidth:  an attempt to exclude noise. Below this threshold the area is discarded.
-    noiseThreshold: value used to calculate the intersectingLine to get the peak limits
-    """
-    # TODO: add excludeRegions option. Calculate Negative peak integral.
-    # self._project.suspendNotification()
-    from ccpn.core.lib.peakUtils import peakdet
+    @title.setter
+    def title(self, value: str):
+        self._wrappedData.name = value
 
-    try:
-      spectrum = self.spectrum
-      peakList = spectrum.newPeakList()
-      x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
-      if noiseThreshold is None:
-        intersectingLine = None
-      else:
-        intersectingLine = [noiseThreshold] * len(x)
-      limitsPairs = _getPeaksLimits(x, y, intersectingLine)
+    @property
+    def symbolColour(self) -> str:
+        """Symbol colour for integral annotation display"""
+        return self._wrappedData.symbolColour
 
-      integrals = []
+    @symbolColour.setter
+    def symbolColour(self, value: str):
+        self._wrappedData.symbolColour = value
 
-      for i in limitsPairs:
-        lineWidth = abs(i[0] - i[1])
-        if lineWidth > minimalLineWidth:
-          newIntegral = self.newIntegral(value= None, limits=[[min(i), max(i)],])
-          filteredX = np.where((x <= i[0]) & (x >= i[1]))
-          filteredY = spectrum.intensities[filteredX]
-          if findPeak: # pick peaks and link to integral
-            maxValues, minValues = peakdet(y=filteredY, x=filteredX[0], delta=noiseThreshold / deltaFactor)
-            if len(maxValues)>1: #calculate centre of mass or     #   add to multiplet ??
+    @property
+    def textColour(self) -> str:
+        """Text colour for integral annotation display"""
+        return self._wrappedData.textColour
 
-              positions=[]
-              heights =[]
-              numerator = []
-              for position, height in maxValues:
-                positions.append(x[position])
-                heights.append(height)
-              for p, h in zip(positions, heights):
-                numerator.append(p * h)
-                centerOfMass = sum(numerator) / sum(heights)
-                newPeak = peakList.newPeak(position=[centerOfMass, ], height=max(heights))
-                newIntegral.peak = newPeak
-                newPeak.volume = newIntegral.value
-                newPeak.lineWidths = (lineWidth,)
+    @textColour.setter
+    def textColour(self, value: str):
+        self._wrappedData.textColour = value
 
+    @property
+    def comment(self) -> str:
+        """Free-form text comment"""
+        return self._wrappedData.details
+
+    @comment.setter
+    def comment(self, value: str):
+        self._wrappedData.details = value
+
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Spectrum) -> Tuple[ApiIntegralList, ...]:
+        """get wrappedData (PeakLists) for all IntegralList children of parent Spectrum"""
+        return parent._wrappedData.sortedIntegralLists()
+
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated peakListViews
+        """
+        super()._finaliseAction(action=action)
+        # propagate the rename to associated ChemicalShift instances
+        if action in ['change']:
+            for ilv in self.integralListViews:
+                ilv._finaliseAction(action=action)
+
+    #=========================================================================================
+    # Library functions
+    #=========================================================================================
+
+    def automaticIntegral1D(self, minimalLineWidth=0.01, deltaFactor=1.5, findPeak=False, noiseThreshold=None) -> List['Integral']:
+        """
+        minimalLineWidth:  an attempt to exclude noise. Below this threshold the area is discarded.
+        noiseThreshold: value used to calculate the intersectingLine to get the peak limits
+        """
+        # TODO: add excludeRegions option. Calculate Negative peak integral.
+        # self._project.suspendNotification()
+        from ccpn.core.lib.peakUtils import peakdet
+
+        try:
+            spectrum = self.spectrum
+            peakList = spectrum.newPeakList()
+            x, y = np.array(spectrum.positions), np.array(spectrum.intensities)
+            if noiseThreshold is None:
+                intersectingLine = None
             else:
-              for position, height in maxValues:
-                newPeak = peakList.newPeak(position=[float(x[position]),], height=height)
-                newIntegral.peak = newPeak
-                newPeak.volume = newIntegral.value
-                newPeak.lineWidths = (lineWidth,)
+                intersectingLine = [noiseThreshold] * len(x)
+            limitsPairs = _getPeaksLimits(x, y, intersectingLine)
 
+            integrals = []
 
-          if intersectingLine:
-            newIntegral._baseline = intersectingLine[0]
+            for i in limitsPairs:
+                lineWidth = abs(i[0] - i[1])
+                if lineWidth > minimalLineWidth:
+                    newIntegral = self.newIntegral(value=None, limits=[[min(i), max(i)], ])
+                    filteredX = np.where((x <= i[0]) & (x >= i[1]))
+                    filteredY = spectrum.intensities[filteredX]
+                    if findPeak:  # pick peaks and link to integral
+                        maxValues, minValues = peakdet(y=filteredY, x=filteredX[0], delta=noiseThreshold / deltaFactor)
+                        if len(maxValues) > 1:  #calculate centre of mass or     #   add to multiplet ??
 
-          integrals.append(newIntegral)
+                            positions = []
+                            heights = []
+                            numerator = []
+                            for position, height in maxValues:
+                                positions.append(x[position])
+                                heights.append(height)
+                            for p, h in zip(positions, heights):
+                                numerator.append(p * h)
+                                centerOfMass = sum(numerator) / sum(heights)
+                                newPeak = peakList.newPeak(position=[centerOfMass, ], height=max(heights))
+                                newIntegral.peak = newPeak
+                                newPeak.volume = newIntegral.value
+                                newPeak.lineWidths = (lineWidth,)
 
-    finally:
-      # self._project.resumeNotification()
-      pass
+                        else:
+                            for position, height in maxValues:
+                                newPeak = peakList.newPeak(position=[float(x[position]), ], height=height)
+                                newIntegral.peak = newPeak
+                                newPeak.volume = newIntegral.value
+                                newPeak.lineWidths = (lineWidth,)
 
-    return integrals
+                    if intersectingLine:
+                        newIntegral._baseline = intersectingLine[0]
+
+                    integrals.append(newIntegral)
+
+        finally:
+            # self._project.resumeNotification()
+            pass
+
+        return integrals
+
+#=========================================================================================
+# CCPN functions
+#=========================================================================================
 
 # Connections to parents:
 
-def _newIntegralList(self:Spectrum, title:str=None, symbolColour:str=None,
-                     textColour:str=None, comment:str=None) -> IntegralList:
-  """Create new IntegralList within Spectrum"""
+def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None,
+                     textColour: str = None, comment: str = None) -> IntegralList:
+    """Create new IntegralList within Spectrum"""
 
-  defaults = collections.OrderedDict((('title', None), ('comment', None),
-                                      ('symbolColour',None), ('textColour',None)))
+    defaults = collections.OrderedDict((('title', None), ('comment', None),
+                                        ('symbolColour', None), ('textColour', None)))
 
-  apiParent = self._wrappedData
-  self._startCommandEchoBlock('newIntegralList', values=locals(), defaults=defaults,
-                              parName='newIntegralList')
-  dd = {'name':title, 'details':comment, 'dataType':'Integral'}
-  if symbolColour:
-    dd['symbolColour'] = symbolColour
-  if textColour:
-    dd['textColour'] = textColour
-  try:
-    apiIntegralList = apiParent.newIntegralList(**dd)
-  finally:
-    self._endCommandEchoBlock()
+    apiParent = self._wrappedData
+    self._startCommandEchoBlock('newIntegralList', values=locals(), defaults=defaults,
+                                parName='newIntegralList')
+    dd = {'name': title, 'details': comment, 'dataType': 'Integral'}
+    if symbolColour:
+        dd['symbolColour'] = symbolColour
+    if textColour:
+        dd['textColour'] = textColour
+    try:
+        apiIntegralList = apiParent.newIntegralList(**dd)
+    finally:
+        self._endCommandEchoBlock()
 
-  result = self._project._data2Obj.get(apiIntegralList)
-  return result
+    result = self._project._data2Obj.get(apiIntegralList)
+    return result
+
 
 IntegralList._parentClass.newIntegralList = _newIntegralList
 del _newIntegralList
-
 
 # def _factoryFunction(project:Project, wrappedData:ApiIntegralList) -> AbstractWrapperObject:
 #   """create PeakList or IntegralList from API PeakList"""
@@ -282,18 +306,6 @@ del _newIntegralList
 # PeakList._factoryFunction = staticmethod(_factoryFunction)
 
 
-
-
-
-
-
-
-
-
-
 # Notifiers:
 
 # NB API level notifiers are (and must be) in PeakList instead
-
-
-

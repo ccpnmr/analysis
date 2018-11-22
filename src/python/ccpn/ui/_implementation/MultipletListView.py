@@ -170,7 +170,10 @@ class MultipletListView(AbstractWrapperObject):
         """MultipletList that MultipletListView refers to"""
         return self._project._data2Obj.get(self._wrappedData.multipletListView.multipletList)
 
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: SpectrumView) -> typing.Optional[list]:
         """get wrappedData (ccpnmr.gui.Task.MultipletListView) in serial number order"""
@@ -180,7 +183,9 @@ class MultipletListView(AbstractWrapperObject):
         else:
             return None
 
-    #CCPN functions
+#=========================================================================================
+# CCPN functions
+#=========================================================================================
 
 
 # newMultipletListView functions: None
@@ -194,26 +199,28 @@ def getter(multipletList: MultipletList) -> typing.Tuple[MultipletListView, ...]
 
 
 MultipletList.multipletListViews = property(getter, None, None,
-                                  "MultipletListViews showing Spectrum")
+                                            "MultipletListViews showing Spectrum")
 del getter
-
 
 # Notifiers:
 # TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'stripMultipletListViews', 'action': 'change'},
          ApiStripMultipletListView._metaclass.qualifiedName(), '')
-)
+        )
 
+#EJB 20181122: moved to MultipletList
 # Notify MultipletListView change when MultipletList changes
-MultipletList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-                            {'pathToObject': 'multipletListViews', 'action': 'change'})
+# MultipletList._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+#                                  {'pathToObject': 'multipletListViews', 'action': 'change'})
 
 
 def _multipletListAddMultipletListViews(project: Project, apiMultipletList: Nmr.MultipletList):
     """Add ApiMultipletListView when ApiMultipletList is created"""
     for apiSpectrumView in apiMultipletList.dataSource.spectrumViews:
         apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+
+
 #
 Project._setupApiNotifier(_multipletListAddMultipletListViews, Nmr.MultipletList, 'postInit')
 
@@ -222,6 +229,7 @@ def _spectrumViewAddMultipletListViews(project: Project, apiSpectrumView: ApiSpe
     """Add ApiMultipletListView when ApiSpectrumView is created"""
     for apiMultipletList in apiSpectrumView.dataSource.multipletLists:
         apiSpectrumView.newMultipletListView(multipletListSerial=apiMultipletList.serial, multipletList=apiMultipletList)
+
+
 #
 Project._setupApiNotifier(_spectrumViewAddMultipletListViews, ApiSpectrumView, 'postInit')
-

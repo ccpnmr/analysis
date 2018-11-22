@@ -224,12 +224,6 @@ class PeakList(AbstractWrapperObject):
     def isSimulated(self, value: bool):
         self._wrappedData.isSimulated = value
 
-    # Implementation functions
-    @classmethod
-    def _getAllWrappedData(cls, parent: Spectrum) -> list:
-        """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
-        return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
-
     # Library functions
 
     ###def pickPeaksNd(self, positions:Sequence[float]=None,
@@ -726,6 +720,28 @@ class PeakList(AbstractWrapperObject):
     #   """Readable string representation"""
     #   return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
 
+    #=========================================================================================
+    # Implementation functions
+    #=========================================================================================
+
+    @classmethod
+    def _getAllWrappedData(cls, parent: Spectrum) -> list:
+        """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
+        return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
+
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated peakListViews
+        """
+        super()._finaliseAction(action=action)
+        # propagate the rename to associated ChemicalShift instances
+        if action in ['change']:
+            for plv in self.peakListViews:
+                plv._finaliseAction(action=action)
+
+
+#=========================================================================================
+# CCPN functions
+#=========================================================================================
 
 # Connections to parents:
 

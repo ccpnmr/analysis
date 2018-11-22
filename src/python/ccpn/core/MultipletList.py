@@ -190,12 +190,27 @@ class MultipletList(AbstractWrapperObject):
     def comment(self, value: str):
         self._wrappedData.details = value
 
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: Spectrum) -> Tuple[ApiMultipletList, ...]:
         """get wrappedData (MultipletLists) for all MultipletList children of parent MultipletListList"""
         return parent._wrappedData.sortedMultipletLists()
 
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated peakListViews
+        """
+        super()._finaliseAction(action=action)
+        # propagate the rename to associated ChemicalShift instances
+        if action in ['change']:
+            for mlv in self.multipletListViews:
+                mlv._finaliseAction(action=action)
+
+#=========================================================================================
+# CCPN functions
+#=========================================================================================
 
 # Connections to parents:
 def _newMultipletList(self: Spectrum, title: str = None,

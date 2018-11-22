@@ -43,7 +43,7 @@ from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, AXISLOCKASPECTRATIO
 
 ALL = '<all>'
 
@@ -52,7 +52,6 @@ STRIPPLOT_NMRRESIDUES = 'nmrResidues'
 
 
 class SpectrumDisplaySettings(Widget):
-
     # signal for parentWidgets to respond to changes in the widget
     settingsChanged = pyqtSignal(dict)
 
@@ -128,13 +127,18 @@ class SpectrumDisplaySettings(Widget):
         self._GLSignals = GLNotifier(parent=self._parent)
         self._GLSignals.glAxisLockChanged.connect(self._lockAspectRatioChanged)
 
+    def getValues(self):
+        """Return a dict containing the current settings
+        """
+        return {AXISXUNITS: self.xAxisUnitsButtons.getIndex(),
+                AXISYUNITS: self.yAxisUnitsButtons.getIndex(),
+                AXISLOCKASPECTRATIO: self.lockAspectCheckBox.isChecked()}
+
     @pyqtSlot()
     def _settingsChanged(self):
         """Handle changing the X axis units
         """
-        self.settingsChanged.emit({'xUnits': self.xAxisUnitsButtons.getIndex(),
-                                   'yUnits': self.yAxisUnitsButtons.getIndex(),
-                                   'lockAspectRatio': self.lockAspectCheckBox.isChecked()})
+        self.settingsChanged.emit(self.getValues())
 
     @pyqtSlot(dict)
     def _lockAspectRatioChanged(self, aDict):
@@ -510,41 +514,16 @@ class StripPlot(Widget):
         """Notifiers for responding to spectrumViews
         """
         self._spectrumViewNotifier = Notifier(self.project,
-                                              [Notifier.CREATE, Notifier.DELETE],
-                                              SpectrumView.__name__,
+                                              [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                                              SpectrumView.className,
                                               self._spectrumViewChanged,
                                               onceOnly=True)
 
-        self._registerMonitors()
-
     def _unRegisterNotifiers(self):
-        """Unregister all notifiers
+        """Unregister notifiers
         """
         if self._spectrumViewNotifier:
             self._spectrumViewNotifier.unRegister()
-
-    def _registerMonitors(self):
-        """Register monitors of spectrumView visibleChanged
-        """
-        self._spectrumMonitors = []
-
-        # get the valid displays
-        displays = self._getDisplays()
-
-        # loop through all the selected displays/spectrumViews that are visible
-        for dp in displays:
-            if dp.strips:
-                for sv in dp.strips[0].spectrumViews:
-                    self._spectrumMonitors.append(sv)
-
-        for sv in self._spectrumMonitors:
-            sv.visibleChanged.connect(self._spectrumViewVisibleChanged)
-
-    def _unregisterMonitors(self):
-        """Unregister monitors of spectrumView visibleChanged
-        """
-        for sv in self._spectrumMonitors:
-            sv.visibleChanged.disconnect(self._spectrumViewVisibleChanged)
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -552,12 +531,8 @@ class StripPlot(Widget):
         if self.includeSpectrumTable:
             self._fillSpectrumFrame()
 
-        # clear the old monitors and reregister new ones
-        self._unregisterMonitors()
-        self._registerMonitors()
-
     def _spectrumViewVisibleChanged(self):
-        """Respond to a visibleChanged in one of the spectrumViews, don't know which though
+        """Respond to a visibleChanged in one of the spectrumViews
         """
         if self.includeSpectrumTable:
             self._fillSpectrumFrame()
@@ -577,7 +552,6 @@ class StripPlot(Widget):
         """Cleanup the notifiers that are left behind after the widget is closed
         """
         self._unRegisterNotifiers()
-        self._unregisterMonitors()
 
 
 class _SpectrumRow(Frame):

@@ -245,7 +245,7 @@ class NmrAtom(AbstractWrapperObject):
                 (('chainCode', None), ('sequenceCode', None),
                  ('residueType', None), ('name', None), ('mergeToExisting', False)
                  )
-        )
+                )
 
         oldPid = self.longPid
         clearUndo = False
@@ -550,6 +550,4 @@ for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
             (('_modifiedLink', {'classNames': ('NmrAtom', 'Peak')}, className, 'create'),
              ('_modifiedLink', {'classNames': ('NmrAtom', 'Peak')}, className, 'delete'),
              )
-    )
-
-
+            )

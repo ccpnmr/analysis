@@ -175,11 +175,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #   yLimits = self.strip.viewBox.viewRange()[1]
     #   self.strip.setZoomLimits(xLimits, yLimits, factor=5)
 
-    def setVisible(self, visible):
-        GuiSpectrumView.setVisible(self, visible)
-        if self._application.preferences.general.showSpectrumBorder:
-            self.borderItem.setVisible(visible)
-
     def _setupBorderItem(self):
         spectrumLimits = self.spectrum.spectrumLimits
         displayIndices = self._displayOrderSpectrumDimensionIndices

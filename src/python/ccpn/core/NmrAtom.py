@@ -29,7 +29,6 @@ import operator
 from typing import Union, Tuple, Optional
 
 from ccpn.core.Residue import Residue
-from ccpn.core.Atom import Atom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project
@@ -124,17 +123,18 @@ class NmrAtom(AbstractWrapperObject):
     def comment(self, value: str):
         self._wrappedData.details = value
 
-    @property
-    def atom(self) -> Atom:
+    #from ccpn.core.Atom import Atom: This will break the import sequence@property
+    def atom(self) -> 'Atom':
         """Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom"""
         return self._project.getAtom(self._id)
 
-    @atom.setter
-    def atom(self, value: Atom):
-        if value is None:
-            self.deassign()
-        else:
-            self._wrappedData.atom = value._wrappedData
+    # # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
+    # @atom.setter
+    # def atom(self, value: 'Atom'):
+    #     if value is None:
+    #         self.deassign()
+    #     else:
+    #         self._wrappedData.atom = value._wrappedData
 
     @property
     def isotopeCode(self) -> str:
@@ -244,7 +244,7 @@ class NmrAtom(AbstractWrapperObject):
                 (('chainCode', None), ('sequenceCode', None),
                  ('residueType', None), ('name', None), ('mergeToExisting', False)
                  )
-                )
+        )
 
         oldPid = self.longPid
         clearUndo = False
@@ -338,36 +338,58 @@ class NmrAtom(AbstractWrapperObject):
         #
         return result
 
+    @property
+    def chemicalShifts(self) -> Tuple:
+        "Returns ChemicalShift objects connected to NmrAtom"
+        getDataObj = self._project._data2Obj.get
+        return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
+
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: NmrResidue) -> list:
         """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue"""
         return parent._wrappedData.sortedResonances()
 
-
-def getter(self: Atom) -> Optional[NmrAtom]:
-    try:
-        return self._project.getNmrAtom(self._id)
-    except:
-        return None
-
-
-def setter(self: Atom, value: NmrAtom):
-    oldValue = self.nmrAtom
-    if oldValue is value:
-        return
-    elif value is None:
-        raise ValueError("Cannot set Atom.nmrAtom to None")
-    elif oldValue is not None:
-        raise ValueError("New assignment of Atom clashes with existing assignment")
-    else:
-        value.atom = self
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated ChemicalShift instances"""
+        #print('>>> NmrAtom._finaliseAction')
+        super()._finaliseAction(action=action)
+        # propagate the rename to associated ChemicalShift instances
+        if action == 'rename':
+            for cs in self.chemicalShifts:
+                cs._finaliseAction(action=action)
 
 
-Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
+#=========================================================================================
 
-del getter
-del setter
+
+#GWV 20181122: moved to Atom class
+# def getter(self: Atom) -> Optional[NmrAtom]:
+#     try:
+#         return self._project.getNmrAtom(self._id)
+#     except:
+#         return None
+#
+#
+# def setter(self: Atom, value: NmrAtom):
+#     oldValue = self.nmrAtom
+#     if oldValue is value:
+#         return
+#     elif value is None:
+#         raise ValueError("Cannot set Atom.nmrAtom to None")
+#     elif oldValue is not None:
+#         raise ValueError("New assignment of Atom clashes with existing assignment")
+#     else:
+#         value.atom = self
+#
+#
+# Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
+#
+# del getter
+# del setter
 
 
 def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None,
@@ -520,14 +542,13 @@ Project._apiNotifiers.extend(
         (('_finaliseApiRename', {}, className, 'setImplName'),
          ('_finaliseApiRename', {}, className, 'setResonanceGroup'),
          )
-        )
+)
 for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
     className = clazz.qualifiedName()
     Project._apiNotifiers.extend(
             (('_modifiedLink', {'classNames': ('NmrAtom', 'Peak')}, className, 'create'),
              ('_modifiedLink', {'classNames': ('NmrAtom', 'Peak')}, className, 'delete'),
              )
-            )
+    )
 
-# NB Atom<->NmrAtom link depends solely on the NmrAtom name.
-# So no notifiers on the link - notify on the NmrAtom rename instead.
+

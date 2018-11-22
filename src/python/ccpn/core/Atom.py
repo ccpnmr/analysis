@@ -176,6 +176,32 @@ class Atom(AbstractWrapperObject):
     project = self._project
     project._wrappedData.molSystem.newGenericBond(atoms=(self._wrappedData, atom._wrappedData))
 
+  #from ccpn.core.NmrAtom import NmrAtom: This will break the import sequence
+  @property
+  def nmrAtom(self) -> typing.Optional['NmrAtom']:
+    """NmrAtom to which Atom is assigned
+
+    NB  Atom<->NmrAtom link depends solely on the NmrAtom name.
+        So no notifiers on the link - notify on the NmrAtom rename instead.
+    """
+    try:
+        return self._project.getNmrAtom(self._id)
+    except:
+        return None
+
+  # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
+  # @nmrAtom.setter
+  # def nmrAtom(self, value:'NmrAtom'):
+  #   oldValue = self.nmrAtom
+  #   if oldValue is value:
+  #     return
+  #   elif value is None:
+  #     raise ValueError("Cannot set Atom.nmrAtom to None")
+  #   elif oldValue is not None:
+  #     raise ValueError("New assignment of Atom clashes with existing assignment")
+  #   else:
+  #     value.atom = self
+
   @property
   def isAssigned(self) -> bool:
     """
@@ -185,12 +211,15 @@ class Atom(AbstractWrapperObject):
     if not self.nmrAtom.chemicalShifts: return False # either None or len==0
     return True
 
+  #=========================================================================================
   # Implementation functions
+  #=========================================================================================
 
   @classmethod
   def _getAllWrappedData(cls, parent: Residue)-> list:
     """get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue"""
     return parent._wrappedData.sortedAtoms()
+
 
 def _newAtom(self:Residue, name:str, elementSymbol:str=None) -> 'Atom':
   """Create new Atom within Residue. If elementSymbol is None, it is derived from the name"""

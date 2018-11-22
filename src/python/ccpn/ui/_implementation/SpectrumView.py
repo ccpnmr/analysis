@@ -400,6 +400,9 @@ Project._apiNotifiers.append(
 )
 
 # Notify SpectrumView change when Spectrum changes
+# Bloody hell: as far as GWV understands the effect of this: a 'change' to a Spectrum object triggers
+# a _finaliseAction('change') on each of the spectrum.spectrumViews objects, which then calls all
+# ('SpectrumView','change') notifiers
 Spectrum._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
                           {'pathToObject':'spectrumViews', 'action':'change'})
 

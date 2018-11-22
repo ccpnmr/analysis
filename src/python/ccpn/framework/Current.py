@@ -54,28 +54,28 @@ from ccpn.ui._implementation.Strip import Strip
 
 # from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
+
 SingularOnly = 'singularOnly'
 Remove = 'remove'
 PCAcompontents = 'pcaComponents'
 
 _currentClasses = {
-    SpectrumGroup: {SingularOnly: True},
-    Spectrum:{},Peak: {},
-    Integral: {},
-    NmrChain: {},
-    NmrResidue: {},
-    NmrAtom: {},
-    Strip: {SingularOnly: True},
-    Chain: {},
-    Residue: {},
+    SpectrumGroup    : {SingularOnly: True},
+    Peak             : {},
+    Integral         : {},
+    NmrChain         : {},
+    NmrResidue       : {},
+    NmrAtom          : {},
+    Strip            : {SingularOnly: True},
+    Chain            : {},
+    Residue          : {},
     ChemicalShiftList: {},
-    ChemicalShift: {},
-    Sample: {},
-    SpectrumHit: {SingularOnly: True},
-    Substance: {},
-    Multiplet: {}
-
-    }
+    ChemicalShift    : {},
+    Sample           : {},
+    SpectrumHit      : {SingularOnly: True},
+    Substance        : {},
+    Multiplet        : {}
+}
 
 _currentExtraFields = {
     'positions': {'docTemplate': "last cursor %s"},
@@ -128,6 +128,7 @@ class Current:
             ss = field
             ll.append('%s (%s)' % (ss, dd['docTemplate'] % ss))
 
+    # Have the doc string reflect all defined curent attributes
     __doc__ = (
             """The current object gives access to the collection of active or selected objects and values.
           
@@ -138,28 +139,34 @@ class Current:
           """ % '; '.join(ll)
     )
 
-    # + '; '.join(('%s (%s)' % (f,v) for f,t,v in _definitions))
-    # + '\n\nUse print(current) to get a list of attribute, value pairs')
-
     def __init__(self, project):
         # initialise non-=auto fields
         self._project = project
-
         self._pid = '%s:current' % self.shortClassName
 
         for field in _fields:
             setattr(self, '_' + field, [])
 
-        # initialise notifies
-        notifies = self._notifies = {}
+        # The notifiers the Current instance sets to be updated on project changes
+        self._notifiers = None
+        self._registerNotifiers()
+
+        # The Current notifier mechanism
+        notifies = self._notifies = {}  # The notifier mechanism of current: a dict of (field, list-of-functions) pairs
         for field in _fields:
             notifies[field] = []
 
-        self.registerNotify(self._updateSelectedPeaks, 'peaks')  # Optimization; see below
+        # GWV 20181122: deactivated
+        # self.registerNotify(self._updateSelectedPeaks, 'peaks')  # Optimization; see below
 
     @property
     def pid(self):
         return self._pid
+
+    @property
+    def project(self):
+        """Project attached to current"""
+        return self._project
 
     def registerNotify(self, notify, field):
         """Register notifier function 'notify' to be called on field 'field'
@@ -195,22 +202,18 @@ class Current:
         except:
             IndexError('callback not found; unable to unRegister from current')
 
-    def _updateSelectedPeaks(self, currentPeaks):
-        """ Update selected status of peaks.
-        This attribute is redundant information but is done for time efficiency in drawing,
-        so you don't have to check whether a peak is in a list / set but just check the attribute.
-        """
-        for peakList in self.project.peakLists:
-            for peak in peakList.peaks:
-                peak._isSelected = False
-
-        for peak in currentPeaks:
-            peak._isSelected = True
-
-    @property
-    def project(self):
-        """Project attached to current"""
-        return self._project
+    # GWV 20181122: deactivated
+    # def _updateSelectedPeaks(self, currentPeaks):
+    #     """ Update selected status of peaks.
+    #     This attribute is redundant information but is done for time efficiency in drawing,
+    #     so you don't have to check whether a peak is in a list / set but just check the attribute.
+    #     """
+    #     for peakList in self.project.peakLists:
+    #         for peak in peakList.peaks:
+    #             peak._isSelected = False
+    #
+    #     for peak in currentPeaks:
+    #         peak._isSelected = True
 
     def __str__(self):
         return '<Current>'
@@ -238,11 +241,6 @@ class Current:
         fmt = 'current.%-' + str(maxlen) + 's : %s'
         # fmt = "current.%%-%s : %%s" % maxlen
         return '\n'.join(fmt % tt for tt in ll)
-
-        # maxlen = max((len(f) for f,t,v in self._definitions))
-        # fmt = 'current.%-' + str(maxlen) + 's : %s'
-        # #return "current\n" + '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in _definitions))
-        # return '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in self._definitions))
 
     @property
     def state(self):
@@ -294,8 +292,10 @@ class Current:
         '''
         sortedState = OrderedDict(state)
         try:
-            pluralClasses = [cls._pluralLinkName for cls in _currentClasses if not _currentClasses[cls].get(SingularOnly)]
-            singularClasses = [cls.className.lower() for cls in _currentClasses if _currentClasses[cls].get(SingularOnly)]
+            pluralClasses = [cls._pluralLinkName for cls in _currentClasses if
+                             not _currentClasses[cls].get(SingularOnly)]
+            singularClasses = [cls.className.lower() for cls in _currentClasses if
+                               _currentClasses[cls].get(SingularOnly)]
             for attName, values in sortedState.items():
                 if values is None:
                     continue
@@ -339,14 +339,9 @@ class Current:
         # getFieldItem(obj) returns obj[field]
         getFieldItem = operator.itemgetter(plural)
 
-        # setField(obj, value) sets obj._field = value and calls notifiers
         def setField(self, value, plural=plural, enforceType=enforceType):
-
+            # setField(obj, value) sets obj._field = value and calls notifiers
             if len(set(value)) != len(value):
-
-                # TODO - replace with this call:
-                # value = commonUtil.uniquify(value)
-
                 # ejb - remove duplicates here
                 tempList = []
                 for inL in value:
@@ -357,72 +352,92 @@ class Current:
                 # raise ValueError( "Current %s contains duplicates: %s" % (plural, value))
 
             if enforceType and any(x for x in value if not isinstance(x, enforceType)):
-                raise ValueError("Current values for %s must be of type %s"
-                                 % (plural, enforceType))
+                raise ValueError("Current values for %s must be of type %s" % (plural, enforceType))
             setattr(self, '_' + plural, value)
-            funcs = getFieldItem(self._notifies) or ()
+
+            # Trigger the notifiers
+            funcs = getFieldItem(self._notifies) or () # getFieldItem(obj) returns obj[field]
             for func in funcs:
                 func(value)
 
+        # define singular properties
         def getter(self):
             ll = getField(self)
             return ll[-1] if ll else None
-
         def setter(self, value):
             setField(self, [value])
-
-        #
         setattr(cls, singular, property(getter, setter, None, "Current %s" % singular))
 
         if not singularOnly:
-
+            # define the plural properties
             def getter(self):
                 return tuple(getField(self))
-
             def setter(self, value):
                 setField(self, list(value))
-
-            #
             setattr(cls, plural, property(getter, setter, None, "Current %s" % plural))
 
+            # define the add'Field' method
             def adder(self, value):
                 """Add %s to current.%s""" % (singular, plural)
                 values = getField(self)
                 if value not in values:
                     setField(self, values + [value])
-
-            #
             setattr(cls, 'add' + singular[0].upper() + singular[1:], adder)
 
+            # define the remove'Field' method
             def remover(self, value):
                 """Remove %s from current.%s""" % (singular, plural)
                 values = getField(self)
                 if value in values:
                     values.remove(value)
                 setField(self, values)
+            setattr(cls, 'remove' + singular[0].upper() + singular[1:], remover)
 
-            #
-            setattr(cls, Remove + singular[0].upper() + singular[1:], remover)
-
+            # define the clear'Field' method
             def clearer(self):
                 """Clear current.%s""" % plural
                 setField(self, [])
-
-            #
             setattr(cls, 'clear' + plural[0].upper() + plural[1:], clearer)
 
-        if not isinstance(param, str):
-            # param is a class - Add notifiers for deleted objects
-            def cleanup(self: AbstractWrapperObject):
-                current = self._project._appBase.current
-                if current:
-                    fieldData = getField(current)
-                    if self in fieldData:
-                        fieldData.remove(self)
+        # if not isinstance(param, str):
+        #     # param is a class - Add notifiers for deleted objects
+        #     def cleanup(self: AbstractWrapperObject):
+        #         current = self._project._appBase.current
+        #         if current:
+        #             fieldData = getField(current)
+        #             if self in fieldData:
+        #                 fieldData.remove(self)
+        #
+        #     cleanup.__name__ = 'current_%s_deletion_cleanup' % singular
+        #     #
+        #     param._setupCoreNotifier('delete', cleanup)
 
-            cleanup.__name__ = 'current_%s_deletion_cleanup' % singular
-            #
-            param._setupCoreNotifier('delete', cleanup)
+    def _cleanUp(self, cDict, fieldName):
+        "Callback for deletion of an object in the project"
+        from ccpn.core.lib.Notifiers import Notifier ## needs to be local to avoid circular imports
+        obj = cDict[Notifier.OBJECT]
+        values = getattr(self, fieldName)
+        if values and obj in values:
+            values.remove(obj)
+
+    def _registerNotifiers(self):
+        """Registers the notifiers to cleanup current.fieldName on deletion of an object
+        """
+        from ccpn.core.lib.Notifiers import Notifier ## needs to be local to avoid circular imports
+
+        self._notifiers = []
+        for cls in _currentClasses:
+            fieldName = '_' + cls._pluralLinkName
+            ntf = Notifier(self.project, triggers=[Notifier.DELETE], targetName=cls.className,
+                           callback=self._cleanUp, debug=True, fieldName=fieldName)  # fieldName is passed on to the callback function
+            self._notifiers.append(ntf)
+
+    def _unregisterNotifiers(self):
+        """Unregisters the notifiers
+        CCPNINTERNAL: used in Framework._closeProject
+        """
+        for ntf in self._notifiers:
+            ntf.unRegister()
 
     def _dumpStateToFile(self, statePath):
         try:

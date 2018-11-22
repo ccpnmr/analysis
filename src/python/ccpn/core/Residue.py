@@ -361,7 +361,11 @@ class Residue(AbstractWrapperObject):
 
   @property
   def nmrResidue(self) -> typing.Optional['NmrResidue']:
-    "NmrResidue to which Residue is assigned"
+    """NmrResidue to which Residue is assigned
+
+    NB Residue<->NmrResidue link depends solely on the NmrResidue name.
+    So no notifiers on the link - notify on the NmrResidue rename instead.
+    """
     try:
       return self._project.getNmrResidue(self._id)
     except:

@@ -1291,7 +1291,7 @@ class NmrResidue(AbstractWrapperObject):
         """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
         return parent._wrappedData.sortedResonanceGroups()
 
-
+#=========================================================================================
 # GWV 20181122: Moved to Residue class
 # def getter(self:Residue) -> typing.Optional[NmrResidue]:
 #   try:
@@ -1549,5 +1549,4 @@ Project._apiNotifiers.extend(
          )
         )
 
-# NB Residue<->NmrResidue link depends solely on the NmrResidue name.
-# So no notifiers on the link - notify on the NmrResidue rename instead.
+

@@ -75,7 +75,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, Chec
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 
 CommonWidgets = {
@@ -118,7 +118,7 @@ ALL = '<all>'
 DoubleUnderscore = '__'
 
 
-class CcpnModule(Dock, DropBase):
+class CcpnModule(Dock, DropBase, NotifierBase):
     """
     Base class for CCPN modules
     sets self.application, self.current, self.project and self.mainWindow
@@ -672,6 +672,9 @@ class CcpnModule(Dock, DropBase):
                 self.closeFunc()
         except:
             pass
+
+        # unregister any notifiers
+        self.unRegisterAllNotifiers()
 
         # Try de-registering any notifiers or object with unRegister() method for notifiers
         try:

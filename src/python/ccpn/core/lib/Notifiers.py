@@ -413,82 +413,99 @@ class Notifier(object):
 #                         callback=callback, onlyOnce=onlyOnce, debug=debug)
 #     return notifier
 
-#=============================================================================================================
-# adjust V3 classes by patching AbstractWrapperObject (just a hack for trying)
-# TODO: See if this will be moved to the AbstractWrapperObject
-#=============================================================================================================
-# from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-#
-# NOTIFIERS = '_notifiers'  # attribute name for storing notifiers in Ccpn V3 objects
-#
-# def setNotifier(self, triggers:list, targetName:str, callback:Callable[..., str], *args, **kwargs) -> Notifier:
-#   """
-#   Set Notifier for Ccpn V3 object
-#   :param triggers: list of triggers to trigger callback
-#   :param targetName: valid className, attributeName or None (See Notifier doc string for details)
-#   :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
-#   :param *args: optional arguments to callback
-#   :param **kwargs: optional keyword,value arguments to callback
-#
-#   :returns Notifier instance
-#   """
-#   if not hasattr(self, NOTIFIERS):
-#     setattr(self, NOTIFIERS, OrderedDict())
-#   objNotifiers = getattr(self, NOTIFIERS)
-#
-#   notifier = Notifier(self, triggers, targetName, callback, *args, **kwargs)
-#   id = notifier._index
-#   # this should never happen, except when 'monkying' in the console; hence just a check
-#   if id in objNotifiers.keys():
-#     n = objNotifiers[id]
-#     self.deleteNotifier(n)
-#   # add the notifier
-#   objNotifiers[id] = notifier
-#   return notifier
-# AbstractWrapperObject.setNotifier = setNotifier
-#
-# def deleteNotifier(self, notifier:Notifier):
-#   """
-#   delete notifier from object.
-#
-#   to delete and destroy a notifier from myObj:
-#     myObj.deleteNotifier(notifier)
-#     del(notifier)
-#
-#   :param notifier: Notifier instance
-#   """
-#   if not self.hasNotifier(notifier):
-#     raise RuntimeWarning('"%s" is not a (valid) notifier of "%s"' % (notifier, self))
-#
-#   objNotifiers = getattr(self, NOTIFIERS)
-#   notifier.unregister()
-#   del(objNotifiers[notifier._index])
-# AbstractWrapperObject.deleteNotifier = deleteNotifier
-#
-# def hasNotifier(self, notifier:Notifier) -> bool:
-#   """
-#   Checks if object has notifier
-#   :param notifier: Notifier instance
-#   :return: True or False
-#   """
-#   if not hasattr(self, NOTIFIERS):
-#     return False
-#
-#   objNotifiers = getattr(self, NOTIFIERS)
-#   if len(objNotifiers) == 0:
-#     return False
-#
-#   # For now: not using: if not isinstance(notifier, Notifier): because when run as script from console
-#   # this appears not to work as each new iteration of Notifier is a different Object(!?)
-#   if notifier.__class__.__name__ != Notifier.__name__:
-#     #print(notifier.__class__.__name__, Notifier.__name__)
-#     return False
-#
-#   if notifier._index in objNotifiers.keys():
-#     return True
-#
-#   return False
-# AbstractWrapperObject.hasNotifier = hasNotifier
+
+class NotifierBase(object):
+    """
+    A class confering notifier management routines;
+    """
+    NOTIFIERS = '_V3notifiers'  # attribute name for storing notifiers in Ccpn objects
+
+    # def _init(self):
+    #     """Method to call at intialisation; deliberately different from __init__"""
+    #     setattr(self, self.NOTIFIERS, OrderedDict())
+
+    def registerNotifier(self, theObject:AbstractWrapperObject, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs) -> Notifier:
+        """
+        Set Notifier for Ccpn V3 object theObject
+        :param theObject: V3 object to register a notifier with
+        :param triggers: list of triggers to trigger callback
+        :param targetName: valid className, attributeName or None (See Notifier doc string for details)
+        :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
+        :param *args: optional arguments to callback
+        :param **kwargs: optional keyword,value arguments to callback
+
+        :returns Notifier instance
+        """
+        if not hasattr(self, self.NOTIFIERS):
+            setattr(self, self.NOTIFIERS, OrderedDict())
+        objNotifiers = getattr(self, self.NOTIFIERS)
+
+        notifier = Notifier(theObject, triggers, targetName, callback, *args, **kwargs)
+        id = notifier._index
+        # this should never happen, except when 'monkying' in the console; hence just a check
+        if id in objNotifiers.keys():
+            n = objNotifiers[id]
+            self.deleteNotifier(n)
+        # add the notifier
+        objNotifiers[id] = notifier
+        return notifier
+
+    def unregisterNotifier(self, notifier: Notifier):
+        """
+        unregister notifier; remove it from the list and delete it
+        :param notifier: Notifier instance
+        """
+        # For now: not using: if not isinstance(notifier, Notifier): because when run as script from console
+        # this appears not to work as each new iteration of Notifier is a different Object(!?)
+        if notifier.__class__.__name__ != Notifier.__name__:
+            #print(notifier.__class__.__name__, Notifier.__name__)
+            raise ValueError('"%s" is not a valid Notifier instance')
+
+        if not self.hasNotifier(notifier):
+            raise RuntimeWarning('"%s" is not a (valid) notifier of "%s"' % (notifier, self))
+
+        objNotifiers = getattr(self, self.NOTIFIERS)
+        notifier.unregister()
+        del(objNotifiers[notifier._index])
+        del(notifier)
+
+    def hasNotifier(self, notifier: Notifier=None) -> bool:
+        """
+        Checks if object has notifier; return True if it has notifier or has any notifier when notifier=None
+
+        :param notifier: Notifier instance
+        :return: True or False
+        """
+        if not hasattr(self, self.NOTIFIERS):
+            return False
+
+        objNotifiers = getattr(self, self.NOTIFIERS)
+        if len(objNotifiers) == 0:
+            return False
+
+        if notifier is None and len(objNotifiers) > 0:
+            return True
+
+        # For now: not using: if not isinstance(notifier, Notifier): because when run as script from console
+        # this appears not to work as each new iteration of Notifier is a different Object(!?)
+        if notifier.__class__.__name__ != Notifier.__name__:
+            #print(notifier.__class__.__name__, Notifier.__name__)
+            return False
+
+        if notifier._index in objNotifiers.keys():
+            return True
+
+        return False
+
+    def unRegisterAllNotifiers(self):
+        """Unregister all the notifiers"""
+        if not self.hasNotifier(None):
+            return
+        objNotifiers = getattr(self, self.NOTIFIERS)
+        for notifier in list(objNotifiers.values()):
+            notifier.unRegister()
+
+
 #
 #
 # def deleteAllNotifiers(project):

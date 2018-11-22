@@ -1927,12 +1927,7 @@ class Framework:
       # ui/gui cleanup
       self._closeMainWindows()
       self._closeExtraWindows()
-      self.ui.mainWindow.deleteLater()
-      self.ui.mainWindow = None
-
-    if self.current:
-      self.current._unregisterNotifiers()
-      self.current = None
+      # self.ui.mainWindow.deleteLater()
 
     if self.project is not None:
       # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)

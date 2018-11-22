@@ -1690,6 +1690,8 @@ QuickTable::item::selected {
                                            tableClass.__name__,
                                            self._updateTableCallback,
                                            onceOnly=True)
+            self._tableNotifier.setDebug(True)
+
         if rowClass:
             # TODO:ED check OnceOnly residue notifiers
             # 'i-1' residue spawns a rename but the 'i' residue only fires a change
@@ -1778,31 +1780,36 @@ QuickTable::item::selected {
     @staticmethod  # has to be a static method
     def onDestroyed(widget):
         # print("DEBUG on destroyed:", widget)
-        widget.clearTableNotifiers()
+        widget._clearTableNotifiers()
 
-    def clearTableNotifiers(self):
+    def _clearTableNotifiers(self):
         """Clean up the notifiers
         """
         if self._tableNotifier is not None:
             self._tableNotifier.unRegister()
-            # del (self._tableNotifier)
+            self._tableNotifier = None
+
         if self._rowNotifier is not None:
             self._rowNotifier.unRegister()
-            # del (self._rowNotifier)
+            self._rowNotifier = None
+
         if self._cellNotifiers:
             for cell in self._cellNotifiers:
                 if cell is not None:
                     cell.unRegister()
-        # del self._cellNotifiers
+
+        self._cellNotifiers = None
         if self._selectCurrentNotifier is not None:
             self._selectCurrentNotifier.unRegister()
-            # del (self._selectCurrentNotifier)
+            self._selectCurrentNotifier = None
+
         if self._droppedNotifier is not None:
             self._droppedNotifier.unRegister()
-            # del (self._droppedNotifier)
+            self._droppedNotifier = None
+
         if self._searchNotifier is not None:
             self._searchNotifier.unRegister()
-            # del (self._searchNotifier)
+            self._searchNotifier = None
 
     # def dragEnterEvent(self, event):
     #   ccpnmrJsonData = 'ccpnmr-json'

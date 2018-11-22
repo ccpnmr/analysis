@@ -114,10 +114,10 @@ class MultipletTableModule(CcpnModule):
         """
         self.multipletListTable._selectMultipletList(multipletList)
 
-    def _closeModule(self):
-        """Re-implementation of closeModule function from CcpnModule to unregister notification """
-        self.multipletListTable.destroy()
-        super(MultipletTableModule, self)._closeModule()
+    # def _closeModule(self):
+    #     """Re-implementation of closeModule function from CcpnModule to unregister notification """
+    #     self.multipletListTable.destroy()
+    #     super(MultipletTableModule, self)._closeModule()
 
     def close(self):
         """
@@ -482,7 +482,7 @@ class MultipletListTableWidget(QuickTable):
         if value in MultipletPosUnits:
             MultipletListTableWidget.positionsUnit = value
 
-    def destroy(self):
-        "Cleanup of self"
-        self.clearTableNotifiers()
+    # def destroy(self):
+    #     "Cleanup of self"
+    #     self.clearTableNotifiers()
 

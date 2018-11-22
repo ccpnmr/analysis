@@ -658,11 +658,11 @@ class NmrResidueTable(QuickTable):
     #   if self._selectOnTableCurrentNmrResiduesNotifier is not None:
     #     self._selectOnTableCurrentNmrResiduesNotifier.unRegister()
 
-    def _close(self):
-        """
-        Cleanup the notifiers when the window is closed
-        """
-        self.clearTableNotifiers()
+    # def _close(self):
+    #     """
+    #     Cleanup the notifiers when the window is closed
+    #     """
+    #     self.clearTableNotifiers()
 
     def _getPullDownSelection(self):
         return self.ncWidget.getText()

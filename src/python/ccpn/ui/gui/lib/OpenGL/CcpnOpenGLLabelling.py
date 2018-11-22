@@ -123,6 +123,17 @@ class GLLabelling():
             for pp in self._GLLabels.values():
                 pp.renderMode = GLRENDERMODE_RESCALE
 
+    def setListViews(self, spectrumViews):
+        """Return a list of tuples containing the visible lists and the containing spectrumView
+        """
+        self._listViews = [(lv, specView) for specView in spectrumViews
+                       for lv in self.listViews(specView)
+                       if not lv.isDeleted]
+        self._visibleListViews = [(lv, specView) for lv, specView in self._listViews
+                                  if lv.isVisible()
+                                  and specView.isVisible()
+                                  and lv in self._GLSymbols.keys()]
+
 
 class GLpeakListMethods():
     """Class of methods common to 1d and Nd peaks
@@ -287,7 +298,7 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
     def __init__(self, parent=None, strip=None, name=None, resizeGL=False):
         """Initialise the class
         """
-        super(GLpeakNdLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
+        super().__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Handle notifiers
@@ -1596,8 +1607,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         if self.strip.isDeleted:
             return
 
-        # times = [time.time(), self]
-
         # list through the valid peakListViews attached to the strip - including undeleted
         for spectrumView in self.strip.spectrumViews:
             # for peakListView in spectrumView.peakListViews:
@@ -1607,7 +1616,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                     if self._GLSymbols[objListView].renderMode == GLRENDERMODE_RESCALE:
                         self._buildSymbols(spectrumView, objListView)
 
-                # times.append('_rescale:'+str(time.time()-times[0]))
                 if objListView.buildSymbols:
                     objListView.buildSymbols = False
 
@@ -1616,7 +1624,6 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
                         self._GLSymbols[objListView].renderMode = GLRENDERMODE_REBUILD
 
                     self._buildSymbols(spectrumView, objListView)
-                    # times.append('_build:'+str(time.time()-times[0]))
 
     def buildLabels(self):
         if self.strip.isDeleted:
@@ -1723,15 +1730,16 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         lineThickness = self.strip.symbolThickness
         GL.glLineWidth(lineThickness)
 
-        # loop through the attached objListViews to the strip
-        for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:
-            # for peakListView in spectrumView.peakListViews:
-            for objListView in self.listViews(spectrumView):
-                if spectrumView.isVisible() and objListView.isVisible():
+        # # loop through the attached objListViews to the strip
+        # for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:
+        #     # for peakListView in spectrumView.peakListViews:
+        #     for objListView in self.listViews(spectrumView):
+        #         if spectrumView.isVisible() and objListView.isVisible():
 
-                    if objListView in self._GLSymbols.keys():
-                        # self._GLSymbols[objListView].drawIndexArray()
-                        self._GLSymbols[objListView].drawIndexVBO(enableVBO=False)
+        for objListView, specView in self._visibleListViews:
+            if objListView in self._GLSymbols.keys():
+                # self._GLSymbols[objListView].drawIndexArray()
+                self._GLSymbols[objListView].drawIndexVBO(enableVBO=False)
 
         GL.glLineWidth(1.0)
 
@@ -1744,17 +1752,17 @@ class GLpeakNdLabelling(GLLabelling, GLpeakListMethods):
         self._spectrumSettings = spectrumSettings
         self.buildLabels()
 
-        # loop through the attached peakListViews to the strip
-        for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:
-            # for peakListView in spectrumView.peakListViews:
-            for objListView in self.listViews(spectrumView):
-                if spectrumView.isVisible() and objListView.isVisible():
+        # # loop through the attached peakListViews to the strip
+        # for spectrumView in self._GLParent._ordering:  #self._parent.spectrumViews:
+        #     # for peakListView in spectrumView.peakListViews:
+        #     for objListView in self.listViews(spectrumView):
+        #         if spectrumView.isVisible() and objListView.isVisible():
 
-                    if objListView in self._GLLabels.keys():
-
-                        for drawString in self._GLLabels[objListView].stringList:
-                            drawString.drawTextArray()
-                            # drawString.defineTextArray()
+        for objListView, specView in self._visibleListViews:
+            if objListView in self._GLLabels.keys():
+                for drawString in self._GLLabels[objListView].stringList:
+                    drawString.drawTextArray()
+                    # drawString.defineTextArray()
 
 
 class GLpeak1dLabelling(GLpeakNdLabelling):
@@ -1944,42 +1952,6 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
                                            spectrumView, buildIndex)
 
             drawList.defineIndexVBO(enableVBO=False)
-
-                # if symbolType is not None:  #== 0:
-                #
-                #     # draw a cross
-                #     _selected = False
-                #     if self._isSelected(obj):
-                #         # if hasattr(obj, '_isSelected') and obj._isSelected:
-                #         _selected = True
-                #         drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3,
-                #                                                         index, index + 2, index + 2, index + 1,
-                #                                                         index, index + 3, index + 3, index + 1))
-                #     else:
-                #         drawList.indices = np.append(drawList.indices, (index, index + 1, index + 2, index + 3))
-                #
-                #     # add extra indices for the multiplet
-                #     extraIndices = self.appendExtraIndices(drawList, index + 4, obj)
-                #
-                #     drawList.vertices = np.append(drawList.vertices, (p0[0] - r, p0[1] - w,
-                #                                                       p0[0] + r, p0[1] + w,
-                #                                                       p0[0] + r, p0[1] - w,
-                #                                                       p0[0] - r, p0[1] + w))
-                #     drawList.colors = np.append(drawList.colors, (*cols, 1.0) * GLDefs.LENCOLORS)
-                #     drawList.attribs = np.append(drawList.attribs, (p0[0], p0[1]) * 4)
-                #     # drawList.offsets = np.append(drawList.offsets, (p0[0]+r, p0[1]+w) * 4)
-                #
-                #     # add extra vertices for the multiplet
-                #     extraVertices = self.appendExtraVertices(drawList, pIndex, obj, p0, (*cols, 1.0), 1.0)
-                #
-                #     # keep a pointer to the obj
-                #     drawList.pids = np.append(drawList.pids, (obj, index, (4 + extraVertices),
-                #                                               True, True, _selected,
-                #                                               indexPtr, len(drawList.indices)))
-                #     indexPtr = len(drawList.indices)
-                #
-                #     index += (4 + extraIndices)
-                #     drawList.numVertices += (4 + extraVertices)
 
     def _rescaleSymbols(self, spectrumView, objListView):
         """rescale symbols when the screen dimensions change
@@ -2179,23 +2151,6 @@ class GLpeak1dLabelling(GLpeakNdLabelling):
         if not obj.position:
             return
         p0 = (obj.position[pIndex[0]], obj.height)
-
-        # # get the correct coordinates based on the axisCodes
-        # p0 = [0.0] * 2  # len(self.axisOrder)
-        # for ps, psCode in enumerate(self._GLParent.axisOrder[0:2]):
-        #     for pp, ppCode in enumerate(obj.axisCodes):
-        #
-        #         if self._GLParent._preferences.matchAxisCode == 0:  # default - match atom type
-        #             if ppCode[0] == psCode[0]:
-        #                 p0[ps] = obj.position[pp]
-        #             else:
-        #                 p0[ps] = obj.height
-        #
-        #         elif self._GLParent._preferences.matchAxisCode == 1:  # match full code
-        #             if ppCode == psCode:
-        #                 p0[ps] = obj.position[pp]
-        #             else:
-        #                 p0[ps] = obj.height
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -2626,26 +2581,27 @@ class GLintegralNdLabelling(GLintegralListMethods, GLpeakNdLabelling):
         self._spectrumSettings = spectrumSettings
         self.buildSymbols()
 
-        # loop through the attached integralListViews to the strip
-        for spectrumView in self._GLParent._ordering:  #self.strip.spectrumViews:
-            for integralListView in spectrumView.integralListViews:
-                if spectrumView.isVisible() and integralListView.isVisible():
+        # # loop through the attached integralListViews to the strip
+        # for spectrumView in self._GLParent._ordering:  #self.strip.spectrumViews:
+        #     for integralListView in spectrumView.integralListViews:
+        #         if spectrumView.isVisible() and integralListView.isVisible():
 
-                    if integralListView in self._GLSymbols.keys():
-                        self._GLSymbols[integralListView].drawIndexArray()
+        for integralListView, specView in self._visibleListViews:
+            if integralListView in self._GLSymbols.keys():
+                self._GLSymbols[integralListView].drawIndexArray()
 
-                        # draw the integralAreas if they exist
-                        for integralArea in self._GLSymbols[integralListView]._regions:
-                            if hasattr(integralArea, '_integralArea'):
-                                if self._GLParent._stackingMode:
-                                    # use the stacking matrix to offset the 1D spectra
-                                    self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
-                                                                                                  1, GL.GL_FALSE,
-                                                                                                  self._GLParent._spectrumSettings[
-                                                                                                      spectrumView][
-                                                                                                      GLDefs.SPECTRUM_STACKEDMATRIX])
+                # draw the integralAreas if they exist
+                for integralArea in self._GLSymbols[integralListView]._regions:
+                    if hasattr(integralArea, '_integralArea'):
+                        if self._GLParent._stackingMode:
+                            # use the stacking matrix to offset the 1D spectra
+                            self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
+                                                                                          1, GL.GL_FALSE,
+                                                                                          self._GLParent._spectrumSettings[
+                                                                                              specView][
+                                                                                              GLDefs.SPECTRUM_STACKEDMATRIX])
 
-                                integralArea._integralArea.drawVertexColor()
+                        integralArea._integralArea.drawVertexColor()
 
         self._GLParent.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix', 1, GL.GL_FALSE, self._GLParent._IMatrix)
 

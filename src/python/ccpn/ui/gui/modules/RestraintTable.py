@@ -403,8 +403,8 @@ class RestraintTable(QuickTable):
         """
         pass
 
-    def _close(self):
-        """
-        Cleanup the notifiers when the window is closed
-        """
-        self.clearTableNotifiers()
+    # def _close(self):
+    #     """
+    #     Cleanup the notifiers when the window is closed
+    #     """
+    #     self.clearTableNotifiers()

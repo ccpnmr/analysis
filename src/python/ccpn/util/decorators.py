@@ -8,6 +8,7 @@ import linecache
 import functools
 import cProfile
 
+
 def trace(f):
     def globaltrace(frame, why, arg):
         if why == "call":
@@ -21,10 +22,10 @@ def trace(f):
             lineno = frame.f_lineno
 
             bname = os.path.basename(filename)
-            sys.stderr.write( "{}({}): {}".format(  bname,
-                                        lineno,
-                                        linecache.getline(filename, lineno)),
-                   )
+            sys.stderr.write("{}({}): {}".format(bname,
+                                                 lineno,
+                                                 linecache.getline(filename, lineno)),
+                             )
         return localtrace
 
     def _f(*args, **kwds):
@@ -41,11 +42,11 @@ def singleton(cls):
     From: https://wiki.python.org/moin/PythonDecoratorLibrary#Singleton
     Annotated by GWV
     """
-    @functools.wraps(cls.__new__)
 
+    @functools.wraps(cls.__new__)
     def singleton_new(cls, *args, **kwds):
         # check if it already exists
-        it =  cls.__dict__.get('__it__')
+        it = cls.__dict__.get('__it__')
         if it is not None:
             return it
         # it did not yet exist; generate an instance
@@ -75,4 +76,5 @@ def profile(func):
         finally:
             filename = os.path.expanduser(os.path.join('~', func.__name__ + '.pstat'))
             profiler.dump_stats(filename)
+
     return profileWrapper

@@ -746,7 +746,7 @@ class GuiSpectrumDisplay(CcpnModule):
             self._unRegisterNotifiers()
 
         finally:
-            CcpnModule._closeModule(self)
+            super()._closeModule()
             self.delete()
 
     def _unDelete(self, strip):

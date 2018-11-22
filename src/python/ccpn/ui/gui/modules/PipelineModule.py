@@ -447,7 +447,7 @@ class GuiPipeline(CcpnModule, Pipeline):
     def _closeModule(self):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """
         self._unregisterNotifier()
-        super(GuiPipeline, self)._closeModule()
+        super()._closeModule()
 
     def close(self):
         """

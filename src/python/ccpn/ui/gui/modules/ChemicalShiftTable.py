@@ -173,7 +173,7 @@ class ChemicalShiftTableModule(CcpnModule):
         CCPN-INTERNAL: used to close the module
         """
         self.chemicalShiftTable._close()
-        super(ChemicalShiftTableModule, self)._closeModule()
+        super()._closeModule()
 
     def close(self):
         """
@@ -196,13 +196,16 @@ class ChemicalShiftTable(QuickTable):
         """
         Initialise the widgets for the module.
         """
-
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
-        self.moduleParent = moduleParent
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
         self._widget = Widget(parent=parent, **kwds)
         self.chemicalShiftList = None
 
@@ -237,6 +240,7 @@ class ChemicalShiftTable(QuickTable):
                          selectionCallback=selectionCallback if selectionCallback else self._selectionCallback,
                          grid=(3, 0), gridSpan=(1, 6),
                          )
+        self.moduleParent = moduleParent
 
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
@@ -283,7 +287,7 @@ class ChemicalShiftTable(QuickTable):
                                callBackClass=ChemicalShift,
                                selectCurrentCallBack=None,
                                searchCallBack=NmrResidue,
-                               moduleParent=self.moduleParent)
+                               moduleParent=moduleParent)
 
         self._droppedNotifier = GuiNotifier(self,
                                             [GuiNotifier.DROPEVENT], [DropBase.PIDS],
@@ -445,3 +449,4 @@ class ChemicalShiftTable(QuickTable):
         """
         # self.clearTableNotifiers()
         self._chemicalShiftListPulldown.unRegister()
+        super()._close()

@@ -95,10 +95,10 @@ class PeakTableModule(CcpnModule):
         """
         self.peakListTable._selectPeakList(peakList)
 
-    # def _closeModule(self):
-    #     """Re-implementation of closeModule function from CcpnModule to unregister notification """
-    #     # self.peakListTable.destroy()
-    #     super()._closeModule()
+    def _closeModule(self):
+        """Re-implementation of closeModule function from CcpnModule to unregister notification """
+        self.peakListTable._close()
+        super()._closeModule()
 
     def close(self):
         """
@@ -117,11 +117,19 @@ class PeakListTableWidget(QuickTable):
     positionsUnit = UNITS[0]  #default
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, actionCallback=None, selectionCallback=None, **kwds):
+        """
+        Initialise the table
+        """
+        # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
-        self.moduleParent = moduleParent
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
 
         PeakListTableWidget.project = self.project
 
@@ -169,7 +177,7 @@ class PeakListTableWidget(QuickTable):
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
 
-        QuickTable.__init__(self, parent=parent,
+        super().__init__(parent=parent,
                             mainWindow=self.mainWindow,
                             dataFrameObject=None,
                             setLayout=True,
@@ -177,6 +185,7 @@ class PeakListTableWidget(QuickTable):
                             actionCallback=actionCallback,
                             selectionCallback=selectionCallback,
                             grid=(3, 0), gridSpan=(1, 6))
+        self.moduleParent = moduleParent
 
         self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
 
@@ -195,7 +204,7 @@ class PeakListTableWidget(QuickTable):
                                pullDownWidget=self.pLwidget,
                                callBackClass=Peak,
                                selectCurrentCallBack=self._selectOnTableCurrentPeaksNotifierCallback,
-                               moduleParent=self.moduleParent)
+                               moduleParent=moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],

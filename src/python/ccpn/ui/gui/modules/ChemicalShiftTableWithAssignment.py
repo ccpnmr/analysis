@@ -242,8 +242,8 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
         CCPN-INTERNAL: used to close the module
         """
         # self._unRegisterNotifiers()
-        # self.assignedPeaksTable.clearTableNotifiers()
-        super(ChemicalShiftTableWithAssignment, self)._closeModule()
+        self.assignedPeaksTable._close()
+        super()._closeModule()
 
     def close(self):
         """

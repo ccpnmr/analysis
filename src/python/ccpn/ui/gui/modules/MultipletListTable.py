@@ -114,10 +114,10 @@ class MultipletTableModule(CcpnModule):
         """
         self.multipletListTable._selectMultipletList(multipletList)
 
-    # def _closeModule(self):
-    #     """Re-implementation of closeModule function from CcpnModule to unregister notification """
-    #     self.multipletListTable.destroy()
-    #     super(MultipletTableModule, self)._closeModule()
+    def _closeModule(self):
+        """Re-implementation of closeModule function from CcpnModule to unregister notification """
+        self.multipletListTable._close()
+        super()._closeModule()
 
     def close(self):
         """
@@ -150,7 +150,6 @@ class MultipletListTableWidget(QuickTable):
             self.application = None
             self.project = None
             self.current = None
-        self.moduleParent = moduleParent
 
         self.peakListTable = self.moduleParent.peakListTable
         MultipletListTableWidget.project = self.project
@@ -199,7 +198,7 @@ class MultipletListTableWidget(QuickTable):
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
 
-        QuickTable.__init__(self, parent=parent,
+        super().__init__(parent=parent,
                             mainWindow=self.mainWindow,
                             dataFrameObject=None,
                             setLayout=True,
@@ -207,6 +206,7 @@ class MultipletListTableWidget(QuickTable):
                             actionCallback=actionCallback,
                             selectionCallback=selectionCallback,
                             grid=(3, 0), gridSpan=(1, 6))
+        self.moduleParent = moduleParent
 
         # self.tableMenu.addAction('Copy Multiplets...', self._copyMultiplets)
         self.tableMenu.insertSeparator(self.tableMenu.actions()[0])
@@ -228,7 +228,7 @@ class MultipletListTableWidget(QuickTable):
                                pullDownWidget=self.mLwidget,
                                callBackClass=Multiplet,
                                selectCurrentCallBack=self._selectOnTableCurrentMultipletsNotifierCallback,
-                               moduleParent=self.moduleParent)
+                               moduleParent=moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],

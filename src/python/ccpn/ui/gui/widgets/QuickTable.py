@@ -1748,6 +1748,7 @@ QuickTable::item::selected {
         # add a cleaner id to the opened quickTable list
         self.moduleParent = moduleParent
         MODULEIDS[id(moduleParent)] = len(MODULEIDS)
+        print('>>>', MODULEIDS, moduleParent)
 
     def setDefaultTableData(self):
         """Populate an empty table data object
@@ -1777,10 +1778,14 @@ QuickTable::item::selected {
         self._droppedNotifier = None
         self._searchNotifier = None
 
-    @staticmethod  # has to be a static method
-    def onDestroyed(widget):
-        # print("DEBUG on destroyed:", widget)
-        widget._clearTableNotifiers()
+    # @staticmethod  # has to be a static method
+    # def onDestroyed(widget):
+    #     # print("DEBUG on destroyed:", widget)
+    #     widget._clearTableNotifiers()
+
+    def _close(self):
+        self._clearTableNotifiers()
+        # self.close()
 
     def _clearTableNotifiers(self):
         """Clean up the notifiers

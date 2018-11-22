@@ -274,7 +274,7 @@ class NotesEditorModule(CcpnModule):
         CCPN-INTERNAL: used to close the module
         """
         self._clearNotifiers()
-        super(NotesEditorModule, self)._closeModule()
+        super()._closeModule()
 
     def close(self):
         """

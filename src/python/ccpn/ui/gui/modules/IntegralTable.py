@@ -98,7 +98,7 @@ class IntegralTableModule(CcpnModule):
         CCPN-INTERNAL: used to close the module
         """
         self.integralTable._close()
-        super(IntegralTableModule, self)._closeModule()
+        super()._closeModule()
 
     def close(self):
         """
@@ -123,10 +123,14 @@ class IntegralTable(QuickTable):
         """
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
-        self.application = mainWindow.application
-        self.project = mainWindow.application.project
-        self.current = mainWindow.application.current
-        self.moduleParent = moduleParent
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = None
+            self.project = None
+            self.current = None
         IntegralTable.project = self.project
 
         kwds['setLayout'] = True  ## Assure we have a layout with the widget
@@ -176,7 +180,7 @@ class IntegralTable(QuickTable):
         self.dataFrameObject = None
 
         # initialise the table
-        QuickTable.__init__(self, parent=parent,
+        super().__init__(parent=parent,
                             mainWindow=self.mainWindow,
                             dataFrameObject=None,
                             setLayout=True,
@@ -185,6 +189,7 @@ class IntegralTable(QuickTable):
                             actionCallback=self._actionCallback,
                             multiSelect=True,
                             grid=(3, 0), gridSpan=(1, 6))
+        self.moduleParent = moduleParent
 
         if integralList is not None:
             self._selectIntegralList(integralList)
@@ -200,7 +205,7 @@ class IntegralTable(QuickTable):
                                pullDownWidget=self.ITcolumns,
                                callBackClass=Integral,
                                selectCurrentCallBack=self._selectOnTableCurrentIntegralsNotifierCallback,
-                               moduleParent=self.moduleParent)
+                               moduleParent=moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],

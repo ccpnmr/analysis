@@ -132,7 +132,7 @@ class RestraintTableModule(CcpnModule):
         CCPN-INTERNAL: used to close the module
         """
         self.restraintTable._close()
-        super(RestraintTableModule, self)._closeModule()
+        super()._closeModule()
 
     def close(self):
         """
@@ -166,7 +166,6 @@ class RestraintTable(QuickTable):
             self.project = None
             self.current = None
 
-        self.moduleParent = moduleParent
         parent.getLayout().setHorizontalSpacing(0)
         self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
@@ -220,7 +219,7 @@ class RestraintTable(QuickTable):
         self.dataFrameObject = None
 
         # initialise the table
-        QuickTable.__init__(self, parent=parent,
+        super().__init__(parent=parent,
                             mainWindow=self.mainWindow,
                             dataFrameObject=None,
                             setLayout=True,
@@ -228,6 +227,7 @@ class RestraintTable(QuickTable):
                             selectionCallback=self._selectionCallback,
                             actionCallback=self._actionCallback,
                             grid=(3, 0), gridSpan=(1, 6))
+        self.moduleParent = moduleParent
 
         ## populate the table if there are restraintLists in the project
         if restraintList is not None:
@@ -244,7 +244,7 @@ class RestraintTable(QuickTable):
                                pullDownWidget=self.RLcolumns,
                                callBackClass=Restraint,
                                selectCurrentCallBack=None,
-                               moduleParent=self.moduleParent)
+                               moduleParent=moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],

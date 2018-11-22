@@ -110,7 +110,7 @@ class ResidueTableModule(CcpnModule):
         """CCPN-INTERNAL: used to close the module
         """
         self.residueTable._close()
-        super(ResidueTableModule, self)._closeModule()
+        super()._closeModule()
 
     def close(self):
         """Close the table from the commandline
@@ -158,7 +158,6 @@ class ResidueTable(QuickTable):
             self.project = None
             self.current = None
 
-        self.moduleParent = moduleParent
         parent.getLayout().setHorizontalSpacing(0)
         self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
@@ -205,7 +204,7 @@ class ResidueTable(QuickTable):
         self.dataFrameObject = None
 
         # initialise the table
-        QuickTable.__init__(self, parent=parent,
+        super().__init__(parent=parent,
                             mainWindow=self.mainWindow,
                             dataFrameObject=None,
                             setLayout=True,
@@ -216,6 +215,7 @@ class ResidueTable(QuickTable):
                             grid=(3, 0), gridSpan=(1, 6),
                             enableDelete=True
                             )
+        self.moduleParent = moduleParent
 
         # TODO: see how to handle peaks as this is too costly at present
         # Notifier object to update the table if the peaks change
@@ -234,7 +234,7 @@ class ResidueTable(QuickTable):
                                pullDownWidget=self.cWidget,
                                callBackClass=Residue,
                                selectCurrentCallBack=self._selectOnTableCurrentResiduesNotifierCallback,
-                               moduleParent=self.moduleParent)
+                               moduleParent=moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],

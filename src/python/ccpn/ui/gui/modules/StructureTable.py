@@ -199,7 +199,7 @@ class StructureTableModule(CcpnModule):
         CCPN-INTERNAL: used to close the module
         """
         self.structureTable._close()
-        super(StructureTableModule, self)._closeModule()
+        super()._closeModule()
 
     def close(self):
         """
@@ -367,7 +367,6 @@ class StructureTable(QuickTableStructure):
             self._project = None
             self._current = None
 
-        self.moduleParent = moduleParent
         parent.getLayout().setHorizontalSpacing(0)
         self._widgetScrollArea = ScrollArea(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
         self._widgetScrollArea.setWidgetResizable(True)
@@ -435,7 +434,7 @@ class StructureTable(QuickTableStructure):
         self._hiddenColumns = ['altLocationCode', 'element', 'occupancy']
         self.dataFrameObject = None
 
-        QuickTable.__init__(self, parent=parent,
+        super().__init__(parent=parent,
                             mainWindow=self._mainWindow,
                             dataFrameObject=None,  # class collating table and objects and headings,
                             setLayout=True,
@@ -444,6 +443,7 @@ class StructureTable(QuickTableStructure):
                             actionCallback=self._actionCallback,
                             grid=(3, 0), gridSpan=(1, 6)
                             )
+        self.moduleParent = moduleParent
 
         self._ensembleNotifier = None
         self._updateSilence = False

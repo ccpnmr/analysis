@@ -396,7 +396,6 @@ class PeakListTableWidget(QuickTable):
         if peaks is None:
             self.current.clearPeaks()
         else:
-            # TODO:ED fix feedback loop
             self.current.peaks = peaks
 
     def _pulldownUnitsCallback(self, unit):

@@ -421,3 +421,4 @@ class IntegralTable(QuickTable):
         """
         # self.clearTableNotifiers()
         self._clearRegions()
+        super()._close()

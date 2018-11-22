@@ -425,7 +425,7 @@ class Current:
         for cls in _currentClasses:
             fieldName = '_' + cls._pluralLinkName
             ntf = Notifier(self.project, triggers=[Notifier.DELETE], targetName=cls.className,
-                           callback=self._cleanUp, debug=True, fieldName=fieldName)  # fieldName is passed on to the callback function
+                           callback=self._cleanUp, debug=False, fieldName=fieldName)  # fieldName is passed on to the callback function
             self._notifiers.append(ntf)
 
     def _unregisterNotifiers(self):

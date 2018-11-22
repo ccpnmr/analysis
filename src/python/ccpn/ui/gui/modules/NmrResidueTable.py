@@ -218,7 +218,6 @@ class NmrResidueTable(QuickTable):
         """
         Initialise the widgets for the module. kwds passed to the scrollArea widget
         """
-
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
         if mainWindow:
@@ -229,7 +228,6 @@ class NmrResidueTable(QuickTable):
             self.application = None
             self.project = None
             self.current = None
-        self.moduleParent = moduleParent
 
         # strange, need to do this when using scrollArea, but not a Widget
         parent.getLayout().setHorizontalSpacing(0)
@@ -284,7 +282,7 @@ class NmrResidueTable(QuickTable):
         self.dataFrameObject = None
 
         # initialise the table
-        QuickTable.__init__(self, parent=parent,
+        super().__init__(parent=parent,
                             mainWindow=self.mainWindow,
                             dataFrameObject=None,
                             setLayout=True,
@@ -295,6 +293,7 @@ class NmrResidueTable(QuickTable):
                             grid=(3, 0), gridSpan=(1, 6),
                             enableDelete=True
                             )
+        self.moduleParent = moduleParent
 
         # Notifier object to update the table if the peaks change
         self._peakNotifier = None
@@ -313,7 +312,7 @@ class NmrResidueTable(QuickTable):
                                pullDownWidget=self.ncWidget,
                                callBackClass=NmrResidue,
                                selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback,
-                               moduleParent=self.moduleParent)
+                               moduleParent=moduleParent)
 
         self.droppedNotifier = GuiNotifier(self,
                                            [GuiNotifier.DROPEVENT], [DropBase.PIDS],

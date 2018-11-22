@@ -263,7 +263,7 @@ class MacroEditor(CcpnModule):
     if ok:
       self._saveMacro()
 
-    super(MacroEditor, self)._closeModule()
+    super()._closeModule()
 
 if __name__ == '__main__':
   from PyQt5 import QtGui, QtWidgets

@@ -47,11 +47,11 @@ class CcpnWebView(CcpnModule):
     self.webView.load(QUrl(urlPath))
     self.webView.show()
 
-  def _closeModule(self):
-    """
-    CCPN-INTERNAL: used to close the module
-    """
-    super(CcpnWebView, self)._closeModule()
+  # def _closeModule(self):
+  #   """
+  #   CCPN-INTERNAL: used to close the module
+  #   """
+  #   super(CcpnWebView, self)._closeModule()
 
   def close(self):
     """

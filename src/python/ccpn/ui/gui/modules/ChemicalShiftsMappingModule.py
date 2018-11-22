@@ -1039,4 +1039,4 @@ class ChemicalShiftsMapping(CcpnModule):
         if self._nrDeletedNotifier:
             self._nrDeletedNotifier.unRegister()
 
-        super(ChemicalShiftsMapping, self)._closeModule()
+        super()._closeModule()

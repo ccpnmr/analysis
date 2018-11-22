@@ -217,11 +217,6 @@ class Notifier(object):
                 func = theObject.registerNotify(partial(self, notifier=notifier), tName)
                 self._notifiers.append(notifier)
                 self._unregister.append((tName, Notifier.CURRENT, func))
-                if self._debug:
-                    # logger.info
-                    sys.stderr.write('>>> Notifier (%d): registered %r, %r, %r, %r\n' % \
-                                     (self._index, self._theObject, trigger, tName, self._callback)
-                                    )
 
             # OBSERVE special case, as the current underpinning implementation does not allow this directly
             # Hence, we track all changes to the object class, filtering those that apply
@@ -240,11 +235,6 @@ class Notifier(object):
                                                       onceOnly=onceOnly)
                 self._notifiers.append(notifier)
                 self._unregister.append((theObject.className, Notifier.CHANGE, func))
-                if self._debug:
-                    # logger.info
-                    sys.stderr.write('>>> Notifier (%d): registered %r, %r, %r, %r\n' % \
-                                     (self._index, self._theObject, trigger, targetName, self._callback)
-                                    )
 
             # All other triggers; if targetName == None, respond to changes in the object itself.
             else:
@@ -268,15 +258,14 @@ class Notifier(object):
                                                       onceOnly=onceOnly)
                 self._notifiers.append(notifier)
                 self._unregister.append((targetName, trigger, func))
-                if self._debug:
-                    # logger.info
-                    sys.stderr.write('>>> Notifier (%d): registered %r, %r, %r, %r\n' % \
-                                     (self._index, self._theObject, trigger, targetName, self._callback)
-                                    )
 
         if len(self._notifiers) == 0:
             raise RuntimeWarning('Notifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
                                  (theObject, targetName, triggers))
+
+        if self._debug:
+            # logger.info
+            sys.stderr.write('>>> registered %s\n' % self)
 
     def unRegister(self):
         """
@@ -324,7 +313,7 @@ class Notifier(object):
         trigger, targetName, triggerForTheObject = notifier
 
         if self._debug:
-            sys.stderr.write('>>> Notifier.__call__: %s, notifier=%s, obj=%r parameter2=%r\n' % \
+            sys.stderr.write('>>> Notifier.__call__: %s --> notifier=%s, obj=%r parameter2=%r\n' % \
                              (self, notifier, obj, parameter2)
             )
 

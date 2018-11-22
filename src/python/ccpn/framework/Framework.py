@@ -1924,15 +1924,19 @@ class Framework:
       self._closeMainWindows()
       self._closeExtraWindows()
       self.ui.mainWindow.deleteLater()
+      self.ui.mainWindow = None
+
+    if self.current:
+      self.current._unregisterNotifiers()
+      self.current = None
 
     if self.project is not None:
       # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
       self.project._close()
       self.project = None
 
-    self.ui.mainWindow = None
-    self.current = None
-    self.project = None
+    # self.ui.mainWindow = None
+    # self.project = None
 
   ###################################################################################################################
   ## MENU callbacks:  Spectrum

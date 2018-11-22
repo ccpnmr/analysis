@@ -673,6 +673,6 @@ for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
             )
 
 # Notify Peaks change when SpectrumReference changes
-# (That means DataDimRef referencing information)
-SpectrumReference._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-                                     {'pathToObject': 'spectrum.peaks', 'action': 'change'})
+# # (That means DataDimRef referencing information)
+# SpectrumReference._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+#                                      {'pathToObject': 'spectrum.peaks', 'action': 'change'})

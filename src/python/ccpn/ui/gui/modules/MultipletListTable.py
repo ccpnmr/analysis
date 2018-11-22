@@ -80,7 +80,7 @@ class MultipletTableModule(CcpnModule):
 
         self.peakListTable = PeakListTableWidget(parent=self.peaksFrame,
                                                  mainWindow=self.mainWindow,
-                                                 moduleParent=self,
+                                                 moduleParent=self.peaksFrame,  # just to give a unique id
                                                  setLayout=False,
                                                  grid=(1, 0))
         self.peakListTable._widgetScrollArea.hide()
@@ -117,6 +117,7 @@ class MultipletTableModule(CcpnModule):
     def _closeModule(self):
         """Re-implementation of closeModule function from CcpnModule to unregister notification """
         self.multipletListTable._close()
+        self.peakListTable._close()
         super()._closeModule()
 
     def close(self):
@@ -151,7 +152,8 @@ class MultipletListTableWidget(QuickTable):
             self.project = None
             self.current = None
 
-        self.peakListTable = self.moduleParent.peakListTable
+        if moduleParent:
+            self.peakListTable = moduleParent.peakListTable
         MultipletListTableWidget.project = self.project
 
         self.settingWidgets = None

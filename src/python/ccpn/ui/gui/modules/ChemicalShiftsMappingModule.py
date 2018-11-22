@@ -300,7 +300,7 @@ class ChemicalShiftsMapping(CcpnModule):
             self.barGraphWidget.xLine.setPos(DefaultThreshould)
             self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._threshouldLineMoved)
             self.barGraphWidget.customViewBox.mouseClickEvent = self._viewboxMouseClickEvent
-            self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
+            self.nmrResidueTable = CustomNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow, moduleParent=self,
                                                          actionCallback=self._customActionCallBack, checkBoxCallback=self._checkBoxCallback,
                                                          setLayout=True, grid=(0, 0))
             self.nmrResidueTable.chemicalShiftsMappingModule = self
@@ -1039,4 +1039,5 @@ class ChemicalShiftsMapping(CcpnModule):
         if self._nrDeletedNotifier:
             self._nrDeletedNotifier.unRegister()
 
+        self.nmrResidueTable._close()
         super()._closeModule()

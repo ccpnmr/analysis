@@ -112,7 +112,7 @@ class Gui(Ui):
 
         from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 
-        project.registerNotifier('SpectrumView', 'delete', GuiSpectrumView._deletedSpectrumView)
+        # project.registerNotifier('SpectrumView', 'delete', GuiSpectrumView._deletedSpectrumView)
         project.registerNotifier('SpectrumView', 'create', GuiSpectrumView._createdSpectrumView)
         project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
 

@@ -244,7 +244,7 @@ class NmrAtom(AbstractWrapperObject):
                 (('chainCode', None), ('sequenceCode', None),
                  ('residueType', None), ('name', None), ('mergeToExisting', False)
                  )
-        )
+                )
 
         oldPid = self.longPid
         clearUndo = False
@@ -542,13 +542,11 @@ Project._apiNotifiers.extend(
         (('_finaliseApiRename', {}, className, 'setImplName'),
          ('_finaliseApiRename', {}, className, 'setResonanceGroup'),
          )
-)
+        )
 for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
     className = clazz.qualifiedName()
     Project._apiNotifiers.extend(
             (('_modifiedLink', {'classNames': ('NmrAtom', 'Peak')}, className, 'create'),
              ('_modifiedLink', {'classNames': ('NmrAtom', 'Peak')}, className, 'delete'),
              )
-    )
-
-
+            )

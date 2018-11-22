@@ -53,39 +53,39 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         # store the list of ordered spectrumViews
         self._orderedSpectrumViews = None
 
-    def showPeaks(self, peakListView, peaks):
-        """
-        Displays specified peaks in all strips of the display using peakListView
-        """
-
-        # NB should not be imported at top of file to avoid potential cyclic imports
-        from ccpn.ui.gui.lib import GuiPeakListView
-
-        viewBox = peakListView.spectrumView.strip.viewBox
-        activePeakItemDict = self.activePeakItemDict
-        peakItemDict = activePeakItemDict.setdefault(peakListView, {})
-        inactivePeakItemDict = self.inactivePeakItemDict
-        inactivePeakItems = inactivePeakItemDict.setdefault(peakListView, set())
-        ##inactivePeakItems = self.inactivePeakItems
-        existingApiPeaks = set(peakItemDict.keys())
-        unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
-        for apiPeak in unusedApiPeaks:
-            peakItem = peakItemDict.pop(apiPeak)
-            #viewBox.removeItem(peakItem)
-            inactivePeakItems.add(peakItem)
-            peakItem.setVisible(False)
-        for peak in peaks:
-            apiPeak = peak._wrappedData
-            if apiPeak in existingApiPeaks:
-                continue
-            if inactivePeakItems:
-                peakItem = inactivePeakItems.pop()
-                peakItem.setupPeakItem(peakListView, peak)
-                #viewBox.addItem(peakItem)
-                peakItem.setVisible(True)
-            else:
-                peakItem = GuiPeakListView.Peak1d(peak, peakListView)
-            peakItemDict[apiPeak] = peakItem
+    # def showPeaks(self, peakListView, peaks):
+    #     """
+    #     Displays specified peaks in all strips of the display using peakListView
+    #     """
+    #
+    #     # NB should not be imported at top of file to avoid potential cyclic imports
+    #     from ccpn.ui.gui.lib import GuiPeakListView
+    #
+    #     viewBox = peakListView.spectrumView.strip.viewBox
+    #     activePeakItemDict = self.activePeakItemDict
+    #     peakItemDict = activePeakItemDict.setdefault(peakListView, {})
+    #     inactivePeakItemDict = self.inactivePeakItemDict
+    #     inactivePeakItems = inactivePeakItemDict.setdefault(peakListView, set())
+    #     ##inactivePeakItems = self.inactivePeakItems
+    #     existingApiPeaks = set(peakItemDict.keys())
+    #     unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
+    #     for apiPeak in unusedApiPeaks:
+    #         peakItem = peakItemDict.pop(apiPeak)
+    #         #viewBox.removeItem(peakItem)
+    #         inactivePeakItems.add(peakItem)
+    #         peakItem.setVisible(False)
+    #     for peak in peaks:
+    #         apiPeak = peak._wrappedData
+    #         if apiPeak in existingApiPeaks:
+    #             continue
+    #         if inactivePeakItems:
+    #             peakItem = inactivePeakItems.pop()
+    #             peakItem.setupPeakItem(peakListView, peak)
+    #             #viewBox.addItem(peakItem)
+    #             peakItem.setVisible(True)
+    #         else:
+    #             peakItem = GuiPeakListView.Peak1d(peak, peakListView)
+    #         peakItemDict[apiPeak] = peakItem
 
     def _fillToolBar(self):
         """

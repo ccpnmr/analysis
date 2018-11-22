@@ -9,7 +9,7 @@ __credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timot
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
-               "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+                 "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -31,6 +31,7 @@ from ccpn.util import Colour
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
 
+
 #import pyqtgraph as pg
 
 #from ccpn.ui.gui.modules.spectrumPane.PeakListItem import PeakListItem
@@ -45,219 +46,201 @@ SpectrumViewParams = collections.namedtuple('SpectrumViewParams', ('valuePerPoin
 
 class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
-  #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
-  def __init__(self):
-    """ spectrumPane is the parent
-        spectrum is the Spectrum object
-        dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
-        (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
-    """
-    
-    QtWidgets.QGraphicsItem.__init__(self)    #, scene=self.strip.plotWidget.scene())
-    self.scene = self.strip.plotWidget.scene
-    self._currentBoundingRect = self.strip.plotWidget.sceneRect()
+    #def __init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping=None):
+    def __init__(self):
+        """ spectrumPane is the parent
+            spectrum is the Spectrum object
+            dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
+            (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
+        """
 
-    self._apiDataSource = self._wrappedData.spectrumView.dataSource
-    self.spectrumGroupsToolBar = None
+        QtWidgets.QGraphicsItem.__init__(self)  #, scene=self.strip.plotWidget.scene())
+        self.scene = self.strip.plotWidget.scene
+        self._currentBoundingRect = self.strip.plotWidget.sceneRect()
 
-    action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
-    if action and not action.isChecked():
-      self.setVisible(False)
-      # below does not work so looks like we have a Qt / data model visibility sync issue
-      #self._wrappedData.spectrumView.displayPositiveContours = self._wrappedData.spectrumView.displayNegativeContours = False
+        self._apiDataSource = self._wrappedData.spectrumView.dataSource
+        self.spectrumGroupsToolBar = None
 
-    ##self.spectrum = self._parent # Is this necessary?
-    
-    ###self.setDimMapping(dimMapping)
-    #self.peakListItems = {} # CCPN peakList -> Qt peakListItem
-
-    # strip = self._parent
-    # strip.setupAxes()
-    
-    """
-    for peakList in spectrum.peakLists:
-      self.peakListItems[peakList.pid] = PeakListItem(self, peakList)
-"""      
-    # guiSpectrumDisplay.spectrumItems.append(self)
-    
-    ##for strip in self.strips:
-    ##  strip.addSpectrum(self)
-
-  # To write your own graphics item, you first create a subclass of QGraphicsItem, and
-  # then start by implementing its two pure virtual public functions:
-  # boundingRect(), which returns an estimate of the area painted by the item,
-  # and paint(), which implements the actual painting. For example:
-
-  # mandatory function to override for QGraphicsItem
-  # Implemented in GuiSpectrumViewNd or GuiSpectrumView1d
-  def paint(self, painter, option, widget=None):
-    pass
-
-  def updateGeometryChange(self):   # ejb - can we call this?
-    self._currentBoundingRect = self.strip.plotWidget.sceneRect()
-    self.prepareGeometryChange()
-    # print ('>>>prepareGeometryChange', self._currentBoundingRect)
-
-  # mandatory function to override for QGraphicsItem
-  def boundingRect(self):  # seems necessary to have
-    return self._currentBoundingRect
-
-    # Earlier versions too large value (~1400,1000);
-    # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears
-    # to give less flicker in Scrolled Strips.
-
-  # override of Qt setVisible
-  def setVisible(self, visible):
-    QtWidgets.QGraphicsItem.setVisible(self, visible)
-    try:
-      if self:                                        # ejb - ?? crashes on table update otherwise
         action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
-        action.setChecked(visible)
-        # for peakListView in self.peakListViews:
-        #   peakListView.setVisible(visible)
-    except:
-      getLogger().debug('No visible peaklists')  # gwv changed to debug to reduce output
+        if action and not action.isChecked():
+            self.setVisible(False)
 
-    # repaint all displays - this is called for each spectrumView in the spectrumDisplay
-    # all are attached to the same click
-    from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-    GLSignals = GLNotifier(parent=self)
-    GLSignals.emitPaintEvent()
+    # To write your own graphics item, you first create a subclass of QGraphicsItem, and
+    # then start by implementing its two pure virtual public functions:
+    # boundingRect(), which returns an estimate of the area painted by the item,
+    # and paint(), which implements the actual painting. For example:
 
+    # mandatory function to override for QGraphicsItem
+    # Implemented in GuiSpectrumViewNd or GuiSpectrumView1d
+    def paint(self, painter, option, widget=None):
+        pass
 
-  """
-  def setDimMapping(self, dimMapping=None):
-    
-    dimensionCount = self.spectrum.dimensionCount
-    if dimMapping is None:
-      dimMapping = {}
-      for i in range(dimensionCount):
-        dimMapping[i] = i
-    self.dimMapping = dimMapping
+    def updateGeometryChange(self):  # ejb - can we call this?
+        self._currentBoundingRect = self.strip.plotWidget.sceneRect()
+        self.prepareGeometryChange()
+        # print ('>>>prepareGeometryChange', self._currentBoundingRect)
 
-    xDim = yDim = None
-    inverseDimMapping = {}
-    for dim in dimMapping:
-      inverseDim = dimMapping[dim]
-      if inverseDim == 0:
-        xDim = inverseDim
-      elif inverseDim == 1:
-        yDim = inverseDim
-    
-    if xDim is not None: 
-      assert 0 <= xDim < dimensionCount, 'xDim = %d, dimensionCount = %d' % (xDim, dimensionCount)
-      
-    if yDim is not None:
-      assert 0 <= yDim < dimensionCount, 'yDim = %d, dimensionCount = %d' % (yDim, dimensionCount)
-      assert xDim != yDim, 'xDim = yDim = %d' % xDim
+    # mandatory function to override for QGraphicsItem
+    def boundingRect(self):  # seems necessary to have
+        return self._currentBoundingRect
 
-    self.xDim = xDim
-    self.yDim = yDim
-  """
+        # Earlier versions too large value (~1400,1000);
+        # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears
+        # to give less flicker in Scrolled Strips.
 
-  def _getSpectrumViewParams(self, axisDim:int) -> tuple:
-    """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
-    for axisDimth axis (zero-origin)"""
+    # override of Qt setVisible
+    def setVisible(self, visible):
+        QtWidgets.QGraphicsItem.setVisible(self, visible)
+        try:
+            if self:  # ejb - ?? crashes on table update otherwise
+                action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
+                action.setChecked(visible)
+                # for peakListView in self.peakListViews:
+                #   peakListView.setVisible(visible)
+        except:
+            getLogger().debug('No visible peaklists')  # gwv changed to debug to reduce output
 
-    # axis = self.strip.orderedAxes[axisDim]
-    dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
+        # repaint all displays - this is called for each spectrumView in the spectrumDisplay
+        # all are attached to the same click
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-    if not dataDim:
-      return
+        GLSignals = GLNotifier(parent=self)
+        GLSignals.emitPaintEvent()
 
-    totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, "numPointsOrig")
-                       else dataDim.numPoints)
-    for ii,dd in enumerate(dataDim.dataSource.sortedDataDims()):
-      # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
-      if dd is dataDim:
-        minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
-        break
-    else:
-      minAliasedFrequency = maxAliasedFrequency = dataDim = None
+        # notify that the spectrumView has changed
+        self._finaliseAction('change')
 
-    if hasattr(dataDim, 'primaryDataDimRef'):
-      # FreqDataDim - get ppm valuePerPoint
-      ddr = dataDim.primaryDataDimRef
-      valuePerPoint = ddr and ddr.valuePerPoint
-    elif hasattr(dataDim, 'valuePerPoint'):
-      # FidDataDim - get time valuePerPoint
-      valuePerPoint = dataDim.valuePerPoint
-    else:
-      # Sampled DataDim - return None
-      valuePerPoint = None
+    # def setDimMapping(self, dimMapping=None):
+    #
+    #   dimensionCount = self.spectrum.dimensionCount
+    #   if dimMapping is None:
+    #     dimMapping = {}
+    #     for i in range(dimensionCount):
+    #       dimMapping[i] = i
+    #   self.dimMapping = dimMapping
+    #
+    #   xDim = yDim = None
+    #   inverseDimMapping = {}
+    #   for dim in dimMapping:
+    #     inverseDim = dimMapping[dim]
+    #     if inverseDim == 0:
+    #       xDim = inverseDim
+    #     elif inverseDim == 1:
+    #       yDim = inverseDim
+    #
+    #   if xDim is not None:
+    #     assert 0 <= xDim < dimensionCount, 'xDim = %d, dimensionCount = %d' % (xDim, dimensionCount)
+    #
+    #   if yDim is not None:
+    #     assert 0 <= yDim < dimensionCount, 'yDim = %d, dimensionCount = %d' % (yDim, dimensionCount)
+    #     assert xDim != yDim, 'xDim = yDim = %d' % xDim
+    #
+    #   self.xDim = xDim
+    #   self.yDim = yDim
 
-    # return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
-    return SpectrumViewParams(valuePerPoint, totalPointCount,
-                              minAliasedFrequency, maxAliasedFrequency, dataDim)
+    def _getSpectrumViewParams(self, axisDim: int) -> tuple:
+        """Get position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency
+        for axisDimth axis (zero-origin)"""
 
-  def _getColour(self, colourAttr, defaultColour=None):
+        # axis = self.strip.orderedAxes[axisDim]
+        dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[axisDim]
 
-    colour = getattr(self, colourAttr)
-    # if not colour:
-    #   colour = getattr(self.spectrum, colourAttr)
-      
-    if not colour:
-      colour = defaultColour
+        if not dataDim:
+            return
 
-    colour = Colour.colourNameToHexDict.get(colour, colour)  # works even if None
-      
-    return colour
+        totalPointCount = (dataDim.numPointsOrig if hasattr(dataDim, "numPointsOrig")
+                           else dataDim.numPoints)
+        for ii, dd in enumerate(dataDim.dataSource.sortedDataDims()):
+            # Must be done this way as dataDim.dim may not be in order 1,2,3 (e.g. for projections)
+            if dd is dataDim:
+                minAliasedFrequency, maxAliasedFrequency = (self.spectrum.aliasingLimits)[ii]
+                break
+        else:
+            minAliasedFrequency = maxAliasedFrequency = dataDim = None
 
-  def _spectrumViewHasChanged(self):
-    """Change action icon colour and other changes when spectrumView changes
+        if hasattr(dataDim, 'primaryDataDimRef'):
+            # FreqDataDim - get ppm valuePerPoint
+            ddr = dataDim.primaryDataDimRef
+            valuePerPoint = ddr and ddr.valuePerPoint
+        elif hasattr(dataDim, 'valuePerPoint'):
+            # FidDataDim - get time valuePerPoint
+            valuePerPoint = dataDim.valuePerPoint
+        else:
+            # Sampled DataDim - return None
+            valuePerPoint = None
 
-    NB SpectrumView change notifiers are triggered when either DataSource or ApiSpectrumView change"""
-    spectrumDisplay = self.strip.spectrumDisplay
-    apiDataSource = self.spectrum._wrappedData
+        # return axis.position, axis.width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim
+        return SpectrumViewParams(valuePerPoint, totalPointCount,
+                                  minAliasedFrequency, maxAliasedFrequency, dataDim)
 
-    # Update action icol colour
-    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
-    if action:
-      pix=QtGui.QPixmap(QtCore.QSize(60, 10))
-      if spectrumDisplay.is1D:
-        pix.fill(QtGui.QColor(self.sliceColour))
-      else:
-        pix.fill(QtGui.QColor(self.positiveContourColour))
-      action.setIcon(QtGui.QIcon(pix))
+    def _getColour(self, colourAttr, defaultColour=None):
 
-    # Update strip
-    self.strip.update()
+        colour = getattr(self, colourAttr)
+        # if not colour:
+        #   colour = getattr(self.spectrum, colourAttr)
 
-  def _createdSpectrumView(self, index=None):
-    """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers.
-    This function adds the spectra buttons to the spectrumToolBar."""
+        if not colour:
+            colour = defaultColour
 
-    # NBNB TBD FIXME get rid of API objects
+        colour = Colour.colourNameToHexDict.get(colour, colour)  # works even if None
 
-    spectrumDisplay = self.strip.spectrumDisplay
-    spectrum = self.spectrum
+        return colour
 
-    # Set Z widgets for nD strips
-    strip = self.strip
-    if not spectrumDisplay.is1D:
-      if not strip.haveSetupZWidgets:
-        strip._setZWidgets()
+    def _spectrumViewHasChanged(self):
+        """Change action icon colour and other changes when spectrumView changes
 
-    spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)
+        NB SpectrumView change notifiers are triggered when either DataSource or ApiSpectrumView change"""
+        spectrumDisplay = self.strip.spectrumDisplay
+        apiDataSource = self.spectrum._wrappedData
 
-    # TODO:ED check here - used to catch undelete of spectrumView
-    if self.strip.plotWidget:
-      scene = self.strip.plotWidget.scene()
-      if self not in scene.items():  # This happens when you do an undo after deletion of spectrum(View)
-        scene.addItem(self)
+        # Update action icol colour
+        action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+        if action:
+            pix = QtGui.QPixmap(QtCore.QSize(60, 10))
+            if spectrumDisplay.is1D:
+                pix.fill(QtGui.QColor(self.sliceColour))
+            else:
+                pix.fill(QtGui.QColor(self.positiveContourColour))
+            action.setIcon(QtGui.QIcon(pix))
 
-        # TODO:ED ERROR HERE shouldn't need this soon be check
-        # if spectrumDisplay.is1D:
-        #   strip.viewBox.addItem(self.plot)
+        # Update strip
+        self.strip.update()
 
-  def _deletedSpectrumView(self):
-    """Update interface when a spectrumView is deleted"""
-    if self.strip.plotWidget:
-      scene = self.strip.plotWidget.scene()
-      scene.removeItem(self)
-      if hasattr(self, 'plot'):  # 1d
-        scene.removeItem(self.plot)
+    def _createdSpectrumView(self, index=None):
+        """Set up SpectrumDisplay when new StripSpectrumView is created - for notifiers.
+        This function adds the spectra buttons to the spectrumToolBar."""
 
-  def refreshData(self):
+        # NBNB TBD FIXME get rid of API objects
 
-    raise Exception('Needs to be implemented in subclass')
+        spectrumDisplay = self.strip.spectrumDisplay
+        spectrum = self.spectrum
+
+        # Set Z widgets for nD strips
+        strip = self.strip
+        if not spectrumDisplay.is1D:
+            if not strip.haveSetupZWidgets:
+                strip._setZWidgets()
+
+        spectrumDisplay.spectrumToolBar._addSpectrumViewToolButtons(self)
+
+        # # TODO:ED check here - used to catch undelete of spectrumView
+        # if self.strip.plotWidget:
+        #     scene = self.strip.plotWidget.scene()
+        #     if self not in scene.items():  # This happens when you do an undo after deletion of spectrum(View)
+        #         scene.addItem(self)
+        #
+        #         # TODO:ED ERROR HERE shouldn't need this soon be check
+        #         # if spectrumDisplay.is1D:
+        #         #   strip.viewBox.addItem(self.plot)
+
+    # def _deletedSpectrumView(self):
+    #     """Update interface when a spectrumView is deleted"""
+    #     if self.strip.plotWidget:
+    #         scene = self.strip.plotWidget.scene()
+    #         scene.removeItem(self)
+    #         if hasattr(self, 'plot'):  # 1d
+    #             scene.removeItem(self.plot)
+
+    def refreshData(self):
+
+        raise Exception('Needs to be implemented in subclass')

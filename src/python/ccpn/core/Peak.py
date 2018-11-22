@@ -709,7 +709,8 @@ for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
         )
             )
 
+# EJB 20181122: moved to SpectrumReference
 # Notify Peaks change when SpectrumReference changes
 # (That means DataDimRef referencing information)
-SpectrumReference._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
-                                     {'pathToObject': 'spectrum.peaks', 'action': 'change'})
+# SpectrumReference._setupCoreNotifier('change', AbstractWrapperObject._finaliseRelatedObject,
+#                                      {'pathToObject': 'spectrum.peaks', 'action': 'change'})

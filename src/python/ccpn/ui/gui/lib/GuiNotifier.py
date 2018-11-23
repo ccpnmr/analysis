@@ -44,6 +44,7 @@ from typing import Callable, Any
 
 from PyQt5 import QtGui, QtWidgets
 
+from ccpn.core.lib.Notifiers import NotifierABC
 from ccpn.ui.gui.widgets.DropBase import DropBase
 
 from ccpn.util.Logging import getLogger
@@ -57,7 +58,7 @@ def skip(*args, **kwargs):
     pass
 
 
-class GuiNotifier(object):
+class GuiNotifier(NotifierABC):
     """
      GuiNotifier class:
 
@@ -92,7 +93,6 @@ class GuiNotifier(object):
       as defined in DropBase, from which each Ccpn-Widget derives.
 
     """
-    _currentIndex = 0
 
     # Trigger keywords
     DROPEVENT = 'dropEvent'
@@ -101,7 +101,7 @@ class GuiNotifier(object):
     _triggerKeywords = (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
 
     def __init__(self, theObject: Any, triggers: list, targetName: list,
-                       callback: Callable[..., str], *args, **kwargs):
+                       callback: Callable[..., str], debug=False, **kwargs):
         """
         Create GuiNotifier object;
 
@@ -109,9 +109,11 @@ class GuiNotifier(object):
         :param triggers: list of trigger keywords callback; i.e. (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)
         :param targetName: optional list of dropTargets (URLS, TEXT, PIDS, IDS) or None
         :param callback: callback function with signature: callback(callbackDict [, *args] [, **kwargs])
+        :param debug: set debug
         :param *args: optional arguments to callback
         :param **kwargs: optional keyword,value arguments to callback
         """
+        super().__init__(debug=debug)
 
         # some sanity checks
         if not isinstance(theObject, QtWidgets.QWidget):
@@ -122,19 +124,13 @@ class GuiNotifier(object):
                     or len(triggers) == 0:
                 raise RuntimeError('Invalid trigger (%r)' % triggers)
 
-        self._index = GuiNotifier._currentIndex
-        GuiNotifier._currentIndex += 1
-
         self._theObject = theObject  # The object we are monitoring
 
         self._notifiers = []  # list of tuples defining Notifier call signature; used for __str__
         self._unregister = []  # list of tuples needed for unregistering
 
         self._callback = callback
-        self._args = args
         self._kwargs = kwargs
-
-        self._debug = False  # ability to report on individual instances
 
         # register the callbacks
         for trigger in triggers:
@@ -196,10 +192,6 @@ class GuiNotifier(object):
         "Return True if notifier is still registered; i.e. active"
         return len(self._notifiers) > 0
 
-    def setDebug(self, flag: bool):
-        "Set debug output on/off"
-        self._debug = flag
-
     def __call__(self, data: dict, notifier: tuple = None):
         """
         wrapper, accommodating the different triggers before firing the callback
@@ -229,7 +221,7 @@ class GuiNotifier(object):
                 targetName=targetName,
                 )
         callbackDict.update(data)
-        self._callback(callbackDict, *self._args, **self._kwargs)
+        self._callback(callbackDict, **self._kwargs)
         return
 
     def __str__(self) -> str:

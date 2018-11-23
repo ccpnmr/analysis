@@ -30,6 +30,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.util.Colour import spectrumHexColours
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getCcpCodeData
+from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
 
 
 class ReferenceChemicalShifts(CcpnModule): # DropBase needs to be first, else the drop events are not processed
@@ -41,8 +42,8 @@ class ReferenceChemicalShifts(CcpnModule): # DropBase needs to be first, else th
 
   def __init__(self, mainWindow, name='Reference Chemical Shifts',):
     CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
-
-    self.plotWidget = pg.PlotWidget()
+    bc = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+    self.plotWidget = pg.PlotWidget(background=bc)
     self.plotWidget.invertX()
     self.mainWindow = mainWindow
     self.project = self.mainWindow.project

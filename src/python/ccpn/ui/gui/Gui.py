@@ -90,8 +90,10 @@ class Gui(Ui):
         # Wrapper Notifiers
         from ccpn.ui.gui.lib import GuiStrip
 
-        notifier = project.registerNotifier('Strip', 'create', GuiStrip.GuiStrip._resetRemoveStripAction)
-        project.duplicateNotifier('Strip', 'delete', notifier)
+        Notifier(project, [Notifier.CREATE, Notifier.DELETE], 'Strip',
+                            GuiStrip.GuiStrip._resetRemoveStripAction)
+        # notifier = project.registerNotifier('Strip', 'create', GuiStrip.GuiStrip._resetRemoveStripAction)
+        # project.duplicateNotifier('Strip', 'delete', notifier)
 
         project.registerNotifier('Axis', 'change', GuiStrip._axisRegionChanged)
 

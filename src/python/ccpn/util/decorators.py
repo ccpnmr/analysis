@@ -10,6 +10,7 @@ import cProfile
 import decorator
 import inspect
 from functools import partial
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 def trace(f):
@@ -83,84 +84,57 @@ def profile(func):
     return profileWrapper
 
 
-def notify(action, subClass=''):
+def notify(trigger):
     """A decorator wrap a method in an undo block
     """
+
+    trigger = 'change' if trigger == 'observe' else trigger
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
 
-        def undo(self):
-            """preRedo/postUndo function, needed for undo/redo
-            """
-            pass
-
-        def redo(self):
-            """preUndo/postRedo function, needed for undo/redo, and fire single change notifiers
-            """
-            self._finaliseAction(action=action)
-            for obj in getattr(self, subClass, []):
-                obj._finaliseAction(action)
-
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
-
         self = args[0]
-        _undo = self.project._undo
 
-        _undo._newItem(undoPartial=partial(redo, self))
-        # undo(self)
-        try:
+        # Execute the function with blanked notification
+        self.project.blankNotification()
+        result = func(*args, **kwds)
+        self.project.unblankNotification()
 
-            # call the wrapped function
-            result = func(*args, **kwds)
-
-        finally:
-            redo(self)
-            _undo._newItem(redoPartial=partial(redo, self))
+        # now call the notification
+        self._finaliseAction(trigger)
 
         return result
 
     return theDecorator
 
 
-def undo():
+def propertyUndo():
     """A decorator wrap a method in an undo block
     """
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
 
-        def undo(self):
-            """preRedo/postUndo function, needed for undo/redo
-            """
-            self.project.blankNotification()
-
-        def redo(self):
-            """preUndo/postRedo function, needed for undo/redo, and fire single change notifiers
-            """
-            self.project.unblankNotification()
-
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
 
         self = args[0]
-        self._startCommandEchoBlock(func.__name__, *args, propertySetter=True)
-        _undo = self.project._undo
 
-        _undo._newItem(undoPartial=partial(redo, self),
-                       redoPartial=partial(undo, self))
-        undo(self)
-        try:
+        _undo = self.project._undo
+        with undoBlock(self.project.application):
+
+            _undo.increaseBlocking()
+            oldValue = getattr(self, func.__name__)
 
             # call the wrapped function
             result = func(*args, **kwds)
 
-        finally:
-            redo(self)
-            _undo._newItem(undoPartial=partial(undo, self),
-                           redoPartial=partial(redo, self))
-            self._endCommandEchoBlock()
+            _undo.decreaseBlocking()
+
+            _undo._newItem(undoPartial=partial(func, self, oldValue),
+                           redoPartial=partial(func, *args, **kwds))
 
         return result
 

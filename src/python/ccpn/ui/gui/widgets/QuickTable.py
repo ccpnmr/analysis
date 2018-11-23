@@ -217,7 +217,7 @@ QuickTable::item::selected {
         # set Interactive and last column to expanding
         self.horizontalHeader().setResizeMode(QtWidgets.QHeaderView.Interactive)
         self.horizontalHeader().setStretchLastSection(stretchLastSection)
-        self.horizontalHeader().setResizeContentsPrecision(-1)
+        self.horizontalHeader().setResizeContentsPrecision(0)
         self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
 
         # enable the right click menu
@@ -1530,7 +1530,11 @@ QuickTable::item::selected {
                             rowCallback = cBack[OBJECT_PARENT]
                             break
                 else:
-                    rowObj = getattr(cell, callbacktypes[OBJECT_PARENT])
+                    try:
+                        rowObj = getattr(cell, callbacktypes[OBJECT_PARENT])
+                    except Exception as es:
+                        pass
+
                     rowCallback = callbacktypes[OBJECT_PARENT]
 
                 # concatenate the list - will always return a list

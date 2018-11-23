@@ -682,10 +682,12 @@ class Project(AbstractWrapperObject):
                 if onceOnly:
 
                     # check whether the match pair, (function, object) is in the found set
-                    matchNotifier = (notifier, notification[2:])
+                    matchNotifier = (notifier, notification[2])
                     if matchNotifier not in scheduledNotifiers:
                         scheduledNotifiers.add(matchNotifier)
-                        executeNotifications.append(matchNotifier)
+
+                        # append the function call (function, object, *params)
+                        executeNotifications.append((notifier, notification[2:]))
 
                     # if notifier not in scheduledNotifiers:
                     #     scheduledNotifiers.add(notifier)

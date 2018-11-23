@@ -905,7 +905,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         for lItem in list:
             items = self.findItems(lItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
             if len(items) > 1:
-                print('>>>expand Error')
+                # print('>>>expand Error')
                 for item in items:
                     print(item.text(0))
             else:

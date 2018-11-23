@@ -213,7 +213,7 @@ class PeakListTableWidget(QuickTable):
     def _processDroppedItems(self, data):
         """CallBack for Drop events
         """
-        print('>>>_processDroppedItems')
+        # print('>>>_processDroppedItems')
 
         pids = data.get('pids', [])
         self._handleDroppedItems(pids, PeakList, self.pLwidget)
@@ -286,7 +286,7 @@ class PeakListTableWidget(QuickTable):
         Obviously, If the peak has not been previously deleted and flagged isDeleted
         """
 
-        print('>>>PeakTable _updateTable', repr(self))
+        # print('>>>PeakTable _updateTable', repr(self))
 
         # self.setObjectsAndColumns(objects=[], columns=[]) #clear current table first
         self._selectedPeakList = self.project.getByPid(self.pLwidget.getText())
@@ -339,7 +339,7 @@ class PeakListTableWidget(QuickTable):
     def _selectPeakList(self, peakList=None):
         """Manually select a PeakList from the pullDown
         """
-        print('>>>PeakTable _selectPeakList', repr(self))
+        # print('>>>PeakTable _selectPeakList', repr(self))
 
         if peakList is None:
             logger.warning('select: No PeakList selected')
@@ -366,7 +366,7 @@ class PeakListTableWidget(QuickTable):
     def displayTableForPeakList(self, peakList):
         """Display the table for all NmrResidue's of nmrChain
         """
-        print('>>>displayTableForPeakList')
+        # print('>>>displayTableForPeakList')
 
         self.pLwidget.select(peakList.pid)
         self._updateTable(peaks=peakList.peaks)
@@ -375,7 +375,7 @@ class PeakListTableWidget(QuickTable):
         """If current strip contains the double clicked peak will navigateToPositionInStrip
         """
 
-        print('>>>_actionCallback')
+        # print('>>>_actionCallback')
 
         from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 
@@ -400,7 +400,7 @@ class PeakListTableWidget(QuickTable):
         """
         set as current the selected peaks on the table
         """
-        print('>>>PeakTable _selectionCallback', repr(self))
+        # print('>>>PeakTable _selectionCallback', repr(self))
         peaks = data[Notifier.OBJECT]
         if peaks is None:
             self.current.clearPeaks()
@@ -413,7 +413,7 @@ class PeakListTableWidget(QuickTable):
         self._updateAllModule()
 
     def _pulldownPLcallback(self, data):
-        print('>>>PeakTable _pulldownPLcallback', repr(self))
+        # print('>>>PeakTable _pulldownPLcallback', repr(self))
 
         self._updateAllModule()
 
@@ -460,7 +460,7 @@ class PeakListTableWidget(QuickTable):
         Callback from a notifier to highlight the peaks on the peak table
         :param data:
         """
-        print('>>>PeakTable _selectOnTableCurrentPeaksNotifierCallback', repr(self))
+        # print('>>>PeakTable _selectOnTableCurrentPeaksNotifierCallback', repr(self))
 
         currentPeaks = data['value']
         self._selectOnTableCurrentPeaks(currentPeaks)
@@ -470,7 +470,7 @@ class PeakListTableWidget(QuickTable):
         Highlight the list of peaks on the table
         :param currentPeaks:
         """
-        print('>>>PeakTable _selectOnTableCurrentPeaks', repr(self))
+        # print('>>>PeakTable _selectOnTableCurrentPeaks', repr(self))
 
         if len(currentPeaks) > 0:
             self._highLightObjs(currentPeaks)

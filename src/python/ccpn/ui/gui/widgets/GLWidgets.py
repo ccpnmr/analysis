@@ -320,7 +320,7 @@ class Gui1dWidget(CcpnGLWidget):
             hSpectrum.spectrumView = spectrumView
 
         except Exception as es:
-            print('>>>', str(es))
+            # print('>>>', str(es))
             tracesDict = []
 
     @property

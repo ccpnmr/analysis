@@ -72,7 +72,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
         self.setCallback(callback)
 
-    def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None):
+    def setButtons(self, texts=None, selectedInd=None, direction='h', tipTexts=None, silent=False):
         """Change the buttons in the button group
         """
         # clear the original buttons
@@ -99,7 +99,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
         if selectedInd is not None:
             self.radioButtons[selectedInd].setChecked(True)
         elif selected and selected in self.texts:
-            self.set(selected)
+            self.set(selected, silent=silent)
         else:
             self.radioButtons[0].setChecked(True)
 

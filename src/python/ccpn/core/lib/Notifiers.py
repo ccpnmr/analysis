@@ -181,6 +181,7 @@ class Notifier(object):
         self._kwargs = kwargs
 
         self._debug = debug  # ability to report on individual instances
+        self._isBlanked = False  # ability to blank notifier
 
         # some sanity checks
         if len(triggers) > 1 and Notifier.OBSERVE in triggers:
@@ -301,6 +302,10 @@ class Notifier(object):
         "Set debug output on/off"
         self._debug = flag
 
+    def setBlanking(self, flag: bool):
+        "Set blanking on/off"
+        self._isBlanked = flag
+
     def __call__(self, obj: Any, parameter2: Any = None, notifier: tuple = None):
         """
         wrapper, accomodating the different triggers before firing the callback
@@ -308,6 +313,9 @@ class Notifier(object):
 
         if not self.isRegistered():
             logger.warning('Trigering unregistered notifier %s' % self)
+            return
+
+        if self._isBlanked:
             return
 
         trigger, targetName, triggerForTheObject = notifier
@@ -414,17 +422,18 @@ class Notifier(object):
 #     return notifier
 
 
+
 class NotifierBase(object):
     """
     A class confering notifier management routines;
     """
-    NOTIFIERS = '_V3notifiers'  # attribute name for storing notifiers in Ccpn objects
+    NOTIFIERS = '_ccpNmrV3notifiersDict'  # attribute name for storing notifiers in Ccpn objects
 
     # def _init(self):
     #     """Method to call at intialisation; deliberately different from __init__"""
     #     setattr(self, self.NOTIFIERS, OrderedDict())
 
-    def registerNotifier(self, theObject:AbstractWrapperObject, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs) -> Notifier:
+    def setNotifier(self, theObject:AbstractWrapperObject, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
         :param theObject: V3 object to register a notifier with
@@ -450,17 +459,11 @@ class NotifierBase(object):
         objNotifiers[id] = notifier
         return notifier
 
-    def unregisterNotifier(self, notifier: Notifier):
+    def deleteNotifier(self, notifier: Notifier):
         """
         unregister notifier; remove it from the list and delete it
         :param notifier: Notifier instance
         """
-        # For now: not using: if not isinstance(notifier, Notifier): because when run as script from console
-        # this appears not to work as each new iteration of Notifier is a different Object(!?)
-        if notifier.__class__.__name__ != Notifier.__name__:
-            #print(notifier.__class__.__name__, Notifier.__name__)
-            raise ValueError('"%s" is not a valid Notifier instance')
-
         if not self.hasNotifier(notifier):
             raise RuntimeWarning('"%s" is not a (valid) notifier of "%s"' % (notifier, self))
 
@@ -497,7 +500,7 @@ class NotifierBase(object):
 
         return False
 
-    def unRegisterAllNotifiers(self):
+    def deleteAllNotifiers(self):
         """Unregister all the notifiers"""
         if not self.hasNotifier(None):
             return
@@ -505,6 +508,13 @@ class NotifierBase(object):
         for notifier in list(objNotifiers.values()):
             notifier.unRegister()
 
+    def setBlankingAllNotifiers(self, flag):
+        """Set blanking of all the notifiers to flag"""
+        if not self.hasNotifier(None):
+            return
+        objNotifiers = getattr(self, self.NOTIFIERS)
+        for notifier in list(objNotifiers.values()):
+            notifier.setBlanking(flag)
 
 #
 #

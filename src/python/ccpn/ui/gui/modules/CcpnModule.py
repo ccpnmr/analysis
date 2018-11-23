@@ -673,8 +673,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         except:
             pass
 
-        # unregister any notifiers
-        self.unRegisterAllNotifiers()
+        # delete any notifiers initiated with this Module
+        self.deleteAllNotifiers()
 
         # Try de-registering any notifiers or object with unRegister() method for notifiers
         try:

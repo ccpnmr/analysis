@@ -62,7 +62,62 @@ def skip(*args, **kwargs):
     pass
 
 
-class Notifier(object):
+class NotifierABC(object):
+    """
+    Abstract base class for Notifier and GuiNotifier classes
+    """
+    _currentIndex = 0
+
+    # needs subclassing
+    _triggerKeywords = ()
+
+    def __init__(self, theObject, triggers, targetName, callback, debug=False, **kwargs):
+
+        # Sanity checks
+        if len(self._triggerKeywords) == 0:
+            raise RuntimeError('Not trigger keywords defined; assure proper subclassing definitions')
+
+        # initialisations
+        self._id = NotifierABC._currentIndex
+        NotifierABC._currentIndex += 1
+
+        self._theObject = theObject  # The object we are monitoring
+
+        if triggers is not None:
+            if not (isinstance(triggers, list) or isinstance(triggers, tuple)) \
+                    or len(triggers) == 0:
+                raise RuntimeError('Invalid triggers (%r); should be a list or tuple' % triggers)
+        for trigger in triggers:
+            if not trigger in self._triggerKeywords:
+                raise ValueError('Invalid trigger "%s" for <%s>' % (trigger, self.__class__.__name__))
+        self._triggers = tuple(triggers)
+
+        self._targetName = targetName
+
+        self._callback = callback
+        self._kwargs = kwargs
+
+        self._debug = debug  # ability to report on individual instances
+        self._isBlanked = False  # ability to blank notifier
+
+    @property
+    def id(self):
+        return self._id
+
+    def setDebug(self, flag: bool):
+        "Set debug output on/off"
+        self._debug = flag
+
+    def setBlanking(self, flag: bool):
+        "Set blanking on/off"
+        self._isBlanked = flag
+
+    def __str__(self) -> str:
+        return '<%s (%d): theObject=%s, triggers=%s targetName=%r>' % \
+               (self.__class__.__name__, self.id, self._theObject, self._triggers, self._targetName)
+
+
+class Notifier(NotifierABC):
     """
     Notifier class:
 
@@ -110,7 +165,6 @@ class Notifier(object):
       to pass-on additional implementation specfic information to the callback function.
 
     """
-    _currentIndex = 0
 
     # Trigger keywords
     CREATE = 'create'
@@ -138,7 +192,7 @@ class Notifier(object):
                  callback: Callable[..., str],
                  onceOnly=False,
                  debug=False,
-                 *args, **kwargs):
+                 **kwargs):
         """
         Create Notifier object;
         The triggers CREATE, DELETE, RENAME and CHANGE can be combined in the call signature
@@ -151,11 +205,9 @@ class Notifier(object):
         :param *args: optional arguments to callback
         :param **kwargs: optional keyword,value arguments to callback
         """
-        #print('Notifier.__init__>>>', theObject, triggers, targetName, callback)
-        self._index = Notifier._currentIndex
-        Notifier._currentIndex += 1
-
-        self._theObject = theObject  # The object we are monitoring
+        super().__init__(theObject=theObject, triggers=triggers, targetName=targetName, debug=debug,
+                         callback=callback, **kwargs
+                         )
 
         # bit of a clutch for now
         if isinstance(theObject, Current):
@@ -176,12 +228,6 @@ class Notifier(object):
         self._notifiers = []  # list of tuples defining Notifier call signature; used for __str__
         self._unregister = []  # list of tuples needed for unregistering
 
-        self._callback = callback
-        self._args = args
-        self._kwargs = kwargs
-
-        self._debug = debug  # ability to report on individual instances
-
         # some sanity checks
         if len(triggers) > 1 and Notifier.OBSERVE in triggers:
             raise RuntimeError('Notifier: trigger "%s" only to be used in isolation' % Notifier.OBSERVE)
@@ -189,14 +235,9 @@ class Notifier(object):
             raise RuntimeError('Notifier.__init__: trigger "%s" only to be used in isolation' % Notifier.CURRENT)
         if triggers[0] == Notifier.CURRENT and not self._isCurrent:
             raise RuntimeError('Notifier.__init__: invalid object "%s" for trigger "%s"' % (theObject, triggers[0]))
-        self._triggers = triggers
-        self._targetName = targetName
 
         # register the callbacks
         for trigger in self._triggers:
-
-            if trigger not in Notifier._triggerKeywords:
-                raise RuntimeWarning('Notifier.__init__: invalid trigger "%s"' % trigger)
 
             # CURRENT special case; has its own callback mechanism
             if trigger == Notifier.CURRENT:
@@ -217,11 +258,6 @@ class Notifier(object):
                 func = theObject.registerNotify(partial(self, notifier=notifier), tName)
                 self._notifiers.append(notifier)
                 self._unregister.append((tName, Notifier.CURRENT, func))
-                if self._debug:
-                    # logger.info
-                    sys.stderr.write('>>> Notifier (%d): registered %r, %r, %r, %r\n' % \
-                                     (self._index, self._theObject, trigger, tName, self._callback)
-                                    )
 
             # OBSERVE special case, as the current underpinning implementation does not allow this directly
             # Hence, we track all changes to the object class, filtering those that apply
@@ -240,11 +276,6 @@ class Notifier(object):
                                                       onceOnly=onceOnly)
                 self._notifiers.append(notifier)
                 self._unregister.append((theObject.className, Notifier.CHANGE, func))
-                if self._debug:
-                    # logger.info
-                    sys.stderr.write('>>> Notifier (%d): registered %r, %r, %r, %r\n' % \
-                                     (self._index, self._theObject, trigger, targetName, self._callback)
-                                    )
 
             # All other triggers; if targetName == None, respond to changes in the object itself.
             else:
@@ -268,15 +299,14 @@ class Notifier(object):
                                                       onceOnly=onceOnly)
                 self._notifiers.append(notifier)
                 self._unregister.append((targetName, trigger, func))
-                if self._debug:
-                    # logger.info
-                    sys.stderr.write('>>> Notifier (%d): registered %r, %r, %r, %r\n' % \
-                                     (self._index, self._theObject, trigger, targetName, self._callback)
-                                    )
 
         if len(self._notifiers) == 0:
             raise RuntimeWarning('Notifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
                                  (theObject, targetName, triggers))
+
+        if self._debug:
+            # logger.info
+            sys.stderr.write('>>> registered %s\n' % self)
 
     def unRegister(self):
         """
@@ -308,10 +338,6 @@ class Notifier(object):
         "Return True if notifier is still registered; i.e. active"
         return len(self._notifiers) > 0
 
-    def setDebug(self, flag: bool):
-        "Set debug output on/off"
-        self._debug = flag
-
     def __call__(self, obj: Any, parameter2: Any = None, notifier: tuple = None):
         """
         wrapper, accomodating the different triggers before firing the callback
@@ -321,10 +347,13 @@ class Notifier(object):
             logger.warning('Trigering unregistered notifier %s' % self)
             return
 
+        if self._isBlanked:
+            return
+
         trigger, targetName, triggerForTheObject = notifier
 
         if self._debug:
-            sys.stderr.write('>>> Notifier.__call__: %s, notifier=%s, obj=%r parameter2=%r\n' % \
+            sys.stderr.write('>>> Notifier.__call__: %s --> notifier=%s, obj=%r parameter2=%r\n' % \
                              (self, notifier, obj, parameter2)
             )
 
@@ -345,7 +374,7 @@ class Notifier(object):
                 callbackDict[self.OBJECT] = self._theObject  # triggerForTheObject is True
                 callbackDict[self.PREVIOUSVALUE] = self._value
                 callbackDict[self.VALUE] = value
-                self._callback(callbackDict, *self._args, **self._kwargs)
+                self._callback(callbackDict, **self._kwargs)
                 self._value = value
 
         # OBSERVE special case
@@ -357,7 +386,7 @@ class Notifier(object):
                 callbackDict[self.OBJECT] = self._theObject  # triggerForTheObject is True
                 callbackDict[self.PREVIOUSVALUE] = self._value
                 callbackDict[self.VALUE] = value
-                self._callback(callbackDict, *self._args, **self._kwargs)
+                self._callback(callbackDict, **self._kwargs)
                 self._value = value
 
         # check if the trigger applies for all other cases
@@ -367,13 +396,9 @@ class Notifier(object):
 
             if trigger == self.RENAME and parameter2 is not None:
                 callbackDict[self.OLDPID] = parameter2
-            self._callback(callbackDict, *self._args, **self._kwargs)
+            self._callback(callbackDict, **self._kwargs)
 
         return
-
-    def __str__(self) -> str:
-        return '<Notifier (%d): theObject=%s, notifiers=%s>' % \
-               (self._index, self._theObject, self._notifiers)
 
     # convenience methods
 
@@ -424,82 +449,128 @@ class Notifier(object):
 #                         callback=callback, onlyOnce=onlyOnce, debug=debug)
 #     return notifier
 
-#=============================================================================================================
-# adjust V3 classes by patching AbstractWrapperObject (just a hack for trying)
-# TODO: See if this will be moved to the AbstractWrapperObject
-#=============================================================================================================
-# from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-#
-# NOTIFIERS = '_notifiers'  # attribute name for storing notifiers in Ccpn V3 objects
-#
-# def setNotifier(self, triggers:list, targetName:str, callback:Callable[..., str], *args, **kwargs) -> Notifier:
-#   """
-#   Set Notifier for Ccpn V3 object
-#   :param triggers: list of triggers to trigger callback
-#   :param targetName: valid className, attributeName or None (See Notifier doc string for details)
-#   :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
-#   :param *args: optional arguments to callback
-#   :param **kwargs: optional keyword,value arguments to callback
-#
-#   :returns Notifier instance
-#   """
-#   if not hasattr(self, NOTIFIERS):
-#     setattr(self, NOTIFIERS, OrderedDict())
-#   objNotifiers = getattr(self, NOTIFIERS)
-#
-#   notifier = Notifier(self, triggers, targetName, callback, *args, **kwargs)
-#   id = notifier._index
-#   # this should never happen, except when 'monkying' in the console; hence just a check
-#   if id in objNotifiers.keys():
-#     n = objNotifiers[id]
-#     self.deleteNotifier(n)
-#   # add the notifier
-#   objNotifiers[id] = notifier
-#   return notifier
-# AbstractWrapperObject.setNotifier = setNotifier
-#
-# def deleteNotifier(self, notifier:Notifier):
-#   """
-#   delete notifier from object.
-#
-#   to delete and destroy a notifier from myObj:
-#     myObj.deleteNotifier(notifier)
-#     del(notifier)
-#
-#   :param notifier: Notifier instance
-#   """
-#   if not self.hasNotifier(notifier):
-#     raise RuntimeWarning('"%s" is not a (valid) notifier of "%s"' % (notifier, self))
-#
-#   objNotifiers = getattr(self, NOTIFIERS)
-#   notifier.unregister()
-#   del(objNotifiers[notifier._index])
-# AbstractWrapperObject.deleteNotifier = deleteNotifier
-#
-# def hasNotifier(self, notifier:Notifier) -> bool:
-#   """
-#   Checks if object has notifier
-#   :param notifier: Notifier instance
-#   :return: True or False
-#   """
-#   if not hasattr(self, NOTIFIERS):
-#     return False
-#
-#   objNotifiers = getattr(self, NOTIFIERS)
-#   if len(objNotifiers) == 0:
-#     return False
-#
-#   # For now: not using: if not isinstance(notifier, Notifier): because when run as script from console
-#   # this appears not to work as each new iteration of Notifier is a different Object(!?)
-#   if notifier.__class__.__name__ != Notifier.__name__:
-#     #print(notifier.__class__.__name__, Notifier.__name__)
-#     return False
-#
-#   if notifier._index in objNotifiers.keys():
-#     return True
-#
-#   return False
-# AbstractWrapperObject.hasNotifier = hasNotifier
+
+
+class NotifierBase(object):
+    """
+    A class confering notifier management routines;
+    """
+    NOTIFIERSDICT = '_ccpNmrV3notifiersDict'  # attribute name for storing notifiers in Ccpn objects
+
+    # def _init(self):
+    #     """Method to call at intialisation; deliberately different from __init__"""
+    #     setattr(self, self.NOTIFIERSDICT, OrderedDict())
+
+    def _getObjectNotifiersDict(self):
+        """Internal routine to get the object notifiers dict"""
+        if not hasattr(self, self.NOTIFIERSDICT):
+            setattr(self, self.NOTIFIERSDICT, OrderedDict())
+        objNotifiers = getattr(self, self.NOTIFIERSDICT)
+        # Need to implement a check
+        return objNotifiers
+
+    def setNotifier(self, theObject:AbstractWrapperObject, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs) -> Notifier:
+        """
+        Set Notifier for Ccpn V3 object theObject
+        :param theObject: V3 object to register a notifier with
+        :param triggers: list of triggers to trigger callback
+        :param targetName: valid className, attributeName or None (See Notifier doc string for details)
+        :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
+        :param *args: optional arguments
+        :param **kwargs: optional keyword,value arguments
+        :returns Notifier instance
+        """
+        objNotifiers = self._getObjectNotifiersDict()
+        notifier = Notifier(theObject=theObject, triggers=triggers, targetName=targetName,
+                            callback=callback, *args, **kwargs)
+        id = notifier.id
+        # this should never happen; hence just a check
+        if id in objNotifiers:
+            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, id, objNotifiers[id]))
+        # add the notifier
+        objNotifiers[id] = notifier
+        return notifier
+
+    def setGuiNotifier(self, theObject:AbstractWrapperObject, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs) -> Notifier:
+        """
+        Set Notifier for Ccpn V3 object theObject
+        :param theObject: V3 object to register a notifier with
+        :param triggers: list of triggers to trigger callback
+        :param targetName: valid className, attributeName or None (See Notifier doc string for details)
+        :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
+        :param *args: optional arguments
+        :param **kwargs: optional keyword,value arguments
+
+        :returns GuiNotifier instance
+        """
+        from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier  # To avoid circular imports
+
+        objNotifiers = self._getObjectNotifiersDict()
+        notifier = GuiNotifier(theObject=theObject, triggers=triggers, targetName=targetName,
+                               callback=callback, *args, **kwargs)
+        id = notifier.id
+        # this should never happen; hence just a check
+        if id in objNotifiers:
+            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, id, objNotifiers[id]))
+        # add the notifier
+        objNotifiers[id] = notifier
+        return notifier
+
+    def deleteNotifier(self, notifier: Notifier):
+        """
+        unregister notifier; remove it from the list and delete it
+        :param notifier: Notifier instance
+        """
+        if not self.hasNotifier(notifier):
+            raise RuntimeWarning('"%s" is not a (valid) notifier of "%s"' % (notifier, self))
+
+        objNotifiers = self._getObjectNotifiersDict()
+        notifier.unregister()
+        del(objNotifiers[notifier.id])
+        del(notifier)
+
+    def hasNotifier(self, notifier: Notifier=None) -> bool:
+        """
+        Checks if object has notifier; return True if it has notifier or has any notifier when notifier=None
+
+        :param notifier: Notifier instance or None
+        :return: True or False
+        """
+        if not hasattr(self, self.NOTIFIERSDICT):
+            return False
+
+        objNotifiers = self._getObjectNotifiersDict()
+        if len(objNotifiers) == 0:
+            return False
+
+        if notifier is None and len(objNotifiers) > 0:
+            return True
+
+        if not isinstance(notifier, NotifierABC):
+           raise ValueError('"%s" is not a valid notifier instance' % notifier)
+
+        if notifier.id in objNotifiers:
+            return True
+
+        return False
+
+    def deleteAllNotifiers(self):
+        """Unregister all the notifiers"""
+        if not self.hasNotifier(None):
+            # there are no notifiers
+            return
+        objNotifiers = self._getObjectNotifiersDict()
+        for notifier in list(objNotifiers.values()):
+            self.deleteNotifier(notifier)
+
+    def setBlankingAllNotifiers(self, flag):
+        """Set blanking of all the notifiers to flag"""
+        if not self.hasNotifier(None):
+            return
+        objNotifiers = self._getObjectNotifiersDict()
+        for notifier in list(objNotifiers.values()):
+            notifier.setBlanking(flag)
+
 #
 #
 # def deleteAllNotifiers(project):
@@ -511,9 +582,9 @@ class Notifier(object):
 #   """
 #
 #   def _deleteNotifiers(obj):
-#     if not hasattr(obj, NOTIFIERS) or len() == 0:
+#     if not hasattr(obj, NOTIFIERSDICT) or len() == 0:
 #       return
-#     objNotifiers = getattr(obj, NOTIFIERS)
+#     objNotifiers = getattr(obj, NOTIFIERSDICT)
 #     if len(objNotifiers) == 0:
 #       return
 #     for notifier in objNotifiers.values():

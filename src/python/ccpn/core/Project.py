@@ -594,26 +594,27 @@ class Project(AbstractWrapperObject):
         #
         return notifier
 
-    def duplicateNotifier(self, className: str, target: str,
-                          notifier: typing.Callable[..., None]):
-        """register copy of notifier for a new className and target.
-        Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
-        interface matches the action"""
-        if target in self._notifierActions:
-
-            tt = (className, target)
-        else:
-            # This is right, it just looks strange. But if target is not an action it is
-            # another className, and if so the names must be sorted.
-            tt = tuple(sorted([className, target]))
-
-        for od in self._context2Notifiers.values():
-            onceOnly = od.get(notifier)
-            if onceOnly is not None:
-                self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
-                break
-        else:
-            raise ValueError("Unknown notifier: %s" % notifier)
+    #GWV 20181123
+  # def duplicateNotifier(self,  className:str, target:str,
+  #                       notifier:typing.Callable[..., None]):
+  #   """register copy of notifier for a new className and target.
+  #   Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
+  #   interface matches the action"""
+  #   if target in self._notifierActions:
+  #
+  #     tt = (className, target)
+  #   else:
+  #     # This is right, it just looks strange. But if target is not an action it is
+  #     # another className, and if so the names must be sorted.
+  #     tt = tuple(sorted([className, target]))
+  #
+  #   for od in self._context2Notifiers.values():
+  #     onceOnly = od.get(notifier)
+  #     if onceOnly is not None:
+  #       self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
+  #       break
+  #   else:
+  #     raise ValueError("Unknown notifier: %s" % notifier)
 
     def unRegisterNotifier(self, className: str, target: str, notifier: typing.Callable[..., None]):
         """Unregister the notifier from this className, and target"""

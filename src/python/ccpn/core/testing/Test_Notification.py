@@ -186,11 +186,9 @@ class NotificationTest(WrapperTesting):
                               parameterDict={'value':'createx', 'll':ll}, onceOnly=True)
     not2 = project.registerNotifier('Note','delete',  notifyfunc,
                               parameterDict={'value':'deletex', 'll':ll}, onceOnly=True)
-    project.duplicateNotifier('Note','change', not1)
     registered = project._context2Notifiers
     self.assertEqual(registered.get(('Note','create')), {not1:True})
     self.assertEqual(registered.get(('Note','delete')), {not2:True})
-    self.assertEqual(registered.get(('Note','change')), {not1:True})
 
     project.newUndoPoint()
 
@@ -234,7 +232,6 @@ class NotificationTest(WrapperTesting):
                               parameterDict={'value':'createx', 'll':ll}, onceOnly=True)
     not2 = project.registerNotifier('Note','delete',  notifyfunc,
                               parameterDict={'value':'deletex', 'll':ll}, onceOnly=True)
-    project.duplicateNotifier('Note','change', not1)
     registered = project._context2Notifiers
     project.suspendNotification()
     project.newUndoPoint()
@@ -259,7 +256,6 @@ class NotificationTest(WrapperTesting):
     project.unRegisterNotifier('Note','delete', not2)
     self.assertEqual(registered.get(('Note','create')), {})
     self.assertEqual(registered.get(('Note','delete')), {})
-    self.assertEqual(registered.get(('Note','change')), {})
 
 
 

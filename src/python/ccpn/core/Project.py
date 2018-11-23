@@ -680,9 +680,16 @@ class Project(AbstractWrapperObject):
                 notifier = notification[0]
                 onceOnly = notification[1]
                 if onceOnly:
-                    if notifier not in scheduledNotifiers:
-                        scheduledNotifiers.add(notifier)
-                        executeNotifications.append((notifier, notification[2:]))
+
+                    # check whether the match pair, (function, object) is in the found set
+                    matchNotifier = (notifier, notification[2:])
+                    if matchNotifier not in scheduledNotifiers:
+                        scheduledNotifiers.add(matchNotifier)
+                        executeNotifications.append(matchNotifier)
+
+                    # if notifier not in scheduledNotifiers:
+                    #     scheduledNotifiers.add(notifier)
+                    #     executeNotifications.append((notifier, notification[2:]))
                 else:
                     executeNotifications.append((notifier, notification[2:]))
             #

@@ -93,7 +93,6 @@ def notify(action, subClass=''):
         def undo(self):
             """preRedo/postUndo function, needed for undo/redo
             """
-            print('>>>UNDO notify decorator')
             pass
 
         def redo(self):
@@ -102,7 +101,6 @@ def notify(action, subClass=''):
             self._finaliseAction(action=action)
             for obj in getattr(self, subClass, []):
                 obj._finaliseAction(action)
-            print('>>>REDO notify decorator')
 
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
@@ -110,9 +108,8 @@ def notify(action, subClass=''):
         self = args[0]
         _undo = self.project._undo
 
-        _undo._newItem(undoPartial=partial(redo, self),
-                       redoPartial=partial(undo, self))
-        undo(self)
+        _undo._newItem(undoPartial=partial(redo, self))
+        # undo(self)
         try:
 
             # call the wrapped function
@@ -120,8 +117,7 @@ def notify(action, subClass=''):
 
         finally:
             redo(self)
-            _undo._newItem(undoPartial=partial(undo, self),
-                           redoPartial=partial(redo, self))
+            _undo._newItem(redoPartial=partial(redo, self))
 
         return result
 
@@ -139,13 +135,11 @@ def undo():
             """preRedo/postUndo function, needed for undo/redo
             """
             self.project.blankNotification()
-            print('>>>UNDO undo decorator')
 
         def redo(self):
             """preUndo/postRedo function, needed for undo/redo, and fire single change notifiers
             """
             self.project.unblankNotification()
-            print('>>>REDO undo decorator')
 
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]

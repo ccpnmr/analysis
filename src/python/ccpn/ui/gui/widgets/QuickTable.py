@@ -96,8 +96,8 @@ def __sortByColumn__(self, col, newOrder):
         # QtWidgets.QTableWidget.sortByColumn(self, col, newOrder)
         super(QtWidgets.QTableWidget, self).sortByColumn(col, newOrder)
     except Exception as es:
-        print(str(es))
-    print('>>>sorting')
+        pass
+        # print(str(es))
 
 
 # define a simple class that can contains a simple id
@@ -354,7 +354,7 @@ QuickTable::item::selected {
                 self.setUpdatesEnabled(False)
                 self.project.blankNotification()
 
-            print(' ' * self._tableBlockingLevel, '>>>INC', _moduleId(self.moduleParent), self._tableBlockingLevel, callerId)
+            # print(' ' * self._tableBlockingLevel, '>>>INC', _moduleId(self.moduleParent), self._tableBlockingLevel, callerId)
             self._tableBlockingLevel += 1
             yield  # yield control to the main process
 
@@ -382,7 +382,7 @@ QuickTable::item::selected {
         """
         catch the click event on a header
         """
-        print('>>> %s _postSort' % _moduleId(self.moduleParent))
+        # print('>>> %s _postSort' % _moduleId(self.moduleParent))
 
         self.resizeColumnsToContents()
 
@@ -415,8 +415,8 @@ QuickTable::item::selected {
         # this is also called when the table is populated from the pulldown :)
         return
 
-        print('>>>tableSorting', col, sortOrder)
-        print('>>>currentIndex', self.currentIndex())
+        # print('>>>tableSorting', col, sortOrder)
+        # print('>>>currentIndex', self.currentIndex())
 
         rows = list(range(self.rowCount()))
         columns = list(range(self.columnCount()))
@@ -428,13 +428,13 @@ QuickTable::item::selected {
             else:
                 headings.append('*')
 
-        print(headings)
+        # print(headings)
         if DATAFRAME_PID in headings:
             pidCol = headings.index(DATAFRAME_PID)
             pids = []
             for r in rows:
                 pids.append(self.item(r, pidCol).value)
-            print(pids)
+            # print(pids)
 
         self._newSorted = True
 
@@ -484,7 +484,7 @@ QuickTable::item::selected {
                     _openItemObject(self.mainWindow, others)
 
     def _cellClicked(self, item):
-        print('>>> %s _cellClicked' % _moduleId(self.moduleParent))
+        # print('>>> %s _cellClicked' % _moduleId(self.moduleParent))
 
         if item:
             if isinstance(item.value, bool):
@@ -500,13 +500,13 @@ QuickTable::item::selected {
         #
 
     def _checkBoxCallback(self, data):
-        print('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
+        # print('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))
 
         pass
 
     def _defaultDoubleClick(self, itemSelection):
 
-        print('>>> %s _defaultDoubleClick' % _moduleId(self.moduleParent))
+        # print('>>> %s _defaultDoubleClick' % _moduleId(self.moduleParent))
 
         model = self.selectionModel()
 
@@ -612,7 +612,7 @@ QuickTable::item::selected {
 
         item = self.item(row, col)
 
-        print('>>>changeMe', row, col)
+        # print('>>>changeMe', row, col)
 
         # obj = self._dataFrameObject.objects[row]
         # self._dataFrameObject.columnDefinitions.setEditValues[col](obj, text)
@@ -627,7 +627,7 @@ QuickTable::item::selected {
             # if not self._selectionCallback:
             #     return
 
-            print('>>> %s _selectionTableCallback__' % _moduleId(self.moduleParent))
+            # print('>>> %s _selectionTableCallback__' % _moduleId(self.moduleParent))
             objList = self.getSelectedObjects()
 
             if objList:
@@ -647,7 +647,7 @@ QuickTable::item::selected {
                 self.clearSelection()
 
     def _checkBoxTableCallback(self, itemSelection):
-        print('>>> %s _checkBoxTableCallback' % _moduleId(self.moduleParent))
+        # print('>>> %s _checkBoxTableCallback' % _moduleId(self.moduleParent))
 
         state = True if itemSelection.checkState() == 2 else False
         value = itemSelection.value
@@ -815,13 +815,13 @@ QuickTable::item::selected {
         self.customContextMenuRequested.connect(self._raiseTableContextMenu)
 
     def _raiseTableContextMenu(self, pos):
-        print('>>> %s _raiseTableContextMenu' % _moduleId(self.moduleParent))
+        # print('>>> %s _raiseTableContextMenu' % _moduleId(self.moduleParent))
 
         pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
         action = self.tableMenu.exec_(self.mapToGlobal(pos))
 
     def _raiseHeaderContextMenu(self, pos):
-        print('>>> %s _raiseHeaderContextMenu' % _moduleId(self.moduleParent))
+        # print('>>> %s _raiseHeaderContextMenu' % _moduleId(self.moduleParent))
 
         if self._enableSearch and self.searchWidget is None:
             if not attachSearchWidget(self._parent, self):
@@ -1596,7 +1596,7 @@ QuickTable::item::selected {
             # cells = getattr(cellData, attr)
             cells = makeIterableList(cellData)
 
-            print('      >>>', cells, data[Notifier.TRIGGER])
+            # print('      >>>', cells, data[Notifier.TRIGGER])
             #self._silenceCallback = True
             _update = False
 
@@ -1640,7 +1640,7 @@ QuickTable::item::selected {
         """
         Callback to populate the search bar with the selected item
         """
-        print('>>> %s _searchCallBack' % _moduleId(self.moduleParent))
+        # print('>>> %s _searchCallBack' % _moduleId(self.moduleParent))
 
         value = getattr(data[CallBack.OBJECT], self._tableData['searchCallBack']._pluralLinkName, None)
         if value and self.searchWidget and self.searchWidget.isVisible():
@@ -1654,7 +1654,7 @@ QuickTable::item::selected {
         # self._sortChanged(0, 0)
 
         if not self._tableBlockingLevel:
-            print('>>> %s _selectCurrentCallBack' % _moduleId(self.moduleParent))
+            # print('>>> %s _selectCurrentCallBack' % _moduleId(self.moduleParent))
 
             self._tableData['selectCurrentCallBack'](data)
 
@@ -1690,7 +1690,7 @@ QuickTable::item::selected {
                                            tableClass.__name__,
                                            self._updateTableCallback,
                                            onceOnly=True)
-            self._tableNotifier.setDebug(True)
+            # self._tableNotifier.setDebug(True)
 
         if rowClass:
             # TODO:ED check OnceOnly residue notifiers
@@ -1700,7 +1700,7 @@ QuickTable::item::selected {
                                          rowClass.__name__,
                                          self._updateRowCallback,
                                          onceOnly=True)  # should be True, but doesn't work
-            self._rowNotifier.setDebug(True)
+            # self._rowNotifier.setDebug(True)
 
             # for 'i-1' nmrResidues
         if isinstance(cellClassNames, list):
@@ -1748,7 +1748,7 @@ QuickTable::item::selected {
         # add a cleaner id to the opened quickTable list
         self.moduleParent = moduleParent
         MODULEIDS[id(moduleParent)] = len(MODULEIDS)
-        print('>>>', MODULEIDS, moduleParent)
+        # print('>>>', MODULEIDS, moduleParent)
 
     def setDefaultTableData(self):
         """Populate an empty table data object

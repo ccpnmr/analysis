@@ -213,7 +213,9 @@ class AbstractWrapperObject():
 
     __hash__ = object.__hash__
 
+    #--------------------------------------------------------------------------------------------
     # CCPN properties
+    #--------------------------------------------------------------------------------------------
 
     @property
     def className(self) -> str:
@@ -377,7 +379,6 @@ class AbstractWrapperObject():
                          'GD', 'SpectrumDisplay', 'GW', 'Window',
                          'GV', 'SpectrumView', 'GT', 'Task'):
                 from warnings import warn
-
                 warn('ui.getByGid should be used for getting graphics ({})'.format(pidstring),
                      category=DeprecationWarning)
             dd = self._project._pid2Obj.get(tt[0])
@@ -466,7 +467,7 @@ class AbstractWrapperObject():
                         ('_endDeleteCommandBlock', {}, className, 'endDeleteBlock'),
                         ('_finaliseApiUnDelete', {}, className, 'undelete'),
                         ('_modifiedApiObject', {}, className, ''),
-                        ]
+                    ]
         else:
             # Project class. Start generation here
             Project = cls
@@ -486,9 +487,27 @@ class AbstractWrapperObject():
             cc._linkWrapperClasses(newAncestors, Project=Project)
 
     @classmethod
+    def _getChildClasses(cls, recursion:bool = False) -> list:
+        """
+        :param recursion: use recursion to also add child objects
+        :return: list of valid child classes of cls
+
+        NB: Depth-first ordering
+
+        CCPNINTERNAL: Notifier class
+        """
+        result = []
+        for klass in cls._childClasses:
+            result.append(klass)
+            if recursion:
+                result = result + klass._getChildClasses(recursion=recursion)
+        return result
+
+    @classmethod
     def _getDescendant(cls, self, relativeId: str):
         """Get descendant of class cls with relative key relativeId
-         Implementation function, used to generate getCls functions"""
+         Implementation function, used to generate getCls functions
+         """
 
         dd = self._project._pid2Obj.get(cls.className)
         if dd:
@@ -501,7 +520,7 @@ class AbstractWrapperObject():
             return None
 
     def _allDescendants(self, descendantClasses):
-        """get all descendants of a given class, following descendantClasses down the data tree
+        """get all descendants of a given class , following descendantClasses down the data tree
         Implementation function, used to generate child and descendant links
         descendantClasses is a list of classes going down from the class of self down the data tree.
         E.g. if called on a chain with descendantClass == [Residue,Atom] the function returns
@@ -717,8 +736,7 @@ class AbstractWrapperObject():
             else:
                 for dd in iterator:
                     for notifier in dd:
-                        # notifier(self, oldPid)
-                        self._notifierAction(notifier, self, oldPid)
+                        notifier(self, oldPid)
 
             for obj in self._getDirectChildren():
                 obj._finaliseAction('rename')
@@ -736,12 +754,7 @@ class AbstractWrapperObject():
                         # GWV: Maybe only at the highest debug level
                         self._project._logger.debug('Notifier: %s; %s; %s'
                                                     % (action, self, notifier))
-                        # notifier(self)
-                        self._notifierAction(notifier, self)
-
-    def _notifierAction(self, notifier, *args, **kwds):
-        # if not getattr(self.project, '_apiBlanking', 0):
-        notifier(*args, **kwds)
+                        notifier(self)
 
     def resetSerial(self, newSerial: int):
         """ADVANCED Reset serial of object to newSerial, resetting parent link
@@ -753,7 +766,8 @@ class AbstractWrapperObject():
         commonUtil.resetSerial(self._wrappedData, newSerial)
         self._resetIds()
 
-    def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False, quiet=False):
+    def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,
+                               quiet=False):
         """Start block for command echoing, set undo waypoint, and echo command to ui and logger
 
         *params, values, and defaults are used by coreUtil.commandParameterString to set the function

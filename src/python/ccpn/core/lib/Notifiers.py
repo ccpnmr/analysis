@@ -286,7 +286,7 @@ class Notifier(NotifierABC):
             # All other triggers;
             else:
                 # Projects allow all registering of all classes
-                allowedClassNames = [c.className for c in self._getChildClasses(theObject, recursion=self._isProject)]
+                allowedClassNames = [c.className for c in theObject._getChildClasses(recursion=self._isProject)]
                 if targetName not in allowedClassNames:
                     raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
@@ -403,43 +403,43 @@ class Notifier(NotifierABC):
 
     # convenience methods
 
-    @staticmethod
-    def _getChildClasses(obj: AbstractWrapperObject, recursion: bool) -> list:
-        """
-        :param obj: valid V3 object
-        :param recursion: use recursion to also add child objects
-        :return: list of valid child classes of obj
-        """
-        #if not isinstance(obj, AbstractWrapperObject):
-        #  raise RuntimeError('Ivalid object type (%s)' % obj)
+    # @staticmethod
+    # def _getChildClasses(obj: AbstractWrapperObject, recursion: bool) -> list:
+    #     """
+    #     :param obj: valid V3 object
+    #     :param recursion: use recursion to also add child objects
+    #     :return: list of valid child classes of obj
+    #     """
+    #     #if not isinstance(obj, AbstractWrapperObject):
+    #     #  raise RuntimeError('Ivalid object type (%s)' % obj)
+    #
+    #     cls = []
+    #     for child in obj._childClasses:
+    #         cls.append(child)
+    #         if recursion:
+    #             for grandchild in Notifier._getChildClasses(child, recursion=True):
+    #                 cls.append(grandchild)
+    #     return cls
 
-        cls = []
-        for child in obj._childClasses:
-            cls.append(child)
-            if recursion:
-                for grandchild in Notifier._getChildClasses(child, recursion=True):
-                    cls.append(grandchild)
-        return cls
-
-    @staticmethod
-    def _getChildObjects(obj: AbstractWrapperObject, recursion: bool = False) -> list:
-        """
-        depth-first extraction of all child objects, optionally using recursion
-        :param obj: valid V3 object
-        :return: list of child objects
-        """
-        #if not isinstance(obj, AbstractWrapperObject):
-        #  raise RuntimeError('Invalid object type (%s)' % obj)
-
-        children = []
-        for cls in obj._childClasses:
-            if hasattr(obj, cls._pluralLinkName):
-                for child in getattr(obj, cls._pluralLinkName):
-                    children.append(child)
-                    if recursion:
-                        for grandchild in Notifier._getChildObjects(child, recursion=True):
-                            children.append(grandchild)
-        return children
+    # @staticmethod
+    # def _getChildObjects(obj: AbstractWrapperObject, recursion: bool = False) -> list:
+    #     """
+    #     depth-first extraction of all child objects, optionally using recursion
+    #     :param obj: valid V3 object
+    #     :return: list of child objects
+    #     """
+    #     #if not isinstance(obj, AbstractWrapperObject):
+    #     #  raise RuntimeError('Invalid object type (%s)' % obj)
+    #
+    #     children = []
+    #     for cls in obj._childClasses:
+    #         if hasattr(obj, cls._pluralLinkName):
+    #             for child in getattr(obj, cls._pluralLinkName):
+    #                 children.append(child)
+    #                 if recursion:
+    #                     for grandchild in Notifier._getChildObjects(child, recursion=True):
+    #                         children.append(grandchild)
+    #     return children
 
 
 # def currentNotifier(attributeName, callback, onlyOnce=False, debug=False):

@@ -1913,20 +1913,20 @@ class Framework:
             # ui/gui cleanup
             self._closeMainWindows()
             self._closeExtraWindows()
-
-            # TODO:ED not sure what is best here, but problem is not in refactored
-            self.ui.mainWindow.hide()
             self.ui.mainWindow.deleteLater()
-            # self.ui.mainWindow.destroy()
+            self.ui.mainWindow = None
+
+        if self.current:
+            self.current._unregisterNotifiers()
+            self.current = None
 
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
             self.project._close()
             self.project = None
 
-        self.ui.mainWindow = None
-        self.current = None
-        self.project = None
+        # self.ui.mainWindow = None
+        # self.project = None
 
     ###################################################################################################################
     ## MENU callbacks:  Spectrum

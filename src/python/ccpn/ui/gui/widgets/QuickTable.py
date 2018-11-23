@@ -342,7 +342,7 @@ QuickTable::item::selected {
         # TableWidget.sortByColumn = __sortByColumn__   #MethodType(__sortByColumn__, TableWidget)
 
     @contextmanager
-    def _tableBlockSignals(self, callerId=''):
+    def _tableBlockSignals(self, callerId='', blanking=True):
         """Block all signals from the table
         """
         try:
@@ -352,7 +352,8 @@ QuickTable::item::selected {
                 self.blockSignals(True)
                 self.selectionModel().blockSignals(True)
                 self.setUpdatesEnabled(False)
-                self.project.blankNotification()
+                if blanking:
+                    self.project.blankNotification()
 
             # print(' ' * self._tableBlockingLevel, '>>>INC', _moduleId(self.moduleParent), self._tableBlockingLevel, callerId)
             self._tableBlockingLevel += 1
@@ -365,7 +366,8 @@ QuickTable::item::selected {
             # unblock all signals on exit
             if self._tableBlockingLevel <= 0:
                 # self._tableBlockingLevel = 0
-                self.project.unblankNotification()
+                if blanking:
+                    self.project.unblankNotification()
                 self.setUpdatesEnabled(True)
                 self.selectionModel().blockSignals(False)
                 self.blockSignals(False)
@@ -527,7 +529,8 @@ QuickTable::item::selected {
 
     def _doubleClickCallback(self, itemSelection):
 
-        with self._tableBlockSignals('_doubleClickCallback'):
+        with self._tableBlockSignals('_doubleClickCallback', blanking=False):
+
             model = self.selectionModel()
 
             # selects all the items in the row
@@ -606,28 +609,23 @@ QuickTable::item::selected {
             else:
                 item.setValue(val)
 
-    def _changeMe(self, row, col, widget, endEditHint):
-        text = widget.text()
-        # TODO:ED process setting of object in here
-
-        item = self.item(row, col)
-
-        # print('>>>changeMe', row, col)
-
-        # obj = self._dataFrameObject.objects[row]
-        # self._dataFrameObject.columnDefinitions.setEditValues[col](obj, text)
-        pass
+    # def _changeMe(self, row, col, widget, endEditHint):
+    #     text = widget.text()
+    #     # TODO:ED process setting of object in here
+    #
+    #     item = self.item(row, col)
+    #
+    #     # print('>>>changeMe', row, col)
+    #
+    #     # obj = self._dataFrameObject.objects[row]
+    #     # self._dataFrameObject.columnDefinitions.setEditValues[col](obj, text)
+    #     pass
 
     def _selectionTableCallback(self, itemSelection):
-        # TODO:ED generate a callback dict for the selected item
-        # data = OrderedDict()
-        # data['OBJECT'] = return pid, key/values, row, col
+        # print('>>> %s _selectionTableCallback' % _moduleId(self.moduleParent))
 
-        with self._tableBlockSignals('_selectionTableCallback'):
-            # if not self._selectionCallback:
-            #     return
+        with self._tableBlockSignals('_selectionTableCallback', blanking=False):
 
-            # print('>>> %s _selectionTableCallback__' % _moduleId(self.moduleParent))
             objList = self.getSelectedObjects()
 
             if objList:
@@ -1658,8 +1656,6 @@ QuickTable::item::selected {
         # self._sortChanged(0, 0)
 
         if not self._tableBlockingLevel:
-            # print('>>> %s _selectCurrentCallBack' % _moduleId(self.moduleParent))
-
             self._tableData['selectCurrentCallBack'](data)
 
     def setTableNotifiers(self, tableClass=None, rowClass=None, cellClassNames=None,

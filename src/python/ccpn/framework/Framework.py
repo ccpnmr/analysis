@@ -1915,7 +1915,9 @@ class Framework:
             self._closeExtraWindows()
 
             # TODO:ED not sure what is best here, but problem is not in refactored
-            self.ui.mainWindow.destroy()
+            self.ui.mainWindow.hide()
+            self.ui.mainWindow.deleteLater()
+            # self.ui.mainWindow.destroy()
 
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)

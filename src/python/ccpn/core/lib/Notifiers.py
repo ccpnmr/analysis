@@ -112,6 +112,10 @@ class NotifierABC(object):
         "Set blanking on/off"
         self._isBlanked = flag
 
+    def triggersOn(self, trigger) -> bool:
+        """Return True if notifier triggers on trigger"""
+        return trigger in self._triggers
+
     def __str__(self) -> str:
         return '<%s (%d): theObject=%s, triggers=%s targetName=%r>' % \
                (self.__class__.__name__, self.id, self._theObject, self._triggers, self._targetName)
@@ -132,20 +136,20 @@ class Notifier(NotifierABC):
                                               targetName, trigger       (any for project instances)
                                               notifier
 
-     Notifier.DELETE    className or None     theObject, object,        targetName: valid child className of theObject
+     Notifier.DELETE    className             theObject, object,        targetName: valid child className of theObject
                                               targetName, trigger       (any for project instances)
-                                              notifier                  targetName==None: monitor theObject itself
+                                              notifier
 
-     Notifier.RENAME    className or None     theObject, object         targetName: valid child className of theObject
+     Notifier.RENAME    className             theObject, object         targetName: valid child className of theObject
                                               targetName, oldPid,       (any for project instances)
-                                              trigger                   targetName==None: monitor theObject itself
+                                              trigger
 
-     Notifier.CHANGE    className or None     theObject, object         targetName: valid child className of theObject
+     Notifier.CHANGE    className             theObject, object         targetName: valid child className of theObject
                                               targetName,               (any for project instances)
-                                              trigger, notifier         targetName==None: monitor theObject itself
+                                              trigger, notifier
 
      Notifier.OBSERVE   attributeName         theObject,targetName      targetName: valid attribute name of theObject
-                                              value, previousValue,     NB: should only be used in isolation; i.e. not
+                        or ANY                value, previousValue,     NB: should only be used in isolation; i.e. not
                                               trigger, notifier         combined with other triggers
 
      Notifier.CURRENT   attributeName         theObject,targetName      theObject should be current object
@@ -173,6 +177,8 @@ class Notifier(NotifierABC):
     CHANGE = 'change'
     OBSERVE = 'observe'
     CURRENT = 'current'
+
+    ANY = '<Any>'
 
     NOTIFIER = 'notifier'
     THEOBJECT = 'theObject'
@@ -223,9 +229,8 @@ class Notifier(NotifierABC):
             raise RuntimeError('Invalid object (%s)', theObject)
 
         self._value = None  # used to store the value of attribute to observe for change
-        triggerForTheObject = False  # flag to denote if triggers are firing for theObject, not children
 
-        self._notifiers = []  # list of tuples defining Notifier call signature; used for __str__
+        self._notifiers = []  # list of tuples defining Notifier call signature;
         self._unregister = []  # list of tuples needed for unregistering
 
         # some sanity checks
@@ -235,6 +240,9 @@ class Notifier(NotifierABC):
             raise RuntimeError('Notifier.__init__: trigger "%s" only to be used in isolation' % Notifier.CURRENT)
         if triggers[0] == Notifier.CURRENT and not self._isCurrent:
             raise RuntimeError('Notifier.__init__: invalid object "%s" for trigger "%s"' % (theObject, triggers[0]))
+
+        if targetName is None:
+            raise ValueError('Invalid None targetName')
 
         # register the callbacks
         for trigger in self._triggers:
@@ -246,10 +254,8 @@ class Notifier(NotifierABC):
                     raise RuntimeWarning(
                             'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject))
 
-                triggerForTheObject = True
                 self._value = getattr(theObject, targetName)
-
-                notifier = (trigger, targetName, triggerForTheObject)
+                notifier = (trigger, targetName)
                 # current has its own notifier system
 
                 #TODO:RASMUS: change this and remove this hack
@@ -262,14 +268,14 @@ class Notifier(NotifierABC):
             # OBSERVE special case, as the current underpinning implementation does not allow this directly
             # Hence, we track all changes to the object class, filtering those that apply
             elif trigger == Notifier.OBSERVE:
-                if not hasattr(theObject, targetName):
+                if targetName != self.ANY and not hasattr(theObject, targetName):
                     raise RuntimeWarning(
                             'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
-                triggerForTheObject = True
-                self._value = getattr(theObject, targetName)
+                if targetName != self.ANY:
+                    self._value = getattr(theObject, targetName)
 
-                notifier = (trigger, targetName, triggerForTheObject)
+                notifier = (trigger, targetName)
                 func = self._project.registerNotifier(theObject.className,
                                                       Notifier.CHANGE,
                                                       partial(self, notifier=notifier),
@@ -277,22 +283,14 @@ class Notifier(NotifierABC):
                 self._notifiers.append(notifier)
                 self._unregister.append((theObject.className, Notifier.CHANGE, func))
 
-            # All other triggers; if targetName == None, respond to changes in the object itself.
+            # All other triggers;
             else:
-                if targetName is None:
-                    targetName = theObject.className
-                    triggerForTheObject = True
-
-                if trigger == Notifier.CREATE and triggerForTheObject:
-                    raise RuntimeWarning('Notifier.__init__: invalid trigger "%s" for instance "%s"' % (targetName, theObject))
-
                 # Projects allow all registering of all classes
-                allowedClassNames = [theObject.className] + \
-                                    [c.className for c in self._getChildClasses(theObject, recursion=self._isProject)]
+                allowedClassNames = [c.className for c in self._getChildClasses(theObject, recursion=self._isProject)]
                 if targetName not in allowedClassNames:
                     raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
-                notifier = (trigger, targetName, triggerForTheObject)
+                notifier = (trigger, targetName)
                 func = self._project.registerNotifier(targetName,
                                                       trigger,
                                                       partial(self, notifier=notifier),
@@ -350,10 +348,10 @@ class Notifier(NotifierABC):
         if self._isBlanked:
             return
 
-        trigger, targetName, triggerForTheObject = notifier
+        trigger, targetName = notifier
 
         if self._debug:
-            sys.stderr.write('>>> Notifier.__call__: %s --> notifier=%s, obj=%r parameter2=%r\n' % \
+            sys.stderr.write('>>> Notifier.__call__: %s \n--> notifier=%s obj=%r parameter2=%r\n' % \
                              (self, notifier, obj, parameter2)
             )
 
@@ -371,29 +369,32 @@ class Notifier(NotifierABC):
         if trigger == Notifier.CURRENT:
             value = getattr(self._theObject, targetName)
             if value != self._value:
-                callbackDict[self.OBJECT] = self._theObject  # triggerForTheObject is True
+                callbackDict[self.OBJECT] = self._theObject
                 callbackDict[self.PREVIOUSVALUE] = self._value
                 callbackDict[self.VALUE] = value
                 self._callback(callbackDict, **self._kwargs)
                 self._value = value
 
-        # OBSERVE special case
-        elif trigger == Notifier.OBSERVE:
-            value = getattr(self._theObject, targetName)
+        # OBSERVE ANY special case
+        elif trigger == Notifier.OBSERVE and targetName == self.ANY:
+            if obj.pid == self._theObject.pid:
+                callbackDict[self.OBJECT] = self._theObject
+                self._callback(callbackDict, **self._kwargs)
+
+        # OBSERVE targetName special case
+        elif trigger == Notifier.OBSERVE and targetName != self.ANY:
             # The check below catches all changes to obj that do not involve targetName, as only when it has changed
             # its value will we trigger the callback
+            value = getattr(self._theObject, targetName)
             if obj.pid == self._theObject.pid and value != self._value:
-                callbackDict[self.OBJECT] = self._theObject  # triggerForTheObject is True
+                callbackDict[self.OBJECT] = self._theObject
                 callbackDict[self.PREVIOUSVALUE] = self._value
                 callbackDict[self.VALUE] = value
                 self._callback(callbackDict, **self._kwargs)
                 self._value = value
 
         # check if the trigger applies for all other cases
-        elif self._isProject \
-                or (triggerForTheObject and obj.id == self._theObject.id) \
-                or obj._parent.id == self._theObject.id:
-
+        elif self._isProject or obj._parent.pid == self._theObject.pid:
             if trigger == self.RENAME and parameter2 is not None:
                 callbackDict[self.OLDPID] = parameter2
             self._callback(callbackDict, **self._kwargs)

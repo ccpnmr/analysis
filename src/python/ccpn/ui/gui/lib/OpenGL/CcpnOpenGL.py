@@ -571,6 +571,11 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._stackingMode:
                 stackCount += 1
 
+    def _setRegion(self, region, value):
+        self.strip.project._undo.increaseBlocking()
+        region = value
+        self.strip.project._undo.decreaseBlocking()
+
     def _maximiseRegions(self):
         for spectrumView in self.strip.spectrumViews:  #.orderedSpectrumViews():
             if spectrumView.isDeleted:
@@ -580,7 +585,9 @@ class CcpnGLWidget(QOpenGLWidget):
             self._buildSpectrumSetting(spectrumView)
 
             axis = self._orderedAxes[0]
-            axis.region = (float(self._minX), float(self._maxX))
+            # axis.region = (float(self._minX), float(self._maxX))
+            self._setRegion(axis, (float(self._minX), float(self._maxX)))
+
             if self.INVERTXAXIS:
                 self.axisL = max(axis.region[0], axis.region[1])
                 self.axisR = min(axis.region[0], axis.region[1])
@@ -589,7 +596,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisR = max(axis.region[0], axis.region[1])
 
             axis = self._orderedAxes[1]
-            axis.region = (float(self._minY), float(self._maxY))
+            # axis.region = (float(self._minY), float(self._maxY))
+            self._setRegion(axis, (float(self._minY), float(self._maxY)))
+
             if self.INVERTYAXIS:
                 self.axisB = max(axis.region[0], axis.region[1])
                 self.axisT = min(axis.region[0], axis.region[1])
@@ -1005,7 +1014,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # self.project._startCommandEchoBlock('_rescaleXAxis', quiet=True)
         try:
-            self._orderedAxes[0].region = (self.axisL, self.axisR)
+            # self._orderedAxes[0].region = (self.axisL, self.axisR)
+            self._setRegion(self._orderedAxes[0], (self.axisL, self.axisR))
         except:
             getLogger().debug('error setting viewbox X-range')
         # finally:
@@ -1031,7 +1041,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # self.project._startCommandEchoBlock('_rescaleYAxis', quiet=True)
         try:
-            self._orderedAxes[1].region = (self.axisT, self.axisB)
+            # self._orderedAxes[1].region = (self.axisT, self.axisB)
+            self._setRegion(self._orderedAxes[1], (self.axisT, self.axisB))
+
         except Exception as es:
             getLogger().debug('error setting viewbox Y-range')
         # finally:
@@ -1108,8 +1120,12 @@ class CcpnGLWidget(QOpenGLWidget):
             self.update()
 
         try:
-            self._orderedAxes[0].region = (self.axisL, self.axisR)
-            self._orderedAxes[1].region = (self.axisT, self.axisB)
+            # self._orderedAxes[0].region = (self.axisL, self.axisR)
+            # self._orderedAxes[1].region = (self.axisT, self.axisB)
+
+            self._setRegion(self._orderedAxes[0], (self.axisL, self.axisR))
+            self._setRegion(self._orderedAxes[1], (self.axisT, self.axisB))
+
         except Exception as es:
             getLogger().debug('error setting viewbox XY-range')
 

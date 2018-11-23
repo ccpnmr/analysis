@@ -96,9 +96,9 @@ class Gui(Ui):
         project.registerNotifier('Axis', 'change', GuiStrip._axisRegionChanged)
 
         # TODO:ED not sure this is the best place
-        project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks)
-        project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks)
-        project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks)
+        project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks, onceOnly=True)
+        project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks, onceOnly=True)
+        project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks, onceOnly=True)
 
         # TODO:ED sorry - don't actually want _appBase
         self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)

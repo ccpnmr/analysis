@@ -168,10 +168,6 @@ class Mark(AbstractWrapperObject):
                       parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
         return apiGuiTask.sortedMarks()
 
-    def _finaliseAction(self, action: str):
-        """checking when the mark is changed
-        """
-        super()._finaliseAction(action=action)
 
 #=========================================================================================
 

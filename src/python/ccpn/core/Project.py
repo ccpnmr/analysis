@@ -1284,7 +1284,8 @@ class Project(AbstractWrapperObject):
             # readCsv(self, path=path)
 
         elif subType == ioFormats.EXCEL:
-            ExcelReader(project=self, excelPath=path)
+            with suspendSideBarNotifications(self, 'ExcelReader', quiet=False):
+                ExcelReader(project=self, excelPath=path)
 
     def _uniqueSubstanceName(self, name: str = None, defaultName: str = 'Molecule') -> str:
         """add integer suffixed to name till it is unique"""

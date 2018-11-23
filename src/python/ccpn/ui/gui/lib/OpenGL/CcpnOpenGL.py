@@ -2175,6 +2175,7 @@ class CcpnGLWidget(QOpenGLWidget):
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()
 
         self._setViewPortFontScale()
+
         if self.strip.crosshairVisible:
             self.drawMouseCoords()
 

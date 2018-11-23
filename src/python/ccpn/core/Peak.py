@@ -38,7 +38,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
-
+from ccpn.util.decorators import notify, undo
 
 class Peak(AbstractWrapperObject):
     """Peak object, holding position, intensity, and assignment information
@@ -169,42 +169,53 @@ class Peak(AbstractWrapperObject):
         return tuple(x.value for x in self._wrappedData.sortedPeakDims())
 
     @position.setter
-    # @notify('change')
-    # @undo
+    @notify('change', 'multiplets')
+    @undo()
     def position(self, value: Sequence):
         """set the position of the peak
         """
+        # call api changes
+        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            peakDim.value = value[ii]
+            peakDim.realValue = None
 
-        def undo():
-            """preredo/postundo function, needed for undo/redo"""
-            self.project.blankNotification()
-            # if not hasattr(self.project, '_apiBlanking'):
-            #     self.project._apiBlanking = 0
-            # self.project._apiBlanking += 1
-
-        def redo():
-            """preundo/postredo function, needed for undo/redo, and fire single change notifier"""
-            self.project.unblankNotification()
-            # self.project._apiBlanking = max(0, self.project._apiBlanking-1)
-            self._finaliseAction('change')
-            for mt in self.multiplets:
-                mt._finaliseAction('change')
-
-        self._startCommandEchoBlock('position', value, propertySetter=True)
-        _undo = self.project._undo
-
-        _undo.newItem(redo, undo)
-        undo()
-        try:
-            # call api changes
-            for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-                peakDim.value = value[ii]
-                peakDim.realValue = None
-        finally:
-            redo()
-            _undo.newItem(undo, redo)
-
-            self._endCommandEchoBlock()
+    # @position.setter
+    # # @notify('change')
+    # # @undo
+    # def position(self, value: Sequence):
+    #     """set the position of the peak
+    #     """
+    #
+    #     def undo():
+    #         """preredo/postundo function, needed for undo/redo"""
+    #         self.project.blankNotification()
+    #         # if not hasattr(self.project, '_apiBlanking'):
+    #         #     self.project._apiBlanking = 0
+    #         # self.project._apiBlanking += 1
+    #
+    #     def redo():
+    #         """preundo/postredo function, needed for undo/redo, and fire single change notifier"""
+    #         self.project.unblankNotification()
+    #         # self.project._apiBlanking = max(0, self.project._apiBlanking-1)
+    #         self._finaliseAction('change')
+    #         for mt in self.multiplets:
+    #             mt._finaliseAction('change')
+    #
+    #     self._startCommandEchoBlock('position', value, propertySetter=True)
+    #     _undo = self.project._undo
+    #
+    #     _undo.newItem(redo, undo)
+    #     undo()
+    #     try:
+    #         # call api changes
+    #         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+    #             peakDim.value = value[ii]
+    #             peakDim.realValue = None
+    #     finally:
+    #         redo()
+    #         _undo.newItem(undo, redo)
+    #
+    #         self._endCommandEchoBlock()
 
     @property
     def positionError(self) -> Tuple[Optional[float], ...]:

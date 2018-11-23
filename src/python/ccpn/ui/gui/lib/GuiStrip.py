@@ -254,7 +254,8 @@ class GuiStrip(Frame):
         # Notifier for updating the multiplets
         self._multipletNotifier = Notifier(self.project, [Notifier.CREATE,
                                                           Notifier.DELETE,
-                                                          Notifier.CHANGE], 'Multiplet', self._updateDisplayedMultiplets)
+                                                          Notifier.CHANGE], 'Multiplet', self._updateDisplayedMultiplets,
+                                           onceOnly=True)
         self._multipletNotifier.setDebug(True)
 
         # Notifier for change of stripLabel

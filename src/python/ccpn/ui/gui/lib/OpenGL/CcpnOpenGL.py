@@ -5035,6 +5035,9 @@ class CcpnGLWidget(QOpenGLWidget):
             try:
                 for peak in peaks:
                     self._movePeak(peak, deltaPosition)
+            except Exception as es:
+                pass
+
             finally:
                 self.project._endCommandEchoBlock()
 

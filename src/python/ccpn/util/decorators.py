@@ -7,6 +7,9 @@ import os
 import linecache
 import functools
 import cProfile
+import decorator
+import inspect
+from functools import partial
 
 
 def trace(f):
@@ -78,3 +81,93 @@ def profile(func):
             profiler.dump_stats(filename)
 
     return profileWrapper
+
+
+def notify(action, subClass=''):
+    """A decorator wrap a method in an undo block
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+
+        def undo(self):
+            """preRedo/postUndo function, needed for undo/redo
+            """
+            print('>>>UNDO notify decorator')
+            pass
+
+        def redo(self):
+            """preUndo/postRedo function, needed for undo/redo, and fire single change notifiers
+            """
+            self._finaliseAction(action=action)
+            for obj in getattr(self, subClass, []):
+                obj._finaliseAction(action)
+            print('>>>REDO notify decorator')
+
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+
+        self = args[0]
+        _undo = self.project._undo
+
+        _undo._newItem(undoPartial=partial(redo, self),
+                       redoPartial=partial(undo, self))
+        undo(self)
+        try:
+
+            # call the wrapped function
+            result = func(*args, **kwds)
+
+        finally:
+            redo(self)
+            _undo._newItem(undoPartial=partial(undo, self),
+                           redoPartial=partial(redo, self))
+
+        return result
+
+    return theDecorator
+
+
+def undo():
+    """A decorator wrap a method in an undo block
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+
+        def undo(self):
+            """preRedo/postUndo function, needed for undo/redo
+            """
+            self.project.blankNotification()
+            print('>>>UNDO undo decorator')
+
+        def redo(self):
+            """preUndo/postRedo function, needed for undo/redo, and fire single change notifiers
+            """
+            self.project.unblankNotification()
+            print('>>>REDO undo decorator')
+
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+
+        self = args[0]
+        self._startCommandEchoBlock(func.__name__, *args, propertySetter=True)
+        _undo = self.project._undo
+
+        _undo._newItem(undoPartial=partial(redo, self),
+                       redoPartial=partial(undo, self))
+        undo(self)
+        try:
+
+            # call the wrapped function
+            result = func(*args, **kwds)
+
+        finally:
+            redo(self)
+            _undo._newItem(undoPartial=partial(undo, self),
+                           redoPartial=partial(redo, self))
+            self._endCommandEchoBlock()
+
+        return result
+
+    return theDecorator

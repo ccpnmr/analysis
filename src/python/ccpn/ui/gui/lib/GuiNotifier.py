@@ -113,32 +113,21 @@ class GuiNotifier(NotifierABC):
         :param *args: optional arguments to callback
         :param **kwargs: optional keyword,value arguments to callback
         """
-        super().__init__(debug=debug)
+        super().__init__(theObject=theObject, triggers=triggers, targetName=targetName, debug=debug,
+                         callback=callback, **kwargs
+                         )
 
         # some sanity checks
         if not isinstance(theObject, QtWidgets.QWidget):
             raise RuntimeError('Invalid object (%r), expected object of type QWidget' % theObject)
 
-        if triggers is None:
-            if not (isinstance(triggers, list) or isinstance(triggers, tuple)) \
-                    or len(triggers) == 0:
-                raise RuntimeError('Invalid trigger (%r)' % triggers)
-
-        self._theObject = theObject  # The object we are monitoring
-
         self._notifiers = []  # list of tuples defining Notifier call signature; used for __str__
         self._unregister = []  # list of tuples needed for unregistering
 
-        self._callback = callback
-        self._kwargs = kwargs
-
         # register the callbacks
-        for trigger in triggers:
+        for trigger in self._triggers:
 
-            if trigger not in GuiNotifier._triggerKeywords:
-                raise RuntimeError('GuiNotifier.__init__: invalid trigger "%s"' % trigger)
-
-            elif trigger == GuiNotifier.DROPEVENT:
+            if trigger == GuiNotifier.DROPEVENT:
 
                 # if not self._theObject.acceptDrops():
                 #     raise RuntimeError('GuiNotifier.__init__: Widget "%s" does not accept drops' % self._theObject)
@@ -201,7 +190,7 @@ class GuiNotifier(NotifierABC):
         # DROPEVENT
         if self._debug:
             logger.info('>>> GuiNotifier (%d): obj=%s  callback for %s, %s: data=%s' % \
-                        (self._index, self._theObject, notifier, self._callback, data)
+                        (self.id, self._theObject, notifier, self._callback, data)
                         )
         if trigger == GuiNotifier.DROPEVENT:
             # optionally filter for targetName
@@ -224,9 +213,9 @@ class GuiNotifier(NotifierABC):
         self._callback(callbackDict, **self._kwargs)
         return
 
-    def __str__(self) -> str:
-        return '<GuiNotifier (%d): theObject=%s, notifiers=%s>' % \
-               (self._index, self._theObject, self._notifiers)
+    # def __str__(self) -> str:
+    #     return '<GuiNotifier (%d): theObject=%s, notifiers=%s>' % \
+    #            (self.id, self._theObject, self._notifiers)
 
 
 if __name__ == '__main__':

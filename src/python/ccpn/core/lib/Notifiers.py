@@ -401,55 +401,14 @@ class Notifier(NotifierABC):
 
         return
 
-    # convenience methods
 
-    # @staticmethod
-    # def _getChildClasses(obj: AbstractWrapperObject, recursion: bool) -> list:
-    #     """
-    #     :param obj: valid V3 object
-    #     :param recursion: use recursion to also add child objects
-    #     :return: list of valid child classes of obj
-    #     """
-    #     #if not isinstance(obj, AbstractWrapperObject):
-    #     #  raise RuntimeError('Ivalid object type (%s)' % obj)
-    #
-    #     cls = []
-    #     for child in obj._childClasses:
-    #         cls.append(child)
-    #         if recursion:
-    #             for grandchild in Notifier._getChildClasses(child, recursion=True):
-    #                 cls.append(grandchild)
-    #     return cls
-
-    # @staticmethod
-    # def _getChildObjects(obj: AbstractWrapperObject, recursion: bool = False) -> list:
-    #     """
-    #     depth-first extraction of all child objects, optionally using recursion
-    #     :param obj: valid V3 object
-    #     :return: list of child objects
-    #     """
-    #     #if not isinstance(obj, AbstractWrapperObject):
-    #     #  raise RuntimeError('Invalid object type (%s)' % obj)
-    #
-    #     children = []
-    #     for cls in obj._childClasses:
-    #         if hasattr(obj, cls._pluralLinkName):
-    #             for child in getattr(obj, cls._pluralLinkName):
-    #                 children.append(child)
-    #                 if recursion:
-    #                     for grandchild in Notifier._getChildObjects(child, recursion=True):
-    #                         children.append(grandchild)
-    #     return children
-
-
-# def currentNotifier(attributeName, callback, onlyOnce=False, debug=False):
+# def currentNotifier(attributeName, callback, onlyOnce=False, debug=False, **kwargs):
 #     """Convienience method: Return a Notifier instance for current.attributeName
 #     """
 #     app = getApplication()
 #     notifier = Notifier(app.current, [Notifier.CURRENT], targetName=attributeName,
-#                         callback=callback, onlyOnce=onlyOnce, debug=debug)
+#                         callback=callback, onlyOnce=onlyOnce, debug=debug, **kwargs)
 #     return notifier
-
 
 
 class NotifierBase(object):
@@ -571,58 +530,3 @@ class NotifierBase(object):
         objNotifiers = self._getObjectNotifiersDict()
         for notifier in list(objNotifiers.values()):
             notifier.setBlanking(flag)
-
-#
-#
-# def deleteAllNotifiers(project):
-#   """
-#   remove all notifiers from project object using depth-first recursion, i.e. the
-#   deepest objects in the tree are handled first.
-#
-#   :param project: valid V3 project
-#   """
-#
-#   def _deleteNotifiers(obj):
-#     if not hasattr(obj, NOTIFIERSDICT) or len() == 0:
-#       return
-#     objNotifiers = getattr(obj, NOTIFIERSDICT)
-#     if len(objNotifiers) == 0:
-#       return
-#     for notifier in objNotifiers.values():
-#       obj.deleteNotifier(notifier)
-#     return
-#
-#   def _handleObj(obj):
-#     for cls in obj._childClasses:
-#       if hasattr(obj, cls._pluralLinkName):
-#         for child in getattr(obj, cls._pluralLinkName):
-#           _handleObj(child)
-#     _deleteNotifiers(obj)
-#
-#   _handleObj(project)
-#   return
-#
-# # class Test(object):
-# #   "testing __del__"
-# #   def __init__(self):
-# #     print('__init__')
-# #
-# #   def __del__(self):
-# #     print('__del__')
-#
-#
-# # some testing in console
-# if False:
-#   r = project.nmrResidues[10]
-#   n0 = r.setNotifier([Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'NmrAtom', print)
-#   n1 = r.setNotifier([Notifier.RENAME], None, print, 'renaming')
-#   n2 = project.setNotifier([Notifier.CREATE, Notifier.DELETE], 'NmrAtom', print)
-#   n4 = r.setNotifier([Notifier.OBSERVE], 'comment', print)
-#
-#   a = r.newNmrAtom()
-#   project.deleteObjects(a)
-#   r.rename('test')
-#   r.comment = 'new comment'
-#
-#   n0.delete()
-#   a = r.newNmrAtom()

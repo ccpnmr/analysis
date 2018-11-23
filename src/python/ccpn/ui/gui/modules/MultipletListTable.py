@@ -221,7 +221,7 @@ class MultipletListTableWidget(QuickTable):
 
         self.setTableNotifiers(tableClass=MultipletList,
                                rowClass=Multiplet,
-                               cellClassNames=(NmrAtom, 'assignedMultiplets'),
+                               cellClassNames=None,
                                tableName='multipletList', rowName='multiplet',
                                changeFunc=self._updateAllModule,
                                className=self.attributeName,

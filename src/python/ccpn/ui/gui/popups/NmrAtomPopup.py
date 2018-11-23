@@ -107,7 +107,7 @@ class NmrAtomPopup(CcpnDialog):
                                           sequenceCode=nmrResidue.sequenceCode,
                                           residueType=nmrResidue.residueType,
                                           mergeToExisting=self.mergeBox.isChecked())
-                    self.nmrResidue._finaliseAction('change')
+                    # self.nmrResidue._finaliseAction('change')
 
                 self.nmrAtomLabel.setText("NmrAtom: %s" % self.nmrAtom.id)
 

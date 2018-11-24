@@ -189,7 +189,7 @@ class PreferencesPopup(CcpnDialog):
         row += 1
         self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
         self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
-        self.colourSchemeBox.setToolTip('Spectrum Display Background only')
+        self.colourSchemeBox.setToolTip('SpectrumDisplay Background only')
         self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
         self.colourSchemeBox.addItems(COLOUR_SCHEMES)
         self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(

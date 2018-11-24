@@ -2292,7 +2292,7 @@ class Framework:
         from ccpn.ui.gui.popups.ExportStripToFile import ExportStripToFilePopup
 
         if len(self.project.spectrumDisplays) == 0:
-            MessageDialog.showWarning('', 'No Spectrum Display found')
+            MessageDialog.showWarning('', 'No SpectrumDisplay found')
         else:
             exportDialog = ExportStripToFilePopup(parent=self.ui.mainWindow,
                                                   mainWindow=self.ui.mainWindow,

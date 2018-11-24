@@ -1142,7 +1142,7 @@ class SpectrumDisplayPropertiesPopupNd(CcpnDialog):
     MINIMUM_WIDTH = 400
 
     def __init__(self, parent=None, mainWindow=None, orderedSpectrumViews=None,
-                 title='Spectrum Display Properties', **kwds):
+                 title='SpectrumDisplay Properties', **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
@@ -1280,7 +1280,7 @@ class SpectrumDisplayPropertiesPopup1d(CcpnDialog):
     MINIMUM_WIDTH = 400
 
     def __init__(self, parent=None, mainWindow=None, orderedSpectrumViews=None,
-                 title='Spectrum Display Properties', **kwds):
+                 title='SpectrumDisplay Properties', **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow

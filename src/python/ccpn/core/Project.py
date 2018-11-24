@@ -189,8 +189,9 @@ class Project(AbstractWrapperObject):
         # Set up notifiers
         self._registerPresetApiNotifiers()
 
-        for tt in self._coreNotifiers:
-            self.registerNotifier(*tt)
+        # GWV 20181123: deactivated
+        # for tt in self._coreNotifiers:
+        #     self.registerNotifier(*tt)
 
         # initialise, creating the wrapped objects
         self._initializeAll()

@@ -2056,7 +2056,6 @@ def _axisRegionChanged(cDict):
 
     axis = cDict[Notifier.OBJECT]
     strip = axis.strip
-    if not strip._finaliseDone: return
 
     position = axis.position
     width = axis.width
@@ -2138,8 +2137,6 @@ def _rulerDeleted(project: Project, apiRuler: ApiRuler):
 def _setupGuiStrip(project: Project, apiStrip):
     """Set up graphical parameters for completed strips - for notifiers"""
     strip = project._data2Obj[apiStrip]
-
-    if not strip._finaliseDone: return
 
     # orderedAxes = strip.orderedAxes
     # padding = strip.application.preferences.general.stripRegionPadding

@@ -243,7 +243,7 @@ class Notifier(NotifierABC):
         else:
             raise RuntimeError('Invalid object (%s)', theObject)
 
-        self._value = None  # used to store the value of attribute to observe for change
+        self._previousValue = None  # used to store the value of attribute to observe for change
 
         self._unregister = []  # list of tuples needed for unregistering
 
@@ -268,7 +268,7 @@ class Notifier(NotifierABC):
                     raise RuntimeWarning(
                             'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject))
 
-                self._value = getattr(theObject, targetName)
+                self._previousValue = getattr(theObject, targetName)
                 notifier = (trigger, targetName)
                 # current has its own notifier system
 
@@ -287,7 +287,7 @@ class Notifier(NotifierABC):
                             'Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
                 if targetName != self.ANY:
-                    self._value = getattr(theObject, targetName)
+                    self._previousValue = getattr(theObject, targetName)
 
                 notifier = (trigger, targetName)
                 func = self._project.registerNotifier(theObject.className,
@@ -350,7 +350,7 @@ class Notifier(NotifierABC):
         self._debug = True
         if self._debug:
             p2 = 'parameter2=%r ' % parameter2 if parameter2 else ''
-            sys.stderr.write('--> %-30s obj=%-30s %s' % \
+            sys.stderr.write('--> %-25s obj=%-25s %s' % \
                              (notifier, obj, p2)
             )
 
@@ -368,15 +368,15 @@ class Notifier(NotifierABC):
         # CURRENT special case
         if trigger == Notifier.CURRENT:
             value = getattr(self._theObject, targetName)
-            if value != self._value:
+            if value != self._previousValue:
                 callbackDict[self.OBJECT] = self._theObject
-                callbackDict[self.PREVIOUSVALUE] = self._value
+                callbackDict[self.PREVIOUSVALUE] = self._previousValue
                 callbackDict[self.VALUE] = value
                 if self._debug:
                     sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
                 self._callback(callbackDict, **self._kwargs)
                 notifierFired = True
-                self._value = value
+                self._previousValue = value
 
         # OBSERVE ANY special case
         elif trigger == Notifier.OBSERVE and targetName == self.ANY:
@@ -392,14 +392,14 @@ class Notifier(NotifierABC):
             # The check below catches all changes to obj that do not involve targetName, as only when it has changed
             # its value will we trigger the callback
             value = getattr(self._theObject, targetName)
-            if obj.pid == self._theObject.pid and value != self._value:
+            if obj.pid == self._theObject.pid and value != self._previousValue:
                 callbackDict[self.OBJECT] = self._theObject
-                callbackDict[self.PREVIOUSVALUE] = self._value
+                callbackDict[self.PREVIOUSVALUE] = self._previousValue
                 callbackDict[self.VALUE] = value
                 if self._debug:
                     sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
                 self._callback(callbackDict, **self._kwargs)
-                self._value = value
+                self._previousValue = value
                 notifierFired = True
 
         # check if the trigger applies for all other cases

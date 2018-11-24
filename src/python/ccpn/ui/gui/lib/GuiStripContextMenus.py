@@ -209,13 +209,13 @@ def _estimateNoise(strip):
 
 def _makeStripPlot(strip):
     return _SCMitem(name='Make Strip Plot',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Make a strip plot in the current spectrumDisplay', shortcut='SP',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Make a strip plot in the current SpectrumDisplay', shortcut='SP',
                     callback=strip.makeStripPlot)
 
 
 def _printItem(strip):
     return _SCMitem(name='Print to File...',
-                    typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Print Spectrum Display to File',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/print', toolTip='Print SpectrumDisplay to File',
                     shortcut='PT', callback=strip.showExportDialog)
 
 

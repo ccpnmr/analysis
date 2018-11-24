@@ -289,7 +289,7 @@ class CustomViewBox(pg.ViewBox):
     def mouseDragEvent(self, event):
         """
         Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
-        drag events. Same as spectrum Display. Check Spectrum Display View Box for more documentation.
+        drag events. Same as spectrum Display. Check SpectrumDisplay View Box for more documentation.
 
         """
 

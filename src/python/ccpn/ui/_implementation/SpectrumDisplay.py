@@ -353,7 +353,7 @@ def _newSpectrumDisplay(self: Project, axisCodes: (str,), stripDirection: str = 
         if 'intensity' in axisCodes:
             title = ''.join(['1D:', axisCodes[0]] + list(axisCodes[2:]))
         else:
-            title = ''.join([str(x) for x in axisCodes])
+            title = ''.join([str(x)[0:1] for x in axisCodes])
     elif Pid.altCharacter in title:
         raise ValueError("Character %s not allowed in gui.core.SpectrumDisplay.name" % Pid.altCharacter)
     while apiTask.findFirstModule(name=title):

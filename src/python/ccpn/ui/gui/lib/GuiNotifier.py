@@ -38,6 +38,8 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 # Start of code
 #=========================================================================================
 
+import sys
+
 from functools import partial
 from collections import OrderedDict
 from typing import Callable, Any
@@ -110,7 +112,6 @@ class GuiNotifier(NotifierABC):
         :param targetName: optional list of dropTargets (URLS, TEXT, PIDS, IDS) or None
         :param callback: callback function with signature: callback(callbackDict [, *args] [, **kwargs])
         :param debug: set debug
-        :param *args: optional arguments to callback
         :param **kwargs: optional keyword,value arguments to callback
         """
         super().__init__(theObject=theObject, triggers=triggers, targetName=targetName, debug=debug,
@@ -121,7 +122,6 @@ class GuiNotifier(NotifierABC):
         if not isinstance(theObject, QtWidgets.QWidget):
             raise RuntimeError('Invalid object (%r), expected object of type QWidget' % theObject)
 
-        self._notifiers = []  # list of tuples defining Notifier call signature; used for __str__
         self._unregister = []  # list of tuples needed for unregistering
 
         # register the callbacks
@@ -138,25 +138,27 @@ class GuiNotifier(NotifierABC):
                             raise RuntimeError('GuiNotifier.__init__: invalid dropTarget "%s"' % (target))
 
                 notifier = (trigger, targetName)
-                self._notifiers.append(notifier)
                 self._theObject.setDropEventCallback(partial(self, notifier=notifier))
-                self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this later
+                self._unregister.append((trigger, targetName))
+                self._isRegistered = True
 
             elif trigger == GuiNotifier.ENTEREVENT:
                 notifier = (trigger, targetName)
-                self._notifiers.append(notifier)
                 self._theObject.setDragEnterEventCallback(partial(self, notifier=notifier))
-                self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this later
+                self._unregister.append((trigger, targetName))
+                self._isRegistered = True
 
             elif trigger == GuiNotifier.DRAGMOVEEVENT:
                 notifier = (trigger, targetName)
-                self._notifiers.append(notifier)
                 self._theObject.setDragMoveEventCallback(partial(self, notifier=notifier))
-                self._unregister.append((trigger, targetName))  # for now a duplicate, but we may need this later
+                self._unregister.append((trigger, targetName))
+                self._isRegistered = True
 
-        if len(self._notifiers) == 0:
+        if not self.isRegistered():
             raise RuntimeWarning('GuiNotifier.__init__: no notifiers intialised for theObject=%s, targetName=%r, triggers=%s ' % \
                                  (theObject, targetName, triggers))
+        if self._debug:
+            sys.stderr.write('>>> registered %s\n' % self)
 
     def unRegister(self):
         """
@@ -172,26 +174,28 @@ class GuiNotifier(NotifierABC):
                 self._theObject.setDragEnterEventCallback(None)
             elif trigger == GuiNotifier.DRAGMOVEEVENT:
                 self._theObject.setDragMoveEventCallback(None)
-        self._theObject = None
-        self._callback = None
-        self._notifiers = []
-        self._unregister = []
 
-    def isRegistered(self):
-        "Return True if notifier is still registered; i.e. active"
-        return len(self._notifiers) > 0
+        super().unRegister() # the end as it clears all attributes
 
     def __call__(self, data: dict, notifier: tuple = None):
         """
         wrapper, accommodating the different triggers before firing the callback
         """
+        if not self.isRegistered():
+            logger.warning('Trigering unregistered notifier %s' % self)
+            return
+
+        if self._isBlanked:
+            return
+
         trigger, targetName = notifier
 
-        # DROPEVENT
         if self._debug:
-            logger.info('>>> GuiNotifier (%d): obj=%s  callback for %s, %s: data=%s' % \
-                        (self.id, self._theObject, notifier, self._callback, data)
-                        )
+            sys.stderr.write('>>> Notifier.__call__: %s \n--> notifier=%s data=%s\n' % \
+                             (self, notifier, data)
+            )
+
+        # DROPEVENT
         if trigger == GuiNotifier.DROPEVENT:
             # optionally filter for targetName
             skip = False
@@ -212,10 +216,6 @@ class GuiNotifier(NotifierABC):
         callbackDict.update(data)
         self._callback(callbackDict, **self._kwargs)
         return
-
-    # def __str__(self) -> str:
-    #     return '<GuiNotifier (%d): theObject=%s, notifiers=%s>' % \
-    #            (self.id, self._theObject, self._notifiers)
 
 
 if __name__ == '__main__':

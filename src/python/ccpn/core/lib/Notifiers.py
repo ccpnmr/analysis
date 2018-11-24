@@ -132,8 +132,9 @@ class NotifierABC(object):
         return self._isRegistered
 
     def __str__(self) -> str:
-        return '<%s (%d): theObject=%s, triggers=%s targetName=%r>' % \
-               (self.__class__.__name__, self.id, self._theObject, self._triggers, self._targetName)
+        trigs = '%s' % [(t, self._targetName) for t in self._triggers]
+        return '<%s (%d): theObject:%s triggers:%s>' % \
+               (self.__class__.__name__, self.id, self._theObject, trigs[1:-1])
 
 
 class Notifier(NotifierABC):
@@ -346,9 +347,10 @@ class Notifier(NotifierABC):
 
         trigger, targetName = notifier
 
-        if self._debug:
-            sys.stderr.write('>>> Notifier.__call__: %s \n--> notifier=%s obj=%r parameter2=%r\n' % \
-                             (self, notifier, obj, parameter2)
+        if self._debug or True:
+            p2 = 'parameter2=%r ' % parameter2 if parameter2 else ''
+            sys.stderr.write('--> %-30s obj=%-30s %son %s func:%s\n' % \
+                             (notifier, obj, p2, self, self._callback)
             )
 
         callbackDict = dict(
@@ -407,8 +409,13 @@ class Notifier(NotifierABC):
 #     return notifier
 
 class _NotifiersDict(OrderedDict):
-    """A dummy class to test its type"""
-    pass
+    """A class to retain all notifiers of an object
+    """
+    REGISTERED_WITH_OBJECT = 'registeredWithObject'
+    INITIATED_FROM_OBJECT = 'initiatedFromObject'
+
+    def __init__(self):
+        super().__init__()
 
 
 class NotifierBase(object):

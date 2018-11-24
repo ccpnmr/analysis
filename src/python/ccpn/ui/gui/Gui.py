@@ -86,26 +86,31 @@ class Gui(Ui):
         self.application.initGraphics()
 
         project = self.application.project
+        current = self.application.current
 
         # Wrapper Notifiers
         from ccpn.ui.gui.lib import GuiStrip
 
-        Notifier(project, [Notifier.CREATE, Notifier.DELETE], 'Strip',
-                            GuiStrip.GuiStrip._resetRemoveStripAction)
+        # GWV 20181123: Callback does not have right signature and does not do anything
+        # Notifier(project, [Notifier.CREATE, Notifier.DELETE], 'Strip',
+        #                     GuiStrip.GuiStrip._resetRemoveStripAction)
+
         # notifier = project.registerNotifier('Strip', 'create', GuiStrip.GuiStrip._resetRemoveStripAction)
         # project.duplicateNotifier('Strip', 'delete', notifier)
 
-        project.registerNotifier('Axis', 'change', GuiStrip._axisRegionChanged)
+        # project.registerNotifier('Axis', 'change', GuiStrip._axisRegionChanged)
+        Notifier(project, [Notifier.CHANGE], 'Axis', GuiStrip._axisRegionChanged)
 
         # TODO:ED not sure this is the best place
-        project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks, onceOnly=True)
-        project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks, onceOnly=True)
-        project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks, onceOnly=True)
+        Notifier(project, [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE], 'Mark',
+                 GuiStrip._updateDisplayedMarks, onceOnly=True)
+        # project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks, onceOnly=True)
+        # project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks, onceOnly=True)
+        # project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks, onceOnly=True)
 
-        # TODO:ED sorry - don't actually want _appBase
-        self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
-        self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
-        self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
+        self._currentPeakNotifier = Notifier(current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
+        self._currentIntegralNotifier = Notifier(current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
+        self._currentMultipletNotifier = Notifier(current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
 
         from ccpn.ui.gui.lib import GuiSpectrumDisplay
 

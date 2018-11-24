@@ -2051,9 +2051,10 @@ def _updateSelectedMultiplets(data):
     GLSignals.emitEvent(triggers=[GLNotifier.GLHIGHLIGHTMULTIPLETS], targets=data[Notifier.OBJECT].multiplets)
 
 
-def _axisRegionChanged(axis: 'Axis'):
+def _axisRegionChanged(cDict):
     """Notifier function: Update strips etc. for when axis position or width changes"""
 
+    axis = cDict[Notifier.OBJECT]
     strip = axis.strip
     if not strip._finaliseDone: return
 

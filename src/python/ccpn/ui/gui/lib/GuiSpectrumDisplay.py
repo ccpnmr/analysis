@@ -1408,7 +1408,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
 def _deletedPeak(peak: Peak):
     """Function for notifiers.
-    #CCPNINTERNAL """
+    #CCPNINTERNAL
+    """
 
     for spectrumView in peak.peakList.spectrum.spectrumViews:
         spectrumView.strip.spectrumDisplay._deletedPeak(peak)

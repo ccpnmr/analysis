@@ -110,9 +110,10 @@ class AbstractWrapperObject():
     #: List of child classes. Must be overridden for each subclass.
     _childClasses = []
 
+    # GWV 20181123: deactivated
     # Wrapper-level notifiers that are set up on code import and
     # registered afresh for every new project
-    _coreNotifiers = []
+    # _coreNotifiers = []
 
     # Should notifiers be registered separately for this class?
     # Set to False if multiple wrapper classes wrap the same API class (e.g. PeakList, IntegralList;
@@ -637,23 +638,24 @@ class AbstractWrapperObject():
 
     # Notifiers and related functions:
 
-    @classmethod
-    def _setupCoreNotifier(cls, target: str, func: typing.Callable,
-                           parameterDict: dict = {}, onceOnly: bool = False):
-        """Set up notifiers for class cls that do not depend on individual objects -
-        These will be registered whenever a new project is initialised.
-        Parameters are eventually passed to the project.registerNotifier() function
-        (with cls converted to cls.className). Please see the Project.registerNotifier
-        documentation for a precise parameter description
-
-        Note that these notifiers are NOT cleared once set up.
-        """
-
-        # CCPNINTERNAL - used in top level class definitions, Current (ONLY)
-
-        # NB _coreNotifiers is a class attribute of AbstractWrapperObject
-        # So all tuples are appended to the same list, living in AbstractWrapperObject
-        cls._coreNotifiers.append((cls.className, target, func, parameterDict, onceOnly))
+    #GWV 20181123:
+    # @classmethod
+    # def _setupCoreNotifier(cls, target: str, func: typing.Callable,
+    #                        parameterDict: dict = {}, onceOnly: bool = False):
+    #     """Set up notifiers for class cls that do not depend on individual objects -
+    #     These will be registered whenever a new project is initialised.
+    #     Parameters are eventually passed to the project.registerNotifier() function
+    #     (with cls converted to cls.className). Please see the Project.registerNotifier
+    #     documentation for a precise parameter description
+    #
+    #     Note that these notifiers are NOT cleared once set up.
+    #     """
+    #
+    #     # CCPNINTERNAL - used in top level class definitions, Current (ONLY)
+    #
+    #     # NB _coreNotifiers is a class attribute of AbstractWrapperObject
+    #     # So all tuples are appended to the same list, living in AbstractWrapperObject
+    #     cls._coreNotifiers.append((cls.className, target, func, parameterDict, onceOnly))
 
     # def _finaliseRename(self):
     #   """Reset internal attributes after values determining PID have changed
@@ -676,34 +678,34 @@ class AbstractWrapperObject():
     #   del dd[oldId]
     #   dd[_id] = self
 
-    def _finaliseRelatedObjectFromRename(self, oldPid, pathToObject: str, action: str):
-        """Finalise related objects after rename
-        Alternative to _finaliseRelatedObject for calling from rename notifier.
-        """
-        target = operator.attrgetter(pathToObject)(self)
-        if not target:
-            pass
-        elif isinstance(target, AbstractWrapperObject):
-            target._finaliseAction(action)
-        else:
-            # This must be an iterable
-            for obj in target:
-                obj._finaliseAction(action)
-
-    def _finaliseRelatedObject(self, pathToObject: str, action: str):
-        """ Finalise 'action' type notifiers for getattribute(pathToObject)(self)
-        pathToObject is a navigation path (may contain dots) and must yield an object
-        or an iterable of objects. Can NOT be called from a rename notifier"""
-
-        target = operator.attrgetter(pathToObject)(self)
-        if not target:
-            pass
-        elif isinstance(target, AbstractWrapperObject):
-            target._finaliseAction(action)
-        else:
-            # This must be an iterable
-            for obj in target:
-                obj._finaliseAction(action)
+    # def _finaliseRelatedObjectFromRename(self, oldPid, pathToObject: str, action: str):
+    #     """Finalise related objects after rename
+    #     Alternative to _finaliseRelatedObject for calling from rename notifier.
+    #     """
+    #     target = operator.attrgetter(pathToObject)(self)
+    #     if not target:
+    #         pass
+    #     elif isinstance(target, AbstractWrapperObject):
+    #         target._finaliseAction(action)
+    #     else:
+    #         # This must be an iterable
+    #         for obj in target:
+    #             obj._finaliseAction(action)
+    #
+    # def _finaliseRelatedObject(self, pathToObject: str, action: str):
+    #     """ Finalise 'action' type notifiers for getattribute(pathToObject)(self)
+    #     pathToObject is a navigation path (may contain dots) and must yield an object
+    #     or an iterable of objects. Can NOT be called from a rename notifier"""
+    #
+    #     target = operator.attrgetter(pathToObject)(self)
+    #     if not target:
+    #         pass
+    #     elif isinstance(target, AbstractWrapperObject):
+    #         target._finaliseAction(action)
+    #     else:
+    #         # This must be an iterable
+    #         for obj in target:
+    #             obj._finaliseAction(action)
 
     def _finaliseAction(self, action: str):
         """Do wrapper level finalisation, and execute all notifiers

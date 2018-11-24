@@ -120,7 +120,7 @@ class NotifierABC(object):
     def unRegister(self):
         "Reset the attributes"
         if self._debug:
-            sys.stderr.write('>>> unregister %s' % self )
+            sys.stderr.write('>>> unRegister %s\n' % self )
         self._theObject = None
         self._callback = None
         self._unregister = []
@@ -347,12 +347,14 @@ class Notifier(NotifierABC):
 
         trigger, targetName = notifier
 
-        if self._debug or True:
+        self._debug = True
+        if self._debug:
             p2 = 'parameter2=%r ' % parameter2 if parameter2 else ''
-            sys.stderr.write('--> %-30s obj=%-30s %son %s func:%s\n' % \
-                             (notifier, obj, p2, self, self._callback)
+            sys.stderr.write('--> %-30s obj=%-30s %s' % \
+                             (notifier, obj, p2)
             )
 
+        notifierFired = False
         callbackDict = dict(
                 notifier=self,
                 trigger=trigger,
@@ -370,14 +372,20 @@ class Notifier(NotifierABC):
                 callbackDict[self.OBJECT] = self._theObject
                 callbackDict[self.PREVIOUSVALUE] = self._value
                 callbackDict[self.VALUE] = value
+                if self._debug:
+                    sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
                 self._callback(callbackDict, **self._kwargs)
+                notifierFired = True
                 self._value = value
 
         # OBSERVE ANY special case
         elif trigger == Notifier.OBSERVE and targetName == self.ANY:
             if obj.pid == self._theObject.pid:
                 callbackDict[self.OBJECT] = self._theObject
+                if self._debug:
+                    sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
                 self._callback(callbackDict, **self._kwargs)
+                notifierFired = True
 
         # OBSERVE targetName special case
         elif trigger == Notifier.OBSERVE and targetName != self.ANY:
@@ -388,14 +396,23 @@ class Notifier(NotifierABC):
                 callbackDict[self.OBJECT] = self._theObject
                 callbackDict[self.PREVIOUSVALUE] = self._value
                 callbackDict[self.VALUE] = value
+                if self._debug:
+                    sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
                 self._callback(callbackDict, **self._kwargs)
                 self._value = value
+                notifierFired = True
 
         # check if the trigger applies for all other cases
         elif self._isProject or obj._parent.pid == self._theObject.pid:
             if trigger == self.RENAME and parameter2 is not None:
                 callbackDict[self.OLDPID] = parameter2
+            if self._debug:
+                sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
             self._callback(callbackDict, **self._kwargs)
+            notifierFired = True
+
+        if self._debug and not notifierFired:
+            sys.stderr.write('%-9s *** %s func:%s\n' % ('not-FIRED', self, self._callback))
 
         return
 
@@ -492,7 +509,7 @@ class NotifierBase(object):
             raise RuntimeWarning('"%s" is not a (valid) notifier of "%s"' % (notifier, self))
 
         objNotifiers = self._getObjectNotifiersDict()
-        notifier.unregister()
+        notifier.unRegister()
         del(objNotifiers[notifier.id])
         del(notifier)
 

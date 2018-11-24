@@ -242,7 +242,7 @@ class GuiSpectrumDisplay(CcpnModule):
         # self.stripFrame.setAcceptDrops(True)
 
         # notifier to respond to items being dropped onto the stripFrame
-        self.droppedNotifier = GuiNotifier(self.stripFrame,
+        self.droppedNotifier = self.setGuiNotifier(self.stripFrame,
                                            [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                                            self._processDroppedItems)
 
@@ -253,28 +253,23 @@ class GuiSpectrumDisplay(CcpnModule):
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
 
-        self._toolbarNotifier = Notifier(self.project,
+        self._toolbarNotifier = self.setNotifier(self.project,
                                          [Notifier.CHANGE],
                                          'SpectrumDisplay',
                                          self._toolbarChange)
 
-        # register the spectrumView notifiers
-        self._registerNotifiers()
-
-    def _registerNotifiers(self):
-        """Notifiers for responding to spectrumViews
-        """
-        self._spectrumViewNotifier = Notifier(self.project,
+        self._spectrumViewNotifier = self.setNotifier(self.project,
                                               [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
                                               SpectrumView.className,
                                               self._spectrumViewChanged,
                                               onceOnly=True)
 
-    def _unRegisterNotifiers(self):
-        """Unregister notifiers
-        """
-        if self._spectrumViewNotifier:
-            self._spectrumViewNotifier.unRegister()
+    # GWV 20181124:
+    # def _unRegisterNotifiers(self):
+    #     """Unregister notifiers
+    #     """
+    #     if self._spectrumViewNotifier:
+    #         self._spectrumViewNotifier.unRegister()
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame
@@ -741,9 +736,9 @@ class GuiSpectrumDisplay(CcpnModule):
             for strip in self.strips:
                 getLogger().debug2('unregistering strip: %s' % strip)
                 strip._unregisterStrip()
-            self.droppedNotifier.unRegister()
-            self._toolbarNotifier.unRegister()
-            self._unRegisterNotifiers()
+            # self.droppedNotifier.unRegister()
+            # self._toolbarNotifier.unRegister()
+            # self._unRegisterNotifiers()
 
         finally:
             super()._closeModule()

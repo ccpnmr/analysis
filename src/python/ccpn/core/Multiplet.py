@@ -42,6 +42,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 # from ccpn.core.MultipletList import MultipletList
 from typing import Optional, Tuple, Any, Union, Sequence, List
 from ccpn.util.Common import makeIterableList
+from ccpn.util.decorators import notify, propertyUndo
 
 
 MULTIPLET_TYPES = ['singlet', 'doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
@@ -77,7 +78,7 @@ def _calculateCenterOfMass(multiplet):
 
 
 def _getMultipletHeight(multiplet):
-    'return the heighest peak intensity across the multiplet peaks'
+    'return the highest peak intensity across the multiplet peaks'
     if len(multiplet.peaks) > 0:
         return max([peak.height or 1 for peak in multiplet.peaks])
 
@@ -110,17 +111,17 @@ class Multiplet(AbstractWrapperObject):
     # CCPN properties
     @property
     def _apiMultiplet(self) -> apiMultiplet:
-        """ API multiplets matching Multiplet"""
+        """API multiplets matching Multiplet."""
         return self._wrappedData
 
     @property
     def _key(self) -> str:
-        """id string - serial number converted to string"""
+        """id string - serial number converted to string."""
         return str(self._wrappedData.serial)
 
     @property
     def serial(self) -> int:
-        """serial number of Multiplet, used in Pid and to identify the Multiplet. """
+        """serial number of Multiplet, used in Pid and to identify the Multiplet."""
         return self._wrappedData.serial
 
     @property
@@ -132,7 +133,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def height(self) -> Optional[float]:
-        """height of Multiplet"""
+        """height of Multiplet."""
         height = _getMultipletHeight(self)
         return height
 
@@ -142,7 +143,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def heightError(self) -> Optional[float]:
-        """height error of Multiplet"""
+        """height error of Multiplet."""
         return self._wrappedData.heightError
 
     @heightError.setter
@@ -151,7 +152,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def volume(self) -> Optional[float]:
-        """volume of Multiplet"""
+        """volume of Multiplet."""
         return self._wrappedData.volume
 
     @volume.setter
@@ -160,7 +161,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def offset(self) -> Optional[float]:
-        """offset of Multiplet"""
+        """offset of Multiplet."""
         return self._wrappedData.offset
 
     @offset.setter
@@ -169,7 +170,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def constraintWeight(self) -> Optional[float]:
-        """constraintWeight of Multiplet"""
+        """constraintWeight of Multiplet."""
         return self._wrappedData.constraintWeight
 
     @constraintWeight.setter
@@ -178,7 +179,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def volumeError(self) -> Optional[float]:
-        """volume error of Multiplet"""
+        """volume error of Multiplet."""
         return self._wrappedData.volumeError
 
     @volumeError.setter
@@ -196,7 +197,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def annotation(self) -> Optional[str]:
-        """Multiplet text annotation"""
+        """Multiplet text annotation."""
         return self._wrappedData.annotation
 
     @annotation.setter
@@ -205,7 +206,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def comment(self) -> Optional[str]:
-        """Free-form text comment"""
+        """Free-form text comment."""
         return self._wrappedData.details
 
     @comment.setter
@@ -214,7 +215,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def slopes(self) -> List[float]:
-        """slope (in dimension order) used in calculating integral value"""
+        """slope (in dimension order) used in calculating integral value."""
         return self._wrappedData.slopes
 
     @slopes.setter
@@ -223,6 +224,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def limits(self) -> List[Tuple[float, float]]:
+        """limits (in dimension order) of the multiplet."""
         return self._wrappedData.limits
 
     @limits.setter
@@ -231,6 +233,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def pointlimits(self) -> List[Tuple[float, float]]:
+        """pointlimits (in dimension order) of the multiplet."""
         return self._wrappedData.pointLimits
 
     @pointlimits.setter
@@ -244,15 +247,14 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def peaks(self) -> Optional[Tuple[Any]]:
-        """List of peaks attached to the multiplet"""
-        try:
-            return tuple([self._project._data2Obj[pk] for pk in self._wrappedData.sortedPeaks()])
-        except:
-            return None
+        """List of peaks attached to the multiplet."""
+        return tuple([self._project._data2Obj[pk] for pk in self._wrappedData.sortedPeaks()
+                      if pk in self._project._data2Obj])
 
     @peaks.setter
+    @propertyUndo()
+    @notify('observe')
     def peaks(self, ll: list):
-
         if ll:
             toRemove = [pk for pk in self.peaks if pk not in ll]
             toAdd = [pk for pk in ll if pk not in self.peaks]
@@ -261,7 +263,7 @@ class Multiplet(AbstractWrapperObject):
 
     @property
     def numPeaks(self) -> int:
-        """return number of peaks in the multiplet"""
+        """return number of peaks in the multiplet."""
         return len(self._wrappedData.sortedPeaks())
 
     @property
@@ -314,7 +316,10 @@ class Multiplet(AbstractWrapperObject):
     def lineWidths(self, value):
         self._wrappedData.lineWidths = value
 
+    #=========================================================================================
     # Implementation functions
+    #=========================================================================================
+
     @classmethod
     def _getAllWrappedData(cls, parent: MultipletList) -> Tuple[apiMultiplet, ...]:
         """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""
@@ -385,6 +390,10 @@ class Multiplet(AbstractWrapperObject):
             self._endCommandEchoBlock()
 
 
+#=========================================================================================
+# CCPN functions
+#=========================================================================================
+
 # Connections to parents:
 def _newMultiplet(self: MultipletList,
                   height: float = 0.0, heightError: float = 0.0,
@@ -395,7 +404,26 @@ def _newMultiplet(self: MultipletList,
                   limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
                   pointLimits: Sequence[Tuple[float, float]] = (),
                   peaks: ['Peak'] = ()) -> Multiplet:
-    """Create new Multiplet within multipletList"""
+    """Create a new Multiplet within a multipletList
+
+    :param height:
+    :param heightError:
+    :param volume:
+    :param volumeError:
+    :param offset:
+    :param constraintWeight:
+    :param figureOfMerit:
+    :param annotation:
+    :param comment:
+    :param position:
+    :param positionError:
+    :param limits:
+    :param slopes:
+    :param pointLimits:
+    :param peaks:
+    :return: add a new Multiplet to the MultipletList.
+    """
+    # __doc__ added to MultipletList
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # throw more understandable errors for the python console
@@ -441,6 +469,9 @@ def _newMultiplet(self: MultipletList,
         apiMultiplet = apiParent.newMultiplet(multipletType='multiplet', **dd)
 
         result = self._project._data2Obj.get(apiMultiplet)
+
+        # attach a notifier to the peaks
+        
     finally:
         self._endCommandEchoBlock()
 

@@ -37,7 +37,7 @@ from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
 # from ccpn.core.Multiplet import Multiplet
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Sequence, List
 
 
 LINECOLOUR = 'lineColour'
@@ -208,6 +208,43 @@ class MultipletList(AbstractWrapperObject):
             for mlv in self.multipletListViews:
                 mlv._finaliseAction(action=action)
 
+    #===========================================================================================
+    # Hot fixed methods (baahhhhhh)
+    # Copied from their respective locations
+    #===========================================================================================
+
+    def newMultiplet(self,
+                      height: float = 0.0, heightError: float = 0.0,
+                      volume: float = 0.0, volumeError: float = 0.0,
+                      offset: float = 0.0, constraintWeight: float = 0.0,
+                      figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
+                      position: List[float] = (), positionError: List[float] = (),
+                      limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
+                      pointLimits: Sequence[Tuple[float, float]] = (),
+                      peaks: ['Peak'] = ()):
+        """Create a new Multiplet within a multipletList
+
+        :param height:
+        :param heightError:
+        :param volume:
+        :param volumeError:
+        :param offset:
+        :param constraintWeight:
+        :param figureOfMerit:
+        :param annotation:
+        :param comment:
+        :param position:
+        :param positionError:
+        :param limits:
+        :param slopes:
+        :param pointLimits:
+        :param peaks:
+        :return: add a new Multiplet to the MultipletList.
+
+        Inserted later ccpn.Core.Multiplet
+        """
+        pass
+
 #=========================================================================================
 # CCPN functions
 #=========================================================================================
@@ -217,7 +254,19 @@ def _newMultipletList(self: Spectrum, title: str = None,
                       symbolColour: str = None, textColour: str = None, lineColour: str = None,
                       multipletAveraging = 0,
                       comment: str = None, multiplets: ['Multiplet'] = None) -> MultipletList:
-    """Create new MultipletList within Spectrum"""
+    """Create new MultipletList within Spectrum
+
+    :param self:
+    :param title:
+    :param symbolColour:
+    :param textColour:
+    :param lineColour:
+    :param multipletAveraging:
+    :param comment:
+    :param multiplets:
+    :return: a new MultipletList attached to the Spectrum.
+    """
+    # __doc__ added to Spectrum
 
     defaults = collections.OrderedDict(
             (('title', None), ('symbolColour', None), ('textColour', None), ('comment', None), ('multiplets', None),

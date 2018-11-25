@@ -1712,6 +1712,52 @@ class Spectrum(AbstractWrapperObject):
             for specView in self.spectrumViews:
                 specView._finaliseAction(action=action)
 
+    #===========================================================================================
+    # Hot fixed methods (baahhhhhh)
+    # Copied from their respective locations
+    #===========================================================================================
+
+    def newPeakList(self, title: str = None, comment: str = None,
+                     isSimulated: bool = False, symbolStyle: str = None, symbolColour: str = None,
+                     textColour: str = None, serial: int = None):
+        """
+        Create new empty PeakList within Spectrum
+
+        :param title:
+        :param comment:
+        :param isSimulated:
+        :param symbolStyle:
+        :param symbolColour:
+        :param textColour:
+        :param serial:
+        :return: a new PeakList attached to the spectrum.
+
+        Inserted later ccpn.Core.PeakList
+        """
+        pass
+
+
+    def _newMultipletList(self, title: str = None,
+                          symbolColour: str = None, textColour: str = None, lineColour: str = None,
+                          multipletAveraging=0,
+                          comment: str = None, multiplets: ['Multiplet'] = None):
+        """
+        Create new MultipletList within Spectrum
+
+        :param self:
+        :param title:
+        :param symbolColour:
+        :param textColour:
+        :param lineColour:
+        :param multipletAveraging:
+        :param comment:
+        :param multiplets:
+        :return: a new MultipletList attached to the Spectrum.
+
+        Inserted later ccpn.Core.MultipletList
+        """
+
+
 #=========================================================================================
 # CCPN functions
 #=========================================================================================
@@ -1719,6 +1765,7 @@ class Spectrum(AbstractWrapperObject):
 def _newSpectrum(self: Project, name: str) -> Spectrum:
     """Creation of new Spectrum NOT IMPLEMENTED.
     Use Project.loadData or Project.createDummySpectrum instead"""
+    # __doc__ added to Project
 
     raise NotImplementedError("Not implemented. Use loadSpectrum instead")
 
@@ -1726,6 +1773,7 @@ def _newSpectrum(self: Project, name: str) -> Spectrum:
 def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
                          chemicalShiftList=None) -> Spectrum:
     """Make dummy spectrum from isotopeCodes list - without data and with default parameters """
+    # __doc__ added to Project
 
     # TODO - change so isotopeCodes can be passed in instead of axisCodes
 

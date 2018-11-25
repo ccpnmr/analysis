@@ -44,6 +44,7 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 # from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
+from ccpn.util.decorators import notify, propertyUndo
 
 
 def _estimateNoiseLevel1D(y):
@@ -150,17 +151,17 @@ class PeakList(AbstractWrapperObject):
     # CCPN properties
     @property
     def _apiPeakList(self) -> ApiPeakList:
-        """ API peakLists matching PeakList"""
+        """API peakLists matching PeakList."""
         return self._wrappedData
 
     @property
     def _key(self) -> str:
-        """id string - serial number converted to string"""
+        """id string - serial number converted to string."""
         return str(self._wrappedData.serial)
 
     @property
     def serial(self) -> int:
-        """serial number of PeakList, used in Pid and to identify the PeakList. """
+        """serial number of PeakList, used in Pid and to identify the PeakList."""
         return self._wrappedData.serial
 
     @property
@@ -190,7 +191,7 @@ class PeakList(AbstractWrapperObject):
 
     @property
     def symbolStyle(self) -> str:
-        """Symbol style for peak annotation display in all displays"""
+        """Symbol style for peak annotation display in all displays."""
         return self._wrappedData.symbolStyle
 
     @symbolStyle.setter
@@ -199,7 +200,7 @@ class PeakList(AbstractWrapperObject):
 
     @property
     def symbolColour(self) -> str:
-        """Symbol colour for peak annotation display in all displays"""
+        """Symbol colour for peak annotation display in all displays."""
         return self._wrappedData.symbolColour
 
     @symbolColour.setter
@@ -208,7 +209,7 @@ class PeakList(AbstractWrapperObject):
 
     @property
     def textColour(self) -> str:
-        """Text colour for peak annotation display in all displays"""
+        """Text colour for peak annotation display in all displays."""
         return self._wrappedData.textColour
 
     @textColour.setter
@@ -738,6 +739,45 @@ class PeakList(AbstractWrapperObject):
             for plv in self.peakListViews:
                 plv._finaliseAction(action=action)
 
+    #===========================================================================================
+    # Hot fixed methods (baahhhhhh)
+    # Copied from their respective locations
+    #===========================================================================================
+
+    def newPeak(self, height: float = None, volume: float = None,
+                heightError: float = None, volumeError: float = None,
+                figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
+                position: Sequence[float] = (), positionError: Sequence[float] = (),
+                pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
+                lineWidths: Sequence[float] = (), serial: int = None):
+        """
+        Create a new Peak within a peakList
+
+        NB you must create the peak before you can assign it. The assignment attributes are:
+        - assignedNmrAtoms - A tuple of all (e.g.) assignment triplets for a 3D spectrum
+        - dimensionNmrAtoms - A tuple of tuples of assignments, one for each dimension
+
+        See the Peak class for details
+
+        :param height:
+        :param volume:
+        :param heightError:
+        :param volumeError:
+        :param figureOfMerit:
+        :param annotation:
+        :param comment:
+        :param position:
+        :param positionError:
+        :param pointPosition:
+        :param boxWidths:
+        :param lineWidths:
+        :param serial:
+        :return new peak:
+
+        Inserted later ccpn.Core.Peak
+        """
+        pass
+
 
 #=========================================================================================
 # CCPN functions
@@ -748,7 +788,18 @@ class PeakList(AbstractWrapperObject):
 def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
                  isSimulated: bool = False, symbolStyle: str = None, symbolColour: str = None,
                  textColour: str = None, serial: int = None) -> PeakList:
-    """Create new empty PeakList within Spectrum"""
+    """Create new empty PeakList within Spectrum
+
+    :param title:
+    :param comment:
+    :param isSimulated:
+    :param symbolStyle:
+    :param symbolColour:
+    :param textColour:
+    :param serial:
+    :return: a new PeakList attached to the spectrum.
+    """
+    # __doc__ added to Spectrum
 
     defaults = collections.OrderedDict((('title', None), ('comment', None), ('isSimulated', False),
                                         ('serial', None), ('symbolStyle', None), (

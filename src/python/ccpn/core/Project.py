@@ -1333,6 +1333,7 @@ class Project(AbstractWrapperObject):
     # Hot fixed methods (baahhhhhh)
     # Copied from their respective locations
     #===========================================================================================
+
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence,
                 style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
         """Create new Mark
@@ -1350,7 +1351,7 @@ class Project(AbstractWrapperObject):
         """
         pass
 
-    def _newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',
+    def newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',
                        unit: str = 'ppm', label: str = None):
         """Create new child Mark with a single line
 
@@ -1374,9 +1375,8 @@ class Project(AbstractWrapperObject):
         Inserted later ccpn.Core.Spectrum
         """
         pass
-        pass
 
-    def _createDummySpectrum(self, axisCodes: Sequence[str], name=None,
+    def createDummySpectrum(self, axisCodes: Sequence[str], name=None,
                              chemicalShiftList=None):
         """Make dummy spectrum from isotopeCodes list - without data and with
         default parameters

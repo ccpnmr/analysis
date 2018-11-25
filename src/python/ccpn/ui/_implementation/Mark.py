@@ -183,6 +183,7 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
     :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
     :param tuple/list labels: Ruler labels for all lines in the mark. Default: None"""
+    # __doc__ added to Project
 
     apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
                   self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
@@ -248,6 +249,7 @@ def _newSimpleMark(self: Project, colour: str, position: float, axisCode: str, s
     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
     :param tuple/list unit: Axis unit. Default: all ppm
     :param tuple/list label: Line label. Default: None"""
+    # __doc__ added to Project
 
     apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
                   self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))

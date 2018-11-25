@@ -85,9 +85,9 @@ def profile(func):
 
 
 def notify(trigger):
-    """A decorator wrap a method in an undo block
+    """A decorator to wrap a method and trigger a _finaliseAction at the end
+    Will trigger in the correct place on the undo/redo action
     """
-
     trigger = 'change' if trigger == 'observe' else trigger
 
     @decorator.decorator
@@ -111,21 +111,23 @@ def notify(trigger):
 
 
 def propertyUndo():
-    """A decorator wrap a method in an undo block
+    """A decorator to wrap a method in an undo block
+    Requires that the 'self' has 'project' as an attribute
     """
-
     @decorator.decorator
     def theDecorator(*args, **kwds):
 
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
-
         self = args[0]
 
         _undo = self.project._undo
         with undoBlock(self.project.application):
 
+            # Execute the function while blocking all additions to the call undo stack
             _undo.increaseBlocking()
+
+            # remember the old value, requires a property getter
             oldValue = getattr(self, func.__name__)
 
             # call the wrapped function
@@ -133,6 +135,7 @@ def propertyUndo():
 
             _undo.decreaseBlocking()
 
+            # add the wrapped function to the undo stack
             _undo._newItem(undoPartial=partial(func, self, oldValue),
                            redoPartial=partial(func, *args, **kwds))
 

@@ -40,6 +40,7 @@ from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
 from ccpn.util.decorators import notify, propertyUndo
 
+
 class Peak(AbstractWrapperObject):
     """Peak object, holding position, intensity, and assignment information
 
@@ -71,33 +72,30 @@ class Peak(AbstractWrapperObject):
     # CCPN properties
     @property
     def _apiPeak(self) -> Nmr.Peak:
-        """ API peaks matching Peak"""
+        """API peaks matching Peak"""
         return self._wrappedData
 
     @property
     def _key(self) -> str:
-        """id string - serial number converted to string"""
+        """id string - serial number converted to string."""
         return str(self._wrappedData.serial)
 
     @property
     def serial(self) -> int:
-        """serial number of Peak, used in Pid and to identify the Peak. """
+        """serial number of Peak, used in Pid and to identify the Peak."""
         return self._wrappedData.serial
 
     @property
     def _parent(self) -> Optional[PeakList]:
         """PeakList containing Peak."""
-        #TODO:ED trap that the Peak is no longer attached due to deletion
-        try:
-            return self._project._data2Obj[self._wrappedData.peakList]
-        except:
-            return None
+        return self._project._data2Obj[self._wrappedData.peakList] \
+            if self._wrappedData.peakList in self._project._data2Obj else None
 
     peakList = _parent
 
     @property
     def height(self) -> Optional[float]:
-        """height of Peak"""
+        """height of Peak."""
         return self._wrappedData.height
 
     @height.setter
@@ -106,7 +104,7 @@ class Peak(AbstractWrapperObject):
 
     @property
     def heightError(self) -> Optional[float]:
-        """height error of Peak"""
+        """height error of Peak."""
         return self._wrappedData.heightError
 
     @heightError.setter
@@ -115,7 +113,7 @@ class Peak(AbstractWrapperObject):
 
     @property
     def volume(self) -> Optional[float]:
-        """volume of Peak"""
+        """volume of Peak."""
         return self._wrappedData.volume
 
     @volume.setter
@@ -124,7 +122,7 @@ class Peak(AbstractWrapperObject):
 
     @property
     def volumeError(self) -> Optional[float]:
-        """volume error of Peak"""
+        """volume error of Peak."""
         return self._wrappedData.volumeError
 
     @volumeError.setter
@@ -142,7 +140,7 @@ class Peak(AbstractWrapperObject):
 
     @property
     def annotation(self) -> Optional[str]:
-        """Peak text annotation"""
+        """Peak text annotation."""
         return self._wrappedData.annotation
 
     @annotation.setter
@@ -151,7 +149,7 @@ class Peak(AbstractWrapperObject):
 
     @property
     def comment(self) -> Optional[str]:
-        """Free-form text comment"""
+        """Free-form text comment."""
         return self._wrappedData.details
 
     @comment.setter
@@ -172,50 +170,10 @@ class Peak(AbstractWrapperObject):
     @propertyUndo()
     @notify('observe')
     def position(self, value: Sequence):
-        """set the position of the peak
-        """
         # call api changes
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             peakDim.value = value[ii]
             peakDim.realValue = None
-
-    # @position.setter
-    # # @notify('change')
-    # # @undo
-    # def position(self, value: Sequence):
-    #     """set the position of the peak
-    #     """
-    #
-    #     def undo():
-    #         """preredo/postundo function, needed for undo/redo"""
-    #         self.project.blankNotification()
-    #         # if not hasattr(self.project, '_apiBlanking'):
-    #         #     self.project._apiBlanking = 0
-    #         # self.project._apiBlanking += 1
-    #
-    #     def redo():
-    #         """preundo/postredo function, needed for undo/redo, and fire single change notifier"""
-    #         self.project.unblankNotification()
-    #         # self.project._apiBlanking = max(0, self.project._apiBlanking-1)
-    #         self._finaliseAction('change')
-    #         for mt in self.multiplets:
-    #             mt._finaliseAction('change')
-    #
-    #     self._startCommandEchoBlock('position', value, propertySetter=True)
-    #     _undo = self.project._undo
-    #
-    #     _undo.newItem(redo, undo)
-    #     undo()
-    #     try:
-    #         # call api changes
-    #         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-    #             peakDim.value = value[ii]
-    #             peakDim.realValue = None
-    #     finally:
-    #         redo()
-    #         _undo.newItem(undo, redo)
-    #
-    #         self._endCommandEchoBlock()
 
     @property
     def positionError(self) -> Tuple[Optional[float], ...]:
@@ -223,13 +181,11 @@ class Peak(AbstractWrapperObject):
         return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
 
     @positionError.setter
+    @propertyUndo()
+    @notify('observe')
     def positionError(self, value: Sequence):
-        self._startCommandEchoBlock('positionError', value, propertySetter=True)
-        try:
-            for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-                peakDim.valueError = value[ii]
-        finally:
-            self._endCommandEchoBlock()
+        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            peakDim.valueError = value[ii]
 
     @property
     def pointPosition(self) -> Tuple[float, ...]:
@@ -237,42 +193,36 @@ class Peak(AbstractWrapperObject):
         return tuple(x.position for x in self._wrappedData.sortedPeakDims())
 
     @pointPosition.setter
+    @propertyUndo()
+    @notify('observe')
     def pointPosition(self, value: Sequence):
-        self._startCommandEchoBlock('pointPosition', value, propertySetter=True)
-        try:
-            for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-                peakDim.position = value[ii]
-        finally:
-            self._endCommandEchoBlock()
+        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            peakDim.position = value[ii]
 
     @property
     def boxWidths(self) -> Tuple[Optional[float], ...]:
         """The full width of the peak footprint in points for each dimension,
-        i.e. the width of the area that should be considered for integration, fitting, etc. ."""
+        i.e. the width of the area that should be considered for integration, fitting, etc."""
         return tuple(x.boxWidth for x in self._wrappedData.sortedPeakDims())
 
     @boxWidths.setter
+    @propertyUndo()
+    @notify('observe')
     def boxWidths(self, value: Sequence):
-        self._startCommandEchoBlock('boxWidths', value, propertySetter=True)
-        try:
-            for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-                peakDim.boxWidth = value[ii]
-        finally:
-            self._endCommandEchoBlock()
+        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            peakDim.boxWidth = value[ii]
 
     @property
     def lineWidths(self) -> Tuple[Optional[float], ...]:
-        """Full-width-half-height of peak/multiplet for each dimension, in Hz. """
+        """Full-width-half-height of peak for each dimension, in Hz."""
         return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
 
     @lineWidths.setter
+    @propertyUndo()
+    @notify('observe')
     def lineWidths(self, value: Sequence):
-        self._startCommandEchoBlock('lineWidths', value, propertySetter=True)
-        try:
-            for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-                peakDim.lineWidth = value[ii]
-        finally:
-            self._endCommandEchoBlock()
+        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+            peakDim.lineWidth = value[ii]
 
     @property
     def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
@@ -289,7 +239,7 @@ class Peak(AbstractWrapperObject):
         Note that by setting dimensionAssignments you tel the program that all combinations are
         possible - in the example that all four protons could be bound to either of the carbons
 
-        To (re)set the assignment for a single dimension, use the Peak.assignDimension method. """
+        To (re)set the assignment for a single dimension, use the Peak.assignDimension method."""
         result = []
         for peakDim in self._wrappedData.sortedPeakDims():
             mainPeakDimContribs = peakDim.mainPeakDimContribs
@@ -304,39 +254,37 @@ class Peak(AbstractWrapperObject):
         return tuple(result)
 
     @dimensionNmrAtoms.setter
+    @propertyUndo()
+    @notify('observe')
     def dimensionNmrAtoms(self, value: Sequence):
 
-        self._startCommandEchoBlock('dimensionNmrAtoms', value, propertySetter=True)
-        try:
-            isotopeCodes = self.peakList.spectrum.isotopeCodes
+        isotopeCodes = self.peakList.spectrum.isotopeCodes
 
-            apiPeak = self._wrappedData
-            dimResonances = []
-            for ii, atoms in enumerate(value):
-                if atoms is None:
-                    dimResonances.append(None)
+        apiPeak = self._wrappedData
+        dimResonances = []
+        for ii, atoms in enumerate(value):
+            if atoms is None:
+                dimResonances.append(None)
 
-                else:
+            else:
 
-                    isotopeCode = isotopeCodes[ii]
+                isotopeCode = isotopeCodes[ii]
 
-                    if isinstance(atoms, str):
-                        raise ValueError("dimensionNmrAtoms cannot be set to a sequence of strings")
-                    if not isinstance(atoms, Sequence):
-                        raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
+                if isinstance(atoms, str):
+                    raise ValueError("dimensionNmrAtoms cannot be set to a sequence of strings")
+                if not isinstance(atoms, Sequence):
+                    raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
 
-                    atoms = tuple(self.getByPid(x) if isinstance(x, str) else x for x in atoms)
-                    resonances = tuple(x._wrappedData for x in atoms if x is not None)
-                    if isotopeCode and isotopeCode != '?':
-                        # check for isotope match
-                        if any(x.isotopeCode not in (isotopeCode, '?') for x in resonances):
-                            raise ValueError("NmrAtom assigned to dimension %s must have isotope %s or '?'"
-                                             % (ii + 1, isotopeCode))
-                    dimResonances.append(resonances)
+                atoms = tuple(self.getByPid(x) if isinstance(x, str) else x for x in atoms)
+                resonances = tuple(x._wrappedData for x in atoms if x is not None)
+                if isotopeCode and isotopeCode != '?':
+                    # check for isotope match
+                    if any(x.isotopeCode not in (isotopeCode, '?') for x in resonances):
+                        raise ValueError("NmrAtom assigned to dimension %s must have isotope %s or '?'"
+                                         % (ii + 1, isotopeCode))
+                dimResonances.append(resonances)
 
-            apiPeak.assignByDimensions(dimResonances)
-        finally:
-            self._endCommandEchoBlock()
+        apiPeak.assignByDimensions(dimResonances)
 
     @property
     def assignedNmrAtoms(self) -> Tuple[Tuple[Optional['NmrAtom'], ...], ...]:
@@ -356,9 +304,8 @@ class Peak(AbstractWrapperObject):
 
         To add a single assignment tuple, use the Peak.addAssignment method
 
-        See also dimensionNmrAtoms, which gives assignments per dimension.
+        See also dimensionNmrAtoms, which gives assignments per dimension."""
 
-        """
         data2Obj = self._project._data2Obj
         apiPeak = self._wrappedData
         peakDims = apiPeak.sortedPeakDims()
@@ -380,38 +327,37 @@ class Peak(AbstractWrapperObject):
             result.extend(tt for tt in itertools.product(*allAtoms)
                           if any(x is not None for x in tt))
             # result += itertools.product(*allAtoms)
-        #
+
         return tuple(sorted(result))
 
     @assignedNmrAtoms.setter
+    @propertyUndo()
+    @notify('observe')
     def assignedNmrAtoms(self, value: Sequence):
-        self._startCommandEchoBlock('assignedNmrAtoms', value, propertySetter=True)
-        try:
-            isotopeCodes = tuple(None if x == '?' else x for x in self.peakList.spectrum.isotopeCodes)
 
-            apiPeak = self._wrappedData
-            peakDims = apiPeak.sortedPeakDims()
-            dimensionCount = len(peakDims)
+        isotopeCodes = tuple(None if x == '?' else x for x in self.peakList.spectrum.isotopeCodes)
 
-            # get resonance, all tuples and per dimension
-            resonances = []
-            for tt in value:
-                ll = dimensionCount * [None]
-                resonances.append(ll)
-                for ii, atom in enumerate(tt):
-                    atom = self.getByPid(atom) if isinstance(atom, str) else atom
-                    if atom is not None:
-                        resonance = atom._wrappedData
-                        if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], '?'):
-                            raise ValueError("NmrAtom %s, isotope %s, assigned to dimension %s must have isotope %s or '?'"
-                                             % (atom, resonance.isotopeCode, ii + 1, isotopeCodes[ii]))
+        apiPeak = self._wrappedData
+        peakDims = apiPeak.sortedPeakDims()
+        dimensionCount = len(peakDims)
 
-                        ll[ii] = resonance
+        # get resonance, all tuples and per dimension
+        resonances = []
+        for tt in value:
+            ll = dimensionCount * [None]
+            resonances.append(ll)
+            for ii, atom in enumerate(tt):
+                atom = self.getByPid(atom) if isinstance(atom, str) else atom
+                if atom is not None:
+                    resonance = atom._wrappedData
+                    if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], '?'):
+                        raise ValueError("NmrAtom %s, isotope %s, assigned to dimension %s must have isotope %s or '?'"
+                                         % (atom, resonance.isotopeCode, ii + 1, isotopeCodes[ii]))
 
-            # set assignments
-            apiPeak.assignByContributions(resonances)
-        finally:
-            self._endCommandEchoBlock()
+                    ll[ii] = resonance
+
+        # set assignments
+        apiPeak.assignByContributions(resonances)
 
     # alternativeNames
     assignments = assignedNmrAtoms
@@ -419,12 +365,9 @@ class Peak(AbstractWrapperObject):
 
     @property
     def multiplets(self) -> Optional[Tuple[Any]]:
-        """List of multiplets that the peak belongs to
-        """
-        try:
-            return tuple([self._project._data2Obj[mt] for mt in self._wrappedData.sortedMultiplets()])
-        except:
-            return None
+        """List of multiplets containing the Peak."""
+        return tuple([self._project._data2Obj[mt] for mt in self._wrappedData.sortedMultiplets()
+                      if mt in self._project._data2Obj])
 
     def _linkPeaks(self, peaks):
         """
@@ -433,6 +376,9 @@ class Peak(AbstractWrapperObject):
         """
         pids = [str(peak.pid) for peak in peaks if peak != self and isinstance(peak, Peak)]
         if isinstance(self._ccpnInternalData, dict):
+
+            # a single write is required to the api to notify that a change has occurred,
+            # this will prompt for a save of the v2 data
             tempCcpn = self._ccpnInternalData.copy()
             tempCcpn[self._linkedPeaksName] = pids
             self._ccpnInternalData = tempCcpn
@@ -447,7 +393,6 @@ class Peak(AbstractWrapperObject):
         This functionality is not implemented in the model. Saves the Peak pids in _ccpnInternalData.
         :return: a list of peaks
         """
-
         pids = self._ccpnInternalData.get(self._linkedPeaksName) or []
         peaks = [self.project.getByPid(pid) for pid in pids if pid is not None]
         return peaks
@@ -482,8 +427,7 @@ class Peak(AbstractWrapperObject):
 
     def assignDimension(self, axisCode: str, value: Union[Union[str, 'NmrAtom'],
                                                           Sequence[Union[str, 'NmrAtom']]] = None):
-        """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None)
-        """
+        """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None)."""
 
         axisCodes = self._parent._parent.axisCodes
         try:
@@ -506,17 +450,15 @@ class Peak(AbstractWrapperObject):
     # Utility functions
 
     def isPartlyAssigned(self):
-        """Whether peak is partly assigned"""
-
+        """Whether peak is partly assigned."""
         return any(self.dimensionNmrAtoms)
 
     def isFullyAssigned(self):
-        """Whether peak is fully assigned"""
-
+        """Whether peak is fully assigned."""
         return all(self.dimensionNmrAtoms)
 
     def copyTo(self, targetPeakList: PeakList) -> 'Peak':
-        """Make (and return) a copy of the Peak in targetPeakList"""
+        """Make (and return) a copy of the Peak in targetPeakList."""
 
         singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
                            'annotation', 'comment', 'serial']
@@ -552,13 +494,12 @@ class Peak(AbstractWrapperObject):
 
     def reorderValues(self, values, newAxisCodeOrder):
         """Reorder values in spectrum dimension order to newAxisCodeOrder
-        by matching newAxisCodeOrder to spectrum axis code order"""
+        by matching newAxisCodeOrder to spectrum axis code order."""
         return commonUtil.reorder(values, self._parent._parent.axisCodes, newAxisCodeOrder)
 
     def getInAxisOrder(self, attributeName: str, axisCodes: Sequence[str] = None):
         """Get attributeName in order defined by axisCodes :
-           (default order if None)
-        """
+           (default order if None)"""
         if not hasattr(self, attributeName):
             raise AttributeError('Peak object does not have attribute "%s"' % attributeName)
 
@@ -571,8 +512,7 @@ class Peak(AbstractWrapperObject):
 
     def setInAxisOrder(self, attributeName: str, values: Sequence, axisCodes: Sequence[str] = None):
         """Set attributeName from values in order defined by axisCodes
-           (default order if None)
-        """
+           (default order if None)"""
         if not hasattr(self, attributeName):
             raise AttributeError('Peak object does not have attribute "%s"' % attributeName)
 
@@ -582,10 +522,11 @@ class Peak(AbstractWrapperObject):
         setattr(self, attributeName, values)
 
     def snapToExtremum(self, halfBoxSearchWidth: int = 2, halfBoxFitWidth: int = 2):
+        """Snap the Peak to the closest local extrema, if within range."""
         LibPeak.snapToExtremum(self._apiPeak, halfBoxSearchWidth=halfBoxSearchWidth, halfBoxFitWidth=halfBoxFitWidth)
 
     def fitPositionHeightLineWidths(self):
-
+        """Set the position, height and lineWidth of the Peak."""
         LibPeak.fitPositionHeightLineWidths(self._apiPeak)
 
     #=========================================================================================
@@ -594,21 +535,20 @@ class Peak(AbstractWrapperObject):
 
     @classmethod
     def _getAllWrappedData(cls, parent: PeakList) -> Tuple[Nmr.Peak, ...]:
-        """get wrappedData (Peaks) for all Peak children of parent PeakList"""
+        """Get wrappedData (Peaks) for all Peak children of parent PeakList."""
         return parent._wrappedData.sortedPeaks()
 
     @property
     def integral(self):
-        """The integral attached to the peak"""
+        """Return the integral attached to the peak."""
         return self._project._data2Obj[self._wrappedData.integral] if self._wrappedData.integral else None
 
     @integral.setter
     def integral(self, integral: Union['Integral'] = None):
-        """
-        link an integral to the peak
+        """Link an integral to the peak.
         The peak must belong to the spectrum containing the peakList.
-        :param integral: single integral
-        """
+        :param integral: single integral."""
+
         undo = self._project._undo
         integralStr = "project.getByPid('%s')" % integral.pid if integral else 'None'
         self._startCommandEchoBlock('integral = ' + integralStr, propertySetter=True)
@@ -630,15 +570,31 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
              position: Sequence[float] = (), positionError: Sequence[float] = (),
              pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
              lineWidths: Sequence[float] = (), serial: int = None) -> Peak:
-    """Create new Peak within peakList
+    """
+    Create a new Peak within a peakList
 
     NB you must create the peak before you can assign it. The assignment attributes are:
-
     - assignedNmrAtoms - A tuple of all (e.g.) assignment triplets for a 3D spectrum
-
     - dimensionNmrAtoms - A tuple of tuples of assignments, one for each dimension
 
-    See the Peak class for details"""
+    See the Peak class for details
+
+    :param height:
+    :param volume:
+    :param heightError:
+    :param volumeError:
+    :param figureOfMerit:
+    :param annotation:
+    :param comment:
+    :param position:
+    :param positionError:
+    :param pointPosition:
+    :param boxWidths:
+    :param lineWidths:
+    :param serial:
+    :return new peak:
+    """
+    # __doc__ added to PeakList
 
     defaults = collections.OrderedDict(
             (('height', None), ('volume', None), ('heightError', None), ('volumeError', None),
@@ -668,6 +624,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
                                              % (result, serial))
         # set peak position
         # NBNB TBD currently unused parameters could be added, and will have to come in here as well
+        # this needs fixing so that it doesn't necessarily call api methods
         apiPeakDims = apiPeak.sortedPeakDims()
         if position:
             for ii, peakDim in enumerate(apiPeakDims):

@@ -61,7 +61,7 @@ class DropBase:
         self.setAcceptDrops(acceptDrops)
 
     def setDropEventCallback(self, callback):
-        "Set the callback function for drop event"
+        """Set the callback function for drop event."""
         self._dropEventCallback = callback
 
     def dragEnterEvent(self, event):
@@ -96,20 +96,12 @@ class DropBase:
         Catch dropEvent and dispatch to processing callback
         'Native' treatment of CcpnModule instances
         """
-
-        # Needs to be here to prevent circular imports as CcpnModule imports several Widgets which import DropBase
-        from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-
         inModuleOverlay = self._callModuleDrop(event)
 
         if inModuleOverlay:
             inModuleOverlay.dropEvent(event)
             self._clearOverlays()
             return
-
-        # if isinstance(self, CcpnModule):
-        #     CcpnModule.dropEvent(self, event)
-        #     return
 
         if self.acceptDrops():
 
@@ -145,7 +137,7 @@ class DropBase:
         if mimeData.hasFormat(DropBase.JSONDATA):
             data['isCcpnJson'] = True
             jsonData = json.loads(mimeData.text())
-            if jsonData != None and len(jsonData) > 0:
+            if jsonData is not None and len(jsonData) > 0:
                 data.update(jsonData)
             if self.PIDS in data:
                 newPids = [Pid(pid) for pid in data[self.PIDS]]
@@ -163,10 +155,16 @@ class DropBase:
     def dragMoveEvent(self, ev):
         """drag move event that propagates through all the widgets
         """
-        # print('>>>dragMoveEvent DropBase', repr(self))
-
         parentModule = self._findModule()
         if parentModule:
+            data = self.parseEvent(ev)
+
+            from ccpn.ui.gui.widgets.CcpnModuleArea import MODULEAREA_IGNORELIST
+
+            # ignore dropAreas if the source of the event is in the list
+            if isinstance(data['source'], MODULEAREA_IGNORELIST):
+                return
+
             p = parentModule.mapFromGlobal(QtGui.QCursor().pos())
 
             ld = p.x()                              # ev.pos().x()

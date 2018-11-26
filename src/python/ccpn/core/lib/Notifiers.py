@@ -345,6 +345,15 @@ class Notifier(NotifierABC):
         if self._isBlanked:
             return
 
+        if obj is None:
+            #
+            raise RuntimeError('Notifier.__call__: obj is None')
+
+        if not self._isCurrent and obj.isDeleted:
+            # It is a V3 core object notifier; check if obj is still around
+            # hack for now (20181127) until a better implementation
+            return
+
         trigger, targetName = notifier
 
         self._debug = True

@@ -85,10 +85,10 @@ def profile(func):
     return profileWrapper
 
 
-def notify(trigger):
-    """A decorator to wrap a method and trigger a _finaliseAction at the end
-    Will trigger in the correct place on the undo/redo action
+def notify(trigger, preExecution=False):
+    """A decorator wrap a method around a notification blanking with explicit notification pre- or post-execution
     """
+
     trigger = 'change' if trigger == 'observe' else trigger
 
     @decorator.decorator
@@ -97,14 +97,20 @@ def notify(trigger):
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
+        project = self.project # we need a reference now, as the func could be deleting the obj
+
+        if preExecution:
+            # call the notification
+            self._finaliseAction(trigger)
 
         # Execute the function with blanked notification
-        self.project.blankNotification()
+        project.blankNotification()
         result = func(*args, **kwds)
-        self.project.unblankNotification()
+        project.unblankNotification()
 
-        # now call the notification
-        self._finaliseAction(trigger)
+        if not preExecution:
+            # call the notification
+            self._finaliseAction(trigger)
 
         return result
 
@@ -115,6 +121,7 @@ def propertyUndo():
     """A decorator to wrap a method in an undo block
     Requires that the 'self' has 'project' as an attribute
     """
+
     @decorator.decorator
     def theDecorator(*args, **kwds):
 
@@ -178,25 +185,25 @@ def newObject():
     return theDecorator
 
 
-def ccpNmrSetter():
-
-    @logCommand('peak.')
-    @position.setter
-    @propertyUndo()
-    @notify('observe')
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]
-
-        result = func(*args, **kwds)
-
-        return result
-
-    return theDecorator
+# def ccpNmrSetter():
+#
+#     @logCommand('peak.')
+#     @position.setter
+#     @propertyUndo()
+#     @notify('observe')
+#
+#     @decorator.decorator
+#     def theDecorator(*args, **kwds):
+#
+#         func = args[0]
+#         args = args[1:]  # Optional 'self' is now args[0]
+#         self = args[0]
+#
+#         result = func(*args, **kwds)
+#
+#         return result
+#
+#     return theDecorator
 
 
 #----------------------------------------------------------------------------------------------
@@ -206,23 +213,62 @@ def ccpNmrSetter():
 
 def _makeLogString(prefix, addSelf, func, *args, **kwds):
     """Helper function to create the log string from func, args and kwds
+
+    returns string:
+
+    if addSelf == False:
+      prefix+func.__name__(EXPANDED-ARGUMENTS)
+
+    if addSelf == True
+      prefix+CLASSNAME-of-SELF+'.'+func.__name__(EXPANDED-ARGUMENTS)
+
     """
+    from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
-    ba = inspect.signature(func).bind(*args, **kwds)
+    def obj2pid(obj):
+        "Convert core objects and CcpnModules to pids"
+        return obj.pid if isinstance(obj, (AbstractWrapperObject, CcpnModule)) else obj
+
+    # get the signature
+    sig = inspect.signature(func)
+    # fill in the missing parameters
+    ba = sig.bind(*args, **kwds)
     ba.apply_defaults()
+    # get the parameters kinds that determine how to print them
+    kinds = dict([(pName, p.kind) for pName, p in sig.parameters.items()])
 
-    logs = prefix
     if 'self' in ba.arguments or 'cls' in ba.arguments:
-        if addSelf:
-            logs += '%s.' % (args[0].__class__.__name__,)
-        allArgs = [(k, ba.arguments[k]) for k in list(ba.arguments.keys())[1:]]
+        # we skip the first 'self' or 'cls' in the argument list
+        pNames = list(ba.arguments.keys())[1:]
     else:
-        allArgs = [(k, ba.arguments[k]) for k in list(ba.arguments.keys())]
+        pNames = list(ba.arguments.keys())
 
-    logs += '%s(' % (func.__name__)
-    logs += ', '.join(['{0!s}={1!r}'.format(k, v) for k, v in allArgs])
-    logs += ')'
-    return logs
+    # make a string for each parameter
+    pStrings = []
+    for pName in pNames:
+        pValue = ba.arguments[pName]
+
+        if kinds[pName] == inspect.Parameter.VAR_POSITIONAL:  # variable argument
+            pStrings.extend([repr(obj2pid(p)) for p in pValue])
+
+        elif kinds[pName] == inspect.Parameter.VAR_KEYWORD:  # variable keywords
+            pStrings.extend(['{0!s}={1!r}'.format(k, obj2pid(v)) for (k, v) in pValue.items()])
+
+        elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY or \
+                kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # positional keywords
+            pStrings.append(repr(obj2pid(pValue)))
+
+        elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY:  #  keywords
+            pStrings.append('{0!s}={1!r}'.format(pName, obj2pid(pValue)))
+
+    if ('self' in ba.arguments or 'cls' in ba.arguments) and addSelf:
+        logString = prefix + '%s.%s' % (args[0].__class__.__name__, func.__name__)
+    else:
+        logString = prefix + '%s' % (func.__name__,)
+
+    logString += '(%s)' % ', '.join(pStrings)
+    return logString
 
 
 def logCommand(prefix='', get=None):
@@ -254,190 +300,6 @@ def logCommand(prefix='', get=None):
         return result
 
     return theDecorator
-
-
-
-
-
-
-def logCommand2(prefix='', get=None, isProperty=False, showArguments=[], logCommandOnly=False):
-    """
-    Echo a command to the logger reflecting the python command required to call the function.
-
-    :param prefix: string to be prepended to the echo command
-    :param get: function containing the function
-    :param isProperty: is the function a property
-    :param showArguments: list of string names for arguments that need to be included.
-                        By default, the parameters set to the defaults are not included.
-
-    Examples:
-
-    1)  def something(self, name=None, value=0):
-            logCommandManager(prefix='process.') as log:
-                log('something')
-
-                ... code here
-
-        call function                   echo command
-
-        something('Hello')              process.something(name='Hello')
-        something('Hello', 12)          process.something(name='Hello', value=12)
-
-        Parameters are not required in the log() command, parameters are picked up from
-        the containing function; however, changes can be inserted by including
-        the parameter, e.g., log('something', name=name+'There') will append 'There' to the name.
-
-            something('Hello')          process.something(name='HelloThere')
-
-    2)  def something(self, name=None, value=0):
-            logCommandManager(get='self') as log:
-                log('something')
-
-                ... code here
-
-        call function                   echo command
-
-        something('Hello')              get('parent:ID').something(name='Hello')
-        something('Hello', 12)          get('parent:ID').something(name='Hello', value=12)
-
-    3)  @property
-        def something(self, value=0):
-            logCommandManager(get='self', isProperty=True) as log:
-                log('something', value=value)
-
-                ... code here
-
-
-        call function                   echo command
-
-        something = 12                  get('parent:ID').something = 12
-
-        functions of this type can only contain one parameter, and
-        must be set as a keyword in the log.
-
-    4)  Mixing prefix and get:
-
-        def something(self, value=0):
-            logCommandManager(prefix='process.', get='self') as log:
-                log('something')
-
-        if called from SpectrumDisplay:
-
-        call function                   echo command
-
-        spectrumDisplay.something(12)   process.get('spectrumDisplay:1').something(12)
-
-    5)  If the log command needs modifying, this can be included in the log command,
-        e.g., if the pid of an object needs inserting
-
-        def something(self, value=None):
-            logCommandManager(prefix='process.', get='self') as log:
-                log('something', value=value.pid)
-
-        if called from SpectrumDisplay:
-
-        call function                   echo command
-
-        spectrumDisplay.something(<anObject>)   process.get('spectrumDisplay:1').something(value=anObject:pid)
-
-        To make quotes appear around the value use: log('something', value=repr(value.pid))
-
-    """
-    from inspect import signature, Parameter
-    import sys
-    # from sandbox.Geerten.Refactored.framework import getApplication
-
-    # get the current application
-    # application = getApplication()
-
-    def log(funcName, *args, **kwds):  # remember _undoBlocked, as first parameter
-        # if logger._loggingCommandBlock > 1:  # or _undoBlocked:
-        #     return
-
-        # get the caller from the getframe stack
-        fr1 = sys._getframe(1)
-        selfCaller = fr1.f_locals[get] if get else None
-        pid = selfCaller.pid if selfCaller is not None and hasattr(selfCaller, 'pid') else ''
-
-        # make a list for modifying the log string with more readable labels
-        # checkList = [(application, 'application.'),
-        #              (application.mainWindow, 'mainWindow.'),
-        #              (application.project, 'project.'),
-        #              (application.current, 'current.')]
-        checkList = []
-
-        for obj, label in checkList:
-            if selfCaller is obj:
-                getPrefix = label
-                break
-        else:
-            getPrefix = "get('%s')." % pid if (get and pid) else ''
-
-        # search if caller matches the main items in the application namespace, e.g., 'application', 'project', etc.
-        # nameSpace = application._getNamespace()
-        # for k in nameSpace.keys():
-        #     if selfCaller == nameSpace[k]:
-        #         getPrefix = k+'.'
-        #         break
-        # else:
-        #     getPrefix = "get('%s')." % pid if get else ''
-
-        # construct the new log string
-        if isProperty:
-            # if kwds.values():
-            #     kwdsList = repr(list(kwds.values())[0])
-            # else:
-            #     kwdsList = ''
-            logs = prefix + getPrefix + funcName + ' = ' + repr(args[1])     # repr(list(kwds.values())[0])
-        else:
-
-            # build the log command from the parameters of the caller function
-            # only those that are not in the default list are added, i.e. those defined
-            # explicitly by the caller
-            if selfCaller is not None:
-                selfFunc = getattr(selfCaller, funcName)
-                sig0 = [(k, v) for k, v in signature(selfFunc).parameters.items()]
-                sig1 = [k for k, v in signature(selfFunc).parameters.items()
-                        if v.default is Parameter.empty
-                        or k in showArguments
-                        or k in kwds
-                        or repr(fr1.f_locals[k]) != repr(v.default)]
-            else:
-                sig1 = {}
-
-            # create the log string
-            logs = prefix + getPrefix + funcName + '('
-            for k in sig1:
-                if k != 'self':
-                    kval = str(kwds[k]) if k in kwds else repr(fr1.f_locals[k])
-                    logs += str(k) + '=' + kval + ', '
-            logs = logs.rstrip(', ')
-            logs += ')'
-
-        getLogger().info(logs)
-
-    # log commands to the registered outputs
-    logger = getLogger()
-    # logger._loggingCommandBlock += 1
-
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-        # def logCommand(func, self, *args, **kwds):
-        # to avoid potential conflicts with potential 'func' named keywords
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]
-
-        log(func.__name__, *args, **kwds)
-        result = func(*args, **kwds)
-
-        return result
-
-    return theDecorator
-
-
-
 
 
 # def debugEnter(verbosityLevel=Logger.DEBUG1):
@@ -539,3 +401,40 @@ def logCommand2(prefix='', get=None, isProperty=False, showArguments=[], logComm
 # def debug3Leave():
 #     """Convenience"""
 #     return debugLeave(verbosityLevel=Logger.DEBUG3)
+
+
+if __name__ == '__main__':
+
+    def func(par, *args, flag=False, **kwds):
+
+        sig = inspect.signature(func)  # get the signature
+        ba = sig.bind(par, *args, flag=flag, **kwds)
+        ba.apply_defaults()  # fill in the missing parameters
+        kinds = dict([(pName, p.kind) for pName, p in sig.parameters.items()])  # get the parameters kinds that determine
+                                                                                # how to print them
+
+        pStrings = []
+        for pName, pValue in ba.arguments.items():
+
+            if kinds[pName] == inspect.Parameter.VAR_POSITIONAL:  # variable argument
+                pStrings.extend([repr(p) for p in pValue])
+
+            elif kinds[pName] == inspect.Parameter.VAR_KEYWORD:  # variable keywords
+                pStrings.extend(['{0!s}={1!r}'.format(k, v) for (k,v) in pValue.items()])
+
+            elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY or \
+                    kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD   :  # positional keywords
+                pStrings.append(repr(pValue))
+
+            elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY:  #  keywords
+                pStrings.append('{0!s}={1!r}'.format(pName, pValue))
+
+        print(', '.join(pStrings))
+
+    logCommand('myPrefix.')
+    def func2(par, *args, flag=False, **kwds):
+        pass
+
+
+    func2('test', 1, 2, myPar='myValue')
+

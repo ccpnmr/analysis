@@ -270,7 +270,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         """
         for i in range(self.count()):
             item = self.item(i)
-            self.setItemSelected(item, True)
+            item.setSelected(True)
 
     def _selectNone(self):
         """
@@ -316,8 +316,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
                     else:
                         event.setDropAction(QtCore.Qt.MoveAction)
                     # self.emit(QtCore.SIGNAL("dropped"), items)
-                    self.dropped.emit(items)
                     super(ListWidget, self).dropEvent(event)
+                    self.dropped.emit(items)
                     if self.sortOnDrop is True:
                         self.sortItems()
                 else:
@@ -325,8 +325,8 @@ class ListWidget(QtWidgets.QListWidget, Base):
                     if event.source() is self.dropSource:  # check that the drop comes
                         event.setDropAction(QtCore.Qt.MoveAction)  # from only the permitted widget
                         # self.emit(QtCore.SIGNAL("dropped"), items)
-                        self.dropped.emit(items)
                         super(ListWidget, self).dropEvent(event)
+                        self.dropped.emit(items)
                         if self.sortOnDrop is True:
                             self.sortItems()
                     else:

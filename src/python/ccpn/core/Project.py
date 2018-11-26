@@ -1361,22 +1361,23 @@ class Project(AbstractWrapperObject):
                         style=style, units=units, labels=labels
                         )
 
-    def newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',
-                       unit: str = 'ppm', label: str = None):
-        """Create new child Mark with a single line
-
-        :param str colour: Mark colour
-        :param tuple/list position: Position in unit (default ppm)
-        :param tuple/list axisCode: Axis code
-        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
-        :param tuple/list unit: Axis unit. Default: all ppm
-        :param tuple/list label: Line label. Default: None
-
-        return Mark instance
-
-        Inserted later ccpn.ui._implementation.Mark
-        """
-        pass
+    # GWV 20181127: not used
+    # def _newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',
+    #                    unit: str = 'ppm', label: str = None):
+    #     """Create new child Mark with a single line
+    #
+    #     :param str colour: Mark colour
+    #     :param tuple/list position: Position in unit (default ppm)
+    #     :param tuple/list axisCode: Axis code
+    #     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
+    #     :param tuple/list unit: Axis unit. Default: all ppm
+    #     :param tuple/list label: Line label. Default: None
+    #
+    #     return Mark instance
+    #
+    #     Inserted later ccpn.ui._implementation.Mark
+    #     """
+    #     pass
 
     def newSpectrum(self, name: str):
         """Creation of new Spectrum NOT IMPLEMENTED.

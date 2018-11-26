@@ -53,20 +53,22 @@ class MarkTest(WrapperTesting):
 
     mark1.delete()
 
-  def test_extend_mark(self):
-    data = (1.27, 'Hc', None, None)
-    mark1 = self.project.newMark('red', positions=self.positions, axisCodes=self.axisCodes,
-                                units=self.units, labels=self.labels)
-    mark1.newLine(*data)
+  # GWV 20181127: not used
+  # def test_extend_mark(self):
+  #   data = (1.27, 'Hc', None, None)
+  #   mark1 = self.project.newMark('red', positions=self.positions, axisCodes=self.axisCodes,
+  #                               units=self.units, labels=self.labels)
+  #   mark1.newLine(*data)
+  #
+  #   ll = list(zip(self.positions, self.axisCodes, self.units, self.labels))
+  #   ll.append((1.27, 'Hc', 'ppm', None))
+  #
+  #   assert mark1.rulerData == tuple(Mark.RulerData(*x) for x in ll)
+  #
+  #   mark1.delete()
 
-    ll = list(zip(self.positions, self.axisCodes, self.units, self.labels))
-    ll.append((1.27, 'Hc', 'ppm', None))
-
-    assert mark1.rulerData == tuple(Mark.RulerData(*x) for x in ll)
-
-    mark1.delete()
-
-  def test_create_single_mark(self):
-    data = (1.27, 'Hc', None, None)
-    mark1 = self.project.newSimpleMark('red', data[0], data[1])
-    assert  mark1.rulerData == (Mark.RulerData(1.27, 'Hc', 'ppm', None),)
+  # GWV 20181127: not used
+  # def test_create_single_mark(self):
+  #   data = (1.27, 'Hc', None, None)
+  #   mark1 = self.project.newSimpleMark('red', data[0], data[1])
+  #   assert  mark1.rulerData == (Mark.RulerData(1.27, 'Hc', 'ppm', None),)

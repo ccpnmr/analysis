@@ -1,4 +1,6 @@
-"""GUI window class
+"""Mark class
+
+Ifter creation, there are no attributes that ca be modified; i.e. the Mark object is inmutable
 
 """
 #=========================================================================================
@@ -33,6 +35,7 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
+from ccpn.util.decorators import logCommand
 
 
 RulerData = collections.namedtuple('RulerData', ['position', 'axisCode', 'unit', 'label'])
@@ -85,58 +88,59 @@ class Mark(AbstractWrapperObject):
         """Mark colour"""
         return self._wrappedData.colour
 
-    @colour.setter
-    def colour(self, value: Sequence):
-        self._wrappedData.colour = value
+    #GWV 20181127: deactivated all the setters
+    # @colour.setter
+    # def colour(self, value: Sequence):
+    #     self._wrappedData.colour = value
 
     @property
     def style(self) -> str:
         """Mark drawing style. Defaults to 'simple'"""
         return self._wrappedData.style
 
-    @style.setter
-    def style(self, value: str):
-        self._wrappedData.style = value
+    # @style.setter
+    # def style(self, value: str):
+    #     self._wrappedData.style = value
 
     @property
     def positions(self) -> Tuple[float, ...]:
         """Mark position in  float ppm (or other relevant unit) for each ruler making up the mark."""
         return tuple(x.position for x in self._wrappedData.sortedRulers())
 
-    @positions.setter
-    def positions(self, value: Sequence):
-        for ii, ruler in enumerate(self._wrappedData.sortedRulers()):
-            ruler.position = value[ii]
+    # @positions.setter
+    # def positions(self, value: Sequence):
+    #     for ii, ruler in enumerate(self._wrappedData.sortedRulers()):
+    #         ruler.position = value[ii]
 
     @property
     def axisCodes(self) -> Tuple[str, ...]:
         """AxisCode (string) for each ruler making up the mark."""
         return tuple(x.axisCode for x in self._wrappedData.sortedRulers())
 
-    @axisCodes.setter
-    def axisCodes(self, value: Sequence):
-        for ii, ruler in enumerate(self._wrappedData.sortedRulers()):
-            ruler.axisCode = value[ii]
+    # @axisCodes.setter
+    # def axisCodes(self, value: Sequence):
+    #     for ii, ruler in enumerate(self._wrappedData.sortedRulers()):
+    #         ruler.axisCode = value[ii]
 
     @property
     def units(self) -> Tuple[str, ...]:
         """Unit (string, default is ppm) for each ruler making up the mark."""
         return tuple(x.unit for x in self._wrappedData.sortedRulers())
 
-    @units.setter
-    def units(self, value: Sequence):
-        for ii, ruler in enumerate(self._wrappedData.sortedRulers()):
-            ruler.unit = value[ii]
+    # @units.setter
+    # def units(self, value: Sequence):
+    #     for ii, ruler in enumerate(self._wrappedData.sortedRulers()):
+    #         ruler.unit = value[ii]
 
     @property
     def labels(self) -> Tuple[str, ...]:
         """Optional label (string) for each ruler making up the mark."""
         return tuple(x.label for x in self._wrappedData.sortedRulers())
 
-    @labels.setter
-    def labels(self, value: Sequence):
-        for ii, ruler in enumerate(self._wrappedData.sortedRulers()):
-            ruler.label = value[ii]
+    # @labels.setter
+    # def labels(self, value: Sequence):
+    #     for ii, ruler in enumerate(self._wrappedData.sortedRulers()):
+    #         ruler.label = value[ii]
 
     @property
     def rulerData(self) -> tuple:
@@ -144,17 +148,13 @@ class Mark(AbstractWrapperObject):
         return tuple(RulerData(*(getattr(x, tag) for tag in RulerData._fields))
                      for x in self._wrappedData.sortedRulers())
 
-    def newLine(self, position: float, axisCode: str, unit: str = 'ppm', label: str = None):
-        """Add an extra line to the mark."""
-        if unit is None:
-            unit = 'ppm'
-        defaults = collections.OrderedDict((('unit', 'ppm'), ('label', None)))
-        self._startCommandEchoBlock('newLine', position, axisCode, values=locals(),
-                                    defaults=defaults)
-        try:
-            self._wrappedData.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
-        finally:
-            self._endCommandEchoBlock()
+    # GWV 20181127: Not used
+    # @logCommand(get='self')
+    # def newLine(self, position: float, axisCode: str, unit: str = 'ppm', label: str = None):
+    #     """Add an extra line to the mark."""
+    #     if unit is None:
+    #         raise ValueError('Mark.newLine: unit is None')
+    #     self._wrappedData.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
 
     #=========================================================================================
     # Implementation functions
@@ -195,7 +195,6 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
     :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
     :param tuple/list labels: Ruler labels for all lines in the mark. Default: None"""
-    # __doc__ added to Project
 
     apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
                   self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
@@ -260,49 +259,49 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
 # Project.newMark = _newMark
 
 
-def _newSimpleMark(self: Project, colour: str, position: float, axisCode: str, style: str = 'simple',
-                   unit: str = 'ppm', label: str = None) -> Mark:
-    """Create new child Mark with a single line
-
-    :param str colour: Mark colour
-    :param tuple/list position: Position in unit (default ppm)
-    :param tuple/list axisCode: Axis code
-    :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
-    :param tuple/list unit: Axis unit. Default: all ppm
-    :param tuple/list label: Line label. Default: None"""
-    # __doc__ added to Project
-
-    apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
-                  self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
-
-    defaults = collections.OrderedDict((('style', 'simple'), ('unit', 'ppm'),
-                                        ('label', None)))
-
-    self._startCommandEchoBlock('newSimpleMark', colour, position, axisCode, values=locals(),
-                                defaults=defaults, parName='newMark')
-    try:
-
-        apiMark = apiGuiTask.newMark(colour=colour, style=style)
-        if unit is None:
-            unit = 'ppm'
-        apiMark.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
-        #
-        result = self._data2Obj.get(apiMark)
-    finally:
-        self._endCommandEchoBlock()
-
-    return result
-
-
-Project.newSimpleMark = _newSimpleMark
+#GWV 20181127: not used
+# def _newSimpleMark(self: Project, colour: str, position: float, axisCode: str, style: str = 'simple',
+#                    unit: str = 'ppm', label: str = None) -> Mark:
+#     """Create new child Mark with a single line
+#
+#     :param str colour: Mark colour
+#     :param tuple/list position: Position in unit (default ppm)
+#     :param tuple/list axisCode: Axis code
+#     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
+#     :param tuple/list unit: Axis unit. Default: all ppm
+#     :param tuple/list label: Line label. Default: None"""
+#
+#     apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+#                   self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+#
+#     defaults = collections.OrderedDict((('style', 'simple'), ('unit', 'ppm'),
+#                                         ('label', None)))
+#
+#     self._startCommandEchoBlock('newSimpleMark', colour, position, axisCode, values=locals(),
+#                                 defaults=defaults, parName='newMark')
+#     try:
+#
+#         apiMark = apiGuiTask.newMark(colour=colour, style=style)
+#         if unit is None:
+#             unit = 'ppm'
+#         apiMark.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
+#         #
+#         result = self._data2Obj.get(apiMark)
+#     finally:
+#         self._endCommandEchoBlock()
+#
+#     return result
+#
+#
+# Project.newSimpleMark = _newSimpleMark
 
 # Notifiers:
 # Mark changes when rulers are created or deleted
 # TODO change to calling _setupApiNotifier
-Project._apiNotifiers.extend(
-        (('_notifyRelatedApiObject', {'pathToObject': 'mark', 'action': 'change'},
-          ApiRuler._metaclass.qualifiedName(), 'postInit'),
-         ('_notifyRelatedApiObject', {'pathToObject': 'mark', 'action': 'change'},
-          ApiRuler._metaclass.qualifiedName(), 'preDelete'),
-         )
-        )
+# Project._apiNotifiers.extend(
+#         (('_notifyRelatedApiObject', {'pathToObject': 'mark', 'action': 'change'},
+#           ApiRuler._metaclass.qualifiedName(), 'postInit'),
+#          ('_notifyRelatedApiObject', {'pathToObject': 'mark', 'action': 'change'},
+#           ApiRuler._metaclass.qualifiedName(), 'preDelete'),
+#          )
+#         )

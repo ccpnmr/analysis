@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 from ccpn.ui.gui.widgets.Base import Base
@@ -57,6 +58,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                  multiSelect=True,
                  acceptDrops=False,
                  sortOnDrop=False,
+                 allowDuplicates=False,
                  copyDrop=True,
                  **kwds):
 
@@ -69,11 +71,12 @@ class ListWidget(QtWidgets.QListWidget, Base):
         self.contextMenu = contextMenu
         self.callback = callback
         self.objects = list(objects or [])
-        self.items = list(objects or [])
+        self._items = list(objects or [])
         self.multiSelect = multiSelect
         self.dropSource = None
         self.sortOnDrop = sortOnDrop
         self.copyDrop = copyDrop
+        self.allowDuplicates = allowDuplicates
         if not self.copyDrop:
             self.setDefaultDropAction(QtCore.Qt.MoveAction)
 
@@ -102,7 +105,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
             self.clear()
             self.cleared.emit()
 
-            self.items = []
+            # self.items = []
         for text in texts:
             item = QtWidgets.QListWidgetItem(str(text))
             self.addItem(item)
@@ -118,7 +121,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                 item.setData(QtCore.Qt.UserRole, obj)
                 obj.item = item
                 self.addItem(item)
-                self.items.append(item)
+                self._items.append(item)
 
             else:
                 item = QtWidgets.QListWidgetItem(str(obj))
@@ -127,6 +130,18 @@ class ListWidget(QtWidgets.QListWidget, Base):
 
     def getObjects(self):
         return list(self.objects)
+
+    def addItem(self, item):
+        if self.allowDuplicates:
+            super(ListWidget, self).addItem(item)
+        else:
+            if isinstance(item, str):
+                if not item in self.getTexts():
+                    super(ListWidget, self).addItem(item)
+            else:
+                if not item.text() in self.getTexts():
+                    super(ListWidget, self).addItem(item)
+
 
     def hideAllItems(self):
         for i in range(self.count()):
@@ -185,11 +200,20 @@ class ListWidget(QtWidgets.QListWidget, Base):
             # self.setItemSelected(item, False)
             item.setSelected(False)
 
+    def getItems(self):
+        items = []
+        for index in range(self.count()):
+            items.append(self.item(index))
+        return items
+
     def getTexts(self):
         items = []
         for index in range(self.count()):
             items.append(self.item(index))
         return [i.text() for i in items]
+
+    def getSelectedTexts(self):
+        return [i.text() for i in self.selectedItems()]
 
     def selectObject(self, obj):
         try:
@@ -309,15 +333,16 @@ class ListWidget(QtWidgets.QListWidget, Base):
         else:
             items = []
             if event.source() != self:  # otherwise duplicates
-
                 if self.dropSource is None:  # allow event drops from anywhere
                     if self.copyDrop:
                         event.setDropAction(QtCore.Qt.CopyAction)
                     else:
                         event.setDropAction(QtCore.Qt.MoveAction)
-                    # self.emit(QtCore.SIGNAL("dropped"), items)
+
                     super(ListWidget, self).dropEvent(event)
                     self.dropped.emit(items)
+                    if not self.allowDuplicates:
+                        self._removeDuplicate()
                     if self.sortOnDrop is True:
                         self.sortItems()
                 else:
@@ -352,6 +377,18 @@ class ListWidget(QtWidgets.QListWidget, Base):
             #   super(ListWidget, self).dropEvent(event)
             # else:
             #   event.ignore()
+
+    def _removeDuplicate(self):
+        """ Removes duplicates from listwidget on dropping. Could be implemented to don't add in first place but difficult
+        to know where the items are added from, eg from different drop event sources (sidebar, other List or outside urls etc).
+        which didn't work well when duplicates  were dropped as a group and also qt as different signatures for each item on same function!.
+        Don't use the ccpn parse data for pids as this is not a widget where you use always pids!
+        """
+
+        seen = set()
+        uniq = [i for i in self.getItems() if i.text() not in seen and not seen.add(i.text())]
+        removeDuplicates = [self.model().removeRow(self.row(i)) for i in self.getItems() if i not in uniq]
+
 
 
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -734,38 +771,24 @@ class ListWidgetSelector(Frame):
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.BasePopup import BasePopup
-    from ccpn.ui.gui.widgets.Icon import Icon
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
+    from ccpn.ui.gui.widgets.Widget import Widget
 
 
     app = TestApplication()
 
-    texts = ['Int', 'Float', 'String', 'icon']
+    texts = ['Int', 'Float', 'String', '']
     objects = [int, float, str, 'Green']
-    icons = [None, None, None, Icon(color='#008000')]
 
 
-    def callback(object):
-        print('callback', object)
 
+    popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
+    widget = ListWidget(parent=popup,allowDuplicates=True, acceptDrops=True, grid=(0,0))
+    widget2 = ListWidget(parent=popup, allowDuplicates=False, acceptDrops=True, grid=(0, 1))
 
-    def callback2(object):
-        print('callback2', object)
-
-
-    popup = BasePopup(title='Test PulldownList')
-
-    # policyDict = dict(
-    #   vAlign='top',
-    #   hPolicy='expanding',
-    # )
-    # policyDict = dict(
-    #   vAlign='top',
-    #   # hAlign='left',
-    # )
-    # policyDict = dict(
-    #   hAlign='left',
-    # )
-    policyDict = {}
-
+    for i in ['a','a','c']:
+        widget.addItem(i)
+    popup.show()
+    popup.raise_()
     app.start()
+

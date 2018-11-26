@@ -52,10 +52,9 @@ from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 
 from ccpn.util.Logging import getLogger
-from contextlib import contextmanager
 
 from ccpn.util.decorators import newObject, logCommand
-
+from ccpn.core.lib.ContextManagers import undoBlock
 
 
 # TODO These should be merged with the sams constants in CcpnNefIo
@@ -299,8 +298,14 @@ class Project(AbstractWrapperObject):
         appBase = self._appBase if hasattr(self, '_appBase') else None
         return 'CcpNmr' if appBase is None else appBase.applicationName
 
+    def _deleteObject(self, obj):
+        """Delete an object
+        """
+        pass
+
     def deleteObjects(self, *objects: typing.Sequence[typing.Union[Pid.Pid, AbstractWrapperObject]]):
-        """Delete one or more objects, given as either objects or Pids"""
+        """Delete one or more objects, given as either objects or Pids
+        """
 
         getByPid = self.getByPid
 
@@ -540,20 +545,20 @@ class Project(AbstractWrapperObject):
         :param str target: can have the following values
 
           *'create'* is called after the creation (or undeletion) of the object and its wrapper.
-          Notifier functions are called with the created wrapper object as the only parameter.
+          Notifier functions are called with the created V3 core object as the only parameter.
 
-          *'delete'* is called after the object is deleted, but before the .id and .pid attributes
-          are modified. Notifier functions are called with the deleted wrapper object as the only
+          *'delete'* is called before the object is deleted
+          Notifier functions are called with the deleted to be deleted V3 core object as the only
           parameter.
 
           *'rename'* is called after the id and pid of an object has changed
-          Notifier functions are called with the renamed wrapper object and the old pid as parameters.
+          Notifier functions are called with the renamed V3 core object and the old pid as parameters.
 
           *'change'* when any object attribute changes value.
-          Notifier functions are called with the created wrapper object as the only parameter.
+          Notifier functions are called with the changed V3 core object as the only parameter.
           rename and crosslink notifiers (see below) may also trigger change notifiers.
 
-          Any other value is interpreted as the name of a wrapper class, and the notifier
+          Any other value is interpreted as the name of a V3 core class, and the notifier
           is triggered when a cross link (NOT a parent-child link) between the className and
           the target class is modified
 
@@ -775,8 +780,7 @@ class Project(AbstractWrapperObject):
         obj._finaliseAction('change')
 
     def _finaliseApiDelete(self, wrappedData):
-        """Clean up after object deletion - and call deletion notifiers
-        Notifiers are called AFTER wrappedData are deleted, but BEFORE  wrapper objects are modified
+        """Clean up after object deletion
         """
         if not wrappedData.isDeleted:
             raise ValueError("_finaliseApiDelete called before wrapped data are deleted: %s" % wrappedData)
@@ -785,7 +789,7 @@ class Project(AbstractWrapperObject):
         obj = self._data2Obj.get(wrappedData)
         pid = obj.pid
 
-        obj._finaliseAction('delete')
+        # obj._finaliseAction('delete')  # GWV: 20181127: now as notify('delete') decorator on delete method
 
         # remove from wrapped2Obj
         del self._data2Obj[wrappedData]

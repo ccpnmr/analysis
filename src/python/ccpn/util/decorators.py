@@ -85,8 +85,8 @@ def profile(func):
     return profileWrapper
 
 
-def notify(trigger):
-    """A decorator wrap a method in an undo block
+def notify(trigger, preExecution=False):
+    """A decorator wrap a method around a notification blanking with explicit notification pre- or post-execution
     """
 
     trigger = 'change' if trigger == 'observe' else trigger
@@ -98,13 +98,18 @@ def notify(trigger):
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
 
+        if preExecution:
+            # call the notification
+            self._finaliseAction(trigger)
+
         # Execute the function with blanked notification
         self.project.blankNotification()
         result = func(*args, **kwds)
         self.project.unblankNotification()
 
-        # now call the notification
-        self._finaliseAction(trigger)
+        if not preExecution:
+            # call the notification
+            self._finaliseAction(trigger)
 
         return result
 
@@ -182,23 +187,39 @@ def newObject():
 
 def _makeLogString(prefix, addSelf, func, *args, **kwds):
     """Helper function to create the log string from func, args and kwds
+
+    returns string:
+
+    if addSelf == False:
+      prefix+func.__name__(EXPANDED-ARGUMENTS)
+
+    if addSelf == True
+      prefix+CLASSNAME-of-SELF+'.'+func.__name__(EXPANDED-ARGUMENTS)
+
     """
+    from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+
+    def obj2pid(obj):
+        "Convert core objects and CcpnModules to pids"
+        return obj.pid if isinstance(obj, (AbstractWrapperObject, CcpnModule)) else obj
 
     ba = inspect.signature(func).bind(*args, **kwds)
     ba.apply_defaults()
 
-    logs = prefix
+    logString = prefix
     if 'self' in ba.arguments or 'cls' in ba.arguments:
         if addSelf:
-            logs += '%s.' % (args[0].__class__.__name__,)
-        allArgs = [(k, ba.arguments[k]) for k in list(ba.arguments.keys())[1:]]
+            logString += '%s.' % (args[0].__class__.__name__,)
+        # we skip the first 'self' or 'cls' in the argument list
+        allArgs = [(k, obj2pid(ba.arguments[k])) for k in list(ba.arguments.keys())[1:]]
     else:
-        allArgs = [(k, ba.arguments[k]) for k in list(ba.arguments.keys())]
+        allArgs = [(k, obj2pid(ba.arguments[k])) for k in list(ba.arguments.keys())]
 
-    logs += '%s(' % (func.__name__)
-    logs += ', '.join(['{0!s}={1!r}'.format(k, v) for k, v in allArgs])
-    logs += ')'
-    return logs
+    logString += '%s(' % (func.__name__)
+    logString += ', '.join(['{0!s}={1!r}'.format(k, v) for k, v in allArgs])
+    logString += ')'
+    return logString
 
 
 def logCommand(prefix='', get=None):

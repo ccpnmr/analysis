@@ -168,11 +168,23 @@ class Mark(AbstractWrapperObject):
                       parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
         return apiGuiTask.sortedMarks()
 
+    def __str__(self):
+        if self.isDeleted:
+            return super().__str__()
+        else:
+            ll = min(len(self.positions), len(self.axisCodes))
+            def roundedValue(value):
+                return float('%.2f' % value)
+            pstring = str(tuple([(self.axisCodes[i], roundedValue(self.positions[i])) for i in range(ll)]))
+            return '<%s:%s %s>' % (self.shortClassName, self.serial, pstring[1:-1])
+
 
 #=========================================================================================
 
 
 # newMark functions
+from ccpn.util.decorators import newObject, logCommand
+
 def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence,
              style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()) -> Mark:
     """Create new Mark
@@ -186,56 +198,65 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
 
     apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
                   self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+    apiMark = apiGuiTask.newMark(colour=colour, style=style)
 
-    defaults = collections.OrderedDict((('style', 'simple'), ('units', ()),
-                                        ('labels', ())))
+    for ii, position in enumerate(positions):
+        dd = {'position': position, 'axisCode': axisCodes[ii]}
+        if units:
+            unit = units[ii]
+            if unit is not None:
+                dd['unit'] = unit
+        if labels:
+            label = labels[ii]
+            if label is not None:
+                dd['label'] = label
+        apiRuler = apiMark.newRuler(**dd)
 
-    # self._startCommandEchoBlock('newMark', colour, positions, axisCodes, values=locals(),
-    #                             defaults=defaults, parName='newMark')
-    # try:
-    #   apiMark = apiGuiTask.newMark(colour=colour, style=style)
-    #
-    #   for ii,position in enumerate(positions):
-    #     dd = {'position':position, 'axisCode':axisCodes[ii]}
-    #     if units:
-    #       unit = units[ii]
-    #       if unit is not None:
-    #        dd['unit'] = unit
-    #     if labels:
-    #       label = labels[ii]
-    #       if label is not None:
-    #        dd['label'] = label
-    #     apiRuler = apiMark.newRuler(**dd)
-    #   #
-    #   result =  self._data2Obj.get(apiMark)
-    # finally:
-    #   self._endCommandEchoBlock()
-
-    result = None
-    from ccpn.core.lib.ContextManagers import undoBlock, echoCommand
-
-    with echoCommand(self, 'newMark', colour, positions, axisCodes, values=locals(),
-                     defaults=defaults, parName='newMark'):
-        with undoBlock(self._appBase):  # testing -> _appBase will disappear with the new framework
-            apiMark = apiGuiTask.newMark(colour=colour, style=style)
-
-            for ii, position in enumerate(positions):
-                dd = {'position': position, 'axisCode': axisCodes[ii]}
-                if units:
-                    unit = units[ii]
-                    if unit is not None:
-                        dd['unit'] = unit
-                if labels:
-                    label = labels[ii]
-                    if label is not None:
-                        dd['label'] = label
-                apiRuler = apiMark.newRuler(**dd)
-
-            result = self._data2Obj.get(apiMark)
+    result = self._data2Obj.get(apiMark)
     return result
 
+# GWV 20181124: refactored
+# def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence,
+#              style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()) -> Mark:
+#     """Create new Mark
+#
+#     :param str colour: Mark colour
+#     :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
+#     :param tuple/list axisCodes: Axis codes for all lines in the mark
+#     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
+#     :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
+#     :param tuple/list labels: Ruler labels for all lines in the mark. Default: None"""
+#
+#     apiGuiTask = (self._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
+#                   self._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
+#
+#     defaults = collections.OrderedDict((('style', 'simple'), ('units', ()),
+#                                         ('labels', ())))
+#
+#     result = None
+#     from ccpn.core.lib.ContextManagers import undoBlock, echoCommand
+#
+#     with echoCommand(self, 'newMark', colour, positions, axisCodes, values=locals(),
+#                      defaults=defaults, parName='newMark'):
+#         with undoBlock(self._appBase):  # testing -> _appBase will disappear with the new framework
+#             apiMark = apiGuiTask.newMark(colour=colour, style=style)
+#
+#             for ii, position in enumerate(positions):
+#                 dd = {'position': position, 'axisCode': axisCodes[ii]}
+#                 if units:
+#                     unit = units[ii]
+#                     if unit is not None:
+#                         dd['unit'] = unit
+#                 if labels:
+#                     label = labels[ii]
+#                     if label is not None:
+#                         dd['label'] = label
+#                 apiRuler = apiMark.newRuler(**dd)
+#
+#             result = self._data2Obj.get(apiMark)
+#     return result
 
-Project.newMark = _newMark
+# Project.newMark = _newMark
 
 
 def _newSimpleMark(self: Project, colour: str, position: float, axisCode: str, style: str = 'simple',

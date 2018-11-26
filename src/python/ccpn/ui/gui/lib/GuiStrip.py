@@ -1153,7 +1153,8 @@ class GuiStrip(Frame):
             self._project.newMark(defaultColour, positions, self.axisCodes)
 
         except Exception as es:
-            getLogger().warning('Error setting mark at current position')
+            getLogger().warning('Error setting mark at current cursor position')
+            raise(es)
 
     # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
     def _initRulers(self):

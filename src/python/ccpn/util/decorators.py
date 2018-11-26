@@ -178,6 +178,27 @@ def newObject():
     return theDecorator
 
 
+def ccpNmrSetter():
+
+    @logCommand('peak.')
+    @position.setter
+    @propertyUndo()
+    @notify('observe')
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+
+        result = func(*args, **kwds)
+
+        return result
+
+    return theDecorator
+
+
 #----------------------------------------------------------------------------------------------
 # Adapted from from sandbox.Geerten.Refactored.decorators to fit current setup
 #----------------------------------------------------------------------------------------------
@@ -233,6 +254,190 @@ def logCommand(prefix='', get=None):
         return result
 
     return theDecorator
+
+
+
+
+
+
+def logCommand2(prefix='', get=None, isProperty=False, showArguments=[], logCommandOnly=False):
+    """
+    Echo a command to the logger reflecting the python command required to call the function.
+
+    :param prefix: string to be prepended to the echo command
+    :param get: function containing the function
+    :param isProperty: is the function a property
+    :param showArguments: list of string names for arguments that need to be included.
+                        By default, the parameters set to the defaults are not included.
+
+    Examples:
+
+    1)  def something(self, name=None, value=0):
+            logCommandManager(prefix='process.') as log:
+                log('something')
+
+                ... code here
+
+        call function                   echo command
+
+        something('Hello')              process.something(name='Hello')
+        something('Hello', 12)          process.something(name='Hello', value=12)
+
+        Parameters are not required in the log() command, parameters are picked up from
+        the containing function; however, changes can be inserted by including
+        the parameter, e.g., log('something', name=name+'There') will append 'There' to the name.
+
+            something('Hello')          process.something(name='HelloThere')
+
+    2)  def something(self, name=None, value=0):
+            logCommandManager(get='self') as log:
+                log('something')
+
+                ... code here
+
+        call function                   echo command
+
+        something('Hello')              get('parent:ID').something(name='Hello')
+        something('Hello', 12)          get('parent:ID').something(name='Hello', value=12)
+
+    3)  @property
+        def something(self, value=0):
+            logCommandManager(get='self', isProperty=True) as log:
+                log('something', value=value)
+
+                ... code here
+
+
+        call function                   echo command
+
+        something = 12                  get('parent:ID').something = 12
+
+        functions of this type can only contain one parameter, and
+        must be set as a keyword in the log.
+
+    4)  Mixing prefix and get:
+
+        def something(self, value=0):
+            logCommandManager(prefix='process.', get='self') as log:
+                log('something')
+
+        if called from SpectrumDisplay:
+
+        call function                   echo command
+
+        spectrumDisplay.something(12)   process.get('spectrumDisplay:1').something(12)
+
+    5)  If the log command needs modifying, this can be included in the log command,
+        e.g., if the pid of an object needs inserting
+
+        def something(self, value=None):
+            logCommandManager(prefix='process.', get='self') as log:
+                log('something', value=value.pid)
+
+        if called from SpectrumDisplay:
+
+        call function                   echo command
+
+        spectrumDisplay.something(<anObject>)   process.get('spectrumDisplay:1').something(value=anObject:pid)
+
+        To make quotes appear around the value use: log('something', value=repr(value.pid))
+
+    """
+    from inspect import signature, Parameter
+    import sys
+    # from sandbox.Geerten.Refactored.framework import getApplication
+
+    # get the current application
+    # application = getApplication()
+
+    def log(funcName, *args, **kwds):  # remember _undoBlocked, as first parameter
+        # if logger._loggingCommandBlock > 1:  # or _undoBlocked:
+        #     return
+
+        # get the caller from the getframe stack
+        fr1 = sys._getframe(1)
+        selfCaller = fr1.f_locals[get] if get else None
+        pid = selfCaller.pid if selfCaller is not None and hasattr(selfCaller, 'pid') else ''
+
+        # make a list for modifying the log string with more readable labels
+        # checkList = [(application, 'application.'),
+        #              (application.mainWindow, 'mainWindow.'),
+        #              (application.project, 'project.'),
+        #              (application.current, 'current.')]
+        checkList = []
+
+        for obj, label in checkList:
+            if selfCaller is obj:
+                getPrefix = label
+                break
+        else:
+            getPrefix = "get('%s')." % pid if (get and pid) else ''
+
+        # search if caller matches the main items in the application namespace, e.g., 'application', 'project', etc.
+        # nameSpace = application._getNamespace()
+        # for k in nameSpace.keys():
+        #     if selfCaller == nameSpace[k]:
+        #         getPrefix = k+'.'
+        #         break
+        # else:
+        #     getPrefix = "get('%s')." % pid if get else ''
+
+        # construct the new log string
+        if isProperty:
+            # if kwds.values():
+            #     kwdsList = repr(list(kwds.values())[0])
+            # else:
+            #     kwdsList = ''
+            logs = prefix + getPrefix + funcName + ' = ' + repr(args[1])     # repr(list(kwds.values())[0])
+        else:
+
+            # build the log command from the parameters of the caller function
+            # only those that are not in the default list are added, i.e. those defined
+            # explicitly by the caller
+            if selfCaller is not None:
+                selfFunc = getattr(selfCaller, funcName)
+                sig0 = [(k, v) for k, v in signature(selfFunc).parameters.items()]
+                sig1 = [k for k, v in signature(selfFunc).parameters.items()
+                        if v.default is Parameter.empty
+                        or k in showArguments
+                        or k in kwds
+                        or repr(fr1.f_locals[k]) != repr(v.default)]
+            else:
+                sig1 = {}
+
+            # create the log string
+            logs = prefix + getPrefix + funcName + '('
+            for k in sig1:
+                if k != 'self':
+                    kval = str(kwds[k]) if k in kwds else repr(fr1.f_locals[k])
+                    logs += str(k) + '=' + kval + ', '
+            logs = logs.rstrip(', ')
+            logs += ')'
+
+        getLogger().info(logs)
+
+    # log commands to the registered outputs
+    logger = getLogger()
+    # logger._loggingCommandBlock += 1
+
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        # def logCommand(func, self, *args, **kwds):
+        # to avoid potential conflicts with potential 'func' named keywords
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+
+        log(func.__name__, *args, **kwds)
+        result = func(*args, **kwds)
+
+        return result
+
+    return theDecorator
+
+
+
 
 
 # def debugEnter(verbosityLevel=Logger.DEBUG1):

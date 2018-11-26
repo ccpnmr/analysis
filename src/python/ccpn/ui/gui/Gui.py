@@ -98,18 +98,15 @@ class Gui(Ui):
         # notifier = project.registerNotifier('Strip', 'create', GuiStrip.GuiStrip._resetRemoveStripAction)
         # project.duplicateNotifier('Strip', 'delete', notifier)
 
-        # project.registerNotifier('Axis', 'change', GuiStrip._axisRegionChanged)
-        Notifier(project, [Notifier.CHANGE], 'Axis', GuiStrip._axisRegionChanged)
+        # TODO:ED not sure this is the best place
+        project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks)
+        project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks)
+        project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks)
 
-        Notifier(project, [Notifier.CREATE, Notifier.DELETE], 'Mark',
-                 GuiStrip._updateDisplayedMarks, onceOnly=True)
-        # project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks, onceOnly=True)
-        # project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks, onceOnly=True)
-        # project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks, onceOnly=True)
-
-        self._currentPeakNotifier = Notifier(current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
-        self._currentIntegralNotifier = Notifier(current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
-        self._currentMultipletNotifier = Notifier(current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
+        # TODO:ED sorry - don't actually want _appBase
+        self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
+        self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
+        self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
 
         from ccpn.ui.gui.lib import GuiSpectrumDisplay
 

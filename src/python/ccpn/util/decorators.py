@@ -97,15 +97,16 @@ def notify(trigger, preExecution=False):
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
+        project = self.project # we need a reference now, as the func could be deleting the obj
 
         if preExecution:
             # call the notification
             self._finaliseAction(trigger)
 
         # Execute the function with blanked notification
-        self.project.blankNotification()
+        project.blankNotification()
         result = func(*args, **kwds)
-        self.project.unblankNotification()
+        project.unblankNotification()
 
         if not preExecution:
             # call the notification

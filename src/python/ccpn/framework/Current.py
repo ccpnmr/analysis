@@ -341,6 +341,7 @@ class Current:
 
         def setField(self, value, plural=plural, enforceType=enforceType):
             # setField(obj, value) sets obj._field = value and calls notifiers
+
             if len(set(value)) != len(value):
                 # ejb - remove duplicates here
                 tempList = []
@@ -351,14 +352,18 @@ class Current:
                 set(value)
                 # raise ValueError( "Current %s contains duplicates: %s" % (plural, value))
 
-            if enforceType and any(x for x in value if not isinstance(x, enforceType)):
-                raise ValueError("Current values for %s must be of type %s" % (plural, enforceType))
-            setattr(self, '_' + plural, value)
+            attributeName = '_' + plural
+            oldValue = getattr(self, attributeName)
 
-            # Trigger the notifiers
-            funcs = getFieldItem(self._notifies) or () # getFieldItem(obj) returns obj[field]
-            for func in funcs:
-                func(value)
+            if value != oldValue:
+                if enforceType and any(x for x in value if not isinstance(x, enforceType)):
+                    raise ValueError("Current values for %s must be of type %s" % (plural, enforceType))
+                setattr(self, attributeName, value)
+
+                # Trigger the notifiers
+                funcs = getFieldItem(self._notifies) or () # getFieldItem(obj) returns obj[field]
+                for func in funcs:
+                    func(value)
 
         # define singular properties
         def getter(self):

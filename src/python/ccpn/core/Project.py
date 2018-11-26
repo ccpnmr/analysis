@@ -54,7 +54,6 @@ from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.Logging import getLogger
 
 from ccpn.util.decorators import newObject, logCommand
-from ccpn.core.lib.ContextManagers import undoBlock
 
 
 # TODO These should be merged with the sams constants in CcpnNefIo

@@ -10,7 +10,7 @@ import cProfile
 import decorator
 import inspect
 from functools import partial
-from ccpn.core.lib.ContextManagers import undoBlock
+# from ccpn.core.lib.ContextManagers import undoBlock
 from ccpn.util.Logging import getLogger
 
 
@@ -121,6 +121,7 @@ def propertyUndo():
     """A decorator to wrap a method in an undo block
     Requires that the 'self' has 'project' as an attribute
     """
+    from ccpn.core.lib.ContextManagers import undoBlock
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
@@ -156,6 +157,7 @@ def newObject():
     """A decorator wrap a newObject method in an undo block and calls
      result._finalise('create')
     """
+    from ccpn.core.lib.ContextManagers import undoBlock
 
     @decorator.decorator
     def theDecorator(*args, **kwds):

@@ -45,6 +45,7 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import notify, propertyUndo
+from ccpn.util.decorators import newObject, logCommand
 
 
 def _estimateNoiseLevel1D(y):
@@ -744,14 +745,15 @@ class PeakList(AbstractWrapperObject):
     # Copied from their respective locations
     #===========================================================================================
 
+    @logCommand('peaklist.')
+    @newObject()
     def newPeak(self, height: float = None, volume: float = None,
                 heightError: float = None, volumeError: float = None,
                 figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
                 position: Sequence[float] = (), positionError: Sequence[float] = (),
                 pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
                 lineWidths: Sequence[float] = (), serial: int = None):
-        """
-        Create a new Peak within a peakList
+        """Create a new Peak within a peakList
 
         NB you must create the peak before you can assign it. The assignment attributes are:
         - assignedNmrAtoms - A tuple of all (e.g.) assignment triplets for a 3D spectrum
@@ -773,10 +775,16 @@ class PeakList(AbstractWrapperObject):
         :param lineWidths:
         :param serial:
         :return new peak:
-
-        Inserted later ccpn.Core.Peak
         """
-        pass
+        from ccpn.core.Peak import _newPeak
+
+        return _newPeak(self, height=height, volume=volume,
+                        heightError=heightError, volumeError=volumeError,
+                        figureOfMerit=figureOfMerit, annotation=annotation, comment=comment,
+                        position=position, positionError=positionError,
+                        pointPosition=pointPosition, boxWidths=boxWidths,
+                        lineWidths=lineWidths, serial=serial
+                        )
 
 
 #=========================================================================================

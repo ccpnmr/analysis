@@ -38,7 +38,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
-from ccpn.util.decorators import notify, propertyUndo, logCommand, logCommand2
+from ccpn.util.decorators import notify, propertyUndo, logCommand
 
 
 class Peak(AbstractWrapperObject):
@@ -570,15 +570,15 @@ class Peak(AbstractWrapperObject):
 #=========================================================================================
 
 
-# Connections to parents:
+# newPeak functions
+
 def _newPeak(self: PeakList, height: float = None, volume: float = None,
              heightError: float = None, volumeError: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
              position: Sequence[float] = (), positionError: Sequence[float] = (),
              pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
              lineWidths: Sequence[float] = (), serial: int = None) -> Peak:
-    """
-    Create a new Peak within a peakList
+    """Create a new Peak within a peakList
 
     NB you must create the peak before you can assign it. The assignment attributes are:
     - assignedNmrAtoms - A tuple of all (e.g.) assignment triplets for a 3D spectrum
@@ -601,7 +601,6 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param serial:
     :return new peak:
     """
-    # __doc__ added to PeakList
 
     defaults = collections.OrderedDict(
             (('height', None), ('volume', None), ('heightError', None), ('volumeError', None),
@@ -611,10 +610,11 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
              )
             )
 
+    #EJB 20181126: minor refactoring
     undo = self._project._undo
-    self._startCommandEchoBlock('newPeak', values=locals(), defaults=defaults,
-                                parName='newPeak')
-    self._project.blankNotification()
+    # self._startCommandEchoBlock('newPeak', values=locals(), defaults=defaults,
+    #                             parName='newPeak')
+    # self._project.blankNotification()
     undo.increaseBlocking()
     try:
         apiPeakList = self._apiPeakList
@@ -650,10 +650,11 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
                 peakDim.lineWidth = lineWidths[ii]
 
     finally:
-        self._endCommandEchoBlock()
-        self._project.unblankNotification()
         undo.decreaseBlocking()
+        # self._project.unblankNotification()
+        # self._endCommandEchoBlock()
 
+    # use the api to delete/undelete the new objects
     apiObjectsCreated = [apiPeak]
     apiObjectsCreated.extend(apiPeakDims)
     undo.newItem(Undo._deleteAllApiObjects, apiPeak.root._unDelete,

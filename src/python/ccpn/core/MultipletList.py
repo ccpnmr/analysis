@@ -203,7 +203,7 @@ class MultipletList(AbstractWrapperObject):
         """Subclassed to handle associated peakListViews
         """
         super()._finaliseAction(action=action)
-        # propagate the rename to associated ChemicalShift instances
+
         if action in ['change']:
             for mlv in self.multipletListViews:
                 mlv._finaliseAction(action=action)

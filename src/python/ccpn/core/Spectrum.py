@@ -1736,6 +1736,20 @@ class Spectrum(AbstractWrapperObject):
         """
         pass
 
+    def _newIntegralList(self, title: str = None, symbolColour: str = None,
+                         textColour: str = None, comment: str = None):
+        """
+        Create new IntegralList within Spectrum.
+
+        :param self:
+        :param title:
+        :param symbolColour:
+        :param textColour:
+        :param comment:
+        :return:
+
+        Inserted later ccpn.Core.IntegralList
+        """
 
     def _newMultipletList(self, title: str = None,
                           symbolColour: str = None, textColour: str = None, lineColour: str = None,

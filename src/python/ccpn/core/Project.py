@@ -30,6 +30,8 @@ import typing
 from typing import Sequence, Tuple
 import operator
 from collections import OrderedDict
+from time import time
+
 from ccpn.util.Common import _traverse, _getChildren
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -48,9 +50,12 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
-from time import time
+
 from ccpn.util.Logging import getLogger
 from contextlib import contextmanager
+
+from ccpn.util.decorators import newObject, logCommand
+
 
 
 # TODO These should be merged with the sams constants in CcpnNefIo
@@ -595,26 +600,27 @@ class Project(AbstractWrapperObject):
         #
         return notifier
 
-    def duplicateNotifier(self, className: str, target: str,
-                          notifier: typing.Callable[..., None]):
-        """register copy of notifier for a new className and target.
-        Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
-        interface matches the action"""
-        if target in self._notifierActions:
-
-            tt = (className, target)
-        else:
-            # This is right, it just looks strange. But if target is not an action it is
-            # another className, and if so the names must be sorted.
-            tt = tuple(sorted([className, target]))
-
-        for od in self._context2Notifiers.values():
-            onceOnly = od.get(notifier)
-            if onceOnly is not None:
-                self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
-                break
-        else:
-            raise ValueError("Unknown notifier: %s" % notifier)
+    #GWV 20181123
+  # def duplicateNotifier(self,  className:str, target:str,
+  #                       notifier:typing.Callable[..., None]):
+  #   """register copy of notifier for a new className and target.
+  #   Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
+  #   interface matches the action"""
+  #   if target in self._notifierActions:
+  #
+  #     tt = (className, target)
+  #   else:
+  #     # This is right, it just looks strange. But if target is not an action it is
+  #     # another className, and if so the names must be sorted.
+  #     tt = tuple(sorted([className, target]))
+  #
+  #   for od in self._context2Notifiers.values():
+  #     onceOnly = od.get(notifier)
+  #     if onceOnly is not None:
+  #       self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
+  #       break
+  #   else:
+  #     raise ValueError("Unknown notifier: %s" % notifier)
 
     def unRegisterNotifier(self, className: str, target: str, notifier: typing.Callable[..., None]):
         """Unregister the notifier from this className, and target"""
@@ -1329,10 +1335,12 @@ class Project(AbstractWrapperObject):
         return result
 
     #===========================================================================================
-    # Hot fixed methods (baahhhhhh)
-    # Copied from their respective locations
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @logCommand('project.')
+    @newObject()
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence,
                 style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
         """Create new Mark
@@ -1348,7 +1356,10 @@ class Project(AbstractWrapperObject):
 
         Inserted later ccpn.ui._implementation.Mark
         """
-        pass
+        from ccpn.ui._implementation.Mark import _newMark
+        return _newMark(self, colour=colour, positions=positions, axisCodes=axisCodes,
+                        style=style, units=units, labels=labels
+                        )
 
     def newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',
                        unit: str = 'ppm', label: str = None):

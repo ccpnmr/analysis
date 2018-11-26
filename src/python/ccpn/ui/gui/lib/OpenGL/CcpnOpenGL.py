@@ -2103,7 +2103,7 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         # stop notifiers interfering with paint event
-        self.project.blankNotification()
+        # self.project.blankNotification()
 
         self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
         self._GLPeaks.setListViews(self._ordering)
@@ -2219,7 +2219,7 @@ class CcpnGLWidget(QOpenGLWidget):
         GL.glEnd()
 
         # re-enable notifiers
-        self.project.unblankNotification()
+        # self.project.unblankNotification()
 
     def enableTexture(self):
         GL.glEnable(GL.GL_BLEND)

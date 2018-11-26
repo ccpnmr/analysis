@@ -587,7 +587,12 @@ class GuiStrip(Frame):
         # self.plotWidget.highlightAxes(self is self.current.strip)
 
         try:
-            self._CcpnGLWidget.highlightCurrentStrip(self is self.current.strip)
+            # Only do something in case of the old and new current strip
+            previousStrip = data[Notifier.PREVIOUSVALUE]
+            if self is previousStrip:
+                self._CcpnGLWidget.highlightCurrentStrip(False)
+            elif self is self.current.strip:
+                self._CcpnGLWidget.highlightCurrentStrip(True)
 
             # # spawn a redraw of the GL windows
             # from ccpn.util.CcpnOpenGL import GLNotifier
@@ -963,8 +968,6 @@ class GuiStrip(Frame):
         # this code is complicated because need to keep viewBox region and axis region in sync
         # and there can be different viewBoxes with the same axis
 
-        if not self._finaliseDone: return
-
         assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
 
         self._updateX()
@@ -974,8 +977,6 @@ class GuiStrip(Frame):
         # this is called when the viewBox is changed on the screen via the mouse
         # this code is complicated because need to keep viewBox region and axis region in sync
         # and there can be different viewBoxes with the same axis
-
-        if not self._finaliseDone: return
 
         assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
 
@@ -990,8 +991,6 @@ class GuiStrip(Frame):
             minDiff = abs(r1[0] - r2[0])
             maxDiff = abs(r1[1] - r2[1])
             return (minDiff > tol) or (maxDiff > tol)
-
-        if not self._finaliseDone: return
 
         # this only wants to get the scaling of the modified strip and not the actual values
 
@@ -1015,8 +1014,6 @@ class GuiStrip(Frame):
             minDiff = abs(r1[0] - r2[0])
             maxDiff = abs(r1[1] - r2[1])
             return (minDiff > tol) or (maxDiff > tol)
-
-        if not self._finaliseDone: return
 
         yRange = list(self.viewBox.viewRange()[1])
         for strip in self.spectrumDisplay.strips:
@@ -1168,8 +1165,6 @@ class GuiStrip(Frame):
         """
         Displays mouse position for both axes by axis code.
         """
-        if not self._finaliseDone: return
-
         if self.isDeleted:
             return
 
@@ -1205,7 +1200,6 @@ class GuiStrip(Frame):
         """
         Zooms strip to the specified region
         """
-        if not self._finaliseDone: return
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setXRange(*xRegion, padding=padding)
         self.viewBox.setYRange(*yRegion, padding=padding)
@@ -1214,8 +1208,6 @@ class GuiStrip(Frame):
         """
         Zooms x axis of strip to the specified region
         """
-        if not self._finaliseDone: return
-
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setXRange(x1, x2, padding=padding)
 
@@ -1223,7 +1215,6 @@ class GuiStrip(Frame):
         """
         Zooms y axis of strip to the specified region
         """
-        if not self._finaliseDone: return
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setYRange(y1, y2, padding=padding)
 
@@ -1305,7 +1296,6 @@ class GuiStrip(Frame):
         """
         Adds current region to the zoom stack for the strip.
         """
-        if not self._finaliseDone: return
         self.storedZooms.append(self.viewBox.viewRange())
 
         try:
@@ -1317,7 +1307,6 @@ class GuiStrip(Frame):
         """
         Restores last saved region to the zoom stack for the strip.
         """
-        if not self._finaliseDone: return
         if len(self.storedZooms) != 0:
             restoredZoom = self.storedZooms.pop()
             padding = self.application.preferences.general.stripRegionPadding
@@ -1335,7 +1324,6 @@ class GuiStrip(Frame):
     #   """
     #   Zooms both axis of strip to the specified region
     #   """
-    #   if not self._finaliseDone: return
     #   padding = self.application.preferences.general.stripRegionPadding
     #   self.viewBox.autoRange(padding=padding)
 
@@ -1357,7 +1345,6 @@ class GuiStrip(Frame):
         """
         zoom in to the strip.
         """
-        if not self._finaliseDone: return
         zoomPercent = -self.application.preferences.general.zoomPercent / 100.0
         padding = self.application.preferences.general.stripRegionPadding
         currentRange = self.viewBox.viewRange()
@@ -1383,7 +1370,6 @@ class GuiStrip(Frame):
         """
         zoom out of the strip.
         """
-        if not self._finaliseDone: return
         zoomPercent = +self.application.preferences.general.zoomPercent / 100.0
         padding = self.application.preferences.general.stripRegionPadding
         currentRange = self.viewBox.viewRange()

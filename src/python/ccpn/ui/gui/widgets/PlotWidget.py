@@ -205,7 +205,6 @@ class PlotWidget(pg.PlotWidget):
     """
     strip = self.strip
     if strip.isDeleted: return
-    if not strip._finaliseDone: return
 
     axes = strip.orderedAxes
 
@@ -319,7 +318,6 @@ class PlotWidget(pg.PlotWidget):
     """
     return
 
-    if not self.strip._finaliseDone: return
     self.xAxisTextItem.setPos(self.viewBox.boundingRect().bottomLeft())
     self.yAxisTextItem.setPos(self.viewBox.boundingRect().topRight())
     for item in self.xAxisAtomLabels:

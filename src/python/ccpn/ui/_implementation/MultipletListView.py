@@ -183,6 +183,16 @@ class MultipletListView(AbstractWrapperObject):
         else:
             return None
 
+    def _propagateAction(self, data):
+        from ccpn.core.lib.Notifiers import Notifier
+
+        trigger = data[Notifier.TRIGGER]
+
+        trigger = 'change' if trigger == 'observe' else trigger
+        if trigger in ['change']:
+            self._finaliseAction(trigger)
+
+
 #=========================================================================================
 # CCPN functions
 #=========================================================================================

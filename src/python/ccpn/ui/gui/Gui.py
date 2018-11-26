@@ -473,9 +473,6 @@ class Strip1d(coreClass, _GuiStrip1d):
 
         AbstractWrapperObject.__init__(self, project, wrappedData)
 
-        # hack : Postpone SpectrumLoading and PlotWidget stuff until later
-        self._finaliseDone = True
-
         Logging.getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
         _GuiStrip1d.__init__(self, self.spectrumDisplay)
 
@@ -493,9 +490,6 @@ class StripNd(coreClass, _GuiStripNd):
         """Local override init for Qt subclass"""
 
         AbstractWrapperObject.__init__(self, project, wrappedData)
-
-        # hack : Postpone SpectrumLoading and PlotWidget stuff until later
-        self._finaliseDone = True
 
         Logging.getLogger().debug('StripNd>> spectrumDisplay: %s' % self.spectrumDisplay)
         _GuiStripNd.__init__(self, self.spectrumDisplay)

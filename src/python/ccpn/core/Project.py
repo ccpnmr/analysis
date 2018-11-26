@@ -30,6 +30,8 @@ import typing
 from typing import Sequence, Tuple
 import operator
 from collections import OrderedDict
+from time import time
+
 from ccpn.util.Common import _traverse, _getChildren
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
@@ -48,9 +50,12 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
-from time import time
+
 from ccpn.util.Logging import getLogger
 from contextlib import contextmanager
+
+from ccpn.util.decorators import newObject, logCommand
+
 
 
 # TODO These should be merged with the sams constants in CcpnNefIo
@@ -1330,10 +1335,12 @@ class Project(AbstractWrapperObject):
         return result
 
     #===========================================================================================
-    # Hot fixed methods (baahhhhhh)
-    # Copied from their respective locations
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @logCommand('project.')
+    @newObject()
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence,
                 style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
         """Create new Mark
@@ -1349,7 +1356,10 @@ class Project(AbstractWrapperObject):
 
         Inserted later ccpn.ui._implementation.Mark
         """
-        pass
+        from ccpn.ui._implementation.Mark import _newMark
+        return _newMark(self, colour=colour, positions=positions, axisCodes=axisCodes,
+                        style=style, units=units, labels=labels
+                        )
 
     def newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',
                        unit: str = 'ppm', label: str = None):

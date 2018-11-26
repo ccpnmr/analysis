@@ -492,14 +492,6 @@ def _newMultiplet(self: MultipletList,
 
         result = self._project._data2Obj.get(apiMultiplet)
 
-        # # attach a notifier to the peaks
-        # from ccpn.core.lib.Notifiers import Notifier
-        #
-        # for pp in peaks:
-        #     Notifier(pp, ['observe'], Notifier.ANY,
-        #              callback=result._propagateAction,
-        #              onceOnly=True, debug=True)
-
     finally:
         self._endCommandEchoBlock()
 

@@ -298,18 +298,14 @@ class Project(AbstractWrapperObject):
         appBase = self._appBase if hasattr(self, '_appBase') else None
         return 'CcpNmr' if appBase is None else appBase.applicationName
 
-    def _deleteObject(self, obj):
-        """Delete an object
-        """
-        pass
-
-    def deleteObjects(self, *objects: typing.Sequence[typing.Union[Pid.Pid, AbstractWrapperObject]]):
+    @logCommand('project.')
+    def deleteObjects(self, *objs: typing.Sequence[typing.Union[Pid.Pid, AbstractWrapperObject]]):
         """Delete one or more objects, given as either objects or Pids
         """
 
         getByPid = self.getByPid
 
-        objs = [getByPid(x) if isinstance(x, str) else x for x in objects]
+        objs = [getByPid(x) if isinstance(x, str) else x for x in objs]
         apiObjs = [x._wrappedData for x in objs]
         self._startDeleteCommandBlock(*apiObjs)
         try:
@@ -725,19 +721,19 @@ class Project(AbstractWrapperObject):
             # TODO:ED check this!
             # self.suspendNotification()
 
-        if not self._appBase._echoBlocking:
-
-            getDataObj = self._data2Obj.get
-            ll = [getDataObj(x) for x in allWrappedData]
-            ss = ', '.join(repr(x.pid) for x in ll if x is not None)
-            if not ss:
-                raise ValueError("No object for deletion recognised among API objects: %s"
-                                 % allWrappedData)
-            command = "project.deleteObjects(%s)" % ss
-            # echo command strings
-            self._appBase.ui.echoCommands((command,))
-
-        self._appBase._echoBlocking += 1
+        # if not self._appBase._echoBlocking:
+        #
+        #     getDataObj = self._data2Obj.get
+        #     ll = [getDataObj(x) for x in allWrappedData]
+        #     ss = ', '.join(repr(x.pid) for x in ll if x is not None)
+        #     if not ss:
+        #         raise ValueError("No object for deletion recognised among API objects: %s"
+        #                          % allWrappedData)
+        #     command = "project.deleteObjects(%s)" % ss
+        #     # echo command strings
+        #     self._appBase.ui.echoCommands((command,))
+        #
+        # self._appBase._echoBlocking += 1
 
     def _endDeleteCommandBlock(self, *dummyWrappedData):
         """End block for delete command echoing
@@ -749,9 +745,9 @@ class Project(AbstractWrapperObject):
             # self.resumeNotification()
             undo.decreaseWaypointBlocking()
 
-        if self._appBase._echoBlocking > 0:
-            # If statement should always be True, but to avoid weird behaviour in error situations we check
-            self._appBase._echoBlocking -= 1
+        # if self._appBase._echoBlocking > 0:
+        #     # If statement should always be True, but to avoid weird behaviour in error situations we check
+        #     self._appBase._echoBlocking -= 1
 
     def _newApiObject(self, wrappedData, cls: AbstractWrapperObject):
         """Create new wrapper object of class cls, associated with wrappedData.

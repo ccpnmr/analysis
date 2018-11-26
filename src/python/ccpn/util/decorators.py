@@ -290,7 +290,6 @@ def logCommand(prefix='', get=None):
             if get == 'self':
                 _pref += "get('%s')." % args[0].pid
             logS = _makeLogString(_pref, False, func, *args, **kwds)
-            print('>>>', logS)
             application.ui.echoCommands([logS])
 
         blocking += 1

@@ -236,7 +236,7 @@ class GuiStrip(Frame):
         self.haveSetVPhasingPivot = False
 
         # notifier for highlighting the strip
-        self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+        # self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
 
         # Notifier for updating the peaks
         self._peakNotifier = Notifier(self.project, [Notifier.CREATE,
@@ -582,25 +582,34 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget._processIntegralNotifier(data)
 
-    def _highlightCurrentStrip(self, data):
-        "Callback to highlight the axes of current strip"
-        # self.plotWidget.highlightAxes(self is self.current.strip)
+    def _highlightStrip(self, flag):
+        """(un)highLight the strip depending on flag
 
-        try:
-            # Only do something in case of the old and new current strip
-            previousStrip = data[Notifier.PREVIOUSVALUE]
-            if self is previousStrip:
-                self._CcpnGLWidget.highlightCurrentStrip(False)
-            elif self is self.current.strip:
-                self._CcpnGLWidget.highlightCurrentStrip(True)
+        CCPNINTERNAL: used in GuiMainWindow
+        """
+        self._CcpnGLWidget.highlightCurrentStrip(flag)
 
-            # # spawn a redraw of the GL windows
-            # from ccpn.util.CcpnOpenGL import GLNotifier
-            # GLSignals = GLNotifier(parent=None)
-            # GLSignals.emitPaintEvent()
-
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+    # GWV 20181127: moved to a single notifier in GuiMainWindow
+    # def _highlightCurrentStrip(self, data):
+    #     "Callback to highlight the axes of current strip"
+    #     # self.plotWidget.highlightAxes(self is self.current.strip)
+    #     pass
+    #
+    #     try:
+    #         # Only do something in case of the old and new current strip
+    #         previousStrip = data[Notifier.PREVIOUSVALUE]
+    #         if self is previousStrip:
+    #             self._CcpnGLWidget.highlightCurrentStrip(False)
+    #         elif self is self.current.strip:
+    #             self._CcpnGLWidget.highlightCurrentStrip(True)
+    #
+    #         # # spawn a redraw of the GL windows
+    #         # from ccpn.util.CcpnOpenGL import GLNotifier
+    #         # GLSignals = GLNotifier(parent=None)
+    #         # GLSignals.emitPaintEvent()
+    #
+    #     except Exception as es:
+    #         getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     def _printToFile(self, printer):
         # CCPN INTERNAL - called in printToFile method of GuiMainWindow

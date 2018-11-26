@@ -86,6 +86,7 @@ class Gui(Ui):
         self.application.initGraphics()
 
         project = self.application.project
+        current = self.application.current
 
         # Wrapper Notifiers
         from ccpn.ui.gui.lib import GuiStrip
@@ -100,10 +101,9 @@ class Gui(Ui):
         project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks, onceOnly=True)
         project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks, onceOnly=True)
 
-        # TODO:ED sorry - don't actually want _appBase
-        self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
-        self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
-        self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
+        self._currentPeakNotifier = Notifier(current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
+        self._currentIntegralNotifier = Notifier(current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
+        self._currentMultipletNotifier = Notifier(current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
 
         from ccpn.ui.gui.lib import GuiSpectrumDisplay
 
@@ -142,16 +142,16 @@ class Gui(Ui):
         #                          GuiMultipletListView.GuiMultipletListView._changedMultipletListView)
 
         # TODO:ED need to unregister these notifiers on close
-        self._updateNotifier1 = Notifier(project
-                                         , triggers=[Notifier.RENAME]
-                                         , targetName='NmrAtom'
-                                         , callback=GuiPeakListView._updateAssignmentsNmrAtom)
-        # self._updateNotifier2 = Notifier(project
-        #                                 , triggers=[Notifier.CREATE]
-        #                                 , targetName='NmrAtom'
-        #                                 , callback=GuiPeakListView._editAssignmentsNmrAtom)
+        self._updateNotifier1 = Notifier(project,
+                                         triggers=[Notifier.RENAME],
+                                         targetName='NmrAtom',
+                                         callback=GuiPeakListView._updateAssignmentsNmrAtom)
+        # self._updateNotifier2 = Notifier(project,
+        #                                 triggers=[Notifier.CREATE],
+        #                                 targetName='NmrAtom',
+        #                                 callback=GuiPeakListView._editAssignmentsNmrAtom)
 
-        project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition)
+        project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition, onceOnly=True)
 
         # API notifiers - see functions for comments on why this is done this way
         project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,

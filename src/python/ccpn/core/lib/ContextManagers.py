@@ -327,7 +327,8 @@ def logCommandManager(prefix='', get=None, isProperty=False, showArguments=[], l
     """
     from inspect import signature, Parameter
     import sys
-    from sandbox.Geerten.Refactored.framework import getApplication
+    # from sandbox.Geerten.Refactored.framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     # get the current application
     application = getApplication()
@@ -531,7 +532,8 @@ def blankNotification():
     """
 
     # get the current application
-    from sandbox.Geerten.Refactored.framework import getApplication
+    # from sandbox.Geerten.Refactored.framework import getApplication
+    from ccpn.framework.Application import getApplication
     application = getApplication()
 
     application.project.blankNotification()
@@ -554,7 +556,8 @@ def temporaryUnblankNotification():
     """
 
     # get the current application
-    from sandbox.Geerten.Refactored.framework import getApplication
+    # from sandbox.Geerten.Refactored.framework import getApplication
+    from ccpn.framework.Application import getApplication
     application = getApplication()
 
     application.project.unblankNotification()
@@ -589,7 +592,8 @@ def blockUndoItems():
     """
 
     # get the current application
-    from sandbox.Geerten.Refactored.framework import getApplication
+    # from sandbox.Geerten.Refactored.framework import getApplication
+    from ccpn.framework.Application import getApplication
     application = getApplication()
 
     projectUndo = application.project._undo

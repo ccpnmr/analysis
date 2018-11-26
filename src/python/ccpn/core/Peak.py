@@ -39,6 +39,8 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
 from ccpn.util.decorators import notify, propertyUndo, logCommand
+from ccpn.core.lib.ContextManagers import blockUndoItems
+from functools import partial
 
 
 class Peak(AbstractWrapperObject):
@@ -611,12 +613,15 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
             )
 
     #EJB 20181126: minor refactoring
-    undo = self._project._undo
+    with blockUndoItems() as undoItem:
+
+    # undo = self._project._undo
     # self._startCommandEchoBlock('newPeak', values=locals(), defaults=defaults,
     #                             parName='newPeak')
     # self._project.blankNotification()
-    undo.increaseBlocking()
-    try:
+    # undo.increaseBlocking()
+    # try:
+
         apiPeakList = self._apiPeakList
         apiPeak = apiPeakList.newPeak(height=height, volume=volume,
                                       heightError=heightError, volumeError=volumeError,
@@ -649,28 +654,37 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
             for ii, peakDim in enumerate(apiPeakDims):
                 peakDim.lineWidth = lineWidths[ii]
 
-    finally:
-        undo.decreaseBlocking()
+        apiObjectsCreated = [apiPeak]
+        apiObjectsCreated.extend(apiPeakDims)
+        undoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
+                 redo=partial(apiPeak.root._unDelete, apiObjectsCreated, (apiPeak.topObject,)))
+
+                # Undo._deleteAllApiObjects, apiPeak.root._unDelete,
+                #      undoArgs=(apiObjectsCreated,),
+                #      redoArgs=(apiObjectsCreated, (apiPeak.topObject,)))
+
+    # finally:
+    #     undo.decreaseBlocking()
         # self._project.unblankNotification()
         # self._endCommandEchoBlock()
 
     # use the api to delete/undelete the new objects
-    apiObjectsCreated = [apiPeak]
-    apiObjectsCreated.extend(apiPeakDims)
-    undo.newItem(Undo._deleteAllApiObjects, apiPeak.root._unDelete,
-                 undoArgs=(apiObjectsCreated,),
-                 redoArgs=(apiObjectsCreated, (apiPeak.topObject,)))
+    # apiObjectsCreated = [apiPeak]
+    # apiObjectsCreated.extend(apiPeakDims)
+    # undo.newItem(Undo._deleteAllApiObjects, apiPeak.root._unDelete,
+    #              undoArgs=(apiObjectsCreated,),
+    #              redoArgs=(apiObjectsCreated, (apiPeak.topObject,)))
 
-    # DO creation notifications
-    if serial is not None:
-        result._finaliseAction('rename')
-    result._finaliseAction('create')
+    # # DO creation notifications
+    # if serial is not None:
+    #     result._finaliseAction('rename')
+    # result._finaliseAction('create')
 
     return result
 
 
-PeakList.newPeak = _newPeak
-del _newPeak
+# PeakList.newPeak = _newPeak
+# del _newPeak
 
 # Additional Notifiers:
 #

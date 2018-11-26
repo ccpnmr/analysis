@@ -1354,7 +1354,8 @@ class Project(AbstractWrapperObject):
 
         return Mark instance
 
-        Inserted later ccpn.ui._implementation.Mark
+        To be depreciated in next version in lieu of mainWindow.newMark (with different call signature)
+
         """
         from ccpn.ui._implementation.Mark import _newMark
         return _newMark(self, colour=colour, positions=positions, axisCodes=axisCodes,

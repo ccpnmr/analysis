@@ -42,7 +42,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 # from ccpn.core.MultipletList import MultipletList
 from typing import Optional, Tuple, Any, Union, Sequence, List
 from ccpn.util.Common import makeIterableList
-from ccpn.util.decorators import notify, propertyUndo
+from ccpn.util.decorators import notify, propertyUndo, logCommand
 from functools import partial
 
 
@@ -253,6 +253,7 @@ class Multiplet(AbstractWrapperObject):
                       if pk in self._project._data2Obj])
 
     @peaks.setter
+    @logCommand('multiplet.', get='self')
     @propertyUndo()
     @notify('observe')
     def peaks(self, ll: list):

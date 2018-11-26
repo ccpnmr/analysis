@@ -38,7 +38,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
-from ccpn.util.decorators import notify, propertyUndo
+from ccpn.util.decorators import notify, propertyUndo, logCommand, logCommand2
 
 
 class Peak(AbstractWrapperObject):
@@ -167,6 +167,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.value for x in self._wrappedData.sortedPeakDims())
 
     @position.setter
+    @logCommand('peak.', get='self')
     @propertyUndo()
     @notify('observe')
     def position(self, value: Sequence):
@@ -181,6 +182,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
 
     @positionError.setter
+    @logCommand('peak.', get='self')
     @propertyUndo()
     @notify('observe')
     def positionError(self, value: Sequence):
@@ -193,6 +195,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.position for x in self._wrappedData.sortedPeakDims())
 
     @pointPosition.setter
+    @logCommand('peak.', get='self')
     @propertyUndo()
     @notify('observe')
     def pointPosition(self, value: Sequence):
@@ -206,6 +209,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.boxWidth for x in self._wrappedData.sortedPeakDims())
 
     @boxWidths.setter
+    @logCommand('peak.', get='self')
     @propertyUndo()
     @notify('observe')
     def boxWidths(self, value: Sequence):
@@ -218,6 +222,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
 
     @lineWidths.setter
+    @logCommand('peak.', get='self')
     @propertyUndo()
     @notify('observe')
     def lineWidths(self, value: Sequence):
@@ -254,6 +259,7 @@ class Peak(AbstractWrapperObject):
         return tuple(result)
 
     @dimensionNmrAtoms.setter
+    @logCommand('peak.', get='self')
     @propertyUndo()
     @notify('observe')
     def dimensionNmrAtoms(self, value: Sequence):
@@ -331,6 +337,7 @@ class Peak(AbstractWrapperObject):
         return tuple(sorted(result))
 
     @assignedNmrAtoms.setter
+    @logCommand('peak.', get='self')
     @propertyUndo()
     @notify('observe')
     def assignedNmrAtoms(self, value: Sequence):

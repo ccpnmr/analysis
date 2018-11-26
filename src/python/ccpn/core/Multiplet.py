@@ -43,6 +43,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 from typing import Optional, Tuple, Any, Union, Sequence, List
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import notify, propertyUndo
+from functools import partial
 
 
 MULTIPLET_TYPES = ['singlet', 'doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
@@ -320,6 +321,19 @@ class Multiplet(AbstractWrapperObject):
     # Implementation functions
     #=========================================================================================
 
+    from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
+
+    def __init__(self, project: 'Project', wrappedData: ApiImplementation.DataObject):
+        super().__init__(project, wrappedData)
+
+        # attach a notifier to the peaks
+        from ccpn.core.lib.Notifiers import Notifier
+
+        for pp in self.peaks:
+            Notifier(pp, ['observe'], Notifier.ANY,
+                     callback=self._propagateAction,
+                     onceOnly=True, debug=True)
+
     @classmethod
     def _getAllWrappedData(cls, parent: MultipletList) -> Tuple[apiMultiplet, ...]:
         """get wrappedData (Multiplets) for all Multiplet children of parent MultipletList"""
@@ -389,6 +403,14 @@ class Multiplet(AbstractWrapperObject):
         finally:
             self._endCommandEchoBlock()
 
+    def _propagateAction(self, data):
+        from ccpn.core.lib.Notifiers import Notifier
+
+        trigger = data[Notifier.TRIGGER]
+
+        trigger = 'change' if trigger == 'observe' else trigger
+        if trigger in ['change']:
+            self._finaliseAction(trigger)
 
 #=========================================================================================
 # CCPN functions
@@ -470,8 +492,14 @@ def _newMultiplet(self: MultipletList,
 
         result = self._project._data2Obj.get(apiMultiplet)
 
-        # attach a notifier to the peaks
-        
+        # # attach a notifier to the peaks
+        # from ccpn.core.lib.Notifiers import Notifier
+        #
+        # for pp in peaks:
+        #     Notifier(pp, ['observe'], Notifier.ANY,
+        #              callback=result._propagateAction,
+        #              onceOnly=True, debug=True)
+
     finally:
         self._endCommandEchoBlock()
 

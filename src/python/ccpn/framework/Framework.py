@@ -318,6 +318,11 @@ class Framework:
     def start(self):
         """Start the program execution"""
 
+        # register the programme for later
+        from ccpn.framework.Application import ApplicationContainer
+        container = ApplicationContainer()
+        container.register(self)
+
         # Load / create project
         projectPath = self.args.projectPath
         if projectPath:

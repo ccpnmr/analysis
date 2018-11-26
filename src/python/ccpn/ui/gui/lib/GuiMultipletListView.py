@@ -293,6 +293,14 @@ class GuiMultipletListView(QtWidgets.QGraphicsItem):
         # if isinstance(self.peakList, IntegralList):
         #     self.setVisible(False)
 
+        # attach a notifier to the peaks
+        from ccpn.core.lib.Notifiers import Notifier
+
+        Notifier(self.multipletList, ['observe'], Notifier.ANY,
+                 callback=self._propagateAction,
+                 onceOnly=True, debug=True)
+
+
     def _printToFile(self, printer):
         # CCPN INTERNAL - called in _printToFile method of GuiSpectrumViewNd
 
@@ -405,7 +413,7 @@ class GuiMultipletListView(QtWidgets.QGraphicsItem):
         #         peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
     def setVisible(self, visible):
-        super(GuiMultipletListView, self).setVisible(visible)
+        super().setVisible(visible)
 
         # repaint all displays - this is called for each spectrumView in the spectrumDisplay
         # all are attached to the same click

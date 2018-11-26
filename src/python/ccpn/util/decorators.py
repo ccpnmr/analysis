@@ -205,21 +205,44 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
         "Convert core objects and CcpnModules to pids"
         return obj.pid if isinstance(obj, (AbstractWrapperObject, CcpnModule)) else obj
 
-    ba = inspect.signature(func).bind(*args, **kwds)
+    # get the signature
+    sig = inspect.signature(func)
+    # fill in the missing parameters
+    ba = sig.bind(*args, **kwds)
     ba.apply_defaults()
+    # get the parameters kinds that determine how to print them
+    kinds = dict([(pName, p.kind) for pName, p in sig.parameters.items()])
 
-    logString = prefix
     if 'self' in ba.arguments or 'cls' in ba.arguments:
-        if addSelf:
-            logString += '%s.' % (args[0].__class__.__name__,)
         # we skip the first 'self' or 'cls' in the argument list
-        allArgs = [(k, obj2pid(ba.arguments[k])) for k in list(ba.arguments.keys())[1:]]
+        pNames = list(ba.arguments.keys())[1:]
     else:
-        allArgs = [(k, obj2pid(ba.arguments[k])) for k in list(ba.arguments.keys())]
+        pNames = list(ba.arguments.keys())
 
-    logString += '%s(' % (func.__name__)
-    logString += ', '.join(['{0!s}={1!r}'.format(k, v) for k, v in allArgs])
-    logString += ')'
+    # make a string for each parameter
+    pStrings = []
+    for pName in pNames:
+        pValue = ba.arguments[pName]
+
+        if kinds[pName] == inspect.Parameter.VAR_POSITIONAL:  # variable argument
+            pStrings.extend([repr(obj2pid(p)) for p in pValue])
+
+        elif kinds[pName] == inspect.Parameter.VAR_KEYWORD:  # variable keywords
+            pStrings.extend(['{0!s}={1!r}'.format(k, obj2pid(v)) for (k, v) in pValue.items()])
+
+        elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY or \
+                kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # positional keywords
+            pStrings.append(repr(obj2pid(pValue)))
+
+        elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY:  #  keywords
+            pStrings.append('{0!s}={1!r}'.format(pName, obj2pid(pValue)))
+
+    if ('self' in ba.arguments or 'cls' in ba.arguments) and addSelf:
+        logString = prefix + '%s.%s' % (args[0].__class__.__name__, func.__name__)
+    else:
+        logString = prefix + '%s' % (func.__name__,)
+
+    logString += '(%s)' % ', '.join(pStrings)
     return logString
 
 
@@ -243,6 +266,7 @@ def logCommand(prefix='', get=None):
             if get == 'self':
                 _pref += "get('%s')." % args[0].pid
             logS = _makeLogString(_pref, False, func, *args, **kwds)
+            print('>>>', logS)
             application.ui.echoCommands([logS])
 
         blocking += 1
@@ -353,3 +377,40 @@ def logCommand(prefix='', get=None):
 # def debug3Leave():
 #     """Convenience"""
 #     return debugLeave(verbosityLevel=Logger.DEBUG3)
+
+
+if __name__ == '__main__':
+
+    def func(par, *args, flag=False, **kwds):
+
+        sig = inspect.signature(func)  # get the signature
+        ba = sig.bind(par, *args, flag=flag, **kwds)
+        ba.apply_defaults()  # fill in the missing parameters
+        kinds = dict([(pName, p.kind) for pName, p in sig.parameters.items()])  # get the parameters kinds that determine
+                                                                                # how to print them
+
+        pStrings = []
+        for pName, pValue in ba.arguments.items():
+
+            if kinds[pName] == inspect.Parameter.VAR_POSITIONAL:  # variable argument
+                pStrings.extend([repr(p) for p in pValue])
+
+            elif kinds[pName] == inspect.Parameter.VAR_KEYWORD:  # variable keywords
+                pStrings.extend(['{0!s}={1!r}'.format(k, v) for (k,v) in pValue.items()])
+
+            elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY or \
+                    kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD   :  # positional keywords
+                pStrings.append(repr(pValue))
+
+            elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY:  #  keywords
+                pStrings.append('{0!s}={1!r}'.format(pName, pValue))
+
+        print(', '.join(pStrings))
+
+    logCommand('myPrefix.')
+    def func2(par, *args, flag=False, **kwds):
+        pass
+
+
+    func2('test', 1, 2, myPar='myValue')
+

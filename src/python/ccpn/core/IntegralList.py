@@ -117,17 +117,17 @@ class IntegralList(AbstractWrapperObject):
     # CCPN properties
     @property
     def _apiIntegralList(self) -> ApiIntegralList:
-        """ API peakLists matching IntegralList"""
+        """API peakLists matching IntegralList."""
         return self._wrappedData
 
     @property
     def _key(self) -> str:
-        """id string - serial number converted to string"""
+        """id string - serial number converted to string."""
         return str(self._wrappedData.serial)
 
     @property
     def serial(self) -> int:
-        """serial number of IntegralList, used in Pid and to identify the IntegralList. """
+        """serial number of IntegralList, used in Pid and to identify the IntegralList."""
         return self._wrappedData.serial
 
     @property
@@ -148,7 +148,7 @@ class IntegralList(AbstractWrapperObject):
 
     @property
     def symbolColour(self) -> str:
-        """Symbol colour for integral annotation display"""
+        """Symbol colour for integral annotation display."""
         return self._wrappedData.symbolColour
 
     @symbolColour.setter
@@ -157,7 +157,7 @@ class IntegralList(AbstractWrapperObject):
 
     @property
     def textColour(self) -> str:
-        """Text colour for integral annotation display"""
+        """Text colour for integral annotation display."""
         return self._wrappedData.textColour
 
     @textColour.setter
@@ -166,7 +166,7 @@ class IntegralList(AbstractWrapperObject):
 
     @property
     def comment(self) -> str:
-        """Free-form text comment"""
+        """Free-form text comment."""
         return self._wrappedData.details
 
     @comment.setter
@@ -183,10 +183,10 @@ class IntegralList(AbstractWrapperObject):
         return parent._wrappedData.sortedIntegralLists()
 
     def _finaliseAction(self, action: str):
-        """Subclassed to handle associated peakListViews
+        """Subclassed to handle associated integralListViews
         """
         super()._finaliseAction(action=action)
-        # propagate the rename to associated ChemicalShift instances
+
         if action in ['change']:
             for ilv in self.integralListViews:
                 ilv._finaliseAction(action=action)
@@ -258,15 +258,27 @@ class IntegralList(AbstractWrapperObject):
 
         return integrals
 
+
 #=========================================================================================
 # CCPN functions
 #=========================================================================================
+
 
 # Connections to parents:
 
 def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None,
                      textColour: str = None, comment: str = None) -> IntegralList:
-    """Create new IntegralList within Spectrum"""
+    """
+    Create new IntegralList within Spectrum.
+
+    :param self:
+    :param title:
+    :param symbolColour:
+    :param textColour:
+    :param comment:
+    :return:
+    """
+    # __doc__ added to Spectrum
 
     defaults = collections.OrderedDict((('title', None), ('comment', None),
                                         ('symbolColour', None), ('textColour', None)))

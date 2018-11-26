@@ -101,8 +101,7 @@ class Gui(Ui):
         # project.registerNotifier('Axis', 'change', GuiStrip._axisRegionChanged)
         Notifier(project, [Notifier.CHANGE], 'Axis', GuiStrip._axisRegionChanged)
 
-        # TODO:ED not sure this is the best place
-        Notifier(project, [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE], 'Mark',
+        Notifier(project, [Notifier.CREATE, Notifier.DELETE], 'Mark',
                  GuiStrip._updateDisplayedMarks, onceOnly=True)
         # project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks, onceOnly=True)
         # project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks, onceOnly=True)

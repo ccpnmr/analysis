@@ -38,6 +38,7 @@ from ccpn.ui.gui.lib.Shortcuts import addShortCut
 from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode
+from ccpn.util.decorators import logCommand
 
 
 #TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
@@ -432,17 +433,12 @@ class GuiWindow():
         if strip:
             strip._createMarkAtCursorPosition()
 
+    @logCommand('mainWindow.')
     def clearMarks(self):
         """
         Clears all marks in all windows for the current task.
         """
-        self._startCommandEchoBlock('clearMarks')
-        try:
-            for mark in self.project.marks:
-                mark.delete()
-
-        finally:
-            self._endCommandEchoBlock()
+        self.project.deleteObjects(*self.project.marks)
 
     def markPositions(self, axisCodes, chemicalShifts):
         """

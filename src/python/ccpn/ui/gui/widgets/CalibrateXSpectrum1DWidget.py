@@ -118,14 +118,17 @@ class CalibrateX1DWidgets(Frame):
             #   self.strip.plotWidget.addItem(self.infiniteLine)
             #   self.strip.plotWidget.addItem(self.originalPosInfiniteLine)
             ## NB Current.cursorPosition is extremely unreliable.
-            if self.strip.plotWidget.viewBox.contextMenuPosition is not None:
-                self.originalPosition = self.strip.plotWidget.viewBox.contextMenuPosition[0]
-                self.infiniteLine.setValue(self.originalPosition)
-                self.originalPosInfiniteLine.setValue(self.originalPosition)
-                self.boxOriginalPosition.setValue(round(self.originalPosition, 3))
+            # if self.strip.plotWidget.viewBox.contextMenuPosition is not None:
+            # self.originalPosition = self.strip.plotWidget.viewBox.contextMenuPosition[0]
 
-                self.infiniteLine.visible = True and self.targetLineVisible
-                self.originalPosInfiniteLine.visible = True
+            self.originalPosition = float(self.strip._CcpnGLWidget.cursorCoordinate[0])
+
+            self.infiniteLine.setValue(self.originalPosition)
+            self.originalPosInfiniteLine.setValue(self.originalPosition)
+            self.boxOriginalPosition.setValue(round(self.originalPosition, 3))
+
+            self.infiniteLine.visible = True and self.targetLineVisible
+            self.originalPosInfiniteLine.visible = True
 
     def _newBoxCallback(self):
         spinboxValue = self.sender().value()

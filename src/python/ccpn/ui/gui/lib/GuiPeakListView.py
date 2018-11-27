@@ -266,9 +266,9 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
         #FIXME: apparently it gets passed an object which already has crucial attributes
         # A big NONO!!!
         strip = self.spectrumView.strip
-        scene = strip.plotWidget.scene()
+        # scene = strip.plotWidget.scene()
         QtWidgets.QGraphicsItem.__init__(self)  # ejb - need to remove, scene=scene from here
-        self.scene = scene
+        # self.scene = scene
 
         ###self.strip = strip
         ###self.peakList = peakList
@@ -276,7 +276,7 @@ class GuiPeakListView(QtWidgets.QGraphicsItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemHasNoContents, True)
         self.application = self.spectrumView.application
 
-        strip.viewBox.addItem(self)
+        # strip.viewBox.addItem(self)
         ###self._parent = parent
         # self.displayed = True
         # self.symbolColour = None

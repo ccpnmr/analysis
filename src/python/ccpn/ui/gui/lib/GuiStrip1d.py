@@ -105,9 +105,9 @@ class GuiStrip1d(GuiStrip):
         """
         GuiStrip.__init__(self, spectrumDisplay)
 
-        self.viewBox.invertX()
-        self.plotWidget.showGrid(x=False, y=False)
-        self.gridShown = True
+        # self.viewBox.invertX()
+        # self.plotWidget.showGrid(x=False, y=False)
+        # self.gridShown = True
 
         # self.viewBox.menu = _get1dDefaultMenu(self)
         # self._defaultMenu = self.viewBox.menu
@@ -127,7 +127,7 @@ class GuiStrip1d(GuiStrip):
                                    IntegralMenu: self._integralMenu,
                                    MultipletMenu: self._multipletMenu})
 
-        self.plotWidget.plotItem.setAcceptDrops(True)
+        # self.plotWidget.plotItem.setAcceptDrops(True)
         self.spectrumIndex = 0
         self.peakItems = {}
         # self._hideCrossHair()

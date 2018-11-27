@@ -4873,10 +4873,10 @@ class CcpnGLWidget(QOpenGLWidget):
                 menu = strip._contextMenus.get(strip.contextMenuMode)
 
             if menu is not None:
-                strip.viewBox.menu = menu
+                strip.viewBoxMenu = menu
             else:
-                strip.viewBox.menu = self._getCanvasContextMenu()
-            strip.viewBox._raiseContextMenu(event)
+                strip.viewBoxMenu = self._getCanvasContextMenu()
+            strip._raiseContextMenu(event)
 
 
         elif controlRightMouse(event) and axis is None:
@@ -4914,7 +4914,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _setContextMenu(self, menu):
         """Set a needed menu based on strip mode
         """
-        self.strip.viewBox.menu = menu
+        self.strip.viewBoxMenu = menu
 
     def _selectPeaksInRegion(self, xPositions, yPositions, zPositions):
         peaks = list(self.current.peaks)

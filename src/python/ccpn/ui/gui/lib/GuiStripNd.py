@@ -145,7 +145,7 @@ class GuiStripNd(GuiStrip):
         self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
 
         self.haveSetupZWidgets = False
-        self.viewBox.menu = _getNdDefaultMenu(self)
+        self.viewBoxMenu = _getNdDefaultMenu(self)
 
         self._defaultMenu = _getNdDefaultMenu(self)
         self._phasingMenu = _getNdPhasingMenu(self)
@@ -159,8 +159,8 @@ class GuiStripNd(GuiStrip):
                                    IntegralMenu: self._integralMenu,
                                    MultipletMenu: self._multipletMenu})
 
-        self.viewBox.invertX()
-        self.viewBox.invertY()
+        # self.viewBox.invertX()
+        # self.viewBox.invertY()
         ###self.region = guiSpectrumDisplay.defaultRegion()
         self.planeLabel = None
         self.axesSwapped = False
@@ -183,9 +183,9 @@ class GuiStripNd(GuiStrip):
             self._stripToolBarWidget.setFixedHeight(0)
 
         #self.mouseDragEvent = self._mouseDragEvent
-        self.updateRegion = self._updateRegion
+        # self.updateRegion = self._updateRegion
 
-        self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
+        # self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
 
         self.setMinimumWidth(50)
         self.setMinimumHeight(150)
@@ -528,11 +528,11 @@ class GuiStripNd(GuiStrip):
         # elif axis == 1:
         #   self.zoomY(*zoomArray)
 
-    def _updateRegion(self, viewBox):
-        # this is called when the viewBox is changed on the screen via the mouse
-
-        GuiStrip._updateRegion(self, viewBox)
-        self._updateTraces()
+    # def _updateRegion(self, viewBox):
+    #     # this is called when the viewBox is changed on the screen via the mouse
+    #
+    #     GuiStrip._updateRegion(self, viewBox)
+    #     self._updateTraces()
 
     def _toggleLastAxisOnly(self):
         self.spectrumDisplay.setLastAxisOnly(lastAxisOnly=self.lastAxisOnlyCheckBox.isChecked())
@@ -555,21 +555,21 @@ class GuiStripNd(GuiStrip):
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        return
-
-        cursorPosition = self.current.cursorPosition
-        if cursorPosition:
-            position = list(cursorPosition)
-            for axis in self.orderedAxes[2:]:
-                position.append(axis.position)
-            point = QtCore.QPointF(cursorPosition[0], cursorPosition[1])
-            pixel = self.viewBox.mapViewToScene(point)
-            cursorPixel = (pixel.x(), pixel.y())
-            updateHTrace = self.hTraceAction.isChecked()
-            updateVTrace = self.vTraceAction.isChecked()
-
-            for spectrumView in self.spectrumViews:
-                spectrumView._updateTrace(position, cursorPixel, updateHTrace, updateVTrace)
+        # return
+        #
+        # cursorPosition = self.current.cursorPosition
+        # if cursorPosition:
+        #     position = list(cursorPosition)
+        #     for axis in self.orderedAxes[2:]:
+        #         position.append(axis.position)
+        #     point = QtCore.QPointF(cursorPosition[0], cursorPosition[1])
+        #     pixel = self.viewBox.mapViewToScene(point)
+        #     cursorPixel = (pixel.x(), pixel.y())
+        #     updateHTrace = self.hTraceAction.isChecked()
+        #     updateVTrace = self.vTraceAction.isChecked()
+        #
+        #     for spectrumView in self.spectrumViews:
+        #         spectrumView._updateTrace(position, cursorPixel, updateHTrace, updateVTrace)
 
     def toggleHorizontalTrace(self):
         """
@@ -785,9 +785,9 @@ class GuiStripNd(GuiStrip):
     def resizeEvent(self, event):
         super(GuiStripNd, self).resizeEvent(event)
 
-        if hasattr(self, 'spectrumViews'):
-            for spectrumView in self.spectrumViews:
-                spectrumView.updateGeometryChange()
+        # if hasattr(self, 'spectrumViews'):
+        #     for spectrumView in self.spectrumViews:
+        #         spectrumView.updateGeometryChange()
 
     def _addCalibrateXNDSpectrumWidget(self):
         """add a new widget for calibrateX

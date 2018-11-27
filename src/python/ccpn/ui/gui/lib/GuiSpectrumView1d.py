@@ -65,9 +65,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
         # have to add in two steps because simple plot() command draws all other data even if currently not visible
         ##self.plot = self.strip.plotWidget.plot(self.data[0], self.data[1], pen=self.spectrum.sliceColour)
-        self.plot = pg.PlotDataItem(x=self.data[0], y=self.data[1], pen=self.spectrum.sliceColour)
-        self.plot.setObjectName(self.spectrum.pid)
-        self.strip.viewBox.addItem(self.plot)
+        # self.plot = pg.PlotDataItem(x=self.data[0], y=self.data[1], pen=self.spectrum.sliceColour)
+        # self.plot.setObjectName(self.spectrum.pid)
+        # self.strip.viewBox.addItem(self.plot)
 
         # self.plot.curve.setClickable(True)
         # self.plot.sigClicked.connect(self._clicked)
@@ -253,12 +253,12 @@ class GuiSpectrumView1d(GuiSpectrumView):
     #     apiDataSource = spectrum._apiDataSource
     #   return apiDataSource.get1dSpectrumData()
 
-    def _setBorderItemHidden(self, checked):
-        """
-        # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
-        """
-        pass
-        # self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
+    # def _setBorderItemHidden(self, checked):
+    #     """
+    #     # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
+    #     """
+    #     pass
+    #     # self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
 
     def update(self):
         self.plot.curve.setData(self.data[0], self.data[1])

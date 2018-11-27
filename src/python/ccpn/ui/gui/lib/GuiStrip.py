@@ -108,8 +108,8 @@ class GuiStrip(NotifierBase, Frame):
         self.header = StripHeader(parent=self, mainWindow=self.mainWindow,
                                   grid=(0, 0), gridSpan=(1, 2), setLayout=True, spacing=(0, 0))
 
-        self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
-        self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # self.plotWidget = PlotWidget(self, useOpenGL=useOpenGL)
+        # self.plotWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
 
         #showDoubleCrosshair = self.application.preferences.general.doubleCrossHair)
         # GWV: plotWidget appears not to be responsive to contentsMargins
@@ -122,7 +122,7 @@ class GuiStrip(NotifierBase, Frame):
         self._useCcpnGL = True
         # TODO: ED comment out the block below to return to normal
         if self._useCcpnGL:
-            self.plotWidget.hide()
+            # self.plotWidget.hide()
 
             if spectrumDisplay.is1D:
                 from ccpn.ui.gui.widgets.GLWidgets import Gui1dWidget as CcpnGLWidget
@@ -166,7 +166,7 @@ class GuiStrip(NotifierBase, Frame):
         #                            grid=(0,0), gridSpan=(1,1), hAlign='left', vAlign='top', hPolicy='minimum')
         # self._stripIdLabel.setFont(textFontSmall)
         # TODO:ED check - have moved the label to the top-left corner
-        self.plotWidget.stripIDLabel.setText('.'.join(self.id.split('.')))
+        # self.plotWidget.stripIDLabel.setText('.'.join(self.id.split('.')))
 
         # Displays a draggable label for the strip
         #TODO:GEERTEN reinsert a notifier for update in case this displays a nmrResidue
@@ -194,17 +194,17 @@ class GuiStrip(NotifierBase, Frame):
         # self._labelWidget.layout().setAlignment(QtCore.Qt.AlignTop)
 
         # Strip needs access to plotWidget's items and info #TODO: get rid of this
-        self.plotItem = self.plotWidget.plotItem
-        self.viewBox = self.plotItem.vb
+        # self.plotItem = self.plotWidget.plotItem
+        self.viewBoxMenu = None         # = self.plotItem.vb
 
         self._showCrossHair()
         # callbacks
         ###self.plotWidget.scene().sigMouseMoved.connect(self._mouseMoved)
-        self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)  # update mouse cursors
+        # self.plotWidget.scene().sigMouseMoved.connect(self._showMousePosition)  # update mouse cursors
         self.storedZooms = []
 
         self.beingUpdated = False
-        self.xPreviousRegion, self.yPreviousRegion = self.viewBox.viewRange()
+        # self.xPreviousRegion, self.yPreviousRegion = self.viewBox.viewRange()
 
         # need to keep track of mouse position because Qt shortcuts don't provide
         # the widget or the position of where the cursor is
@@ -221,19 +221,19 @@ class GuiStrip(NotifierBase, Frame):
 
         self.navigateToPeakMenu = None  #set from context menu and in CcpnOpenGL rightClick
         self.navigateToCursorMenu = None  #set from context menu and in CcpnOpenGL rightClick
-        self._initRulers()
+        # self._initRulers()
         self._isPhasingOn = False
-        self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
-        self.hPhasingPivot.setVisible(False)
-        self.plotWidget.addItem(self.hPhasingPivot)
-        self.hPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
-        self.haveSetHPhasingPivot = False
+        # self.hPhasingPivot = pg.InfiniteLine(angle=90, movable=True)
+        # self.hPhasingPivot.setVisible(False)
+        # self.plotWidget.addItem(self.hPhasingPivot)
+        # self.hPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
+        # self.haveSetHPhasingPivot = False
 
-        self.vPhasingPivot = pg.InfiniteLine(angle=0, movable=True)
-        self.vPhasingPivot.setVisible(False)
-        self.plotWidget.addItem(self.vPhasingPivot)
-        self.vPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
-        self.haveSetVPhasingPivot = False
+        # self.vPhasingPivot = pg.InfiniteLine(angle=0, movable=True)
+        # self.vPhasingPivot.setVisible(False)
+        # self.plotWidget.addItem(self.vPhasingPivot)
+        # self.vPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
+        # self.haveSetVPhasingPivot = False
 
         # GWV 20181127: moved to GuiMainWindow
         # notifier for highlighting the strip
@@ -293,7 +293,7 @@ class GuiStrip(NotifierBase, Frame):
             self.crosshairVisible = self.application.preferences.general.showCrosshair
             self.showSpectraOnPhasing = self.application.preferences.general.showSpectraOnPhasing
 
-        self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
+        # self.plotWidget.grid.setVisible(self.application.preferences.general.showGrid)
 
         self._storedPhasingData = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
 
@@ -327,7 +327,7 @@ class GuiStrip(NotifierBase, Frame):
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        return self.plotWidget.grid.isVisible()
+        # return self.plotWidget.grid.isVisible()
 
     @property
     def crossHairIsVisible(self):
@@ -338,7 +338,7 @@ class GuiStrip(NotifierBase, Frame):
         except Exception as es:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        return self.plotWidget.crossHair1.isVisible()
+        # return self.plotWidget.crossHair1.isVisible()
 
     # @property
     # def mouseMode(self):
@@ -604,55 +604,55 @@ class GuiStrip(NotifierBase, Frame):
     #     except Exception as es:
     #         getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
-    def _printToFile(self, printer):
-        # CCPN INTERNAL - called in printToFile method of GuiMainWindow
-
-        for spectrumView in self.spectrumViews:
-            spectrumView._printToFile(printer)
-
-        # print box
-
-        # print ticks and grid line
-        viewRegion = self.plotWidget.viewRange()
-        v1, v0 = viewRegion[0]  # TBD: relies on axes being backwards
-        w1, w0 = viewRegion[1]  # TBD: relies on axes being backwards, which is not true in 1D
-        xMajorTicks, xMinorTicks, xMajorFormat = Ticks.findTicks((v0, v1))
-        yMajorTicks, yMinorTicks, yMajorFormat = Ticks.findTicks((w0, w1))
-
-        xScale = (printer.x1 - printer.x0) / (v1 - v0)
-        xOffset = printer.x0 - xScale * v0
-        yScale = (printer.y1 - printer.y0) / (w1 - w0)
-        yOffset = printer.y0 - yScale * w0
-        xMajorText = [xMajorFormat % tick for tick in xMajorTicks]
-        xMajorTicks = [tick * xScale + xOffset for tick in xMajorTicks]
-        xMinorTicks = [tick * xScale + xOffset for tick in xMinorTicks]
-        yMajorText = [xMajorFormat % tick for tick in yMajorTicks]
-        yMajorTicks = [tick * yScale + yOffset for tick in yMajorTicks]
-        yMinorTicks = [tick * yScale + yOffset for tick in yMinorTicks]
-
-        xTickHeight = yTickHeight = max(printer.y1 - printer.y0, printer.x1 - printer.x0) * 0.01
-
-        for tick in xMinorTicks:
-            printer.writeLine(tick, printer.y0, tick, printer.y0 + 0.5 * xTickHeight)
-
-        fontsize = 10
-        for n, tick in enumerate(xMajorTicks):
-            if self.plotWidget.grid.isVisible():
-                printer.writeLine(tick, printer.y0, tick, printer.y1, colour='#888888')
-            printer.writeLine(tick, printer.y0, tick, printer.y0 + xTickHeight)
-            text = xMajorText[n]
-            printer.writeText(text, tick - 0.5 * len(text) * fontsize * 0.7, printer.y0 + xTickHeight + 1.5 * fontsize)
-
-        # output backwards for y
-        for tick in yMinorTicks:
-            printer.writeLine(printer.x0, printer.y1 - tick, printer.x0 + 0.5 * yTickHeight, printer.y1 - tick)
-
-        for n, tick in enumerate(yMajorTicks):
-            if self.plotWidget.grid.isVisible():
-                printer.writeLine(printer.x0, printer.y1 - tick, printer.x1, printer.y1 - tick, colour='#888888')
-            printer.writeLine(printer.x0, printer.y1 - tick, printer.x0 + yTickHeight, printer.y1 - tick)
-            text = yMajorText[n]
-            printer.writeText(text, printer.x0 + yTickHeight + 0.5 * fontsize * 0.7, printer.y1 - tick + 0.5 * fontsize)
+    # def _printToFile(self, printer):
+    #     # CCPN INTERNAL - called in printToFile method of GuiMainWindow
+    #
+    #     for spectrumView in self.spectrumViews:
+    #         spectrumView._printToFile(printer)
+    #
+    #     # print box
+    #
+    #     # print ticks and grid line
+    #     viewRegion = self.plotWidget.viewRange()
+    #     v1, v0 = viewRegion[0]  # TBD: relies on axes being backwards
+    #     w1, w0 = viewRegion[1]  # TBD: relies on axes being backwards, which is not true in 1D
+    #     xMajorTicks, xMinorTicks, xMajorFormat = Ticks.findTicks((v0, v1))
+    #     yMajorTicks, yMinorTicks, yMajorFormat = Ticks.findTicks((w0, w1))
+    #
+    #     xScale = (printer.x1 - printer.x0) / (v1 - v0)
+    #     xOffset = printer.x0 - xScale * v0
+    #     yScale = (printer.y1 - printer.y0) / (w1 - w0)
+    #     yOffset = printer.y0 - yScale * w0
+    #     xMajorText = [xMajorFormat % tick for tick in xMajorTicks]
+    #     xMajorTicks = [tick * xScale + xOffset for tick in xMajorTicks]
+    #     xMinorTicks = [tick * xScale + xOffset for tick in xMinorTicks]
+    #     yMajorText = [xMajorFormat % tick for tick in yMajorTicks]
+    #     yMajorTicks = [tick * yScale + yOffset for tick in yMajorTicks]
+    #     yMinorTicks = [tick * yScale + yOffset for tick in yMinorTicks]
+    #
+    #     xTickHeight = yTickHeight = max(printer.y1 - printer.y0, printer.x1 - printer.x0) * 0.01
+    #
+    #     for tick in xMinorTicks:
+    #         printer.writeLine(tick, printer.y0, tick, printer.y0 + 0.5 * xTickHeight)
+    #
+    #     fontsize = 10
+    #     for n, tick in enumerate(xMajorTicks):
+    #         if self.plotWidget.grid.isVisible():
+    #             printer.writeLine(tick, printer.y0, tick, printer.y1, colour='#888888')
+    #         printer.writeLine(tick, printer.y0, tick, printer.y0 + xTickHeight)
+    #         text = xMajorText[n]
+    #         printer.writeText(text, tick - 0.5 * len(text) * fontsize * 0.7, printer.y0 + xTickHeight + 1.5 * fontsize)
+    #
+    #     # output backwards for y
+    #     for tick in yMinorTicks:
+    #         printer.writeLine(printer.x0, printer.y1 - tick, printer.x0 + 0.5 * yTickHeight, printer.y1 - tick)
+    #
+    #     for n, tick in enumerate(yMajorTicks):
+    #         if self.plotWidget.grid.isVisible():
+    #             printer.writeLine(printer.x0, printer.y1 - tick, printer.x1, printer.y1 - tick, colour='#888888')
+    #         printer.writeLine(printer.x0, printer.y1 - tick, printer.x0 + yTickHeight, printer.y1 - tick)
+    #         text = yMajorText[n]
+    #         printer.writeText(text, printer.x0 + yTickHeight + 0.5 * fontsize * 0.7, printer.y1 - tick + 0.5 * fontsize)
 
     def _newPhasingTrace(self):
 
@@ -705,16 +705,16 @@ class GuiStrip(NotifierBase, Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        return
-        for spectrumView in self.spectrumViews:
-            spectrumView.removePhasingTraces()
-
-    """
-    def togglePhasingPivot(self):
-      
-      self.hPhasingPivot.setPos(self.mousePosition[0])
-      self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
-    """
+        #     return
+        #     for spectrumView in self.spectrumViews:
+        #         spectrumView.removePhasingTraces()
+        #
+        # """
+        # def togglePhasingPivot(self):
+        #
+        #   self.hPhasingPivot.setPos(self.mousePosition[0])
+        #   self.hPhasingPivot.setVisible(not self.hPhasingPivot.isVisible())
+        # """
 
     def _updatePivot(self):  # this is called if pivot entry at bottom of display is updated and then "return" key used
 
@@ -725,28 +725,28 @@ class GuiStrip(NotifierBase, Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        return
+        # return
+        #
+        # phasingFrame = self.spectrumDisplay.phasingFrame
+        # position = phasingFrame.pivotEntry.get()
+        # direction = phasingFrame.getDirection()
+        # if direction == 0:
+        #     self.hPhasingPivot.setPos(position)
+        # else:
+        #     self.vPhasingPivot.setPos(position)
+        # self._updatePhasing()
 
-        phasingFrame = self.spectrumDisplay.phasingFrame
-        position = phasingFrame.pivotEntry.get()
-        direction = phasingFrame.getDirection()
-        if direction == 0:
-            self.hPhasingPivot.setPos(position)
-        else:
-            self.vPhasingPivot.setPos(position)
-        self._updatePhasing()
-
-    def _movedPivot(self):  # this is called if pivot on screen is dragged
-
-        phasingFrame = self.spectrumDisplay.phasingFrame
-        direction = phasingFrame.getDirection()
-        if direction == 0:
-            position = self.hPhasingPivot.getXPos()
-        else:
-            position = self.vPhasingPivot.getYPos()
-
-        phasingFrame.pivotEntry.set(position)
-        self._updatePhasing()
+    # def _movedPivot(self):  # this is called if pivot on screen is dragged
+    #
+    #     phasingFrame = self.spectrumDisplay.phasingFrame
+    #     direction = phasingFrame.getDirection()
+    #     if direction == 0:
+    #         position = self.hPhasingPivot.getXPos()
+    #     else:
+    #         position = self.vPhasingPivot.getYPos()
+    #
+    #     phasingFrame.pivotEntry.set(position)
+    #     self._updatePhasing()
 
     def setTraceScale(self, traceScale):
         for spectrumView in self.spectrumViews:
@@ -767,12 +767,12 @@ class GuiStrip(NotifierBase, Frame):
     def turnOnPhasing(self):
 
         phasingFrame = self.spectrumDisplay.phasingFrame
-        self.hPhasingPivot.setVisible(True)
-        self.vPhasingPivot.setVisible(True)
+        # self.hPhasingPivot.setVisible(True)
+        # self.vPhasingPivot.setVisible(True)
 
         # change menu
         self._isPhasingOn = True
-        self.viewBox.menu = self._phasingMenu
+        self.viewBoxMenu = self._phasingMenu
 
         if self.spectrumDisplay.is1D:
 
@@ -864,8 +864,8 @@ class GuiStrip(NotifierBase, Frame):
     def turnOffPhasing(self):
         phasingFrame = self.spectrumDisplay.phasingFrame
 
-        self.hPhasingPivot.setVisible(False)
-        self.vPhasingPivot.setVisible(False)
+        # self.hPhasingPivot.setVisible(False)
+        # self.vPhasingPivot.setVisible(False)
 
         # change menu
         self._isPhasingOn = False
@@ -905,14 +905,14 @@ class GuiStrip(NotifierBase, Frame):
         if not phasingFrame.isVisible():
             return
 
-        if direction == 0:
-            self.hPhasingPivot.setVisible(True)
-            self.vPhasingPivot.setVisible(False)
-            # self.pivotLine.orientation = ('v')
-        else:
-            self.hPhasingPivot.setVisible(False)
-            self.vPhasingPivot.setVisible(True)
-            # self.pivotLine.orientation = ('h')
+        # if direction == 0:
+        #     self.hPhasingPivot.setVisible(True)
+        #     self.vPhasingPivot.setVisible(False)
+        #     # self.pivotLine.orientation = ('v')
+        # else:
+        #     self.hPhasingPivot.setVisible(False)
+        #     self.vPhasingPivot.setVisible(True)
+        #     # self.pivotLine.orientation = ('h')
 
         if direction == 0:
             self.pivotLine.orientation = ('v')
@@ -955,80 +955,88 @@ class GuiStrip(NotifierBase, Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated', spectrumDisplay=self.spectrumDisplay, strip=self)
 
-        return
+        # return
+        #
+        # # TODO:GEERTEN: Fix  (not yet picked-up!; why? - ED: old code, return statement above)
+        # colour = getColours()[GUISTRIP_PIVOT]
+        # self.hPhasingPivot.setPen({'color': colour})
+        # self.vPhasingPivot.setPen({'color': colour})
+        # for spectrumView in self.spectrumViews:
+        #     spectrumView.setPivotColour(colour)
+        #     spectrumView._updatePhasing()
 
-        # TODO:GEERTEN: Fix  (not yet picked-up!; why? - ED: old code, return statement above)
-        colour = getColours()[GUISTRIP_PIVOT]
-        self.hPhasingPivot.setPen({'color': colour})
-        self.vPhasingPivot.setPen({'color': colour})
-        for spectrumView in self.spectrumViews:
-            spectrumView.setPivotColour(colour)
-            spectrumView._updatePhasing()
+    # def _updateXRegion(self, viewBox):
+    #     # this is called when the viewBox is changed on the screen via the mouse
+    #     # this code is complicated because need to keep viewBox region and axis region in sync
+    #     # and there can be different viewBoxes with the same axis
+    #
+    #     if not self._finaliseDone: return
+    #
+    #     assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
+    #
+    #     self._updateX()
+    #     self._updatePhasing()
+    #
+    # def _updateYRegion(self, viewBox):
+    #     # this is called when the viewBox is changed on the screen via the mouse
+    #     # this code is complicated because need to keep viewBox region and axis region in sync
+    #     # and there can be different viewBoxes with the same axis
+    #
+    #     if not self._finaliseDone: return
+    #
+    #     assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
+    #
+    #     self._updateY()
+    #     self._updatePhasing()
 
-    def _updateXRegion(self, viewBox):
-        # this is called when the viewBox is changed on the screen via the mouse
-        # this code is complicated because need to keep viewBox region and axis region in sync
-        # and there can be different viewBoxes with the same axis
+    # def _updateX(self):
+    #
+    #     def _widthsChangedEnough(r1, r2, tol=1e-5):
+    #         r1 = sorted(r1)
+    #         r2 = sorted(r2)
+    #         minDiff = abs(r1[0] - r2[0])
+    #         maxDiff = abs(r1[1] - r2[1])
+    #         return (minDiff > tol) or (maxDiff > tol)
+    #
+    #     if not self._finaliseDone: return
+    #
+    #     # this only wants to get the scaling of the modified strip and not the actual values
+    #
+    #     xRange = list(self.viewBox.viewRange()[0])
+    #     for strip in self.spectrumDisplay.strips:
+    #         if strip is not self:
+    #             stripXRange = list(strip.viewBox.viewRange()[0])
+    #             if _widthsChangedEnough(stripXRange, xRange):
+    #                 # TODO:ED check whether the strip has a range set yet
+    #                 diff = (xRange[1] - xRange[0]) / 2.0
+    #                 mid = (stripXRange[1] + stripXRange[0]) / 2.0
+    #                 xRange = (mid - diff, mid + diff)
+    #
+    #                 strip.viewBox.setXRange(*xRange, padding=0)
 
-        assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
-
-        self._updateX()
-        self._updatePhasing()
-
-    def _updateYRegion(self, viewBox):
-        # this is called when the viewBox is changed on the screen via the mouse
-        # this code is complicated because need to keep viewBox region and axis region in sync
-        # and there can be different viewBoxes with the same axis
-
-        assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
-
-        self._updateY()
-        self._updatePhasing()
-
-    def _updateX(self):
-
-        def _widthsChangedEnough(r1, r2, tol=1e-5):
-            r1 = sorted(r1)
-            r2 = sorted(r2)
-            minDiff = abs(r1[0] - r2[0])
-            maxDiff = abs(r1[1] - r2[1])
-            return (minDiff > tol) or (maxDiff > tol)
-
-        # this only wants to get the scaling of the modified strip and not the actual values
-
-        xRange = list(self.viewBox.viewRange()[0])
-        for strip in self.spectrumDisplay.strips:
-            if strip is not self:
-                stripXRange = list(strip.viewBox.viewRange()[0])
-                if _widthsChangedEnough(stripXRange, xRange):
-                    # TODO:ED check whether the strip has a range set yet
-                    diff = (xRange[1] - xRange[0]) / 2.0
-                    mid = (stripXRange[1] + stripXRange[0]) / 2.0
-                    xRange = (mid - diff, mid + diff)
-
-                    strip.viewBox.setXRange(*xRange, padding=0)
-
-    def _updateY(self):
-
-        def _widthsChangedEnough(r1, r2, tol=1e-5):
-            r1 = sorted(r1)
-            r2 = sorted(r2)
-            minDiff = abs(r1[0] - r2[0])
-            maxDiff = abs(r1[1] - r2[1])
-            return (minDiff > tol) or (maxDiff > tol)
-
-        yRange = list(self.viewBox.viewRange()[1])
-        for strip in self.spectrumDisplay.strips:
-            if strip is not self:
-                stripYRange = list(strip.viewBox.viewRange()[1])
-                if _widthsChangedEnough(stripYRange, yRange):
-                    strip.viewBox.setYRange(*yRange, padding=0)
+    # def _updateY(self):
+    #
+    #     def _widthsChangedEnough(r1, r2, tol=1e-5):
+    #         r1 = sorted(r1)
+    #         r2 = sorted(r2)
+    #         minDiff = abs(r1[0] - r2[0])
+    #         maxDiff = abs(r1[1] - r2[1])
+    #         return (minDiff > tol) or (maxDiff > tol)
+    #
+    #     if not self._finaliseDone: return
+    #
+    #     yRange = list(self.viewBox.viewRange()[1])
+    #     for strip in self.spectrumDisplay.strips:
+    #         if strip is not self:
+    #             stripYRange = list(strip.viewBox.viewRange()[1])
+    #             if _widthsChangedEnough(stripYRange, yRange):
+    #                 strip.viewBox.setYRange(*yRange, padding=0)
 
     def _toggleCrossHair(self):
         " Toggles whether crosshair is visible"
-        self.plotWidget.crossHair1.toggle()
-        if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
-            self.plotWidget.crossHair2.toggle()
+        # self.plotWidget.crossHair1.toggle()
+        # if self.spectrumViews and self.spectrumViews[0].spectrum.showDoubleCrosshair:
+        #     self.plotWidget.crossHair2.toggle()
 
         try:
             self.crosshairVisible = not self.crosshairVisible
@@ -1086,7 +1094,7 @@ class GuiStrip(NotifierBase, Frame):
 
     def toggleGrid(self):
         "Toggles whether grid is visible in the strip."
-        self.plotWidget.toggleGrid()
+        # self.plotWidget.toggleGrid()
 
         try:
             self.gridVisible = not self.gridVisible
@@ -1155,22 +1163,24 @@ class GuiStrip(NotifierBase, Frame):
             getLogger().warning('Error setting mark at current cursor position')
             raise(es)
 
-    # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
-    def _initRulers(self):
-
-        for mark in self._project.marks:
-            apiMark = mark._wrappedData
-            for apiRuler in apiMark.rulers:
-                self.plotWidget._addRulerLine(apiRuler)
+    # # TODO: remove apiRuler (when notifier at bottom of module gets rid of it)
+    # def _initRulers(self):
+    #
+    #     for mark in self._project.marks:
+    #         apiMark = mark._wrappedData
+    #         for apiRuler in apiMark.rulers:
+    #             self.plotWidget._addRulerLine(apiRuler)
 
     def _showMousePosition(self, pos: QtCore.QPointF):
         """
         Displays mouse position for both axes by axis code.
         """
+        if not self._finaliseDone: return
+
         if self.isDeleted:
             return
 
-        position = self.viewBox.mapSceneToView(pos)
+        # position = self.viewBox.mapSceneToView(pos)
         try:
             # this only calls a single _wrapper function
             if self.orderedAxes[1] and self.orderedAxes[1].code == 'intensity':
@@ -1184,11 +1194,11 @@ class GuiStrip(NotifierBase, Frame):
         #   (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
         # )
 
-        self.plotWidget.mouseLabel.setText(format %
-                                           (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
-                                           )
-        self.plotWidget.mouseLabel.setPos(position.x(), position.y())
-        self.plotWidget.mouseLabel.show()
+        # self.plotWidget.mouseLabel.setText(format %
+        #                                    (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())
+        #                                    )
+        # self.plotWidget.mouseLabel.setPos(position.x(), position.y())
+        # self.plotWidget.mouseLabel.show()
 
     def zoom(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
         """Zooms strip to the specified region
@@ -1198,18 +1208,21 @@ class GuiStrip(NotifierBase, Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-    def zoomToRegion(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
-        """
-        Zooms strip to the specified region
-        """
-        padding = self.application.preferences.general.stripRegionPadding
-        self.viewBox.setXRange(*xRegion, padding=padding)
-        self.viewBox.setYRange(*yRegion, padding=padding)
+    # def zoomToRegion(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
+    #     """
+    #     Zooms strip to the specified region
+    #     """
+    #     if not self._finaliseDone: return
+    #     padding = self.application.preferences.general.stripRegionPadding
+    #     self.viewBox.setXRange(*xRegion, padding=padding)
+    #     self.viewBox.setYRange(*yRegion, padding=padding)
 
     def zoomX(self, x1: float, x2: float):
         """
         Zooms x axis of strip to the specified region
         """
+        if not self._finaliseDone: return
+
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setXRange(x1, x2, padding=padding)
 
@@ -1217,39 +1230,40 @@ class GuiStrip(NotifierBase, Frame):
         """
         Zooms y axis of strip to the specified region
         """
+        if not self._finaliseDone: return
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setYRange(y1, y2, padding=padding)
 
-    def showZoomPopup(self):
-        """
-        Creates and displays a popup for zooming to a region in the strip.
-        """
-        zoomPopup = QtWidgets.QDialog()
-
-        Label(zoomPopup, text='x1', grid=(0, 0))
-        x1LineEdit = FloatLineEdit(zoomPopup, grid=(0, 1))
-        Label(zoomPopup, text='x2', grid=(0, 2))
-        x2LineEdit = FloatLineEdit(zoomPopup, grid=(0, 3))
-        Label(zoomPopup, text='y1', grid=(1, 0))
-        y1LineEdit = FloatLineEdit(zoomPopup, grid=(1, 1))
-        Label(zoomPopup, text='y2', grid=(1, 2))
-        y2LineEdit = FloatLineEdit(zoomPopup, grid=(1, 3))
-
-        def _zoomTo():
-            x1 = x1LineEdit.get()
-            y1 = y1LineEdit.get()
-            x2 = x2LineEdit.get()
-            y2 = y2LineEdit.get()
-            if None in (x1, y1, x2, y2):
-                getLogger().warning('Zoom: must specify region completely')
-                return
-            self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
-            zoomPopup.close()
-
-        Button(zoomPopup, text='OK', callback=_zoomTo, grid=(2, 0), gridSpan=(1, 2))
-        Button(zoomPopup, text='Cancel', callback=zoomPopup.close, grid=(2, 2), gridSpan=(1, 2))
-
-        zoomPopup.exec_()
+    # def showZoomPopup(self):
+    #     """
+    #     Creates and displays a popup for zooming to a region in the strip.
+    #     """
+    #     zoomPopup = QtWidgets.QDialog()
+    #
+    #     Label(zoomPopup, text='x1', grid=(0, 0))
+    #     x1LineEdit = FloatLineEdit(zoomPopup, grid=(0, 1))
+    #     Label(zoomPopup, text='x2', grid=(0, 2))
+    #     x2LineEdit = FloatLineEdit(zoomPopup, grid=(0, 3))
+    #     Label(zoomPopup, text='y1', grid=(1, 0))
+    #     y1LineEdit = FloatLineEdit(zoomPopup, grid=(1, 1))
+    #     Label(zoomPopup, text='y2', grid=(1, 2))
+    #     y2LineEdit = FloatLineEdit(zoomPopup, grid=(1, 3))
+    #
+    #     def _zoomTo():
+    #         x1 = x1LineEdit.get()
+    #         y1 = y1LineEdit.get()
+    #         x2 = x2LineEdit.get()
+    #         y2 = y2LineEdit.get()
+    #         if None in (x1, y1, x2, y2):
+    #             getLogger().warning('Zoom: must specify region completely')
+    #             return
+    #         self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))
+    #         zoomPopup.close()
+    #
+    #     Button(zoomPopup, text='OK', callback=_zoomTo, grid=(2, 0), gridSpan=(1, 2))
+    #     Button(zoomPopup, text='Cancel', callback=zoomPopup.close, grid=(2, 2), gridSpan=(1, 2))
+    #
+    #     zoomPopup.exec_()
 
     # TODO. Set limit range properly for each case: 1D/nD, flipped axis
     # def setZoomLimits(self, xLimits, yLimits, factor=5):
@@ -1309,13 +1323,15 @@ class GuiStrip(NotifierBase, Frame):
         """
         Restores last saved region to the zoom stack for the strip.
         """
-        if len(self.storedZooms) != 0:
-            restoredZoom = self.storedZooms.pop()
-            padding = self.application.preferences.general.stripRegionPadding
-            self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1], padding=padding)
-            self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1], padding=padding)
-        else:
-            self.resetZoom()
+        if not self._finaliseDone: return
+
+        # if len(self.storedZooms) != 0:
+        #     restoredZoom = self.storedZooms.pop()
+        #     padding = self.application.preferences.general.stripRegionPadding
+        #     self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1], padding=padding)
+        #     self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1], padding=padding)
+        # else:
+        #     self.resetZoom()
 
         try:
             self._CcpnGLWidget.restoreZoom()
@@ -1347,21 +1363,23 @@ class GuiStrip(NotifierBase, Frame):
         """
         zoom in to the strip.
         """
-        zoomPercent = -self.application.preferences.general.zoomPercent / 100.0
-        padding = self.application.preferences.general.stripRegionPadding
-        currentRange = self.viewBox.viewRange()
-        l = currentRange[0][0]
-        r = currentRange[0][1]
-        b = currentRange[1][0]
-        t = currentRange[1][1]
-        dx = (r - l) / 2.0
-        dy = (t - b) / 2.0
-        nl = l - zoomPercent * dx
-        nr = r + zoomPercent * dx
-        nt = t + zoomPercent * dy
-        nb = b - zoomPercent * dy
-        self.plotWidget.setXRange(nl, nr, padding=padding)
-        self.plotWidget.setYRange(nb, nt, padding=padding)
+        if not self._finaliseDone: return
+
+        # zoomPercent = -self.application.preferences.general.zoomPercent / 100.0
+        # padding = self.application.preferences.general.stripRegionPadding
+        # currentRange = self.viewBox.viewRange()
+        # l = currentRange[0][0]
+        # r = currentRange[0][1]
+        # b = currentRange[1][0]
+        # t = currentRange[1][1]
+        # dx = (r - l) / 2.0
+        # dy = (t - b) / 2.0
+        # nl = l - zoomPercent * dx
+        # nr = r + zoomPercent * dx
+        # nt = t + zoomPercent * dy
+        # nb = b - zoomPercent * dy
+        # self.plotWidget.setXRange(nl, nr, padding=padding)
+        # self.plotWidget.setYRange(nb, nt, padding=padding)
 
         try:
             self._CcpnGLWidget.zoomIn()
@@ -1372,21 +1390,23 @@ class GuiStrip(NotifierBase, Frame):
         """
         zoom out of the strip.
         """
-        zoomPercent = +self.application.preferences.general.zoomPercent / 100.0
-        padding = self.application.preferences.general.stripRegionPadding
-        currentRange = self.viewBox.viewRange()
-        l = currentRange[0][0]
-        r = currentRange[0][1]
-        b = currentRange[1][0]
-        t = currentRange[1][1]
-        dx = (r - l) / 2.0
-        dy = (t - b) / 2.0
-        nl = l - zoomPercent * dx
-        nr = r + zoomPercent * dx
-        nt = t + zoomPercent * dy
-        nb = b - zoomPercent * dy
-        self.plotWidget.setXRange(nl, nr, padding=padding)
-        self.plotWidget.setYRange(nb, nt, padding=padding)
+        if not self._finaliseDone: return
+
+        # zoomPercent = +self.application.preferences.general.zoomPercent / 100.0
+        # padding = self.application.preferences.general.stripRegionPadding
+        # currentRange = self.viewBox.viewRange()
+        # l = currentRange[0][0]
+        # r = currentRange[0][1]
+        # b = currentRange[1][0]
+        # t = currentRange[1][1]
+        # dx = (r - l) / 2.0
+        # dy = (t - b) / 2.0
+        # nl = l - zoomPercent * dx
+        # nr = r + zoomPercent * dx
+        # nt = t + zoomPercent * dy
+        # nb = b - zoomPercent * dy
+        # self.plotWidget.setXRange(nl, nr, padding=padding)
+        # self.plotWidget.setYRange(nb, nt, padding=padding)
 
         try:
             self._CcpnGLWidget.zoomOut()
@@ -1826,6 +1846,16 @@ class GuiStrip(NotifierBase, Frame):
             # rebuild the axes for each strip
             self.spectrumDisplay.showAxes()
 
+    def _raiseContextMenu(self, event: QtGui.QMouseEvent):
+        """
+        Raise the context menu
+        """
+
+        position = event.screenPos()
+        self.viewBoxMenu.popup(QtCore.QPoint(int(position.x()),
+                                             int(position.y())))
+        self.contextMenuPosition = self.current.cursorPosition
+
     # def peakPickPosition(self, inPosition) -> Tuple[Peak]:
     #     """
     #     Pick peak at position for all spectra currently displayed in strip
@@ -2106,16 +2136,16 @@ def _axisRegionChanged(cDict):
 
 # NBNB TODO code uses API object. REFACTOR
 
-def _rulerCreated(project: Project, apiRuler: ApiRuler):
-    """Notifier function for creating rulers"""
-    for strip in project.strips:
-        strip.plotWidget._addRulerLine(apiRuler)
+# def _rulerCreated(project: Project, apiRuler: ApiRuler):
+#     """Notifier function for creating rulers"""
+#     for strip in project.strips:
+#         strip.plotWidget._addRulerLine(apiRuler)
 
 
-def _rulerDeleted(project: Project, apiRuler: ApiRuler):
-    """Notifier function for deleting rulers"""
-    for strip in project.strips:
-        strip.plotWidget._removeRulerLine(apiRuler)
+# def _rulerDeleted(project: Project, apiRuler: ApiRuler):
+#     """Notifier function for deleting rulers"""
+#     for strip in project.strips:
+#         strip.plotWidget._removeRulerLine(apiRuler)
 
 
 # Add notifier functions to Project

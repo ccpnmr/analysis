@@ -33,7 +33,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 
 from ccpn.ui.gui.guiSettings import getColours, GUISTRIP_PIVOT
 from ccpn.ui.gui.guiSettings import textFontSmall
@@ -70,7 +70,7 @@ MultipletMenu = 'MultipletMenu'
 PhasingMenu = 'PhasingMenu'
 
 
-class GuiStrip(Frame):
+class GuiStrip(NotifierBase, Frame):
 
     def __init__(self, spectrumDisplay, useOpenGL=False):
         """
@@ -235,42 +235,30 @@ class GuiStrip(Frame):
         # self.vPhasingPivot.sigPositionChanged.connect(lambda phasingPivot: self._movedPivot())
         # self.haveSetVPhasingPivot = False
 
+        # GWV 20181127: moved to GuiMainWindow
         # notifier for highlighting the strip
-        self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
+        # self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
 
         # Notifier for updating the peaks
-        self._peakNotifier = Notifier(self.project, [Notifier.CREATE,
-                                                     Notifier.DELETE,
-                                                     Notifier.CHANGE], 'Peak', self._updateDisplayedPeaks,
-                                      onceOnly=True)
-        # self._peakNotifier.setDebug(True)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                         'Peak', self._updateDisplayedPeaks, onceOnly=True)
 
         # Notifier for updating the integrals
-        self._integralNotifier = Notifier(self.project, [Notifier.CREATE,
-                                                         Notifier.DELETE,
-                                                         Notifier.CHANGE], 'Integral', self._updateDisplayedIntegrals,
-                                          onceOnly=True)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                         'Integral', self._updateDisplayedIntegrals, onceOnly=True)
 
         # Notifier for updating the multiplets
-        self._multipletNotifier = Notifier(self.project, [Notifier.CREATE,
-                                                          Notifier.DELETE,
-                                                          Notifier.CHANGE], 'Multiplet', self._updateDisplayedMultiplets,
-                                           onceOnly=True)
-        # self._multipletNotifier.setDebug(True)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
+                         'Multiplet', self._updateDisplayedMultiplets, onceOnly=True)
 
         # Notifier for change of stripLabel
-        self._stripLabelNotifier = Notifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
-        #self._stripNotifier.setDebug(True)
-        #self._peakNotifier.setDebug(True)
+        self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
 
-        # For now, all dropEvents are not strip specific, use spectrumDisplay's
-        # handling
-        self._droppedNotifier = GuiNotifier(self,
-                                            [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
-                                            self.spectrumDisplay._processDroppedItems)
-        self._moveEventNotifier = GuiNotifier(self,
-                                              [GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
-                                              self.spectrumDisplay._processDragEnterEvent)
+        # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
+        self.setGuiNotifier(self,[GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
+                            self.spectrumDisplay._processDroppedItems)
+        self.setGuiNotifier(self,[GuiNotifier.DRAGMOVEEVENT], [DropBase.URLS, DropBase.PIDS],
+                            self.spectrumDisplay._processDragEnterEvent)
 
         # set peakLabelling to the default from preferences or strip to the left
         settings = spectrumDisplay.getSettings()
@@ -495,16 +483,21 @@ class GuiStrip(Frame):
         popup.exec_()
         popup._cleanupWidget()
 
-    def _unregisterStrip(self):
-        """Unregister all notifiers
-        """
-        self._stripNotifier.unRegister()
-        self._peakNotifier.unRegister()
-        self._integralNotifier.unRegister()
-        self._multipletNotifier.unRegister()
-        self._stripLabelNotifier.unRegister()
-        self._droppedNotifier.unRegister()
-        self._moveEventNotifier.unRegister()
+    def close(self):
+        self.deleteAllNotifiers()
+        super().close()
+
+    # GWV 20181127: changed implementation to use deleteAllNotifiers in close() method
+    # def _unregisterStrip(self):
+    #     """Unregister all notifiers
+    #     """
+    #     self._stripNotifier.unRegister()
+    #     self._peakNotifier.unRegister()
+    #     self._integralNotifier.unRegister()
+    #     self._multipletNotifier.unRegister()
+    #     self._stripLabelNotifier.unRegister()
+    #     self._droppedNotifier.unRegister()
+    #     self._moveEventNotifier.unRegister()
 
     def _updateDisplayedPeaks(self, data):
         """Callback when peaks have changed
@@ -582,20 +575,34 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget._processIntegralNotifier(data)
 
-    def _highlightCurrentStrip(self, data):
-        "Callback to highlight the axes of current strip"
-        # self.plotWidget.highlightAxes(self is self.current.strip)
+    def _highlightStrip(self, flag):
+        """(un)highLight the strip depending on flag
 
-        try:
-            self._CcpnGLWidget.highlightCurrentStrip(self is self.current.strip)
+        CCPNINTERNAL: used in GuiMainWindow
+        """
+        self._CcpnGLWidget.highlightCurrentStrip(flag)
 
-            # # spawn a redraw of the GL windows
-            # from ccpn.util.CcpnOpenGL import GLNotifier
-            # GLSignals = GLNotifier(parent=None)
-            # GLSignals.emitPaintEvent()
-
-        except Exception as es:
-            getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
+    # GWV 20181127: moved to a single notifier in GuiMainWindow
+    # def _highlightCurrentStrip(self, data):
+    #     "Callback to highlight the axes of current strip"
+    #     # self.plotWidget.highlightAxes(self is self.current.strip)
+    #     pass
+    #
+    #     try:
+    #         # Only do something in case of the old and new current strip
+    #         previousStrip = data[Notifier.PREVIOUSVALUE]
+    #         if self is previousStrip:
+    #             self._CcpnGLWidget.highlightCurrentStrip(False)
+    #         elif self is self.current.strip:
+    #             self._CcpnGLWidget.highlightCurrentStrip(True)
+    #
+    #         # # spawn a redraw of the GL windows
+    #         # from ccpn.util.CcpnOpenGL import GLNotifier
+    #         # GLSignals = GLNotifier(parent=None)
+    #         # GLSignals.emitPaintEvent()
+    #
+    #     except Exception as es:
+    #         getLogger().debugGL('OpenGL widget not instantiated', strip=self, error=es)
 
     # def _printToFile(self, printer):
     #     # CCPN INTERNAL - called in printToFile method of GuiMainWindow
@@ -1168,8 +1175,6 @@ class GuiStrip(Frame):
         """
         Displays mouse position for both axes by axis code.
         """
-        if not self._finaliseDone: return
-
         if self.isDeleted:
             return
 
@@ -1214,8 +1219,6 @@ class GuiStrip(Frame):
         """
         Zooms x axis of strip to the specified region
         """
-        if not self._finaliseDone: return
-
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setXRange(x1, x2, padding=padding)
 
@@ -1223,7 +1226,6 @@ class GuiStrip(Frame):
         """
         Zooms y axis of strip to the specified region
         """
-        if not self._finaliseDone: return
         padding = self.application.preferences.general.stripRegionPadding
         self.viewBox.setYRange(y1, y2, padding=padding)
 
@@ -1305,7 +1307,6 @@ class GuiStrip(Frame):
         """
         Adds current region to the zoom stack for the strip.
         """
-        if not self._finaliseDone: return
         self.storedZooms.append(self.viewBox.viewRange())
 
         try:
@@ -1336,7 +1337,6 @@ class GuiStrip(Frame):
     #   """
     #   Zooms both axis of strip to the specified region
     #   """
-    #   if not self._finaliseDone: return
     #   padding = self.application.preferences.general.stripRegionPadding
     #   self.viewBox.autoRange(padding=padding)
 

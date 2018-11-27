@@ -55,6 +55,8 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.util.Common import uniquify
 from ccpn.util import Logging
 
+from ccpn.core.lib.Notifiers import NotifierBase, Notifier
+
 
 #from ccpn.util.Logging import getLogger
 #from collections import OrderedDict
@@ -72,7 +74,7 @@ from ccpn.util import Logging
 # The docstring of GuiMainWindow should detail how this setup is
 
 
-class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
+class GuiMainWindow(GuiWindow, NotifierBase, QtWidgets.QMainWindow):
 
     def __init__(self, application=None):
 
@@ -113,8 +115,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._setShortcuts()
         self._setUserShortcuts(preferences=self.application.preferences, mainWindow=self)
 
-        # do not need an unRegisterNotify because those removed when mainWindow / project destroyed
-        self.application.current.registerNotify(self._resetRemoveStripAction, 'strips')
+        # self.application.current.registerNotify(self._resetRemoveStripAction, 'strips')
+        # self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._resetRemoveStripAction)
+        self.setNotifier(self.application.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
 
         self.feedbackPopup = None
         self.updatePopup = None
@@ -643,6 +646,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             success = self.application.saveProject()
             if success is True:
                 # Close and clean up project
+                self.deleteAllNotifiers()
                 self.application._closeProject()  # close if saved
                 QtWidgets.QApplication.quit()
                 os._exit(0)
@@ -658,8 +662,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
             prefFile.close()
 
+            self.deleteAllNotifiers()
             self.application._closeProject()
-
             QtWidgets.QApplication.quit()
             os._exit(0)
 
@@ -698,9 +702,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #     # self._fillRecentMacrosMenu()
     #     self.pythonConsole._runMacro(macroFile)
 
-    def _resetRemoveStripAction(self, strips):
-        for spectrumDisplay in self.spectrumDisplays:
-            pass  # GWV: poor solution spectrumDisplay._resetRemoveStripAction()
+    # GWV 20181127: commented not used
+    # def _resetRemoveStripAction(self, strips):
+    #     "Callback on current"
+    #     for spectrumDisplay in self.spectrumDisplays:
+    #         pass  # GWV: poor solution spectrumDisplay._resetRemoveStripAction()
+
+    def _highlightCurrentStrip(self, data):
+        "Callback on current to highlight the strip"
+        previousStrip = data[Notifier.PREVIOUSVALUE]
+        currentStrip = data[Notifier.VALUE]
+        if previousStrip:
+            previousStrip._highlightStrip(False)
+        if currentStrip:
+            currentStrip._highlightStrip(True)
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()

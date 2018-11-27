@@ -735,7 +735,8 @@ class GuiSpectrumDisplay(CcpnModule):
         try:
             for strip in self.strips:
                 getLogger().debug2('unregistering strip: %s' % strip)
-                strip._unregisterStrip()
+                strip.close()
+                # strip._unregisterStrip()
             # self.droppedNotifier.unRegister()
             # self._toolbarNotifier.unRegister()
             # self._unRegisterNotifiers()

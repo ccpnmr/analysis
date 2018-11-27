@@ -377,7 +377,7 @@ class Notifier(NotifierABC):
         # CURRENT special case
         if trigger == Notifier.CURRENT:
             value = getattr(self._theObject, targetName)
-            if value != self._previousValue:
+            if not self._isEqual(value, self._previousValue):
                 callbackDict[self.OBJECT] = self._theObject
                 callbackDict[self.PREVIOUSVALUE] = self._previousValue
                 callbackDict[self.VALUE] = value
@@ -398,18 +398,18 @@ class Notifier(NotifierABC):
 
         # OBSERVE targetName special case
         elif trigger == Notifier.OBSERVE and targetName != self.ANY:
-            # The check below catches all changes to obj that do not involve targetName, as only when it has changed
-            # its value will we trigger the callback
+            # The check below catches all changes to obj that do not involve targetName, as only
+            # when it has changed its value will we trigger the callback
             value = getattr(self._theObject, targetName)
-            if obj.pid == self._theObject.pid and value != self._previousValue:
+            if obj.pid == self._theObject.pid and not self._isEqual(value, self._previousValue):
                 callbackDict[self.OBJECT] = self._theObject
                 callbackDict[self.PREVIOUSVALUE] = self._previousValue
                 callbackDict[self.VALUE] = value
                 if self._debug:
                     sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
                 self._callback(callbackDict, **self._kwargs)
-                self._previousValue = value
                 notifierFired = True
+                self._previousValue = value
 
         # check if the trigger applies for all other cases
         elif self._isProject or obj._parent.pid == self._theObject.pid:
@@ -424,6 +424,15 @@ class Notifier(NotifierABC):
             sys.stderr.write('%-9s *** %s func:%s\n' % ('not-FIRED', self, self._callback))
 
         return
+
+    @staticmethod
+    def _isEqual(value1, value2):
+        """Return true if values are equal, accounting for tuple/list conversion"""
+        if isinstance(value1, tuple):
+            value1 = list(value1)
+        if isinstance(value2, tuple):
+            value1 = list(value2)
+        return value1==value2
 
 
 # def currentNotifier(attributeName, callback, onlyOnce=False, debug=False, **kwargs):

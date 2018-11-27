@@ -433,10 +433,11 @@ if __name__ == '__main__':
 
         print(', '.join(pStrings))
 
-    logCommand('myPrefix.')
-    def func2(par, *args, flag=False, **kwds):
+    # logCommand('myPrefix.')
+
+    def func2(**axisCodeEqValueKwds):
         pass
 
 
-    func2('test', 1, 2, myPar='myValue')
+    func('test', 1, 2, myPar='myValue')
 

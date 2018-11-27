@@ -223,8 +223,8 @@ def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
                 for spectrum in sampleComponent.substance.referenceSpectra:
                     spectrumDisplay.displaySpectrum(spectrum)
         mainWindow.application.current.strip = spectrumDisplay.strips[0]
-        if all(sample.spectra[0].dimensionCount) == 1:
-            mainWindow.application.current.strip.plotWidget.autoRange()
+        # if all(sample.spectra[0].dimensionCount) == 1:
+        #     mainWindow.application.current.strip.plotWidget.autoRange()
 
 
 def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):

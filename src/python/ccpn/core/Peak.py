@@ -654,8 +654,11 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
             for ii, peakDim in enumerate(apiPeakDims):
                 peakDim.lineWidth = lineWidths[ii]
 
-        apiObjectsCreated = [apiPeak]
-        apiObjectsCreated.extend(apiPeakDims)
+        apiObjectsCreated = Undo._getAllApiObjects(apiPeak)
+
+        # apiObjectsCreated = [apiPeak]
+        # apiObjectsCreated.extend(apiPeakDims)
+
         undoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
                  redo=partial(apiPeak.root._unDelete, apiObjectsCreated, (apiPeak.topObject,)))
 

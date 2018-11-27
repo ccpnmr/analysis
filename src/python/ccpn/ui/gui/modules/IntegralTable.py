@@ -290,15 +290,15 @@ class IntegralTable(QuickTable):
         """
         self._updateSilence = silence
 
-    def _clearRegions(self):
-        strip = self.current.strip
-        if strip:
-            strip.plotWidget.viewBox._clearIntegralRegions()
+    # def _clearRegions(self):
+    #     strip = self.current.strip
+    #     if strip:
+    #         strip.plotWidget.viewBox._clearIntegralRegions()
 
-    def _showRegions(self):
-        strip = self.current.strip
-        if strip:
-            strip.plotWidget.viewBox._showIntegralLines()
+    # def _showRegions(self):
+    #     strip = self.current.strip
+    #     if strip:
+    #         strip.plotWidget.viewBox._showIntegralLines()
 
     def _selectionCallback(self, data, *args):
         """
@@ -420,5 +420,5 @@ class IntegralTable(QuickTable):
         Cleanup the notifiers when the window is closed
         """
         # self.clearTableNotifiers()
-        self._clearRegions()
+        # self._clearRegions()
         super()._close()

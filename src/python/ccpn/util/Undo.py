@@ -34,6 +34,37 @@ from collections import deque
 #     obj.delete()
 
 
+def _getAllApiObjects(self):
+    """Retrieve the apiObject tree contained by this object
+    CCPN Internal    should be in the model
+    """
+    #EJB 20181127: taken from memops.Implementation.DataObject.delete
+
+    from ccpn.util.OrderedSet import OrderedSet
+
+    objsToBeDeleted = OrderedSet()
+    # objects still to be checked for cascading delete (each object to be deleted gets checked)
+    objsToBeChecked = list()
+    # counter keyed on (obj, roleName) for how many objects at other end of link are to be deleted
+    linkCounter = {}
+
+    # topObjects to check if modifiable
+    topObjectsToCheck = set()
+
+    objsToBeChecked.append(self)
+    while len(objsToBeChecked) > 0:
+        obj = objsToBeChecked.pop()
+        obj._checkDelete(objsToBeDeleted, objsToBeChecked, linkCounter, topObjectsToCheck)
+
+    for topObjectToCheck in topObjectsToCheck:
+        if (not (topObjectToCheck.__dict__.get('isModifiable'))):
+            raise ValueError("""%s.delete:
+       Storage not modifiable""" % self.qualifiedName
+                           + ": %s" % (topObjectToCheck,)
+                           )
+
+    return tuple(objsToBeDeleted)
+
 def _deleteAllApiObjects(objsToBeDeleted):
     """Delete all API objects in collection, together.
     Does NOT look for additional deletes or do any checks. Programmer beware!!!

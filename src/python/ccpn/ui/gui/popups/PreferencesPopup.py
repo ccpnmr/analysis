@@ -772,10 +772,10 @@ class PreferencesPopup(CcpnDialog):
         if preference == 'showToolbar':
             for spectrumDisplay in self.project.spectrumDisplays:
                 spectrumDisplay.spectrumUtilToolBar.setVisible(checked)
-        elif preference == 'showSpectrumBorder':
-            for strip in self.project.strips:
-                for spectrumView in strip.spectrumViews:
-                    spectrumView._setBorderItemHidden(checked)
+        # elif preference == 'showSpectrumBorder':
+        #     for strip in self.project.strips:
+        #         for spectrumView in strip.spectrumViews:
+        #             spectrumView._setBorderItemHidden(checked)
         elif preference == 'autoBackupEnabled':
             self.application.updateAutoBackup()
 

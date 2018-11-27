@@ -778,7 +778,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #         printer.startRegion(xOutputRegion, yOutputRegion)
     #         spectrumDisplayOrStrip._printToFile(printer)
 
-    _mouseMovedSignal = QtCore.pyqtSignal(dict)
+    # _mouseMovedSignal = QtCore.pyqtSignal(dict)
 
     def _mousePositionMoved(self, strip: GuiStrip, position: QtCore.QPointF):
         """ CCPN INTERNAL: called from ViewBox

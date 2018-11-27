@@ -179,8 +179,8 @@ class Gui(Ui):
         # project._registerApiNotifier(SpectrumDisplay1d._updateSpectrumViewPlotColour,
         #                              SpectrumDisplay1d.ApiSpectrumView, 'setSliceColour')
 
-        project._registerApiNotifier(GuiStrip._rulerCreated, 'ccpnmr.gui.Task.Ruler', 'postInit')
-        project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')
+        # project._registerApiNotifier(GuiStrip._rulerCreated, 'ccpnmr.gui.Task.Ruler', 'postInit')
+        # project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')
         project._registerApiNotifier(GuiStrip._setupGuiStrip, 'ccpnmr.gui.Task.Strip', 'postInit')
 
         project._registerApiNotifier(GuiSpectrumDisplay._deletedSpectrumView,

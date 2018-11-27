@@ -89,7 +89,7 @@ class PlotWidget(pg.PlotWidget):
       # self.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
       # not sure if these change anything
 
-    strip.spectrumDisplay.mainWindow._mouseMovedSignal.connect(self._mousePositionChanged)
+    # strip.spectrumDisplay.mainWindow._mouseMovedSignal.connect(self._mousePositionChanged)
 
     #TODO:GEERTEN: Fix with proper stylesheet
     # Also used in AxisTextItem

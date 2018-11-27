@@ -55,8 +55,8 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         """
 
         QtWidgets.QGraphicsItem.__init__(self)  #, scene=self.strip.plotWidget.scene())
-        self.scene = self.strip.plotWidget.scene
-        self._currentBoundingRect = self.strip.plotWidget.sceneRect()
+        # self.scene = self.strip.plotWidget.scene
+        # self._currentBoundingRect = self.strip.plotWidget.sceneRect()
 
         self._apiDataSource = self._wrappedData.spectrumView.dataSource
         self.spectrumGroupsToolBar = None
@@ -75,14 +75,14 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     def paint(self, painter, option, widget=None):
         pass
 
-    def updateGeometryChange(self):  # ejb - can we call this?
-        self._currentBoundingRect = self.strip.plotWidget.sceneRect()
-        self.prepareGeometryChange()
-        # print ('>>>prepareGeometryChange', self._currentBoundingRect)
+    # def updateGeometryChange(self):  # ejb - can we call this?
+    #     self._currentBoundingRect = self.strip.plotWidget.sceneRect()
+    #     self.prepareGeometryChange()
+    #     # print ('>>>prepareGeometryChange', self._currentBoundingRect)
 
     # mandatory function to override for QGraphicsItem
-    def boundingRect(self):  # seems necessary to have
-        return self._currentBoundingRect
+    # def boundingRect(self):  # seems necessary to have
+    #     return self._currentBoundingRect
 
         # Earlier versions too large value (~1400,1000);
         # i.e larger then inital MainWIndow size; reduced to (900, 700); but (100, 150) appears

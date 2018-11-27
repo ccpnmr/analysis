@@ -129,7 +129,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         # have to setup border item before superclass constructor called because latter calls
         # setVisible and that in turn expects there to be a border item
-        self._setupBorderItem()
+        # self._setupBorderItem()
 
         # TODO. Set limit range properly for each case: 1D/nD, flipped axis
         # self._setDefaultLimits()
@@ -149,9 +149,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         for func in ('setPositiveContourColour', 'setSliceColour'):
           Notifiers.registerNotify(self.changedSpectrumColour, 'ccp.nmr.Nmr.DataSource', func)
     """
-        self.strip.viewBox.addItem(self)
+        # self.strip.viewBox.addItem(self)
 
-        self._setupTrace()
+        # self._setupTrace()
 
         self.buildContours = True  # trigger the first build
         self.buildContoursOnly = False
@@ -175,49 +175,49 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #   yLimits = self.strip.viewBox.viewRange()[1]
     #   self.strip.setZoomLimits(xLimits, yLimits, factor=5)
 
-    def _setupBorderItem(self):
-        spectrumLimits = self.spectrum.spectrumLimits
-        displayIndices = self._displayOrderSpectrumDimensionIndices
-        xLimits = spectrumLimits[displayIndices[0]]
-        yLimits = spectrumLimits[displayIndices[1]]
+    # def _setupBorderItem(self):
+    #     spectrumLimits = self.spectrum.spectrumLimits
+    #     displayIndices = self._displayOrderSpectrumDimensionIndices
+    #     xLimits = spectrumLimits[displayIndices[0]]
+    #     yLimits = spectrumLimits[displayIndices[1]]
+    #
+    #     # apiSpectrumView = self._apiStripSpectrumView.spectrumView
+    #     # dataDims = apiSpectrumView.orderedDataDims
+    #     # ll = apiSpectrumView.dataSource.sortedDataDims()
+    #     # # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
+    #     # dimIndices = [x and ll.index(x) for x in dataDims]
+    #     # xDim = dimIndices[0]
+    #     # yDim = dimIndices[1]
+    #     #
+    #     # spectrumLimits = self.spectrum.spectrumLimits
+    #     # xLimits = spectrumLimits[xDim]
+    #     # yLimits = spectrumLimits[yDim]
+    #
+    #     colour = Colour.rgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
+    #     rect = QtCore.QRectF(xLimits[0], yLimits[0], xLimits[1] - xLimits[0], yLimits[1] - yLimits[0])
+    #     self.borderItem = QtWidgets.QGraphicsRectItem(rect)
+    #     self.borderItem.setPen(pg.functions.mkPen(colour[:3], width=1, style=QtCore.Qt.DotLine))
+    #     self.strip.viewBox.addItem(self.borderItem)
+    #
+    #     self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder)
 
-        # apiSpectrumView = self._apiStripSpectrumView.spectrumView
-        # dataDims = apiSpectrumView.orderedDataDims
-        # ll = apiSpectrumView.dataSource.sortedDataDims()
-        # # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
-        # dimIndices = [x and ll.index(x) for x in dataDims]
-        # xDim = dimIndices[0]
-        # yDim = dimIndices[1]
-        #
-        # spectrumLimits = self.spectrum.spectrumLimits
-        # xLimits = spectrumLimits[xDim]
-        # yLimits = spectrumLimits[yDim]
+    # def _setBorderItemHidden(self, checked):
+    #     """
+    #     # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
+    #     """
+    #     pass
+    #     # self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
 
-        colour = Colour.rgba(self._getColour('positiveContourColour'))  # TBD: for now assume only one colour
-        rect = QtCore.QRectF(xLimits[0], yLimits[0], xLimits[1] - xLimits[0], yLimits[1] - yLimits[0])
-        self.borderItem = QtWidgets.QGraphicsRectItem(rect)
-        self.borderItem.setPen(pg.functions.mkPen(colour[:3], width=1, style=QtCore.Qt.DotLine))
-        self.strip.viewBox.addItem(self.borderItem)
-
-        self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder)
-
-    def _setBorderItemHidden(self, checked):
-        """
-        # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
-        """
-        pass
-        # self.borderItem.setVisible(self._application.preferences.general.showSpectrumBorder and self.isVisible())
-
-    def _setupTrace(self):
-
-        self.hTrace = pg.PlotDataItem()
-        self.strip.plotWidget.scene().addItem(self.hTrace)
-
-        self.vTrace = pg.PlotDataItem()
-        self.strip.plotWidget.scene().addItem(self.vTrace)
-
-        self.hPhaseTraces = []
-        self.vPhaseTraces = []
+    # def _setupTrace(self):
+    #
+    #     self.hTrace = pg.PlotDataItem()
+    #     self.strip.plotWidget.scene().addItem(self.hTrace)
+    #
+    #     self.vTrace = pg.PlotDataItem()
+    #     self.strip.plotWidget.scene().addItem(self.vTrace)
+    #
+    #     self.hPhaseTraces = []
+    #     self.vPhaseTraces = []
 
     def _turnOnPhasing(self):
         """
@@ -321,6 +321,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         """
         if not self.isVisible():
             return
+        return
 
         # print('>>>_updatePhasing')
         position = [axis.position for axis in self.strip.orderedAxes]
@@ -539,68 +540,68 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # def _newPeakListView(self, peakListView):
     #   pass
 
-    def _printToFile(self, printer):
-        """
-        # CCPN INTERNAL - called in _printToFile method of GuiStrip
-        """
-
-        if not self.isVisible():
-            return
-
-        # assume that already done on screen
-        #if apiDataSource.positiveContourBase == 10000.0: # horrid
-        #  # base has not yet been set, so guess a sensible value
-        #  apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
-        #  apiDataSource.negativeContourBase = - apiDataSource.positiveContourBase
-
-        if self.displayPositiveContours:
-            posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
-                                   self.positiveContourFactor)
-        else:
-            posLevels = []
-
-        if self.displayNegativeContours is True:
-            negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
-                                   self.negativeContourFactor)
-        else:
-            negLevels = []
-
-        if not posLevels and not negLevels:
-            return
-
-        posColour = self._getColour('positiveContourColour')
-        negColour = self._getColour('negativeContourColour')
-
-        xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(
-                0, pixelViewBox0=printer.x0, pixelViewBox1=printer.x1)
-        yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(
-                1, pixelViewBox0=printer.y0, pixelViewBox1=printer.y1)
-
-        xTile0 = xClipPoint0 // xTotalPointCount
-        xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
-        yTile0 = yClipPoint0 // yTotalPointCount
-        yTile1 = 1 + (yClipPoint1 // yTotalPointCount)
-
-        for position, dataArray in self._getPlaneData():
-
-            if posLevels:
-                posLevelsArray = numpy.array(posLevels, numpy.float32)
-                posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-                for contourData in posContours:
-                    self._printContourData(printer, contourData, posColour, xTile0, xTile1, yTile0, yTile1,
-                                           xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
-                                           yTotalPointCount)
-
-            if negLevels:
-                negLevelsArray = numpy.array(negLevels, numpy.float32)
-                negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
-                for contourData in negContours:
-                    self._printContourData(printer, contourData, negColour, xTile0, xTile1, yTile0, yTile1,
-                                           xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
-                                           yTotalPointCount)
-
-        for peakListView in self.peakListViews:
-            peakListView._printToFile(printer)
+    # def _printToFile(self, printer):
+    #     """
+    #     # CCPN INTERNAL - called in _printToFile method of GuiStrip
+    #     """
+    #
+    #     if not self.isVisible():
+    #         return
+    #
+    #     # assume that already done on screen
+    #     #if apiDataSource.positiveContourBase == 10000.0: # horrid
+    #     #  # base has not yet been set, so guess a sensible value
+    #     #  apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
+    #     #  apiDataSource.negativeContourBase = - apiDataSource.positiveContourBase
+    #
+    #     if self.displayPositiveContours:
+    #         posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
+    #                                self.positiveContourFactor)
+    #     else:
+    #         posLevels = []
+    #
+    #     if self.displayNegativeContours is True:
+    #         negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
+    #                                self.negativeContourFactor)
+    #     else:
+    #         negLevels = []
+    #
+    #     if not posLevels and not negLevels:
+    #         return
+    #
+    #     posColour = self._getColour('positiveContourColour')
+    #     negColour = self._getColour('negativeContourColour')
+    #
+    #     xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(
+    #             0, pixelViewBox0=printer.x0, pixelViewBox1=printer.x1)
+    #     yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(
+    #             1, pixelViewBox0=printer.y0, pixelViewBox1=printer.y1)
+    #
+    #     xTile0 = xClipPoint0 // xTotalPointCount
+    #     xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
+    #     yTile0 = yClipPoint0 // yTotalPointCount
+    #     yTile1 = 1 + (yClipPoint1 // yTotalPointCount)
+    #
+    #     for position, dataArray in self._getPlaneData():
+    #
+    #         if posLevels:
+    #             posLevelsArray = numpy.array(posLevels, numpy.float32)
+    #             posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
+    #             for contourData in posContours:
+    #                 self._printContourData(printer, contourData, posColour, xTile0, xTile1, yTile0, yTile1,
+    #                                        xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
+    #                                        yTotalPointCount)
+    #
+    #         if negLevels:
+    #             negLevelsArray = numpy.array(negLevels, numpy.float32)
+    #             negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
+    #             for contourData in negContours:
+    #                 self._printContourData(printer, contourData, negColour, xTile0, xTile1, yTile0, yTile1,
+    #                                        xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
+    #                                        yTotalPointCount)
+    #
+    #     for peakListView in self.peakListViews:
+    #         peakListView._printToFile(printer)
 
     def _printContourData(self, printer, contourData, colour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
                           yTotalPointCount):

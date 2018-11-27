@@ -1,6 +1,5 @@
 """Miscellaneous common utilities
 """
-# NB must be Python 2.7 and 3.x compatible
 
 from __future__ import absolute_import
 from __future__ import division
@@ -227,6 +226,14 @@ def isClose(a, b, relTolerance=1e-05, absTolerance=1e-08):
     Inspired by numpy.isclose()"""
     return (abs(a - b) <= (absTolerance + relTolerance * abs(b)))
 
+def isIterable(obj) -> bool:
+    "Returns True if obj is iterable"
+    try:
+        iter(obj)
+        return True
+    except TypeError:
+        pass
+    return False
 
 def getTimeStamp():
     """Get iso-formtted timestamp"""

@@ -116,7 +116,7 @@ def undoBlock():
     # application._echoBlocking += 1
     application._increaseNotificationBlocking()
 
-    getLogger().debug('_enterUndoBlock')
+    getLogger().debug2('_enterUndoBlock')
 
     try:
         # transfer control to the calling function

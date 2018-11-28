@@ -37,7 +37,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
-from ccpn.util.decorators import notify
+from ccpn.util.decorators import notify, deleteObject
 
 
 @functools.total_ordering
@@ -522,7 +522,7 @@ class AbstractWrapperObject():
 
     # CCPN functions
 
-    @notify('delete', preExecution=True)
+    @deleteObject()
     def delete(self):
         """Delete object, with all contained objects and underlying data."""
 

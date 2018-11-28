@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import itertools
 import collections
 import operator
+from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
 
 from ccpn.util import Undo
 from ccpn.util import Common as commonUtil
@@ -37,11 +38,10 @@ from ccpn.core.PeakList import PeakList
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
-from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
+
 from ccpn.util.decorators import notify, propertyUndo, logCommand
-from ccpn.core.lib.ContextManagers import blockUndoItems, BlankedPartial
-from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import newObject
+from ccpn.util.Logging import getLogger
 
 class Peak(AbstractWrapperObject):
     """Peak object, holding position, intensity, and assignment information
@@ -643,9 +643,6 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
             peakDim.lineWidth = lineWidths[ii]
 
     return result
-
-# PeakList.newPeak = _newPeak
-# del _newPeak
 
 # Additional Notifiers:
 #

@@ -223,6 +223,121 @@ def propertyUndo():
 #         return result
 #
 #     return theDecorator
+def ccpNmrV3CoreSetter():
+    """A decorator wrap a method in an undo block
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+
+        self = args[0]
+        project = self.project
+
+        _undo = self.project._undo
+        project.blankNotification()
+        with undoBlock(self.project.application):
+
+            _undo.increaseBlocking()
+            oldValue = getattr(self, func.__name__)
+
+            # call the wrapped function
+            result = func(*args, **kwds)
+
+            _undo.decreaseBlocking()
+
+            _undo._newItem(undoPartial=partial(func, self, oldValue),
+                           redoPartial=partial(func, *args, **kwds))
+        project.unblankNotification()
+        project._finaliseAction('change')
+        return result
+
+    return theDecorator
+
+def _ccpNmrV3CoreSetterDD():
+    """A decorator for ccpNmr property setters inserting an undo block and calling
+     result._finalise('change')
+    """
+    @notify('change')
+    @propertyUndo()
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        result = func(*args, **kwds)
+        return result
+
+    return theDecorator
+
+
+def newObject():
+    """A decorator wrap a newObject method in an undo block and calls
+     result._finalise('create')
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+
+        # print('>>> in the newObject decorator:', func.__name__, args, kwds)
+
+        _undo = self.project._undo
+        self.project.blankNotification()
+        with undoBlock(self.project.application):
+
+            #_undo.increaseBlocking()
+            # call the wrapped function
+            result = func(*args, **kwds)
+            #_undo.decreaseBlocking()
+
+            # _undo._newItem(undoPartial=partial(self.project.deleteObjects, result),
+            #                redoPartial=partial(func, *args, **kwds))
+
+        self.project.unblankNotification()
+        result._finaliseAction('create')
+        return result
+
+    return theDecorator
+
+
+def deleteObject():
+    """ A decorator to wrap the delete(self) method of the V3 core classes
+    calls self._finalise('delete') prior to deletion
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+
+        # print('>>> in the deleteObject decorator:', func.__name__, args, kwds)
+
+        self._finaliseAction('delete')
+
+        _undo = self.project._undo
+        self.project.blankNotification()
+        with undoBlock(self.project.application):
+
+            #_undo.increaseBlocking()
+            # call the wrapped function
+            result = func(*args, **kwds)
+            #_undo.decreaseBlocking()
+
+            # _undo._newItem(undoPartial=partial(self.project.deleteObjects, result),
+            #                redoPartial=partial(func, *args, **kwds))
+
+        self.project.unblankNotification()
+        return result
+
+    return theDecorator
 
 
 #----------------------------------------------------------------------------------------------

@@ -1814,7 +1814,7 @@ class GuiStrip(NotifierBase, Frame):
         if layout:
             from ccpn.core.lib.ContextManagers import undoBlock
 
-            with undoBlock(self.application):
+            with undoBlock():
                 # retrieve the old index from storageDict
                 currentIndex = self._getStripDeleteDict()
 

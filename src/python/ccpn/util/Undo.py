@@ -403,7 +403,7 @@ class Undo(deque):
         from ccpn.core.lib.ContextManagers import undoBlock
 
         try:
-            with undoBlock(self.application):
+            with undoBlock():
                 undoCall = redoCall = None
                 for n in range(self.nextIndex - 1, undoTo, -1):
                     undoCall, redoCall = self[n]
@@ -453,7 +453,7 @@ class Undo(deque):
         from ccpn.core.lib.ContextManagers import undoBlock
 
         try:
-            with undoBlock(self.application):
+            with undoBlock():
                 for n in range(self.nextIndex, redoTo + 1):
                     # undoMethod, undoData, redoMethod, redoData = self[n]
                     # if redoData is None:

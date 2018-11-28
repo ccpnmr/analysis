@@ -45,7 +45,7 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import notify, propertyUndo
-from ccpn.util.decorators import newObject, logCommand
+from ccpn.util.decorators import logCommand
 
 
 def _estimateNoiseLevel1D(y):
@@ -745,47 +745,32 @@ class PeakList(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
-    @logCommand('peaklist.')
-    @newObject()
-    def newPeak(self, height: float = None, volume: float = None,
-                heightError: float = None, volumeError: float = None,
-                figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
-                position: Sequence[float] = (), positionError: Sequence[float] = (),
-                pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
-                lineWidths: Sequence[float] = (), serial: int = None):
+    @logCommand(get='self')
+    def newPeak(self, ppmPositions: Sequence[float] = (), height: float = None,
+                comment: str = None, **kwds):
         """Create a new Peak within a peakList
-
-        NB you must create the peak before you can assign it. The assignment attributes are:
-        - assignedNmrAtoms - A tuple of all (e.g.) assignment triplets for a 3D spectrum
-        - dimensionNmrAtoms - A tuple of tuples of assignments, one for each dimension
 
         See the Peak class for details
 
-        :param height:
-        :param volume:
-        :param heightError:
-        :param volumeError:
-        :param figureOfMerit:
-        :param annotation:
-        :param comment:
-        :param position:
-        :param positionError:
-        :param pointPosition:
-        :param boxWidths:
-        :param lineWidths:
-        :param serial:
+        :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
+        :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
+        :param comment: optional comment string
 
         :return peak instance
-        """
-        from ccpn.core.Peak import _newPeak
 
-        return _newPeak(self, height=height, volume=volume,
-                        heightError=heightError, volumeError=volumeError,
-                        figureOfMerit=figureOfMerit, annotation=annotation, comment=comment,
-                        position=position, positionError=positionError,
-                        pointPosition=pointPosition, boxWidths=boxWidths,
-                        lineWidths=lineWidths, serial=serial
-                        )
+        optional keyword arguments can be passed in; see Peak._newPeak for details.
+
+
+        NB you must create the peak before you can assign it. The assignment attributes are:
+        - assignments (assignedNmrAtoms) - A tuple of all (e.g.) assignment triplets for a 3D spectrum
+        - assignmentsByDimensions (dimensionNmrAtoms) - A tuple of tuples of assignments, one for each dimension
+
+        """
+        from ccpn.core.Peak import _newPeak  # imported here to avoid circular imports
+
+        if height is None:
+            height = self.spectrum.getHeight(ppmPositions)
+        return _newPeak(self, ppmPositions=ppmPositions, height=height, comment=comment, **kwds)
 
 
 #=========================================================================================

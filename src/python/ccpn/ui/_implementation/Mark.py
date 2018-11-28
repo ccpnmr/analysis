@@ -1,6 +1,6 @@
 """Mark class
 
-Ifter creation, there are no attributes that ca be modified; i.e. the Mark object is inmutable
+After creation, there are no attributes that can be modified; i.e. the Mark object is inmutable
 
 """
 #=========================================================================================
@@ -12,7 +12,6 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                  "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
@@ -22,12 +21,12 @@ __version__ = "$Revision: 3.0.b4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-
 __author__ = "$Author: CCPN $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import collections
 from typing import Sequence, Tuple
 
@@ -36,6 +35,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject
 
 
 RulerData = collections.namedtuple('RulerData', ['position', 'axisCode', 'unit', 'label'])
@@ -173,8 +173,10 @@ class Mark(AbstractWrapperObject):
             return super().__str__()
         else:
             ll = min(len(self.positions), len(self.axisCodes))
+
             def roundedValue(value):
                 return float('%.2f' % value)
+
             pstring = str(tuple([(self.axisCodes[i], roundedValue(self.positions[i])) for i in range(ll)]))
             return '<%s:%s %s>' % (self.shortClassName, self.serial, pstring[1:-1])
 
@@ -184,6 +186,7 @@ class Mark(AbstractWrapperObject):
 
 # newMark functions
 
+@newObject()
 def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: Sequence,
              style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()) -> Mark:
     """Create new Mark
@@ -237,7 +240,7 @@ def _newMark(self: Project, colour: str, positions: Sequence[float], axisCodes: 
 #
 #     with echoCommand(self, 'newMark', colour, positions, axisCodes, values=locals(),
 #                      defaults=defaults, parName='newMark'):
-#         with undoBlock(self._appBase):  # testing -> _appBase will disappear with the new framework
+#         with undoBlock():  # testing -> _appBase will disappear with the new framework
 #             apiMark = apiGuiTask.newMark(colour=colour, style=style)
 #
 #             for ii, position in enumerate(positions):

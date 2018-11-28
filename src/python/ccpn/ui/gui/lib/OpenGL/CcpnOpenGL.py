@@ -4755,8 +4755,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         newPeaks, peakLists = self.strip.peakPickPosition(position)
 
-        self.current.peaks = newPeaks
-
     def _clearIntegralRegions(self):
         """Clear the integral regions
         """

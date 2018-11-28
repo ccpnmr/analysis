@@ -53,7 +53,7 @@ from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 
 from ccpn.util.Logging import getLogger
 
-from ccpn.util.decorators import newObject, logCommand
+from ccpn.util.decorators import logCommand
 
 
 # TODO These should be merged with the sams constants in CcpnNefIo
@@ -1338,8 +1338,7 @@ class Project(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
-    @logCommand('project.')
-    @newObject()
+    @logCommand(get='self')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence,
                 style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
         """Create new Mark

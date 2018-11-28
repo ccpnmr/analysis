@@ -1191,6 +1191,11 @@ class Spectrum(AbstractWrapperObject):
     # Library functions
     #=========================================================================================
 
+    def getHeight(self, ppmPositions):
+        """returns the interpolated height at the ppm position
+        """
+        return 10
+
     def getPositionValue(self, position):
         return self._apiDataSource.getPositionValue(position)
 

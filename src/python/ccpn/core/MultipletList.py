@@ -38,7 +38,7 @@ from ccpn.core.Spectrum import Spectrum
 # from ccpn.core.Multiplet import Multiplet
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
 from typing import Optional, Tuple, Sequence, List
-from ccpn.util.decorators import newObject, logCommand
+from ccpn.util.decorators import logCommand
 
 
 LINECOLOUR = 'lineColour'
@@ -215,7 +215,6 @@ class MultipletList(AbstractWrapperObject):
     #===========================================================================================
 
     @logCommand('multipletlist.')
-    @newObject()
     def newMultiplet(self,
                       height: float = 0.0, heightError: float = 0.0,
                       volume: float = 0.0, volumeError: float = 0.0,

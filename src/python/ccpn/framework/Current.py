@@ -151,6 +151,7 @@ class Current:
         notifies = self._notifies = {}  # The notifier mechanism of current: a dict of (field, list-of-functions) pairs
         for field in _fields:
             notifies[field] = []
+        self._blanking = 0  # Notifier blanking
 
         # GWV 20181122: deactivated
         # self.registerNotify(self._updateSelectedPeaks, 'peaks')  # Optimization; see below
@@ -197,6 +198,15 @@ class Current:
             callbacks.remove(notify)
         except:
             IndexError('callback not found; unable to unRegister from current')
+
+    def increaseBlanking(self):
+        self._blanking += 1
+
+    def decreaseBlanking(self):
+        if self._blanking > 0:
+            self._blanking -= 1
+        else:
+            raise RuntimeError('Error decreasing blanking; already at 0')
 
     # GWV 20181122: deactivated
     # def _updateSelectedPeaks(self, currentPeaks):
@@ -357,9 +367,10 @@ class Current:
                 setattr(self, attributeName, value)
 
                 # Trigger the notifiers
-                funcs = getFieldItem(self._notifies) or () # getFieldItem(obj) returns obj[field]
-                for func in funcs:
-                    func(value)
+                if self._blanking > 0:
+                    funcs = getFieldItem(self._notifies) or () # getFieldItem(obj) returns obj[field]
+                    for func in funcs:
+                        func(value)
 
         # define singular properties
         def getter(self):
@@ -416,10 +427,12 @@ class Current:
     def _cleanUp(self, cDict, fieldName):
         "Callback for deletion of an object in the project"
         from ccpn.core.lib.Notifiers import Notifier ## needs to be local to avoid circular imports
+        self.increaseBlanking()
         obj = cDict[Notifier.OBJECT]
         values = getattr(self, fieldName)
         if values and obj in values:
             values.remove(obj)
+        self.decreaseBlanking()
 
     def _registerNotifiers(self):
         """Registers the notifiers to cleanup current.fieldName on deletion of an object

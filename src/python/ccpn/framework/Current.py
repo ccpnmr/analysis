@@ -367,7 +367,7 @@ class Current:
                 setattr(self, attributeName, value)
 
                 # Trigger the notifiers
-                if self._blanking > 0:
+                if self._blanking == 0:
                     funcs = getFieldItem(self._notifies) or () # getFieldItem(obj) returns obj[field]
                     for func in funcs:
                         func(value)

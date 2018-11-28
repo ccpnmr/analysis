@@ -683,15 +683,19 @@ CURRENT_ATTRIBUTE_NAME = '_currentAttributeName'
 class _ObjectStore(object):
     "A class to store a current setting"
     def __init__(self, obj):
-        self.attributeName = getattr(obj, CURRENT_ATTRIBUTE_NAME)
-        self.currentObjects = None
         self.current = getApplication().current
+        self.attributeName = getattr(obj, CURRENT_ATTRIBUTE_NAME)
+        if not hasattr(self.current, self.attributeName):
+            raise RuntimeError('Current object does not have attribute "%s"' % self.attributeName)
+        self.currentObjects = None
 
     def _storeCurrentSelectedObject(self):
         self.currentObjects = list(getattr(self.current, self.attributeName))
 
     def _restoreCurrentSelectedObject(self):
+        self.current.increaseBlanking()
         setattr(self.current, self.attributeName, self.currentObjects)
+        self.current.decreaseBlanking()
 
 
 def newObject():

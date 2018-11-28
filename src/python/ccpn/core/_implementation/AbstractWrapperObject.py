@@ -328,7 +328,172 @@ class AbstractWrapperObject():
         else:
             return (self._key,)
 
-    # Abstract methods
+    def _newInstance(self, *kwds):
+        """Intialiate a new instance, including the wrappedData
+        Shoudl be subclassed
+        """
+        pass
+
+    #--------------------------------------------------------------------------------------------
+    # Abstract /Api methods
+    #--------------------------------------------------------------------------------------------
+
+    def _printClassTree(self, node=None, tabs=0):
+        """Simple Class-tree printing method
+         """
+        if node is None:
+            node = self
+        s = '\t' * tabs + '%s' % (node.className)
+        if node._isGuiClass:
+            s += '  (GuiClass)'
+        print(s)
+        for child in node._childClasses:
+            self._printClassTree(child, tabs=tabs + 1)
+
+    def _getChildren(self, classes=['all']) -> OrderedDict:
+        """GWV; Return a dict of (className, ChildrenList) pairs
+        classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+        CCPNINTERNAL: used throughout
+        """
+        _get = self._project._data2Obj.get
+        data = OrderedDict()
+        for className, apiChildren in self._getApiChildren(classes=classes).items():
+            children = data.setdefault(className, [])
+            for apiChild in apiChildren:
+                child = _get(apiChild)
+                if child is not None:
+                    children.append(child)
+        return data
+
+    def _getApiChildren(self, classes=['all']) -> OrderedDict:
+        """GWV; Return a dict of (className, apiChildrenList) pairs
+         classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+         CCPNINTERNAL: used throughout
+         """
+        data = OrderedDict()
+        for childClass in self._childClasses:
+
+            if ('all' in classes) or \
+                    (childClass._isGuiClass and 'gui' in classes) or \
+                    (not childClass._isGuiClass and 'nonGui' in classes) or \
+                    childClass.className in classes:
+
+                childApis = data.setdefault(childClass.className, [])
+                for apiObj in childClass._getAllWrappedData(self):
+                    childApis.append(apiObj)
+
+        return data
+
+    def _getApiSiblings(self) -> list:
+        """GWV; Return a list of apiSiblings of self
+         CCPNINTERNAL: used throughout
+         """
+        if self._parent is None:
+            # We are at the root (i.e. Project), no siblings
+            return []
+        else:
+            return self._parent._getApiChildren().get(self.className)
+
+    def _getSiblings(self) -> list:
+        """GWV; Return a list of siblings of self
+         CCPNINTERNAL: used throughout
+         """
+        if self._parent is None:
+            # We are at the root (i.e. Project), no siblings
+            return []
+        else:
+            return self._parent._getChildren().get(self.className)
+
+    def _getDirectChildren(self):
+        """RF; Get list of all objects that have self as a parent
+        """
+        getDataObj = self._project._data2Obj.get
+        result = list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
+        return result
+
+    def _restoreChildren(self, classes=['all']):
+        """GWV: A method to restore the children of self
+        classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+        For restore 3.1 branch
+        """
+        _classMap = dict([(cls.className, cls) for cls in self._childClasses])
+
+        # loop over all the child-classses
+        for clsName, apiChildren in self._getApiChildren(classes=classes).items():
+
+            cls = _classMap.get(clsName)
+            if cls is None:
+                raise RuntimeError('Undefined class "%s"' % clsName)
+
+            for apiChild in apiChildren:
+
+                newInstance = self._newInstanceWithApiData(cls=cls, apiData=apiChild)
+                if newInstance is None:
+                    raise RuntimeError('Error creating new instance of class "%s"' % clsName)
+
+                # add the newInstance to the appropriate mapping dictionaries
+                self._project._data2Obj[apiChild] = newInstance
+                _d = self._project._pid2Obj.setdefault(clsName, {})
+                _d[newInstance.pid] = newInstance
+
+                # recursively do the children of newInstance
+                newInstance._restoreChildren(classes=classes)
+
+    def _newInstanceWithApiData(self, cls, apiData):
+        """Return a new instance of cls, initialised with apiData
+        For restore 3.1 branch
+        """
+        if apiData in self._project._data2Obj:
+            # This happens with Window, as it get initialised by the Windowstore and then once
+            # more as child of Project
+            newInstance = self._project._data2Obj[apiData]
+
+        elif hasattr(cls, '_factoryFunction') and getattr(cls, '_factoryFunction') is not None:
+            newInstance = cls._factoryFunction(self._project, apiData)
+
+        else:
+            newInstance = cls(self._project, apiData)
+
+        if newInstance is None:
+            raise RuntimeError('Error creating new instance of class "%s"' % cls.className)
+
+        return newInstance
+
+    def _getApiObjectTree(self) -> tuple:
+        """Retrieve the apiObject tree contained by this object
+
+        CCPNINTERNAL   used for undo's, redo's
+        """
+        #EJB 20181127: taken from memops.Implementation.DataObject.delete
+        #                   should be in the model??
+
+        from ccpn.util.OrderedSet import OrderedSet
+
+        apiObject = self._wrappedData
+
+        apiObjectlist = OrderedSet()
+        # objects still to be checked
+        objsToBeChecked = list()
+        # counter keyed on (obj, roleName) for how many objects at other end of link
+        linkCounter = {}
+
+        # topObjects to check if modifiable
+        topObjectsToCheck = set()
+
+        objsToBeChecked.append(apiObject)
+        while len(objsToBeChecked) > 0:
+            obj = objsToBeChecked.pop()
+            obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
+
+        for topObjectToCheck in topObjectsToCheck:
+            if (not (topObjectToCheck.__dict__.get('isModifiable'))):
+                raise ValueError("""%s.delete:
+           Storage not modifiable""" % apiObject.qualifiedName
+                                 + ": %s" % (topObjectToCheck,)
+                                 )
+
+        return tuple(apiObjectlist)
+
     @classmethod
     def _getAllWrappedData(cls, parent) -> list:
         """get list of wrapped data objects for each class that is a child of parent

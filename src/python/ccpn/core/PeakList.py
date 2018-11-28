@@ -741,8 +741,8 @@ class PeakList(AbstractWrapperObject):
                 plv._finaliseAction(action=action)
 
     #===========================================================================================
-    # Hot fixed methods (baahhhhhh)
-    # Copied from their respective locations
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
     #===========================================================================================
 
     @logCommand('peaklist.')
@@ -774,7 +774,8 @@ class PeakList(AbstractWrapperObject):
         :param boxWidths:
         :param lineWidths:
         :param serial:
-        :return new peak:
+
+        :return peak instance
         """
         from ccpn.core.Peak import _newPeak
 
@@ -844,7 +845,8 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
     return result
 
 
-Spectrum.newPeakList = _newPeakList
-del _newPeakList
+# EJB 20181127: moved to spectrum
+# Spectrum.newPeakList = _newPeakList
+# del _newPeakList
 
 # Notifiers:

@@ -1685,8 +1685,8 @@ class Spectrum(AbstractWrapperObject):
                 specView._finaliseAction(action=action)
 
     #===========================================================================================
-    # Hot fixed methods (baahhhhhh)
-    # Copied from their respective locations
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
     #===========================================================================================
 
     def newPeakList(self, title: str = None, comment: str = None,

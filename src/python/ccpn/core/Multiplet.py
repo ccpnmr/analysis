@@ -43,6 +43,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 from typing import Optional, Tuple, Any, Union, Sequence, List
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import notify, propertyUndo, logCommand
+from ccpn.core.lib.ContextManagers import blockUndoItems
 from functools import partial
 
 
@@ -423,9 +424,8 @@ def _newMultiplet(self: MultipletList,
                   volume: float = 0.0, volumeError: float = 0.0,
                   offset: float = 0.0, constraintWeight: float = 0.0,
                   figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
-                  position: List[float] = (), positionError: List[float] = (),
                   limits: Sequence[Tuple[float, float]] = (), slopes: List[float] = (),
-                  pointLimits: Sequence[Tuple[float, float]] = (),
+                  pointLimits: Sequence[Tuple[float, float]] = (), serial: int = None,
                   peaks: ['Peak'] = ()) -> Multiplet:
     """Create a new Multiplet within a multipletList
 
@@ -444,14 +444,18 @@ def _newMultiplet(self: MultipletList,
     :param slopes:
     :param pointLimits:
     :param peaks:
-    :return: add a new Multiplet to the MultipletList.
+
+    :return: new multiplet instance.
     """
-    # __doc__ added to MultipletList
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # throw more understandable errors for the python console
     spectrum = self.spectrum
-    pks = makeIterableList(peaks)
+    peakList = makeIterableList(peaks)
+    pks = []
+    for peak in peakList:
+        pks.append(self.project.getByPid(peak) if isinstance(peak, str) else peak)
+
     for pp in pks:
         if not isinstance(pp, Peak):
             raise TypeError('%s is not of type Peak' % pp)
@@ -459,52 +463,56 @@ def _newMultiplet(self: MultipletList,
             raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
-    defaults = collections.OrderedDict((('annotation', None),
-                                        ('height', 0.0), ('heightError', 0.0),
-                                        ('volume', 0.0), ('volumeError', 0.0),
-                                        ('offset', 0.0),
-                                        ('figureOfMerit', 1.0),
-                                        ('constraintWeight', 0.0),
-                                        ('comment', None),
-                                        ('position', ()), ('positionError', ()),
-                                        ('limits', ()), ('slopes', ()), ('pointLimits', ()),
-                                        ('peaks', [])))
     dd = {'height': height, 'heightError': heightError,
           'volume': volume, 'volumeError': volumeError, 'offset': offset, 'slopes': slopes,
           'figOfMerit': figureOfMerit, 'constraintWeight': constraintWeight,
           'annotation': annotation, 'details': comment,
-          # 'position': position, 'positionError': positionError,   # these can't be set
           'limits': limits, 'pointLimits': pointLimits}
-    if peaks:
-        dd['peaks'] = [p._wrappedData for p in peaks]
+    if pks:
+        dd['peaks'] = [pk._wrappedData for pk in pks]
 
-    undo = self._project._undo
-    self._startCommandEchoBlock('newMultiplet', values=locals(), defaults=defaults,
-                                parName='newMultiplet')
-    try:
-        apiParent = self._apiMultipletList
+    # remove items that can't be set to None in the model
+    if not offset:
+        del dd['offset']
+    if not constraintWeight:
+        del dd['constraintWeight']
+
+    with blockUndoItems() as undoItem:
+
+        # my need this relabelling in logCommand - newObject
         # if pks:
-        #   apiMultiplet = apiParent.newMultiplet(multipletType='multiplet',
-        #                                           peaks=[p._wrappedData for p in pks])
+        #     peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
+        #     log('newMultiplet', peaks=peakStr)
         # else:
-        #   apiMultiplet = apiParent.newMultiplet(multipletType='multiplet')
+        #     log('newMultiplet')
 
+        apiParent = self._apiMultipletList
         apiMultiplet = apiParent.newMultiplet(multipletType='multiplet', **dd)
 
         result = self._project._data2Obj.get(apiMultiplet)
 
-    finally:
-        self._endCommandEchoBlock()
+        if serial is not None:
+            try:
+                result.resetSerial(serial)
+            except ValueError:
+                self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                             % (result, serial))
+
+        # retrieve list of created items from the api
+        apiObjectsCreated = Undo._getApiObjectTree(apiMultiplet)
+        undoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
+                 redo=partial(apiMultiplet.root._unDelete, apiObjectsCreated, (apiMultiplet.topObject,)))
 
     return result
 
+# EJB 20181127: removed
+# Multiplet._parentClass.newMultiplet = _newMultiplet
+# del _newMultiplet
 
-Multiplet._parentClass.newMultiplet = _newMultiplet
-del _newMultiplet
-
+# EJB 20181128: removed, to be added to multiplet __init__?
 # Notify Multiplets when the contents of peaks have changed
 # i.e PeakDim references
-Project._apiNotifiers.append(
-        ('_notifyRelatedApiObject', {'pathToObject': 'peak.multiplets', 'action': 'change'},
-         Nmr.PeakDim._metaclass.qualifiedName(), '')
-        )
+# Project._apiNotifiers.append(
+#         ('_notifyRelatedApiObject', {'pathToObject': 'peak.multiplets', 'action': 'change'},
+#          Nmr.PeakDim._metaclass.qualifiedName(), '')
+#         )

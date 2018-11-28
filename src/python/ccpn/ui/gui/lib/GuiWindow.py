@@ -621,18 +621,12 @@ class GuiWindow():
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
-        # self.application.project.unblankNotification()
-        # self.application.project.unblankNotification()
-
     def setMouseMode(self, mode):
         if mode in MouseModes:
             # self.mouseMode = mode
             setCurrentMouseMode(mode)
             mouseModeText = ' Mouse Mode: '
             self.statusBar().showMessage(mouseModeText + mode)
-            project = self.application.project
-            for strip in project.strips:
-                strip.viewBox._setMouseCursor()
 
     def switchMouseMode(self):
         # mode = self.mouseMode

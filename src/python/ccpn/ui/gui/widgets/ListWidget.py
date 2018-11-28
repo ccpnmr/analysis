@@ -188,6 +188,12 @@ class ListWidget(QtWidgets.QListWidget, Base):
                 objects.append(obj)
         return objects
 
+    def selectItems(self, names):
+        for index in range(self.count()):
+            item = self.item(index)
+            if item.text() in names:
+                item.setSelected(True)
+
     def select(self, name):
         for index in range(self.count()):
             item = self.item(index)
@@ -210,7 +216,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
         items = []
         for index in range(self.count()):
             items.append(self.item(index))
-        return [i.text() for i in items]
+        return list(set([i.text() for i in items]))
 
     def getSelectedTexts(self):
         return [i.text() for i in self.selectedItems()]
@@ -331,7 +337,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
             if self.sortOnDrop is True:
                 self.sortItems()
         else:
-            items = []
+            data = [self.parseEvent(event)]
             if event.source() != self:  # otherwise duplicates
                 if self.dropSource is None:  # allow event drops from anywhere
                     if self.copyDrop:
@@ -340,7 +346,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                         event.setDropAction(QtCore.Qt.MoveAction)
 
                     super(ListWidget, self).dropEvent(event)
-                    self.dropped.emit(items)
+                    self.dropped.emit(data)
                     if not self.allowDuplicates:
                         self._removeDuplicate()
                     if self.sortOnDrop is True:
@@ -351,7 +357,7 @@ class ListWidget(QtWidgets.QListWidget, Base):
                         event.setDropAction(QtCore.Qt.MoveAction)  # from only the permitted widget
                         # self.emit(QtCore.SIGNAL("dropped"), items)
                         super(ListWidget, self).dropEvent(event)
-                        self.dropped.emit(items)
+                        self.dropped.emit(data)
                         if self.sortOnDrop is True:
                             self.sortItems()
                     else:
@@ -775,6 +781,9 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Widget import Widget
 
 
+    def droppedCallback(*r):
+        print(r)
+
     app = TestApplication()
 
     texts = ['Int', 'Float', 'String', '']
@@ -782,9 +791,12 @@ if __name__ == '__main__':
 
 
 
+
     popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
     widget = ListWidget(parent=popup,allowDuplicates=True, acceptDrops=True, grid=(0,0))
     widget2 = ListWidget(parent=popup, allowDuplicates=False, acceptDrops=True, grid=(0, 1))
+    widget2.dropped.connect(droppedCallback)
+
 
     for i in ['a','a','c']:
         widget.addItem(i)

@@ -127,7 +127,7 @@ class ZoomPopup(CcpnDialog):
     def _zoom(self):
         from ccpn.core.lib.ContextManagers import undoBlock
 
-        with undoBlock(self.application):  # testing -> _appBase will disappear with the new framework
+        with undoBlock():  # testing -> _appBase will disappear with the new framework
 
             positions = [(minVal.value(), maxVal.value()) for minVal, maxVal in zip(self.minPositionBoxes, self.maxPositionBoxes)]
             self.current.strip.zoom(positions[0], positions[1])

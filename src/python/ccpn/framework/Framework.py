@@ -1335,7 +1335,7 @@ class Framework:
         # self.project._undo.increaseBlocking()
         self.project._wrappedData.shiftAveraging = False
 
-        with undoBlock(self):
+        with undoBlock():
             try:
                 self.nefReader.importNewProject(self.project, dataBlock)
             except Exception as es:
@@ -1364,7 +1364,7 @@ class Framework:
         # self.project._undo.increaseBlocking()
         self.project._wrappedData.shiftAveraging = False
 
-        with undoBlock(self):
+        with undoBlock():
             try:
                 self.nefReader.importNewNMRStarProject(self.project, dataBlock)
             except Exception as es:
@@ -1395,7 +1395,7 @@ class Framework:
         # self._echoBlocking += 1
         # self.project._undo.increaseBlocking()
 
-        with undoBlock(self):
+        with undoBlock():
             try:
                 # insert file into project
 
@@ -1697,6 +1697,22 @@ class Framework:
                 self._echoBlocking -= 1
         else:
             getLogger().warning('nothing to redo.')
+
+    def _getUndo(self):
+        if self.project:
+            return self.project._undo
+        else:
+            raise RuntimeError('Error: undefined project')
+
+    def _increaseNotificationBlocking(self):
+        self._echoBlocking += 1
+
+    def _decreaseNotificationBlocking(self):
+        if self._echoBlocking > 0:
+            self._echoBlocking -= 1
+        else:
+            raise RuntimeError('Error: decreaseNotificationBlocking, already at 0')
+
 
     def saveLogFile(self):
         pass

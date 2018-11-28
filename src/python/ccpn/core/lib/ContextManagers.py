@@ -28,8 +28,9 @@ import functools
 import itertools
 import operator
 import typing
+import decorator
+from functools import partial
 from collections import OrderedDict
-
 from ccpn.core import _importOrder
 # from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Util as coreUtil
@@ -37,6 +38,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
+from ccpn.framework.Application import getApplication
 
 
 @contextmanager
@@ -91,22 +93,28 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
 
 
 @contextmanager
-def undoBlock(obj):
+def undoBlock():
     # usually called from application
-    undo = obj.project._undo
+
+    application = getApplication()
+
+    # undo = application.project._undo
+    undo = application._getUndo()
+
     if undo is not None:  # ejb - changed from if undo:
         undo.newWaypoint()  # DO NOT CHANGE
 
-        if not obj.project._blockSideBar and not undo._blocked:
-            if undo._waypointBlockingLevel < 1 and obj.ui and obj.ui.mainWindow:
-                obj._storedState = obj.ui.mainWindow.sideBar._saveExpandedState()
+        if not application.project._blockSideBar and not undo._blocked:
+            if undo._waypointBlockingLevel < 1 and application.ui and application.ui.mainWindow:
+                application._storedState = application.ui.mainWindow.sideBar._saveExpandedState()
 
         undo.increaseWaypointBlocking()
 
-    if not obj._echoBlocking:
-        obj.project.suspendNotification()
+    if not application._echoBlocking:
+        application.project.suspendNotification()
 
-    obj._echoBlocking += 1
+    # application._echoBlocking += 1
+    application._increaseNotificationBlocking()
 
     getLogger().debug('_enterUndoBlock')
 
@@ -115,22 +123,21 @@ def undoBlock(obj):
         yield
 
     finally:
-        undo = obj.project._undo
+        # if application._echoBlocking > 0:
+        #     application._echoBlocking -= 1
+        application._decreaseNotificationBlocking()
 
-        if obj._echoBlocking > 0:
-            obj._echoBlocking -= 1
-
-        if not obj._echoBlocking:
-            obj.project.resumeNotification()
+        if not application._echoBlocking:
+            application.project.resumeNotification()
 
         if undo is not None:
             undo.decreaseWaypointBlocking()
 
-            if not obj.project._blockSideBar and not undo._blocked:
-                if undo._waypointBlockingLevel < 1 and obj.ui and obj.ui.mainWindow:
-                    obj.ui.mainWindow.sideBar._restoreExpandedState(obj._storedState)
+            if not application.project._blockSideBar and not undo._blocked:
+                if undo._waypointBlockingLevel < 1 and application.ui and application.ui.mainWindow:
+                    application.ui.mainWindow.sideBar._restoreExpandedState(application._storedState)
 
-        getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % obj._echoBlocking)
+        getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
 
 
 # @contextmanager
@@ -422,7 +429,6 @@ def undoBlockManager(application=None, undoBlockOnly=False):
 
     # get the current application
     if not application:
-        from sandbox.Geerten.Refactored.framework import getApplication
         application = getApplication()
 
     undo = application.project._undo
@@ -470,7 +476,6 @@ def suspendSidebar(application=None, suspendSidebarOnly=False):
 
     # get the current application
     if not application:
-        from sandbox.Geerten.Refactored.framework import getApplication
         application = getApplication()
 
     storedState = None
@@ -509,7 +514,6 @@ def suspendNotification(application=None):
 
     # get the current application
     if not application:
-        from sandbox.Geerten.Refactored.framework import getApplication
         application = getApplication()
 
     application.project.suspendNotification()
@@ -532,8 +536,6 @@ def blankNotification():
     """
 
     # get the current application
-    # from sandbox.Geerten.Refactored.framework import getApplication
-    from ccpn.framework.Application import getApplication
     application = getApplication()
 
     application.project.blankNotification()
@@ -556,8 +558,6 @@ def temporaryUnblankNotification():
     """
 
     # get the current application
-    # from sandbox.Geerten.Refactored.framework import getApplication
-    from ccpn.framework.Application import getApplication
     application = getApplication()
 
     application.project.unblankNotification()
@@ -574,7 +574,7 @@ def temporaryUnblankNotification():
 
 
 @contextmanager
-def blockUndoItems():
+def blockUndoItems(application=None):
     """
     Block addition of items to the undo stack, re-enable at the end of the function block.
     New user items can be added to the undo stack after blocking is re-enabled
@@ -592,20 +592,21 @@ def blockUndoItems():
     """
 
     # get the current application
-    # from sandbox.Geerten.Refactored.framework import getApplication
-    from ccpn.framework.Application import getApplication
-    application = getApplication()
+    if not application:
+        application = getApplication()
 
-    projectUndo = application.project._undo
+    undo = application._getUndo()
     _undoStack = []
 
     def undoItem(undo=None, redo=None):
-        if projectUndo is not None:
+        if undo is not None:
             # store the new undo/redo items for later addition to the stack
             _undoStack.append((undo, redo))
 
-    if projectUndo is not None:
-        projectUndo.increaseBlocking()
+    if undo is not None:
+        undo.newWaypoint()  # DO NOT CHANGE
+        undo.increaseWaypointBlocking()
+        undo.increaseBlocking()
 
     try:
         # transfer control to the calling function
@@ -616,11 +617,12 @@ def blockUndoItems():
 
     finally:
         # clean up after blocking undo items
-        if projectUndo is not None:
-            projectUndo.decreaseBlocking()
+        if undo is not None:
+            undo.decreaseBlocking()
+            undo.decreaseWaypointBlocking()
 
             for item in _undoStack:
-                projectUndo._newItem(undoPartial=item[0], redoPartial=item[1])
+                undo._newItem(undoPartial=item[0], redoPartial=item[1])
 
 
 @contextmanager
@@ -661,6 +663,99 @@ def deleteBlockManager(application=None, deleteBlockOnly=False):
 
         logger.debug2('_exitDeleteBlock')
 
+
+CURRENT_ATTRIBUTE_NAME = '_currentAttributeName'
+
+class _ObjectStore(object):
+    "A class to store a current setting"
+    def __init__(self, obj):
+        self.attributeName = getattr(obj, CURRENT_ATTRIBUTE_NAME)
+        self.currentObjects = None
+        self.current = getApplication().current
+
+    def _storeCurrentSelectedObject(self):
+        self.currentObjects = list(getattr(self.current, self.attributeName))
+
+    def _restoreCurrentSelectedObject(self):
+        setattr(self.current, self.attributeName, self.currentObjects)
+
+
+def newObject():
+    """A decorator wrap a newObject method in an undo block and calls
+    result._finalise('create')
+    """
+    from ccpn.util import Undo
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+
+        # application = getApplication()
+
+        with blankNotification():
+            with blockUndoItems() as undoItem:
+
+                # currentSelected
+                result = func(*args, **kwds)
+
+                # if hasattr(result, '_currentAttributeName'):
+                #     currentObjects = getattr(result, '_currentAttributeName')
+                #     undoItem(undo=partial(application.current, currentObjects),
+                #              redo=None)
+
+                # retrieve list of created items from the api
+                apiObjectsCreated = result._getApiObjectTree()
+                undoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
+                                             obj=result, trigger='delete', preExecution=True,
+                                             objsToBeDeleted=apiObjectsCreated),
+                         redo=BlankedPartial(result._wrappedData.root._unDelete,
+                                             topObjectsToCheck=(result._wrappedData.topObject,),
+                                             obj=result, trigger='create', preExecution=False,
+                                             objsToBeUnDeleted=apiObjectsCreated)
+                         )
+
+                if hasattr(result, CURRENT_ATTRIBUTE_NAME):
+                    # currentObjects = list(getattr(result, '_currentAttributeName'))
+                    # if result in currentObjects:
+                    #     currentObjects.remove(result)
+
+                    storeObj = _ObjectStore(result)
+                    undoItem(undo=storeObj._storeCurrentSelectedObject,
+                             redo=storeObj._restoreCurrentSelectedObject,
+                             )
+
+        result._finaliseAction('create')
+        return result
+
+    return theDecorator
+
+
+class BlankedPartial(object):
+    """Wrapper (like partial) to call func(*args, **kwds) with blanking
+    optionally trigger the notification of obj, either pre- or post execution
+    """
+    def __init__(self, func, obj=None, trigger=None, preExecution=False, **kwds):
+        self._func = func
+        self._kwds = kwds
+        self._obj = obj
+        self._trigger = trigger
+        self._preExecution = obj is not None and trigger is not None and preExecution
+        self._postExecution = obj is not None and trigger is not None and not preExecution
+
+    def __call__(self):
+        # kwds = self._kwds.update(kwds)
+        if self._preExecution:
+            # call the notification
+            self._obj._finaliseAction(self._trigger)
+
+        with blankNotification():
+            self._func(**self._kwds)
+
+        if self._postExecution:
+            # call the notification
+            self._obj._finaliseAction(self._trigger)
 
 # if __name__ == '__main__':
 #     # check that the undo mechanism is working with the new context managers

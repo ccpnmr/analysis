@@ -423,17 +423,17 @@ class GuiSpectrumDisplay(CcpnModule):
         if nmrChains:
             # with suspendSideBarNotifications(self.project):
 
-            with undoBlock(self.application):
+            with undoBlock():
                 self._handleNmrChains(nmrChains)
         if nmrResidues:
             # with suspendSideBarNotifications(self.project):
 
-            with undoBlock(self.application):
+            with undoBlock():
                 self._handleNmrResidues(nmrResidues)
         if nmrAtoms:
             # with suspendSideBarNotifications(self.project):
 
-            with undoBlock(self.application):
+            with undoBlock():
                 self._handleNmrAtoms(nmrAtoms)
 
         return success

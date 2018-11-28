@@ -37,7 +37,8 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from ccpn.core.lib.OrderedSpectrumViews import OrderedSpectrumViews
-
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import undoBlock
 
 # SV_TITLE = '_Strip'
 
@@ -785,6 +786,7 @@ class Strip(AbstractWrapperObject):
         #
         return tuple(result)
 
+    @logCommand(get='self')
     def peakPickPosition(self, inPosition) -> Tuple[Peak]:
         """
         Pick peak at position for all spectra currently displayed in strip
@@ -794,48 +796,16 @@ class Strip(AbstractWrapperObject):
         result = []
         peakLists = []
 
-        self._startCommandEchoBlock('peakPickPosition', inPosition)  #Dict)
-        self._project.blankNotification()
-        try:
-            for spectrumView in self.spectrumViews:
-
-                # check whether there any peakLists attached to the spectrumView - could be peakLists or integralLists
-                numPeakLists = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)]
-                if not numPeakLists:  # this can happen if no peakLists, so create one
-                    # if not spectrumView.peakListViews:    # this can happen if no peakLists, so create one
-                    self._project.unblankNotification()  # need this otherwise SideBar does not get updated
-                    spectrumView.spectrum.newPeakList()
-                    self._project.blankNotification()
+        with undoBlock():
+            for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
 
                 validPeakListViews = [pp for pp in spectrumView.peakListViews if isinstance(pp.peakList, PeakList)
                                       and pp.isVisible()
                                       and spectrumView.isVisible()]
+
                 for thisPeakListView in validPeakListViews:
                     # find the first visible peakList
                     peakList = thisPeakListView.peakList
-
-                    # for peakListView in spectrumView.peakListViews:
-                    # find the first visible peakList
-                    # if not peakListView.isVisible() or not spectrumView.isVisible():
-                    #   continue
-
-                    # peakList = peakListView.peakList
-
-                    # if isinstance(peakList, PeakList):
-                    peak = peakList.newPeak()
-
-                    # change dict to position
-                    # position = [0.0] * len(peak.axisCodes)
-                    # for n, axis in enumerate(peak.axisCodes):
-                    #   if _preferences.matchAxisCode == 0:  # default - match atom type
-                    #     for ax in positionDict.keys():
-                    #       if ax and axis and ax[0] == axis[0]:
-                    #         position[n] = positionDict[ax]
-                    #         break
-                    #
-                    #   elif _preferences.matchAxisCode == 1:  # match full code
-                    #     if axis in positionDict.keys():
-                    #       position[n] = positionDict[axis]
 
                     position = inPosition
                     if spectrumView.spectrum.dimensionCount > 1:
@@ -855,27 +825,22 @@ class Strip(AbstractWrapperObject):
                         else:
                             position = inPosition
 
-                    if peak.peakList.spectrum.dimensionCount == 1:
-                        if len(position) > 1:
-                            peak.position = (position[0],)
-                            peak.height = position[1]
-                    else:
-                        peak.position = position
-                        # note, the height below is not derived from any fitting
-                        # but is a weighted average of the values at the neighbouring grid points
-                        peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+                    # if spectrumView.spectrum.dimensionCount == 1:
+                    #     # if len(position) > 1:
+                    #     peak = peakList.newPeak(ppmPositions=(position[0],))        #, height=position[1])
+                    #         # peak.position = (position[0],)
+                    #         # peak.height = position[1]
+                    # else:
+                    peak = peakList.newPeak(ppmPositions=position)
+
+                        # peak.position = position
+                        # # note, the height below is not derived from any fitting
+                        # # but is a weighted average of the values at the neighbouring grid points
+                        # peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
                     result.append(peak)
                     peakLists.append(peakList)
 
-        except Exception as es:
-            pass
-
-        finally:
-            self._endCommandEchoBlock()
-            self._project.unblankNotification()
-
-        for peak in result:
-            peak._finaliseAction('create')
+            self.current.peaks = result
 
         return tuple(result), tuple(peakLists)
 

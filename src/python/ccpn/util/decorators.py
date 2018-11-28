@@ -131,7 +131,7 @@ def propertyUndo():
         self = args[0]
 
         _undo = self.project._undo
-        with undoBlock(self.project.application):
+        with undoBlock():
 
             # Execute the function while blocking all additions to the call undo stack
             _undo.increaseBlocking()
@@ -153,38 +153,55 @@ def propertyUndo():
     return theDecorator
 
 
-def newObject():
-    """A decorator wrap a newObject method in an undo block and calls
-     result._finalise('create')
-    """
-    from ccpn.core.lib.ContextManagers import undoBlock
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]
-
-        # print('>>> in the newObject decorator:', func.__name__, args, kwds)
-
-        _undo = self.project._undo
-        self.project.blankNotification()
-        with undoBlock(self.project.application):
-
-            #_undo.increaseBlocking()
-            # call the wrapped function
-            result = func(*args, **kwds)
-            #_undo.decreaseBlocking()
-
-            # _undo._newItem(undoPartial=partial(self.project.deleteObjects, result),
-            #                redoPartial=partial(func, *args, **kwds))
-
-        self.project.unblankNotification()
-        result._finaliseAction('create')
-        return result
-
-    return theDecorator
+# def newObject():
+#     """A decorator wrap a newObject method in an undo block and calls
+#      result._finalise('create')
+#     """
+#     from ccpn.core.lib.ContextManagers import undoBlock
+#
+#     @decorator.decorator
+#     def theDecorator(*args, **kwds):
+#
+#         func = args[0]
+#         args = args[1:]  # Optional 'self' is now args[0]
+#         self = args[0]
+#
+#         # print('>>> in the newObject decorator:', func.__name__, args, kwds)
+#
+#         # _undo = self.project._undo
+#         # self.project.blankNotification()
+#
+#         with blankNotification():
+#         # with undoBlock():
+#
+#             #_undo.increaseBlocking()
+#             # call the wrapped function
+#
+#             with blockUndoItems() as undoItem:
+#
+#                 result = func(*args, **kwds)
+#
+#                 # retrieve list of created items from the api
+#                 apiObjectsCreated = result._getApiObjectTree()
+#                 undoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
+#                                              obj=result, trigger='delete', preExecution=True,
+#                                              objsToBeDeleted=apiObjectsCreated),
+#                          redo=BlankedPartial(apiPeak.root._unDelete,
+#                                              topObjectsToCheck=(result._wrappedData.topObject,),
+#                                              obj=result, trigger='create', preExecution=False,
+#                                              objsToBeUnDeleted=apiObjectsCreated)
+#                          )
+#
+#             #_undo.decreaseBlocking()
+#
+#             # _undo._newItem(undoPartial=partial(self.project.deleteObjects, result),
+#             #                redoPartial=partial(func, *args, **kwds))
+#
+#         # self.project.unblankNotification()
+#         result._finaliseAction('create')
+#         return result
+#
+#     return theDecorator
 
 
 # def ccpNmrSetter():

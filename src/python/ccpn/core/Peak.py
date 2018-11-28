@@ -39,9 +39,9 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
 from ccpn.util.decorators import notify, propertyUndo, logCommand
-from ccpn.core.lib.ContextManagers import blockUndoItems
-from functools import partial
-
+from ccpn.core.lib.ContextManagers import blockUndoItems, BlankedPartial
+from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import newObject
 
 class Peak(AbstractWrapperObject):
     """Peak object, holding position, intensity, and assignment information
@@ -70,6 +70,9 @@ class Peak(AbstractWrapperObject):
 
     # _linkedPeak = None
     _linkedPeaksName = 'linkedPeaks'
+
+    # the attribute name used by current
+    _currentAttributeName = 'peaks'
 
     # CCPN properties
     @property
@@ -169,7 +172,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.value for x in self._wrappedData.sortedPeakDims())
 
     @position.setter
-    @logCommand('peak.', get='self')
+    @logCommand(get='self')
     @propertyUndo()
     @notify('observe')
     def position(self, value: Sequence):
@@ -184,7 +187,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
 
     @positionError.setter
-    @logCommand('peak.', get='self')
+    @logCommand(get='self')
     @propertyUndo()
     @notify('observe')
     def positionError(self, value: Sequence):
@@ -197,7 +200,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.position for x in self._wrappedData.sortedPeakDims())
 
     @pointPosition.setter
-    @logCommand('peak.', get='self')
+    @logCommand(get='self')
     @propertyUndo()
     @notify('observe')
     def pointPosition(self, value: Sequence):
@@ -211,7 +214,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.boxWidth for x in self._wrappedData.sortedPeakDims())
 
     @boxWidths.setter
-    @logCommand('peak.', get='self')
+    @logCommand(get='self')
     @propertyUndo()
     @notify('observe')
     def boxWidths(self, value: Sequence):
@@ -224,7 +227,7 @@ class Peak(AbstractWrapperObject):
         return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
 
     @lineWidths.setter
-    @logCommand('peak.', get='self')
+    @logCommand(get='self')
     @propertyUndo()
     @notify('observe')
     def lineWidths(self, value: Sequence):
@@ -261,7 +264,7 @@ class Peak(AbstractWrapperObject):
         return tuple(result)
 
     @dimensionNmrAtoms.setter
-    @logCommand('peak.', get='self')
+    @logCommand(get='self')
     @propertyUndo()
     @notify('observe')
     def dimensionNmrAtoms(self, value: Sequence):
@@ -339,7 +342,7 @@ class Peak(AbstractWrapperObject):
         return tuple(sorted(result))
 
     @assignedNmrAtoms.setter
-    @logCommand('peak.', get='self')
+    @logCommand(get='self')
     @propertyUndo()
     @notify('observe')
     def assignedNmrAtoms(self, value: Sequence):
@@ -574,10 +577,11 @@ class Peak(AbstractWrapperObject):
 
 # newPeak functions
 
+@newObject()
 def _newPeak(self: PeakList, height: float = None, volume: float = None,
              heightError: float = None, volumeError: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,
-             position: Sequence[float] = (), positionError: Sequence[float] = (),
+             ppmPositions: Sequence[float] = (), positionError: Sequence[float] = (),
              pointPosition: Sequence[float] = (), boxWidths: Sequence[float] = (),
              lineWidths: Sequence[float] = (), serial: int = None) -> Peak:
     """Create a new Peak within a peakList
@@ -588,14 +592,14 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
 
     See the Peak class for details
 
-    :param height:
+    :param height: height of the peak (related attributes: volume, volumeError, lineWidths)
     :param volume:
     :param heightError:
     :param volumeError:
     :param figureOfMerit:
     :param annotation:
-    :param comment:
-    :param position:
+    :param comment: optional comment string
+    :param ppmPositions: peak position in ppm for each dimension (related attributes: positionError, pointPosition)
     :param positionError:
     :param pointPosition:
     :param boxWidths:
@@ -604,46 +608,41 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
 
     :return peak instance
     """
-    #EJB 20181126: minor refactoring - not sure whether needed here, or caught be newObject decorator
-    with blockUndoItems() as undoItem:
+    #EJB 20181126: minor refactoring
 
-        apiPeakList = self._apiPeakList
-        apiPeak = apiPeakList.newPeak(height=height, volume=volume,
-                                      heightError=heightError, volumeError=volumeError,
-                                      figOfMerit=figureOfMerit, annotation=annotation, details=comment)
-        result = self._project._data2Obj.get(apiPeak)
+    apiPeakList = self._apiPeakList
+    apiPeak = apiPeakList.newPeak(height=height, volume=volume,
+                                  heightError=heightError, volumeError=volumeError,
+                                  figOfMerit=figureOfMerit, annotation=annotation, details=comment)
+    result = self._project._data2Obj.get(apiPeak)
+    if result is None:
+        raise RuntimeError('Unable to generate new Peak item')
 
-        if serial is not None:
-            try:
-                result.resetSerial(serial)
-            except ValueError:
-                self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                             % (result, serial))
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
 
-        apiPeakDims = apiPeak.sortedPeakDims()
-        if position:
-            for ii, peakDim in enumerate(apiPeakDims):
-                peakDim.value = position[ii]
-        elif pointPosition:
-            for ii, peakDim in enumerate(apiPeakDims):
-                peakDim.position = pointPosition[ii]
-        if positionError:
-            for ii, peakDim in enumerate(apiPeakDims):
-                peakDim.valueError = positionError[ii]
-        if boxWidths:
-            for ii, peakDim in enumerate(apiPeakDims):
-                peakDim.boxWidth = boxWidths[ii]
-        if lineWidths:
-            for ii, peakDim in enumerate(apiPeakDims):
-                peakDim.lineWidth = lineWidths[ii]
-
-        # retrieve list of created items from the api
-        apiObjectsCreated = result._getApiObjectTree()
-        undoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
-                 redo=partial(apiPeak.root._unDelete, apiObjectsCreated, (apiPeak.topObject,)))
+    apiPeakDims = apiPeak.sortedPeakDims()
+    if ppmPositions:
+        for ii, peakDim in enumerate(apiPeakDims):
+            peakDim.value = ppmPositions[ii]
+    elif pointPosition:
+        for ii, peakDim in enumerate(apiPeakDims):
+            peakDim.position = pointPosition[ii]
+    if positionError:
+        for ii, peakDim in enumerate(apiPeakDims):
+            peakDim.valueError = positionError[ii]
+    if boxWidths:
+        for ii, peakDim in enumerate(apiPeakDims):
+            peakDim.boxWidth = boxWidths[ii]
+    if lineWidths:
+        for ii, peakDim in enumerate(apiPeakDims):
+            peakDim.lineWidth = lineWidths[ii]
 
     return result
-
 
 # PeakList.newPeak = _newPeak
 # del _newPeak

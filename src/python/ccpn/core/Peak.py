@@ -601,42 +601,25 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
     :param boxWidths:
     :param lineWidths:
     :param serial:
-    :return new peak:
+
+    :return peak instance
     """
-
-    defaults = collections.OrderedDict(
-            (('height', None), ('volume', None), ('heightError', None), ('volumeError', None),
-             ('figureOfMerit', 1.0), ('annotation', None), ('comment', None), ('position', ()),
-             ('positionError', ()), ('pointPosition', ()), ('boxWidths', ()), ('lineWidths', ()),
-             ('serial', None),
-             )
-            )
-
-    #EJB 20181126: minor refactoring
+    #EJB 20181126: minor refactoring - not sure whether needed here, or caught be newObject decorator
     with blockUndoItems() as undoItem:
-
-    # undo = self._project._undo
-    # self._startCommandEchoBlock('newPeak', values=locals(), defaults=defaults,
-    #                             parName='newPeak')
-    # self._project.blankNotification()
-    # undo.increaseBlocking()
-    # try:
 
         apiPeakList = self._apiPeakList
         apiPeak = apiPeakList.newPeak(height=height, volume=volume,
                                       heightError=heightError, volumeError=volumeError,
                                       figOfMerit=figureOfMerit, annotation=annotation, details=comment)
         result = self._project._data2Obj.get(apiPeak)
+
         if serial is not None:
             try:
                 result.resetSerial(serial)
-                # modelUtil.resetSerial(apiPeak, serial, 'peaks')
             except ValueError:
                 self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
                                              % (result, serial))
-        # set peak position
-        # NBNB TBD currently unused parameters could be added, and will have to come in here as well
-        # this needs fixing so that it doesn't necessarily call api methods
+
         apiPeakDims = apiPeak.sortedPeakDims()
         if position:
             for ii, peakDim in enumerate(apiPeakDims):
@@ -654,34 +637,10 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
             for ii, peakDim in enumerate(apiPeakDims):
                 peakDim.lineWidth = lineWidths[ii]
 
-        apiObjectsCreated = Undo._getAllApiObjects(apiPeak)
-
-        # apiObjectsCreated = [apiPeak]
-        # apiObjectsCreated.extend(apiPeakDims)
-
+        # retrieve list of created items from the api
+        apiObjectsCreated = result._getApiObjectTree()
         undoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
                  redo=partial(apiPeak.root._unDelete, apiObjectsCreated, (apiPeak.topObject,)))
-
-                # Undo._deleteAllApiObjects, apiPeak.root._unDelete,
-                #      undoArgs=(apiObjectsCreated,),
-                #      redoArgs=(apiObjectsCreated, (apiPeak.topObject,)))
-
-    # finally:
-    #     undo.decreaseBlocking()
-        # self._project.unblankNotification()
-        # self._endCommandEchoBlock()
-
-    # use the api to delete/undelete the new objects
-    # apiObjectsCreated = [apiPeak]
-    # apiObjectsCreated.extend(apiPeakDims)
-    # undo.newItem(Undo._deleteAllApiObjects, apiPeak.root._unDelete,
-    #              undoArgs=(apiObjectsCreated,),
-    #              redoArgs=(apiObjectsCreated, (apiPeak.topObject,)))
-
-    # # DO creation notifications
-    # if serial is not None:
-    #     result._finaliseAction('rename')
-    # result._finaliseAction('create')
 
     return result
 

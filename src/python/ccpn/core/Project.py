@@ -1351,7 +1351,7 @@ class Project(AbstractWrapperObject):
         :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
         :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
 
-        return Mark instance
+        :return Mark instance
 
         To be depreciated in next version in lieu of mainWindow.newMark (with different call signature)
 

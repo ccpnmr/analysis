@@ -153,192 +153,6 @@ def propertyUndo():
     return theDecorator
 
 
-# def newObject():
-#     """A decorator wrap a newObject method in an undo block and calls
-#      result._finalise('create')
-#     """
-#     from ccpn.core.lib.ContextManagers import undoBlock
-#
-#     @decorator.decorator
-#     def theDecorator(*args, **kwds):
-#
-#         func = args[0]
-#         args = args[1:]  # Optional 'self' is now args[0]
-#         self = args[0]
-#
-#         # print('>>> in the newObject decorator:', func.__name__, args, kwds)
-#
-#         # _undo = self.project._undo
-#         # self.project.blankNotification()
-#
-#         with blankNotification():
-#         # with undoBlock():
-#
-#             #_undo.increaseBlocking()
-#             # call the wrapped function
-#
-#             with blockUndoItems() as undoItem:
-#
-#                 result = func(*args, **kwds)
-#
-#                 # retrieve list of created items from the api
-#                 apiObjectsCreated = result._getApiObjectTree()
-#                 undoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
-#                                              obj=result, trigger='delete', preExecution=True,
-#                                              objsToBeDeleted=apiObjectsCreated),
-#                          redo=BlankedPartial(apiPeak.root._unDelete,
-#                                              topObjectsToCheck=(result._wrappedData.topObject,),
-#                                              obj=result, trigger='create', preExecution=False,
-#                                              objsToBeUnDeleted=apiObjectsCreated)
-#                          )
-#
-#             #_undo.decreaseBlocking()
-#
-#             # _undo._newItem(undoPartial=partial(self.project.deleteObjects, result),
-#             #                redoPartial=partial(func, *args, **kwds))
-#
-#         # self.project.unblankNotification()
-#         result._finaliseAction('create')
-#         return result
-#
-#     return theDecorator
-
-
-# def ccpNmrSetter():
-#
-#     @logCommand('peak.')
-#     @position.setter
-#     @propertyUndo()
-#     @notify('observe')
-#
-#     @decorator.decorator
-#     def theDecorator(*args, **kwds):
-#
-#         func = args[0]
-#         args = args[1:]  # Optional 'self' is now args[0]
-#         self = args[0]
-#
-#         result = func(*args, **kwds)
-#
-#         return result
-#
-#     return theDecorator
-def ccpNmrV3CoreSetter():
-    """A decorator wrap a method in an undo block
-    """
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-
-        self = args[0]
-        project = self.project
-
-        _undo = self.project._undo
-        project.blankNotification()
-        with undoBlock(self.project.application):
-
-            _undo.increaseBlocking()
-            oldValue = getattr(self, func.__name__)
-
-            # call the wrapped function
-            result = func(*args, **kwds)
-
-            _undo.decreaseBlocking()
-
-            _undo._newItem(undoPartial=partial(func, self, oldValue),
-                           redoPartial=partial(func, *args, **kwds))
-        project.unblankNotification()
-        project._finaliseAction('change')
-        return result
-
-    return theDecorator
-
-def _ccpNmrV3CoreSetterDD():
-    """A decorator for ccpNmr property setters inserting an undo block and calling
-     result._finalise('change')
-    """
-    @notify('change')
-    @propertyUndo()
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-        result = func(*args, **kwds)
-        return result
-
-    return theDecorator
-
-
-def newObject():
-    """A decorator wrap a newObject method in an undo block and calls
-     result._finalise('create')
-    """
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]
-
-        # print('>>> in the newObject decorator:', func.__name__, args, kwds)
-
-        _undo = self.project._undo
-        self.project.blankNotification()
-        with undoBlock(self.project.application):
-
-            #_undo.increaseBlocking()
-            # call the wrapped function
-            result = func(*args, **kwds)
-            #_undo.decreaseBlocking()
-
-            # _undo._newItem(undoPartial=partial(self.project.deleteObjects, result),
-            #                redoPartial=partial(func, *args, **kwds))
-
-        self.project.unblankNotification()
-        result._finaliseAction('create')
-        return result
-
-    return theDecorator
-
-
-def deleteObject():
-    """ A decorator to wrap the delete(self) method of the V3 core classes
-    calls self._finalise('delete') prior to deletion
-    """
-
-    @decorator.decorator
-    def theDecorator(*args, **kwds):
-
-        func = args[0]
-        args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]
-
-        # print('>>> in the deleteObject decorator:', func.__name__, args, kwds)
-
-        self._finaliseAction('delete')
-
-        _undo = self.project._undo
-        self.project.blankNotification()
-        with undoBlock(self.project.application):
-
-            #_undo.increaseBlocking()
-            # call the wrapped function
-            result = func(*args, **kwds)
-            #_undo.decreaseBlocking()
-
-            # _undo._newItem(undoPartial=partial(self.project.deleteObjects, result),
-            #                redoPartial=partial(func, *args, **kwds))
-
-        self.project.unblankNotification()
-        return result
-
-    return theDecorator
-
 
 #----------------------------------------------------------------------------------------------
 # Adapted from from sandbox.Geerten.Refactored.decorators to fit current setup
@@ -405,9 +219,10 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
     return logString
 
 
-def logCommand(prefix='', get=None):
+def logCommand(prefix='', get=None, isProperty=False):
     """A decorator to log the invocation of the call to a Framework, Project, ... method.
     Use prefix to set the proper command context, e.g. 'application.' or 'project.'
+    Use isProperty to get ' = 'args[1]
     """
 
     @decorator.decorator
@@ -424,7 +239,12 @@ def logCommand(prefix='', get=None):
             _pref = prefix
             if get == 'self':
                 _pref += "get('%s')." % args[0].pid
-            logS = _makeLogString(_pref, False, func, *args, **kwds)
+
+            if isProperty:
+                logS = _pref + '%s = %r' % (func.__name__, args[1])
+            else:
+                logS = _makeLogString(_pref, False, func, *args, **kwds)
+
             application.ui.echoCommands([logS])
 
         blocking += 1
@@ -536,6 +356,10 @@ def logCommand(prefix='', get=None):
 #     """Convenience"""
 #     return debugLeave(verbosityLevel=Logger.DEBUG3)
 
+
+#==========================================================================================================================
+# testing
+#==========================================================================================================================
 
 if __name__ == '__main__':
 

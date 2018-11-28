@@ -40,7 +40,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 
 from ccpn.util.decorators import notify, propertyUndo, logCommand
-from ccpn.core.lib.ContextManagers import newObject
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 
 class Peak(AbstractWrapperObject):
@@ -172,9 +172,8 @@ class Peak(AbstractWrapperObject):
         return tuple(x.value for x in self._wrappedData.sortedPeakDims())
 
     @position.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def position(self, value: Sequence):
         # call api changes
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):

@@ -37,7 +37,7 @@ from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
-from ccpn.util.decorators import notify, deleteObject
+from ccpn.core.lib.ContextManagers import deleteObject
 
 
 @functools.total_ordering

@@ -341,7 +341,7 @@ def progressManager(parent, title=None, progressMax=100):
     thisProg.progress_simulation()
     thisProg.update()
     QtWidgets.QApplication.processEvents()    # still doesn't catch all the paint events
-    sleep(1)
+    sleep(0.1)
 
     yield     # yield control to the main process
 

@@ -191,9 +191,11 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                   }"""
         self.dragStyle = """
                   Dock > QWidget {
-                      border: 4px solid #00F;
+                      border: 0px solid #00F;
                       border-radius: 0px;
                   }"""
+        self._selectedOverlay = DropAreaSelectedOverlay(self)
+        self._selectedOverlay.raise_()
 
         Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
@@ -802,6 +804,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 # reset the dock area
                 self.dropArea = None
                 self.overlay.setDropArea(self.dropArea)
+                self._selectedOverlay.setDropArea(self.dropArea)
 
             if hasattr(source, 'implements') and source.implements('dock'):
                 CcpnModule._lastActionWasDrop = True
@@ -854,14 +857,21 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.widgetArea.setStyleSheet(self.dragStyle)
         self.update()
 
-        # self.drag.destroyed.connect(self._destroyed)
+        self.drag.destroyed.connect(self._destroyed)
+        self._raiseSelectedOverlay()
         action = self.drag.exec_()
         self.updateStyle()
 
-    # def _destroyed(self, ev):
-    #     # print('>>>_destroyed')
-    #     self.mainWindow.moduleArea._dragFinished(ev)
+    def _destroyed(self, ev):
+        self._selectedOverlay.setDropArea(None)
 
+    def _raiseSelectedOverlay(self):
+        self._selectedOverlay.setDropArea(True)
+        self._selectedOverlay.raise_()
+
+    def resizeEvent(self, ev):
+        self._selectedOverlay._resize()
+        super().resizeEvent(ev)
 
 class CcpnModuleLabel(DockLabel):
     """
@@ -1080,3 +1090,47 @@ class CcpnModuleLabel(DockLabel):
     # def _destroyed(self, ev):
     #   print('>>>_destroyed')
     #   self.parent()._dragFinished(ev)
+
+
+class DropAreaSelectedOverlay(QtWidgets.QWidget):
+    """Overlay widget that draws highlight over the current module during a drag-drop operation
+    """
+    def __init__(self, parent):
+        """Initialise widget
+        """
+        QtWidgets.QWidget.__init__(self, parent)
+        self.dropArea = None
+        self.hide()
+        self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+
+    def setDropArea(self, area):
+        """Set the widget coverage, either hidden, or a rectangle covering the module
+        """
+        self.dropArea = area
+        if area is None:
+            self.hide()
+        else:
+            prgn = self.parent().rect()
+            rgn = QtCore.QRect(prgn)
+
+            self.setGeometry(rgn)
+            self.show()
+
+        self.update()
+
+    def _resize(self):
+        """Resize the overlay, sometimes the overlay is temporarily visible while the module is moving
+        """
+        self.setDropArea(self.dropArea)
+
+    def paintEvent(self, ev):
+        """Paint the overlay to the screen
+        """
+        if self.dropArea is None:
+            return
+        p = QtGui.QPainter(self)
+        rgn = self.rect()
+
+        p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 255, 50)))
+        p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 150), 3))
+        p.drawRect(rgn)

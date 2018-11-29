@@ -42,9 +42,11 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 # from ccpn.core.MultipletList import MultipletList
 from typing import Optional, Tuple, Any, Union, Sequence, List
 from ccpn.util.Common import makeIterableList
-from ccpn.util.decorators import notify, propertyUndo, logCommand
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from functools import partial
+from ccpn.util.decorators import notify, propertyUndo, logCommand
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.util.Logging import getLogger
 
 
 MULTIPLET_TYPES = ['singlet', 'doublet', 'triplet', 'quartet', 'quintet', 'sextet', 'septet', 'octet', 'nonet',
@@ -109,6 +111,9 @@ class Multiplet(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = apiMultiplet._metaclass.qualifiedName()
+
+    # the attribute name used by current
+    _currentAttributeName = 'multiplets'
 
     # CCPN properties
     @property
@@ -414,11 +419,12 @@ class Multiplet(AbstractWrapperObject):
         if trigger in ['change']:
             self._finaliseAction(trigger)
 
+
 #=========================================================================================
 # CCPN functions
 #=========================================================================================
 
-# Connections to parents:
+@newObject(Multiplet)
 def _newMultiplet(self: MultipletList,
                   height: float = 0.0, heightError: float = 0.0,
                   volume: float = 0.0, volumeError: float = 0.0,
@@ -447,9 +453,8 @@ def _newMultiplet(self: MultipletList,
 
     :return: new multiplet instance.
     """
+    #EJB 20181128: refactoring
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # throw more understandable errors for the python console
     spectrum = self.spectrum
     peakList = makeIterableList(peaks)
     pks = []
@@ -461,7 +466,6 @@ def _newMultiplet(self: MultipletList,
             raise TypeError('%s is not of type Peak' % pp)
         if pp not in spectrum.peaks:
             raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
     dd = {'height': height, 'heightError': heightError,
           'volume': volume, 'volumeError': volumeError, 'offset': offset, 'slopes': slopes,
@@ -477,31 +481,18 @@ def _newMultiplet(self: MultipletList,
     if not constraintWeight:
         del dd['constraintWeight']
 
-    with undoStackBlocking() as addUndoItem:
+    apiParent = self._apiMultipletList
+    apiMultiplet = apiParent.newMultiplet(multipletType='multiplet', **dd)
+    result = self._project._data2Obj.get(apiMultiplet)
+    if result is None:
+        raise RuntimeError('Unable to generate new Multiplet item')
 
-        # my need this relabelling in logCommand - newObject
-        # if pks:
-        #     peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
-        #     log('newMultiplet', peaks=peakStr)
-        # else:
-        #     log('newMultiplet')
-
-        apiParent = self._apiMultipletList
-        apiMultiplet = apiParent.newMultiplet(multipletType='multiplet', **dd)
-
-        result = self._project._data2Obj.get(apiMultiplet)
-
-        if serial is not None:
-            try:
-                result.resetSerial(serial)
-            except ValueError:
-                self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                             % (result, serial))
-
-        # retrieve list of created items from the api
-        apiObjectsCreated = Undo._getApiObjectTree(apiMultiplet)
-        addUndoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
-                 redo=partial(apiMultiplet.root._unDelete, apiObjectsCreated, (apiMultiplet.topObject,)))
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
 
     return result
 

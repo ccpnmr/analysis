@@ -1583,9 +1583,9 @@ class GuiStrip(NotifierBase, Frame):
         # with logCommandManager(get='self') as log:
         #     log('moveTo')
         #
-        #     with blockUndoItems() as undoItem:
+        #     with blockUndoItems() as addUndoItem:
         #         # needs to be first as it uses currentOrdering
-        #         undoItem(undo=partial(self.spectrumDisplay.showAxes))
+        #         addUndoItem(undo=partial(self.spectrumDisplay.showAxes))
         #
         #     self.moveStrip(newIndex)
         #
@@ -1598,10 +1598,10 @@ class GuiStrip(NotifierBase, Frame):
         #     self.spectrumDisplay._stripOrdering.setOrder(tuple(order))
         #
         #     # add undo item to reorder the strips in the layout
-        #     with blockUndoItems() as undoItem:
-        #         undoItem(undo=partial(self._resetStripLayout, newIndex, currentIndex),
+        #     with blockUndoItems() as addUndoItem:
+        #         addUndoItem(undo=partial(self._resetStripLayout, newIndex, currentIndex),
         #                  redo=partial(self._resetStripLayout, currentIndex, newIndex))
-        #         undoItem(redo=partial(self.spectrumDisplay.showAxes))
+        #         addUndoItem(redo=partial(self.spectrumDisplay.showAxes))
         #
         #     if _undo is not None:
         #         _undo.decreaseBlocking()

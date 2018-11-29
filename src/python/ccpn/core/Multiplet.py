@@ -43,7 +43,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Multiplet as apiMultiplet
 from typing import Optional, Tuple, Any, Union, Sequence, List
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import notify, propertyUndo, logCommand
-from ccpn.core.lib.ContextManagers import blockUndoItems
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 from functools import partial
 
 
@@ -477,7 +477,7 @@ def _newMultiplet(self: MultipletList,
     if not constraintWeight:
         del dd['constraintWeight']
 
-    with blockUndoItems() as undoItem:
+    with undoStackBlocking() as addUndoItem:
 
         # my need this relabelling in logCommand - newObject
         # if pks:
@@ -500,7 +500,7 @@ def _newMultiplet(self: MultipletList,
 
         # retrieve list of created items from the api
         apiObjectsCreated = Undo._getApiObjectTree(apiMultiplet)
-        undoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
+        addUndoItem(undo=partial(Undo._deleteAllApiObjects, apiObjectsCreated),
                  redo=partial(apiMultiplet.root._unDelete, apiObjectsCreated, (apiMultiplet.topObject,)))
 
     return result

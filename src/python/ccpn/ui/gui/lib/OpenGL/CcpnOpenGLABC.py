@@ -4,9 +4,9 @@ By Functionality:
 Zoom and pan:
     Left-drag:                          pans the spectrum.
 
-    shift-left-drag:                    draws a zooming box and zooms the viewbox.
-    shift-middle-drag:                  draws a zooming box and zooms the viewbox.
-    shift-right-drag:                   draws a zooming box and zooms the viewbox.
+    shift-left-drag:                    draws a zooming box and zooms the viewing window.
+    shift-middle-drag:                  draws a zooming box and zooms the viewing window.
+    shift-right-drag:                   draws a zooming box and zooms the viewing window.
     Two successive shift-right-clicks:  define zoombox
     control-right click:                reset the zoom
 
@@ -29,18 +29,18 @@ By Mouse button:
     Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
 
     Left-drag:                          pans the spectrum.
-    shift-left-drag:                    draws a zooming box and zooms the viewbox.
+    shift-left-drag:                    draws a zooming box and zooms the viewing window.
     Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
     Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
 
 
-    shift-middle-drag:                  draws a zooming box and zooms the viewbox.
+    shift-middle-drag:                  draws a zooming box and zooms the viewing window.
 
     Right-click:                        raises the context menu.
     control-right click:                reset the zoom
     Two successive shift-right-clicks:  define zoombox
 
-    shift-right-drag:                   draws a zooming box and zooms the viewbox.
+    shift-right-drag:                   draws a zooming box and zooms the viewing window.
 """
 #=========================================================================================
 # Licence, Reference and Credits

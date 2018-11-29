@@ -44,7 +44,7 @@ from typing import Optional, Tuple, Any, Union, Sequence, List
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from functools import partial
-from ccpn.util.decorators import notify, propertyUndo, logCommand
+from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 
@@ -226,9 +226,8 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.slopes
 
     @slopes.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def slopes(self, value):
         self._wrappedData.slopes = value
 
@@ -238,9 +237,8 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.limits
 
     @limits.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def limits(self, value):
         self._wrappedData.limits = value
 
@@ -250,9 +248,8 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.pointLimits
 
     @pointlimits.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def pointlimits(self, value):
         self._wrappedData.pointLimits = value
 
@@ -268,9 +265,8 @@ class Multiplet(AbstractWrapperObject):
                       if pk in self._project._data2Obj])
 
     @peaks.setter
-    @logCommand('multiplet.', get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def peaks(self, ll: list):
         if ll:
             toRemove = [pk for pk in self.peaks if pk not in ll]
@@ -330,9 +326,8 @@ class Multiplet(AbstractWrapperObject):
             return result
 
     @lineWidths.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def lineWidths(self, value):
         self._wrappedData.lineWidths = value
 

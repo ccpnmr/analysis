@@ -597,7 +597,6 @@ def undoStackBlocking(application=None):
     """
 
     # get the current application
-    # get the application
     if not application:
         application = getApplication()
     if application is None:

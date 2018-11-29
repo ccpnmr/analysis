@@ -35,6 +35,9 @@ from typing import List, Tuple, Optional
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import IntegralList as ApiIntegralList
 import numpy as np
 from scipy.integrate import trapz
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.util.Logging import getLogger
 
 from ccpn.core.lib.SpectrumLib import _oldEstimateNoiseLevel1D
 
@@ -191,6 +194,28 @@ class IntegralList(AbstractWrapperObject):
             for ilv in self.integralListViews:
                 ilv._finaliseAction(action=action)
 
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
+
+    @logCommand(get='self')
+    def newIntegral(self, value: List[float] = None, comment: str = None, **kwds):
+        """Create a new integral within an IntegralList
+
+        See the Integral class for details
+
+        :param value: (min, max) values in ppm for the integral
+        :param comment: optional comment string
+
+        :return Integral instance
+
+        optional keyword arguments can be passed in; see Integral._newIntegral for details.
+        """
+        from ccpn.core.Integral import _newIntegral  # imported here to avoid circular imports
+
+        return _newIntegral(self, value=value, comment=comment, **kwds)
+
     #=========================================================================================
     # Library functions
     #=========================================================================================
@@ -266,8 +291,9 @@ class IntegralList(AbstractWrapperObject):
 
 # Connections to parents:
 
+@newObject(IntegralList)
 def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None,
-                     textColour: str = None, comment: str = None) -> IntegralList:
+                     textColour: str = None, comment: str = None, serial: int = None) -> IntegralList:
     """
     Create new IntegralList within Spectrum.
 
@@ -276,32 +302,34 @@ def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None
     :param symbolColour:
     :param textColour:
     :param comment:
+    :param serial:
     :return:
     """
-    # __doc__ added to Spectrum
 
-    defaults = collections.OrderedDict((('title', None), ('comment', None),
-                                        ('symbolColour', None), ('textColour', None)))
-
-    apiParent = self._wrappedData
-    self._startCommandEchoBlock('newIntegralList', values=locals(), defaults=defaults,
-                                parName='newIntegralList')
+    apiParent = self._apiDataSource
     dd = {'name': title, 'details': comment, 'dataType': 'Integral'}
     if symbolColour:
         dd['symbolColour'] = symbolColour
     if textColour:
         dd['textColour'] = textColour
-    try:
-        apiIntegralList = apiParent.newIntegralList(**dd)
-    finally:
-        self._endCommandEchoBlock()
 
+    apiIntegralList = apiParent.newIntegralList(**dd)
     result = self._project._data2Obj.get(apiIntegralList)
+    if result is None:
+        raise RuntimeError('Unable to generate new IntegralList item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
+
     return result
 
 
-IntegralList._parentClass.newIntegralList = _newIntegralList
-del _newIntegralList
+# IntegralList._parentClass.newIntegralList = _newIntegralList
+# del _newIntegralList
 
 # def _factoryFunction(project:Project, wrappedData:ApiIntegralList) -> AbstractWrapperObject:
 #   """create PeakList or IntegralList from API PeakList"""

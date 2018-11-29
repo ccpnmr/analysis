@@ -383,7 +383,7 @@ class IntegralTable(QuickTable):
         if self.current.strip is not None:
             widths = None
             try:
-                widths = _getCurrentZoomRatio(self.current.strip.viewBox.viewRange())
+                widths = _getCurrentZoomRatio(self.current.strip.viewRange())
                 if len(integral.limits) == 1:
                     positions = integral.limits[0]
                     navigateToPositionInStrip(strip=self.current.strip, positions=positions, widths=widths)

@@ -62,9 +62,9 @@ class GuiIntegralListView(QtWidgets.QGraphicsItem):
         #FIXME: apparently it gets passed an object which already has crucial attributes
         # A big NONO!!!
         strip = self.spectrumView.strip
-        scene = strip.plotWidget.scene()
+        # scene = strip.plotWidget.scene()
         QtWidgets.QGraphicsItem.__init__(self)  # ejb - need to remove, scene=scene from here
-        self.scene = scene
+        # self.scene = scene
 
         ###self.strip = strip
         ###self.peakList = peakList
@@ -72,7 +72,7 @@ class GuiIntegralListView(QtWidgets.QGraphicsItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemHasNoContents, True)
         self.application = self.spectrumView.application
 
-        strip.viewBox.addItem(self)
+        # strip.viewBox.addItem(self)
         ###self._parent = parent
         # self.displayed = True
         # self.symbolColour = None
@@ -100,59 +100,59 @@ class GuiIntegralListView(QtWidgets.QGraphicsItem):
         return
 
     # For notifiers - moved from core IntegralListView
-    def _createdIntegralListView(self):
-        spectrumView = self.spectrumView
-        spectrum = spectrumView.spectrum
-        # NBNB TBD FIXME we should get rid of this API-level access
-        # But that requires refactoring the spectrumActionDict
-        action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(spectrum._wrappedData)
-        if action:
-            action.toggled.connect(self.setVisible)  # TBD: need to undo this if integralListView removed
-
-        if not self.scene:  # this happens after an undo of a spectrum/integralList deletion
-            spectrumView.strip.plotWidget.scene().addItem(self)
-            spectrumView.strip.viewBox.addItem(self)
-
-        strip = spectrumView.strip
-        for integralList in spectrum.integralLists:
-            strip.showIntegrals(integralList)
+    # def _createdIntegralListView(self):
+    #     spectrumView = self.spectrumView
+    #     spectrum = spectrumView.spectrum
+    #     # NBNB TBD FIXME we should get rid of this API-level access
+    #     # But that requires refactoring the spectrumActionDict
+    #     action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(spectrum._wrappedData)
+    #     if action:
+    #         action.toggled.connect(self.setVisible)  # TBD: need to undo this if integralListView removed
+    #
+    #     if not self.scene:  # this happens after an undo of a spectrum/integralList deletion
+    #         spectrumView.strip.plotWidget.scene().addItem(self)
+    #         spectrumView.strip.viewBox.addItem(self)
+    #
+    #     strip = spectrumView.strip
+    #     for integralList in spectrum.integralLists:
+    #         strip.showIntegrals(integralList)
 
     # For notifiers - moved from core IntegralListView
-    def _deletedStripIntegralListView(self):
-        spectrumView = self.spectrumView
-        strip = spectrumView.strip
-        spectrumDisplay = strip.spectrumDisplay
+    # def _deletedStripIntegralListView(self):
+    #     spectrumView = self.spectrumView
+    #     strip = spectrumView.strip
+    #     spectrumDisplay = strip.spectrumDisplay
+    #
+    #     try:
+    #         integralItemDict = spectrumDisplay.activeIntegralItemDict[self]
+    #         integralItems = set(spectrumDisplay.inactiveIntegralItemDict[self])
+    #         for apiIntegral in integralItemDict:
+    #             # NBNB TBD FIXME change to get rid of API integrals here
+    #             integralItem = integralItemDict[apiIntegral]
+    #             integralItems.add(integralItem)
+    #
+    #         # TODO:ED should really remove all references at some point
+    #         # if strip.plotWidget:
+    #         #   scene = strip.plotWidget.scene()
+    #         #   for integralItem in integralItems:
+    #         #     scene.removeItem(integralItem.annotation)
+    #         #     if spectrumDisplay.is1D:
+    #         #       scene.removeItem(integralItem.symbol)
+    #         #     scene.removeItem(integralItem)
+    #         #   self.scene.removeItem(self)
+    #
+    #         del spectrumDisplay.activeIntegralItemDict[self]
+    #         del spectrumDisplay.inactiveIntegralItemDict[self]
+    #     except Exception as es:
+    #         getLogger().warning('Error: integralList does not exist in spectrum')
 
-        try:
-            integralItemDict = spectrumDisplay.activeIntegralItemDict[self]
-            integralItems = set(spectrumDisplay.inactiveIntegralItemDict[self])
-            for apiIntegral in integralItemDict:
-                # NBNB TBD FIXME change to get rid of API integrals here
-                integralItem = integralItemDict[apiIntegral]
-                integralItems.add(integralItem)
-
-            # TODO:ED should really remove all references at some point
-            # if strip.plotWidget:
-            #   scene = strip.plotWidget.scene()
-            #   for integralItem in integralItems:
-            #     scene.removeItem(integralItem.annotation)
-            #     if spectrumDisplay.is1D:
-            #       scene.removeItem(integralItem.symbol)
-            #     scene.removeItem(integralItem)
-            #   self.scene.removeItem(self)
-
-            del spectrumDisplay.activeIntegralItemDict[self]
-            del spectrumDisplay.inactiveIntegralItemDict[self]
-        except Exception as es:
-            getLogger().warning('Error: integralList does not exist in spectrum')
-
-    def _changedIntegralListView(self):
-
-        pass
-        # for integralItem in self.integralItems.values():
-        #     if isinstance(integralItem, IntegralNd):
-        #         integralItem.update()  # ejb - force a repaint of the integralItem
-        #         integralItem.annotation.setupIntegralAnnotationItem(integralItem)
+    # def _changedIntegralListView(self):
+    #
+    #     pass
+    #     # for integralItem in self.integralItems.values():
+    #     #     if isinstance(integralItem, IntegralNd):
+    #     #         integralItem.update()  # ejb - force a repaint of the integralItem
+    #     #         integralItem.annotation.setupIntegralAnnotationItem(integralItem)
 
     def setVisible(self, visible):
         super(GuiIntegralListView, self).setVisible(visible)

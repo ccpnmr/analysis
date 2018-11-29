@@ -296,7 +296,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         Displays specified peaks in all strips of the display using peakListView
         """
 
-        viewBox = peakListView.spectrumView.strip.viewBox
+        # viewBox = peakListView.spectrumView.strip.viewBox
         activePeakItemDict = self.activePeakItemDict
         peakItemDict = activePeakItemDict.setdefault(peakListView, {})
         inactivePeakItemDict = self.inactivePeakItemDict

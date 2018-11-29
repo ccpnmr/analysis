@@ -35,7 +35,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakDim as ApiPeakDim
 from typing import Optional, Tuple, Sequence, List
 import numpy as np
 from scipy.integrate import trapz
-from ccpn.util.decorators import notify, propertyUndo, logCommand
+from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 
@@ -158,9 +158,8 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.slopes
 
     @slopes.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def slopes(self, value):
         self._wrappedData.slopes = value
         # peakDims = self._wrappedData.sortedPeakDims()
@@ -215,9 +214,8 @@ class Integral(AbstractWrapperObject):
         # return result
 
     @limits.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def limits(self, value):
         self._wrappedData.limits = value
         # dataDimRefs = self.integralList.spectrum._mainDataDimRefs()
@@ -264,9 +262,8 @@ class Integral(AbstractWrapperObject):
         # return result
 
     @pointlimits.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def pointlimits(self, value):
         self._wrappedData.pointLimits = value
         # peakDims = self._wrappedData.sortedPeakDims()
@@ -322,9 +319,8 @@ class Integral(AbstractWrapperObject):
         return self._project._data2Obj[self._wrappedData.peak] if self._wrappedData.peak else None
 
     @peak.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def peak(self, peak: Peak = None):
         """link a peak to the integral
         The peak must belong to the spectrum containing the integralList.
@@ -368,14 +364,6 @@ def _newIntegral(self: IntegralList,
     """
     #EJB 20181128: minor refactoring
 
-    defaults = collections.OrderedDict((('annotation', None),
-                                        ('value', None), ('valueError', None),
-                                        ('offset', None),
-                                        ('figureOfMerit', 1.0),
-                                        ('constraintWeight', None),
-                                        ('comment', None),
-                                        ('limits', ()), ('slopes', ()), ('pointLimits', ()),))
-
     dd = {'volume': value, 'volumeError': valueError, 'offset': offset, 'slopes': slopes,
           'figOfMerit': figureOfMerit, 'constraintWeight': constraintWeight,
           'annotation': annotation, 'details': comment,
@@ -387,10 +375,15 @@ def _newIntegral(self: IntegralList,
     apiParent = self._apiIntegralList
     apiIntegral = apiParent.newIntegral(**dd)
     result = self._project._data2Obj.get(apiIntegral)
+    if result is None:
+        raise RuntimeError('Unable to generate new IntegralList item')
 
-
-
-
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
 
     result.limits = limits  #needs to fire the first time for automatic calculation of the value
 

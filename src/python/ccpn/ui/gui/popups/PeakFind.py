@@ -123,8 +123,8 @@ class PeakFindPopup(CcpnDialog):
             # Checking the third box turns the others off and sets both. Hence default
             peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
 
-            for strip in self.project.strips:
-                strip.showPeaks(peakList)
+            # for strip in self.project.strips:
+            #     strip.showPeaks(peakList)
 
         finally:
             self.accept()

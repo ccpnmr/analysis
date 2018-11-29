@@ -781,7 +781,7 @@ class PeakList(AbstractWrapperObject):
 
 # Connections to parents:
 
-@newObject(Peak)
+@newObject(PeakList)
 def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
                  isSimulated: bool = False, symbolStyle: str = None, symbolColour: str = None,
                  textColour: str = None, serial: int = None) -> PeakList:

@@ -93,27 +93,28 @@ def echoCommand(obj, funcName, *params, values=None, defaults=None,
 
 
 @contextmanager
-def undoBlock():
-    # usually called from application
+def undoBlock(application=None):
+    """Wrap all the contained operations into a single undo/redo event.
+    """
 
-    application = getApplication()
+    # get the current application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
 
-    # undo = application.project._undo
+    # get the undo stack
     undo = application._getUndo()
-
-    if undo is not None:  # ejb - changed from if undo:
+    if undo is not None:
         undo.newWaypoint()  # DO NOT CHANGE
+        undo.increaseWaypointBlocking()
 
         if not application.project._blockSideBar and not undo._blocked:
             if undo._waypointBlockingLevel < 1 and application.ui and application.ui.mainWindow:
                 application._storedState = application.ui.mainWindow.sideBar._saveExpandedState()
 
-        undo.increaseWaypointBlocking()
-
     if not application._echoBlocking:
         application.project.suspendNotification()
-
-    # application._echoBlocking += 1
     application._increaseNotificationBlocking()
 
     getLogger().debug2('_enterUndoBlock')
@@ -123,19 +124,16 @@ def undoBlock():
         yield
 
     finally:
-        # if application._echoBlocking > 0:
-        #     application._echoBlocking -= 1
         application._decreaseNotificationBlocking()
-
         if not application._echoBlocking:
             application.project.resumeNotification()
 
         if undo is not None:
-            undo.decreaseWaypointBlocking()
-
             if not application.project._blockSideBar and not undo._blocked:
                 if undo._waypointBlockingLevel < 1 and application.ui and application.ui.mainWindow:
                     application.ui.mainWindow.sideBar._restoreExpandedState(application._storedState)
+
+            undo.decreaseWaypointBlocking()
 
         getLogger().debug2('_exitUndoBlock: echoBlocking=%s' % application._echoBlocking)
 
@@ -423,15 +421,16 @@ def logCommandManager(prefix='', get=None, isProperty=False, showArguments=[], l
 
 @contextmanager
 def undoBlockManager(application=None, undoBlockOnly=False):
-    """
-    Wrap all the following calls with a single undo/redo method.
+    """Wrap all the contained operations into a single undo/redo event.
     """
 
     # get the current application
     if not application:
         application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
 
-    undo = application.project._undo
+    undo = application._getUndo()
     if undo is not None:  # ejb - changed from if undo:
         undo.newWaypoint()  # DO NOT CHANGE
         undo.increaseWaypointBlocking()
@@ -445,7 +444,7 @@ def undoBlockManager(application=None, undoBlockOnly=False):
             yield
         else:
             # transfer control to the calling function, with sidebar blocking
-            with suspendSidebar(application=application):
+            with sidebarBlocking(application=application):
                 yield  # undo._blocked if undo is not None else False
 
     except AttributeError as es:
@@ -469,7 +468,7 @@ def undoBlockManager(application=None, undoBlockOnly=False):
 
 
 @contextmanager
-def suspendSidebar(application=None, suspendSidebarOnly=False):
+def sidebarBlocking(application=None, blockSidebarOnly=False):
     """
     Block updating of the sidebar (if present) until end of function block.
     """
@@ -489,11 +488,11 @@ def suspendSidebar(application=None, suspendSidebarOnly=False):
 
     try:
         # transfer control to the calling function
-        if suspendSidebarOnly:
+        if blockSidebarOnly:
             yield
         else:
             # transfer control to the calling function, suspending notifications
-            with suspendNotification(application=application):
+            with notificationSuspend(application=application):
                 yield
 
     except AttributeError as es:
@@ -509,7 +508,7 @@ def suspendSidebar(application=None, suspendSidebarOnly=False):
 
 
 @contextmanager
-def suspendNotification(application=None):
+def notificationSuspend(application=None):
     """
     Suspend notifiers until the end of the current function block.
     """
@@ -533,7 +532,7 @@ def suspendNotification(application=None):
 
 
 @contextmanager
-def blankNotification(application=None):
+def notificationBlanking(application=None):
     """
     Block all notifiers, re-enable at the end of the function block.
     """
@@ -557,10 +556,10 @@ def blankNotification(application=None):
         application.project.unblankNotification()
 
 @contextmanager
-def temporaryUnblankNotification():
+def notificationUnblanking():
     """
-    Block all notifiers, re-enable at the end of the function block.
-    Used inside blankNotification if a notifier is required for a single event
+    Unblock all notifiers, disable at the end of the function block.
+    Used inside notificationBlanking if a notifier is required for a single event
     """
 
     # get the current application
@@ -580,18 +579,18 @@ def temporaryUnblankNotification():
 
 
 @contextmanager
-def blockUndoItems(application=None):
+def undoStackBlocking(application=None):
     """
     Block addition of items to the undo stack, re-enable at the end of the function block.
     New user items can be added to the undo stack after blocking is re-enabled
     Example:
 
-        with blockUndoItems() as undoItem:
+        with undoStackBlocking() as addUndoItem:
             ...
             do something here
             ...
-            undoItem(undo=partial(<function>, <args and kwargs>),
-                    redo=partial(<function>, <args and kwargs>))
+            addUndoItem(undo=partial(<function>, <args and kwargs>),
+                        redo=partial(<function>, <args and kwargs>))
             do more here
 
     Multiple undoItems can be appended.
@@ -609,9 +608,9 @@ def blockUndoItems(application=None):
         raise RuntimeError("Unable to get the application's undo stack")
     _undoStack = []
 
-    def undoItem(undo=None, redo=None):
-        """This function allows for adding item's onto the application's undo stack
-        They do get collected in a temporary list
+    def addUndoItem(undo=None, redo=None):
+        """This function allows for adding items onto the application's undo stack
+        Collected in a temporary list, and added to the undo stack after the stack has been unblocked
         """
         # store the new undo/redo items for later addition to the stack
         _undoStack.append((undo, redo))
@@ -621,8 +620,8 @@ def blockUndoItems(application=None):
     undo.increaseBlocking()
 
     try:
-        # transfer control to the calling function
-        yield undoItem
+        # transfer control to the calling function, and pass the addUndoItems function
+        yield addUndoItem
 
     except AttributeError as es:
         raise es
@@ -632,7 +631,7 @@ def blockUndoItems(application=None):
         undo.decreaseBlocking()
         undo.decreaseWaypointBlocking()
 
-        # add all undo items (collected via the undoItem function) to the application's undo stack
+        # add all undo items (collected via the addUndoItem function) to the application's undo stack
         for item in _undoStack:
             undo._newItem(undoPartial=item[0], redoPartial=item[1])
 
@@ -664,7 +663,7 @@ def deleteBlockManager(application=None, deleteBlockOnly=False):
             yield
         else:
             # transfer control to the calling function, with sidebar blocking
-            with suspendSidebar(application=application):
+            with sidebarBlocking(application=application):
                 yield  # undo._blocked if undo is not None else False
 
     except AttributeError as es:
@@ -711,8 +710,8 @@ def newObject(klass):
 
         application = getApplication() # pass it in to reduce overhead
 
-        with blankNotification(application=application):
-            with blockUndoItems(application=application) as undoItem:
+        with notificationBlanking(application=application):
+            with undoStackBlocking(application=application) as addUndoItem:
 
                 result = func(*args, **kwds)
                 if not isinstance(result, klass):
@@ -720,7 +719,7 @@ def newObject(klass):
 
                 # retrieve list of created items from the api
                 apiObjectsCreated = result._getApiObjectTree()
-                undoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
+                addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
                                              obj=result, trigger='delete', preExecution=True,
                                              objsToBeDeleted=apiObjectsCreated),
                          redo=BlankedPartial(result._wrappedData.root._unDelete,
@@ -731,7 +730,7 @@ def newObject(klass):
 
                 if hasattr(result, CURRENT_ATTRIBUTE_NAME):
                     storeObj = _ObjectStore(result)
-                    undoItem(undo=storeObj._storeCurrentSelectedObject,
+                    addUndoItem(undo=storeObj._storeCurrentSelectedObject,
                              redo=storeObj._restoreCurrentSelectedObject,
                              )
 
@@ -759,7 +758,7 @@ def deleteObject():
 
         application = getApplication()  # pass it in to reduce overhead
 
-        with blankNotification(application=application):
+        with notificationBlanking(application=application):
                 #_undo.increaseBlocking()
                 # call the wrapped function
                 result = func(*args, **kwds)
@@ -790,7 +789,7 @@ class BlankedPartial(object):
             # call the notification
             self._obj._finaliseAction(self._trigger)
 
-        with blankNotification():
+        with notificationBlanking():
             self._func(**self._kwds)
 
         if self._postExecution:
@@ -814,13 +813,13 @@ def ccpNmrV3CoreSetter():
 
         oldValue = getattr(self, func.__name__)
 
-        with blankNotification(application=application):
-            with blockUndoItems(application=application) as undoItem:
+        with notificationBlanking(application=application):
+            with undoStackBlocking(application=application) as addUndoItem:
 
                 # call the wrapped function
                 result = func(*args, **kwds)
 
-                undoItem(undo=partial(func, self, oldValue),
+                addUndoItem(undo=partial(func, self, oldValue),
                          redo=partial(func, self, args[1])
                          )
         self._finaliseAction('change')
@@ -855,24 +854,24 @@ def ccpNmrV3CoreSetter():
 #     app = MyProgramme('MyProgramme', '3.0.0-beta3', args=myArgs)
 #     app.project._resetUndo(debug=True)
 #
-#     with blockUndoItems() as undoItem:
+#     with blockUndoItems() as addUndoItem:
 #         print('>>>open')
 #
-#         undoItem(undo=partial(testUndo, value=3),
+#         addUndoItem(undo=partial(testUndo, value=3),
 #                  redo=partial(testRedo, value=4))
 #
-#         undoItem(undo=partial(testUndo, value=7),
+#         addUndoItem(undo=partial(testUndo, value=7),
 #                  redo=partial(testRedo, value=8))
 #
 #         print('>>>close')
 #
-#     with blockUndoItems() as undoItem:
+#     with blockUndoItems() as addUndoItem:
 #         print('>>>open')
 #
-#         undoItem(undo=partial(testUndo, value=3),
+#         addUndoItem(undo=partial(testUndo, value=3),
 #                  redo=partial(testRedo, value=4))
 #
-#         undoItem(undo=partial(testUndo, value=7),
+#         addUndoItem(undo=partial(testUndo, value=7),
 #                  redo=partial(testRedo, value=8))
 #
 #         print('>>>close')

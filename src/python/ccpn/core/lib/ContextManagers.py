@@ -698,7 +698,7 @@ class _ObjectStore(object):
         self.current.decreaseBlanking()
 
 
-def newObject():
+def newObject(klass):
     """A decorator wrap a newObject method's of the various classes in an undo block and calls
     result._finalise('create')
     """
@@ -715,6 +715,8 @@ def newObject():
             with blockUndoItems(application=application) as undoItem:
 
                 result = func(*args, **kwds)
+                if not isinstance(result, klass):
+                    raise RuntimeError('Expected an object of class %s, obtained %s' % (klass, result.__class__))
 
                 # retrieve list of created items from the api
                 apiObjectsCreated = result._getApiObjectTree()

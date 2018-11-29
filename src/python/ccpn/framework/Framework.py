@@ -63,7 +63,7 @@ from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.ui.gui.guiSettings import getColourScheme
 from ccpn.framework.PathsAndUrls import userPreferencesDirectory
-
+from ccpn.util.decorators import logCommand
 
 # from functools import partial
 
@@ -1657,46 +1657,62 @@ class Framework:
 
         # NBNB TODO Consider appropriate failure handling. Is this OK?
 
+    @logCommand('application.')
     def undo(self):
         if self.project._undo.canUndo():
-            with MessageDialog.progressManager(self.ui.mainWindow, 'performing Undo'):
-
-                self.ui.echoCommands(['application.undo()'])
-                self._echoBlocking += 1
-
-                expandedState = self.ui.mainWindow.sideBar._saveExpandedState()
+            with MessageDialog.progressManager(self.ui.mainWindow, 'performing undo'):
                 self.project._undo.undo()
-                self.ui.mainWindow.sideBar._restoreExpandedState(expandedState)
-
-                # TODO:ED this is a hack until guiNotifiers are working
-                try:
-                    self.ui.mainWindow.moduleArea.repopulateModules()
-                except:
-                    getLogger().info('application has no Gui')
-
-                self._echoBlocking -= 1
         else:
             getLogger().warning('nothing to undo')
 
+    @logCommand('application.')
     def redo(self):
         if self.project._undo.canRedo():
-            with MessageDialog.progressManager(self.ui.mainWindow, 'performing Redo'):
-                self.ui.echoCommands(['application.redo()'])
-                self._echoBlocking += 1
-
-                expandedState = self.ui.mainWindow.sideBar._saveExpandedState()
+            with MessageDialog.progressManager(self.ui.mainWindow, 'performing redo'):
                 self.project._undo.redo()
-                self.ui.mainWindow.sideBar._restoreExpandedState(expandedState)
-
-                # TODO:ED this is a hack until guiNotifiers are working
-                try:
-                    self.ui.mainWindow.moduleArea.repopulateModules()
-                except:
-                    getLogger().info('application has no Gui')
-
-                self._echoBlocking -= 1
         else:
             getLogger().warning('nothing to redo.')
+
+    # def undo(self):
+    #     if self.project._undo.canUndo():
+    #         with MessageDialog.progressManager(self.ui.mainWindow, 'performing Undo'):
+    #
+    #             self.ui.echoCommands(['application.undo()'])
+    #             self._echoBlocking += 1
+    #
+    #             expandedState = self.ui.mainWindow.sideBar._saveExpandedState()
+    #             self.project._undo.undo()
+    #             self.ui.mainWindow.sideBar._restoreExpandedState(expandedState)
+    #
+    #             # TODO:ED this is a hack until guiNotifiers are working
+    #             try:
+    #                 self.ui.mainWindow.moduleArea.repopulateModules()
+    #             except:
+    #                 getLogger().info('application has no Gui')
+    #
+    #             self._echoBlocking -= 1
+    #     else:
+    #         getLogger().warning('nothing to undo')
+    #
+    # def redo(self):
+    #     if self.project._undo.canRedo():
+    #         with MessageDialog.progressManager(self.ui.mainWindow, 'performing Redo'):
+    #             self.ui.echoCommands(['application.redo()'])
+    #             self._echoBlocking += 1
+    #
+    #             expandedState = self.ui.mainWindow.sideBar._saveExpandedState()
+    #             self.project._undo.redo()
+    #             self.ui.mainWindow.sideBar._restoreExpandedState(expandedState)
+    #
+    #             # TODO:ED this is a hack until guiNotifiers are working
+    #             try:
+    #                 self.ui.mainWindow.moduleArea.repopulateModules()
+    #             except:
+    #                 getLogger().info('application has no Gui')
+    #
+    #             self._echoBlocking -= 1
+    #     else:
+    #         getLogger().warning('nothing to redo.')
 
     def _getUndo(self):
         if self.project:

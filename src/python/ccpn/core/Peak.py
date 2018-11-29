@@ -43,6 +43,7 @@ from ccpn.util.decorators import notify, propertyUndo, logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 
+
 class Peak(AbstractWrapperObject):
     """Peak object, holding position, intensity, and assignment information
 
@@ -642,6 +643,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
             peakDim.lineWidth = lineWidths[ii]
 
     return result
+
 
 # Additional Notifiers:
 #

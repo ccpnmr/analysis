@@ -158,6 +158,9 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.slopes
 
     @slopes.setter
+    @logCommand(get='self')
+    @propertyUndo()
+    @notify('observe')
     def slopes(self, value):
         self._wrappedData.slopes = value
         # peakDims = self._wrappedData.sortedPeakDims()
@@ -212,6 +215,9 @@ class Integral(AbstractWrapperObject):
         # return result
 
     @limits.setter
+    @logCommand(get='self')
+    @propertyUndo()
+    @notify('observe')
     def limits(self, value):
         self._wrappedData.limits = value
         # dataDimRefs = self.integralList.spectrum._mainDataDimRefs()
@@ -258,6 +264,9 @@ class Integral(AbstractWrapperObject):
         # return result
 
     @pointlimits.setter
+    @logCommand(get='self')
+    @propertyUndo()
+    @notify('observe')
     def pointlimits(self, value):
         self._wrappedData.pointLimits = value
         # peakDims = self._wrappedData.sortedPeakDims()

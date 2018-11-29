@@ -44,8 +44,10 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 # from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
-from ccpn.util.decorators import notify, propertyUndo
 from ccpn.util.decorators import logCommand
+from ccpn.util.decorators import notify, propertyUndo, logCommand
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.util.Logging import getLogger
 
 
 def _estimateNoiseLevel1D(y):
@@ -779,6 +781,7 @@ class PeakList(AbstractWrapperObject):
 
 # Connections to parents:
 
+@newObject(Peak)
 def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
                  isSimulated: bool = False, symbolStyle: str = None, symbolColour: str = None,
                  textColour: str = None, serial: int = None) -> PeakList:

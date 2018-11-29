@@ -576,7 +576,7 @@ class Peak(AbstractWrapperObject):
 
 # newPeak functions
 
-@newObject()
+@newObject(Peak)
 def _newPeak(self: PeakList, height: float = None, volume: float = None,
              heightError: float = None, volumeError: float = None,
              figureOfMerit: float = 1.0, annotation: str = None, comment: str = None,

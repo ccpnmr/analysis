@@ -375,7 +375,7 @@ class NmrResidueTable(QuickTable):
         self.application.ui.mainWindow.clearMarks()
         if self.current.strip is not None:
             strip = self.current.strip
-            newWidths = _getCurrentZoomRatio(strip.viewBox.viewRange())
+            newWidths = _getCurrentZoomRatio(strip.viewRange())
             navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
                                           widths=None)
             # widths=['default'] * len(strip.axisCodes))

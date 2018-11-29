@@ -75,6 +75,9 @@ from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection
 from ccpn.core.lib.Cache import cached
+from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.util.Logging import getLogger
 
 from ccpn.util.Common import axisCodeMapping
 
@@ -1694,11 +1697,13 @@ class Spectrum(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    @logCommand(get='self')
     def newPeakList(self, title: str = None, comment: str = None,
-                     isSimulated: bool = False, symbolStyle: str = None, symbolColour: str = None,
-                     textColour: str = None, serial: int = None):
-        """
-        Create new empty PeakList within Spectrum
+                    isSimulated: bool = False, symbolStyle: str = None, symbolColour: str = None,
+                    textColour: str = None, **kwds):
+        """Create new empty PeakList within Spectrum
+
+        See the PeakList class for details
 
         :param title:
         :param comment:
@@ -1706,34 +1711,46 @@ class Spectrum(AbstractWrapperObject):
         :param symbolStyle:
         :param symbolColour:
         :param textColour:
-        :param serial:
-        :return: a new PeakList attached to the spectrum.
+        :return a new PeakList attached to the spectrum.
 
-        Inserted later ccpn.Core.PeakList
+        optional keyword arguments can be passed in; see PeakList._newPeakList for details.
         """
-        pass
+        from ccpn.core.PeakList import _newPeakList
 
-    def _newIntegralList(self, title: str = None, symbolColour: str = None,
-                         textColour: str = None, comment: str = None):
-        """
-        Create new IntegralList within Spectrum.
+        return _newPeakList(self, title=title, comment=comment, isSimulated=isSimulated,
+                            symbolStyle=symbolStyle, symbolColour=symbolColour, textColour=textColour,
+                            **kwds)
+
+    @logCommand(get='self')
+    def newIntegralList(self, title: str = None, symbolColour: str = None,
+                         textColour: str = None, comment: str = None, **kwds):
+        """Create new IntegralList within Spectrum.
+
+        See the IntegralList class for details
 
         :param self:
         :param title:
         :param symbolColour:
         :param textColour:
         :param comment:
-        :return:
+        :return a new IntegralList attached to the spectrum.
 
-        Inserted later ccpn.Core.IntegralList
+        optional keyword arguments can be passed in; see IntegralList._newIntegralList for details.
         """
+        from ccpn.core.IntegralList import _newIntegralList
 
-    def _newMultipletList(self, title: str = None,
+        return _newIntegralList(self, title=title, comment=comment,
+                                symbolColour=symbolColour, textColour=textColour,
+                                **kwds)
+
+    @logCommand(get='self')
+    def newMultipletList(self, title: str = None,
                           symbolColour: str = None, textColour: str = None, lineColour: str = None,
                           multipletAveraging=0,
-                          comment: str = None, multiplets: ['Multiplet'] = None):
-        """
-        Create new MultipletList within Spectrum
+                          comment: str = None, multiplets: ['Multiplet'] = None, **kwds):
+        """Create new MultipletList within Spectrum
+
+        See the MultipletList class for details
 
         :param self:
         :param title:
@@ -1743,10 +1760,17 @@ class Spectrum(AbstractWrapperObject):
         :param multipletAveraging:
         :param comment:
         :param multiplets:
-        :return: a new MultipletList attached to the Spectrum.
+        :return a new MultipletList attached to the Spectrum.
 
-        Inserted later ccpn.Core.MultipletList
+        optional keyword arguments can be passed in; see MultipletList._newMultipletList for details.
         """
+        from ccpn.core.MultipletList import _newMultipletList
+
+        return _newMultipletList(self, title=title, comment=comment,
+                                 lineColour=lineColour, symbolColour=symbolColour, textColour=textColour,
+                                 multipletAveraging=multipletAveraging,
+                                 multiplets=multiplets,
+                                 **kwds)
 
 
 #=========================================================================================

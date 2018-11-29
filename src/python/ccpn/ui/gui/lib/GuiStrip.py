@@ -195,7 +195,7 @@ class GuiStrip(NotifierBase, Frame):
 
         # Strip needs access to plotWidget's items and info #TODO: get rid of this
         # self.plotItem = self.plotWidget.plotItem
-        self.viewBoxMenu = None         # = self.plotItem.vb
+        self.viewStripMenu = None         # = self.plotItem.vb
 
         self._showCrossHair()
         # callbacks
@@ -772,7 +772,7 @@ class GuiStrip(NotifierBase, Frame):
 
         # change menu
         self._isPhasingOn = True
-        self.viewBoxMenu = self._phasingMenu
+        self.viewStripMenu = self._phasingMenu
 
         if self.spectrumDisplay.is1D:
 
@@ -1847,7 +1847,7 @@ class GuiStrip(NotifierBase, Frame):
         """
 
         position = event.screenPos()
-        self.viewBoxMenu.popup(QtCore.QPoint(int(position.x()),
+        self.viewStripMenu.popup(QtCore.QPoint(int(position.x()),
                                              int(position.y())))
         self.contextMenuPosition = self.current.cursorPosition
 

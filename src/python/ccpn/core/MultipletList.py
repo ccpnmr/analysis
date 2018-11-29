@@ -39,6 +39,8 @@ from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
 from typing import Optional, Tuple, Sequence, List
 from ccpn.util.decorators import logCommand
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.util.Logging import getLogger
 
 
 LINECOLOUR = 'lineColour'
@@ -214,7 +216,7 @@ class MultipletList(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
-    @logCommand('multipletlist.')
+    @logCommand(get='self')
     def newMultiplet(self, peaks: ['Peak'] = (), comment: str = None, **kwds):
         """Create a new Multiplet within a multipletList
 
@@ -235,10 +237,13 @@ class MultipletList(AbstractWrapperObject):
 #=========================================================================================
 
 # Connections to parents:
+
+@newObject(MultipletList)
 def _newMultipletList(self: Spectrum, title: str = None,
                       symbolColour: str = None, textColour: str = None, lineColour: str = None,
                       multipletAveraging = 0,
-                      comment: str = None, multiplets: ['Multiplet'] = None) -> MultipletList:
+                      comment: str = None, multiplets: ['Multiplet'] = None,
+                      serial: int = None) -> MultipletList:
     """Create new MultipletList within Spectrum
 
     :param self:
@@ -251,12 +256,6 @@ def _newMultipletList(self: Spectrum, title: str = None,
     :param multiplets:
     :return: a new MultipletList attached to the Spectrum.
     """
-    # __doc__ added to Spectrum
-
-    defaults = collections.OrderedDict(
-            (('title', None), ('symbolColour', None), ('textColour', None), ('comment', None), ('multiplets', None),
-             )
-            )
 
     dd = {'name': title, 'details': comment}
     if symbolColour:
@@ -266,29 +265,25 @@ def _newMultipletList(self: Spectrum, title: str = None,
     if multiplets:
         dd['multiplets'] = multiplets
 
-    undo = self._project._undo
-    self._startCommandEchoBlock('newMultipletList', values=locals(), defaults=defaults,
-                                parName='newMultipletList')
-    try:
-        apiParent = self._wrappedData
-        # if multiplets:
-        #   apiMultipletList = apiParent.newMultipletList(multiplets=[mm._wrappedData for mm in multiplets])
-        # else:
-        #   apiMultipletList = apiParent.newMultipletList()
+    apiParent = self._apiDataSource
+    apiMultipletList = apiParent.newMultipletList(**dd)
+    result = self._project._data2Obj.get(apiMultipletList)
+    if result is None:
+        raise RuntimeError('Unable to generate new MultipletList item')
 
-        apiMultipletList = apiParent.newMultipletList(**dd)
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            getLogger().warning("Could not reset serial of %s to %s - keeping original value"
+                                % (result, serial))
 
-        result = self._project._data2Obj.get(apiMultipletList)
-
-        # set non-api attributes
-        result.lineColour = lineColour
-        result.multipletAveraging = multipletAveraging
-
-    finally:
-        self._endCommandEchoBlock()
+    # set non-api attributes
+    result.lineColour = lineColour
+    result.multipletAveraging = multipletAveraging
 
     return result
 
 
-MultipletList._parentClass.newMultipletList = _newMultipletList
-del _newMultipletList
+# MultipletList._parentClass.newMultipletList = _newMultipletList
+# del _newMultipletList

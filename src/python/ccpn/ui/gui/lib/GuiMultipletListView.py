@@ -358,59 +358,59 @@ class GuiMultipletListView(QtWidgets.QGraphicsItem):
         return
 
     # For notifiers - moved from core MultipletListView
-    def _createdMultipletListView(self):
-        spectrumView = self.spectrumView
-        spectrum = spectrumView.spectrum
-        # NBNB TBD FIXME we should get rid of this API-level access
-        # But that requires refactoring the spectrumActionDict
-        action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(spectrum._wrappedData)
-        if action:
-            action.toggled.connect(self.setVisible)  # TBD: need to undo this if multipletListView removed
-
-        if not self.scene:  # this happens after an undo of a spectrum/multipletList deletion
-            spectrumView.strip.plotWidget.scene().addItem(self)
-            spectrumView.strip.viewBox.addItem(self)
-
-        strip = spectrumView.strip
-        for multipletList in spectrum.multipletLists:
-            strip.showMultiplets(multipletList)
+    # def _createdMultipletListView(self):
+    #     spectrumView = self.spectrumView
+    #     spectrum = spectrumView.spectrum
+    #     # NBNB TBD FIXME we should get rid of this API-level access
+    #     # But that requires refactoring the spectrumActionDict
+    #     action = spectrumView.strip.spectrumDisplay.spectrumActionDict.get(spectrum._wrappedData)
+    #     if action:
+    #         action.toggled.connect(self.setVisible)  # TBD: need to undo this if multipletListView removed
+    #
+    #     if not self.scene:  # this happens after an undo of a spectrum/multipletList deletion
+    #         spectrumView.strip.plotWidget.scene().addItem(self)
+    #         spectrumView.strip.viewBox.addItem(self)
+    #
+    #     strip = spectrumView.strip
+    #     for multipletList in spectrum.multipletLists:
+    #         strip.showMultiplets(multipletList)
 
     # For notifiers - moved from core MultipletListView
-    def _deletedStripMultipletListView(self):
-        spectrumView = self.spectrumView
-        strip = spectrumView.strip
-        spectrumDisplay = strip.spectrumDisplay
+    # def _deletedStripMultipletListView(self):
+    #     spectrumView = self.spectrumView
+    #     strip = spectrumView.strip
+    #     spectrumDisplay = strip.spectrumDisplay
+    #
+    #     try:
+    #         multipletItemDict = spectrumDisplay.activeMultipletItemDict[self]
+    #         multipletItems = set(spectrumDisplay.inactiveMultipletItemDict[self])
+    #         for apiMultiplet in multipletItemDict:
+    #             # NBNB TBD FIXME change to get rid of API multiplets here
+    #             multipletItem = multipletItemDict[apiMultiplet]
+    #             multipletItems.add(multipletItem)
+    #
+    #         # TODO:ED should really remove all references at some point
+    #         # if strip.plotWidget:
+    #         #   scene = strip.plotWidget.scene()
+    #         #   for multipletItem in multipletItems:
+    #         #     scene.removeItem(multipletItem.annotation)
+    #         #     if spectrumDisplay.is1D:
+    #         #       scene.removeItem(multipletItem.symbol)
+    #         #     scene.removeItem(multipletItem)
+    #         #   self.scene.removeItem(self)
+    #
+    #         del spectrumDisplay.activeMultipletItemDict[self]
+    #         del spectrumDisplay.inactiveMultipletItemDict[self]
+    #     except Exception as es:
+    #         getLogger().warning('Error: multipletList does not exist in spectrum')
 
-        try:
-            multipletItemDict = spectrumDisplay.activeMultipletItemDict[self]
-            multipletItems = set(spectrumDisplay.inactiveMultipletItemDict[self])
-            for apiMultiplet in multipletItemDict:
-                # NBNB TBD FIXME change to get rid of API multiplets here
-                multipletItem = multipletItemDict[apiMultiplet]
-                multipletItems.add(multipletItem)
-
-            # TODO:ED should really remove all references at some point
-            # if strip.plotWidget:
-            #   scene = strip.plotWidget.scene()
-            #   for multipletItem in multipletItems:
-            #     scene.removeItem(multipletItem.annotation)
-            #     if spectrumDisplay.is1D:
-            #       scene.removeItem(multipletItem.symbol)
-            #     scene.removeItem(multipletItem)
-            #   self.scene.removeItem(self)
-
-            del spectrumDisplay.activeMultipletItemDict[self]
-            del spectrumDisplay.inactiveMultipletItemDict[self]
-        except Exception as es:
-            getLogger().warning('Error: multipletList does not exist in spectrum')
-
-    def _changedMultipletListView(self):
-
-        pass
-        # for multipletItem in self.multipletItems.values():
-        #     if isinstance(multipletItem, MultipletNd):
-        #         peakItem.update()  # ejb - force a repaint of the peakItem
-        #         peakItem.annotation.setupPeakAnnotationItem(peakItem)
+    # def _changedMultipletListView(self):
+    #
+    #     pass
+    #     # for multipletItem in self.multipletItems.values():
+    #     #     if isinstance(multipletItem, MultipletNd):
+    #     #         peakItem.update()  # ejb - force a repaint of the peakItem
+    #     #         peakItem.annotation.setupPeakAnnotationItem(peakItem)
 
     def setVisible(self, visible):
         super().setVisible(visible)

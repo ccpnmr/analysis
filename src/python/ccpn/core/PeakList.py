@@ -45,7 +45,7 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
-from ccpn.util.decorators import notify, propertyUndo, logCommand
+from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 
@@ -319,7 +319,7 @@ class PeakList(AbstractWrapperObject):
 
     def pickPeaks1d(self, dataRange, intensityRange=None, size: int = 3, mode: str = 'wrap') -> List['Peak']:
         """
-        Pick 1D peaks from a dataRange (E.G selection in ViewBox)
+        Pick 1D peaks from a dataRange
         """
 
         self._project.suspendNotification()
@@ -762,7 +762,6 @@ class PeakList(AbstractWrapperObject):
 
         optional keyword arguments can be passed in; see Peak._newPeak for details.
 
-
         NB you must create the peak before you can assign it. The assignment attributes are:
         - assignments (assignedNmrAtoms) - A tuple of all (e.g.) assignment triplets for a 3D spectrum
         - assignmentsByDimensions (dimensionNmrAtoms) - A tuple of tuples of assignments, one for each dimension
@@ -794,20 +793,11 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
     :param symbolColour:
     :param textColour:
     :param serial:
+
     :return: a new PeakList attached to the spectrum.
     """
-    # __doc__ added to Spectrum
 
-    defaults = collections.OrderedDict((('title', None), ('comment', None), ('isSimulated', False),
-                                        ('serial', None), ('symbolStyle', None), (
-                                            'symbolColour', None), ('textColour', None),
-                                        )
-                                       )
-
-    apiDataSource = self._wrappedData
-    self._startCommandEchoBlock('newPeakList', values=locals(), defaults=defaults,
-                                parName='newPeakList')
-    result = None
+    apiDataSource = self._apiDataSource
     dd = {'name': title, 'details': comment, 'isSimulated': isSimulated}
     if symbolColour:
         dd['symbolColour'] = symbolColour
@@ -815,21 +805,19 @@ def _newPeakList(self: Spectrum, title: str = None, comment: str = None,
         dd['symbolStyle'] = symbolStyle
     if textColour:
         dd['textColour'] = textColour
-    try:
-        obj = apiDataSource.newPeakList(**dd)
-        result = self._project._data2Obj.get(obj)
-        if serial is not None:
-            try:
-                result.resetSerial(serial)
-                # modelUtil.resetSerial(obj, serial, 'peakLists')
-            except ValueError:
-                self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                             % (result, serial))
-            result._finaliseAction('rename')
 
-    finally:
-        self._endCommandEchoBlock()
-    #
+    apiPeakList = apiDataSource.newPeakList(**dd)
+    result = self._project._data2Obj.get(apiPeakList)
+    if result is None:
+        raise RuntimeError('Unable to generate new PeakList item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                         % (result, serial))
+
     return result
 
 

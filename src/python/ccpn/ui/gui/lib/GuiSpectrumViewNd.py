@@ -323,50 +323,50 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             return
         return
 
-        # print('>>>_updatePhasing')
-        position = [axis.position for axis in self.strip.orderedAxes]
-
-        phasingFrame = self.strip.spectrumDisplay.phasingFrame
-        if phasingFrame.isVisible():
-            ph0 = phasingFrame.slider0.value()
-            ph1 = phasingFrame.slider1.value()
-            pivotPpm = phasingFrame.pivotEntry.get()
-            direction = phasingFrame.getDirection()
-            # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
-            # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
-            axisIndex = self._displayOrderSpectrumDimensionIndices[direction]
-            pivot = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
-        else:
-            ph0 = ph1 = direction = 0
-            pivot = 1
-
-        #hPhasingPivot = self.strip.hPhasingPivot
-        #if hPhasingPivot.isVisible():
-        #  dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]
-        #  pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())
-        #else:
-        #  pivot = 1
-
-        if direction == 0:
-            phaseTraces = self.hPhaseTraces
-        else:
-            phaseTraces = self.vPhaseTraces
-        for trace, line in phaseTraces:
-            line.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
-            if direction == 0:
-                position[1] = line.getYPos()
-            else:
-                position[0] = line.getXPos()
-            positionPoint = QtCore.QPointF(position[0], position[1])
-            positionPixel = self.strip.viewBox.mapViewToScene(positionPoint)
-            positionPixel = (positionPixel.x(), positionPixel.y())
-            inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints = self._getTraceParams(
-                    position)
-            if inRange:
-                if direction == 0:
-                    self._updateHTraceData(point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, trace, ph0, ph1, pivot)
-                else:
-                    self._updateVTraceData(point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, trace, ph0, ph1, pivot)
+        # # print('>>>_updatePhasing')
+        # position = [axis.position for axis in self.strip.orderedAxes]
+        #
+        # phasingFrame = self.strip.spectrumDisplay.phasingFrame
+        # if phasingFrame.isVisible():
+        #     ph0 = phasingFrame.slider0.value()
+        #     ph1 = phasingFrame.slider1.value()
+        #     pivotPpm = phasingFrame.pivotEntry.get()
+        #     direction = phasingFrame.getDirection()
+        #     # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
+        #     # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+        #     axisIndex = self._displayOrderSpectrumDimensionIndices[direction]
+        #     pivot = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
+        # else:
+        #     ph0 = ph1 = direction = 0
+        #     pivot = 1
+        #
+        # #hPhasingPivot = self.strip.hPhasingPivot
+        # #if hPhasingPivot.isVisible():
+        # #  dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]
+        # #  pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())
+        # #else:
+        # #  pivot = 1
+        #
+        # if direction == 0:
+        #     phaseTraces = self.hPhaseTraces
+        # else:
+        #     phaseTraces = self.vPhaseTraces
+        # for trace, line in phaseTraces:
+        #     line.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
+        #     if direction == 0:
+        #         position[1] = line.getYPos()
+        #     else:
+        #         position[0] = line.getXPos()
+        #     positionPoint = QtCore.QPointF(position[0], position[1])
+        #     positionPixel = self.strip.viewBox.mapViewToScene(positionPoint)
+        #     positionPixel = (positionPixel.x(), positionPixel.y())
+        #     inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints = self._getTraceParams(
+        #             position)
+        #     if inRange:
+        #         if direction == 0:
+        #             self._updateHTraceData(point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, trace, ph0, ph1, pivot)
+        #         else:
+        #             self._updateVTraceData(point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, trace, ph0, ph1, pivot)
 
     def _getTraceParams(self, position):
         # position is in ppm
@@ -410,68 +410,68 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         return inRange, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints
 
-    def _updateHTraceData(self, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, hTrace, ph0=None, ph1=None, pivot=None):
+    # def _updateHTraceData(self, point, xDataDim, xMinFrequency, xMaxFrequency, xNumPoints, positionPixel, hTrace, ph0=None, ph1=None, pivot=None):
+    #
+    #     # unfortunately it looks like we have to work in pixels, not ppm, yuck
+    #     strip = self.strip
+    #     plotWidget = strip.plotWidget
+    #     plotItem = plotWidget.plotItem
+    #     viewBox = strip.viewBox
+    #     viewRegion = plotWidget.viewRange()
+    #
+    #     pointInt = [1 + int(pnt + 0.5) for pnt in point]
+    #     data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
+    #     if ph0 is not None and ph1 is not None and pivot is not None:
+    #         data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+    #     x = numpy.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
+    #     # scale from ppm to pixels
+    #     pixelViewBox0 = plotItem.getAxis('left').width()
+    #     pixelViewBox1 = pixelViewBox0 + viewBox.width()
+    #     region1, region0 = viewRegion[0]
+    #     x -= region0
+    #     x *= (pixelViewBox1 - pixelViewBox0) / (region1 - region0)
+    #     x += pixelViewBox0
+    #
+    #     pixelViewBox0 = plotItem.getAxis('bottom').height()
+    #     pixelViewBox1 = pixelViewBox0 + viewBox.height()
+    #     # - sign below because ppm scale is backwards
+    #     v = positionPixel[1] - self._traceScale * (pixelViewBox1 - pixelViewBox0) * numpy.array(
+    #             [data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
+    #
+    #     hTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
+    #     hTrace.setData(x, v)
 
-        # unfortunately it looks like we have to work in pixels, not ppm, yuck
-        strip = self.strip
-        plotWidget = strip.plotWidget
-        plotItem = plotWidget.plotItem
-        viewBox = strip.viewBox
-        viewRegion = plotWidget.viewRange()
-
-        pointInt = [1 + int(pnt + 0.5) for pnt in point]
-        data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
-        if ph0 is not None and ph1 is not None and pivot is not None:
-            data = Phasing.phaseRealData(data, ph0, ph1, pivot)
-        x = numpy.array([xDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(xMinFrequency, xMaxFrequency + 1)])
-        # scale from ppm to pixels
-        pixelViewBox0 = plotItem.getAxis('left').width()
-        pixelViewBox1 = pixelViewBox0 + viewBox.width()
-        region1, region0 = viewRegion[0]
-        x -= region0
-        x *= (pixelViewBox1 - pixelViewBox0) / (region1 - region0)
-        x += pixelViewBox0
-
-        pixelViewBox0 = plotItem.getAxis('bottom').height()
-        pixelViewBox1 = pixelViewBox0 + viewBox.height()
-        # - sign below because ppm scale is backwards
-        v = positionPixel[1] - self._traceScale * (pixelViewBox1 - pixelViewBox0) * numpy.array(
-                [data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency + 1)])
-
-        hTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
-        hTrace.setData(x, v)
-
-    def _updateVTraceData(self, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, vTrace, ph0=None, ph1=None, pivot=None):
-
-        # unfortunately it looks like we have to work in pixels, not ppm, yuck
-        strip = self.strip
-        plotWidget = strip.plotWidget
-        plotItem = plotWidget.plotItem
-        viewBox = strip.viewBox
-        viewRegion = plotWidget.viewRange()
-
-        pointInt = [1 + int(pnt + 0.5) for pnt in point]
-        data = self.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
-        if ph0 is not None and ph1 is not None and pivot is not None:
-            data = Phasing.phaseRealData(data, ph0, ph1, pivot)
-        y = numpy.array([yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
-        # scale from ppm to pixels
-        pixelViewBox0 = plotItem.getAxis('bottom').height()
-        pixelViewBox1 = pixelViewBox0 + viewBox.height()
-        region0, region1 = viewRegion[1]
-        y -= region0
-        y *= (pixelViewBox1 - pixelViewBox0) / (region1 - region0)
-        ###y += pixelViewBox0  # not sure why this should be commented out...
-
-        pixelViewBox0 = plotItem.getAxis('left').width()
-        pixelViewBox1 = pixelViewBox0 + viewBox.width()
-        # no - sign below because ppm scale is backwards and pixel y scale is also backwards
-        # (assuming that we want positive signal to point towards the right)
-        v = positionPixel[0] + self._traceScale * (pixelViewBox1 - pixelViewBox0) * numpy.array(
-                [data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
-
-        vTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
-        vTrace.setData(v, y)
+    # def _updateVTraceData(self, point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, vTrace, ph0=None, ph1=None, pivot=None):
+    #
+    #     # unfortunately it looks like we have to work in pixels, not ppm, yuck
+    #     strip = self.strip
+    #     plotWidget = strip.plotWidget
+    #     plotItem = plotWidget.plotItem
+    #     viewBox = strip.viewBox
+    #     viewRegion = plotWidget.viewRange()
+    #
+    #     pointInt = [1 + int(pnt + 0.5) for pnt in point]
+    #     data = self.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
+    #     if ph0 is not None and ph1 is not None and pivot is not None:
+    #         data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+    #     y = numpy.array([yDataDim.primaryDataDimRef.pointToValue(p + 1) for p in range(yMinFrequency, yMaxFrequency + 1)])
+    #     # scale from ppm to pixels
+    #     pixelViewBox0 = plotItem.getAxis('bottom').height()
+    #     pixelViewBox1 = pixelViewBox0 + viewBox.height()
+    #     region0, region1 = viewRegion[1]
+    #     y -= region0
+    #     y *= (pixelViewBox1 - pixelViewBox0) / (region1 - region0)
+    #     ###y += pixelViewBox0  # not sure why this should be commented out...
+    #
+    #     pixelViewBox0 = plotItem.getAxis('left').width()
+    #     pixelViewBox1 = pixelViewBox0 + viewBox.width()
+    #     # no - sign below because ppm scale is backwards and pixel y scale is also backwards
+    #     # (assuming that we want positive signal to point towards the right)
+    #     v = positionPixel[0] + self._traceScale * (pixelViewBox1 - pixelViewBox0) * numpy.array(
+    #             [data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency + 1)])
+    #
+    #     vTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
+    #     vTrace.setData(v, y)
 
     def _updateTrace(self, position, positionPixel, updateHTrace=True, updateVTrace=True):
 
@@ -635,37 +635,37 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                     contour[:, 1] += yTranslate
                     printer.writePolyline(contour, colour)
 
-    def paint(self, painter, option, widget=None):
-
-        # deprecated
-
-        if self.isDeleted or self.project.isDeleted or not self.isVisible():
-            return
-
-        ##if not widget:
-        ##  return
-        dataStore = self._apiDataSource.dataStore
-        if dataStore is None or not os.path.exists(dataStore.fullPath):
-            if self.okDataFile:
-                self.project._logger.warning("%s cannot find any data - data file misplaced?" % self)
-                self.okDataFile = False
-            return
-
-        self.okDataFile = True
-
-        try:
-            # need to separate the build GLLists from the paint GLLists
-            # self._buildPeaks(painter)     # ejb - not done yet, this is the slow one
-            if self.buildContours:
-                self._buildContours(painter)  # need to trigger these changes now
-                self.buildContours = False  # set to false, as we have rebuilt
-                # set to True and update() will rebuild the contours
-                # can be done with a call to self.rebuildContours()
-
-            self._paintContours(painter)
-            # self._paintPeaks(painter)       # ejb - not done yet, this is the slow one
-        except GLError:  # invalid framebuffer operation
-            pass
+    # def paint(self, painter, option, widget=None):
+    #
+    #     # deprecated
+    #
+    #     if self.isDeleted or self.project.isDeleted or not self.isVisible():
+    #         return
+    #
+    #     ##if not widget:
+    #     ##  return
+    #     dataStore = self._apiDataSource.dataStore
+    #     if dataStore is None or not os.path.exists(dataStore.fullPath):
+    #         if self.okDataFile:
+    #             self.project._logger.warning("%s cannot find any data - data file misplaced?" % self)
+    #             self.okDataFile = False
+    #         return
+    #
+    #     self.okDataFile = True
+    #
+    #     try:
+    #         # need to separate the build GLLists from the paint GLLists
+    #         # self._buildPeaks(painter)     # ejb - not done yet, this is the slow one
+    #         if self.buildContours:
+    #             self._buildContours(painter)  # need to trigger these changes now
+    #             self.buildContours = False  # set to false, as we have rebuilt
+    #             # set to True and update() will rebuild the contours
+    #             # can be done with a call to self.rebuildContours()
+    #
+    #         self._paintContours(painter)
+    #         # self._paintPeaks(painter)       # ejb - not done yet, this is the slow one
+    #     except GLError:  # invalid framebuffer operation
+    #         pass
 
     # def boundingRect(self):  # seems necessary to have
     #
@@ -1214,53 +1214,53 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #     glList.numVertices = len(glList.vertices)//2
 
     # def getTranslateScale(self, dim, ind:int):
-    def _getTranslateScale(self, ind: int, pixelViewBox0: float = None, pixelViewBox1: float = None):
-        """Get translation data for X (ind==0) or Y (ind==1) dimension"""
-
-        # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[ind]
-        # valueToPoint = dataDim.primaryDataDimRef.valueToPoint
-
-        axisIndex = self._displayOrderSpectrumDimensionIndices[ind]
-        valueToPoint = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint
-
-        strip = self.strip
-        plotWidget = strip.plotWidget
-        if plotWidget:
-            plotItem = plotWidget.plotItem
-            viewBox = strip.viewBox
-            viewRegion = plotWidget.viewRange()
-            region1, region0 = viewRegion[ind]  # TBD: relies on axes being backwards
-
-            if pixelViewBox0 is None:  # should then also have pixelViewBox1 = None
-                if ind == 0:
-                    pixelCount = plotWidget.width()
-                    pixelViewBox0 = plotItem.getAxis('left').width()
-                    pixelViewBox1 = pixelViewBox0 + viewBox.width()
-                else:
-                    pixelCount = plotWidget.height()
-                    pixelViewBox0 = plotItem.getAxis('bottom').height()
-                    pixelViewBox1 = pixelViewBox0 + viewBox.height()
-
-            # -1 below because points start at 1 in data model
-            firstPoint = valueToPoint(region0) - 1
-            lastPoint = valueToPoint(region1) - 1
-            # (firstPoint, lastPoint) = self.spectrum.getDimPointFromValue(dim, (region0, region1))
-
-            scale = (pixelViewBox1 - pixelViewBox0) / (lastPoint - firstPoint)
-            translate = pixelViewBox0 - firstPoint * scale
-
-            # dataDim2 should be same as dataDim
-            # position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim2 = (
-            #   self._getSpectrumViewParams(ind))
-            viewParams = self._getSpectrumViewParams(ind)
-
-            # -1 below because points start at 1 in data model
-            clipPoint0 = int(math.floor(max(firstPoint, valueToPoint(viewParams.maxAliasedFrequency) - 1)))
-            clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(viewParams.minAliasedFrequency) - 1)))
-
-            return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
-        else:
-            return [None, None, None, None, None]
+    # def _getTranslateScale(self, ind: int, pixelViewBox0: float = None, pixelViewBox1: float = None):
+    #     """Get translation data for X (ind==0) or Y (ind==1) dimension"""
+    #
+    #     # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[ind]
+    #     # valueToPoint = dataDim.primaryDataDimRef.valueToPoint
+    #
+    #     axisIndex = self._displayOrderSpectrumDimensionIndices[ind]
+    #     valueToPoint = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint
+    #
+    #     strip = self.strip
+    #     plotWidget = strip.plotWidget
+    #     if plotWidget:
+    #         plotItem = plotWidget.plotItem
+    #         viewBox = strip.viewBox
+    #         viewRegion = plotWidget.viewRange()
+    #         region1, region0 = viewRegion[ind]  # TBD: relies on axes being backwards
+    #
+    #         if pixelViewBox0 is None:  # should then also have pixelViewBox1 = None
+    #             if ind == 0:
+    #                 pixelCount = plotWidget.width()
+    #                 pixelViewBox0 = plotItem.getAxis('left').width()
+    #                 pixelViewBox1 = pixelViewBox0 + viewBox.width()
+    #             else:
+    #                 pixelCount = plotWidget.height()
+    #                 pixelViewBox0 = plotItem.getAxis('bottom').height()
+    #                 pixelViewBox1 = pixelViewBox0 + viewBox.height()
+    #
+    #         # -1 below because points start at 1 in data model
+    #         firstPoint = valueToPoint(region0) - 1
+    #         lastPoint = valueToPoint(region1) - 1
+    #         # (firstPoint, lastPoint) = self.spectrum.getDimPointFromValue(dim, (region0, region1))
+    #
+    #         scale = (pixelViewBox1 - pixelViewBox0) / (lastPoint - firstPoint)
+    #         translate = pixelViewBox0 - firstPoint * scale
+    #
+    #         # dataDim2 should be same as dataDim
+    #         # position, width, totalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim2 = (
+    #         #   self._getSpectrumViewParams(ind))
+    #         viewParams = self._getSpectrumViewParams(ind)
+    #
+    #         # -1 below because points start at 1 in data model
+    #         clipPoint0 = int(math.floor(max(firstPoint, valueToPoint(viewParams.maxAliasedFrequency) - 1)))
+    #         clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(viewParams.minAliasedFrequency) - 1)))
+    #
+    #         return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
+    #     else:
+    #         return [None, None, None, None, None]
 
     def _getValues(self):
         # ejb - get some spectrum information for scaling the display

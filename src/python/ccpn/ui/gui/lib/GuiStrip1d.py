@@ -392,7 +392,7 @@ class GuiStrip1d(GuiStrip):
             self._stack1DSpectra(self.offsetWidget.value())
         else:
             self._toggleOffsetWidget()
-            self._restoreStacked1DSpectra()
+            # self._restoreStacked1DSpectra()
 
             try:
                 self._CcpnGLWidget.setStackingMode(False)
@@ -408,7 +408,7 @@ class GuiStrip1d(GuiStrip):
             self._stack1DSpectra(self.offsetWidget.value())
         else:
             self._toggleOffsetWidget()
-            self._restoreStacked1DSpectra()
+            # self._restoreStacked1DSpectra()
 
             try:
                 self._CcpnGLWidget.setStackingMode(False)
@@ -423,24 +423,22 @@ class GuiStrip1d(GuiStrip):
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-        return
+        # for i, spectrumView in enumerate(self.spectrumViews):
+        #     sp = spectrumView.spectrum
+        #     x = sp.positions
+        #     y = sp.intensities
+        #     if offSet is None:
+        #         offSet = np.std(y)
+        #         self.offsetValue = offSet
+        #     spectrumView.plot.curve.setData(x, y + (i * offSet))
+        #     for peakListView in self.peakListViews:
+        #         peakListView.setVisible(False)
 
-        for i, spectrumView in enumerate(self.spectrumViews):
-            sp = spectrumView.spectrum
-            x = sp.positions
-            y = sp.intensities
-            if offSet is None:
-                offSet = np.std(y)
-                self.offsetValue = offSet
-            spectrumView.plot.curve.setData(x, y + (i * offSet))
-            for peakListView in self.peakListViews:
-                peakListView.setVisible(False)
-
-    def _restoreStacked1DSpectra(self):
-        for spectrumView in self.spectrumViews:
-            spectrumView.plot.curve.setData(spectrumView.spectrum.positions, spectrumView.spectrum.intensities)
-        # for peakListView in self.peakListViews:
-        #   peakListView.setVisible(True)
+    # def _restoreStacked1DSpectra(self):
+    #     for spectrumView in self.spectrumViews:
+    #         spectrumView.plot.curve.setData(spectrumView.spectrum.positions, spectrumView.spectrum.intensities)
+    #     # for peakListView in self.peakListViews:
+    #     #   peakListView.setVisible(True)
 
     def toggleHorizontalTrace(self):
         """

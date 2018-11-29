@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 #from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Peak as LibPeak
 
-from ccpn.util.decorators import notify, propertyUndo, logCommand
+from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 
@@ -187,9 +187,8 @@ class Peak(AbstractWrapperObject):
         return tuple(x.valueError for x in self._wrappedData.sortedPeakDims())
 
     @positionError.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def positionError(self, value: Sequence):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             peakDim.valueError = value[ii]
@@ -200,9 +199,8 @@ class Peak(AbstractWrapperObject):
         return tuple(x.position for x in self._wrappedData.sortedPeakDims())
 
     @pointPosition.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def pointPosition(self, value: Sequence):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             peakDim.position = value[ii]
@@ -214,9 +212,8 @@ class Peak(AbstractWrapperObject):
         return tuple(x.boxWidth for x in self._wrappedData.sortedPeakDims())
 
     @boxWidths.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def boxWidths(self, value: Sequence):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             peakDim.boxWidth = value[ii]
@@ -227,9 +224,8 @@ class Peak(AbstractWrapperObject):
         return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
 
     @lineWidths.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def lineWidths(self, value: Sequence):
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
             peakDim.lineWidth = value[ii]
@@ -264,9 +260,8 @@ class Peak(AbstractWrapperObject):
         return tuple(result)
 
     @dimensionNmrAtoms.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def dimensionNmrAtoms(self, value: Sequence):
 
         isotopeCodes = self.peakList.spectrum.isotopeCodes
@@ -342,9 +337,8 @@ class Peak(AbstractWrapperObject):
         return tuple(sorted(result))
 
     @assignedNmrAtoms.setter
-    @logCommand(get='self')
-    @propertyUndo()
-    @notify('observe')
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def assignedNmrAtoms(self, value: Sequence):
 
         isotopeCodes = tuple(None if x == '?' else x for x in self.peakList.spectrum.isotopeCodes)
@@ -556,20 +550,22 @@ class Peak(AbstractWrapperObject):
         return self._project._data2Obj[self._wrappedData.integral] if self._wrappedData.integral else None
 
     @integral.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def integral(self, integral: Union['Integral'] = None):
         """Link an integral to the peak.
         The peak must belong to the spectrum containing the peakList.
         :param integral: single integral."""
+        spectrum = self._parent.spectrum
+        if integral:
+            from ccpn.core.Integral import Integral
 
-        undo = self._project._undo
-        integralStr = "project.getByPid('%s')" % integral.pid if integral else 'None'
-        self._startCommandEchoBlock('integral = ' + integralStr, propertySetter=True)
-        try:
-            self._wrappedData.integral = integral._wrappedData if integral else None
-        except Exception as es:
-            raise TypeError('Error setting integral')
-        finally:
-            self._endCommandEchoBlock()
+            if not isinstance(integral, Integral):
+                raise TypeError('%s is not of type Integral' % integral)
+            if integral not in spectrum.integrals:
+                raise ValueError('%s does not belong to spectrum: %s' % (integral.pid, spectrum.pid))
+
+        self._wrappedData.integral = integral._wrappedData if integral else None
 
 
 #=========================================================================================

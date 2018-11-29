@@ -4,9 +4,9 @@ By Functionality:
 Zoom and pan:
     Left-drag:                          pans the spectrum.
 
-    shift-left-drag:                    draws a zooming box and zooms the viewbox.
-    shift-middle-drag:                  draws a zooming box and zooms the viewbox.
-    shift-right-drag:                   draws a zooming box and zooms the viewbox.
+    shift-left-drag:                    draws a zooming box and zooms the viewing window.
+    shift-middle-drag:                  draws a zooming box and zooms the viewing window.
+    shift-right-drag:                   draws a zooming box and zooms the viewing window.
     Two successive shift-right-clicks:  define zoombox
     control-right click:                reset the zoom
 
@@ -29,18 +29,18 @@ By Mouse button:
     Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
 
     Left-drag:                          pans the spectrum.
-    shift-left-drag:                    draws a zooming box and zooms the viewbox.
+    shift-left-drag:                    draws a zooming box and zooms the viewing window.
     Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
     Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
 
 
-    shift-middle-drag:                  draws a zooming box and zooms the viewbox.
+    shift-middle-drag:                  draws a zooming box and zooms the viewing window.
 
     Right-click:                        raises the context menu.
     control-right click:                reset the zoom
     Two successive shift-right-clicks:  define zoombox
 
-    shift-right-drag:                   draws a zooming box and zooms the viewbox.
+    shift-right-drag:                   draws a zooming box and zooms the viewing window.
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -1017,7 +1017,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # self._orderedAxes[0].region = (self.axisL, self.axisR)
             self._setRegion(self._orderedAxes[0], (self.axisL, self.axisR))
         except:
-            getLogger().debug('error setting viewbox X-range')
+            getLogger().debug('error setting viewing window X-range')
         # finally:
         #     self.project._endCommandEchoBlock()
 
@@ -1045,7 +1045,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._setRegion(self._orderedAxes[1], (self.axisT, self.axisB))
 
         except Exception as es:
-            getLogger().debug('error setting viewbox Y-range')
+            getLogger().debug('error setting viewing window Y-range')
         # finally:
         #     self.project._endCommandEchoBlock()
 
@@ -1127,7 +1127,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._setRegion(self._orderedAxes[1], (self.axisT, self.axisB))
 
         except Exception as es:
-            getLogger().debug('error setting viewbox XY-range')
+            getLogger().debug('error setting viewing window XY-range')
 
     def eventFilter(self, obj, event):
         self._key = '_'
@@ -4871,9 +4871,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 menu = strip._contextMenus.get(strip.contextMenuMode)
 
             if menu is not None:
-                strip.viewBoxMenu = menu
+                strip.viewStripMenu = menu
             else:
-                strip.viewBoxMenu = self._getCanvasContextMenu()
+                strip.viewStripMenu = self._getCanvasContextMenu()
             strip._raiseContextMenu(event)
 
 
@@ -4912,7 +4912,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def _setContextMenu(self, menu):
         """Set a needed menu based on strip mode
         """
-        self.strip.viewBoxMenu = menu
+        self.strip.viewStripMenu = menu
 
     def _selectPeaksInRegion(self, xPositions, yPositions, zPositions):
         peaks = list(self.current.peaks)

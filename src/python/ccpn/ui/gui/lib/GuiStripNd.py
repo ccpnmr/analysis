@@ -145,7 +145,7 @@ class GuiStripNd(GuiStrip):
         self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
 
         self.haveSetupZWidgets = False
-        self.viewBoxMenu = _getNdDefaultMenu(self)
+        self.viewStripMenu = _getNdDefaultMenu(self)
 
         self._defaultMenu = _getNdDefaultMenu(self)
         self._phasingMenu = _getNdPhasingMenu(self)

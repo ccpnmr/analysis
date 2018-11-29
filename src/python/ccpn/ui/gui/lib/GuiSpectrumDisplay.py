@@ -1118,7 +1118,7 @@ class GuiSpectrumDisplay(CcpnModule):
             #     return
             # else:
             #     self.current.strip._restoreZoom()
-        except:
+        except Exception as ex:
             getLogger().warning('Error restoring zoom')
 
     def _storeZoom(self):

@@ -291,36 +291,36 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                                                  orderedSpectrumViews=self.orderedSpectrumViews(self.spectrumViews))
         popup.exec_()
 
-    def showPeaks(self, peakListView: GuiPeakListView.GuiPeakListView, peaks: typing.List[Peak]):
-        """
-        Displays specified peaks in all strips of the display using peakListView
-        """
-
-        # viewBox = peakListView.spectrumView.strip.viewBox
-        activePeakItemDict = self.activePeakItemDict
-        peakItemDict = activePeakItemDict.setdefault(peakListView, {})
-        inactivePeakItemDict = self.inactivePeakItemDict
-        inactivePeakItems = inactivePeakItemDict.setdefault(peakListView, set())
-        ##inactivePeakItems = self.inactivePeakItems
-        existingApiPeaks = set(peakItemDict.keys())
-        unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
-        for apiPeak in unusedApiPeaks:
-            peakItem = peakItemDict.pop(apiPeak)
-            #viewBox.removeItem(peakItem)
-            inactivePeakItems.add(peakItem)
-            peakItem.setVisible(False)
-        for peak in peaks:
-            apiPeak = peak._wrappedData
-            if apiPeak in existingApiPeaks:
-                continue
-            if inactivePeakItems:
-                peakItem = inactivePeakItems.pop()
-                peakItem.setupPeakItem(peakListView, peak)
-                #viewBox.addItem(peakItem)
-                peakItem.setVisible(True)
-            else:
-                peakItem = GuiPeakListView.PeakNd(peakListView, peak)
-            peakItemDict[apiPeak] = peakItem
+    # def showPeaks(self, peakListView: GuiPeakListView.GuiPeakListView, peaks: typing.List[Peak]):
+    #     """
+    #     Displays specified peaks in all strips of the display using peakListView
+    #     """
+    #
+    #     # viewBox = peakListView.spectrumView.strip.viewBox
+    #     activePeakItemDict = self.activePeakItemDict
+    #     peakItemDict = activePeakItemDict.setdefault(peakListView, {})
+    #     inactivePeakItemDict = self.inactivePeakItemDict
+    #     inactivePeakItems = inactivePeakItemDict.setdefault(peakListView, set())
+    #     ##inactivePeakItems = self.inactivePeakItems
+    #     existingApiPeaks = set(peakItemDict.keys())
+    #     unusedApiPeaks = existingApiPeaks - set([peak._wrappedData for peak in peaks])
+    #     for apiPeak in unusedApiPeaks:
+    #         peakItem = peakItemDict.pop(apiPeak)
+    #         #viewBox.removeItem(peakItem)
+    #         inactivePeakItems.add(peakItem)
+    #         peakItem.setVisible(False)
+    #     for peak in peaks:
+    #         apiPeak = peak._wrappedData
+    #         if apiPeak in existingApiPeaks:
+    #             continue
+    #         if inactivePeakItems:
+    #             peakItem = inactivePeakItems.pop()
+    #             peakItem.setupPeakItem(peakListView, peak)
+    #             #viewBox.addItem(peakItem)
+    #             peakItem.setVisible(True)
+    #         else:
+    #             peakItem = GuiPeakListView.PeakNd(peakListView, peak)
+    #         peakItemDict[apiPeak] = peakItem
 
 
 # Functions for notifiers

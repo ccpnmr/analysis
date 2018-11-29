@@ -1323,7 +1323,7 @@ class GuiStrip(NotifierBase, Frame):
         """
         Restores last saved region to the zoom stack for the strip.
         """
-        if not self._finaliseDone: return
+        # if not self._finaliseDone: return
 
         # if len(self.storedZooms) != 0:
         #     restoredZoom = self.storedZooms.pop()
@@ -1363,7 +1363,7 @@ class GuiStrip(NotifierBase, Frame):
         """
         zoom in to the strip.
         """
-        if not self._finaliseDone: return
+        # if not self._finaliseDone: return
 
         # zoomPercent = -self.application.preferences.general.zoomPercent / 100.0
         # padding = self.application.preferences.general.stripRegionPadding
@@ -1390,7 +1390,7 @@ class GuiStrip(NotifierBase, Frame):
         """
         zoom out of the strip.
         """
-        if not self._finaliseDone: return
+        # if not self._finaliseDone: return
 
         # zoomPercent = +self.application.preferences.general.zoomPercent / 100.0
         # padding = self.application.preferences.general.stripRegionPadding
@@ -1413,14 +1413,14 @@ class GuiStrip(NotifierBase, Frame):
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
 
-    def showPeaks(self, peakList: PeakList, peaks: typing.List[Peak] = None):
-        ###from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
-        # NBNB TBD 1) we should not always display all peak lists together
-        # NBNB TBD 2) This should not be called for each strip
-
-        # Redundant but still removing
-
-        return
+    # def showPeaks(self, peakList: PeakList, peaks: typing.List[Peak] = None):
+    #     ###from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import GuiPeakListView
+    #     # NBNB TBD 1) we should not always display all peak lists together
+    #     # NBNB TBD 2) This should not be called for each strip
+    #
+    #     # Redundant but still removing
+    #
+    #     return
 
     # if not peaks:
     #     peaks = peakList.peaks

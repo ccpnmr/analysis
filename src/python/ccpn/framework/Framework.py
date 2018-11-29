@@ -705,8 +705,8 @@ class Framework:
 
                 for iSV, spectrumView in enumerate(spectrumDisplay.orderedSpectrumViews(specViews)):
                     spectrumView._createdSpectrumView(iSV)
-                    for peakList in spectrumView.spectrum.peakLists:
-                        strip.showPeaks(peakList)
+                    # for peakList in spectrumView.spectrum.peakLists:
+                    #     strip.showPeaks(peakList)
 
             # some of the strips may not be instantiated at this point
             # resize the stripFrame to the spectrumDisplay - ready for first resize event

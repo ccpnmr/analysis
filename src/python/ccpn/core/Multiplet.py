@@ -226,6 +226,9 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.slopes
 
     @slopes.setter
+    @logCommand(get='self')
+    @propertyUndo()
+    @notify('observe')
     def slopes(self, value):
         self._wrappedData.slopes = value
 
@@ -235,6 +238,9 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.limits
 
     @limits.setter
+    @logCommand(get='self')
+    @propertyUndo()
+    @notify('observe')
     def limits(self, value):
         self._wrappedData.limits = value
 
@@ -244,6 +250,9 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.pointLimits
 
     @pointlimits.setter
+    @logCommand(get='self')
+    @propertyUndo()
+    @notify('observe')
     def pointlimits(self, value):
         self._wrappedData.pointLimits = value
 
@@ -321,6 +330,9 @@ class Multiplet(AbstractWrapperObject):
             return result
 
     @lineWidths.setter
+    @logCommand(get='self')
+    @propertyUndo()
+    @notify('observe')
     def lineWidths(self, value):
         self._wrappedData.lineWidths = value
 
@@ -353,29 +365,29 @@ class Multiplet(AbstractWrapperObject):
 
         :param peaks - single peak or list of peaks:
         """
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-        # throw more understandable errors for the python console
         spectrum = self._parent.spectrum
-        pks = makeIterableList(peaks)
+        peakList = makeIterableList(peaks)
+        pks = []
+        for peak in peakList:
+            pks.append(self.project.getByPid(peak) if isinstance(peak, str) else peak)
+
         for pp in pks:
             if not isinstance(pp, Peak):
                 raise TypeError('%s is not of type Peak' % pp)
             if pp not in spectrum.peaks:
                 raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
-        defaults = collections.OrderedDict(
-                (('peaks', None),
-                 )
-                )
-        undo = self._project._undo
-        self._startCommandEchoBlock('addPeaks', values=locals(), defaults=defaults,
-                                    parName='addPeaks')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
+
+        with logCommandBlock(get='self') as log:
+            if pks:
+                peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
+                log('addPeaks', peaks=peakStr)
+            else:
+                log('addPeaks')
+
             for pk in pks:
                 self._wrappedData.addPeak(pk._wrappedData)
-        finally:
-            self._endCommandEchoBlock()
 
     def removePeaks(self, peaks: ['Peak'] = None):
         """
@@ -384,10 +396,12 @@ class Multiplet(AbstractWrapperObject):
 
         :param peaks - single peak or list of peaks:
         """
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-        # throw more understandable errors for the python console
         spectrum = self._parent.spectrum
-        pks = makeIterableList(peaks)
+        peakList = makeIterableList(peaks)
+        pks = []
+        for peak in peakList:
+            pks.append(self.project.getByPid(peak) if isinstance(peak, str) else peak)
+
         for pp in pks:
             if not isinstance(pp, Peak):
                 raise TypeError('%s is not of type Peak' % pp)
@@ -395,20 +409,18 @@ class Multiplet(AbstractWrapperObject):
                 raise ValueError('%s does not belong to multiplet: %s' % (pp.pid, self.pid))
             if pp not in spectrum.peaks:
                 raise ValueError('%s does not belong to spectrum: %s' % (pp.pid, spectrum.pid))
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
-        defaults = collections.OrderedDict(
-                (('peaks', None),
-                 )
-                )
-        undo = self._project._undo
-        self._startCommandEchoBlock('removePeaks', values=locals(), defaults=defaults,
-                                    parName='removePeaks')
-        try:
+        from ccpn.core.lib.ContextManagers import logCommandBlock
+
+        with logCommandBlock(get='self') as log:
+            if pks:
+                peakStr = '[' + ','.join(["'%s'" % peak.pid for peak in pks]) + ']'
+                log('removePeaks', peaks=peakStr)
+            else:
+                log('removePeaks')
+
             for pk in pks:
                 self._wrappedData.removePeak(pk._wrappedData)
-        finally:
-            self._endCommandEchoBlock()
 
     def _propagateAction(self, data):
         from ccpn.core.lib.Notifiers import Notifier

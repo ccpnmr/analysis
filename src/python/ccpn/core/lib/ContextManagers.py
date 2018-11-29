@@ -247,7 +247,7 @@ from ccpn.util.Logging import getLogger
 
 
 @contextmanager
-def logCommandManager(prefix='', get=None, isProperty=False, showArguments=[], logCommandOnly=False):
+def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], logCommandOnly=False):
     """
     Echo a command to the logger reflecting the python command required to call the function.
 

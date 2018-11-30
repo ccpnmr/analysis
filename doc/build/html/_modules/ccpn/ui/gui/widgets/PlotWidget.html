@@ -59,20 +59,17 @@
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:55 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
-
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-07-07 15:29:34 +0000 (Fri, July 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
@@ -80,7 +77,8 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtOpenGL</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtOpenGL</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ViewBox</span> <span class="kn">import</span> <span class="n">ViewBox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ViewBox</span> <span class="kn">import</span> <span class="n">CrossHair</span>
@@ -90,14 +88,18 @@
 <span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">Colour</span>
 
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccpnmr.gui.Task</span> <span class="kn">import</span> <span class="n">Ruler</span> <span class="k">as</span> <span class="n">ApiRuler</span>
+<span class="kn">import</span> <span class="nn">pyqtgraph.opengl</span> <span class="kn">as</span> <span class="nn">gl</span>
 
 <span class="c1">#TODO:WAYNE: This class should contain all the nitty gritty of the displaying; including the axis labels and the like</span>
 <span class="c1"># as it is only there and is just a small wrapper arount a pyqtgraph class</span>
 <span class="c1"># goes together with AxisTextItem (probably can be reduced to a function and included here.</span>
 <span class="c1">#TODO:WAYNE: should this inherit from Base??</span>
+
+
 <div class="viewcode-block" id="PlotWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget">[docs]</a><span class="k">class</span> <span class="nc">PlotWidget</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">useOpenGL</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">showDoubleCrosshair</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">useOpenGL</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="c1">#def __init__(self, strip, useOpenGL=False, showDoubleCrosshair=False):</span>
 
     <span class="c1"># Be sure to use explicit arguments to ViewBox as the call order is different in the __init__</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span> <span class="o">=</span> <span class="n">ViewBox</span><span class="p">(</span><span class="n">strip</span><span class="p">)</span>
@@ -123,24 +125,37 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">hideButtons</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">useOpenGL</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setViewport</span><span class="p">(</span><span class="n">QtOpenGL</span><span class="o">.</span><span class="n">QGLWidget</span><span class="p">())</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">setViewportUpdateMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">FullViewportUpdate</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">useOpenGL</span> <span class="ow">and</span> <span class="n">QtOpenGL</span><span class="o">.</span><span class="n">QGLFormat</span><span class="o">.</span><span class="n">hasOpenGL</span><span class="p">():</span>
 
-    <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_mouseMovedSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mousePositionChanged</span><span class="p">)</span>
+      <span class="c1"># TODO:ED The OpenGL needs to be optimised</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">setViewport</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QOpenGLWidget</span><span class="p">())</span>
+      <span class="c1"># need FullViewportUpdate below, otherwise ND windows do not update when you pan/zoom</span>
+      <span class="c1"># (BoundingRectViewportUpdate might work if you can implement boundingRect suitably)</span>
+      <span class="c1"># (NoViewportUpdate might work if you could explicitly get the view to repaint when needed)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setViewportUpdateMode</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="o">.</span><span class="n">BoundingRectViewportUpdate</span><span class="p">)</span>
+      <span class="c1"># self.setOptimizationFlags(QtWidgets.QGraphicsView.DontSavePainterState)</span>
+      <span class="c1"># self.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)</span>
+      <span class="c1"># not sure if these change anything</span>
+
+    <span class="c1"># strip.spectrumDisplay.mainWindow._mouseMovedSignal.connect(self._mousePositionChanged)</span>
 
     <span class="c1">#TODO:GEERTEN: Fix with proper stylesheet</span>
     <span class="c1"># Also used in AxisTextItem</span>
+    <span class="c1"># NOTE: self.highlightColour is also being used in GuiPeakListView for selected peaks</span>
     <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">foreground</span> <span class="o">=</span> <span class="s1">&#39;#080000&#39;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">gridColour</span> <span class="o">=</span> <span class="s1">&#39;#080000&#39;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">highlightColour</span> <span class="o">=</span> <span class="s1">&#39;#3333ff&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_labellingColour</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">background</span> <span class="o">=</span> <span class="s1">&#39;#080000&#39;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">foreground</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">gridColour</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">highlightColour</span> <span class="o">=</span> <span class="s1">&#39;#00ff00&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_labellingColour</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">background</span><span class="p">)</span>
     <span class="c1">#self.setForeground(self.foreground) # does not seem to have this (or typo?)</span>
 
@@ -153,14 +168,28 @@
     <span class="k">for</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">):</span>
       <span class="n">axisItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">orientation</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span>
       <span class="n">axisItem</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+      <span class="c1"># axisItem = self.plotItem.axes[orientation][&#39;item&#39;]</span>
+      <span class="c1"># axisItem.hide()</span>
 
     <span class="c1"># add grid</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">CcpnGridItem</span><span class="p">(</span><span class="n">gridColour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gridColour</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">ignoreBounds</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
     <span class="c1"># Add two crosshairs</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">crossHair1</span> <span class="o">=</span> <span class="n">CrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span> <span class="o">=</span> <span class="n">CrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="n">showDoubleCrosshair</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span> <span class="o">=</span> <span class="n">CrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+
+    <span class="c1"># add label to show mouse coordinates at the position of the cursor</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mouseLabel</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_labellingColour</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mouseLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mouseLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mouseLabel</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>      <span class="c1"># brings the item to the top (I assume everything else is 0)</span>
+
+    <span class="c1"># add label to show stripID in the top corner</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripIDLabel</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;BOX LABEL&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_labellingColour</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripIDLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stripIDLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripIDLabel</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PlotWidget.highlightAxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.highlightAxes">[docs]</a>  <span class="k">def</span> <span class="nf">highlightAxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="s2">&quot;Highlight the axes on/of&quot;</span>
@@ -168,14 +197,22 @@
       <span class="k">for</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">):</span>
         <span class="n">axisItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">orientation</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span>
         <span class="n">axisItem</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">highlightColour</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stripIDLabel</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">highlightColour</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">):</span>
         <span class="n">axisItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="n">orientation</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span>
-        <span class="n">axisItem</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span></div>
+        <span class="n">axisItem</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stripIDLabel</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PlotWidget.toggleGrid"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.toggleGrid">[docs]</a>  <span class="k">def</span> <span class="nf">toggleGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="s2">&quot;Toggle grid state&quot;</span>
+    <span class="n">newState</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">isVisible</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">isVisible</span><span class="p">())</span></div>
+
+  <span class="c1"># def cyclePeakLabelling(self):</span>
+  <span class="c1">#   &quot;Toggle grid state&quot;</span>
+  <span class="c1">#   self.peakLabelling = not self.peakLabelling</span>
+    <span class="c1"># TODO:ED update peaks here</span>
 
   <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -186,7 +223,7 @@
     <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PlotWidget.addItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.addItem">[docs]</a>  <span class="k">def</span> <span class="nf">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsObject</span><span class="p">):</span>
+<div class="viewcode-block" id="PlotWidget.addItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.PlotWidget.addItem">[docs]</a>  <span class="k">def</span> <span class="nf">addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsObject</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds specified graphics object to the Graphics Scene of the PlotWidget.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -217,9 +254,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span>
     <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span> <span class="k">return</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="o">.</span><span class="n">_finaliseDone</span><span class="p">:</span> <span class="k">return</span>
 
     <span class="n">axes</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span>
+
+    <span class="c1"># TODO:ED sometimes set to None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+      <span class="k">return</span>
+
     <span class="n">xPos</span> <span class="o">=</span> <span class="n">mouseMovedDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crosshairCode</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">))</span>
     <span class="n">yPos</span> <span class="o">=</span> <span class="n">mouseMovedDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crosshairCode</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">))</span>
     <span class="c1">#print(&#39;&gt;&gt;&#39;, strip, xPos, yPos)</span>
@@ -229,9 +270,36 @@
     <span class="n">strip</span><span class="o">.</span><span class="n">axisPositionDict</span><span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">yPos</span>
 
     <span class="c1">#TODO:SOLIDS This is clearly not correct; it should take the offset as defined for spectrum</span>
-    <span class="n">xPos</span> <span class="o">=</span> <span class="n">mouseMovedDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crosshairCode</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">))</span>
-    <span class="n">yPos</span> <span class="o">=</span> <span class="n">mouseMovedDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_crosshairCode</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">code</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">xPos</span><span class="p">,</span> <span class="n">yPos</span><span class="p">)</span>
+    <span class="c1">#xPos = mouseMovedDict.get(self._crosshairCode(axes[1].code))</span>
+    <span class="c1">#yPos = mouseMovedDict.get(self._crosshairCode(axes[0].code))</span>
+    <span class="c1">#self.crossHair2.setPosition(xPos, yPos)</span>
+    <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+      <span class="n">spectrumView</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># use the first spectrum</span>
+      <span class="n">spectrum</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span>
+      <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">showDoubleCrosshair</span><span class="p">:</span>
+      <span class="c1">#if strip.spectrumDisplay.mainWindow.application.preferences.general.doubleCrossHair:</span>
+        <span class="n">offsets</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">doubleCrosshairOffsets</span>
+        <span class="n">displayIndices</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
+        <span class="n">xOffset</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">displayIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">yOffset</span> <span class="o">=</span> <span class="n">offsets</span><span class="p">[</span><span class="n">displayIndices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">xPos</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">xOffset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">vLine</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># TBD: below assumes that axis is in ppm</span>
+          <span class="n">xOffset</span> <span class="o">/=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">spectrometerFrequencies</span><span class="p">[</span><span class="n">displayIndices</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="c1"># convert from Hz to ppm</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">setVline</span><span class="p">(</span><span class="n">xPos</span> <span class="o">+</span> <span class="n">xOffset</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">vLine</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">yPos</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">yOffset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">hLine</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># TBD: below assumes that axis is in ppm</span>
+          <span class="n">yOffset</span> <span class="o">/=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">spectrometerFrequencies</span><span class="p">[</span><span class="n">displayIndices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="c1"># convert from Hz to ppm</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">setHline</span><span class="p">(</span><span class="n">yPos</span> <span class="o">+</span> <span class="n">yOffset</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">crossHair2</span><span class="o">.</span><span class="n">hLine</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span> <span class="o">!=</span> <span class="n">mouseMovedDict</span><span class="p">[</span><span class="s1">&#39;strip&#39;</span><span class="p">]:</span>
+      <span class="c1"># hide the mouse label if the event comes form a different window</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">mouseLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
 
   <span class="c1"># NBNB TODO code uses API object. REFACTOR</span>
 
@@ -297,7 +365,8 @@
 <span class="sd">       Called from a notifier in GuiStrip</span>
 <span class="sd">       Puts axis code labels in the correct place on the PlotWidget</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_finaliseDone</span><span class="p">:</span> <span class="k">return</span>
+    <span class="k">return</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">xAxisTextItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">bottomLeft</span><span class="p">())</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">yAxisTextItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">topRight</span><span class="p">())</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisAtomLabels</span><span class="p">:</span>
@@ -309,6 +378,11 @@
       <span class="n">y</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
       <span class="n">item</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
+    <span class="c1"># ejb - move the stripIDLabel to be fixed in the top-left corner if the plotWidget</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">topLeft</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripIDLabel</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
+
   <span class="k">def</span> <span class="nf">_initTextItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;CCPN internal</span>
 <span class="sd">       Called from GuiStrip when axes are ready</span>
@@ -316,6 +390,25 @@
     <span class="n">axisOrder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">xAxisTextItem</span> <span class="o">=</span> <span class="n">AxisTextItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">axisCode</span><span class="o">=</span><span class="n">axisOrder</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">yAxisTextItem</span> <span class="o">=</span> <span class="n">AxisTextItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">axisCode</span><span class="o">=</span><span class="n">axisOrder</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+  <span class="c1"># TODO:ED this does override but acnnot change the zoom centre</span>
+  <span class="c1"># def wheelEvent(self, ev, axis=None):</span>
+  <span class="c1">#   mask = np.array(self.state[&#39;mouseEnabled&#39;], dtype=np.float)</span>
+  <span class="c1">#   if axis is not None and axis &gt;= 0 and axis &lt; len(mask):</span>
+  <span class="c1">#     mv = mask[axis]</span>
+  <span class="c1">#     mask[:] = 0</span>
+  <span class="c1">#     mask[axis] = mv</span>
+  <span class="c1">#   s = ((mask * 0.02) + 1) ** (</span>
+  <span class="c1">#       ev.delta() * self.state[&#39;wheelScaleFactor&#39;])  # actual scaling factor</span>
+  <span class="c1">#</span>
+  <span class="c1">#   center = None   # Point(fn.invertQTransform(self.childGroup.transform()).map(ev.pos()))</span>
+  <span class="c1">#   # center = ev.pos()</span>
+  <span class="c1">#</span>
+  <span class="c1">#   self._resetTarget()</span>
+  <span class="c1">#   self.scaleBy(s, center)</span>
+  <span class="c1">#   self.sigRangeChangedManually.emit(self.state[&#39;mouseEnabled&#39;])</span>
+  <span class="c1">#   ev.accept()</span>
+
 
 <div class="viewcode-block" id="AxisTextItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlotWidget.AxisTextItem">[docs]</a><span class="k">class</span> <span class="nc">AxisTextItem</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">):</span>
 

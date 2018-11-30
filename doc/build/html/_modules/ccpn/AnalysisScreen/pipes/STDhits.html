@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:26 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -73,14 +73,15 @@
 
 
 <span class="c1">#### GUI IMPORTS</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span> <span class="p">,</span> <span class="n">_getWidgetByAtt</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span><span class="p">,</span> <span class="n">_getWidgetByAtt</span>
 <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.gui.widgets</span> <span class="kn">import</span> <span class="n">HitFinderWidgets</span> <span class="k">as</span> <span class="n">hw</span>
 
 <span class="c1">#### NON GUI IMPORTS</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.Pipe</span> <span class="kn">import</span> <span class="n">SpectraPipe</span>
 <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.experimentAnalysis.STD</span> <span class="kn">import</span> <span class="n">_find_STD_Hits</span>
 <span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.experimentAnalysis.NewHit</span> <span class="kn">import</span> <span class="n">_addNewHit</span><span class="p">,</span> <span class="n">_getReferencesFromSample</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span> <span class="p">,</span> <span class="n">_debug3</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">_debug3</span>
+
 
 <span class="c1">########################################################################################################################</span>
 <span class="c1">###   Attributes:</span>
@@ -93,7 +94,7 @@
 <span class="n">STD_Control_SpectrumGroup</span> <span class="o">=</span> <span class="s1">&#39;STD_Control_SpectrumGroup&#39;</span>
 <span class="n">STD_Target_SpectrumGroup</span> <span class="o">=</span> <span class="s1">&#39;STD_Target_SpectrumGroup&#39;</span>
 <span class="n">SC_as_Refs</span> <span class="o">=</span> <span class="s1">&#39;Use_SampleComponents_as_References&#39;</span>
-<span class="n">SGVarNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">STD_Target_SpectrumGroup</span><span class="p">,</span> <span class="n">ReferenceSpectrumGroup</span><span class="p">]</span>
+<span class="n">SGVarNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">STD_Control_SpectrumGroup</span><span class="p">,</span> <span class="n">STD_Target_SpectrumGroup</span><span class="p">,</span> <span class="n">ReferenceSpectrumGroup</span><span class="p">]</span>
 
 <span class="n">MatchPeaksWithin</span> <span class="o">=</span> <span class="s1">&#39;Match_Peaks_Within_(ppm)&#39;</span>
 <span class="n">RefPLIndex</span> <span class="o">=</span> <span class="s1">&#39;Reference_PeakList&#39;</span>
@@ -108,6 +109,7 @@
 <span class="c1">## PipeName</span>
 <span class="n">PipeName</span> <span class="o">=</span> <span class="s1">&#39;STD Hits&#39;</span>
 
+
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################      ALGORITHM       ########################################################</span>
 <span class="c1">########################################################################################################################</span>
@@ -120,35 +122,27 @@
 
 
 <div class="viewcode-block" id="STDHitFinderGuiPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.STDhits.STDHitFinderGuiPipe">[docs]</a><span class="k">class</span> <span class="nc">STDHitFinderGuiPipe</span><span class="p">(</span><span class="n">GuiPipe</span><span class="p">):</span>
+    <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">applicationSpecificPipe</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">False</span>
-  <span class="n">applicationSpecificPipe</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">STDHitFinderGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
 
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">hw</span><span class="o">.</span><span class="n">_addSGpulldowns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">SGVarNames</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>   <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">STDHitFinderGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span>
+        <span class="n">hw</span><span class="o">.</span><span class="n">_addCommonHitFinderWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">ReferenceSpectrumGroup</span><span class="p">,</span> <span class="n">SC_as_Refs</span><span class="p">,</span>
+                                      <span class="n">MatchPeaksWithin</span><span class="p">,</span> <span class="n">DefaultMinDist</span><span class="p">,</span>
+                                      <span class="n">MinEfficiency</span><span class="p">,</span> <span class="n">DefaultEfficiency</span><span class="p">)</span>
 
-    <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">hw</span><span class="o">.</span><span class="n">_addSGpulldowns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">SGVarNames</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateWidgets</span><span class="p">()</span>
 
-    <span class="n">row</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span>
-    <span class="n">hw</span><span class="o">.</span><span class="n">_addCommonHitFinderWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">ReferenceSpectrumGroup</span><span class="p">,</span> <span class="n">SC_as_Refs</span><span class="p">,</span>
-                                  <span class="n">MatchPeaksWithin</span><span class="p">,</span> <span class="n">DefaultMinDist</span><span class="p">,</span>
-                                  <span class="n">MinEfficiency</span><span class="p">,</span> <span class="n">DefaultEfficiency</span><span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateWidgets</span><span class="p">()</span>
-
-
-  <span class="k">def</span> <span class="nf">_updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_setSpectrumGroupPullDowns</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span></div>
-
-
-
-
-
+    <span class="k">def</span> <span class="nf">_updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSpectrumGroupPullDowns</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">,</span> <span class="n">headerText</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">headerEnabled</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="p">)</span></div>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -156,66 +150,91 @@
 <span class="c1">########################################################################################################################</span>
 
 
-
-
 <div class="viewcode-block" id="STDHitFinder"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.STDhits.STDHitFinder">[docs]</a><span class="k">class</span> <span class="nc">STDHitFinder</span><span class="p">(</span><span class="n">SpectraPipe</span><span class="p">):</span>
+    <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">STDHitFinderGuiPipe</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">STDHitFinderGuiPipe</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">ReferenceSpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
+        <span class="n">STD_Control_SpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
+        <span class="n">STD_Target_SpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
+        <span class="n">SC_as_Refs</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">MatchPeaksWithin</span><span class="p">:</span> <span class="n">DefaultMinDist</span><span class="p">,</span>
+        <span class="n">MinEfficiency</span><span class="p">:</span> <span class="n">DefaultEfficiency</span><span class="p">,</span>
 
-  <span class="n">_kwargs</span>  <span class="o">=</span>   <span class="p">{</span>
-                <span class="n">ReferenceSpectrumGroup</span><span class="p">:</span>     <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
-                <span class="n">STD_Control_SpectrumGroup</span><span class="p">:</span>  <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
-                <span class="n">STD_Target_SpectrumGroup</span><span class="p">:</span>   <span class="s1">&#39;spectrumGroup.pid&#39;</span><span class="p">,</span>
-                <span class="n">SC_as_Refs</span><span class="p">:</span>       <span class="bp">False</span><span class="p">,</span>
-                <span class="n">MatchPeaksWithin</span><span class="p">:</span>           <span class="n">DefaultMinDist</span><span class="p">,</span>
-                <span class="n">MinEfficiency</span><span class="p">:</span>              <span class="n">DefaultEfficiency</span><span class="p">,</span>
+        <span class="p">}</span>
 
-               <span class="p">}</span>
+<div class="viewcode-block" id="STDHitFinder.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.STDhits.STDHitFinder.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param spectra: inputData</span>
+<span class="sd">        :return: same spectra after finding hits. The spectra should be the same</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">controlSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">STD_Control_SpectrumGroup</span><span class="p">])</span>
+        <span class="n">referenceSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ReferenceSpectrumGroup</span><span class="p">])</span>
+        <span class="n">stdTargetSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">STD_Target_SpectrumGroup</span><span class="p">])</span>
+        <span class="n">sampleComponents_as_References</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">SC_as_Refs</span><span class="p">]</span>
+        <span class="n">minimumDistance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MatchPeaksWithin</span><span class="p">])</span>
+        <span class="n">minimumEfficiency</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MinEfficiency</span><span class="p">])</span> <span class="o">/</span> <span class="mi">100</span>
+
+        <span class="n">references</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">stdTargetSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">stdTargetSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>  <span class="c1"># make sure spectrumGroup.spectra are in the input spectra</span>
+                <span class="k">if</span> <span class="n">controlSpectrumGroup</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">controlSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">stdTargetSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">controlSpectra</span> <span class="o">=</span> <span class="n">controlSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span>
+                <span class="k">for</span> <span class="n">stdSpectrum</span><span class="p">,</span> <span class="n">controlSTD</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">stdTargetSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">,</span> <span class="n">controlSpectra</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">stdSpectrum</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">stdSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="n">stdSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="s1">&#39;STD.H&#39;</span>
+                        <span class="k">if</span> <span class="n">sampleComponents_as_References</span><span class="p">:</span>
+                            <span class="n">references</span> <span class="o">=</span> <span class="n">_getReferencesFromSample</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">referenceSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">referenceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
+                                    <span class="n">references</span> <span class="o">=</span> <span class="n">referenceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span>  <span class="c1">#make sure references are in the input spectra</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">listsTargetHits</span> <span class="o">=</span> <span class="n">_find_STD_Hits</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="o">=</span><span class="n">stdSpectrum</span><span class="p">,</span> <span class="n">referenceSpectra</span><span class="o">=</span><span class="n">references</span><span class="p">,</span> <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">,</span>
+                                                             <span class="n">refPeakListIndex</span><span class="o">=</span><span class="n">DefaultPeakListIndex</span><span class="p">,</span> <span class="n">minEfficiency</span><span class="o">=</span><span class="n">minimumEfficiency</span><span class="p">)</span>
+
+                            <span class="k">if</span> <span class="n">controlSTD</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                                <span class="n">listsControlHits</span> <span class="o">=</span> <span class="n">_find_STD_Hits</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="o">=</span><span class="n">controlSTD</span><span class="p">,</span> <span class="n">referenceSpectra</span><span class="o">=</span><span class="n">references</span><span class="p">,</span>
+                                                                  <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">,</span>
+                                                                  <span class="n">refPeakListIndex</span><span class="o">=</span><span class="n">DefaultPeakListIndex</span><span class="p">,</span> <span class="n">minEfficiency</span><span class="o">=</span><span class="n">minimumEfficiency</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">listsControlHits</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">targetHits</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">listsTargetHits</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">]</span>  <span class="c1"># clean up the empty sublists</span>
+                            <span class="n">controlHits</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">listsControlHits</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">]</span>  <span class="c1"># clean up the empty sublists</span>
+                            <span class="n">filteredHits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filterFalsePositiveHits</span><span class="p">(</span><span class="n">targetHits</span><span class="p">,</span> <span class="n">controlHits</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filteredHits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">_addNewHit</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="p">,</span> <span class="n">filteredHits</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Aborted: STD SpectrumGroup not found&#39;</span><span class="p">)</span>
+        <span class="c1"># TODO this should return the spectrumHits only</span>
+        <span class="n">SGSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">sg</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">+</span> <span class="n">SGSpectra</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_filterFalsePositiveHits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetHits</span><span class="p">,</span> <span class="n">controlHits</span><span class="p">,</span> <span class="n">limitRange</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Checks if the same hit is present in the control spectrum</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">falsePositivePositions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">falsePositives</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">controlHit</span> <span class="ow">in</span> <span class="n">controlHits</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">controlHit</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">referencePeak</span><span class="p">,</span> <span class="n">controlPeak</span><span class="p">,</span> <span class="n">controlPosition</span> <span class="o">=</span> <span class="n">controlHit</span>
+                <span class="n">falsePositivePositions</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">controlPosition</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],))</span>
+
+        <span class="k">for</span> <span class="n">falsePositivePosition</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">falsePositivePositions</span><span class="p">):</span>
+            <span class="n">falsePositives</span> <span class="o">+=</span> <span class="p">[</span><span class="n">hit</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">targetHits</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">falsePositivePosition</span> <span class="o">-</span> <span class="n">hit</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">limitRange</span><span class="p">]</span>
+
+        <span class="n">targetHits</span> <span class="o">=</span> <span class="p">[</span><span class="n">hit</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">targetHits</span> <span class="k">if</span> <span class="n">hit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">falsePositives</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">targetHits</span></div>
 
 
-<div class="viewcode-block" id="STDHitFinder.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.STDhits.STDHitFinder.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    :param spectra: inputData</span>
-<span class="sd">    :return: same spectra after finding hits. The spectra should be the same</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">referenceSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">ReferenceSpectrumGroup</span><span class="p">])</span>
-    <span class="n">stdTargetSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">STD_Target_SpectrumGroup</span><span class="p">])</span>
-    <span class="n">sampleComponents_as_References</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">SC_as_Refs</span><span class="p">]</span>
-    <span class="n">minimumDistance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MatchPeaksWithin</span><span class="p">])</span>
-    <span class="n">minimumEfficiency</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MinEfficiency</span><span class="p">])</span><span class="o">/</span><span class="mi">100</span>
-
-
-    <span class="n">references</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">stdTargetSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">stdTargetSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span> <span class="c1"># make sure spectrumGroup.spectra are in the input spectra</span>
-        <span class="k">for</span> <span class="n">stdSpectrum</span> <span class="ow">in</span> <span class="n">stdTargetSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">stdSpectrum</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">stdSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-              <span class="n">stdSpectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="s1">&#39;STD.H&#39;</span>
-            <span class="k">if</span> <span class="n">sampleComponents_as_References</span><span class="p">:</span>
-              <span class="n">references</span> <span class="o">=</span> <span class="n">_getReferencesFromSample</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-              <span class="k">if</span> <span class="n">referenceSpectrumGroup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">referenceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">spectra</span><span class="p">):</span>
-                  <span class="n">references</span> <span class="o">=</span> <span class="n">referenceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="c1">#make sure references are in the input spectra</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-              <span class="n">hits</span> <span class="o">=</span> <span class="n">_find_STD_Hits</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="o">=</span><span class="n">stdSpectrum</span><span class="p">,</span><span class="n">referenceSpectra</span><span class="o">=</span><span class="n">references</span><span class="p">,</span> <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">,</span>
-                                    <span class="n">refPeakListIndex</span><span class="o">=</span><span class="n">DefaultPeakListIndex</span><span class="p">,</span>  <span class="n">minEfficiency</span><span class="o">=</span><span class="n">minimumEfficiency</span> <span class="p">)</span>
-              <span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">hits</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">]</span> <span class="c1"># clean up the empty sublists</span>
-              <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hits</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-                <span class="n">_addNewHit</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="p">,</span> <span class="n">hits</span><span class="p">)</span>
-
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Aborted: STD SpectrumGroup not found&#39;</span><span class="p">)</span>
-
-    <span class="n">SGSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="k">if</span> <span class="n">sg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">sg</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
-    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span><span class="o">+</span><span class="n">SGSpectra</span><span class="p">)</span></div></div>
-
-
-<span class="n">STDHitFinder</span><span class="o">.</span><span class="n">register</span><span class="p">()</span> <span class="c1"># Registers the pipe in the pipeline</span>
-
-
+<span class="n">STDHitFinder</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>  <span class="c1"># Registers the pipe in the pipeline</span>
 </pre></div>
 
           </div>

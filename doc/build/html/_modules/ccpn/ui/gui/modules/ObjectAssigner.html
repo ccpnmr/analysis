@@ -61,11 +61,11 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: simon1 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -73,14 +73,15 @@
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.AssignmentLib</span> <span class="kn">import</span> <span class="n">CCP_CODES</span><span class="p">,</span> <span class="n">ATOM_NAMES</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.CcpnSorting</span> <span class="kn">import</span> <span class="n">stringSortKey</span>
 
 <span class="c1"># from ccpn.ui.gui.base.assignmentModuleLogic import (getAllNmrAtoms, nmrAtomsForPeaks,</span>
 <span class="c1">#                                                       peaksAreOnLine, intersectionOfAll,</span>
@@ -90,14 +91,16 @@
 <span class="c1">#                                                       getShiftlistForPeak,</span>
 <span class="c1">#                                                       matchingNmrAtomsForDimensionOfPeaks)</span>
 
-<div class="viewcode-block" id="ObjectAssigner"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner">[docs]</a><span class="k">class</span> <span class="nc">ObjectAssigner</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+<div class="viewcode-block" id="ObjectAssigner"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner">[docs]</a><span class="k">class</span> <span class="nc">ObjectAssigner</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">dim</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">opts</span> <span class="o">=</span> <span class="n">opts</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span>
@@ -151,8 +154,8 @@
     <span class="c1"># self.labels.append(label)</span>
 
 <div class="viewcode-block" id="ObjectAssigner.createAssignmentWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAssignmentWidget">[docs]</a>  <span class="k">def</span> <span class="nf">createAssignmentWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
-    <span class="n">newAssignmentWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
-    <span class="n">newLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="n">newAssignmentWidget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+    <span class="n">newLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="n">chainLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Chain&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
     <span class="n">seqCodeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
     <span class="n">residueTypeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
@@ -209,16 +212,16 @@
 
 <div class="viewcode-block" id="ObjectAssigner.setNmrChain"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setNmrChain">[docs]</a>  <span class="k">def</span> <span class="nf">setNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
     <span class="c1"># NBNB FIxed. Assumes that item is a chainCode. NBNB otherwise will BERAK!.  Rasmus Dec 2015</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">assignTo</span><span class="p">(</span><span class="n">chainCode</span><span class="o">=</span><span class="n">item</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">assignTo</span><span class="p">(</span><span class="n">chainCode</span><span class="o">=</span><span class="n">item</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObjectAssigner.setSequenceCode"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setSequenceCode">[docs]</a>  <span class="k">def</span> <span class="nf">setSequenceCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">item</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">item</span></div>
 
 <div class="viewcode-block" id="ObjectAssigner.setResidueType"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setResidueType">[docs]</a>  <span class="k">def</span> <span class="nf">setResidueType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span> <span class="o">=</span> <span class="n">item</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span> <span class="o">=</span> <span class="n">item</span></div>
 
 <div class="viewcode-block" id="ObjectAssigner.setAtomType"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setAtomType">[docs]</a>  <span class="k">def</span> <span class="nf">setAtomType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">item</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">item</span></div>
 
   <span class="c1"># Obsolete, replaced by CcpnSorting.stringSortKey</span>
   <span class="c1"># def natural_key(self, string_):</span>
@@ -231,7 +234,7 @@
 <div class="viewcode-block" id="ObjectAssigner.getNmrAtom"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.getNmrAtom">[docs]</a>  <span class="k">def</span> <span class="nf">getNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
     <span class="c1"># print(item.text(), self.project.getById(item.text()))</span>
     <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getById</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrAtom</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrAtom</span>
     <span class="n">chain</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span>
     <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span>
     <span class="n">residueType</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span>
@@ -245,7 +248,7 @@
       <span class="c1"># self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setNmrChain</span><span class="p">))</span>
       <span class="n">sequenceCodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">]</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">sequenceCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">CcpnSorting</span><span class="o">.</span><span class="n">stringSortKey</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">sequenceCodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">stringSortKey</span><span class="p">))</span>
       <span class="c1"># self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setSequenceCode</span><span class="p">))</span>
       <span class="n">residueTypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">code</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">CCP_CODES</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
@@ -257,7 +260,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">atomTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">atomNames</span><span class="p">)</span>
       <span class="c1"># self.atomTypePulldowns[dim].setIndex(self.atomTypePulldowns[dim].texts.index(nmrAtom.name))</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">atomTypePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setAtomType</span><span class="p">))</span>
-    <span class="c1"># print(self.project._appBase.current.nmrResidue, &#39;currentNmrResidue AssignmentModule&#39;)</span>
+
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldowns</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">([])</span>

@@ -49,9 +49,6 @@
   <h1>Source code for ccpn.AnalysisStructure.AnalysisStructure</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">AnalysisAssign Program</span>
-
-<span class="sd">Please cite:  Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s10858-016-0060-y </span>
-
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
@@ -67,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:26 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -112,10 +109,10 @@
       <span class="c1">#TODO:LIST-AS-ISSUE: This fails for native file dialogs on OSX when trying to select a project (i.e. a directory)</span>
       <span class="c1"># NBNB TBD I assume here that path is either a string or a list lf string paths.</span>
       <span class="c1"># NBNB #FIXME if incorrect</span>
-      <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span>
-                          <span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span>
-                          <span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span>
-                          <span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">)</span>
+      <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span>
+                          <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptOpen</span><span class="p">,</span>
+                          <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">,</span>
+                          <span class="nb">filter</span><span class="o">=</span><span class="nb">filter</span><span class="p">)</span>
       <span class="n">path</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
         <span class="k">return</span>
@@ -133,28 +130,29 @@
 <div class="viewcode-block" id="Structure.loadNEF"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.loadNEF">[docs]</a>  <span class="k">def</span> <span class="nf">loadNEF</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Load NEF File&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;*.nef&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Structure.showStructureTable"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.showStructureTable">[docs]</a>  <span class="k">def</span> <span class="nf">showStructureTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">structureEnsemble</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Displays Structure Table&quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.StructureTable</span> <span class="kn">import</span> <span class="n">StructureTableModule</span>
-
-    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-
-    <span class="c1">#FIXME:ED - sometimes crashes</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">relativeTo</span><span class="p">:</span>
-      <span class="n">relativeTo</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>      <span class="c1"># ejb</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">structureTableModule</span> <span class="o">=</span> <span class="n">StructureTableModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span>
-                                                <span class="p">,</span> <span class="n">structureEnsemble</span><span class="o">=</span><span class="n">structureEnsemble</span><span class="p">)</span>
-
-    <span class="c1"># self.project.newModule(moduleType=self.structureTableModule.className</span>
-    <span class="c1">#                        , title=None</span>
-    <span class="c1">#                        , window=mainWindow</span>
-    <span class="c1">#                        , comment=&#39;&#39;)</span>
-
-    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structureTableModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
-
-    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showStructureTable()</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showStructureTable()&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">structureTableModule</span></div>
+  <span class="c1"># Should inherit from Framework</span>
+  <span class="c1"># def showStructureTable(self, position=&#39;bottom&#39;, relativeTo=None, structureEnsemble=None):</span>
+  <span class="c1">#   &quot;&quot;&quot;Displays Structure Table&quot;&quot;&quot;</span>
+  <span class="c1">#   from ccpn.ui.gui.modules.StructureTable import StructureTableModule</span>
+  <span class="c1">#</span>
+  <span class="c1">#   mainWindow = self.ui.mainWindow</span>
+  <span class="c1">#</span>
+  <span class="c1">#   #FIXME:ED - sometimes crashes</span>
+  <span class="c1">#   if not relativeTo:</span>
+  <span class="c1">#     relativeTo = mainWindow.moduleArea      # ejb</span>
+  <span class="c1">#   self.structureTableModule = StructureTableModule(mainWindow=mainWindow,</span>
+  <span class="c1">#                                               structureEnsemble=structureEnsemble)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   # self.project.newModule(moduleType=self.structureTableModule.className,</span>
+  <span class="c1">#   #                        title=None,</span>
+  <span class="c1">#   #                        window=mainWindow,</span>
+  <span class="c1">#   #                        comment=&#39;&#39;)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   mainWindow.moduleArea.addModule(self.structureTableModule, position=position, relativeTo=relativeTo)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   mainWindow.pythonConsole.writeConsoleCommand(&quot;application.showStructureTable()&quot;)</span>
+  <span class="c1">#   getLogger().info(&quot;application.showStructureTable()&quot;)</span>
+  <span class="c1">#   return self.structureTableModule</span>
 
 <div class="viewcode-block" id="Structure.matchToMolecule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisStructure.html#ccpn.AnalysisStructure.AnalysisStructure.Structure.matchToMolecule">[docs]</a>  <span class="k">def</span> <span class="nf">matchToMolecule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">pass</span></div>

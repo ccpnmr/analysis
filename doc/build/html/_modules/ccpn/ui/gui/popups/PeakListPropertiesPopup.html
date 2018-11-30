@@ -64,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:48 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,39 +74,19 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">as</span> <span class="nn">Colour</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">MessageDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
-
-<span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">spectrumColours</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>      <span class="c1"># ejb</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
-<span class="c1"># def _getColour(peakList, peakListViews, attr):</span>
-<span class="c1">#</span>
-<span class="c1">#   if peakListViews:</span>
-<span class="c1">#     colour = getattr(peakListViews[0], attr)</span>
-<span class="c1">#   else:</span>
-<span class="c1">#     colour = getattr(peakList, attr)</span>
-<span class="c1">#</span>
-<span class="c1">#   if not colour:</span>
-<span class="c1">#     colour = peakList.spectrum.positiveContourColour</span>
-<span class="c1">#</span>
-<span class="c1">#   return colour</span>
-
-<span class="c1"># FIXME   Notifiers are not triggered correctly when changing colours.</span>
-<span class="c1"># TODO</span>
-<span class="c1"># Make it working for all the display and not for the one currently opened.</span>
-<span class="c1"># Add apply, cancel button.</span>
-<span class="c1"># 1D.</span>
 
 <div class="viewcode-block" id="PeakListPropertiesPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.PeakListPropertiesPopup.PeakListPropertiesPopup">[docs]</a><span class="k">class</span> <span class="nc">PeakListPropertiesPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Peak List Properties&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Peak List Properties&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
@@ -122,73 +102,58 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">peakListViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakListView</span> <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakListViews</span> <span class="k">if</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span> <span class="o">==</span> <span class="n">peakList</span><span class="p">]</span>
 
       <span class="c1"># NOTE: below is not sorted in any way, but if we change that, we also have to change loop in _fillColourPulldown</span>
-      <span class="n">spectrumColourKeys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+      <span class="n">spectrumColourKeys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Colour</span><span class="o">.</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span> <span class="o">=</span> <span class="n">spectrumColourKeys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span> <span class="o">=</span> <span class="n">spectrumColourKeys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># default</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span> <span class="o">=</span> <span class="n">spectrumColourKeys</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>   <span class="c1"># default*</span>
 
       <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;PeakList Name &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-      <span class="c1"># does nothing.</span>
-      <span class="c1"># self.symbolLabel = Label(self, &#39;Peak Symbol&#39;, grid=(2, 0))</span>
-      <span class="c1"># self.symbolPulldown = PulldownList(self, grid=(2, 1))</span>
-      <span class="c1"># self.symbolPulldown.setData([&#39;x&#39;])</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Peak Symbol Colour&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">spectrumColourKeys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span><span class="p">))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">)</span>
+      <span class="n">Colour</span><span class="o">.</span><span class="n">fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+      <span class="n">c</span> <span class="o">=</span> <span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span>
+      <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">spectrumColourKeys</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">Colour</span><span class="o">.</span><span class="n">spectrumColours</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">Colour</span><span class="o">.</span><span class="n">addNewColourString</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="n">Colour</span><span class="o">.</span><span class="n">fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">Colour</span><span class="o">.</span><span class="n">selectPullDownColour</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">)</span>
 
       <span class="bp">self</span><span class="o">.</span><span class="n">textColourLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Peak Text Colour&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">spectrumColourKeys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span><span class="p">))</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">)</span>
+      <span class="n">Colour</span><span class="o">.</span><span class="n">fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-      <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">)</span>
-      <span class="c1">## Broken.</span>
-      <span class="c1"># self.minimalAnnotationLabel = Label(self, &#39;Minimal Annotation&#39;, grid=(5, 0))</span>
-      <span class="c1"># self.minimalAnnotationCheckBox = CheckBox(self, grid=(5, 1))</span>
+      <span class="n">c</span> <span class="o">=</span> <span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span>
+      <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">spectrumColourKeys</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="o">.</span><span class="n">setCurrentText</span><span class="p">(</span><span class="n">Colour</span><span class="o">.</span><span class="n">spectrumColours</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">Colour</span><span class="o">.</span><span class="n">addNewColourString</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
-      <span class="c1">## Broken. If you close and reopen a display, it doesn&#39;t care about the checkbox.</span>
-      <span class="c1"># self.displayedLabel = Label(self, &#39;Is displayed&#39;, grid=(1, 0))</span>
-      <span class="c1"># self.displayedCheckBox = CheckBox(self, grid=(1, 1))</span>
-      <span class="c1"># if(any([peakListView.isVisible() for peakListView in self.peakListViews])):</span>
-      <span class="c1">#   self.displayedCheckBox.setChecked(True)</span>
-      <span class="c1">#</span>
-      <span class="c1"># for peakListView in self.peakListViews:</span>
-      <span class="c1">#   self.displayedCheckBox.toggled.connect(peakListView.setVisible)</span>
+        <span class="c1"># repopulate both pulldowns</span>
+        <span class="n">Colour</span><span class="o">.</span><span class="n">fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">Colour</span><span class="o">.</span><span class="n">fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">Colour</span><span class="o">.</span><span class="n">selectPullDownColour</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">allowAuto</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_accept</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">numUndos</span> <span class="o">=</span> <span class="mi">0</span>
 
-  <span class="k">def</span> <span class="nf">_changeSymbolColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>     <span class="c1"># prevent more undo points</span>
-    <span class="n">colour</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">value</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span> <span class="o">=</span> <span class="n">colour</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">_changeTextColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>     <span class="c1"># prevent more undo points</span>
-    <span class="n">colour</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">value</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span> <span class="o">=</span> <span class="n">colour</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
-
   <span class="k">def</span> <span class="nf">_changeColours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">index</span>
-    <span class="n">colour</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">value</span><span class="p">]</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+    <span class="n">colour</span> <span class="o">=</span> <span class="n">Colour</span><span class="o">.</span><span class="n">getSpectrumColour</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">defaultReturn</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span> <span class="o">=</span> <span class="n">colour</span>
 
-    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="o">.</span><span class="n">index</span>
-    <span class="n">colour</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">value</span><span class="p">]</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+    <span class="n">colour</span> <span class="o">=</span> <span class="n">Colour</span><span class="o">.</span><span class="n">getSpectrumColour</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">defaultReturn</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span> <span class="o">=</span> <span class="n">colour</span>
-
-  <span class="k">def</span> <span class="nf">_fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulldown</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">spectrumColours</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="n">pix</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
-      <span class="n">pix</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-      <span class="n">pulldown</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">icon</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">pix</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
   <span class="k">def</span> <span class="nf">_applyChanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -199,15 +164,23 @@
 <span class="sd">      repopulate the popup widgets</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">numUndos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>      <span class="c1"># remove any previous undo from this popup</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>     <span class="c1"># so only the last colour change is kept</span>
+      <span class="c1"># self.application.undo()     # so only the last colour change is kept</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>     <span class="c1"># this doesn&#39;t popup the undo progressManager</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">numUndos</span> <span class="o">-=</span> <span class="mi">1</span>
 
     <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">oldUndo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">()</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyChanges&#39;</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+    <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;_applyChanges&#39;</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_changeColours</span><span class="p">()</span>
+
+      <span class="c1"># repaint</span>
+      <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitEvent</span><span class="p">(</span><span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="p">],</span> <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="n">GLNotifier</span><span class="o">.</span><span class="n">GLPEAKLISTS</span><span class="p">,</span>
+                                                             <span class="n">GLNotifier</span><span class="o">.</span><span class="n">GLPEAKLISTLABELS</span><span class="p">])</span>
 
       <span class="n">applyAccept</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
@@ -221,7 +194,7 @@
       <span class="c1"># and still be added to the change list, so only undo if length has changed</span>
       <span class="n">errorName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">oldUndo</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">numItems</span><span class="p">():</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt;Undo.</span><span class="si">%s</span><span class="s1">._applychanges nothing to remove&#39;</span> <span class="o">%</span> <span class="n">errorName</span><span class="p">)</span>
@@ -233,7 +206,12 @@
 
   <span class="k">def</span> <span class="nf">_okButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_accept</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_applyChanges</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
 </pre></div>
 
           </div>

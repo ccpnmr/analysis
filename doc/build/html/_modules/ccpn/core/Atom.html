@@ -48,6 +48,7 @@
             
   <h1>Source code for ccpn.core.Atom</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module documentation here</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
@@ -57,18 +58,16 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:27 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -85,166 +84,203 @@
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolSystem</span> <span class="kn">import</span> <span class="n">Atom</span> <span class="k">as</span> <span class="n">ApiAtom</span>
 
+
 <div class="viewcode-block" id="Atom"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Atom.Atom">[docs]</a><span class="k">class</span> <span class="nc">Atom</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;A molecular Atom, contained in a Residue.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;A molecular Atom, contained in a Residue.&quot;&quot;&quot;</span>
 
-  <span class="c1">#: Class name and Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;MA&#39;</span>
-  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Atom&#39;</span>
+    <span class="c1">#: Class name and Short class name, for PID.</span>
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;MA&#39;</span>
+    <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Atom&#39;</span>
 
-  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Residue</span>
+    <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Residue</span>
 
-  <span class="c1">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;atoms&#39;</span>
-  
-  <span class="c1">#: List of child classes.</span>
-  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: Name of plural link to instances of class</span>
+    <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;atoms&#39;</span>
 
-  <span class="c1"># Qualified name of matching API class</span>
-  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiAtom</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
-  
+    <span class="c1">#: List of child classes.</span>
+    <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c1"># CCPN properties</span>
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_apiAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiAtom</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; CCPN atom matching Atom&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="c1"># Qualified name of matching API class</span>
+    <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiAtom</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+
+    <span class="c1"># CCPN properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_apiAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiAtom</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; CCPN atom matching Atom&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Residue</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Residue containing Atom.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residue</span><span class="p">]</span>
+
+    <span class="n">residue</span> <span class="o">=</span> <span class="n">_parent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Atom name string (e.g. &#39;HA&#39;) regularised as used for ID&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_idTuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AtomIdTuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;ID as chainCode, sequenceCode, residueType, atomName namedtuple</span>
+<span class="sd">        NB Unlike the _id and key, these do NOT have reserved characters mapped to &#39;^&#39;</span>
+<span class="sd">        NB _idTuple replaces empty strings with None&quot;&quot;&quot;</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">AtomIdTuple</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Atom name string (e.g. &#39;HA&#39;)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">boundAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;Atom&#39;</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Atoms that are covalently bound to this Atom&quot;&quot;&quot;</span>
+        <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+        <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+        <span class="n">boundApiAtoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">apiAtom</span><span class="o">.</span><span class="n">boundAtoms</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">apiBond</span> <span class="ow">in</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">genericBonds</span><span class="p">:</span>
+            <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">apiBond</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
+            <span class="n">apiAtom2</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">apiAtom</span> <span class="ow">is</span> <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">boundApiAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">apiAtom2</span><span class="p">)</span>
+        <span class="n">boundAtoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">boundApiAtoms</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">boundAtoms</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">componentAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;Atom&#39;</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Atoms that are combined to make up this atom - reverse of &#39;compoundAtoms&#39;</span>
+
+<span class="sd">        For simple atoms this is empty.</span>
+<span class="sd">        For wildcard atoms (e.g. HB%, QB) this gives the individual atoms that combine into atom.</span>
+<span class="sd">        For non-stereo atoms (e.g. HBx, HBy, HGx%) it gives the two alternative stereospecific atoms</span>
+
+<span class="sd">        Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13</span>
+<span class="sd">        and is itself a component of HGx%, HGy%, HG%, and QG&quot;&quot;&quot;</span>
+        <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+        <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">compoundAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;Atom&#39;</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;wildcard-, pseudo-, and nonstereo- atoms that incorporate this atom.</span>
+<span class="sd">        - reverse of &#39;componentAtoms&#39;</span>
+
+<span class="sd">        Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13</span>
+<span class="sd">        and is itself a component of HGx%, HGy%, HG%, and QG&quot;&quot;&quot;</span>
+        <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+        <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">atomGroups</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exchangesWithWater</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;True if atom exchanges with water on a msx time scale, and so is mostly unobservable.</span>
+
+<span class="sd">        Holds for e.g. OH atoms, NH£ groups and His side chain NH protons, but NOT for amide protons &quot;&quot;&quot;</span>
+
+        <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">components</span>
+        <span class="k">while</span> <span class="n">components</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">apiAtom</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+                <span class="c1"># Fastest way to get an arbitrary element from a frozen set</span>
+                <span class="k">break</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">components</span>
+        <span class="c1">#</span>
+        <span class="n">apiChemAtom</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">chemAtom</span>
+        <span class="k">if</span> <span class="n">apiChemAtom</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">apiChemAtom</span><span class="o">.</span><span class="n">waterExchangeable</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isEquivalentAtomGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Is this atom a group of equivalent atoms?</span>
+<span class="sd">        Values are:</span>
+
+<span class="sd">        - True  (group of equivalent atoms, e.g. H%, ALA HB%, LYS HZ%, VAL HG1% or any M pseudoatom)</span>
+
+<span class="sd">        - False (all single atoms, all xy nonstereo atoms, LEU HB%, ILE HG1%, VAL HG%,</span>
+<span class="sd">          or any Q non-aromatic pseudoatom)</span>
+
+<span class="sd">        - None  = sometimes equivalent (TYR and PHE HD%, HE%, CD%, CE%, QD, QE)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">apiChemAtomSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">chemAtomSet</span>
+        <span class="k">if</span> <span class="n">apiChemAtomSet</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># NB isEquivalent is None for symmetric aromatic rings. We return True for that</span>
+            <span class="k">return</span> <span class="n">apiChemAtomSet</span><span class="o">.</span><span class="n">isEquivalent</span> <span class="o">!=</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="Atom.addInterAtomBond"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Atom.Atom.addInterAtomBond">[docs]</a>    <span class="k">def</span> <span class="nf">addInterAtomBond</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">:</span> <span class="s1">&#39;Atom&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;ADVANCED Add generic bond between atoms - for creating disulfides or other crosslinks</span>
+<span class="sd">        The bound-to atom will appear in self.boundAtoms.</span>
+
+<span class="sd">        NB This function does not remove superfluous atoms (like CYS HG),</span>
+<span class="sd">        or check for chemical plausibility. Programmer beware!&quot;&quot;&quot;</span>
+        <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">newGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">))</span></div>
+
+    <span class="c1">#from ccpn.core.NmrAtom import NmrAtom: This will break the import sequence</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;NmrAtom&#39;</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;NmrAtom to which Atom is assigned</span>
+
+<span class="sd">        NB  Atom&lt;-&gt;NmrAtom link depends solely on the NmrAtom name.</span>
+<span class="sd">            So no notifiers on the link - notify on the NmrAtom rename instead.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c1"># GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom</span>
+    <span class="c1"># @nmrAtom.setter</span>
+    <span class="c1"># def nmrAtom(self, value:&#39;NmrAtom&#39;):</span>
+    <span class="c1">#   oldValue = self.nmrAtom</span>
+    <span class="c1">#   if oldValue is value:</span>
+    <span class="c1">#     return</span>
+    <span class="c1">#   elif value is None:</span>
+    <span class="c1">#     raise ValueError(&quot;Cannot set Atom.nmrAtom to None&quot;)</span>
+    <span class="c1">#   elif oldValue is not None:</span>
+    <span class="c1">#     raise ValueError(&quot;New assignment of Atom clashes with existing assignment&quot;)</span>
+    <span class="c1">#   else:</span>
+    <span class="c1">#     value.atom = self</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isAssigned</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: True if Atom has as NmrAtom with an associated ChemicalShift object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">chemicalShifts</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>  <span class="c1"># either None or len==0</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># Implementation functions</span>
+    <span class="c1">#=========================================================================================</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Residue</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedAtoms</span><span class="p">()</span></div>
 
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Residue</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Residue containing Atom.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residue</span><span class="p">]</span>
-  
-  <span class="n">residue</span> <span class="o">=</span> <span class="n">_parent</span>
-    
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Atom name string (e.g. &#39;HA&#39;) regularised as used for ID&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_idTuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AtomIdTuple</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;ID as chainCode, sequenceCode, residueType, atomName namedtuple</span>
-<span class="sd">    NB Unlike the _id and key, these do NOT have reserved characters mapped to &#39;^&#39;</span>
-<span class="sd">    NB _idTuple replaces empty strings with None&quot;&quot;&quot;</span>
-    <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
-    <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">parent</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">AtomIdTuple</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">))</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Atom name string (e.g. &#39;HA&#39;)&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">boundAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;Atom&#39;</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Atoms that are covalently bound to this Atom&quot;&quot;&quot;</span>
-    <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
-    <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-
-    <span class="n">boundApiAtoms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">apiAtom</span><span class="o">.</span><span class="n">boundAtoms</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">apiBond</span> <span class="ow">in</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">genericBonds</span><span class="p">:</span>
-      <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">apiBond</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
-      <span class="n">apiAtom2</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">apiAtom</span> <span class="ow">is</span> <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-      <span class="n">boundApiAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">apiAtom2</span><span class="p">)</span>
-    <span class="n">boundAtoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">boundApiAtoms</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">boundAtoms</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">))</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">componentAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;Atom&#39;</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Atoms that are combined to make up this atom - reverse of &#39;compoundAtoms&#39;</span>
-
-<span class="sd">    For simple atoms this is empty.</span>
-<span class="sd">    For wildcard atoms (e.g. HB%, QB) this gives the individual atoms that combine into atom.</span>
-<span class="sd">    For non-stereo atoms (e.g. HBx, HBy, HGx%) it gives the two alternative stereospecific atoms</span>
-
-<span class="sd">    Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13</span>
-<span class="sd">    and is itself a component of HGx%, HGy%, HG%, and QG&quot;&quot;&quot;</span>
-    <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
-    <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">compoundAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;Atom&#39;</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;wildcard-, pseudo-, and nonstereo- atoms that incorporate this atom.</span>
-<span class="sd">    - reverse of &#39;componentAtoms&#39;</span>
-
-<span class="sd">    Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13</span>
-<span class="sd">    and is itself a component of HGx%, HGy%, HG%, and QG&quot;&quot;&quot;</span>
-    <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
-    <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">atomGroups</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">exchangesWithWater</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;True if atom exchanges with water on a msx time scale, and so is mostly unobservable.</span>
-
-<span class="sd">    Holds for e.g. OH atoms, NH£ groups and His side chain NH protons, but NOT for amide protons &quot;&quot;&quot;</span>
-
-    <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="n">components</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">components</span>
-    <span class="k">while</span> <span class="n">components</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">apiAtom</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
-        <span class="c1"># Fastest way to get an arbitrary element from a frozen set</span>
-        <span class="k">break</span>
-      <span class="n">components</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">components</span>
+<span class="k">def</span> <span class="nf">_newAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Residue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Atom&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new Atom within Residue. If elementSymbol is None, it is derived from the name&quot;&quot;&quot;</span>
+    <span class="n">lastAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAtom</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lastAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create </span><span class="si">%s</span><span class="s2">, atom name </span><span class="si">%s</span><span class="s2"> already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lastAtom</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">elementSymbol</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">elementSymbol</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="o">=</span><span class="n">elementSymbol</span><span class="p">)</span>
+    <span class="n">apiAtom</span><span class="o">.</span><span class="n">expandNewAtom</span><span class="p">()</span>
     <span class="c1">#</span>
-    <span class="n">apiChemAtom</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">chemAtom</span>
-    <span class="k">if</span> <span class="n">apiChemAtom</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">apiChemAtom</span><span class="o">.</span><span class="n">waterExchangeable</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">False</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">isEquivalentAtomGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Is this atom a group of equivalent atoms?</span>
-<span class="sd">    Values are:</span>
-
-<span class="sd">    - True  (group of equivalent atoms, e.g. H%, ALA HB%, LYS HZ%, VAL HG1% or any M pseudoatom)</span>
-
-<span class="sd">    - False (all single atoms, all xy nonstereo atoms, LEU HB%, ILE HG1%, VAL HG%,</span>
-<span class="sd">      or any Q non-aromatic pseudoatom)</span>
-
-<span class="sd">    - None  = sometimes equivalent (TYR and PHE HD%, HE%, CD%, CE%, QD, QE)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">apiChemAtomSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">chemAtomSet</span>
-    <span class="k">if</span> <span class="n">apiChemAtomSet</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">False</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># NB isEquivalent is None for symmetric aromatic rings. We return True for that</span>
-      <span class="k">return</span> <span class="n">apiChemAtomSet</span><span class="o">.</span><span class="n">isEquivalent</span> <span class="o">!=</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiAtom</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="Atom.addInterAtomBond"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Atom.Atom.addInterAtomBond">[docs]</a>  <span class="k">def</span> <span class="nf">addInterAtomBond</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">:</span><span class="s1">&#39;Atom&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;ADVANCED Add generic bond between atoms - for creating disulfides or other crosslinks</span>
-<span class="sd">    The bound-to atom will appear in self.boundAtoms.</span>
-
-<span class="sd">    NB This function does not remove superfluous atoms (like CYS HG),</span>
-<span class="sd">    or check for chemical plausibility. Programmer beware!&quot;&quot;&quot;</span>
-    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
-    <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">newGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">))</span></div>
-
-
-  <span class="c1"># Implementation functions</span>
-
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Residue</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedAtoms</span><span class="p">()</span></div>
-
-<span class="k">def</span> <span class="nf">_newAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Residue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Atom&#39;</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new Atom within Residue. If elementSymbol is None, it is derived from the name&quot;&quot;&quot;</span>
-  <span class="n">lastAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAtom</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">lastAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create </span><span class="si">%s</span><span class="s2">, atom name </span><span class="si">%s</span><span class="s2"> already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lastAtom</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
-  <span class="k">if</span> <span class="n">elementSymbol</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">elementSymbol</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-  <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="o">=</span><span class="n">elementSymbol</span><span class="p">)</span>
-  <span class="n">apiAtom</span><span class="o">.</span><span class="n">expandNewAtom</span><span class="p">()</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiAtom</span><span class="p">]</span>
 <span class="c1">#</span>
 <span class="n">Residue</span><span class="o">.</span><span class="n">newAtom</span> <span class="o">=</span> <span class="n">_newAtom</span>
 

@@ -58,18 +58,17 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:40 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: TJ Ragan $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-22 13:00:57 +0000 (Wed, March 22, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
@@ -78,121 +77,208 @@
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui._implementation</span> <span class="kn">import</span> <span class="n">_uiImportOrder</span>
 <span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_coreClassMap</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Register</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Update</span> <span class="kn">import</span> <span class="n">installUpdates</span><span class="p">,</span> <span class="n">UpdateAgent</span>
+
 
 <div class="viewcode-block" id="Ui"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui">[docs]</a><span class="k">class</span> <span class="nc">Ui</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Superclass for all user interface classes&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Superclass for all user interface classes&quot;&quot;&quot;</span>
 
-  <span class="c1"># Factory functions for UI-specific instantiation of wrapped graphics classes</span>
-  <span class="n">_factoryFunctions</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Factory functions for UI-specific instantiation of wrapped graphics classes</span>
+    <span class="n">_factoryFunctions</span> <span class="o">=</span> <span class="p">{}</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">pluginModules</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pluginModules</span> <span class="o">=</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="Ui.addMenu"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.addMenu">[docs]</a>  <span class="k">def</span> <span class="nf">addMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Add a menu specification for the top menu bar.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">position</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="p">[]))</span></div>
+<div class="viewcode-block" id="Ui.addMenu"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.addMenu">[docs]</a>    <span class="k">def</span> <span class="nf">addMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Add a menu specification for the top menu bar.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="p">[]))</span></div>
 
-  <span class="nd">@classmethod</span>
-<div class="viewcode-block" id="Ui.setUp"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.setUp">[docs]</a>  <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set up graphics data classes, cleaning up previous settings&quot;&quot;&quot;</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Ui.setUp"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set up graphics data classes, cleaning up previous settings&quot;&quot;&quot;</span>
 
-    <span class="k">for</span> <span class="n">className</span> <span class="ow">in</span> <span class="n">_uiImportOrder</span><span class="p">:</span>
-      <span class="c1"># Remove ui-specific settings. Will be reset as necessary in subclasses</span>
-      <span class="n">_coreClassMap</span><span class="p">[</span><span class="n">className</span><span class="p">]</span><span class="o">.</span><span class="n">_factoryFunction</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_factoryFunctions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span></div>
+        <span class="k">for</span> <span class="n">className</span> <span class="ow">in</span> <span class="n">_uiImportOrder</span><span class="p">:</span>
+            <span class="c1"># Remove ui-specific settings. Will be reset as necessary in subclasses</span>
+            <span class="n">_coreClassMap</span><span class="p">[</span><span class="n">className</span><span class="p">]</span><span class="o">.</span><span class="n">_factoryFunction</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_factoryFunctions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Ui.initialize"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;UI operations done after every project load/create&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Ui.initialize"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;UI operations done after every project load/create&quot;&quot;&quot;</span>
-    <span class="k">pass</span></div>
+<div class="viewcode-block" id="Ui.start"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start the program execution&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Ui.start"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.start">[docs]</a>  <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Start the program execution&quot;&quot;&quot;</span>
+        <span class="c1"># self._checkRegistered()</span>
+        <span class="c1"># Register.updateServer(Register.loadDict(), self.application.applicationVersion)</span>
 
-    <span class="c1"># self._checkRegistered()</span>
-    <span class="c1"># Register.updateServer(Register.loadDict(), self.application.applicationVersion)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; </span><span class="si">%s</span><span class="s1"> interface is ready</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span></div>
 
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; </span><span class="si">%s</span><span class="s1"> interface is ready</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">_checkRegistration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if registered and if not popup registration and if still no good then exit&quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">_checkRegistered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Check if registered and if not popup registration and if still no good then exit&quot;&quot;&quot;</span>
+        <span class="c1"># checking the registration; need to have the app running, but before the splashscreen, as it will hang</span>
+        <span class="c1"># in case the popup is needed.</span>
+        <span class="c1"># We want to give some feedback; sometimes this takes a while (e.g. poor internet)</span>
+        <span class="c1"># sys.stderr.write(&#39;==&gt; Checking registration ... \n&#39;)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c1"># It seems to be necessary as without the output comes after the registration screen</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">:</span>
 
-    <span class="c1"># checking the registration; need to have the app running, but before the splashscreen, as it will hang</span>
-    <span class="c1"># in case the popup is needed.</span>
-    <span class="c1"># We want to give some feedback; sometimes this takes a while (e.g. poor internet)</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Checking registration ... </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c1"># It seems to be necessary as without the output comes after the registration screen</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_showRegisterPopup</span><span class="p">()</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">### INVALID REGISTRATION, terminating</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Registered to: </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span>
-                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
-                      <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;organisation&#39;</span><span class="p">)))</span>
+            <span class="c1"># call the subclassed register method</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_registerDetails</span><span class="p">()</span>
 
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">### INVALID REGISTRATION, terminating</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">False</span>
 
-<div class="viewcode-block" id="Ui.echoCommands"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.echoCommands">[docs]</a>  <span class="k">def</span> <span class="nf">echoCommands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commands</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;Echo commands strings, one by one, to logger.</span>
-<span class="sd">    Overwritten in subclasses to handle e.g. console putput</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+        <span class="c1">#     # sys.stderr.write(&#39;==&gt; Registered to: %s (%s)\n&#39; %</span>
+        <span class="c1">#     #                  (self.application._registrationDict.get(&#39;name&#39;),</span>
+        <span class="c1">#     #                   self.application._registrationDict.get(&#39;organisation&#39;)))</span>
+        <span class="c1">#       return Register.updateServer(self.application._registrationDict, self.application.applicationVersion)</span>
+        <span class="c1">#</span>
+        <span class="c1"># else:</span>
 
-    <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
+        <span class="c1"># check whether your registration details are on the server</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">checkServer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_registrationDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
-      <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">True</span>
 
+<div class="viewcode-block" id="Ui.echoCommands"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.echoCommands">[docs]</a>    <span class="k">def</span> <span class="nf">echoCommands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commands</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Echo commands strings, one by one, to logger.</span>
+<span class="sd">        Overwritten in subclasses to handle e.g. console putput</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_isRegistered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;return True if registered&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="ow">not</span> <span class="n">Register</span><span class="o">.</span><span class="n">isNewRegistration</span><span class="p">(</span><span class="n">Register</span><span class="o">.</span><span class="n">loadDict</span><span class="p">())</span></div>
+        <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
+
+        <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_execUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span><span class="p">(</span><span class="s1">&#39;ERROR: ..to be subclassed by ui types&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_checkUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">applicationVersion</span> <span class="o">=</span> <span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># ejb - read from the header</span>
+
+        <span class="n">updateAgent</span> <span class="o">=</span> <span class="n">UpdateAgent</span><span class="p">(</span><span class="n">applicationVersion</span><span class="p">)</span>
+        <span class="n">numUpdates</span> <span class="o">=</span> <span class="n">updateAgent</span><span class="o">.</span><span class="n">checkNumberUpdates</span><span class="p">()</span>
+        <span class="c1"># sys.stderr.write(&#39;==&gt; Updates available: %s\n&#39; % str(numUpdates))</span>
+
+        <span class="k">if</span> <span class="n">numUpdates</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_execUpdates</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_isRegistered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return True if registered&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_registrationDict</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">loadDict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="n">Register</span><span class="o">.</span><span class="n">isNewRegistration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_registrationDict</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="NoUi"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.NoUi">[docs]</a><span class="k">class</span> <span class="nc">NoUi</span><span class="p">(</span><span class="n">Ui</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">_showRegisterPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Display registration popup&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_registerDetails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Display registration information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">### Please register, using another application</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
-    <span class="c1"># popup = RegisterPopup(version=self.application.applicationVersion, modal=True)</span>
-    <span class="c1"># popup.show()</span>
-    <span class="c1"># popup.raise_()</span>
-    <span class="c1"># popup.exec_()</span>
-    <span class="c1"># self.application.processEvents()</span>
+        <span class="c1"># check valid internet connection first</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Register</span><span class="o">.</span><span class="n">checkInternetConnection</span><span class="p">():</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Could not connect to the registration server, please check your internet connection.&#39;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">applicationVersion</span> <span class="o">=</span> <span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># sys.stderr.write(&#39;\n### Please register, using another application, or in Gui Mode\n&#39;)</span>
+
+        <span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">licensePath</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">showLicense</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;The licence file can be found at </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">licensePath</span><span class="p">)</span>
+
+        <span class="n">validEmailRegex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">r&#39;^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-_]+\.)+[A-Za-z]{2,63}$&#39;</span><span class="p">)</span>
+
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Please take a moment to read the licence</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">agree</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">while</span> <span class="n">agree</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">agreeIn</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Do you agree to the terms and conditions of the Licence? [Yes/No]&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">agreeIn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">]:</span>
+                <span class="n">agree</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="n">agreeIn</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">]:</span>
+                <span class="n">agree</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Enter &#39;yes&#39; or &#39;no&#39;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">agree</span><span class="p">:</span>
+            <span class="n">registrationDict</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Please enter registration details:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># (&#39;name&#39;, &#39;organisation&#39;, &#39;email&#39;)</span>
+
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Register</span><span class="o">.</span><span class="n">userAttributes</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s1">&#39;email&#39;</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">:</span>
+                    <span class="n">validEmail</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">while</span> <span class="n">validEmail</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+                        <span class="n">regIn</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39; &gt;&#39;</span><span class="p">)</span>
+                        <span class="n">registrationDict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">regIn</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+
+                        <span class="n">validEmail</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="n">validEmailRegex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regIn</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">validEmail</span><span class="p">:</span>
+                            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39; is invalid, please try again</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">regIn</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39; &gt;&#39;</span><span class="p">)</span>
+                    <span class="n">registrationDict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">regIn</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+
+            <span class="n">Register</span><span class="o">.</span><span class="n">setHashCode</span><span class="p">(</span><span class="n">registrationDict</span><span class="p">)</span>
+            <span class="n">Register</span><span class="o">.</span><span class="n">saveDict</span><span class="p">(</span><span class="n">registrationDict</span><span class="p">)</span>
+            <span class="n">Register</span><span class="o">.</span><span class="n">updateServer</span><span class="p">(</span><span class="n">registrationDict</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;You must agree to the licence to continue&#39;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_execUpdates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; NoUi update</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">applicationVersion</span> <span class="o">=</span> <span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># ejb - read from the header</span>
+        <span class="n">installUpdates</span><span class="p">(</span><span class="n">applicationVersion</span><span class="p">)</span>
+
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Please restart the program to apply the updates</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TestUi"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.TestUi">[docs]</a><span class="k">class</span> <span class="nc">TestUi</span><span class="p">(</span><span class="n">NoUi</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+        <span class="n">Ui</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">)</span>
+        <span class="n">application</span><span class="o">.</span><span class="n">_consoleOutput</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="n">Ui</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">)</span>
-    <span class="n">application</span><span class="o">.</span><span class="n">_consoleOutput</span> <span class="o">=</span> <span class="p">[]</span>
+<div class="viewcode-block" id="TestUi.echoCommands"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.TestUi.echoCommands">[docs]</a>    <span class="k">def</span> <span class="nf">echoCommands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commands</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Echo commands strings, one by one, to logger</span>
+<span class="sd">        and store them in internal list for perusal</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_consoleOutput</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span>
 
+        <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
 
-<div class="viewcode-block" id="TestUi.echoCommands"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.TestUi.echoCommands">[docs]</a>  <span class="k">def</span> <span class="nf">echoCommands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commands</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;Echo commands strings, one by one, to logger</span>
-<span class="sd">    and store them in internal list for perusal</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">_consoleOutput</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span>
-
-    <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
-
-    <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
-      <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div></div>
+        <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div></div>
 
 </pre></div>
 

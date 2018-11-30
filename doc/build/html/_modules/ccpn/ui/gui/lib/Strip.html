@@ -47,252 +47,385 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.ui.gui.lib.Strip</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">typing</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module Documentation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
+<span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
+<span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:41 +0100 (Fri, July 07, 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Created</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShift</span> <span class="kn">import</span> <span class="n">ChemicalShift</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiStrip</span> <span class="kn">import</span> <span class="n">GuiStrip</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib</span> <span class="kn">import</span> <span class="n">Window</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.GuiStrip</span> <span class="kn">import</span> <span class="n">GuiStrip</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
 
 <span class="k">def</span> <span class="nf">_getCurrentZoomRatio</span><span class="p">(</span><span class="n">viewRange</span><span class="p">):</span>
-  <span class="n">xRange</span><span class="p">,</span> <span class="n">yRange</span> <span class="o">=</span> <span class="n">viewRange</span>
-  <span class="n">xMin</span><span class="p">,</span> <span class="n">xMax</span> <span class="o">=</span> <span class="n">xRange</span>
-  <span class="n">xRatio</span> <span class="o">=</span> <span class="p">(</span><span class="n">xMax</span> <span class="o">-</span> <span class="n">xMin</span><span class="p">)</span>
-  <span class="n">yMin</span><span class="p">,</span> <span class="n">yMax</span> <span class="o">=</span> <span class="n">yRange</span>
-  <span class="n">yRatio</span> <span class="o">=</span> <span class="p">(</span><span class="n">yMax</span> <span class="o">-</span> <span class="n">yMin</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">xRatio</span><span class="p">,</span> <span class="n">yRatio</span>
+    <span class="n">xRange</span><span class="p">,</span> <span class="n">yRange</span> <span class="o">=</span> <span class="n">viewRange</span>
+    <span class="n">xMin</span><span class="p">,</span> <span class="n">xMax</span> <span class="o">=</span> <span class="n">xRange</span>
+    <span class="n">xRatio</span> <span class="o">=</span> <span class="p">(</span><span class="n">xMax</span> <span class="o">-</span> <span class="n">xMin</span><span class="p">)</span>
+    <span class="n">yMin</span><span class="p">,</span> <span class="n">yMax</span> <span class="o">=</span> <span class="n">yRange</span>
+    <span class="n">yRatio</span> <span class="o">=</span> <span class="p">(</span><span class="n">yMax</span> <span class="o">-</span> <span class="n">yMin</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xRatio</span><span class="p">,</span> <span class="n">yRatio</span>
 
 
-<div class="viewcode-block" id="navigateToPositionInStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.navigateToPositionInStrip">[docs]</a><span class="k">def</span> <span class="nf">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">axisCodes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                              <span class="n">widths</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Takes a strip, a list of positions and optionally, a parallel list of axisCodes.</span>
-<span class="sd">  Navigates to specified positions in strip using axisCodes, if specified, otherwise it navigates</span>
-<span class="sd">  to the positions in the displayed axis order of the strip.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="navigateToPositionInStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.navigateToPositionInStrip">[docs]</a><span class="k">def</span> <span class="nf">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">axisCodes</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                              <span class="n">widths</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a strip, a list of positions and optionally, a parallel list of axisCodes.</span>
+<span class="sd">    Navigates to specified positions in strip using axisCodes, if specified, otherwise it navigates</span>
+<span class="sd">    to the positions in the displayed axis order of the strip.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">axisCodes</span><span class="p">:</span>
-    <span class="n">axisCodes</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">axisCodes</span><span class="p">:</span>
+        <span class="n">axisCodes</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span>
 
-  <span class="c1"># below does not work for the Navigate To right mouse menu option because in the width</span>
-  <span class="c1"># setting further down, stripAxisIndex is not necessarily the same as ii</span>
-  <span class="c1"># so the width in the z axis can be set to some huge number by mistake</span>
-  <span class="c1"># if widths is None:</span>
-  <span class="c1">#   widths = _getCurrentZoomRatio(strip.viewBox.viewRange())</span>
+    <span class="c1"># below does not work for the Navigate To right mouse menu option because in the width</span>
+    <span class="c1"># setting further down, stripAxisIndex is not necessarily the same as ii</span>
+    <span class="c1"># so the width in the z axis can be set to some huge number by mistake</span>
+    <span class="c1"># if widths is None:</span>
+    <span class="c1">#   widths = _getCurrentZoomRatio(strip.viewBox.viewRange())</span>
 
-  <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
+    <span class="c1"># _undo = strip.project._undo     # ejb - just a temporary fix</span>
+    <span class="c1"># if _undo is not None:</span>
+    <span class="c1">#   _undo.increaseBlocking()</span>
+
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stripAxisIndex</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">ii</span><span class="p">:</span>  <span class="c1"># this used to say 1 rather than ii (coupled with the else below)</span>
+            <span class="k">if</span> <span class="n">positions</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
+                <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+        <span class="c1">#else: # what in the world is the case this is trying to deal with??</span>
+        <span class="c1"># why would you want to set all the positions to the same thing??</span>
+        <span class="c1">#  strip.orderedAxes[stripAxisIndex].position = positions[0]</span>
+
+        <span class="k">if</span> <span class="n">widths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>  <span class="c1"># FIXME this can be out of range</span>
+                    <span class="c1"># if this item in the list contains a float, set the axis width to that float value</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span>
+                        <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="c1"># if the list item is a str with value, full, reset the corresponding axis</span>
+                        <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
+                            <span class="n">strip</span><span class="o">.</span><span class="n">resetAxisRange</span><span class="p">(</span><span class="n">stripAxisIndex</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span> <span class="ow">and</span> <span class="n">stripAxisIndex</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="c1"># if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span> <span class="ow">or</span>
+                                    <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;15N&#39;</span><span class="p">):</span>
+                                <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">5</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.5</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+    <span class="c1"># TODO:ED now do the same for the OpenGL widget</span>
+    <span class="c1"># OR just copy from the strip axes</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">stripAxisIndex</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-      <span class="k">continue</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span><span class="o">&gt;</span><span class="n">ii</span><span class="p">:</span> <span class="c1"># this used to say 1 rather than ii (coupled with the else below)</span>
-      <span class="k">if</span> <span class="n">positions</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
-        <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-    <span class="c1">#else: # what in the world is the case this is trying to deal with??</span>
-           <span class="c1"># why would you want to set all the positions to the same thing??</span>
-    <span class="c1">#  strip.orderedAxes[stripAxisIndex].position = positions[0]</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">stripAxisIndex</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">continue</span>
 
-    <span class="k">if</span> <span class="n">widths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span> <span class="c1"># FIXME this can be out of range</span>
-          <span class="c1"># if this item in the list contains a float, set the axis width to that float value</span>
-          <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span>
-            <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-          <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="c1"># if the list item is a str with value, full, reset the corresponding axis</span>
-            <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
-              <span class="n">strip</span><span class="o">.</span><span class="n">resetAxisRange</span><span class="p">(</span><span class="n">stripAxisIndex</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span> <span class="ow">and</span> <span class="n">stripAxisIndex</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-              <span class="c1"># if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H</span>
-              <span class="k">if</span> <span class="p">(</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span> <span class="ow">or</span>
-                  <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;15N&#39;</span><span class="p">):</span>
-                <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">5</span>
-              <span class="k">else</span><span class="p">:</span>
-                <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.5</span>
-      <span class="k">except</span><span class="p">:</span>
-        <span class="k">continue</span></div>
+            <span class="k">if</span> <span class="n">ii</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="ow">and</span> <span class="n">positions</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
+                <span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">setAxisPosition</span><span class="p">(</span><span class="n">axisCode</span><span class="o">=</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">positions</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
+            <span class="n">flippedAxisCode</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">widths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ii</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">widths</span><span class="p">)</span> <span class="ow">and</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
 
-<div class="viewcode-block" id="matchAxesAndNmrAtoms"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.matchAxesAndNmrAtoms">[docs]</a><span class="k">def</span> <span class="nf">matchAxesAndNmrAtoms</span><span class="p">(</span><span class="n">strip</span><span class="p">:</span><span class="n">GuiStrip</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span>
 
-  <span class="n">shiftDict</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="n">shiftList</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">chemicalShiftList</span>
-  <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">:</span>
-    <span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">):</span>
-        <span class="n">shift</span> <span class="o">=</span> <span class="n">shiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">shift</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">isPositionWithinfBounds</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
-          <span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+                        <span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">setAxisWidth</span><span class="p">(</span><span class="n">axisCode</span><span class="o">=</span><span class="n">flippedAxisCode</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
+                                                         <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
-  <span class="k">return</span> <span class="n">shiftDict</span></div>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="c1"># if the list item is a str with value, full, reset the corresponding axis</span>
+                        <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
 
+                            <span class="nb">range</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">getAxisRange</span><span class="p">(</span><span class="n">stripAxisIndex</span><span class="p">)</span>
+                            <span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">setAxisRange</span><span class="p">(</span><span class="n">axisCode</span><span class="o">=</span><span class="n">flippedAxisCode</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span>
+                                                             <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
-<div class="viewcode-block" id="isPositionWithinfBounds"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.isPositionWithinfBounds">[docs]</a><span class="k">def</span> <span class="nf">isPositionWithinfBounds</span><span class="p">(</span><span class="n">strip</span><span class="p">:</span><span class="n">GuiStrip</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span><span class="n">ChemicalShift</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">object</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Determines whether a given shift is within the bounds of the specified axis of the specified</span>
-<span class="sd">  strip.</span>
+                        <span class="k">elif</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+                            <span class="c1"># if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H</span>
 
-<span class="sd">  NBNB Bug Fixed by Rasmus 13/3/2016.</span>
-<span class="sd">  This was not used then. Maybe it should be?</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span> <span class="ow">or</span>
+                                    <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;15N&#39;</span><span class="p">):</span>
 
-<span class="sd">  Modified to use aliasingLimits instead of spectrumLimits. Rasmus, 24/7/2016</span>
+                                <span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">setAxisWidth</span><span class="p">(</span><span class="n">axisCode</span><span class="o">=</span><span class="n">flippedAxisCode</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                                                                 <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">setAxisWidth</span><span class="p">(</span><span class="n">axisCode</span><span class="o">=</span><span class="n">flippedAxisCode</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                                                                 <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">minima</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="n">maxima</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># build here so it doesn&#39;t conflict with OpenGl update</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">buildAllContours</span><span class="p">()</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">_CcpnGLWidget</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
-  <span class="n">axisIndex</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debugGL</span><span class="p">(</span><span class="s1">&#39;OpenGL widget not instantiated&#39;</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="n">strip</span><span class="p">)</span></div>
 
-  <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
-    <span class="n">spectrumIndices</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
-    <span class="n">index</span> <span class="o">=</span> <span class="n">spectrumIndices</span><span class="p">[</span><span class="n">axisIndex</span><span class="p">]</span>
-    <span class="n">minima</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingLimits</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">maxima</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingLimits</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
-
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maxima</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">True</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">minima</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">shift</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maxima</span><span class="p">)</span></div>
+    <span class="c1"># if _undo is not None:</span>
+    <span class="c1">#   _undo.decreaseBlocking()</span>
 
 
-<div class="viewcode-block" id="navigateToNmrAtomsInStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.navigateToNmrAtomsInStrip">[docs]</a><span class="k">def</span> <span class="nf">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">:</span><span class="n">GuiStrip</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                              <span class="n">markPositions</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Takes an NmrResidue and optional spectrum displays and strips and navigates the strips</span>
-<span class="sd">  and spectrum displays to the positions specified by the peak.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;strip: </span><span class="si">%r</span><span class="s1">, nmrAtoms:</span><span class="si">%s</span><span class="s1">, widths=</span><span class="si">%s</span><span class="s1">, markPositions:</span><span class="si">%s</span><span class="s1">, setSpinSystemLabel:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
-                    <span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">,</span> <span class="n">widths</span><span class="p">,</span> <span class="n">markPositions</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="p">)</span>
-                   <span class="p">)</span>
+<div class="viewcode-block" id="matchAxesAndNmrAtoms"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.matchAxesAndNmrAtoms">[docs]</a><span class="k">def</span> <span class="nf">matchAxesAndNmrAtoms</span><span class="p">(</span><span class="n">strip</span><span class="p">:</span> <span class="n">GuiStrip</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">]):</span>
+    <span class="n">shiftDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">shiftList</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">chemicalShiftList</span>
+    <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">:</span>
+        <span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">):</span>
+                <span class="n">shift</span> <span class="o">=</span> <span class="n">shiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">shift</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">isPositionWithinfBounds</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+                    <span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
-    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;navigateToNmrAtomsInStrip: no strip specified&#39;</span><span class="p">)</span>
-    <span class="k">return</span>
+    <span class="k">return</span> <span class="n">shiftDict</span></div>
 
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;navigateToNmrAtomsInStrip: no atoms specified&#39;</span><span class="p">)</span>
 
-  <span class="n">shiftDict</span> <span class="o">=</span> <span class="n">matchAxesAndNmrAtoms</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">)</span>
-  <span class="c1"># atomPositions = shiftDict[strip.axisOrder[2]]</span>
-  <span class="n">atomPositions</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shiftDict</span><span class="p">[</span><span class="n">axisCode</span><span class="p">]]</span> <span class="k">for</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span><span class="p">]</span>
-  <span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="k">for</span> <span class="n">atomPos</span> <span class="ow">in</span> <span class="n">atomPositions</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">atomPos</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomPos</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atomPos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">atomPos</span><span class="p">)</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">atomPos</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<div class="viewcode-block" id="isPositionWithinfBounds"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.isPositionWithinfBounds">[docs]</a><span class="k">def</span> <span class="nf">isPositionWithinfBounds</span><span class="p">(</span><span class="n">strip</span><span class="p">:</span> <span class="n">GuiStrip</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="n">ChemicalShift</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines whether a given shift is within the bounds of the specified axis of the specified</span>
+<span class="sd">    strip.</span>
+
+<span class="sd">    NBNB Bug Fixed by Rasmus 13/3/2016.</span>
+<span class="sd">    This was not used then. Maybe it should be?</span>
+
+<span class="sd">    Modified to use aliasingLimits instead of spectrumLimits. Rasmus, 24/7/2016</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">minima</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">maxima</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">axisIndex</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+        <span class="n">spectrumIndices</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">spectrumIndices</span><span class="p">[</span><span class="n">axisIndex</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">index</span><span class="p">:</span>
+            <span class="n">minima</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingLimits</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">maxima</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingLimits</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maxima</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-  <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">minima</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">shift</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maxima</span><span class="p">)</span></div>
 
-  <span class="k">if</span> <span class="n">markPositions</span><span class="p">:</span>
-    <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">markPositions</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
 
-  <span class="k">if</span> <span class="n">setNmrResidueLabel</span><span class="p">:</span>
-    <span class="n">strip</span><span class="o">.</span><span class="n">setStripLabelText</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
-    <span class="n">strip</span><span class="o">.</span><span class="n">showStripLabel</span><span class="p">()</span></div>
+<div class="viewcode-block" id="navigateToNmrAtomsInStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.navigateToNmrAtomsInStrip">[docs]</a><span class="k">def</span> <span class="nf">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">:</span> <span class="n">GuiStrip</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                              <span class="n">markPositions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes an NmrResidue and optional spectrum displays and strips and navigates the strips</span>
+<span class="sd">    and spectrum displays to the positions specified by the peak.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;strip: </span><span class="si">%r</span><span class="s1">, nmrAtoms:</span><span class="si">%s</span><span class="s1">, widths=</span><span class="si">%s</span><span class="s1">, markPositions:</span><span class="si">%s</span><span class="s1">, setSpinSystemLabel:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                      <span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">,</span> <span class="n">widths</span><span class="p">,</span> <span class="n">markPositions</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="p">)</span>
+                      <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;navigateToNmrAtomsInStrip: no strip specified&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;navigateToNmrAtomsInStrip: no atoms specified&#39;</span><span class="p">)</span>
+
+    <span class="n">shiftDict</span> <span class="o">=</span> <span class="n">matchAxesAndNmrAtoms</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">)</span>
+    <span class="c1"># atomPositions = shiftDict[strip.axisOrder[2]]</span>
+    <span class="n">atomPositions</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shiftDict</span><span class="p">[</span><span class="n">axisCode</span><span class="p">]]</span> <span class="k">for</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span><span class="p">]</span>
+    <span class="c1">#print(&#39;shiftDict&gt;&gt;&#39;, shiftDict)</span>
+    <span class="c1">#print(&#39;atomPositions&#39;, atomPositions)</span>
+
+    <span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">atomPos</span> <span class="ow">in</span> <span class="n">atomPositions</span><span class="p">:</span>
+        <span class="c1"># 20181029: GWV amended to take first value only</span>
+        <span class="k">if</span> <span class="n">atomPos</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomPos</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atomPos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="c1"># if len(atomPos) &lt; 2:</span>
+            <span class="c1">#   positions.append(atomPos[0])</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#   # positions.append(max(atomPos)-min(atomPos)/2)</span>
+            <span class="c1">#</span>
+            <span class="c1">#   # get the midpoint of each axis</span>
+            <span class="c1">#   #positions.append((max(atomPos)+min(atomPos))/2)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">markPositions</span><span class="p">:</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">markPositions</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+    <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">setNmrResidueLabel</span> <span class="ow">and</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+        <span class="c1"># strip.setStripLabelText(nmrAtoms[0].nmrResidue.pid)</span>
+        <span class="c1"># strip.showStripLabel()</span>
+
+        <span class="n">strip</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">nmrAtoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+        <span class="c1"># obj = strip.project.getByPid(nmrAtoms[0].nmrResidue.pid)</span>
+        <span class="c1"># strip.header.setLabelText(position=&#39;l&#39;, text=&#39;&lt;&lt;&lt;&#39;)</span>
+        <span class="c1"># strip.header.setLabelObject(position=&#39;c&#39;, obj=obj)</span>
+        <span class="c1"># strip.header.setLabelText(position=&#39;r&#39;, text=&#39;&gt;&gt;&gt;&#39;)</span>
+
+    <span class="c1"># redraw the contours</span>
+    <span class="k">for</span> <span class="n">specNum</span><span class="p">,</span> <span class="n">thisSpecView</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">):</span>
+        <span class="n">thisSpecView</span><span class="o">.</span><span class="n">buildContours</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">thisSpecView</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="navigateToNmrResidueInDisplay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.navigateToNmrResidueInDisplay">[docs]</a><span class="k">def</span> <span class="nf">navigateToNmrResidueInDisplay</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">display</span><span class="p">,</span> <span class="n">stripIndex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                                   <span class="n">showSequentialResidues</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Navigate in to nmrResidue in strip[stripIndex] of display, with optionally-1, +1 residues in</span>
-<span class="sd">  strips[stripIndex-1] and strips[stripIndex+1]</span>
-<span class="sd">  return list of strips</span>
-<span class="sd">  </span>
-<span class="sd">  :param nmrResidue: </span>
-<span class="sd">  :param display:</span>
-<span class="sd">  :param stripIndex: location of strip in display (assumed 0 if connected and showSequentialResidues)</span>
-<span class="sd">  :param widths: ignored (for now)</span>
-<span class="sd">  :param showSequentialResidues: boolean selecting if sequential strips are displayed</span>
-<span class="sd">  :param markPositions: boolean selecting if marks are displayed</span>
-<span class="sd">  :return list of strips </span>
-<span class="sd">  &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Navigate in to nmrResidue in strip[stripIndex] of display, with optionally-1, +1 residues in</span>
+<span class="sd">    strips[stripIndex-1] and strips[stripIndex+1]</span>
+<span class="sd">    return list of strips</span>
 
-  <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;display=</span><span class="si">%r</span><span class="s1">, nmrResidue=</span><span class="si">%r</span><span class="s1">, showSequentialResidues=</span><span class="si">%s</span><span class="s1">, markPositions=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
-               <span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">showSequentialResidues</span><span class="p">,</span> <span class="n">markPositions</span><span class="p">)</span>
-               <span class="p">)</span>
+<span class="sd">    :param nmrResidue:</span>
+<span class="sd">    :param display:</span>
+<span class="sd">    :param stripIndex: location of strip in display (assumed 0 if connected and showSequentialResidues)</span>
+<span class="sd">    :param widths: ignored (for now)</span>
+<span class="sd">    :param showSequentialResidues: boolean selecting if sequential strips are displayed</span>
+<span class="sd">    :param markPositions: boolean selecting if marks are displayed</span>
+<span class="sd">    :return list of strips</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-  <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">mainNmrResidue</span>
-  <span class="n">strips</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="k">if</span> <span class="n">showSequentialResidues</span> <span class="ow">and</span> <span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">isConnected</span>
-                                 <span class="ow">or</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
-    <span class="c1"># showing sequential strips</span>
+    <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;display=</span><span class="si">%r</span><span class="s1">, nmrResidue=</span><span class="si">%r</span><span class="s1">, showSequentialResidues=</span><span class="si">%s</span><span class="s1">, markPositions=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                      <span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">showSequentialResidues</span><span class="p">,</span> <span class="n">markPositions</span><span class="p">)</span>
+                      <span class="p">)</span>
 
-    <span class="c1"># NB Rasmus 11/7/2017.</span>
-    <span class="c1"># For showSequentialResidues we want to show the exact number of strips,</span>
-    <span class="c1"># resetting what was there earlier, rather than keeping old ones around</span>
-    <span class="c1"># NB if we go back to showing long stretches, this will have to be changed.</span>
-    <span class="c1"># Meanwhile we ignore stripINdex in this branch of the &#39;if&#39; statement</span>
+    <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">mainNmrResidue</span>
+    <span class="n">strips</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">showSequentialResidues</span> <span class="ow">and</span> <span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">isConnected</span>
+                                   <span class="ow">or</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="c1"># showing sequential strips</span>
 
-    <span class="c1"># Previous code, kept for comparison :</span>
-    <span class="c1"># stripIndex = 0  # for now enforce this, o/w below would be more complicated</span>
-    <span class="c1">#</span>
-    <span class="c1"># previousNmrResidue = nmrResidue.previousNmrResidue</span>
-    <span class="c1"># nextNmrResidue = nmrResidue.nextNmrResidue</span>
-    <span class="c1"># minNumStrips = 1</span>
-    <span class="c1"># if previousNmrResidue:</span>
-    <span class="c1">#   minNumStrips += 1</span>
-    <span class="c1"># if nextNmrResidue:</span>
-    <span class="c1">#   minNumStrips += 1</span>
-    <span class="c1">#</span>
-    <span class="c1"># # showing sequential strips</span>
-    <span class="c1"># while len(display.strips) &lt; minNumStrips:</span>
-    <span class="c1">#     display.addStrip()</span>
-    <span class="c1">#</span>
-    <span class="c1"># # display the previousNmrResidue if not None</span>
-    <span class="c1"># if previousNmrResidue is not None:</span>
-    <span class="c1">#   navigateToNmrAtomsInStrip(display.strips[stripIndex], previousNmrResidue.nmrAtoms,</span>
-    <span class="c1">#                             widths=None, markPositions=False, setNmrResidueLabel=True)</span>
-    <span class="c1">#   strips.append(display.strips[stripIndex])</span>
-    <span class="c1">#   stripIndex += 1</span>
-    <span class="c1">#</span>
-    <span class="c1"># if nmrResidue is not None: # this better be true or would hit Exception long before you get here</span>
-    <span class="c1">#   navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,</span>
-    <span class="c1">#                             widths=None, markPositions=markPositions, setNmrResidueLabel=True)</span>
-    <span class="c1">#   strips.append(display.strips[stripIndex])</span>
-    <span class="c1">#   stripIndex += 1</span>
-    <span class="c1">#</span>
-    <span class="c1"># # display the nextNmrResidue if not None</span>
-    <span class="c1"># if nextNmrResidue is not None:</span>
-    <span class="c1">#   navigateToNmrAtomsInStrip(display.strips[stripIndex], nextNmrResidue.nmrAtoms,</span>
-    <span class="c1">#                             widths=None, markPositions=False, setNmrResidueLabel=True)</span>
-    <span class="c1">#   strips.append(display.strips[stripIndex]) now enforce this, o/w below would be more complicated</span>
+        <span class="c1"># NB Rasmus 11/7/2017.</span>
+        <span class="c1"># For showSequentialResidues we want to show the exact number of strips,</span>
+        <span class="c1"># resetting what was there earlier, rather than keeping old ones around</span>
+        <span class="c1"># NB if we go back to showing long stretches, this will have to be changed.</span>
+        <span class="c1"># Meanwhile we ignore stripINdex in this branch of the &#39;if&#39; statement</span>
 
-    <span class="n">nmrResidues</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">previousNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">previousNmrResidue</span>
-    <span class="k">if</span> <span class="n">previousNmrResidue</span><span class="p">:</span>
-      <span class="n">nmrResidues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">previousNmrResidue</span><span class="p">)</span>
-    <span class="n">nmrResidues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
-    <span class="n">nextNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nextNmrResidue</span>
-    <span class="k">if</span> <span class="n">nextNmrResidue</span><span class="p">:</span>
-      <span class="n">nmrResidues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nextNmrResidue</span><span class="p">)</span>
+        <span class="c1"># Previous code, kept for comparison :</span>
+        <span class="c1"># stripIndex = 0  # for now enforce this, o/w below would be more complicated</span>
+        <span class="c1">#</span>
+        <span class="c1"># previousNmrResidue = nmrResidue.previousNmrResidue</span>
+        <span class="c1"># nextNmrResidue = nmrResidue.nextNmrResidue</span>
+        <span class="c1"># minNumStrips = 1</span>
+        <span class="c1"># if previousNmrResidue:</span>
+        <span class="c1">#   minNumStrips += 1</span>
+        <span class="c1"># if nextNmrResidue:</span>
+        <span class="c1">#   minNumStrips += 1</span>
+        <span class="c1">#</span>
+        <span class="c1"># # showing sequential strips</span>
+        <span class="c1"># while len(display.strips) &lt; minNumStrips:</span>
+        <span class="c1">#     display.addStrip()</span>
+        <span class="c1">#</span>
+        <span class="c1"># # display the previousNmrResidue if not None</span>
+        <span class="c1"># if previousNmrResidue is not None:</span>
+        <span class="c1">#   navigateToNmrAtomsInStrip(display.strips[stripIndex], previousNmrResidue.nmrAtoms,</span>
+        <span class="c1">#                             widths=None, markPositions=False, setNmrResidueLabel=True)</span>
+        <span class="c1">#   strips.append(display.strips[stripIndex])</span>
+        <span class="c1">#   stripIndex += 1</span>
+        <span class="c1">#</span>
+        <span class="c1"># if nmrResidue is not None: # this better be true or would hit Exception long before you get here</span>
+        <span class="c1">#   navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,</span>
+        <span class="c1">#                             widths=None, markPositions=markPositions, setNmrResidueLabel=True)</span>
+        <span class="c1">#   strips.append(display.strips[stripIndex])</span>
+        <span class="c1">#   stripIndex += 1</span>
+        <span class="c1">#</span>
+        <span class="c1"># # display the nextNmrResidue if not None</span>
+        <span class="c1"># if nextNmrResidue is not None:</span>
+        <span class="c1">#   navigateToNmrAtomsInStrip(display.strips[stripIndex], nextNmrResidue.nmrAtoms,</span>
+        <span class="c1">#                             widths=None, markPositions=False, setNmrResidueLabel=True)</span>
+        <span class="c1">#   strips.append(display.strips[stripIndex]) now enforce this, o/w below would be more complicated</span>
 
-    <span class="n">stripCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">)</span>
-    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">stripCount</span><span class="p">:</span>
-        <span class="n">display</span><span class="o">.</span><span class="n">addStrip</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripCount</span><span class="p">:]:</span>
-      <span class="n">display</span><span class="o">.</span><span class="n">removeStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">)</span>
-    <span class="n">strips</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span>
+        <span class="c1"># show the three connected nmrResidues in the strip</span>
+        <span class="c1"># but always show the end three if connected and the strip long enough</span>
 
-    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">nr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">):</span>
-      <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strips</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">nr</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
-                                <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">allNmrResidues</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_getAllConnectedList</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">allNmrResidues</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">allNmrResidues</span>  <span class="c1"># display those that we have</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nmrMid</span> <span class="o">=</span> <span class="n">allNmrResidues</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>  <span class="c1"># get the index of the required element</span>
+            <span class="n">nmrMid</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">nmrMid</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">allNmrResidues</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">allNmrResidues</span><span class="p">[</span><span class="n">nmrMid</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span><span class="n">nmrMid</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
 
-  <span class="k">else</span><span class="p">:</span>
-    <span class="c1"># not showing sequential strips</span>
-    <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">],</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
-                              <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="n">markPositions</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">])</span>
+        <span class="c1"># nmrResidues = []</span>
+        <span class="c1"># previousNmrResidue = nmrResidue.previousNmrResidue</span>
+        <span class="c1"># if previousNmrResidue:</span>
+        <span class="c1">#   nmrResidues.append(previousNmrResidue)</span>
+        <span class="c1"># nmrResidues.append(nmrResidue)</span>
+        <span class="c1"># nextNmrResidue = nmrResidue.nextNmrResidue</span>
+        <span class="c1"># if nextNmrResidue:</span>
+        <span class="c1">#   nmrResidues.append(nextNmrResidue)</span>
 
-  <span class="k">return</span> <span class="n">strips</span></div>
+        <span class="n">stripCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">stripCount</span><span class="p">:</span>
+            <span class="n">display</span><span class="o">.</span><span class="n">addStrip</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripCount</span><span class="p">:]:</span>
+            <span class="n">display</span><span class="o">.</span><span class="n">removeStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">)</span>
+        <span class="n">strips</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span>
 
+        <span class="c1"># widths = [&#39;default&#39;] * len(display.strips)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">nr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">):</span>
+            <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strips</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">nr</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
+                                      <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="n">markPositions</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="c1"># add connection tags to start/end sequential strips - may later allow insertion of nmrResidues</span>
+            <span class="k">if</span> <span class="n">allNmrResidues</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># enable the left arrow</span>
+                <span class="n">strips</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&lt;&lt;&lt;&#39;</span><span class="p">)</span>
+                <span class="n">strips</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelObject</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">nr</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">allNmrResidues</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nr</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">allNmrResidues</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">strips</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&gt;&gt;&gt;&#39;</span><span class="p">)</span>
+                <span class="n">strips</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelObject</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">nr</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># not showing sequential strips</span>
+        <span class="c1"># widths = [&#39;default&#39;] * len(display.strips)</span>
+        <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">display</span><span class="o">.</span><span class="n">removeStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">)</span>
+        <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">],</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span>
+                                  <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="n">markPositions</span><span class="p">,</span> <span class="n">setNmrResidueLabel</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">strips</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">stripIndex</span><span class="p">])</span>
+
+        <span class="c1"># add connection tags to non-sequential strips</span>
+        <span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&lt;&lt;&lt;&#39;</span><span class="p">)</span>
+        <span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelText</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&gt;&gt;&gt;&#39;</span><span class="p">)</span>
+        <span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">setLabelObject</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">nmrResidue</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">strips</span></div>
 </pre></div>
 
           </div>

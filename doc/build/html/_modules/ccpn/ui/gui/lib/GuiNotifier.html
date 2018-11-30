@@ -66,250 +66,262 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan &amp; Geerten W Vuister&quot;</span><span class="p">)</span>
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:42 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Geerten Vuister $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-18 15:19:30 +0100 (Tue, April 18, 2017) $&quot;</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">NotifierABC</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+
 <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="skip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.GuiNotifier.skip">[docs]</a><span class="k">def</span> <span class="nf">skip</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-  <span class="s2">&quot;Do nothing&quot;</span>
-  <span class="k">pass</span></div>
+    <span class="s2">&quot;Do nothing&quot;</span>
+    <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="GuiNotifier"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.GuiNotifier.GuiNotifier">[docs]</a><span class="k">class</span> <span class="nc">GuiNotifier</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">   GuiNotifier class:</span>
-
-<span class="sd">  triggers callback function with signature:  callback(callbackDict [, *args] [, **kwargs])</span>
-
-<span class="sd">  ____________________________________________________________________________________________________________________</span>
-
-<span class="sd">  trigger             targetName           callbackDict keys          Notes</span>
-<span class="sd">  ____________________________________________________________________________________________________________________</span>
-
-<span class="sd">  Notifier.DROPEVENT  [dropTargets]         theObject,targetName      theObject should inherit from QtGui.QWidget and </span>
-<span class="sd">                                                                      be droppable</span>
-<span class="sd">                                            trigger, notifier,        targetName: optional dropTargets to filter for</span>
-<span class="sd">                                            event, isCcpnJson,        before callback (None to skip, defined in DropBase)</span>
-<span class="sd">                                            [dropTargets]</span>
-<span class="sd">                                            </span>
-
-<span class="sd">  dropTargets: keywords defining type of dropped objects: currently implemented: &#39;urls&#39;, &#39;text&#39;, &#39;pids&#39;</span>
-<span class="sd">  </span>
-<span class="sd">  Implemention:</span>
-
-<span class="sd">    The callback provides a dict with several key, value pairs and optional arguments and/or keyword arguments if</span>
-<span class="sd">    defined in the instantiation of the Notifier object. (idea following the Traitlets concept).</span>
-<span class="sd">    Note that this dict also contains a reference to the GuiNotifier object itself; this way it can be used </span>
-<span class="sd">    to pass-on additional implementation specfic information to the callback function.</span>
-<span class="sd">    </span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">_currentIndex</span> <span class="o">=</span> <span class="mi">0</span>
-
-  <span class="c1"># Trigger keywords</span>
-  <span class="n">DROPEVENT</span> <span class="o">=</span> <span class="s1">&#39;dropEvent&#39;</span>
-  <span class="n">_triggerKeywords</span> <span class="o">=</span> <span class="p">(</span><span class="n">DROPEVENT</span> <span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">:</span><span class="n">Any</span><span class="p">,</span> <span class="n">triggers</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span> <span class="n">targetName</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="GuiNotifier"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.GuiNotifier.GuiNotifier">[docs]</a><span class="k">class</span> <span class="nc">GuiNotifier</span><span class="p">(</span><span class="n">NotifierABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create GuiNotifier object; </span>
+<span class="sd">     GuiNotifier class:</span>
 
-<span class="sd">    :param theObject: valid V3 core object or current object to watch</span>
-<span class="sd">    :param triggers: list of trigger keywords callback</span>
-<span class="sd">    :param targetName: optional list of dropTargets or None</span>
-<span class="sd">    :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])</span>
-<span class="sd">    :param *args: optional arguments to callback</span>
-<span class="sd">    :param **kwargs: optional keyword,value arguments to callback</span>
+<span class="sd">    triggers callback function with signature:  callback(callbackDict [, *args] [, **kwargs])</span>
+
+<span class="sd">    ____________________________________________________________________________________________________________________</span>
+
+<span class="sd">    trigger             targetName           callbackDict keys          Notes</span>
+<span class="sd">    ____________________________________________________________________________________________________________________</span>
+
+<span class="sd">    Notifier.DROPEVENT  [dropTargets]         theObject,                theObject should inherit from QtWidgets.QWidget</span>
+<span class="sd">                                                                        and be droppable</span>
+<span class="sd">                                              targetName                targetName: optional dropTargets to filter for</span>
+<span class="sd">                                                                        before callback (None to skip), as defined in</span>
+<span class="sd">                                                                        DropBase</span>
+<span class="sd">                                              trigger,</span>
+<span class="sd">                                              notifier,</span>
+<span class="sd">                                              event, isCcpnJson,</span>
+<span class="sd">                                              [dropTargets]</span>
+
+
+<span class="sd">    dropTargets: keywords defining type of dropped objects: currently implemented: &#39;urls&#39;, &#39;text&#39;, &#39;pids&#39; (see DropBase)</span>
+
+<span class="sd">    Implemention:</span>
+
+<span class="sd">      The callback provides a dict with several key, value pairs and optional arguments and/or keyword</span>
+<span class="sd">      arguments if defined in the instantiation of the Notifier object. (idea following the Traitlets concept).</span>
+<span class="sd">      Note that this dict also contains a reference to the GuiNotifier object itself; this way it can be used</span>
+<span class="sd">      to pass-on additional implementation specfic information to the callback function.</span>
+
+<span class="sd">      On Intialisation, the GuiNotifier instance sets the appropriate callback functions of the widget,</span>
+<span class="sd">      as defined in DropBase, from which each Ccpn-Widget derives.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># some sanity checks</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Invalid object (</span><span class="si">%r</span><span class="s1">), expected object of type QWidget&#39;</span> <span class="o">%</span> <span class="n">theObject</span><span class="p">)</span>
+    <span class="c1"># Trigger keywords</span>
+    <span class="n">DROPEVENT</span> <span class="o">=</span> <span class="s1">&#39;dropEvent&#39;</span>
+    <span class="n">ENTEREVENT</span> <span class="o">=</span> <span class="s1">&#39;enterEvent&#39;</span>
+    <span class="n">DRAGMOVEEVENT</span> <span class="o">=</span> <span class="s1">&#39;dragMoveEvent&#39;</span>
+    <span class="n">_triggerKeywords</span> <span class="o">=</span> <span class="p">(</span><span class="n">DROPEVENT</span><span class="p">,</span> <span class="n">ENTEREVENT</span><span class="p">,</span> <span class="n">DRAGMOVEEVENT</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">triggers</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">triggers</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">triggers</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> \
-         <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">triggers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Invalid trigger (</span><span class="si">%r</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">triggers</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theObject</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">triggers</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">targetName</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+                       <span class="n">callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create GuiNotifier object;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">_currentIndex</span>
-    <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">_currentIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="sd">        :param theObject: Widget to watch</span>
+<span class="sd">        :param triggers: list of trigger keywords callback; i.e. (DROPEVENT, ENTEREVENT, DRAGMOVEEVENT)</span>
+<span class="sd">        :param targetName: optional list of dropTargets (URLS, TEXT, PIDS, IDS) or None</span>
+<span class="sd">        :param callback: callback function with signature: callback(callbackDict [, *args] [, **kwargs])</span>
+<span class="sd">        :param debug: set debug</span>
+<span class="sd">        :param **kwargs: optional keyword,value arguments to callback</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">theObject</span><span class="o">=</span><span class="n">theObject</span><span class="p">,</span> <span class="n">triggers</span><span class="o">=</span><span class="n">triggers</span><span class="p">,</span> <span class="n">targetName</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+                         <span class="n">callback</span><span class="o">=</span><span class="n">callback</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                         <span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span> <span class="o">=</span> <span class="n">theObject</span> <span class="c1"># The object we are monitoring</span>
+        <span class="c1"># some sanity checks</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Invalid object (</span><span class="si">%r</span><span class="s1">), expected object of type QWidget&#39;</span> <span class="o">%</span> <span class="n">theObject</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_notifiers</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of tuples defining Notifier call signature; used for __str__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># list of tuples needed for unregistering</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of tuples needed for unregistering</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="c1"># register the callbacks</span>
+        <span class="k">for</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_triggers</span><span class="p">:</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span> <span class="o">=</span> <span class="bp">False</span> <span class="c1"># ability to report on individual instances</span>
+            <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">:</span>
 
-    <span class="c1"># register the callbacks</span>
-    <span class="k">for</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="n">triggers</span><span class="p">:</span>
+                <span class="c1"># if not self._theObject.acceptDrops():</span>
+                <span class="c1">#     raise RuntimeError(&#39;GuiNotifier.__init__: Widget &quot;%s&quot; does not accept drops&#39; % self._theObject)</span>
 
-      <span class="k">if</span> <span class="n">trigger</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">_triggerKeywords</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;GuiNotifier.__init__: invalid trigger &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">trigger</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">targetName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targetName</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DropBase</span><span class="o">.</span><span class="n">_dropTargets</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;GuiNotifier.__init__: invalid dropTarget &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">target</span><span class="p">))</span>
 
-      <span class="k">elif</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">:</span>
+                <span class="n">notifier</span> <span class="o">=</span> <span class="p">(</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">setDropEventCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="o">=</span> <span class="bp">True</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">acceptDrops</span><span class="p">():</span>
-          <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;GuiNotifier.__init__: Widget &quot;</span><span class="si">%s</span><span class="s1">&quot; does not accept drops&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">ENTEREVENT</span><span class="p">:</span>
+                <span class="n">notifier</span> <span class="o">=</span> <span class="p">(</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">setDragEnterEventCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="o">=</span> <span class="bp">True</span>
 
-        <span class="k">if</span> <span class="n">targetName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targetName</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DropBase</span><span class="o">.</span><span class="n">_dropTargets</span><span class="p">:</span>
-              <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;GuiNotifier.__init__: invalid dropTarget &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">target</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DRAGMOVEEVENT</span><span class="p">:</span>
+                <span class="n">notifier</span> <span class="o">=</span> <span class="p">(</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">setDragMoveEventCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span> <span class="o">=</span> <span class="bp">True</span>
 
-        <span class="n">notifier</span> <span class="o">=</span> <span class="p">(</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_notifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notifier</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">setDropEventCallback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="o">=</span><span class="n">notifier</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span><span class="p">))</span> <span class="c1"># for now a duplicate, but we may need this late</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRegistered</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s1">&#39;GuiNotifier.__init__: no notifiers intialised for theObject=</span><span class="si">%s</span><span class="s1">, targetName=</span><span class="si">%r</span><span class="s1">, triggers=</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> \
+                                 <span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">triggers</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; registered </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_notifiers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s1">&#39;GuiNotifier.__init__: no notifiers intialised for theObject=</span><span class="si">%s</span><span class="s1">, targetName=</span><span class="si">%r</span><span class="s1">, triggers=</span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> \
-                         <span class="p">(</span><span class="n">theObject</span><span class="p">,</span> <span class="n">targetName</span><span class="p">,</span> <span class="n">triggers</span><span class="p">))</span>
+<div class="viewcode-block" id="GuiNotifier.unRegister"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.GuiNotifier.GuiNotifier.unRegister">[docs]</a>    <span class="k">def</span> <span class="nf">unRegister</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        unregister the notifiers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRegistered</span><span class="p">():</span>
+            <span class="k">return</span>
 
-<div class="viewcode-block" id="GuiNotifier.unRegister"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.GuiNotifier.GuiNotifier.unRegister">[docs]</a>  <span class="k">def</span> <span class="nf">unRegister</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    unregister the notifiers</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">setDropEventCallback</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_notifiers</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span> <span class="o">=</span> <span class="p">[]</span></div>
+        <span class="k">for</span> <span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unregister</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">setDropEventCallback</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">ENTEREVENT</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">setDragEnterEventCallback</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DRAGMOVEEVENT</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="o">.</span><span class="n">setDragMoveEventCallback</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GuiNotifier.setDebug"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.GuiNotifier.GuiNotifier.setDebug">[docs]</a>  <span class="k">def</span> <span class="nf">setDebug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">:</span><span class="nb">bool</span><span class="p">):</span>
-    <span class="s2">&quot;Set debug output on/off&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span> <span class="o">=</span> <span class="n">flag</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unRegister</span><span class="p">()</span> <span class="c1"># the end as it clears all attributes</span></div>
 
-  <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">notifier</span><span class="p">:</span><span class="nb">tuple</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    wrapper, accomodating the different triggers before firing the callback</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span> <span class="o">=</span> <span class="n">notifier</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">notifier</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        wrapper, accommodating the different triggers before firing the callback</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isRegistered</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Trigering unregistered notifier </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span>
 
-    <span class="c1"># DROPEVENT</span>
-    <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">:</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; GuiNotifier (</span><span class="si">%d</span><span class="s1">): obj=</span><span class="si">%s</span><span class="s1">  callback for </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">: data=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> \
-                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="p">,</span> <span class="n">notifier</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-                    <span class="p">)</span>
-      <span class="c1"># optionally filter for targetName</span>
-      <span class="n">skip</span> <span class="o">=</span> <span class="bp">False</span>
-      <span class="k">if</span> <span class="n">targetName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">skip</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targetName</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isBlanked</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">trigger</span><span class="p">,</span> <span class="n">targetName</span> <span class="o">=</span> <span class="n">notifier</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; Notifier.__call__: </span><span class="si">%s</span><span class="s1"> </span><span class="se">\n</span><span class="s1">--&gt; notifier=</span><span class="si">%s</span><span class="s1"> data=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> \
+                             <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># DROPEVENT</span>
+        <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="n">GuiNotifier</span><span class="o">.</span><span class="n">DROPEVENT</span><span class="p">:</span>
+            <span class="c1"># optionally filter for targetName</span>
             <span class="n">skip</span> <span class="o">=</span> <span class="bp">False</span>
-            <span class="k">break</span>
-      <span class="k">if</span> <span class="n">skip</span><span class="p">:</span> <span class="k">return</span>
+            <span class="k">if</span> <span class="n">targetName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">skip</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targetName</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">skip</span> <span class="o">=</span> <span class="bp">False</span>
+                        <span class="k">break</span>
+            <span class="k">if</span> <span class="n">skip</span><span class="p">:</span> <span class="k">return</span>
 
-      <span class="n">callbackDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-        <span class="n">notifier</span> <span class="o">=</span> <span class="bp">self</span><span class="p">,</span>
-        <span class="n">trigger</span> <span class="o">=</span> <span class="n">trigger</span><span class="p">,</span>
-        <span class="n">theObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="p">,</span>
-        <span class="n">targetName</span> <span class="o">=</span> <span class="n">targetName</span><span class="p">,</span>
-      <span class="p">)</span>
-      <span class="n">callbackDict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">callbackDict</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
-
-    <span class="k">return</span>
-
-  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">return</span> <span class="s1">&#39;&lt;GuiNotifier (</span><span class="si">%d</span><span class="s1">): theObject=</span><span class="si">%s</span><span class="s1">, notifiers=</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> \
-           <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notifiers</span><span class="p">)</span></div>
+        <span class="n">callbackDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">notifier</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">trigger</span><span class="o">=</span><span class="n">trigger</span><span class="p">,</span>
+                <span class="n">theObject</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_theObject</span><span class="p">,</span>
+                <span class="n">targetName</span><span class="o">=</span><span class="n">targetName</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="n">callbackDict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">callbackDict</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+        <span class="k">return</span></div>
 
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
-  <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
-
-  <span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">pyqtSlot</span>
-
-
-  <span class="k">class</span> <span class="nc">MyWidget</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
-
-    <span class="n">buttonPressed1</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="n">buttonPressed2</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-      <span class="nb">super</span><span class="p">(</span><span class="n">MyWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">textColour</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="s1">&#39;18&#39;</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Button-&#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pressed</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_pressed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-      <span class="n">bText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">button</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
-      <span class="k">print</span><span class="p">(</span><span class="n">bText</span> <span class="o">+</span> <span class="s1">&#39; was pressed&#39;</span><span class="p">)</span>
-      <span class="c1"># str signal</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">buttonPressed1</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">bText</span><span class="p">)</span>
-      <span class="c1"># dict signal</span>
-      <span class="n">bDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span><span class="n">bText</span><span class="p">}</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">buttonPressed2</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">bDict</span><span class="p">)</span>
-
-    <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">_receivedSignal1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
-      <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; received signal1:&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-
-    <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">_receivedSignal2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDict</span><span class="p">):</span>
-      <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; received signal2:&#39;</span><span class="p">,</span> <span class="n">aDict</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">pyqtSlot</span>
 
 
-  <span class="k">class</span> <span class="nc">TestPopup</span><span class="p">(</span><span class="n">BasePopup</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
-      <span class="n">mainWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-      <span class="n">widget1</span> <span class="o">=</span> <span class="n">MyWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Widget-1&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">bgColor</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-      <span class="n">widget2</span> <span class="o">=</span> <span class="n">MyWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Widget-2&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">bgColor</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-      <span class="c1"># connect the signals to the str variant</span>
-      <span class="n">widget1</span><span class="o">.</span><span class="n">buttonPressed1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">widget2</span><span class="o">.</span><span class="n">_receivedSignal1</span><span class="p">)</span> <span class="c1"># widget2 listens to widget1.buttonPressed1 signal</span>
-      <span class="n">widget2</span><span class="o">.</span><span class="n">buttonPressed1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">widget1</span><span class="o">.</span><span class="n">_receivedSignal1</span><span class="p">)</span> <span class="c1"># widget1 listens to widget1.buttonPressed1 signal</span>
-      <span class="c1"># connect the signals to the dict variant</span>
-      <span class="n">widget1</span><span class="o">.</span><span class="n">buttonPressed2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">widget2</span><span class="o">.</span><span class="n">_receivedSignal2</span><span class="p">)</span> <span class="c1"># widget2 listens to widget1.buttonPressed2 signal</span>
-      <span class="n">widget2</span><span class="o">.</span><span class="n">buttonPressed2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">widget1</span><span class="o">.</span><span class="n">_receivedSignal2</span><span class="p">)</span> <span class="c1"># widget1 listens to widget1.buttonPressed2 signal</span>
+    <span class="k">class</span> <span class="nc">MyWidget</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+        <span class="n">buttonPressed1</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="n">buttonPressed2</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">MyWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">textColour</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">textSize</span><span class="o">=</span><span class="s1">&#39;18&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Button-&#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pressed</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_pressed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">bText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">button</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">bText</span> <span class="o">+</span> <span class="s1">&#39; was pressed&#39;</span><span class="p">)</span>
+            <span class="c1"># str signal</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buttonPressed1</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">bText</span><span class="p">)</span>
+            <span class="c1"># dict signal</span>
+            <span class="n">bDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">bText</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buttonPressed2</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">bDict</span><span class="p">)</span>
+
+        <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">_receivedSignal1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; received signal1:&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+        <span class="nd">@pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">_receivedSignal2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aDict</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; received signal2:&#39;</span><span class="p">,</span> <span class="n">aDict</span><span class="p">)</span>
 
 
-  <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
-  <span class="n">popup</span> <span class="o">=</span> <span class="n">TestPopup</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Testing slots and signals&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-  <span class="n">popup</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
-  <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="k">class</span> <span class="nc">TestPopup</span><span class="p">(</span><span class="n">BasePopup</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+            <span class="n">mainWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">widget1</span> <span class="o">=</span> <span class="n">MyWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Widget-1&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">bgColor</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">widget2</span> <span class="o">=</span> <span class="n">MyWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Widget-2&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">bgColor</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="c1"># connect the signals to the str variant</span>
+            <span class="n">widget1</span><span class="o">.</span><span class="n">buttonPressed1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">widget2</span><span class="o">.</span><span class="n">_receivedSignal1</span><span class="p">)</span>  <span class="c1"># widget2 listens to widget1.buttonPressed1 signal</span>
+            <span class="n">widget2</span><span class="o">.</span><span class="n">buttonPressed1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">widget1</span><span class="o">.</span><span class="n">_receivedSignal1</span><span class="p">)</span>  <span class="c1"># widget1 listens to widget1.buttonPressed1 signal</span>
+            <span class="c1"># connect the signals to the dict variant</span>
+            <span class="n">widget1</span><span class="o">.</span><span class="n">buttonPressed2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">widget2</span><span class="o">.</span><span class="n">_receivedSignal2</span><span class="p">)</span>  <span class="c1"># widget2 listens to widget1.buttonPressed2 signal</span>
+            <span class="n">widget2</span><span class="o">.</span><span class="n">buttonPressed2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">widget1</span><span class="o">.</span><span class="n">_receivedSignal2</span><span class="p">)</span>  <span class="c1"># widget1 listens to widget1.buttonPressed2 signal</span>
+
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">TestApplication</span><span class="p">()</span>
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">TestPopup</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Testing slots and signals&#39;</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 
           </div>

@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:39 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -73,15 +73,17 @@
 
 
 <span class="c1">#### GUI IMPORTS</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span> <span class="p">,</span> <span class="n">_getWidgetByAtt</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span><span class="p">,</span> <span class="n">_getWidgetByAtt</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LinearRegionsPlot</span> <span class="kn">import</span> <span class="n">TargetButtonSpinBoxes</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GLLinearRegionsPlot</span> <span class="kn">import</span> <span class="n">GLTargetButtonSpinBoxes</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
 
 <span class="c1">#### NON GUI IMPORTS</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.Pipe</span> <span class="kn">import</span> <span class="n">SpectraPipe</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.SpectrumLib</span> <span class="kn">import</span> <span class="n">_estimateNoiseLevel1D</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.SpectrumLib</span> <span class="kn">import</span> <span class="n">_oldEstimateNoiseLevel1D</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
 
 <span class="c1">########################################################################################################################</span>
 <span class="c1">###   Attributes:</span>
@@ -92,7 +94,7 @@
 <span class="n">NoiseThreshold</span> <span class="o">=</span> <span class="s1">&#39;Noise_Threshold&#39;</span>
 <span class="n">EstimateNoiseThreshold</span> <span class="o">=</span> <span class="s1">&#39;Estimate_Noise_Threshold&#39;</span>
 <span class="n">DefaultEstimateNoiseThreshold</span> <span class="o">=</span> <span class="bp">False</span>
-<span class="n">DefaultNoiseThreshold</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">DefaultNoiseThreshold</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -100,9 +102,9 @@
 <span class="c1">########################################################################################################################</span>
 
 <span class="k">def</span> <span class="nf">_getNoiseThreshold</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-  <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">_estimateNoiseLevel1D</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="n">factor</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">positions</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">intensities</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_oldEstimateNoiseLevel1D</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="n">factor</span><span class="p">)</span>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -110,39 +112,36 @@
 <span class="c1">########################################################################################################################</span>
 
 
-
 <div class="viewcode-block" id="NoiseThresholdGuiPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdGuiPipe">[docs]</a><span class="k">class</span> <span class="nc">NoiseThresholdGuiPipe</span><span class="p">(</span><span class="n">GuiPipe</span><span class="p">):</span>
+    <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NoiseThresholdGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>   <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">NoiseThresholdGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimateNoiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">,</span>
+                <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="n">DefaultEstimateNoiseThreshold</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_manageButtons</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">estimateNoiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">,</span>
-            <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="n">DefaultEstimateNoiseThreshold</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_manageButtons</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">NoiseThreshold</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NoiseThreshold</span><span class="p">,</span> <span class="n">GLTargetButtonSpinBoxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                                                              <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manageButtons</span><span class="p">()</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">NoiseThreshold</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NoiseThreshold</span><span class="p">,</span> <span class="n">TargetButtonSpinBoxes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span>
-                                                        <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_manageButtons</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_manageButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">checkBox</span> <span class="o">=</span> <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">)</span>
+        <span class="n">noiseThreshold</span> <span class="o">=</span> <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NoiseThreshold</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+            <span class="n">noiseThreshold</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">noiseThreshold</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_manageButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">checkBox</span> <span class="o">=</span> <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EstimateNoiseThreshold</span><span class="p">)</span>
-    <span class="n">noiseThreshold</span> <span class="o">=</span> <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NoiseThreshold</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">checkBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-      <span class="n">noiseThreshold</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">noiseThreshold</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">_closeBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s1">&#39;remove the lines from plotwidget if any&#39;</span>
-    <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NoiseThreshold</span><span class="p">)</span><span class="o">.</span><span class="n">_turnOffPositionPicking</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">closeBox</span><span class="p">()</span></div>
-
+    <span class="k">def</span> <span class="nf">_closeBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s1">&#39;remove the lines from plotwidget if any&#39;</span>
+        <span class="n">_getWidgetByAtt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NoiseThreshold</span><span class="p">)</span><span class="o">.</span><span class="n">_turnOffPositionPicking</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeBox</span><span class="p">()</span></div>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -150,43 +149,37 @@
 <span class="c1">########################################################################################################################</span>
 
 
-
-
 <div class="viewcode-block" id="NoiseThresholdPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe">[docs]</a><span class="k">class</span> <span class="nc">NoiseThresholdPipe</span><span class="p">(</span><span class="n">SpectraPipe</span><span class="p">):</span>
+    <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">NoiseThresholdGuiPipe</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">NoiseThresholdGuiPipe</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">EstimateNoiseThreshold</span><span class="p">:</span> <span class="n">DefaultEstimateNoiseThreshold</span><span class="p">,</span>
+        <span class="n">NoiseThreshold</span><span class="p">:</span> <span class="n">DefaultNoiseThreshold</span>
+        <span class="p">}</span>
 
-  <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-             <span class="n">EstimateNoiseThreshold</span> <span class="p">:</span> <span class="n">DefaultEstimateNoiseThreshold</span><span class="p">,</span>
-             <span class="n">NoiseThreshold</span><span class="p">:</span> <span class="n">DefaultNoiseThreshold</span>
-            <span class="p">}</span>
+<div class="viewcode-block" id="NoiseThresholdPipe.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        For Now this pipe is a special case because it doesn&#39;t return a new inputData for the next pipe, but set</span>
+<span class="sd">        _kwargs in the pipeline and will be available for the next pipes they might need more then once.</span>
+<span class="sd">        If this is run twice, the pipeline will use only the last set.</span>
+<span class="sd">        Spectra is not really needed for this pipe. But is essential for the base class pipe.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="NoiseThresholdPipe.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.NoiseThresholdPipe.NoiseThresholdPipe.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    For Now this pipe is a special case because it doesn&#39;t return a new inputData for the next pipe, but set</span>
-<span class="sd">    _kwargs in the pipeline and will be available for the next pipes they might need more then once.</span>
-<span class="sd">    If this is run twice, the pipeline will use only the last set.</span>
-<span class="sd">    Spectra is not really needed for this pipe. But is essential for the base class pipe.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">EstimateNoiseThreshold</span><span class="p">]:</span>
+                    <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">_getNoiseThreshold</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">NoiseThreshold</span><span class="p">:</span> <span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span><span class="p">,</span> <span class="o">-</span><span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span><span class="p">]})</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">NoiseThreshold</span><span class="p">])</span>
 
-    <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">EstimateNoiseThreshold</span><span class="p">]:</span>
-          <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">_getNoiseThreshold</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">NoiseThreshold</span><span class="p">:[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span><span class="p">,</span><span class="o">-</span><span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span><span class="p">]})</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">spectrum</span><span class="o">.</span><span class="n">noiseLevel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">NoiseThreshold</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
 
-      <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">spectra</span></div></div>
-
+        <span class="k">return</span> <span class="n">spectra</span></div></div>
 
 
-<span class="n">NoiseThresholdPipe</span><span class="o">.</span><span class="n">register</span><span class="p">()</span> <span class="c1"># Registers the pipe in the pipeline</span>
-
-
+<span class="n">NoiseThresholdPipe</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>  <span class="c1"># Registers the pipe in the pipeline</span>
 </pre></div>
 
           </div>

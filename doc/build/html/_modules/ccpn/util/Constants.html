@@ -59,26 +59,28 @@
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
+
 <span class="kn">import</span> <span class="nn">re</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="n">AXIS_MATCHATOMTYPE</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">AXIS_FULLATOMNAME</span> <span class="o">=</span> <span class="mi">1</span>
 
 <span class="n">POSINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Infinity&#39;</span><span class="p">)</span>
 <span class="n">NEGINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-Infinity&#39;</span><span class="p">)</span>
@@ -135,11 +137,11 @@
 <span class="p">}</span>
 
 <span class="c1"># Isotope-dependent assignment tolerances (in ppm)</span>
-<span class="n">defaultAssignmentTolerance</span> <span class="o">=</span> <span class="mf">0.02</span>
+<span class="n">defaultAssignmentTolerance</span> <span class="o">=</span> <span class="mf">0.03</span>
 <span class="n">isotope2Tolerance</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">&#39;1H&#39;</span><span class="p">:</span><span class="mf">0.02</span><span class="p">,</span>
-  <span class="s1">&#39;13C&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span>
-  <span class="s1">&#39;15N&#39;</span><span class="p">:</span><span class="mf">0.2</span><span class="p">,</span>
+  <span class="s1">&#39;1H&#39;</span><span class="p">:</span><span class="mf">0.03</span><span class="p">,</span>
+  <span class="s1">&#39;13C&#39;</span><span class="p">:</span><span class="mf">0.4</span><span class="p">,</span>
+  <span class="s1">&#39;15N&#39;</span><span class="p">:</span><span class="mf">0.4</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># Chosen to be 1) stable. 2) NMR-active, 3)Spin 1/2, 4) abundant</span>
@@ -147,6 +149,7 @@
 <span class="c1"># whereas values are titlecase, as standard for isotopeCodes</span>
 <span class="n">DEFAULT_ISOTOPE_DICT</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">((</span>
   <span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;1H&#39;</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;2H&#39;</span><span class="p">),</span>
   <span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;11B&#39;</span><span class="p">),</span>
   <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;13C&#39;</span><span class="p">),</span>
   <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;15N&#39;</span><span class="p">),</span>

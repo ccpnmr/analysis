@@ -64,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:30 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -85,6 +85,27 @@
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Constants</span>
 
 
+<span class="c1">#</span>
+<span class="n">SpectrumHitPeakList</span> <span class="o">=</span> <span class="s1">&#39;SpectrumHitPeakList&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">_getReferenceLevel</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">referenceSpectrum</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">    :return:int  the hit level based on  how many experiment type the reference has appeared to be a hit.</span>
+<span class="sd">    EG. STD only -- Grade:1</span>
+<span class="sd">    EG. STD and Wlogsy -- Grade:2 etc</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">experimentTypes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">levelHit</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">spectrumHit</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumHits</span><span class="p">:</span>
+        <span class="n">linkedReferenceSpectra</span> <span class="o">=</span> <span class="n">spectrumHit</span><span class="o">.</span><span class="n">_linkedReferenceSpectra</span>
+        <span class="k">if</span> <span class="n">referenceSpectrum</span> <span class="ow">in</span> <span class="n">linkedReferenceSpectra</span><span class="p">:</span>
+            <span class="n">experimentTypes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumHit</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">experimentType</span><span class="p">)</span>
+            <span class="n">levelHit</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">experimentTypes</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">levelHit</span>
+
 <div class="viewcode-block" id="SpectrumHit"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Spectrum.SpectrumHit">[docs]</a><span class="k">class</span> <span class="nc">SpectrumHit</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Used in screening and metabolomics implementations to describe</span>
 <span class="sd">a &#39;hit&#39;, i.e. that a Substance has been found to be present (metabolomics) or active (screening) in a given</span>
@@ -92,6 +113,9 @@
 
 <span class="sd">The Substance referred to is defined by the SubsanceName attribute, which is part of the ID.</span>
 <span class="sd">For this reason SpectrumHits cannot be renamed.&quot;&quot;&quot;</span>
+
+  <span class="c1"># A spectrumHit will provide extra information for screening 1D. These are stored in _ccpnInternal as dataFrame</span>
+
 
   <span class="c1">#: Short class name, for PID.</span>
   <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;SH&#39;</span>
@@ -110,7 +134,7 @@
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiSpectrumHit</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
   <span class="c1"># link To a reference Spectrum #LM needed for screening hit analysis</span>
-  <span class="n">_referenceSpectrum</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="n">_linkedReferenceSpectra</span> <span class="o">=</span> <span class="p">[]</span>
 
   <span class="c1"># CCPN properties</span>
   <span class="nd">@property</span>
@@ -139,7 +163,7 @@
   <span class="n">spectrum</span> <span class="o">=</span> <span class="n">_parent</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">substanceName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">substanceName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Name of hit substance&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">substanceName</span>
 
@@ -225,7 +249,7 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">concentrationUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Unit of SpectrumHit.concentration, one of: %s &quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span>
+    <span class="sd">&quot;&quot;&quot;Unit of SpectrumHit.concentration, one of: %s% Constants.concentrationUnits &quot;&quot;&quot;</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">concentrationUnit</span>
     <span class="k">if</span> <span class="n">result</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">:</span>
@@ -254,7 +278,117 @@
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData (Nmr.SpectrumHit) for all SpectrumHit children of parent Spectrum&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedSpectrumHits</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedSpectrumHits</span><span class="p">()</span>
+
+
+  <span class="c1"># specific for 1d Screening</span>
+
+  <span class="k">def</span> <span class="nf">_getTotalPeakHitCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Total score calculated by sum of peak hits. Peaks are taken by the parent spectrumHit.</span>
+<span class="sd">        PeakLists where are contained the hits are and must be flagged as simulated. Default is taken the last &#39;&#39;&#39;</span>
+    <span class="n">pp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakHits</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_getTotalScore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Total score calculated by sum of peak intensities. Peaks are taken by the parent spectrum hit.</span>
+<span class="sd">    PeakList where are contained the hits are and must be flagged as simulated. Default is taken the last&#39;&#39;&#39;</span>
+    <span class="n">pp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakHits</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scoreByIntesities</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">score</span>
+
+  <span class="k">def</span> <span class="nf">_getPeakHits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; get the peaks marked as peakHits&#39;&#39;&#39;</span>
+      <span class="n">simulatedPeakLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">pl</span> <span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">peakLists</span> <span class="k">if</span> <span class="n">pl</span><span class="o">.</span><span class="n">isSimulated</span> <span class="ow">and</span> <span class="n">pl</span><span class="o">.</span><span class="n">title</span> <span class="o">==</span> <span class="n">SpectrumHitPeakList</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulatedPeakLists</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">pp</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">simulatedPeakLists</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">peaks</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+          <span class="k">return</span> <span class="n">pp</span>
+      <span class="k">else</span><span class="p">:</span>
+          <span class="k">return</span> <span class="p">[]</span>
+
+  <span class="k">def</span> <span class="nf">_getReferencePeakHits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">referencePeakList</span><span class="p">):</span>
+      <span class="n">peakHits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakHits</span><span class="p">()</span>
+      <span class="n">referencePeaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">referencePeakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">]</span>
+      <span class="n">referencePeakHits</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">peakHits</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">linkedPeak</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">_linkedPeaks</span><span class="p">:</span>
+              <span class="k">if</span> <span class="n">linkedPeak</span> <span class="ow">in</span> <span class="n">referencePeaks</span><span class="p">:</span>
+                  <span class="n">referencePeakHits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">referencePeakHits</span>
+
+  <span class="k">def</span> <span class="nf">_getDeltaPositions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">referencePeakList</span><span class="p">):</span>
+    <span class="n">deltas</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">lp</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="mi">4</span><span class="p">)</span>
+              <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakHits</span><span class="p">()</span> <span class="k">for</span> <span class="n">lp</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">_linkedPeaks</span>
+              <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">position</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">lp</span><span class="o">.</span><span class="n">position</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span>
+              <span class="k">if</span> <span class="n">lp</span> <span class="ow">in</span> <span class="n">referencePeakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">deltas</span>
+
+  <span class="k">def</span> <span class="nf">_scoreByIntesities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">):</span>
+      <span class="n">heights</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">height</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">peaks</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
+      <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">heights</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getSingleScore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">referencePeakList</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; calculate as Total score but for the single reference spectrum&#39;&#39;&#39;</span>
+      <span class="n">peakHits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getReferencePeakHits</span><span class="p">(</span><span class="n">referencePeakList</span><span class="p">)</span>
+      <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scoreByIntesities</span><span class="p">(</span><span class="n">peakHits</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">score</span>
+
+  <span class="k">def</span> <span class="nf">_getSinglePeakCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">referencePeakList</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39; calculate as Total score but for the single reference spectrum&#39;&#39;&#39;</span>
+      <span class="n">peakHits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getReferencePeakHits</span><span class="p">(</span><span class="n">referencePeakList</span><span class="p">)</span>
+      <span class="n">c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">peakHits</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">c</span>
+
+  <span class="k">def</span> <span class="nf">_getSample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">      :return: sample of the spectrumHit if any</span>
+<span class="sd">      &#39;&#39;&#39;</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sample</span>
+
+  <span class="k">def</span> <span class="nf">_getExperimentType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">      :return: experimentType of the spectrumHit parent if any</span>
+<span class="sd">      &#39;&#39;&#39;</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">experimentType</span>
+
+
+
+
+  <span class="k">def</span> <span class="nf">_getReferenceHitsSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Return reference spectra identified as hit in a particular mixture. The mixture is the spectrumHit&#39;&#39;&#39;</span>
+
+    <span class="n">peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakHits</span><span class="p">()</span> <span class="c1"># each peak hit of the spectrum. Each peak is linked to a peak belonging to the reference spectrum</span>
+    <span class="n">linkedPeaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">_linkedPeaks</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">]</span>
+    <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">lps</span> <span class="ow">in</span> <span class="n">linkedPeaks</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">lps</span><span class="p">]</span>
+    <span class="n">linkedSpectra</span> <span class="o">=</span>  <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">spectra</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_linkedReferenceSpectra</span> <span class="o">=</span> <span class="n">linkedSpectra</span>
+    <span class="k">return</span> <span class="n">linkedSpectra</span>
+
+  <span class="k">def</span> <span class="nf">_getReferencePeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">referenceSpectrum</span><span class="p">):</span>
+      <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">      :return: peakList of the reference</span>
+<span class="sd">      &#39;&#39;&#39;</span>
+
+      <span class="n">peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakHits</span><span class="p">()</span>
+      <span class="n">peakLists</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">linkedPeaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">_linkedPeaks</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">lps</span> <span class="ow">in</span> <span class="n">linkedPeaks</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">lp</span> <span class="ow">in</span> <span class="n">lps</span><span class="p">:</span>
+              <span class="k">if</span> <span class="n">lp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">peakLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lp</span><span class="o">.</span><span class="n">peakList</span><span class="p">)</span>
+      <span class="n">peakLists</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">peakLists</span><span class="p">))</span>
+      <span class="n">referencePeakList</span> <span class="o">=</span> <span class="p">[</span><span class="n">pl</span> <span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="n">peakLists</span> <span class="k">if</span> <span class="n">pl</span> <span class="ow">in</span> <span class="n">referenceSpectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">referencePeakList</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span>  <span class="n">referencePeakList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+          <span class="k">print</span><span class="p">(</span><span class="s1">&#39;ADD Warning&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_removeReference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">referenceSpectrum</span><span class="p">):</span>
+     <span class="k">pass</span></div>
 
 <span class="c1"># Connections to parents:</span>
 <span class="k">def</span> <span class="nf">_newSpectrumHit</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">,</span> <span class="n">substanceName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">pointNumber</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>

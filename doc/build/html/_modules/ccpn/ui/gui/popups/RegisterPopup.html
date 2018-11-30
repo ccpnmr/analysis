@@ -64,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:49 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -74,10 +74,12 @@
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="n">Qt</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span>
 
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
@@ -88,16 +90,18 @@
 <span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">ccpnUrl</span>
 <span class="c1">###from ccpn.ui.gui.widgets.WebView import WebViewPanel</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.Dialog</span> <span class="kn">import</span> <span class="n">CcpnDialog</span>      <span class="c1"># ejb</span>
-
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Register</span>
 
 
 <span class="n">licenseUrl</span> <span class="o">=</span> <span class="n">ccpnUrl</span> <span class="o">+</span> <span class="s1">&#39;/license&#39;</span>
+<span class="n">validEmailRegex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">r&#39;^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-_]+\.)+[A-Za-z]{2,63}$&#39;</span><span class="p">)</span>
 
-<span class="c1"># class RegisterPopup(QtGui.QDialog):</span>
+
+<span class="c1"># class RegisterPopup(QtWidgets.QDialog):</span>
 <div class="viewcode-block" id="RegisterPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.RegisterPopup.RegisterPopup">[docs]</a><span class="k">class</span> <span class="nc">RegisterPopup</span><span class="p">(</span><span class="n">CcpnDialog</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Register with CCPN&#39;</span><span class="p">,</span> <span class="n">modal</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Register with CCPN&#39;</span><span class="p">,</span> <span class="n">modal</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="n">CcpnDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">windowTitle</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
     
@@ -105,6 +109,7 @@
       <span class="n">modality</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ApplicationModal</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setWindowModality</span><span class="p">(</span><span class="n">modality</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">700</span><span class="p">,</span><span class="mi">350</span><span class="p">)</span>
 
     <span class="n">frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
 
@@ -116,15 +121,21 @@
 
     <span class="n">row</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">validateEntries</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">registrationDict</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">loadDict</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">Register</span><span class="o">.</span><span class="n">userAttributes</span><span class="p">:</span>
       <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">attr</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
       <span class="n">text</span> <span class="o">=</span> <span class="n">registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
       <span class="n">entry</span> <span class="o">=</span> <span class="n">Entry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">maxLength</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="s1">&#39;email&#39;</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">:</span>
+        <span class="n">currentBaseColour</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Base</span><span class="p">)</span>
+        <span class="n">entry</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_checkEmailValid</span><span class="p">,</span> <span class="n">entry</span><span class="p">,</span> <span class="n">currentBaseColour</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateEntries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
       <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="n">licenseFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">licenseFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span><span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
     <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">licenseCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">licenseFrame</span><span class="p">,</span>
@@ -133,7 +144,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">licenseCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
     <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">licenseFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Show License&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_showLicense</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
 
-    <span class="n">buttonFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">buttonFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span><span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
     <span class="c1">##self.licenseButton = Button(buttonFrame, &#39;Show License&#39;, callback=self.toggleLicense, grid=(0,0))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">registerButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">buttonFrame</span><span class="p">,</span> <span class="s1">&#39;Register&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_register</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">registerButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
@@ -143,44 +154,59 @@
     <span class="c1">##self.licensePanel.hide()</span>
     <span class="c1">#self.resize(300,200)</span>
 
-  <span class="k">def</span> <span class="nf">_toggledCheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_checkEmailValid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entryBox</span><span class="p">,</span> <span class="n">baseColour</span><span class="p">):</span>
+    <span class="n">palette</span> <span class="o">=</span> <span class="n">entryBox</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
+
+    <span class="n">regIn</span> <span class="o">=</span> <span class="n">entryBox</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="n">validEmail</span> <span class="o">=</span> <span class="bp">True</span> <span class="k">if</span> <span class="n">validEmailRegex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regIn</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">validEmail</span><span class="p">:</span>
+      <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Base</span><span class="p">,</span> <span class="n">baseColour</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Base</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;lightpink&#39;</span><span class="p">))</span>
+
+    <span class="n">entryBox</span><span class="o">.</span><span class="n">setPalette</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_toggledCheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">registerButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">licenseCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span>
 
   <span class="k">def</span> <span class="nf">_showLicense</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">showLicense</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">getParent</span><span class="p">()</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">showLicense</span><span class="p">()</span>
 
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  def _toggleLicense(self):</span>
-
-<span class="sd">    if self.licensePanel.isVisible():</span>
-<span class="sd">      self.licensePanel.hide()</span>
-<span class="sd">      self.resize(300,200)</span>
-<span class="sd">      self.licenseButton.setText(&#39;Show License&#39;)</span>
-<span class="sd">    else:</span>
-<span class="sd">      self.licensePanel.show()</span>
-<span class="sd">      self.resize(700,700)</span>
-<span class="sd">      self.licenseButton.setText(&#39;Hide License&#39;)</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># def _toggleLicense(self):</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if self.licensePanel.isVisible():</span>
+  <span class="c1">#     self.licensePanel.hide()</span>
+  <span class="c1">#     self.resize(300,200)</span>
+  <span class="c1">#     self.licenseButton.setText(&#39;Show License&#39;)</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     self.licensePanel.show()</span>
+  <span class="c1">#     self.resize(700,700)</span>
+  <span class="c1">#     self.licenseButton.setText(&#39;Hide License&#39;)</span>
 
   <span class="k">def</span> <span class="nf">_register</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-    <span class="n">registrationDict</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Register</span><span class="o">.</span><span class="n">userAttributes</span><span class="p">):</span>
-      <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
-      <span class="n">registrationDict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
-      
-    <span class="n">Register</span><span class="o">.</span><span class="n">setHashCode</span><span class="p">(</span><span class="n">registrationDict</span><span class="p">)</span>
-    <span class="n">Register</span><span class="o">.</span><span class="n">saveDict</span><span class="p">(</span><span class="n">registrationDict</span><span class="p">)</span>
-    <span class="n">Register</span><span class="o">.</span><span class="n">updateServer</span><span class="p">(</span><span class="n">registrationDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
-    
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isModal</span><span class="p">():</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+    <span class="n">allValid</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="bp">True</span> <span class="k">if</span> <span class="n">validEmailRegex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="k">else</span> <span class="bp">False</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateEntries</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">allValid</span><span class="p">:</span>
+      <span class="n">registrationDict</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Register</span><span class="o">.</span><span class="n">userAttributes</span><span class="p">):</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">registrationDict</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+
+      <span class="n">Register</span><span class="o">.</span><span class="n">setHashCode</span><span class="p">(</span><span class="n">registrationDict</span><span class="p">)</span>
+      <span class="n">Register</span><span class="o">.</span><span class="n">saveDict</span><span class="p">(</span><span class="n">registrationDict</span><span class="p">)</span>
+      <span class="n">Register</span><span class="o">.</span><span class="n">updateServer</span><span class="p">(</span><span class="n">registrationDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isModal</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;Please check all entries are valid&#39;</span><span class="p">)</span></div>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
   <span class="kn">import</span> <span class="nn">sys</span>
 
-  <span class="n">qtApp</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">([</span><span class="s1">&#39;Test Register&#39;</span><span class="p">])</span>
+  <span class="n">qtApp</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">([</span><span class="s1">&#39;Test Register&#39;</span><span class="p">])</span>
 
   <span class="c1">#QtCore.QCoreApplication.setApplicationName(&#39;TestRegister&#39;)</span>
   <span class="c1">#QtCore.QCoreApplication.setApplicationVersion(&#39;0.1&#39;)</span>

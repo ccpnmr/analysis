@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:26 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -81,8 +81,9 @@
 
 <span class="c1">#### NON GUI IMPORTS</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.Pipe</span> <span class="kn">import</span> <span class="n">SpectraPipe</span>
-<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.experimentAnalysis.STD</span> <span class="kn">import</span> <span class="n">_calculatePeakEffiency</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span> <span class="p">,</span> <span class="n">_debug3</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.experimentAnalysis.STD</span> <span class="kn">import</span> <span class="n">_calculatePeakEfficiency</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">_debug3</span>
+
 
 <span class="c1">########################################################################################################################</span>
 <span class="c1">###   Attributes:</span>
@@ -105,6 +106,7 @@
 <span class="c1">## PipeName</span>
 <span class="n">PipeName</span> <span class="o">=</span> <span class="s1">&#39;STD Efficiency&#39;</span>
 
+
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################      ALGORITHM       ########################################################</span>
 <span class="c1">########################################################################################################################</span>
@@ -117,30 +119,27 @@
 
 
 <div class="viewcode-block" id="STDEfficiencyGuiPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.STDefficiency.STDEfficiencyGuiPipe">[docs]</a><span class="k">class</span> <span class="nc">STDEfficiencyGuiPipe</span><span class="p">(</span><span class="n">GuiPipe</span><span class="p">):</span>
+    <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">applicationSpecificPipe</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">False</span>
-  <span class="n">applicationSpecificPipe</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">STDEfficiencyGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
 
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">hw</span><span class="o">.</span><span class="n">_addSGpulldowns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">SGVarNames</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>   <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">STDEfficiencyGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span>
+        <span class="n">minimumDistanceLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">MatchPeaksWithin</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MatchPeaksWithin</span><span class="p">,</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">DefaultMinDist</span><span class="p">,</span>
+                                                      <span class="n">step</span><span class="o">=</span><span class="n">DefaultMinDist</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
 
-    <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">hw</span><span class="o">.</span><span class="n">_addSGpulldowns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">SGVarNames</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updateWidgets</span><span class="p">()</span>
 
-    <span class="n">row</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span>
-    <span class="n">minimumDistanceLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">MatchPeaksWithin</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MatchPeaksWithin</span><span class="p">,</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">DefaultMinDist</span><span class="p">,</span>
-                                                 <span class="n">step</span><span class="o">=</span><span class="n">DefaultMinDist</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateWidgets</span><span class="p">()</span>
-
-
-  <span class="k">def</span> <span class="nf">_updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_setSpectrumGroupPullDowns</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">_updateWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setSpectrumGroupPullDowns</span><span class="p">(</span><span class="n">SGVarNames</span><span class="p">)</span></div>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -149,48 +148,44 @@
 
 
 <div class="viewcode-block" id="STDEfficiencyPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.STDefficiency.STDEfficiencyPipe">[docs]</a><span class="k">class</span> <span class="nc">STDEfficiencyPipe</span><span class="p">(</span><span class="n">SpectraPipe</span><span class="p">):</span>
+    <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">STDEfficiencyGuiPipe</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">STDEfficiencyGuiPipe</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">OffResonanceSpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;OffResonanceSpectrumGroup.pid&#39;</span><span class="p">,</span>
+        <span class="n">OnResonanceSpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;OnResonanceSpectrumGroup.pid&#39;</span><span class="p">,</span>
+        <span class="n">STDSpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;STDSpectrumGroup.pid&#39;</span><span class="p">,</span>
+        <span class="n">MatchPeaksWithin</span><span class="p">:</span> <span class="n">DefaultMinDist</span><span class="p">,</span>
+        <span class="p">}</span>
 
-  <span class="n">_kwargs</span>  <span class="o">=</span>   <span class="p">{</span>
-                <span class="n">OffResonanceSpectrumGroup</span><span class="p">:</span> <span class="s1">&#39;OffResonanceSpectrumGroup.pid&#39;</span><span class="p">,</span>
-                <span class="n">OnResonanceSpectrumGroup</span><span class="p">:</span>  <span class="s1">&#39;OnResonanceSpectrumGroup.pid&#39;</span><span class="p">,</span>
-                <span class="n">STDSpectrumGroup</span><span class="p">:</span>          <span class="s1">&#39;STDSpectrumGroup.pid&#39;</span><span class="p">,</span>
-                <span class="n">MatchPeaksWithin</span><span class="p">:</span>          <span class="n">DefaultMinDist</span><span class="p">,</span>
-               <span class="p">}</span>
+<div class="viewcode-block" id="STDEfficiencyPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.STDefficiency.STDEfficiencyPipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param spectra: inputData</span>
+<span class="sd">        :return: calculates the STD peak efficiency and stores the value in the peak.figureOfMerit.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">stdSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">STDSpectrumGroup</span><span class="p">])</span>
+        <span class="n">offResonanceSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">OffResonanceSpectrumGroup</span><span class="p">])</span>
+        <span class="n">onResonanceSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">OnResonanceSpectrumGroup</span><span class="p">])</span>
+
+        <span class="n">minimumDistance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MatchPeaksWithin</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="p">[</span><span class="n">stdSpectrumGroup</span><span class="p">,</span> <span class="n">offResonanceSpectrumGroup</span><span class="p">,</span> <span class="n">onResonanceSpectrumGroup</span><span class="p">]:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Aborted: SpectrumGroup spectra contains illegal values (None)&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stdSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">offResonanceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">onResonanceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">stdSpectrum</span><span class="p">,</span> <span class="n">offResonanceSpectrum</span><span class="p">,</span> <span class="n">onResonanceSpectrum</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">stdSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">,</span> <span class="n">offResonanceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">,</span> <span class="n">onResonanceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">):</span>
+                <span class="n">_calculatePeakEfficiency</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="p">,</span> <span class="n">onResonanceSpectrum</span><span class="p">,</span> <span class="n">offResonanceSpectrum</span><span class="p">,</span> <span class="n">n_peakList</span><span class="o">=</span><span class="n">DefaultPeakListIndex</span><span class="p">,</span>
+                                         <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Peak efficiency calculated and stored in peak &quot;figureOfMerit&quot; &#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Aborted: SpectrumGroups contain different lenght of spectra.&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="STDEfficiencyPipe.runPipe"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.pipes.html#ccpn.AnalysisScreen.pipes.STDefficiency.STDEfficiencyPipe.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    :param spectra: inputData</span>
-<span class="sd">    :return: calculates the STD peak efficiency and stores the value in the peak.figureOfMerit.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-
-    <span class="n">stdSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">STDSpectrumGroup</span><span class="p">])</span>
-    <span class="n">offResonanceSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">OffResonanceSpectrumGroup</span><span class="p">])</span>
-    <span class="n">onResonanceSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">OnResonanceSpectrumGroup</span><span class="p">])</span>
-
-    <span class="n">minimumDistance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">MatchPeaksWithin</span><span class="p">])</span>
-
-
-    <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="p">[</span><span class="n">stdSpectrumGroup</span><span class="p">,</span> <span class="n">offResonanceSpectrumGroup</span><span class="p">,</span> <span class="n">onResonanceSpectrumGroup</span><span class="p">]:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Aborted: SpectrumGroup spectra contains illegal values (None)&#39;</span><span class="p">)</span>
-      <span class="k">return</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stdSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">offResonanceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">onResonanceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">):</span>
-      <span class="k">for</span> <span class="n">stdSpectrum</span><span class="p">,</span> <span class="n">offResonanceSpectrum</span><span class="p">,</span> <span class="n">onResonanceSpectrum</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-          <span class="n">stdSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">,</span> <span class="n">offResonanceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">,</span><span class="n">onResonanceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">):</span>
-
-        <span class="n">_calculatePeakEffiency</span><span class="p">(</span><span class="n">stdSpectrum</span><span class="p">,</span> <span class="n">onResonanceSpectrum</span><span class="p">,</span> <span class="n">offResonanceSpectrum</span><span class="p">,</span> <span class="n">n_peakList</span><span class="o">=</span><span class="n">DefaultPeakListIndex</span><span class="p">,</span>
-                               <span class="n">limitRange</span><span class="o">=</span><span class="n">minimumDistance</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Peak efficiency calculated and stored in peak &quot;figureOfMerit&quot; &#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Aborted: SpectrumGroups contain different lenght of spectra.&#39;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span></div></div>
-
-<span class="n">STDEfficiencyPipe</span><span class="o">.</span><span class="n">register</span><span class="p">()</span> <span class="c1"># Registers the pipe in the pipeline</span>
-
+<span class="n">STDEfficiencyPipe</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>  <span class="c1"># Registers the pipe in the pipeline</span>
 </pre></div>
 
           </div>

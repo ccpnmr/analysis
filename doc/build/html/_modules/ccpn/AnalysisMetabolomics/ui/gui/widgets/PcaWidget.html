@@ -64,7 +64,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:24 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -75,7 +75,7 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
@@ -85,115 +85,14 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
 
-
-<span class="c1"># class PcaModule(CcpnModule, Base):</span>
-<span class="c1">#</span>
-<span class="c1">#   def __init__(self, project, **kw):</span>
-<span class="c1">#</span>
-<span class="c1">#     super(PcaModule, self)</span>
-<span class="c1">#     CcpnModule.__init__(self, name=&#39;PCA&#39;)</span>
-<span class="c1">#     Base.__init__(self, **kw)</span>
-<span class="c1">#     self.project = project</span>
-<span class="c1">#     self.mDict = MetabolomicsPersistenceDict()</span>
-<span class="c1">#</span>
-<span class="c1">#     self.decomposeLabel = Label(self, &#39;Decompose Method &#39;)</span>
-<span class="c1">#</span>
-<span class="c1">#     self.layout.addWidget(self.decomposeLabel, 0, 0, 1, 1)</span>
-<span class="c1">#     self.decomposePulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 1))</span>
-<span class="c1">#     self.decomposePulldown.setData([&#39;PCA&#39;])</span>
-<span class="c1">#     self.sourceLabel = Label(self, &#39;Source&#39;, grid=(0, 2), gridSpan=(1, 1))</span>
-<span class="c1">#     self.sourcePulldown = PulldownList(self, grid=(0, 3), gridSpan=(1, 1))</span>
-<span class="c1">#     # self.sourcePulldown.setData([group.pid for group in project.spectrumGroups])</span>
-<span class="c1">#     self.sourcePulldown.setData(list(self.mDict[&#39;Pipelines&#39;].keys()))</span>
-<span class="c1">#</span>
-<span class="c1">#     self.goButton = Button(self, &#39;GO&#39;, grid=(0, 5), gridSpan=(1, 1))</span>
-<span class="c1">#     self.goButton.clicked.connect(self.runPca)</span>
-<span class="c1">#</span>
-<span class="c1">#     self.plottingWidget = QtGui.QWidget()</span>
-<span class="c1">#     self.plottingWidgetLayout = QtGui.QGridLayout()</span>
-<span class="c1">#     self.plottingWidget.setLayout(self.plottingWidgetLayout)</span>
-<span class="c1">#</span>
-<span class="c1">#     self.layout.addWidget(self.plottingWidget, 1, 0, 4, 6)</span>
-<span class="c1">#</span>
-<span class="c1">#     self.scoresPlot = PlotWidget(self, appBase=project._appBase)</span>
-<span class="c1">#     self.scoresPlot.plotItem.axes[&#39;left&#39;][&#39;item&#39;].show()</span>
-<span class="c1">#     self.scoresPlot.plotItem.axes[&#39;right&#39;][&#39;item&#39;].hide()</span>
-<span class="c1">#     self.scoresWidget = QtGui.QWidget(self)</span>
-<span class="c1">#     self.scoresWidgetLayout = QtGui.QGridLayout()</span>
-<span class="c1">#     self.scoresWidgetLayout.addWidget(self.scoresPlot, 0, 0, 1, 7)</span>
-<span class="c1">#     self.scoresXLabel = Label(self, &#39;x &#39;)</span>
-<span class="c1">#     self.scoresXBox = PulldownList(self)</span>
-<span class="c1">#     self.scoresYLabel = Label(self, &#39;y &#39;)</span>
-<span class="c1">#     self.scoresYBox = PulldownList(self)</span>
-<span class="c1">#     self.scoresColourLabel = Label(self, &#39;Colour&#39;)</span>
-<span class="c1">#     self.scoresColourPulldown = PulldownList(self)</span>
-<span class="c1">#     self.scoresWidgetLayout.addWidget(self.scoresXLabel, 1, 0, 1, 1)</span>
-<span class="c1">#     self.scoresWidgetLayout.addWidget(self.scoresXBox, 1, 2, 1, 1)</span>
-<span class="c1">#     self.scoresWidgetLayout.addWidget(self.scoresYLabel, 1, 3, 1, 1)</span>
-<span class="c1">#     self.scoresWidgetLayout.addWidget(self.scoresYBox, 1, 4, 1, 1)</span>
-<span class="c1">#     self.scoresWidgetLayout.addWidget(self.scoresColourLabel, 1, 5, 1, 1)</span>
-<span class="c1">#     self.scoresWidgetLayout.addWidget(self.scoresColourPulldown, 1, 6, 1, 1)</span>
-<span class="c1">#     self.scoresWidget.setLayout(self.scoresWidgetLayout)</span>
-<span class="c1">#     self.plottingWidget.layout().addWidget(self.scoresWidget, 1, 0, 2, 2)</span>
-<span class="c1">#</span>
-<span class="c1">#     self.evPlot = PlotWidget(self, appBase=project._appBase)</span>
-<span class="c1">#     self.evPlot.plotItem.axes[&#39;left&#39;][&#39;item&#39;].show()</span>
-<span class="c1">#     self.evPlot.plotItem.axes[&#39;right&#39;][&#39;item&#39;].hide()</span>
-<span class="c1">#     self.evPlotWidgetLayout = QtGui.QGridLayout()</span>
-<span class="c1">#     self.evPlotWidget = QtGui.QWidget(self)</span>
-<span class="c1">#     self.evPlotXLabel = Label(self, &#39;x &#39;)</span>
-<span class="c1">#     self.evPlotXBox = PulldownList(self)</span>
-<span class="c1">#     self.evPlotXBox.setData([]) # list of text that can be used to call stuff.</span>
-<span class="c1">#     self.evPlotYLabel = Label(self, &#39;y &#39;)</span>
-<span class="c1">#     self.evPlotYBox = PulldownList(self)</span>
-<span class="c1">#     self.evPlotColourLabel = Label(self, &#39;Colour&#39;)</span>
-<span class="c1">#     self.evPlotColourPulldown = PulldownList(self)</span>
-<span class="c1">#     self.evPlotWidgetLayout.addWidget(self.evPlot, 0, 0, 1, 7)</span>
-<span class="c1">#     self.evPlotWidgetLayout.addWidget(self.evPlotXLabel, 1, 0, 1, 1)</span>
-<span class="c1">#     self.evPlotWidgetLayout.addWidget(self.evPlotXBox, 1, 2, 1, 1)</span>
-<span class="c1">#     self.evPlotWidgetLayout.addWidget(self.evPlotYLabel, 1, 3, 1, 1)</span>
-<span class="c1">#     self.evPlotWidgetLayout.addWidget(self.evPlotYBox, 1, 4, 1, 1)</span>
-<span class="c1">#     self.evPlotWidgetLayout.addWidget(self.evPlotColourLabel, 1, 5, 1, 1)</span>
-<span class="c1">#     self.evPlotWidgetLayout.addWidget(self.evPlotColourPulldown, 1, 6, 1, 1)</span>
-<span class="c1">#     self.evPlotWidget.setLayout(self.evPlotWidgetLayout)</span>
-<span class="c1">#     self.plottingWidget.layout().addWidget(self.evPlotWidget, 1, 2, 2, 2)</span>
-<span class="c1">#</span>
-<span class="c1">#   def setSpectrumDisplay(self, spectrumDisplay):</span>
-<span class="c1">#     self.spectrumDisplay = spectrumDisplay</span>
-<span class="c1">#</span>
-<span class="c1">#   def runPca(self):</span>
-<span class="c1">#     params = {&#39;method&#39;: self.decomposePulldown.currentText(),</span>
-<span class="c1">#               &#39;source&#39;: self.sourcePulldown.currentText()}</span>
-<span class="c1">#     preProcessedData = self.mDict[&#39;Pipelines&#39;][self.sourcePulldown.currentText()][&#39;output&#39;]</span>
-<span class="c1">#</span>
-<span class="c1">#     self.pca = PCA(preProcessedData)</span>
-<span class="c1">#</span>
-<span class="c1">#     scores = self.pca.scores</span>
-<span class="c1">#     xValues, yValues = &#39;PC1&#39;, &#39;PC2&#39;</span>
-<span class="c1">#     x = scores[xValues].values</span>
-<span class="c1">#     y = scores[yValues].values</span>
-<span class="c1">#     self.scoresPlot.plot(x, y, pen=None, symbol=&#39;o&#39;)</span>
-<span class="c1">#     self.scoresYLabel = yValues</span>
-<span class="c1">#</span>
-<span class="c1">#     ev = self.pca.explainedVariance</span>
-<span class="c1">#     xValues = list(range(1, 1+len(ev)))</span>
-<span class="c1">#     self.evPlot.plot(xValues, ev, symbol=&#39;o&#39;)</span>
-<span class="c1">#</span>
-<span class="c1">#     if self.spectrum:</span>
-<span class="c1">#       spectrumDisplay = self.createSpectrumDisplay(spectrum=None)</span>
-<span class="c1">#       self.setSpectrumDisplay(spectrumDisplay)</span>
-<span class="c1">#       if self.project._appBase.ui.mainWindow is not None:</span>
-<span class="c1">#         mainWindow = self.project._appBase.ui.mainWindow</span>
-<span class="c1">#       else:</span>
-<span class="c1">#         mainWindow = self.project._appBase._mainWindow</span>
-<span class="c1">#       mainWindow.moduleArea.moveModule(spectrumDisplay.module, position=&#39;bottom&#39;, neighbor=self)</span>
 
 <div class="viewcode-block" id="PcaWidget"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.widgets.html#ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget.PcaWidget">[docs]</a><span class="k">class</span> <span class="nc">PcaWidget</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">presenter</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PCA&#39;</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">presenter</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PCA&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span> <span class="o">=</span> <span class="n">presenter</span>
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">PcaSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">presenter</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pcaPlotLeft</span> <span class="o">=</span> <span class="n">PcaPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">presenter</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pcaPlotRight</span> <span class="o">=</span> <span class="n">PcaPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">presenter</span><span class="p">)</span>
@@ -205,14 +104,13 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pcaOutput</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="PcaSettings"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.widgets.html#ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget.PcaSettings">[docs]</a><span class="k">class</span> <span class="nc">PcaSettings</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="viewcode-block" id="PcaSettings"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.widgets.html#ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget.PcaSettings">[docs]</a><span class="k">class</span> <span class="nc">PcaSettings</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span> <span class="o">=</span> <span class="n">presenter</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">())</span>
-    <span class="n">column1Layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">())</span>
+    <span class="n">column1Layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">column1Layout</span><span class="p">)</span>
 
     <span class="n">column1Layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Method:&#39;</span><span class="p">))</span>
@@ -222,7 +120,7 @@
     <span class="c1"># column1Layout.addWidget(self.goButton)</span>
     <span class="n">column1Layout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
 
-    <span class="n">column2Layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="n">column2Layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">column2Layout</span><span class="p">)</span>
     <span class="n">column2Layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;1. Normalization:&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">normMethodPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">presenter</span><span class="o">.</span><span class="n">setNormalization</span><span class="p">)</span>
@@ -236,20 +134,54 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">scalingMethodPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">presenter</span><span class="o">.</span><span class="n">setScaling</span><span class="p">)</span>
     <span class="n">column2Layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scalingMethodPulldown</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Source:&#39;</span><span class="p">))</span>
+    <span class="n">spectrumGroupsLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;SpectrumGroups:&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">spectrumGroupsLabel</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupsList</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_filterBySpectrumGroups</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupsList</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">ExtendedSelection</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupsList</span><span class="o">.</span><span class="n">clearSelection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clearSpectrumGroupSelection</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupsList</span><span class="o">.</span><span class="n">setSelectContextMenu</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupsList</span><span class="p">)</span>
+
+    <span class="n">spectraLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Spectra Source:&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">spectraLabel</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">sourceList</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">presenter</span><span class="o">.</span><span class="n">setSourcesSelection</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">sourceList</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">ExtendedSelection</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sourceList</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">ExtendedSelection</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sourceList</span><span class="o">.</span><span class="n">setSelectContextMenu</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sourceList</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_clearSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listWidget</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">listWidget</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+      <span class="n">item</span> <span class="o">=</span> <span class="n">listWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+      <span class="n">item</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_clearSpectrumGroupSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;This function has not been implemented yet.&#39;</span><span class="p">)</span>
+    <span class="c1"># self._clearSelection(self.spectrumGroupsList)</span>
+    <span class="c1"># self.sourceList.clear()</span>
+    <span class="c1"># self.presenter.setSourcesSelection(None)</span>
+
+
+  <span class="k">def</span> <span class="nf">_filterBySpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rowClicked</span><span class="p">):</span>
+    <span class="n">sGroups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupsList</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
+
+    <span class="c1"># self.sourceList.hideAllItems()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sourceList</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span><span class="o">.</span><span class="n">setSourcesSelection</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp</span> <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="n">sGroups</span> <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">sg</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sourceList</span><span class="o">.</span><span class="n">showItems</span><span class="p">([</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">],</span> <span class="n">select</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span><span class="o">.</span><span class="n">setSourcesSelection</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="PcaPlot"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.widgets.html#ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget.PcaPlot">[docs]</a><span class="k">class</span> <span class="nc">PcaPlot</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="PcaPlot"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.widgets.html#ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget.PcaPlot">[docs]</a><span class="k">class</span> <span class="nc">PcaPlot</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">())</span>
+    <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">())</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span> <span class="o">=</span> <span class="n">presenter</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">plottingWidget</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -258,7 +190,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setHeight</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plottingWidget</span><span class="p">)</span>
-    <span class="n">selectorLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+    <span class="n">selectorLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
 
     <span class="n">selectorLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;x:&#39;</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">xAxisSelector</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">)</span>
@@ -285,27 +217,22 @@
                           <span class="n">pen</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DashLine</span><span class="p">)))</span></div></div>
 
 
-
-<div class="viewcode-block" id="PcaOutput"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.widgets.html#ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget.PcaOutput">[docs]</a><span class="k">class</span> <span class="nc">PcaOutput</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="viewcode-block" id="PcaOutput"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.widgets.html#ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget.PcaOutput">[docs]</a><span class="k">class</span> <span class="nc">PcaOutput</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">presenter</span> <span class="o">=</span> <span class="n">presenter</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">())</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">sgNameEntryBox</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;pca_001&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">descaleCheck</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Descale Components&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;save&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">presenter</span><span class="o">.</span><span class="n">saveOutput</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Output spectrum group:&#39;</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sgNameEntryBox</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descaleCheck</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="p">)</span>
-
-
-
+    <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Output spectrum group:&#39;</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sgNameEntryBox</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descaleCheck</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">getLayout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span></div>
 
 </pre></div>

@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:24 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -75,7 +75,7 @@
 
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
 <span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget</span> <span class="kn">import</span> <span class="n">PcaWidget</span>
-
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SideBar</span> <span class="kn">import</span> <span class="n">_openSpectrumDisplay</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">hexToRgb</span>
 
 <div class="viewcode-block" id="DecompositionModule"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.modules.html#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule">[docs]</a><span class="k">class</span> <span class="nc">DecompositionModule</span><span class="p">:</span>
@@ -85,11 +85,12 @@
 <span class="sd">  Ideally, there are no Qt or pyqtgrpah specific calls here.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">interactor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">PcaWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">,</span> <span class="n">interactor</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">PcaWidget</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">presenter</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span> <span class="o">=</span> <span class="n">interactor</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">current</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">mainWindow</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">__method</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">__normalization</span> <span class="o">=</span> <span class="bp">None</span>
@@ -111,7 +112,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">normMethodPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="s1">&#39;PQN&#39;</span><span class="p">,</span> <span class="s1">&#39;TSA&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">centMethodPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="s1">&#39;Mean&#39;</span><span class="p">,</span> <span class="s1">&#39;Median&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scalingMethodPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="s1">&#39;Pareto&#39;</span><span class="p">,</span> <span class="s1">&#39;Unit Variance&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">])</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">refreshSourceDataOptions</span><span class="p">()</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">refreshSourceDataOptions</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">refreshSpectrumGroupFilter</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="DecompositionModule.setSourceDataOptions"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.modules.html#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.setSourceDataOptions">[docs]</a>  <span class="k">def</span> <span class="nf">setSourceDataOptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceData</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -119,6 +121,11 @@
     <span class="k">if</span> <span class="n">sourceData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">sdo</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sourceData</span><span class="p">]</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">sourceList</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">sdo</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DecompositionModule.setSpectrumGroups"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.modules.html#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.setSpectrumGroups">[docs]</a>  <span class="k">def</span> <span class="nf">setSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumGroups</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">spectrumGroupsList</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">spectrumGroups</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">spectrumGroupsList</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">spectrumGroups</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DecompositionModule.setMethod"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.modules.html#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.setMethod">[docs]</a>  <span class="k">def</span> <span class="nf">setMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
@@ -157,8 +164,10 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">scaling</span> <span class="o">=</span> <span class="n">scaling</span></div>
 
 
+
 <div class="viewcode-block" id="DecompositionModule.setSourcesSelection"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.modules.html#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.setSourcesSelection">[docs]</a>  <span class="k">def</span> <span class="nf">setSourcesSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rowClicked</span><span class="p">):</span>
     <span class="c1"># should actually pass the selection to the interactor and have it bump back up...</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">sourceList</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()]</span></div>
 
 
@@ -185,19 +194,28 @@
     <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">))</span><span class="o">.</span><span class="n">sliceColour</span>
             <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">sources</span><span class="p">]</span></div>
 
+<div class="viewcode-block" id="DecompositionModule.getSpectra"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.modules.html#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.getSpectra">[docs]</a>  <span class="k">def</span> <span class="nf">getSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">sources</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="DecompositionModule.plot"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.modules.html#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.plot">[docs]</a>  <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">xAxisLabel</span><span class="p">,</span> <span class="n">yAxisLabel</span><span class="p">):</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">availablePlotData</span><span class="p">[</span><span class="n">xAxisLabel</span><span class="p">]</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">availablePlotData</span><span class="p">[</span><span class="n">yAxisLabel</span><span class="p">]</span>
-
+    <span class="n">target</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">availablePlotData</span><span class="p">[</span><span class="n">xAxisLabel</span><span class="p">]</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactor</span><span class="o">.</span><span class="n">availablePlotData</span><span class="p">[</span><span class="n">yAxisLabel</span><span class="p">]</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">xAxisLabel</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;PC&#39;</span><span class="p">)</span> <span class="ow">or</span>
         <span class="n">yAxisLabel</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;PC&#39;</span><span class="p">)):</span>
       <span class="n">colourBrushes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pg</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">mkBrush</span><span class="p">(</span><span class="n">hexToRgb</span><span class="p">(</span><span class="n">hexColour</span><span class="p">))</span>
                        <span class="k">for</span> <span class="n">hexColour</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSourceDataColors</span><span class="p">()]</span>
-      <span class="n">target</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>
-                           <span class="n">symbolBrush</span><span class="o">=</span><span class="n">colourBrushes</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">brush</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSpectra</span><span class="p">(),</span> <span class="n">colourBrushes</span><span class="p">):</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">pen</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>
+                             <span class="n">symbolBrush</span><span class="o">=</span><span class="n">brush</span><span class="p">,)</span>
+        <span class="n">plot</span><span class="o">.</span><span class="n">curve</span><span class="o">.</span><span class="n">setClickable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">plot</span><span class="o">.</span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">spectrum</span>
+        <span class="n">plot</span><span class="o">.</span><span class="n">sigClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mouseClickEvent</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">target</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+      <span class="n">target</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">xAxisLabel</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;PC&#39;</span><span class="p">):</span>
       <span class="n">target</span><span class="o">.</span><span class="n">addYOriginLine</span><span class="p">()</span>
@@ -207,6 +225,11 @@
     <span class="n">target</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">xAxisLabel</span><span class="p">)</span>
     <span class="n">target</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">yAxisLabel</span><span class="p">)</span></div>
 
+  <span class="k">def</span> <span class="nf">_mouseClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="s2">&quot; Open a spectrum for the pca point&quot;</span>
+
+    <span class="n">spectrum</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">spectrum</span>
+    <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="n">_openSpectrumDisplay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DecompositionModule.saveOutput"><a class="viewcode-back" href="../../../../../../ccpn/ccpn.AnalysisMetabolomics.ui.gui.modules.html#ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule.DecompositionModule.saveOutput">[docs]</a>  <span class="k">def</span> <span class="nf">saveOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">saveName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">pcaOutput</span><span class="o">.</span><span class="n">sgNameEntryBox</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>

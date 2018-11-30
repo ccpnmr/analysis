@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:59 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -110,7 +110,35 @@
   <span class="n">data</span> <span class="o">*=</span> <span class="n">multipliers</span>
   
   <span class="k">return</span> <span class="n">data</span></div>
-  
+
+
+<div class="viewcode-block" id="autoPhaseReal"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Phasing.autoPhaseReal">[docs]</a><span class="k">def</span> <span class="nf">autoPhaseReal</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">p1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Automatic linear phase correction from NmrGlue</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  data : ndarray</span>
+<span class="sd">      Array of NMR intensity data.</span>
+<span class="sd">  fn : str or function</span>
+<span class="sd">      Algorithm to use for phase scoring. Built in functions can be</span>
+<span class="sd">      specified by one of the following strings: &quot;acme&quot;, &quot;peak_minima&quot;</span>
+<span class="sd">  p0 : float</span>
+<span class="sd">      Initial zero order phase in degrees.</span>
+<span class="sd">  p1 : float</span>
+<span class="sd">      Initial first order phase in degrees.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  ndata : ndarray</span>
+<span class="sd">      Phased NMR data.</span>
+
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="kn">import</span> <span class="nn">nmrglue</span> <span class="kn">as</span> <span class="nn">ng</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">hilbert</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># convert real to complex data in best way possible</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="n">ng</span><span class="o">.</span><span class="n">proc_autophase</span><span class="o">.</span><span class="n">autops</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">p0</span><span class="p">,</span> <span class="n">p1</span><span class="o">=</span><span class="n">p1</span><span class="p">)</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">real</span>
+  <span class="k">return</span> <span class="n">data</span></div>
+
   
 </pre></div>
 

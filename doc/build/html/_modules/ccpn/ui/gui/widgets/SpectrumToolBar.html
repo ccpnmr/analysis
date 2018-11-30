@@ -58,85 +58,480 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
-
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
-
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: simon1 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: CCPN $&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
-
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolBar</span> <span class="kn">import</span> <span class="n">ToolBar</span>
-
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Notifiers</span> <span class="kn">import</span> <span class="n">Notifier</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui._implementation.PeakListView</span> <span class="kn">import</span> <span class="n">PeakListView</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui._implementation.IntegralListView</span> <span class="kn">import</span> <span class="n">IntegralListView</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui._implementation.MultipletListView</span> <span class="kn">import</span> <span class="n">MultipletListView</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.IntegralList</span> <span class="kn">import</span> <span class="n">IntegralList</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.MultipletList</span> <span class="kn">import</span> <span class="n">MultipletList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumPropertiesPopup</span> <span class="kn">import</span> <span class="n">SpectrumPropertiesPopup</span>
+
 
 <div class="viewcode-block" id="SpectrumToolBar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar">[docs]</a><span class="k">class</span> <span class="nc">SpectrumToolBar</span><span class="p">(</span><span class="n">ToolBar</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
 
-    <span class="n">ToolBar</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonTextUnderIcon</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonTextUnderIcon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eventFilter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eventFilter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">installEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMouseTracking</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpectrumToolBar.mousePressEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumToolBar.SpectrumToolBar.mousePressEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Re-implementation of the Toolbar mouse event so a right mouse context menu can be raised.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
-      <span class="n">button</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
-      <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createContextMenu</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">menu</span><span class="p">:</span>
-        <span class="n">menu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
-        <span class="n">menu</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span></div>
+    <span class="k">def</span> <span class="nf">_paintButtonToMove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span>
+        <span class="n">pixmap</span> <span class="o">=</span> <span class="n">button</span><span class="o">.</span><span class="n">grab</span><span class="p">()</span>  <span class="c1"># makes a &quot;ghost&quot; of the button as we drag</span>
+        <span class="c1"># below makes the pixmap half transparent</span>
+        <span class="n">painter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setCompositionMode</span><span class="p">(</span><span class="n">painter</span><span class="o">.</span><span class="n">CompositionMode_DestinationIn</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">pixmap</span><span class="o">.</span><span class="n">rect</span><span class="p">(),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">127</span><span class="p">))</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">pixmap</span>
 
-  <span class="k">def</span> <span class="nf">_createContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates a context menu containing a command to delete the spectrum from the display and its</span>
-<span class="sd">    button from the toolbar.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">button</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">None</span>
-    <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="n">peakListViews</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">peakListViews</span>
-    <span class="n">action</span> <span class="o">=</span> <span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">spectrumActionDict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">action</span><span class="p">]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span> <span class="c1"># if you click on &gt;&gt; button which shows more spectra</span>
-      <span class="k">return</span> <span class="bp">None</span>
-    <span class="n">key</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakListViews</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_apiDataSource</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
-        <span class="n">action</span> <span class="o">=</span> <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
-          <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="n">action</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">peakListView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">)</span>
-    <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Remove&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_removeSpectrum</span><span class="p">,</span> <span class="n">button</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">contextMenu</span>
+    <span class="k">def</span> <span class="nf">_updateSpectrumViews</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newIndex</span><span class="p">):</span>
+        <span class="n">newSpectrumViewsOrder</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="k">def</span> <span class="nf">_removeSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Removes the spectrum from the display and its button from the toolbar.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">key</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">spectrumActionDict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_apiDataSource</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
-        <span class="n">spectrumView</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+            <span class="n">spectrumView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">spectrumViewPid</span><span class="p">)</span>
+            <span class="n">newSpectrumViewsOrder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumView</span><span class="p">)</span>
+
+        <span class="c1"># self.widget.project.blankNotification()</span>
+        <span class="c1"># newIndex = [newIndex.index(ii) for ii in self.widget.getOrderedSpectrumViewsIndex()]</span>
+        <span class="n">newIndex</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">getOrderedSpectrumViewsIndex</span><span class="p">()[</span><span class="n">ii</span><span class="p">]</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">newIndex</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">setOrderedSpectrumViewsIndex</span><span class="p">(</span><span class="n">newIndex</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+
+        <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+        <span class="c1"># GLSignals.emitPaintEvent()</span>
+        <span class="n">GLSignals</span><span class="o">.</span><span class="n">_emitAxisUnitsChanged</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataDict</span><span class="o">=</span><span class="p">{})</span>
+
+    <span class="k">def</span> <span class="nf">_addSubMenusToContext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contextMenu</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span>
+        <span class="n">dd</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="n">PeakList</span><span class="p">,</span> <span class="n">PeakListView</span><span class="p">),</span> <span class="p">(</span><span class="n">IntegralList</span><span class="p">,</span> <span class="n">IntegralListView</span><span class="p">),</span> <span class="p">(</span><span class="n">MultipletList</span><span class="p">,</span> <span class="n">MultipletListView</span><span class="p">)])</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">objectName</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">spectrum</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">coreObj</span><span class="p">,</span> <span class="n">viewObj</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">smenu</span> <span class="o">=</span> <span class="n">contextMenu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="n">coreObj</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
+                <span class="n">allViews</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">vv</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">viewObj</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">vv</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">vv</span><span class="p">:</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="n">coreObj</span><span class="o">.</span><span class="n">className</span>
+                        <span class="n">o</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                        <span class="k">if</span> <span class="n">o</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">o</span><span class="o">.</span><span class="n">_parent</span> <span class="o">==</span> <span class="n">spectrum</span><span class="p">:</span>
+                                <span class="n">allViews</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+                <span class="n">views</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">allViews</span><span class="p">))</span>
+                <span class="n">smenu</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">views</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">smenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Show All&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setVisibleAllFromList</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">smenu</span><span class="p">,</span> <span class="n">views</span><span class="p">))</span>
+                <span class="n">smenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Hide All&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setVisibleAllFromList</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="n">smenu</span><span class="p">,</span> <span class="n">views</span><span class="p">))</span>
+                <span class="n">smenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">views</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                    <span class="n">ccpnObj</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">_childClass</span>
+                    <span class="n">strip</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_parent</span>
+                    <span class="n">toolTip</span> <span class="o">=</span> <span class="s1">&#39;Toggle {0} {1} on strip {2}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">coreObj</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">ccpnObj</span><span class="o">.</span><span class="n">_key</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">ccpnObj</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1">#add shows in which strips the view is</span>
+                            <span class="n">currentTxt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>  <span class="c1"># add in which strip is current</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">==</span> <span class="n">strip</span><span class="p">:</span>
+                                <span class="n">currentTxt</span> <span class="o">=</span> <span class="s1">&#39; Current&#39;</span>
+                            <span class="n">action</span> <span class="o">=</span> <span class="n">smenu</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;{0} ({1}{2})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ccpnObj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">currentTxt</span><span class="p">),</span> <span class="n">toolTip</span><span class="o">=</span><span class="n">toolTip</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">action</span> <span class="o">=</span> <span class="n">smenu</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">ccpnObj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">toolTip</span><span class="o">=</span><span class="n">toolTip</span><span class="p">)</span>
+
+                        <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">view</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+                            <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">view</span><span class="o">.</span><span class="n">setVisible</span><span class="p">)</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateGl</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_createContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a context menu containing a command to delete the spectrum from the display and its</span>
+<span class="sd">        button from the toolbar.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">button</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_addSubMenusToContext</span><span class="p">(</span><span class="n">contextMenu</span><span class="p">,</span> <span class="n">button</span><span class="p">)</span>
+
+        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Jump on SideBar&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jumpOnSideBar</span><span class="p">,</span> <span class="n">button</span><span class="p">))</span>
+        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Properties...&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_showSpectrumProperties</span><span class="p">,</span> <span class="n">button</span><span class="p">))</span>
+        <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Remove Spectrum&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_removeSpectrum</span><span class="p">,</span> <span class="n">button</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">contextMenu</span>
+
+    <span class="k">def</span> <span class="nf">_jumpOnSideBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">objectName</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">spectrum</span><span class="p">:</span>
+            <span class="n">sideBar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">sideBar</span>
+            <span class="n">sideBar</span><span class="o">.</span><span class="n">selectPid</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_showSpectrumProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">objectName</span><span class="p">())</span>
+        <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+        <span class="k">if</span> <span class="n">spectrum</span><span class="p">:</span>  <span class="c1">#not sure why It needs parent = mainWindow. copied from SideBar</span>
+            <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumPropertiesPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">mainWindow</span><span class="o">=</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">)</span>
+            <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+            <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+
+    <span class="c1"># old to be deleted</span>
+    <span class="c1"># def _createContextMenuOld(self, button:QtWidgets.QToolButton):</span>
+    <span class="c1">#   &quot;&quot;&quot;</span>
+    <span class="c1">#   Creates a context menu containing a command to delete the spectrum from the display and its</span>
+    <span class="c1">#   button from the toolbar.</span>
+    <span class="c1">#   &quot;&quot;&quot;</span>
+    <span class="c1">#   if not button:</span>
+    <span class="c1">#     return None</span>
+    <span class="c1">#   contextMenu = Menu(&#39;&#39;, self, isFloatWidget=True)</span>
+    <span class="c1">#   plMenu =  contextMenu.addMenu(&#39;PeakList&#39;)</span>
+    <span class="c1">#   ilMenu =  contextMenu.addMenu(&#39;IntegralList&#39;)</span>
+    <span class="c1">#   mlMenu =  contextMenu.addMenu(&#39;MultipletList&#39;)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   peakListViews = self.widget.peakListViews</span>
+    <span class="c1">#   integralListViews = self.widget.integralListViews</span>
+    <span class="c1">#   multipletListViews = self.widget.multipletListViews</span>
+    <span class="c1">#</span>
+    <span class="c1">#   action = button.actions()[0]</span>
+    <span class="c1">#   # keys = [key for key, value in self.widget.spectrumActionDict.items() if value is action]</span>
+    <span class="c1">#   # if not keys: # if you click on &gt;&gt; button which shows more spectra</span>
+    <span class="c1">#   #   return None</span>
+    <span class="c1">#   # key = keys[0]</span>
+    <span class="c1">#</span>
+    <span class="c1">#   plMenu.setEnabled(len(peakListViews)&gt;0)</span>
+    <span class="c1">#   plMenu.addAction(&#39;Show All&#39;, partial(self._setVisibleAllFromList,True, plMenu, peakListViews))</span>
+    <span class="c1">#   plMenu.addAction(&#39;Hide All&#39;, partial(self._setVisibleAllFromList,False, plMenu, peakListViews))</span>
+    <span class="c1">#   plMenu.addSeparator()</span>
+    <span class="c1">#   for peakListView in peakListViews:</span>
+    <span class="c1">#     # if peakListView.spectrumView._apiDataSource == key:</span>
+    <span class="c1">#       if peakListView.peakList:</span>
+    <span class="c1">#         action = plMenu.addAction(peakListView.peakList.pid)</span>
+    <span class="c1">#         action.setCheckable(True)</span>
+    <span class="c1">#         if peakListView.isVisible():</span>
+    <span class="c1">#           action.setChecked(True)</span>
+    <span class="c1">#         # else:</span>
+    <span class="c1">#         #   allPlAction.setChecked(False)</span>
+    <span class="c1">#         action.toggled.connect(peakListView.setVisible)</span>
+    <span class="c1">#         # TODO:ED check this is okay for each spectrum</span>
+    <span class="c1">#         action.toggled.connect(partial(self._updateVisiblePeakLists, peakListView.spectrumView))</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1">#   ilMenu.setEnabled(len(integralListViews)&gt;0)</span>
+    <span class="c1">#   ilMenu.addAction(&#39;Show All&#39;, partial(self._setVisibleAllFromList,True, ilMenu, integralListViews))</span>
+    <span class="c1">#   ilMenu.addAction(&#39;Hide All&#39;, partial(self._setVisibleAllFromList,False, ilMenu, integralListViews))</span>
+    <span class="c1">#   ilMenu.addSeparator()</span>
+    <span class="c1">#   for integralListView in integralListViews:</span>
+    <span class="c1">#     # if integralListView.spectrumView._apiDataSource == key:</span>
+    <span class="c1">#       if integralListView.integralList:</span>
+    <span class="c1">#         action = ilMenu.addAction(integralListView.integralList.pid)</span>
+    <span class="c1">#         action.setCheckable(True)</span>
+    <span class="c1">#         if integralListView.isVisible():</span>
+    <span class="c1">#           action.setChecked(True)</span>
+    <span class="c1">#         # else:</span>
+    <span class="c1">#         #   allPlAction.setChecked(False)</span>
+    <span class="c1">#         action.toggled.connect(integralListView.setVisible)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         # TODO:ED check this is okay for each spectrum</span>
+    <span class="c1">#         action.toggled.connect(partial(self._updateVisibleIntegralLists, integralListView.spectrumView))</span>
+    <span class="c1">#</span>
+    <span class="c1">#   mlMenu.setEnabled(len(multipletListViews)&gt;0)</span>
+    <span class="c1">#   mlMenu.addAction(&#39;Show All&#39;, partial(self._setVisibleAllFromList,True, mlMenu, multipletListViews))</span>
+    <span class="c1">#   mlMenu.addAction(&#39;Hide All&#39;, partial(self._setVisibleAllFromList,False, mlMenu, multipletListViews))</span>
+    <span class="c1">#   mlMenu.addSeparator()</span>
+    <span class="c1">#   for multipletListView in multipletListViews:</span>
+    <span class="c1">#     # if multipletListView.spectrumView._apiDataSource == key:</span>
+    <span class="c1">#       if multipletListView.multipletList:</span>
+    <span class="c1">#         action = mlMenu.addAction(multipletListView.multipletList.pid)</span>
+    <span class="c1">#         action.setCheckable(True)</span>
+    <span class="c1">#         if multipletListView.isVisible():</span>
+    <span class="c1">#           action.setChecked(True)</span>
+    <span class="c1">#         # else:</span>
+    <span class="c1">#         #   allPlAction.setChecked(False)</span>
+    <span class="c1">#         action.toggled.connect(multipletListView.setVisible)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         # TODO:ED check this is okay for each spectrum</span>
+    <span class="c1">#         action.toggled.connect(partial(self._updateVisibleMultipletLists, multipletListView.spectrumView))</span>
+    <span class="c1">#</span>
+    <span class="c1">#   contextMenu.addSeparator()</span>
+    <span class="c1">#   contextMenu.addAction(&#39;Remove Spectrum&#39;, partial(self._removeSpectrum, button))</span>
+    <span class="c1">#   return contextMenu</span>
+
+    <span class="k">def</span> <span class="nf">_updateGl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+
+        <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitPaintEvent</span><span class="p">()</span>
+
+    <span class="c1"># Triplicated Code?</span>
+    <span class="c1"># def _updateVisiblePeakLists(self, spectrumView=None, visible=True):</span>
+    <span class="c1">#   from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier</span>
+    <span class="c1">#   GLSignals = GLNotifier(parent=self)</span>
+    <span class="c1">#   GLSignals.emitPaintEvent()</span>
+    <span class="c1">#</span>
+    <span class="c1"># def _updateVisibleIntegralLists(self, spectrumView=None, visible=True):</span>
+    <span class="c1">#   from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier</span>
+    <span class="c1">#   GLSignals = GLNotifier(parent=self)</span>
+    <span class="c1">#   GLSignals.emitPaintEvent()</span>
+    <span class="c1">#</span>
+    <span class="c1"># def _updateVisibleMultipletLists(self, spectrumView=None, visible=True):</span>
+    <span class="c1">#   from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier</span>
+    <span class="c1">#   GLSignals = GLNotifier(parent=self)</span>
+    <span class="c1">#   GLSignals.emitPaintEvent()</span>
+
+    <span class="k">def</span> <span class="nf">_getSpectrumViewFromButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">):</span>
+        <span class="n">spvs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">spectrumActionDict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_apiDataSource</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">spvs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumView</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spvs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">spvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># def _allPeakLists(self, contextMenu, button):</span>
+    <span class="c1">#   key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]</span>
+    <span class="c1">#   for peakListView in self.widget.peakListViews:</span>
+    <span class="c1">#     if peakListView.spectrumView._apiDataSource == key:</span>
+    <span class="c1">#       for action in contextMenu.actions():</span>
+    <span class="c1">#         if action is not self.sender():</span>
+    <span class="c1">#           if not action.isChecked():</span>
+    <span class="c1">#             action.setChecked(True)</span>
+    <span class="c1">#             action.toggled.connect(peakListView.setVisible)</span>
+    <span class="c1">#   self._updateVisiblePeakLists()</span>
+    <span class="c1">#</span>
+    <span class="c1"># def _noPeakLists(self, contextMenu, button):</span>
+    <span class="c1">#   key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]</span>
+    <span class="c1">#   for peakListView in self.widget.peakListViews:</span>
+    <span class="c1">#     if peakListView.spectrumView._apiDataSource == key:</span>
+    <span class="c1">#       for action in contextMenu.actions():</span>
+    <span class="c1">#         if action is not self.sender():</span>
+    <span class="c1">#           if action.isChecked():</span>
+    <span class="c1">#             action.setChecked(False)</span>
+    <span class="c1">#             action.toggled.connect(peakListView.setVisible)</span>
+    <span class="c1">#   self._updateVisiblePeakLists()</span>
+
+    <span class="k">def</span> <span class="nf">_setVisibleAllFromList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abool</span><span class="p">,</span> <span class="n">menu</span><span class="p">,</span> <span class="n">views</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">        :param abool: T or F</span>
+<span class="sd">        :param menu:</span>
+<span class="sd">        :param views: any of Views obj _pluralLinkName</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">views</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">views</span><span class="p">:</span>
+                <span class="n">view</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">abool</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">menu</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">view</span><span class="o">.</span><span class="n">pid</span><span class="p">:</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">abool</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_removeSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">button</span><span class="p">:</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes the spectrum from the display and its button from the toolbar.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO:ED this needs patching in to the spectrumView.delete()</span>
+        <span class="c1"># remove the item from the toolbar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># and delete the spectrumView from the V2</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">spectrumActionDict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="n">button</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">stripUpdateList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_apiDataSource</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">spectrumViews</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">spectrumView</span><span class="p">)</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Spectrum not found in toolbar&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># found value is spectrumView, index</span>
+
+        <span class="n">spectrumView</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="c1"># self.widget.removeOrderedSpectrumView(index)</span>
+
+        <span class="c1"># spawn a redraw of the GL windows</span>
+        <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.OpenGL.CcpnOpenGL</span> <span class="kn">import</span> <span class="n">GLNotifier</span>
+
+        <span class="n">GLSignals</span> <span class="o">=</span> <span class="n">GLNotifier</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">GLSignals</span><span class="o">.</span><span class="n">emitPaintEvent</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_dragButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+
+        <span class="n">toolButton</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buttonBeingDragged</span> <span class="o">=</span> <span class="n">toolButton</span>
+        <span class="n">allActionsTexts</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">toolButton</span><span class="p">:</span>
+            <span class="n">pixmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paintButtonToMove</span><span class="p">(</span><span class="n">toolButton</span><span class="p">)</span>
+
+            <span class="n">mimeData</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
+            <span class="n">mimeData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">,</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
+            <span class="n">drag</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">drag</span><span class="o">.</span><span class="n">setMimeData</span><span class="p">(</span><span class="n">mimeData</span><span class="p">)</span>
+            <span class="n">drag</span><span class="o">.</span><span class="n">setPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
+            <span class="c1"># start the drag operation</span>
+
+            <span class="n">allActionsTexts</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">()]</span>
+            <span class="k">if</span> <span class="n">drag</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">)</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">:</span>
+
+                <span class="n">point</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCursor</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+                <span class="n">droppedPoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapFromGlobal</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+                <span class="n">nextButton</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childAt</span><span class="p">(</span><span class="n">droppedPoint</span><span class="p">)</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">droppedPoint</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">droppedPoint</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">nextButton</span><span class="p">:</span>
+                    <span class="n">nextButton</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childAt</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="mi">30</span> <span class="o">+</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">nextButton</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">nextButton</span> <span class="o">==</span> <span class="n">toolButton</span><span class="p">:</span>
+                        <span class="k">return</span>
+                    <span class="c1"># allActionsTexts = [action.text() for action in self.actions()]</span>
+                    <span class="k">if</span> <span class="n">allActionsTexts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">toolButton</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">allActionsTexts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">nextButton</span><span class="o">.</span><span class="n">text</span><span class="p">()):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">insertAction</span><span class="p">(</span><span class="n">nextButton</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">toolButton</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">insertAction</span><span class="p">(</span><span class="n">toolButton</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nextButton</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Dropping outside</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">insertAction</span><span class="p">(</span><span class="n">toolButton</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">toolButton</span><span class="o">.</span><span class="n">actions</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
+
+            <span class="n">actionIndex</span> <span class="o">=</span> <span class="p">[</span><span class="n">allActionsTexts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">act</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="k">for</span> <span class="n">act</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">()</span> <span class="k">if</span> <span class="n">act</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="ow">in</span> <span class="n">allActionsTexts</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_updateSpectrumViews</span><span class="p">(</span><span class="n">actionIndex</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_setSizes</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_eventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replace all the events with a single filter process</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QEvent</span><span class="o">.</span><span class="n">MouseButtonPress</span><span class="p">:</span>
+            <span class="c1"># if event.button() == QtCore.Qt.LeftButton: Can&#39;t make it working!!!</span>
+
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
+                <span class="n">toolButton</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+
+                <span class="n">menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createContextMenu</span><span class="p">(</span><span class="n">toolButton</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">menu</span><span class="p">:</span>
+                    <span class="n">menu</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+                    <span class="n">menu</span><span class="o">.</span><span class="k">exec</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MiddleButton</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dragButton</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">SpectrumToolBar</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">eventFilter</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>  <span class="c1"># do the rest</span>
+
+    <span class="k">def</span> <span class="nf">_addSpectrumViewToolButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumView</span><span class="p">):</span>
+
+        <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span>
+        <span class="n">apiDataSource</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_wrappedData</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumActionDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiDataSource</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="p">:</span>
+            <span class="c1"># add toolbar action (button)</span>
+            <span class="n">spectrumName</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">name</span>
+            <span class="c1"># This is a bug, it changes the name of button and crashes when moving them across</span>
+            <span class="c1"># if len(spectrumName) &gt; 12:</span>
+            <span class="c1">#   spectrumName = spectrumName[:12]+&#39;.....&#39;</span>
+
+            <span class="n">actionList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># try and find the spectrumView in the orderedlist - for undo function</span>
+                <span class="n">oldList</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumViews</span>
+                <span class="n">oldList</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">orderedSpectrumViews</span><span class="p">(</span><span class="n">oldList</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">oldList</span><span class="p">:</span>
+                    <span class="n">oldIndex</span> <span class="o">=</span> <span class="n">oldList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">spectrumView</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">oldIndex</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">oldList</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">actionList</span> <span class="ow">and</span> <span class="n">oldIndex</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">actionList</span><span class="p">):</span>
+                    <span class="n">nextAction</span> <span class="o">=</span> <span class="n">actionList</span><span class="p">[</span><span class="n">oldIndex</span><span class="p">]</span>
+
+                    <span class="c1"># create a new action and move it to the correct place in the list</span>
+                    <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">)</span>
+                    <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">insertAction</span><span class="p">(</span><span class="n">nextAction</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">)</span>
+                    <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">es</span><span class="p">:</span>
+                <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">)</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+            <span class="n">action</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setSizes</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="c1"># WHY _wrappedData and not spectrumView?</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">spectrumView</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_wrappedData</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">spectrumViewPid</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">pid</span>
+
+            <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumActionDict</span><span class="p">[</span><span class="n">apiDataSource</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
+            <span class="c1"># The following call sets the icon colours:</span>
+            <span class="n">spectrumView</span><span class="o">.</span><span class="n">_spectrumViewHasChanged</span><span class="p">()</span>
+
+        <span class="c1"># if spectrumDisplay.is1D:</span>
+        <span class="c1">#     action.toggled.connect(spectrumView.plot.setVisible)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setSizes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+
+        <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">75</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_toolbarChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumViews</span><span class="p">):</span>
+        <span class="n">actionList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">()</span>
+        <span class="c1"># self.clear()</span>
+        <span class="k">for</span> <span class="n">specView</span> <span class="ow">in</span> <span class="n">spectrumViews</span><span class="p">:</span>
+
+            <span class="c1"># self._addSpectrumViewToolButtons(specView)</span>
+            <span class="n">spectrum</span> <span class="o">=</span> <span class="n">specView</span><span class="o">.</span><span class="n">spectrum</span>
+            <span class="n">spectrumName</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">12</span><span class="p">:</span>
+                <span class="n">spectrumName</span> <span class="o">=</span> <span class="n">spectrumName</span><span class="p">[:</span><span class="mi">12</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.....&#39;</span>
+
+            <span class="k">for</span> <span class="n">act</span> <span class="ow">in</span> <span class="n">actionList</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">act</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">spectrumName</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
+
+                    <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetForAction</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
+                    <span class="n">widget</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_setSizes</span><span class="p">(</span><span class="n">act</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
 </pre></div>
 
           </div>

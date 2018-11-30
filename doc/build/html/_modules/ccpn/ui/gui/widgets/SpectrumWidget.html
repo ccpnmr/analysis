@@ -58,14 +58,14 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:56 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -75,178 +75,168 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span><span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
 <span class="kn">from</span> <span class="nn">pyqtgraph.Point</span> <span class="kn">import</span> <span class="n">Point</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+
 <div class="viewcode-block" id="SpectrumWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumWidget.SpectrumWidget">[docs]</a><span class="k">class</span> <span class="nc">SpectrumWidget</span><span class="p">:</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-    <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-    <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;foreground&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
-    <span class="c1"># if self.useOpenGL:</span>
-    <span class="c1">#   pg.setConfigOption(&#39;useOpenGL&#39;, &#39;True&#39;)</span>
-    <span class="c1"># self.viewBox = CustomViewBox()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">xAxis</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">AxisItem</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">yAxis</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">AxisItem</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">(</span>
-      <span class="n">enableMenu</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">axisItems</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;bottom&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxis</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">yAxis</span><span class="p">})</span>
-    <span class="c1"># shortcutFile=open(&#39;/Users/simon/PycharmProjects/CCPN_V3/trunk/ccpnv3/shortcuts.json&#39;, &#39;r&#39;)</span>
-    <span class="c1"># self.shortcuts = json.load(shortcutFile)</span>
-    <span class="c1"># # self.createShortcuts()</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;foreground&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="c1"># if self.useOpenGL:</span>
+        <span class="c1">#   pg.setConfigOption(&#39;useOpenGL&#39;, &#39;True&#39;)</span>
+        <span class="c1"># self.viewBox = CustomViewBox()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xAxis</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">AxisItem</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yAxis</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">AxisItem</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">(</span>
+                <span class="n">enableMenu</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">axisItems</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;bottom&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxis</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">yAxis</span><span class="p">})</span>
+
+        <span class="c1">## setup axes for display</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="c1"># orientation left to put text on left of axis and same for top</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vLine</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">InfiniteLine</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hLine</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">InfiniteLine</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vLine</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hLine</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mouseMoved</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SpectrumWidget.mouseMoved"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumWidget.SpectrumWidget.mouseMoved">[docs]</a>    <span class="k">def</span> <span class="nf">mouseMoved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">event</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">sceneBoundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">position</span><span class="p">):</span>
+            <span class="n">mousePoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vLine</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">x</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hLine</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">y</span><span class="p">())</span></div>
+
+    <span class="c1"># class CustomViewBox(pg.ViewBox):</span>
     <span class="c1">#</span>
-    <span class="c1"># self.createCrossHair()</span>
-    <span class="c1">## connect cross hair (mouseMoved) and mouseClick events to QtGraphicsScene</span>
+    <span class="c1">#   def __init__(self, *args, **kwds):</span>
+    <span class="c1">#         pg.ViewBox.__init__(self, *args, **kwds)</span>
+    <span class="c1">#         self.setMenuDisabled()</span>
 
-    <span class="c1">## setup axes for display</span>
+<div class="viewcode-block" id="SpectrumWidget.mouseClickEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumWidget.SpectrumWidget.mouseClickEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-    <span class="c1"># orientation left to put text on left of axis and same for top</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">plotItem</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Left Click Event&quot;</span><span class="p">)</span>
 
+        <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">):</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">()</span>
+            <span class="n">mousePoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">mousePoint</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">vLine</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">InfiniteLine</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">hLine</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">InfiniteLine</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vLine</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hLine</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Add Select&#39;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mouseMoved</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MiddleButton</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Pick and Assign&#39;</span><span class="p">)</span>
 
+        <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Context Menu to be activated here&#39;</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">double</span><span class="p">():</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Double Click event&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SpectrumWidget.mouseMoved"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumWidget.SpectrumWidget.mouseMoved">[docs]</a>  <span class="k">def</span> <span class="nf">mouseMoved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-    <span class="n">position</span> <span class="o">=</span> <span class="n">event</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">sceneBoundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">position</span><span class="p">):</span>
-        <span class="n">mousePoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vLine</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">x</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hLine</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">y</span><span class="p">())</span></div>
+<div class="viewcode-block" id="SpectrumWidget.mouseDragEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumWidget.SpectrumWidget.mouseDragEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 
-
-<span class="c1"># class CustomViewBox(pg.ViewBox):</span>
-<span class="c1">#</span>
-<span class="c1">#   def __init__(self, *args, **kwds):</span>
-<span class="c1">#         pg.ViewBox.__init__(self, *args, **kwds)</span>
-<span class="c1">#         self.setMenuDisabled()</span>
-
-
-<div class="viewcode-block" id="SpectrumWidget.mouseClickEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumWidget.SpectrumWidget.mouseClickEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mouseClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
-      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-      <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Left Click Event&quot;</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-              <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-    <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">):</span>
-      <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">()</span>
-      <span class="n">mousePoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-      <span class="k">print</span><span class="p">(</span><span class="n">mousePoint</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-              <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-    <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">):</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Add Select&#39;</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MiddleButton</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
-      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Pick and Assign&#39;</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
-      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Context Menu to be activated here&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">double</span><span class="p">():</span>
-      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-      <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Double Click event&quot;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
+            <span class="n">pg</span><span class="o">.</span><span class="n">ViewBox</span><span class="o">.</span><span class="n">mouseDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
 
 
+        <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;RightDrag + Shift&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SpectrumWidget.mouseDragEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpectrumWidget.SpectrumWidget.mouseDragEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mouseDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">isFinish</span><span class="p">():</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+                <span class="c1">## draw rectangle around highlighted area - not tied to axes yet,</span>
+                <span class="c1">## probably needs to be</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">())),</span>
+                                   <span class="n">Point</span><span class="p">(</span><span class="n">position</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">showAxRect</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">():</span>
-      <span class="n">pg</span><span class="o">.</span><span class="n">ViewBox</span><span class="o">.</span><span class="n">mouseDragEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">updateScaleBox</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
 
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 
-    <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-              <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-              <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">):</span>
-      <span class="k">print</span><span class="p">(</span><span class="s2">&quot;RightDrag + Shift&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">):</span>
+            <span class="c1"># Pick in area</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;LeftDrag + Control + Shift&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">isStart</span><span class="p">():</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">()</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;start &quot;</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">isFinish</span><span class="p">():</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;end &quot;</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
 
-      <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">isFinish</span><span class="p">():</span>
-        <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
-        <span class="c1">## draw rectangle around highlighted area - not tied to axes yet,</span>
-        <span class="c1">## probably needs to be</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRectF</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">())),</span>
-                           <span class="n">Point</span><span class="p">(</span><span class="n">position</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">showAxRect</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">):</span>
+            <span class="c1"># Add select area</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;LeftDrag + Shift&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">isStart</span><span class="p">():</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">()</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;start &quot;</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">isFinish</span><span class="p">():</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;end &quot;</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
 
-      <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">updateScaleBox</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">(),</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
-
-      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-
-    <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-              <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-              <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">):</span>
-        <span class="c1"># Pick in area</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;LeftDrag + Control + Shift&#39;</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">isStart</span><span class="p">():</span>
-        <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">()</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;start &quot;</span><span class="p">,</span><span class="n">position</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">isFinish</span><span class="p">():</span>
-        <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;end &quot;</span><span class="p">,</span><span class="n">position</span><span class="p">)</span>
-      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-
-    <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-              <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-              <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">):</span>
-       <span class="c1"># Add select area</span>
-      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;LeftDrag + Shift&#39;</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">isStart</span><span class="p">():</span>
-        <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">buttonDownPos</span><span class="p">()</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;start &quot;</span><span class="p">,</span><span class="n">position</span><span class="p">)</span>
-      <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">isFinish</span><span class="p">():</span>
-        <span class="n">position</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;end &quot;</span><span class="p">,</span><span class="n">position</span><span class="p">)</span>
-
-      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
-    <span class="c1">## above events remove pan abilities from plot window,</span>
-    <span class="c1">## need to re-implement them without changing mouseMode</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span></div></div>
+            <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+        <span class="c1">## above events remove pan abilities from plot window,</span>
+        <span class="c1">## need to re-implement them without changing mouseMode</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span></div></div>
 
 
 <span class="c1">###For testing</span>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
-  <span class="k">def</span> <span class="nf">testMain</span><span class="p">():</span>
-    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
-    <span class="n">w</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
-    <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
-    <span class="n">widget</span><span class="o">=</span><span class="n">SpectrumWidget</span><span class="p">()</span><span class="o">.</span><span class="n">widget</span>
-    <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
-    <span class="n">xdata</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">ydata</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">numPoints</span> <span class="o">=</span> <span class="mi">4096</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numPoints</span><span class="p">):</span>
-       <span class="n">xdata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="o">+</span><span class="p">(</span><span class="mi">20</span><span class="o">/</span><span class="n">numPoints</span><span class="o">*</span><span class="n">i</span><span class="p">))</span>
-       <span class="n">ydata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1e4</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">testMain</span><span class="p">():</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">SpectrumWidget</span><span class="p">()</span><span class="o">.</span><span class="n">widget</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ydata</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">numPoints</span> <span class="o">=</span> <span class="mi">4096</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numPoints</span><span class="p">):</span>
+            <span class="n">xdata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span> <span class="o">+</span> <span class="p">(</span><span class="mi">20</span> <span class="o">/</span> <span class="n">numPoints</span> <span class="o">*</span> <span class="n">i</span><span class="p">))</span>
+            <span class="n">ydata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1e4</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
 
-    <span class="n">spectrumXData</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
-    <span class="n">spectrumYData</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ydata</span><span class="p">)</span>
-    <span class="n">widget</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">spectrumXData</span><span class="p">,</span><span class="n">spectrumYData</span><span class="p">)</span>
-    <span class="n">w</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
-    <span class="n">w</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+        <span class="n">spectrumXData</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xdata</span><span class="p">)</span>
+        <span class="n">spectrumYData</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ydata</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">spectrumXData</span><span class="p">,</span> <span class="n">spectrumYData</span><span class="p">)</span>
+        <span class="n">w</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+        <span class="n">w</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
 
-  <span class="n">testMain</span><span class="p">()</span>
+
+    <span class="n">testMain</span><span class="p">()</span>
 </pre></div>
 
           </div>

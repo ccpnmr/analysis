@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:33:13 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -181,7 +181,11 @@
   <span class="k">elif</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.nef&#39;</span><span class="p">):</span>
     <span class="c1"># NBNB TODO is this OK? enough?</span>
     <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="n">NEF</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
-    
+
+  <span class="k">elif</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.str&#39;</span><span class="p">):</span>
+    <span class="c1"># NBNB TODO:ED is this OK? enough?</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="n">NMRSTAR</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
+
   <span class="c1"># Set up for further analysis</span>
   <span class="n">dirName</span><span class="p">,</span> <span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filePath</span><span class="p">)</span>
 
@@ -265,7 +269,14 @@
   <span class="k">else</span><span class="p">:</span>
 
     <span class="n">fileObj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">text</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+
+      <span class="c1"># error as the file is not uniCode - ejb</span>
+      <span class="k">return</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
+
     <span class="n">textblock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
                            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">line</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;!&#39;</span><span class="p">)])</span>
 
@@ -296,8 +307,13 @@
       <span class="c1"># Assume it is a PDB-type file</span>
       <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Structure&#39;</span><span class="p">,</span> <span class="n">PDB</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">textblock</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&lt;sparky project file&gt;&#39;</span><span class="p">):</span>
+      <span class="c1"># ejb - new sparky project reader, must be the .proj/.proj.BAK file</span>
+      <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="n">SPARKY</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
 
-
+    <span class="k">if</span> <span class="n">textblock</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&lt;sparky save file&gt;&#39;</span><span class="p">):</span>
+      <span class="c1"># ejb - new sparky project reader, must be the .save/.save.BAK file</span>
+      <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="n">SPARKY</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>
 
     <span class="c1"># Default - return as plain text</span>
     <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Text&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">filePath</span><span class="p">)</span>

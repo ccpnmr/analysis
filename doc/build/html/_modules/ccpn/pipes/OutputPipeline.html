@@ -55,13 +55,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:39 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -75,13 +75,11 @@
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">GuiPipe</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">LineEditButtonDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
-
-
 
 <span class="c1">#### NON GUI IMPORTS</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.lib.Pipe</span> <span class="kn">import</span> <span class="n">SpectraPipe</span>
@@ -89,6 +87,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">import</span> <span class="nn">os</span>
+
 
 <span class="c1">########################################################################################################################</span>
 <span class="c1">###   Attributes:</span>
@@ -104,8 +103,9 @@
 <span class="n">XLSX</span> <span class="o">=</span> <span class="s1">&#39;XLSX&#39;</span>
 <span class="n">Json</span> <span class="o">=</span> <span class="s1">&#39;Json&#39;</span>
 <span class="n">DataSet</span> <span class="o">=</span> <span class="s1">&#39;CCPN DataSet&#39;</span>
-<span class="n">Modes</span> <span class="o">=</span> <span class="p">[</span><span class="n">CSV</span><span class="p">,</span><span class="n">TAB</span><span class="p">,</span> <span class="n">XLSX</span><span class="p">,</span> <span class="n">Json</span><span class="p">,</span> <span class="n">DataSet</span><span class="p">]</span>
+<span class="n">Modes</span> <span class="o">=</span> <span class="p">[</span><span class="n">CSV</span><span class="p">,</span> <span class="n">TAB</span><span class="p">,</span> <span class="n">XLSX</span><span class="p">,</span> <span class="n">Json</span><span class="p">,</span> <span class="n">DataSet</span><span class="p">]</span>
 <span class="n">DefaultPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">)</span>
+
 
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################      ALGORITHM       ########################################################</span>
@@ -113,64 +113,64 @@
 
 
 <span class="k">def</span> <span class="nf">_getPipelineOutputs</span><span class="p">(</span><span class="n">pipeline</span><span class="p">):</span>
-  <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
-  <span class="k">if</span> <span class="n">pipeline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">application</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">application</span>
-    <span class="k">if</span> <span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Application Version&#39;</span><span class="p">,</span> <span class="n">application</span><span class="o">.</span><span class="n">applicationName</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span> <span class="n">application</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">))</span>
-      <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Pipeline: &#39;</span><span class="o">+</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span> <span class="p">,</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">))</span>
-      <span class="n">spectraNames</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="k">if</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">inputData</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">inputData</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">sp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">spectraNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-      <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Output spectra:&#39;</span><span class="p">,</span> <span class="n">spectraNames</span><span class="p">))</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">pipeline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">application</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">application</span>
+        <span class="k">if</span> <span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Application Version&#39;</span><span class="p">,</span> <span class="n">application</span><span class="o">.</span><span class="n">applicationName</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">application</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">))</span>
+            <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Pipeline: &#39;</span> <span class="o">+</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">))</span>
+            <span class="n">spectraNames</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">inputData</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">inputData</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">sp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">spectraNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Output spectra:&#39;</span><span class="p">,</span> <span class="n">spectraNames</span><span class="p">))</span>
 
-      <span class="k">for</span> <span class="n">pipe</span> <span class="ow">in</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">pipe</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Pipe: &#39;</span><span class="o">+</span><span class="n">pipe</span><span class="o">.</span><span class="n">pipeName</span><span class="p">,</span>  <span class="n">pipe</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">pipe</span> <span class="ow">in</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pipe</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Pipe: &#39;</span> <span class="o">+</span> <span class="n">pipe</span><span class="o">.</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">pipe</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">))</span>
 
-  <span class="k">return</span> <span class="n">outputs</span>
+    <span class="k">return</span> <span class="n">outputs</span>
+
 
 <span class="k">def</span> <span class="nf">_getOutPutDataFrame</span><span class="p">(</span><span class="n">outputList</span><span class="p">):</span>
-  <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">outputList</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">df</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">outputList</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+
 <span class="c1">########################################################################################################################</span>
 <span class="c1">##########################################     GUI PIPE    #############################################################</span>
 <span class="c1">########################################################################################################################</span>
 
 
 <div class="viewcode-block" id="OutputPipelineGuiPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.OutputPipeline.OutputPipelineGuiPipe">[docs]</a><span class="k">class</span> <span class="nc">OutputPipelineGuiPipe</span><span class="p">(</span><span class="n">GuiPipe</span><span class="p">):</span>
+    <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
 
-  <span class="n">preferredPipe</span> <span class="o">=</span> <span class="bp">True</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OutputPipelineGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">pipeName</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>   <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">(</span><span class="n">OutputPipelineGuiPipe</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">GuiPipe</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveAsHDF5Label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">SaveHDF5</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">SaveHDF5</span><span class="p">,</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
 
-    <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">saveAsHDF5Label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">SaveHDF5</span><span class="p">,</span>  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">SaveHDF5</span><span class="p">,</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">SaveOutputMode</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">SaveOutputMode</span><span class="p">,</span>
+                <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">Modes</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">selectedInd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
 
-    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">modeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">SaveOutputMode</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">SaveOutputMode</span><span class="p">,</span>
-            <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">Modes</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">selectedInd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savePathLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">SavePath</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">SavePath</span><span class="p">,</span>
+                <span class="n">LineEditButtonDialog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">Directory</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setDefaultDataPath</span><span class="p">()</span>
 
-    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">savePathLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">SavePath</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">SavePath</span><span class="p">,</span>
-            <span class="n">LineEditButtonDialog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeFrame</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">Directory</span><span class="p">,</span>  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_setDefaultDataPath</span><span class="p">()</span>
-
-
-
-  <span class="k">def</span> <span class="nf">_setDefaultDataPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="s1">&#39;writes the default data path in the pipe lineEdit&#39;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">SavePath</span><span class="p">)</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">dataPath</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">_setDefaultDataPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s1">&#39;writes the default data path in the pipe lineEdit&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">SavePath</span><span class="p">)</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">dataPath</span><span class="p">)</span></div>
 
 
 <span class="c1">########################################################################################################################</span>
@@ -179,61 +179,58 @@
 
 
 <div class="viewcode-block" id="OutputSpectraPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.OutputPipeline.OutputSpectraPipe">[docs]</a><span class="k">class</span> <span class="nc">OutputSpectraPipe</span><span class="p">(</span><span class="n">SpectraPipe</span><span class="p">):</span>
+    <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">OutputPipelineGuiPipe</span>
+    <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
+    <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">SavePath</span><span class="p">:</span> <span class="n">DefaultPath</span><span class="p">,</span>
+        <span class="n">SaveHDF5</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="n">SaveOutputMode</span><span class="p">:</span> <span class="s1">&#39;&#39;</span>
+        <span class="p">}</span>
 
-  <span class="n">guiPipe</span> <span class="o">=</span> <span class="n">OutputPipelineGuiPipe</span>
-  <span class="n">pipeName</span> <span class="o">=</span> <span class="n">PipeName</span>
-  <span class="n">_kwargs</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">SavePath</span><span class="p">:</span><span class="n">DefaultPath</span><span class="p">,</span>
-            <span class="n">SaveHDF5</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
-            <span class="n">SaveOutputMode</span><span class="p">:</span><span class="s1">&#39;&#39;</span>
-            <span class="p">}</span>
+<div class="viewcode-block" id="OutputSpectraPipe.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.OutputPipeline.OutputSpectraPipe.runPipe">[docs]</a>    <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="OutputSpectraPipe.runPipe"><a class="viewcode-back" href="../../../ccpn/ccpn.pipes.html#ccpn.pipes.OutputPipeline.OutputSpectraPipe.runPipe">[docs]</a>  <span class="k">def</span> <span class="nf">runPipe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
-<span class="sd">    &#39;&#39;&#39;</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">_getPipelineOutputs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">_getOutPutDataFrame</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
 
-    <span class="n">outputs</span> <span class="o">=</span> <span class="n">_getPipelineOutputs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">)</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">_getOutPutDataFrame</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">SavePath</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="s1">&#39;Save_Output_Mode&#39;</span><span class="p">]</span>
+        <span class="n">saveHDF5</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">SaveHDF5</span><span class="p">]</span>
 
-    <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">SavePath</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;/&#39;</span>
-    <span class="n">mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="s1">&#39;Save_Output_Mode&#39;</span><span class="p">]</span>
-    <span class="n">saveHDF5</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">[</span><span class="n">SaveHDF5</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">saveHDF5</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">fullPath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.hdf5&#39;</span>
+                    <span class="n">convertDataToHdf5</span><span class="p">(</span><span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">outputPath</span><span class="o">=</span><span class="n">fullPath</span><span class="p">)</span>
+        <span class="n">sucess</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">CSV</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">)</span>
+                <span class="n">sucess</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">TAB</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">sucess</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">Json</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span>
+                <span class="n">sucess</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">XLSX</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span> <span class="o">+</span> <span class="s1">&#39;.xlsx&#39;</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">,</span>
+                            <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="p">)</span>
+                <span class="n">sucess</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">DataSet</span><span class="p">:</span>
+                <span class="n">newDataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newDataSet</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">newDataSet</span><span class="o">.</span><span class="n">newData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">)</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">saveHDF5</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">fullPath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.hdf5&#39;</span>
-          <span class="n">convertDataToHdf5</span><span class="p">(</span><span class="n">spectrum</span><span class="o">=</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">outputPath</span><span class="o">=</span><span class="n">fullPath</span><span class="p">)</span>
-    <span class="n">sucess</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">CSV</span><span class="p">:</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">)</span>
-        <span class="n">sucess</span> <span class="o">=</span> <span class="bp">True</span>
-      <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">TAB</span><span class="p">:</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">sucess</span> <span class="o">=</span> <span class="bp">True</span>
-      <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">Json</span><span class="p">:</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="o">+</span><span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="n">orient</span> <span class="o">=</span> <span class="s1">&#39;split&#39;</span><span class="p">)</span>
-        <span class="n">sucess</span> <span class="o">=</span> <span class="bp">True</span>
-      <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">XLSX</span><span class="p">:</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">path</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="o">+</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">,</span>
-                    <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">,)</span>
-        <span class="n">sucess</span> <span class="o">=</span> <span class="bp">True</span>
-      <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">DataSet</span><span class="p">:</span>
-        <span class="n">newDataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newDataSet</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">newDataSet</span><span class="o">.</span><span class="n">newData</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">)</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">pipelineName</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sucess</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pipeline Output saved in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">sucess</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pipeline Output saved in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">path</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">spectra</span></div></div>
-
+        <span class="k">return</span> <span class="n">spectra</span></div></div>
 
 
 <span class="n">OutputSpectraPipe</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>
-
 </pre></div>
 
           </div>

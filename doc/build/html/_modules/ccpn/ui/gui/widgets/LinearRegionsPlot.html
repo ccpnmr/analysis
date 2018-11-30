@@ -61,7 +61,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: Luca Mureddu $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:54 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -73,26 +73,15 @@
 
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">expanduser</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PlotWidget</span> <span class="kn">import</span> <span class="n">PlotWidget</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FillBetweenRegions</span> <span class="kn">import</span> <span class="n">FillBetweenRegions</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
-
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
 <span class="kn">import</span>  <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.LinearRegionItem</span> <span class="kn">import</span> <span class="n">LinearRegionItem</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">GuiStrip</span>
+
 
 
 
@@ -105,7 +94,7 @@
 <span class="sd">  The region can be dragged and is bounded by lines which can be dragged individually.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">brush</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">colour</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">brush</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">colour</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span>
       <span class="n">orientation</span> <span class="o">=</span> <span class="n">LinearRegionItem</span><span class="o">.</span><span class="n">Vertical</span>
     <span class="k">else</span><span class="p">:</span>
@@ -123,19 +112,20 @@
     <span class="k">if</span> <span class="n">colour</span> <span class="ow">in</span>  <span class="n">colours</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
       <span class="n">brush</span> <span class="o">=</span> <span class="n">colours</span><span class="p">[</span><span class="n">colour</span><span class="p">]</span>
 
-    <span class="n">LinearRegionItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="n">brush</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="n">movable</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span></div>
+    <span class="n">LinearRegionItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="n">brush</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="n">movable</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LinearRegionsPlot.setLines"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.LinearRegionsPlot.LinearRegionsPlot.setLines">[docs]</a>  <span class="k">def</span> <span class="nf">setLines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">values</span><span class="p">))</span></div></div>
 
 
-
-
-<div class="viewcode-block" id="TargetButtonSpinBoxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.LinearRegionsPlot.TargetButtonSpinBoxes">[docs]</a><span class="k">class</span> <span class="nc">TargetButtonSpinBoxes</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">plotWidget</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colour</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">brush</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
-    <span class="n">Widget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span>  <span class="n">setLayout</span><span class="o">=</span><span class="bp">False</span><span class="p">,)</span>
-    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+<div class="viewcode-block" id="TargetButtonSpinBoxes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.LinearRegionsPlot.TargetButtonSpinBoxes">[docs]</a><span class="k">class</span> <span class="nc">TargetButtonSpinBoxes</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="n">plotWidget</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">colour</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">brush</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span> <span class="o">=</span> <span class="n">plotWidget</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
-
 
     <span class="bp">self</span><span class="o">.</span><span class="n">movable</span> <span class="o">=</span> <span class="n">movable</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">brush</span> <span class="o">=</span> <span class="n">brush</span>
@@ -199,9 +189,6 @@
           <span class="bp">self</span><span class="o">.</span><span class="n">pickOnSpectrumButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggleOffIcon</span><span class="p">)</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">_turnOffPositionPicking</span><span class="p">()</span>
 
-
-
-
   <span class="k">def</span> <span class="nf">_turnOnPositionPicking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linearRegions</span><span class="p">)</span>
@@ -231,7 +218,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">linearRegions</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">linearRegions</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
 
-
 <div class="viewcode-block" id="TargetButtonSpinBoxes.get"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.LinearRegionsPlot.TargetButtonSpinBoxes.get">[docs]</a>  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    :return: positions displayed on the boxes</span>
@@ -246,15 +232,10 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">linearRegions</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">linearRegions</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">values</span><span class="p">))</span></div>
 
-
-  <span class="c1"># def _deleteLater(self):</span>
-  <span class="c1">#   &#39;Remove the line from plotWidget if any&#39;</span>
-  <span class="c1">#   self._turnOffPositionPicking()</span>
-  <span class="c1">#   self.deleteLater()</span>
-
 <div class="viewcode-block" id="TargetButtonSpinBoxes.destroy"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.LinearRegionsPlot.TargetButtonSpinBoxes.destroy">[docs]</a>  <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bool_destroyWindow</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">bool_destroySubWindows</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_turnOffPositionPicking</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span> <span class="n">bool_destroyWindow</span><span class="o">=</span><span class="n">bool_destroyWindow</span><span class="p">,</span> <span class="n">bool_destroySubWindows</span><span class="o">=</span><span class="n">bool_destroySubWindows</span><span class="p">)</span></div></div>
+
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
   <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Application</span> <span class="kn">import</span> <span class="n">TestApplication</span>

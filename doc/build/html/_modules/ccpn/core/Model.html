@@ -57,13 +57,13 @@
 <span class="n">__licence__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text&quot;</span><span class="p">)</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license&quot;</span><span class="p">,</span>
-               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+                 <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:32:28 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -82,316 +82,327 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolStructure</span> <span class="kn">import</span> <span class="n">Model</span> <span class="k">as</span> <span class="n">ApiModel</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
 
+
 <span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="ModelData"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.ModelData">[docs]</a><span class="k">class</span> <span class="nc">ModelData</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  A view of a single model within an ensemble.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A view of a single model within an ensemble.</span>
 
-<span class="sd">  Once created, a ModelData object *should* behave exactly like an Ensemble.</span>
-<span class="sd">  If it doesn&#39;t, please report it as a bug.</span>
+<span class="sd">    Once created, a ModelData object *should* behave exactly like an Ensemble.</span>
+<span class="sd">    If it doesn&#39;t, please report it as a bug.</span>
 
-<span class="sd">  Note that ModelData objects are only valid when linked to an existing StructureEnsemble</span>
-<span class="sd">  and that self._modelNumber must match</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">    Note that ModelData objects are only valid when linked to an existing StructureEnsemble</span>
+<span class="sd">    and that self._modelNumber must match</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span><span class="s1">&#39;Model&#39;</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="s1">&#39;Model&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
 
-    <span class="c1"># Model CCPN object that contains ModelData. The object is ONLY valid when self._model is set</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="c1"># Model CCPN object that contains ModelData. The object is ONLY valid when self._model is set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">model</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_modelNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="c1"># Serial number for model containing ModelData</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">serial</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_modelNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1"># Serial number for model containing ModelData</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">serial</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnsembleData</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;EnsembleData object on which the ModelData are a view&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">data</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_ensemble</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnsembleData</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;EnsembleData object on which the ModelData are a view&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">data</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_modelNumberIndices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Get indices (in the pandas sense, elements of the index column,</span>
-<span class="sd">    in theory need not be integers). These should be used with self._ensemble.loc&quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span>
-    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="c1"># NB, you have to do this with a Series,</span>
-      <span class="c1"># as new DataFrames are automatically reset to 1-start index</span>
-      <span class="n">modelNumberSeries</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;modelNumber&#39;</span><span class="p">]</span>
-      <span class="n">modelFilter</span> <span class="o">=</span> <span class="n">modelNumberSeries</span><span class="p">[</span><span class="n">modelNumberSeries</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelNumber</span><span class="p">]</span>
-      <span class="k">if</span> <span class="n">modelFilter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">modelStart</span> <span class="o">=</span> <span class="n">modelFilter</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">modelEnd</span> <span class="o">=</span> <span class="n">modelFilter</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">modelStart</span><span class="p">,</span> <span class="n">modelEnd</span><span class="p">)</span>
-    <span class="c1"># No data found for the model:</span>
-    <span class="k">return</span> <span class="bp">None</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_modelNumberIndices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get indices (in the pandas sense, elements of the index column,</span>
+<span class="sd">        in theory need not be integers). These should be used with self._ensemble.loc&quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># NB, you have to do this with a Series,</span>
+            <span class="c1"># as new DataFrames are automatically reset to 1-start index</span>
+            <span class="n">modelNumberSeries</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;modelNumber&#39;</span><span class="p">]</span>
+            <span class="n">modelFilter</span> <span class="o">=</span> <span class="n">modelNumberSeries</span><span class="p">[</span><span class="n">modelNumberSeries</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelNumber</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">modelFilter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">modelStart</span> <span class="o">=</span> <span class="n">modelFilter</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">modelEnd</span> <span class="o">=</span> <span class="n">modelFilter</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">modelStart</span><span class="p">,</span> <span class="n">modelEnd</span><span class="p">)</span>
+        <span class="c1"># No data found for the model:</span>
+        <span class="k">return</span> <span class="bp">None</span>
 
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1"># This relies on the EnsembleData.__str__ having (only) the class name and the number of</span>
+        <span class="c1"># models before the first &#39;,&#39;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;ModelData model=</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_modelNumber</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="c1"># This relies on the EnsembleData.__str__ having (only) the class name and the number of</span>
-    <span class="c1"># models before the first &#39;,&#39;</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">return</span> <span class="s1">&#39;&lt;ModelData model=</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_modelNumber</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
 
-  <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="c1"># Use __getitem__</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="c1"># Use __getitem__</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">attr</span> <span class="o">==</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span>
+                <span class="n">mni</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelNumberIndices</span>
+                <span class="k">if</span> <span class="n">mni</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c1"># This should give an empty series of whatever type the index is (?)</span>
+                    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Set e to a slice of the ensemble data</span>
+                    <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mni</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">mni</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                    <span class="c1"># e.reset_index(inplace=True, drop=True)</span>
 
-      <span class="k">elif</span> <span class="n">attr</span> <span class="o">==</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># This is not a column - the indices are irrelevant. Just work on the full ensemble</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span>
+
+            <span class="c1">#</span>
+            <span class="k">return</span> <span class="n">ChainedAssignmentWarningSuppressor</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;Model&#39; object has no attribute &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">mni</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelNumberIndices</span>
+            <span class="k">if</span> <span class="n">mni</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c1"># No data present - return empty series, paying attention to type</span>
+                <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Set get item from a slice of the ensemble data</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mni</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">mni</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="c1"># e.reset_index(inplace=True, drop=True)</span>
+                <span class="k">return</span> <span class="n">e</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Should probably throw an error, but anyway we leave that to pandas</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;&#39;Model&#39; object has no key &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+
+        <span class="c1"># Works by creating a view on the ensemble and using the ensemble.__setitem__ on that.</span>
+
         <span class="n">mni</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelNumberIndices</span>
         <span class="k">if</span> <span class="n">mni</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="c1"># This should give an empty series of whatever type the index is (?)</span>
-          <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot set column values, model </span><span class="si">%s</span><span class="s2"> has no data&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
-          <span class="c1"># Set e to a slice of the ensemble data</span>
-          <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mni</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">mni</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
-          <span class="c1"># e.reset_index(inplace=True, drop=True)</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mni</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">mni</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="c1"># e.reset_index(inplace=True, drop=True)</span>
 
-      <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># This is not a column - the indices are irrelevant. Just work on the full ensemble</span>
-        <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span>
-
-      <span class="c1">#</span>
-      <span class="k">return</span> <span class="n">ChainedAssignmentWarningSuppressor</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
-
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;&#39;Model&#39; object has no attribute &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr</span><span class="p">))</span>
-
-
-  <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
-
-    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-      <span class="n">mni</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelNumberIndices</span>
-      <span class="k">if</span> <span class="n">mni</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c1"># No data present - return empty series, paying attention to type</span>
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">dtypes</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Set get item from a slice of the ensemble data</span>
-        <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mni</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">mni</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
-        <span class="c1"># e.reset_index(inplace=True, drop=True)</span>
-        <span class="k">return</span> <span class="n">e</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># Should probably throw an error, but anyway we leave that to pandas</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-      <span class="k">except</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;&#39;Model&#39; object has no key &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
-
-  <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
-
-    <span class="c1"># Works by creating a view on the ensemble and using the ensemble.__setitem__ on that.</span>
-
-    <span class="n">mni</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelNumberIndices</span>
-    <span class="k">if</span> <span class="n">mni</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot set column values, model </span><span class="si">%s</span><span class="s2"> has no data&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">)</span>
-
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mni</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">mni</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
-      <span class="c1"># e.reset_index(inplace=True, drop=True)</span>
-
-      <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-      <span class="c1"># NB This switch is a nasty hack, done to get the echoing and undoing to work</span>
-      <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">_containingObject</span>
-      <span class="n">e</span><span class="o">.</span><span class="n">_containingObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="n">e</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-      <span class="k">finally</span><span class="p">:</span>
-        <span class="n">e</span><span class="o">.</span><span class="n">_containingObject</span> <span class="o">=</span> <span class="n">structureEnsemble</span>
-        <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;warn&#39;</span><span class="p">)</span></div>
+            <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="c1"># NB This switch is a nasty hack, done to get the echoing and undoing to work</span>
+            <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">_containingObject</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">_containingObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">e</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">_containingObject</span> <span class="o">=</span> <span class="n">structureEnsemble</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;warn&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot; ccpn.Model - Structural Model, or one member of the structure ensemble.&quot;&quot;&quot;</span>
-  
-  <span class="c1">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;MD&#39;</span>
+    <span class="sd">&quot;&quot;&quot; ccpn.Model - Structural Model, or one member of the structure ensemble.&quot;&quot;&quot;</span>
 
-  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Model&#39;</span>
+    <span class="c1">#: Short class name, for PID.</span>
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;MD&#39;</span>
 
-  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">StructureEnsemble</span>
+    <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Model&#39;</span>
 
-  <span class="c1">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;models&#39;</span>
+    <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">StructureEnsemble</span>
 
-  <span class="c1">#: List of child classes.</span>
-  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: Name of plural link to instances of class</span>
+    <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;models&#39;</span>
 
-  <span class="c1"># Qualified name of matching API class</span>
-  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiModel</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="c1">#: List of child classes.</span>
+    <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c1"># Sentinel, to check if modelData view object has been created</span>
-  <span class="n">_modelData</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c1"># Qualified name of matching API class</span>
+    <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiModel</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-  <span class="c1"># CCPN properties</span>
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_apiModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiModel</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; API Model matching Model&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="c1"># Sentinel, to check if modelData view object has been created</span>
+    <span class="n">_modelData</span> <span class="o">=</span> <span class="bp">None</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;id string - ID number converted to string&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+    <span class="c1"># CCPN properties</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_apiModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiModel</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; API Model matching Model&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;ID number of Model, used in Pid and to identify the Model. &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
-    
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructureEnsemble</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;StructureEnsemble containing Model.&quot;&quot;&quot;</span>
-    <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="p">]</span>
-  
-  <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="n">_parent</span>
-  
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;title of Model -  a line of free-form text.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;id string - ID number converted to string&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
 
-  <span class="nd">@label.setter</span>
-  <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;ID number of Model, used in Pid and to identify the Model. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelData</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Model data pandas object - a view on the data in the StructureEnsemble.&quot;&quot;&quot;</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelData</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelData</span> <span class="o">=</span> <span class="n">ModelData</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructureEnsemble</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;StructureEnsemble containing Model.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="p">]</span>
+
+    <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="n">_parent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;title of Model -  a line of free-form text.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="nd">@label.setter</span>
+    <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelData</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Model data pandas object - a view on the data in the StructureEnsemble.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelData</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelData</span> <span class="o">=</span> <span class="n">ModelData</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
+
+    <span class="nd">@comment.setter</span>
+    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Model.clearData"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.Model.clearData">[docs]</a>    <span class="k">def</span> <span class="nf">clearData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove all data for model by successively calling the deleteRow method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># data.drop(modelNumber=data._modelsSelector(self.serial))      # ejb - old - already seems to be empty</span>
+
+            <span class="c1"># need iterrecords to check the modeNumber against the list and delete each individually</span>
+
+            <span class="c1"># containingObject = self._containingObject</span>
+            <span class="n">containingObject</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">_containingObject</span>  <span class="c1"># supresses the creation of intermediate</span>
+            <span class="k">if</span> <span class="n">containingObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>  <span class="c1"># wayPoints - this becomes a single undo event</span>
+                <span class="c1"># undo and echoing</span>
+                <span class="n">containingObject</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;clearData&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Found = True</span>
+            <span class="c1"># while Found:</span>
+            <span class="c1">#   Found = False                             # set to False for the next iteration</span>
+            <span class="c1">#   self.itRec = data.records()</span>
+            <span class="c1">#   for rNum, rec in enumerate(self.itRec):</span>
+            <span class="c1">#     if int(rec[&#39;modelNumber&#39;]) == self.serial:</span>
+            <span class="c1">#       data.deleteRow(rNum+1)          # should also be able to undo this</span>
+            <span class="c1">#       Found = True</span>
+            <span class="c1">#       break                                 # break out for the next repeat</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;modelNumber&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="c1"># If there are no modelNumbers, we must be in the process of deleting</span>
+                    <span class="c1"># the modelNumbers column, or some similar shenanigans.</span>
+                    <span class="c1"># Anyway, you do not clear the data if there are none to clear. OK.</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">deleteSelectedRows</span><span class="p">(</span><span class="n">modelNumbers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">containingObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">containingObject</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;StructureEnsemble </span><span class="si">%s</span><span class="s1"> contains no data for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span></div>
+
+    <span class="c1">#=========================================================================================</span>
+    <span class="c1"># Implementation functions</span>
+    <span class="c1">#=========================================================================================</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">StructureEnsemble</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;get wrappedData - all Model children of parent StructureEnsemble&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedModels</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># clean up the model</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;delete&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clearData</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_newModel</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">StructureEnsemble</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new Model&quot;&quot;&quot;</span>
+
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+
+    <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newModel&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newModel&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">newApiModel</span> <span class="o">=</span> <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">newModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiModel</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
+                               <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
-    
-  <span class="nd">@comment.setter</span>
-  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
-
-<div class="viewcode-block" id="Model.clearData"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.Model.clearData">[docs]</a>  <span class="k">def</span> <span class="nf">clearData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove all data for model by successively calling the deleteRow method</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">data</span>
-    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="c1"># data.drop(modelNumber=data._modelsSelector(self.serial))      # ejb - old - already seems to be empty</span>
-
-      <span class="c1"># need iterrecords to check the modeNumber against the list and delete each individually</span>
-
-      <span class="c1"># containingObject = self._containingObject</span>
-      <span class="n">containingObject</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">_containingObject</span>     <span class="c1"># supresses the creation of intermediate</span>
-      <span class="k">if</span> <span class="n">containingObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>              <span class="c1"># wayPoints - this becomes a single undo event</span>
-        <span class="c1"># undo and echoing</span>
-        <span class="n">containingObject</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;clearData&#39;</span><span class="p">)</span>
-
-      <span class="c1"># Found = True</span>
-      <span class="c1"># while Found:</span>
-      <span class="c1">#   Found = False                             # set to False for the next iteration</span>
-      <span class="c1">#   self.itRec = data.records()</span>
-      <span class="c1">#   for rNum, rec in enumerate(self.itRec):</span>
-      <span class="c1">#     if int(rec[&#39;modelNumber&#39;]) == self.serial:</span>
-      <span class="c1">#       data.deleteRow(rNum+1)          # should also be able to undo this</span>
-      <span class="c1">#       Found = True</span>
-      <span class="c1">#       break                                 # break out for the next repeat</span>
-
-      <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;modelNumber&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-          <span class="c1"># If there are no modelNumbers, we must be in the process of deleting</span>
-          <span class="c1"># the modelNumbers column, or some similar shenanigans.</span>
-          <span class="c1"># Anyway, you do not clear the data if there are none to clear. OK.</span>
-          <span class="n">data</span><span class="o">.</span><span class="n">deleteSelectedRows</span><span class="p">(</span><span class="n">modelNumbers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
-
-      <span class="k">finally</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">containingObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">containingObject</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;StructureEnsemble </span><span class="si">%s</span><span class="s1"> contains no data for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span></div>
-
-  <span class="nd">@classmethod</span>
-  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">StructureEnsemble</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;get wrappedData - all Model children of parent StructureEnsemble&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedModels</span><span class="p">()</span></div>
-
-<span class="k">def</span> <span class="nf">_newModel</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">StructureEnsemble</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new Model&quot;&quot;&quot;</span>
-
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
-
-  <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startCommandEchoBlock</span><span class="p">(</span><span class="s1">&#39;newModel&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                              <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newModel&#39;</span><span class="p">)</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="n">newApiModel</span> <span class="o">=</span> <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">newModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiModel</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
-      <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
-                                     <span class="o">%</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
-      <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
-  <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_endCommandEchoBlock</span><span class="p">()</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span>
 
 
 <span class="c1"># Connections to parents:</span>
 <span class="n">StructureEnsemble</span><span class="o">.</span><span class="n">newModel</span> <span class="o">=</span> <span class="n">_newModel</span>
 <span class="k">del</span> <span class="n">_newModel</span>
 
+<span class="c1">#EJB 20181122: moved to _finaliseAction</span>
 <span class="c1"># Notifiers:</span>
-<span class="n">Model</span><span class="o">.</span><span class="n">_setupCoreNotifier</span><span class="p">(</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="n">Model</span><span class="o">.</span><span class="n">clearData</span><span class="p">)</span>
-
+<span class="c1"># Model._setupCoreNotifier(&#39;delete&#39;, Model.clearData)</span>
 
 
 <div class="viewcode-block" id="ChainedAssignmentWarningSuppressor"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.ChainedAssignmentWarningSuppressor">[docs]</a><span class="k">class</span> <span class="nc">ChainedAssignmentWarningSuppressor</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Suppress Pandas&#39; warnings about chained assignment when using an assignment strategy</span>
-<span class="sd">  known to not suffer from chained assignment.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">__f</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Suppress Pandas&#39; warnings about chained assignment when using an assignment strategy</span>
+<span class="sd">    known to not suffer from chained assignment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
-    <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-    <span class="n">o</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;warn&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">o</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__f</span> <span class="o">=</span> <span class="n">f</span>
 
-  <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">o</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;warn&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">o</span>
 
-  <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
-    <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-    <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;warn&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-  <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span>
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">):</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;chained_assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;warn&#39;</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">__f</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span>
 
-  <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__f</span> <span class="o">=</span> <span class="n">value</span>
 
-  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__f</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
 </pre></div>
 
           </div>

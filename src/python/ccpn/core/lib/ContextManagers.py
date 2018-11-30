@@ -552,6 +552,7 @@ def notificationBlanking(application=None):
         # clean up after blocking notifications
         application.project.unblankNotification()
 
+
 @contextmanager
 def notificationUnblanking():
     """
@@ -680,8 +681,10 @@ def deleteBlockManager(application=None, deleteBlockOnly=False):
 
 CURRENT_ATTRIBUTE_NAME = '_currentAttributeName'
 
+
 class _ObjectStore(object):
     "A class to store a current setting"
+
     def __init__(self, obj):
         self.current = getApplication().current
         self.attributeName = getattr(obj, CURRENT_ATTRIBUTE_NAME)
@@ -709,7 +712,7 @@ def newObject(klass):
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
 
-        application = getApplication() # pass it in to reduce overhead
+        application = getApplication()  # pass it in to reduce overhead
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
@@ -721,19 +724,19 @@ def newObject(klass):
                 # retrieve list of created items from the api
                 apiObjectsCreated = result._getApiObjectTree()
                 addUndoItem(undo=BlankedPartial(Undo._deleteAllApiObjects,
-                                             obj=result, trigger='delete', preExecution=True,
-                                             objsToBeDeleted=apiObjectsCreated),
-                         redo=BlankedPartial(result._wrappedData.root._unDelete,
-                                             topObjectsToCheck=(result._wrappedData.topObject,),
-                                             obj=result, trigger='create', preExecution=False,
-                                             objsToBeUnDeleted=apiObjectsCreated)
-                         )
+                                                obj=result, trigger='delete', preExecution=True,
+                                                objsToBeDeleted=apiObjectsCreated),
+                            redo=BlankedPartial(result._wrappedData.root._unDelete,
+                                                topObjectsToCheck=(result._wrappedData.topObject,),
+                                                obj=result, trigger='create', preExecution=False,
+                                                objsToBeUnDeleted=apiObjectsCreated)
+                            )
 
                 if hasattr(result, CURRENT_ATTRIBUTE_NAME):
                     storeObj = _ObjectStore(result)
                     addUndoItem(undo=storeObj._storeCurrentSelectedObject,
-                             redo=storeObj._restoreCurrentSelectedObject,
-                             )
+                                redo=storeObj._restoreCurrentSelectedObject,
+                                )
 
         result._finaliseAction('create')
         return result
@@ -746,27 +749,41 @@ def deleteObject():
     calls self._finalise('delete') prior to deletion
 
     GWV first try
+    EJB 20181130: modified
     """
+    from ccpn.core.lib import Undo
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
-
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
+        application = getApplication()  # pass it in to reduce overhead
 
         self._finaliseAction('delete')
 
-        application = getApplication()  # pass it in to reduce overhead
-
         with notificationBlanking(application=application):
-                #_undo.increaseBlocking()
-                # call the wrapped function
-                result = func(*args, **kwds)
-                #_undo.decreaseBlocking()
+            with undoStackBlocking(application=application) as addUndoItem:
 
-                # _undo._newItem(undoPartial=partial(self.project.deleteObjects, result),
-                #                redoPartial=partial(func, *args, **kwds))
+                if hasattr(self, CURRENT_ATTRIBUTE_NAME):
+                    storeObj = _ObjectStore(self)
+                    addUndoItem(undo=storeObj._storeCurrentSelectedObject,
+                                redo=storeObj._restoreCurrentSelectedObject
+                                )
+
+                # retrieve list of created items from the api
+                apiObjectsCreated = self._getApiObjectTree()
+                addUndoItem(undo=BlankedPartial(self._wrappedData.root._unDelete,
+                                                topObjectsToCheck=(self._wrappedData.topObject,),
+                                                obj=self, trigger='create', preExecution=False,
+                                                objsToBeUnDeleted=apiObjectsCreated),
+                            redo=BlankedPartial(self._wrappedData.delete,
+                                                obj=self, trigger='delete', preExecution=True)
+                            )
+
+                # call the wrapped delete function
+                result = func(*args, **kwds)
+
         return result
 
     return theDecorator
@@ -776,6 +793,7 @@ class BlankedPartial(object):
     """Wrapper (like partial) to call func(**kwds) with blanking
     optionally trigger the notification of obj, either pre- or post execution
     """
+
     def __init__(self, func, obj=None, trigger=None, preExecution=False, **kwds):
         self._func = func
         self._kwds = kwds
@@ -805,7 +823,6 @@ def ccpNmrV3CoreSetter():
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
-
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
@@ -816,18 +833,16 @@ def ccpNmrV3CoreSetter():
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-
                 # call the wrapped function
                 result = func(*args, **kwds)
 
                 addUndoItem(undo=partial(func, self, oldValue),
-                         redo=partial(func, self, args[1])
-                         )
+                            redo=partial(func, self, args[1])
+                            )
         self._finaliseAction('change')
         return result
 
     return theDecorator
-
 
 # if __name__ == '__main__':
 #     # check that the undo mechanism is working with the new context managers

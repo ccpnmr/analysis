@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, logCommandBlock
 
 
 class NmrChain(AbstractWrapperObject):
@@ -334,11 +334,45 @@ class NmrChain(AbstractWrapperObject):
         """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
         return parent._wrappedData.sortedNmrChains()
 
-
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
+
+    @logCommand(get='self')
+    def newNmrResidue(self, sequenceCode: typing.Union[int, str] = None, residueType: str = None,
+                      comment: str = None):
+        """Create new NmrResidue within NmrChain.
+
+        If NmrChain is connected, append the new NmrResidue to the end of the stretch.
+
+        :param sequenceCode:
+        :param residueType:
+        :param comment:
+        :return: a new NmrResidue instance.
+        """
+        from ccpn.core.NmrResidue import _newNmrResidue
+
+        return _newNmrResidue(self, sequenceCode=sequenceCode, residueType=residueType,
+                              comment=comment)
+
+    @logCommand(get='self')
+    def fetchNmrResidue(self, sequenceCode: typing.Union[int, str] = None,
+                        residueType: str = None):
+        """Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,
+        creating it if necessary.
+
+        if sequenceCode is None will create a new NmrResidue
+
+        if bool(residueType)  is False will return any existing NmrResidue that matches the sequenceCode
+
+        :param sequenceCode:
+        :param residueType:
+        :return: an NmrResidue instance.
+        """
+        from ccpn.core.NmrResidue import _fetchNmrResidue
+
+        return _fetchNmrResidue(self, sequenceCode=sequenceCode, residueType=residueType)
 
 
 # GWV 20181122: moved to Chain class
@@ -358,6 +392,13 @@ class NmrChain(AbstractWrapperObject):
 # del getter
 # del setter
 
+
+#===========================================================================================
+
+
+# new nmrChain functions
+
+@newObject(NmrChain)
 def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False, label: str = '?',
                  comment: str = None) -> NmrChain:
     """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
@@ -365,10 +406,11 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
     :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later
     :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to '@ijk'/'#ijk'
-    :param str comment: comment for new nmrChain (optional)"""
-
-    defaults = collections.OrderedDict((('shortName', None), ('isConnected', False),
-                                        ('label', '?'), ('comment', None)))
+    :param str comment: comment for new nmrChain (optional)
+    :return: a new nmrChain instance.
+    """
+    # defaults = collections.OrderedDict((('shortName', None), ('isConnected', False),
+    #                                     ('label', '?'), ('comment', None)))
 
     nmrProject = self._apiNmrProject
     serial = None
@@ -396,22 +438,27 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
         shortName = None
 
     dd = {'code': shortName, 'isConnected': isConnected, 'label': label, 'details': comment}
-    self._startCommandEchoBlock('newNmrChain', values=locals(), defaults=defaults,
-                                parName='newNmrChain')
-    result = None
-    try:
-        newApiNmrChain = nmrProject.newNmrChain(**dd)
-        result = self._data2Obj.get(newApiNmrChain)
-        if serial is not None:
-            try:
-                result.resetSerial(serial)
-                # modelUtil.resetSerial(newApiNmrChain, serial, 'nmrChains')
-            except ValueError:
-                self.project._logger.warning("Could not set shortName of %s to %s - keeping default value"
-                                             % (result, shortName))
-            result._finaliseAction('rename')
-    finally:
-        self._endCommandEchoBlock()
+    # self._startCommandEchoBlock('newNmrChain', values=locals(), defaults=defaults,
+    #                             parName='newNmrChain')
+    # result = None
+    # try:
+
+    newApiNmrChain = nmrProject.newNmrChain(**dd)
+    result = self._data2Obj.get(newApiNmrChain)
+    if result is None:
+        raise RuntimeError('Unable to generate new NmrChain item')
+
+    if serial is not None:
+        try:
+            result.resetSerial(serial)
+            # modelUtil.resetSerial(newApiNmrChain, serial, 'nmrChains')
+        except ValueError:
+            self.project._logger.warning("Could not set shortName of %s to %s - keeping default value"
+                                         % (result, shortName))
+
+    #     result._finaliseAction('rename')
+    # finally:
+    #     self._endCommandEchoBlock()
 
     return result
 
@@ -420,9 +467,16 @@ def _fetchNmrChain(self: Project, shortName: str = None) -> NmrChain:
     """Fetch chain with given shortName; If none exists call newNmrChain to make one first
 
     If shortName is None returns a new NmrChain with name starting with '@'
+
+    :param shortName:
+    :return: nmrChain instance.
     """
-    self._startCommandEchoBlock('fetchNmrChain', shortName, parName='newNmrChain')
-    try:
+    # self._startCommandEchoBlock('fetchNmrChain', shortName, parName='newNmrChain')
+    # try:
+
+    with logCommandBlock(prefix='newNmrChain', get='self') as log:
+        log('fetchNmrChain')
+
         if not shortName:
             result = self.newNmrChain()
         else:
@@ -431,18 +485,22 @@ def _fetchNmrChain(self: Project, shortName: str = None) -> NmrChain:
                 result = self.newNmrChain(shortName=shortName)
             else:
                 result = self._data2Obj.get(apiNmrChain)
-    finally:
-        self._endCommandEchoBlock()
+
+    # finally:
+    #     self._endCommandEchoBlock()
+
     return result
 
 
 # Clean-up
 
 # Connections to parents:
-Project.newNmrChain = _newNmrChain
-del _newNmrChain
-Project.fetchNmrChain = _fetchNmrChain
-del _fetchNmrChain
+
+#EJB 20181130: moved to project
+# Project.newNmrChain = _newNmrChain
+# del _newNmrChain
+# Project.fetchNmrChain = _fetchNmrChain
+# del _fetchNmrChain
 
 # Notifiers:
 className = ApiNmrChain._metaclass.qualifiedName()

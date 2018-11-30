@@ -602,26 +602,26 @@ class Project(AbstractWrapperObject):
         return notifier
 
     #GWV 20181123
-  # def duplicateNotifier(self,  className:str, target:str,
-  #                       notifier:typing.Callable[..., None]):
-  #   """register copy of notifier for a new className and target.
-  #   Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
-  #   interface matches the action"""
-  #   if target in self._notifierActions:
-  #
-  #     tt = (className, target)
-  #   else:
-  #     # This is right, it just looks strange. But if target is not an action it is
-  #     # another className, and if so the names must be sorted.
-  #     tt = tuple(sorted([className, target]))
-  #
-  #   for od in self._context2Notifiers.values():
-  #     onceOnly = od.get(notifier)
-  #     if onceOnly is not None:
-  #       self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
-  #       break
-  #   else:
-  #     raise ValueError("Unknown notifier: %s" % notifier)
+    # def duplicateNotifier(self,  className:str, target:str,
+    #                       notifier:typing.Callable[..., None]):
+    #   """register copy of notifier for a new className and target.
+    #   Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
+    #   interface matches the action"""
+    #   if target in self._notifierActions:
+    #
+    #     tt = (className, target)
+    #   else:
+    #     # This is right, it just looks strange. But if target is not an action it is
+    #     # another className, and if so the names must be sorted.
+    #     tt = tuple(sorted([className, target]))
+    #
+    #   for od in self._context2Notifiers.values():
+    #     onceOnly = od.get(notifier)
+    #     if onceOnly is not None:
+    #       self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
+    #       break
+    #   else:
+    #     raise ValueError("Unknown notifier: %s" % notifier)
 
     def unRegisterNotifier(self, className: str, target: str, notifier: typing.Callable[..., None]):
         """Unregister the notifier from this className, and target"""
@@ -1357,6 +1357,7 @@ class Project(AbstractWrapperObject):
 
         """
         from ccpn.ui._implementation.Mark import _newMark
+
         return _newMark(self, colour=colour, positions=positions, axisCodes=axisCodes,
                         style=style, units=units, labels=labels
                         )
@@ -1385,11 +1386,12 @@ class Project(AbstractWrapperObject):
         Use Project.loadData or Project.createDummySpectrum instead.
         """
         from ccpn.core.Spectrum import _newSpectrum
+
         return _newSpectrum(self, name=name)
 
     @logCommand(get='self')
     def createDummySpectrum(self, axisCodes: Sequence[str], name=None,
-                             chemicalShiftList=None):
+                            chemicalShiftList=None):
         """
         Make dummy spectrum from isotopeCodes list - without data and with default parameters.
 
@@ -1400,5 +1402,36 @@ class Project(AbstractWrapperObject):
         """
 
         from ccpn.core.Spectrum import _createDummySpectrum
+
         return _createDummySpectrum(self, axisCodes=axisCodes, name=name,
                                     chemicalShiftList=chemicalShiftList)
+
+    @logCommand(get='self')
+    def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',
+                     comment: str = None):
+        """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
+
+        :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
+        :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later
+        :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to '@ijk'/'#ijk'
+        :param str comment: comment for new nmrChain (optional)
+        :return: a new NmrChain instance.
+        """
+        from ccpn.core.NmrChain import _newNmrChain
+
+        return _newNmrChain(self, shortName=shortName, isConnected=isConnected,
+                            label=label, comment=comment)
+
+    @logCommand(get='self')
+    def fetchNmrChain(self, shortName: str = None):
+        """Fetch chain with given shortName; If none exists call newNmrChain to make one first
+
+        If shortName is None returns a new NmrChain with name starting with '@'
+
+        :param shortName:
+        :return: an NmrChain instance.
+        """
+        from ccpn.core.NmrChain import _fetchNmrChain
+
+        return _fetchNmrChain(self, shortName=shortName)
+

@@ -201,16 +201,15 @@ class IntegralList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newIntegral(self, value: List[float] = None, comment: str = None, **kwds):
-        """Create a new integral within an IntegralList
+        """Create a new integral within an IntegralList.
 
-        See the Integral class for details
+        See the Integral class for details.
+
+        Optional keyword arguments can be passed in; see Integral._newIntegral for details.
 
         :param value: (min, max) values in ppm for the integral
         :param comment: optional comment string
-
-        :return Integral instance
-
-        optional keyword arguments can be passed in; see Integral._newIntegral for details.
+        :return: a new Integral instance
         """
         from ccpn.core.Integral import _newIntegral  # imported here to avoid circular imports
 
@@ -303,17 +302,17 @@ def _newIntegralList(self: Spectrum, title: str = None, symbolColour: str = None
     :param textColour:
     :param comment:
     :param serial:
-    :return:
+    :return: a new IntegralList attached to the spectrum.
     """
 
-    apiParent = self._apiDataSource
     dd = {'name': title, 'details': comment, 'dataType': 'Integral'}
     if symbolColour:
         dd['symbolColour'] = symbolColour
     if textColour:
         dd['textColour'] = textColour
 
-    apiIntegralList = apiParent.newIntegralList(**dd)
+    apiDataSource = self._apiDataSource
+    apiIntegralList = apiDataSource.newIntegralList(**dd)
     result = self._project._data2Obj.get(apiIntegralList)
     if result is None:
         raise RuntimeError('Unable to generate new IntegralList item')

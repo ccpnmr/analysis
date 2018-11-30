@@ -1379,21 +1379,26 @@ class Project(AbstractWrapperObject):
     #     """
     #     pass
 
+    @logCommand(get='self')
     def newSpectrum(self, name: str):
         """Creation of new Spectrum NOT IMPLEMENTED.
-        Use Project.loadData or Project.createDummySpectrum instead
-
-        Inserted later ccpn.Core.Spectrum
+        Use Project.loadData or Project.createDummySpectrum instead.
         """
-        pass
+        from ccpn.core.Spectrum import _newSpectrum
+        return _newSpectrum(self, name=name)
 
+    @logCommand(get='self')
     def createDummySpectrum(self, axisCodes: Sequence[str], name=None,
                              chemicalShiftList=None):
-        """Make dummy spectrum from isotopeCodes list - without data and with
-        default parameters
-
-        return Spectrum instance
-
-        Inserted later ccpn.Core.Spectrum
         """
-        pass
+        Make dummy spectrum from isotopeCodes list - without data and with default parameters.
+
+        :param axisCodes:
+        :param name:
+        :param chemicalShiftList:
+        :return: a new Spectrum instance.
+        """
+
+        from ccpn.core.Spectrum import _createDummySpectrum
+        return _createDummySpectrum(self, axisCodes=axisCodes, name=name,
+                                    chemicalShiftList=chemicalShiftList)

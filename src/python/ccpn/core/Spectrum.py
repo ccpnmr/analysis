@@ -1755,7 +1755,7 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newIntegralList(self, title: str = None, symbolColour: str = None,
-                         textColour: str = None, comment: str = None, **kwds):
+                        textColour: str = None, comment: str = None, **kwds):
         """Create new IntegralList within Spectrum.
 
         See the IntegralList class for details.
@@ -1777,9 +1777,9 @@ class Spectrum(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newMultipletList(self, title: str = None,
-                          symbolColour: str = None, textColour: str = None, lineColour: str = None,
-                          multipletAveraging=0,
-                          comment: str = None, multiplets: ['Multiplet'] = None, **kwds):
+                         symbolColour: str = None, textColour: str = None, lineColour: str = None,
+                         multipletAveraging=0,
+                         comment: str = None, multiplets: ['Multiplet'] = None, **kwds):
         """Create new MultipletList within Spectrum
 
         See the MultipletList class for details.
@@ -1809,19 +1809,26 @@ class Spectrum(AbstractWrapperObject):
 # CCPN functions
 #=========================================================================================
 
+@newObject(Spectrum)
 def _newSpectrum(self: Project, name: str) -> Spectrum:
     """Creation of new Spectrum NOT IMPLEMENTED.
     Use Project.loadData or Project.createDummySpectrum instead"""
-    # __doc__ added to Project
 
     raise NotImplementedError("Not implemented. Use loadSpectrum instead")
 
 
+@newObject(Spectrum)
 def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
                          chemicalShiftList=None) -> Spectrum:
-    """Make dummy spectrum from isotopeCodes list - without data and with default parameters """
-    # __doc__ added to Project
+    """
+    Make dummy spectrum from isotopeCodes list - without data and with default parameters.
 
+    :param self:
+    :param axisCodes:
+    :param name:
+    :param chemicalShiftList:
+    :return: a new Spectrum instance.
+    """
     # TODO - change so isotopeCodes can be passed in instead of axisCodes
 
     apiShiftList = chemicalShiftList._wrappedData if chemicalShiftList else None
@@ -1833,16 +1840,15 @@ def _createDummySpectrum(self: Project, axisCodes: Sequence[str], name=None,
     else:
         values = {}
 
-    self._startCommandEchoBlock('_createDummySpectrum', axisCodes, values=values,
-                                parName='newSpectrum')
-    try:
-        result = self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name,
-                                                                      shiftList=apiShiftList)]
-    finally:
-        self._endCommandEchoBlock()
+    apiSpectrum = self._wrappedData.createDummySpectrum(axisCodes, name=name,
+                                                        shiftList=apiShiftList)
+    result = self._project._data2Obj[apiSpectrum]
+    if result is None:
+        raise RuntimeError('Unable to generate new Spectrum item')
+
     return result
 
-
+# EJB 20181130: not sure what do with this
 def _spectrumMakeFirstPeakList(project: Project, dataSource: Nmr.DataSource):
     """Add PeakList if none is present - also IntegralList for 1D. For notifiers."""
     if not dataSource.findFirstPeakList(dataType='Peak'):
@@ -1854,10 +1860,11 @@ del _spectrumMakeFirstPeakList
 
 # Connections to parents:
 
-Project.newSpectrum = _newSpectrum
-del _newSpectrum
-Project.createDummySpectrum = _createDummySpectrum
-del _createDummySpectrum
+# EJB 20181128: moved to Project
+# Project.newSpectrum = _newSpectrum
+# del _newSpectrum
+# Project.createDummySpectrum = _createDummySpectrum
+# del _createDummySpectrum
 
 # Additional Notifiers:
 Project._apiNotifiers.extend(

@@ -38,7 +38,7 @@ class TextExporter(Exporter):
     data = []
     ci = self.item.allChildItems()
     for i in ci:
-      if isinstance(i, pg.PlotDataItem):
+      if isinstance(i, pg.PlotDataItem) or isinstance(i, pg.ScatterPlotItem):
         x, y = i.getData()
         if x is not None:
           if len(x) > 0:

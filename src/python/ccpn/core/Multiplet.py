@@ -358,7 +358,7 @@ class Multiplet(AbstractWrapperObject):
         Add a peak or list of peaks to the Multiplet
         The peaks must belong to the spectrum containing the multipletList.
 
-        :param peaks - single peak or list of peaks:
+        :param peaks: single peak or list of peaks
         """
         spectrum = self._parent.spectrum
         peakList = makeIterableList(peaks)
@@ -389,7 +389,7 @@ class Multiplet(AbstractWrapperObject):
         Remove a peak or list of peaks from the Multiplet
         The peaks must belong to the multiplet.
 
-        :param peaks - single peak or list of peaks:
+        :param peaks: single peak or list of peaks
         """
         spectrum = self._parent.spectrum
         peakList = makeIterableList(peaks)

@@ -76,7 +76,7 @@ from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
 # from ccpn.ui.gui.modules.NotesEditor import NotesEditorModule
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, NotifierBase
 
 
 # NB the order matters!
@@ -223,9 +223,8 @@ def _openSampleSpectra(mainWindow, sample, position=None, relativeTo=None):
                 for spectrum in sampleComponent.substance.referenceSpectra:
                     spectrumDisplay.displaySpectrum(spectrum)
         mainWindow.application.current.strip = spectrumDisplay.strips[0]
-        # if all(sample.spectra[0].dimensionCount) == 1:
-        #     mainWindow.application.current.strip.plotWidget.autoRange()
-
+        if all(sample.spectra[0].dimensionCount) == 1:
+            mainWindow.application.current.strip.autoRange()
 
 def _openPeakList(mainWindow, peakList, position=None, relativeTo=None):
     application = mainWindow.application
@@ -291,7 +290,7 @@ OpenObjAction = {
 ### Flag example code removed in revision 7686
 
 
-class SideBar(QtWidgets.QTreeWidget, Base):
+class SideBar(QtWidgets.QTreeWidget, Base, NotifierBase):
     def __init__(self, parent=None, mainWindow=None, multiSelect=True):
 
         super().__init__(parent)
@@ -304,6 +303,8 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         self.mainWindow = parent  # ejb - needed for moduleArea
         self.application = self.mainWindow.application
         # self._typeToItem = dd = {}
+        self._sidebarBlockingLevel = 0
+        self._sideBarState = []
 
         self.setFont(sidebarFont)
         self.header().hide()
@@ -329,6 +330,24 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                                            self._processDroppedItems)
 
         self.itemDoubleClicked.connect(self._raiseObjectProperties)
+
+    @property
+    def sidebarBlocked(self):
+        """Sidebar blocking. If true (non-zero) sidebar updates are blocked.
+        Allows multiple external functions to set blocking without trampling each other
+        Modify with increaseBlocking/decreaseBlocking only"""
+        return self._sidebarBlockingLevel > 0
+
+    def increaseSidebarBlocking(self):
+        """increase level of blocking"""
+        self._sidebarBlockingLevel += 1
+
+    def decreaseSidebarBlocking(self):
+        """Reduce level of blocking - when level reaches zero, Sidebar is unblocked"""
+        if self.sidebarBlocked:
+            self._sidebarBlockingLevel -= 1
+        else:
+            raise RuntimeError('Error: cannot decrease blocking below 0')
 
     def _populateSidebar(self):
         self._clearQTreeWidget(self)
@@ -508,80 +527,49 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         self.project = project
         self._registerNotifiers()
 
-        # TODO:ED use return to disable sidebar notifiers
-        return
-
-        # # Register notifiers to maintain sidebar
-        # for cls in classesInSideBar.values():
-        #   className = cls.className
-        #   project.registerNotifier(className, 'delete', self._removeItem, onceOnly=True)
-        #   if className != 'NmrResidue':
-        #     project.registerNotifier(className, 'create', self._createItem, )
-        #     project.registerNotifier(className, 'rename', self._renameItem, onceOnly=True)
-        # project.registerNotifier('NmrResidue', 'create', self._refreshParentNmrChain, onceOnly=True)
-        # project.registerNotifier('NmrResidue', 'rename', self._renameNmrResidueItem, onceOnly=True)
-        #
-        # notifier = project.registerNotifier('SpectrumGroup', 'Spectrum', self._refreshSidebarSpectra,
-        #                                     onceOnly=True)
-        # project.duplicateNotifier('SpectrumGroup', 'create', notifier)
-        # project.duplicateNotifier('SpectrumGroup', 'delete', notifier)
-        # # TODO:RASMUS Add similar set of notifiers, and similar function for Complex/Chain
-
     def _registerNotifiers(self):
         self._notifierList = []
 
         # Register notifiers to maintain sidebar
         for cls in classesInSideBar.values():
             className = cls.className
-            # self._notifierList.append(self.project.registerNotifier(className, 'delete', self._removeItem, onceOnly=True))
-            self._notifierList.append(Notifier(self.project,
+
+            self._notifierList.append(self.setNotifier(self.project,
                                                [Notifier.DELETE],
                                                className,
                                                self._removeItem,
                                                onceOnly=True))
 
             if className != 'NmrResidue':
-                # self._notifierList.append(self.project.registerNotifier(className, 'create', self._createItem, ))
-                self._notifierList.append(Notifier(self.project,
+                self._notifierList.append(self.setNotifier(self.project,
                                                    [Notifier.CREATE],
                                                    className,
                                                    self._createItem))
-                # self._notifierList.append(self.project.registerNotifier(className, 'rename', self._renameItem, onceOnly=True))
-                self._notifierList.append(Notifier(self.project,
+
+                self._notifierList.append(self.setNotifier(self.project,
                                                    [Notifier.RENAME],
                                                    className,
                                                    self._renameItem,
                                                    onceOnly=True))
 
-        # self._notifierList.append(self.project.registerNotifier('NmrResidue', 'create', self._refreshParentNmrChain, onceOnly=True))
-        self._notifierList.append(Notifier(self.project,
+        self._notifierList.append(self.setNotifier(self.project,
                                            [Notifier.CREATE],
                                            'NmrResidue',
                                            self._refreshParentNmrChain,
                                            onceOnly=True))
-        # self._notifierList.append(self.project.registerNotifier('NmrResidue', 'rename', self._renameNmrResidueItem, onceOnly=True))
-        self._notifierList.append(Notifier(self.project,
+
+        self._notifierList.append(self.setNotifier(self.project,
                                            [Notifier.RENAME],
                                            'NmrResidue',
                                            self._renameNmrResidueItem,
                                            onceOnly=True))
 
-        # self._notifierList.append(self.project.registerNotifier('SpectrumGroup', 'Spectrum', self._refreshSidebarSpectra,
-        #                                     onceOnly=True))
-        # self._notifierList.append(Notifier(self.project,
-        #                                    'Spectrum',
-        #                                    'SpectrumGroup',
-        #                                    self._refreshSidebarSpectra,
-        #                                    onceOnly=True))
-        # notifier = self._notifierList[-1]
-
-        # self._notifierList.append(self.project.duplicateNotifier('SpectrumGroup', 'create', notifier))
-        # self._notifierList.append(self.project.duplicateNotifier('SpectrumGroup', 'delete', notifier))
-        self._notifierList.append(Notifier(self.project,
+        self._notifierList.append(self.setNotifier(self.project,
                                            [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE],
                                            'SpectrumGroup',
                                            self._refreshSidebarSpectra))
-        # TODO:RASMUS Add similar set of notifiers, and similar function for Complex/Chain
+
+        # TODO:ED Add similar set of notifiers, and similar function for Complex/Chain
 
     def _unregisterNotifiers(self):
         for notifier in self._notifierList:
@@ -591,7 +579,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
     def _refreshSidebarSpectra(self, data):  # dummy:Project):
         """Reset spectra in sidebar - to be called from notifiers
         """
-        sideBarState = self._saveExpandedState()
+        self._saveExpandedState()
 
         for spectrum in self.project.spectra:
             # self._removeItem( self.project, spectrum)
@@ -600,7 +588,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
             for obj in spectrum.peakLists + spectrum.integralLists:
                 self._createItem({Notifier.OBJECT: obj})
 
-        self._restoreExpandedState(sideBarState)
+        self._restoreExpandedState()
 
     def _createSpectrumGroup(self, spectra=None or []):
         popup = SpectrumGroupEditor(parent=self.mainWindow, mainWindow=self.mainWindow, addNew=True, spectra=spectra)
@@ -615,7 +603,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         nmrResidue = data[Notifier.OBJECT]
         # oldPid = data[Notifier.OLDPID]
 
-        sideBarState = self._saveExpandedState()
+        self._saveExpandedState()
 
         nmrChain = nmrResidue._parent
 
@@ -629,7 +617,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
             for nmrAtom in nr.nmrAtoms:
                 self._createItem({Notifier.OBJECT: nmrAtom})
 
-        self._restoreExpandedState(sideBarState)
+        self._restoreExpandedState()
 
         # nmrChain = nmrResidue._parent     # ejb - just insert the 1 item
         # for nr in nmrChain.nmrResidues:
@@ -665,61 +653,27 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         """Removes the specified item from the sidebar and deletes it from the project.
         NB, the clean-up of the side bar is done through notifiers
         """
+        from ccpn.core.lib.ContextManagers import undoBlockManager
 
-        self.project._startCommandEchoBlock('deleteObjects', [obj.pid for obj in objs])
         try:
-
-            for obj in objs:
-                if obj:
-                    if isinstance(obj, Spectrum):
-
-                        # need to delete all peakLists/integralLists/multipletLists first
-                        for peakList in obj.peakLists:
-                            peakList.delete()
-                        for integralList in obj.integralLists:
-                            integralList.delete()
-                        for multipletList in obj.multipletLists:
-                            multipletList.delete()
-
-                    # delete the object
-                    obj.delete()
+            with undoBlockManager():
+                for obj in objs:
+                    if obj:
+                        if isinstance(obj, Spectrum):
+                            # need to delete all peakLists and integralLists first, treat as single undo
+                            for peakList in obj.peakLists:
+                                peakList.delete()
+                            for integralList in obj.integralLists:
+                                integralList.delete()
+                            for multipletList in obj.multipletLists:
+                                multipletList.delete()
+                            obj.delete()
+                        else:
+                            # just delete the object
+                            obj.delete()
 
         except Exception as es:
-            showWarning('Delete Object', str(es))
-        finally:
-            self.project._endCommandEchoBlock()
-
-            # # try:
-            # ll = self._getChildren(obj)
-            # z = [i for i in self._traverse(ll)]
-            # # self.project.blankNotification()
-            # if len(z)>0:
-            #   ii = list(set([type(i) for i in z]))
-            #   index = {k: list(set(filter(lambda x: isinstance(x, k), z))) for k in ii}
-            #   for i in ii:
-            #     children = index[i]
-            #     if len(children)>1:
-            #       self.project.blankNotification()
-            #
-            #       print ('>>>', children)
-            #       for child in children[:-1]:
-            #         if child != obj:
-            #           if child is not None and not child.isDeleted:
-            #             print ('  >>>', child)
-            #             child.delete()
-            #       self.project.unblankNotification()
-            #       if children[-1] is not None and not children[-1].isDeleted:
-            #         children[-1].delete()
-            # if not obj.isDeleted:
-
-            # try:
-            #   obj.delete()
-            #
-            # except Exception as es:
-            #   getLogger().warning('Object %s: %s' % (obj.pid, str(es)))
-            # finally:
-            #
-            #   self.project._endCommandEchoBlock()
+            showWarning('Delete', str(es))
 
         #  Force redrawing
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -727,28 +681,6 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitEvent(triggers=[GLNotifier.GLALLPEAKS, GLNotifier.GLALLINTEGRALS, GLNotifier.GLALLMULTIPLETS])
 
-    # def _traverse(self, o, tree_types=(list, tuple)):
-    #   '''used to flat the state in a long list '''
-    #   if isinstance(o, tree_types):
-    #     for value in o:
-    #       for subvalue in self._traverse(value, tree_types):
-    #         yield subvalue
-    #   else:
-    #     yield o
-    #
-    # def _getChildren(self, obj, path=None):
-    #   "Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...] ."
-    #   children = []
-    #   if path is None:
-    #     path = []
-    #   path.append(obj)
-    #   if obj._childClasses:
-    #     for att in obj._childClasses:
-    #       for child in getattr(obj, att._pluralLinkName):
-    #         children.extend(self._getChildren(child, path[:]))
-    #   else:
-    #     children.append(path)
-    #   return children
 
     def _cloneObject(self, objs):
         """Clones the specified objects"""
@@ -859,7 +791,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         obj = data[Notifier.OBJECT]
         oldPid = data[Notifier.OLDPID]
 
-        ll = self._saveExpandedState()
+        self._saveExpandedState()
 
         import sip
 
@@ -883,39 +815,80 @@ class SideBar(QtWidgets.QTreeWidget, Base):
                 for xx in objects[1:]:
                     self._createItem({Notifier.OBJECT: xx})
 
-        self._restoreExpandedState(ll)
+        self._restoreExpandedState()
+
+    def _getExpanded(self, item, data: list):
+        """Add the name of expanded item to the data list
+        """
+        if item.isExpanded():
+            data.append(item.text(0))
+
+    def _setExpanded(self, item, data: list):
+        """Set the expanded flag if item is in data
+        """
+        if item.text(0) in data:
+            item.setExpanded(True)
+
+    def _traverseNode(self, item, func, data):
+        """Traverse the child elements of the sideBar
+        :param item: item to traverse
+        :param func: function to perform on this element
+        :param data: optional data storage to pass to <func>
+        """
+        # process this element
+        func(item, data)
+
+        # find the other children
+        childCount = item.childCount()
+        for childNum in range(childCount):
+            self._traverseNode(item.child(childNum), func, data)
+
+    def _traverseTree(self, func, data):
+        """Traverse the top elements of the Sidebar
+        :param func: function to perform on all elements of the tree
+        :param data: optional data storage to pass to <func>
+        """
+        topCount = self.topLevelItemCount()
+        for itemNum in range(topCount):
+            item = self.topLevelItem(itemNum)
+            self._traverseNode(item, func, data)
+
+    def _blockSideBarEvents(self):
+        """Block all updates/signals/notifiers on the sidebar
+        """
+        self.setUpdatesEnabled(False)
+        self.blockSignals(True)
+        self.setBlankingAllNotifiers(True)
+
+    def _unblockSideBarEvents(self):
+        """Unblock all updates/signals/notifiers on the sidebar
+        """
+        self.setBlankingAllNotifiers(False)
+        self.blockSignals(False)
+        self.setUpdatesEnabled(True)
 
     def _saveExpandedState(self):
-        self._unregisterNotifiers()
+        """Save the current expanded state of items in the sideBar
+        """
+        if not self.sidebarBlocked:
+            self._blockSideBarEvents()
+            self._sideBarState = []
+            self._traverseTree(self._getExpanded, self._sideBarState)
+        self.increaseSidebarBlocking()
 
-        sideBarState = {}
-
-        items = self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive, 0)
-        for item in items:
-            if item.isExpanded():
-                sideBarState[item.text(0)] = True  #.isExpanded()
-        return sideBarState
-
-    def _restoreExpandedState(self, list):
-
-        self.fillSideBar(self.project)
-        self._registerNotifiers()
-
-        # print ('>>>_restore')
-        for lItem in list:
-            items = self.findItems(lItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive, 0)
-            if len(items) > 1:
-                # print('>>>expand Error')
-                for item in items:
-                    print(item.text(0))
-            else:
-                for item in items:
-                    item.setExpanded(True)  # list[lItem])
+    def _restoreExpandedState(self):
+        """Restore the current expanded state of items in the sideBar
+        """
+        self.decreaseSidebarBlocking()
+        if not self.sidebarBlocked:
+            self._fillSideBar(self.project)
+            self._traverseTree(self._setExpanded, self._sideBarState)
+            self._unblockSideBarEvents()
 
     def _renameNmrResidueItem(self, data):  #obj:NmrResidue, oldPid:str):
         """rename NmrResidue(s) from previous pid oldPid to current object pid"""
 
-        dd = self._saveExpandedState()
+        self._saveExpandedState()
 
         obj = data[Notifier.OBJECT]
         oldPid = data[Notifier.OLDPID]
@@ -936,7 +909,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         # for item in self._findItems(oldPid):
         #   item.setData(0, QtCore.Qt.DisplayRole, str(obj.pid))    # ejb - rename instead of delete
 
-        self._restoreExpandedState(dd)
+        self._restoreExpandedState()
 
     def _removeItem(self, data):  # wrapperObject:AbstractWrapperObject):
         """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.
@@ -980,8 +953,21 @@ class SideBar(QtWidgets.QTreeWidget, Base):
         """
         Fills the sidebar with the relevant data from the project.
         """
-        self._populateSidebar()
 
+        # disable updating/redrawing of the sideBar
+        self._saveExpandedState()
+
+        self._fillSideBar(project)
+
+        # re-enable updating/redrawing of the sideBar
+        self._restoreExpandedState()
+
+    def _fillSideBar(self, project: Project):
+        """
+        Fills the sidebar with the relevant data from the project.
+        """
+
+        self._populateSidebar()
         self.setProjectName(project)
 
         listOrder = [ky for ky in classesInSideBar.keys()]
@@ -999,6 +985,7 @@ class SideBar(QtWidgets.QTreeWidget, Base):
             # if dd:
             #   for obj in sorted(dd.values()):
             #     self._createItem(obj)
+
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # mouse events

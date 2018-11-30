@@ -3,6 +3,8 @@ Cache object and cached / cached.clear decorators
 
 Typical usage:
 
+::
+
     @cached('_myFuncCache', maxItems=100)  # cache for 100 items gets created if it does not exist
     def myFunc(obj, arg1, arg2, kwd1=True)
         # some action here
@@ -10,11 +12,15 @@ Typical usage:
 
 On cleaning up:
 
+::
+
     @cached.clear('_myFuncCache')
     def cleaningUp(self)
         # action here
 
 or alternatively in your code:
+
+::
 
     if hasattr(obj, '_myFuncCache'):
         cache = getattr(obj, '_myFuncCache')

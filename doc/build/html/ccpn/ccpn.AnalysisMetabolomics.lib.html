@@ -61,6 +61,49 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-ccpn.AnalysisMetabolomics.lib.BMRBquery">
+<span id="ccpn-analysismetabolomics-lib-bmrbquery-module"></span><h2>ccpn.AnalysisMetabolomics.lib.BMRBquery module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.lib.BMRBquery" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="data">
+<dt id="ccpn.AnalysisMetabolomics.lib.BMRBquery.ShiftColumns">
+<code class="descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="descname">ShiftColumns</code><em class="property"> = ['Assigned_chem_shift_list_ID', 'Combined_offset', 'Entry_ID', 'Link', 'Peaks_matched', 'Title']</em><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.ShiftColumns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full address to be:</p>
+<blockquote>
+<div><ul class="simple">
+<li>for a single chemical shift query (e.g. 3.136), database=metabolomics
+&gt;&gt; &#8220;<a class="reference external" href="http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;database=metabolomics">http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;database=metabolomics</a>&#8220;</li>
+<li>for multiple  chemical shift searches (e.g. 3.136,7):
+&gt;&gt; &#8220;<a class="reference external" href="http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;s=7.0&amp;database=metabolomics">http://webapi.bmrb.wisc.edu/v2/search/multiple_shift_search?s=3.136&amp;s=7.0&amp;database=metabolomics</a>&#8220;</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.AnalysisMetabolomics.lib.BMRBquery.bmrbMultiShiftSearch">
+<code class="descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="descname">bmrbMultiShiftSearch</code><span class="sig-paren">(</span><em>shifts: list</em>, <em>databaseType='metabolomics'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/BMRBquery.html#bmrbMultiShiftSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.bmrbMultiShiftSearch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.AnalysisMetabolomics.lib.BMRBquery.peaksToShifts1D">
+<code class="descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="descname">peaksToShifts1D</code><span class="sig-paren">(</span><em>objs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/BMRBquery.html#peaksToShifts1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.peaksToShifts1D" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>objs</strong> &#8211; peaks or multiplets</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of peak positions</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.AnalysisMetabolomics.lib.BMRBquery.testAla">
+<code class="descclassname">ccpn.AnalysisMetabolomics.lib.BMRBquery.</code><code class="descname">testAla</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/lib/BMRBquery.html#testAla"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.lib.BMRBquery.testAla" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 <div class="section" id="module-ccpn.AnalysisMetabolomics.lib.centering">
 <span id="ccpn-analysismetabolomics-lib-centering-module"></span><h2>ccpn.AnalysisMetabolomics.lib.centering module<a class="headerlink" href="#module-ccpn.AnalysisMetabolomics.lib.centering" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -341,6 +384,7 @@ from <a class="reference external" href="http://users.stat.umn.edu/~gary/classes
   <ul>
 <li><a class="reference internal" href="#">ccpn.AnalysisMetabolomics.lib package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ccpn.AnalysisMetabolomics.lib.BMRBquery">ccpn.AnalysisMetabolomics.lib.BMRBquery module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisMetabolomics.lib.centering">ccpn.AnalysisMetabolomics.lib.centering module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisMetabolomics.lib.commands">ccpn.AnalysisMetabolomics.lib.commands module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisMetabolomics.lib.decomposition">ccpn.AnalysisMetabolomics.lib.decomposition module</a></li>

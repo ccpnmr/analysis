@@ -80,20 +80,20 @@ class _SpinBase(Base):
     if minValue <= value <= maxValue:
       callback = self.callback
       self.callback = None
-      QtGui.QSpinBox.setRange(minValue, maxValue)
+      QtWidgets.QSpinBox.setRange(minValue, maxValue)
       self.callback = callback
     
     else:
-      QtGui.QSpinBox.setRange(minValue, maxValue)
+      QtWidgets.QSpinBox.setRange(minValue, maxValue)
  
 
 
-class IntSpinBox(QtGui.QSpinBox, _SpinBase):
+class IntSpinBox(QtWidgets.QSpinBox, _SpinBase):
 
   def __init__(self, parent, value=0.0, minValue=-MAXINT, maxValue=MAXINT, step=1,
                callback=None, suffix=None, prefix=None, multiplier=None, **kw):
     
-    QtGui.QSpinBox.__init__(self, parent)
+    QtWidgets.QSpinBox.__init__(self, parent)
     _SpinBase.__init__(self, parent, value, minValue, maxValue, step,
                        callback, suffix, prefix, **kw)
   
@@ -113,19 +113,19 @@ class IntSpinBox(QtGui.QSpinBox, _SpinBase):
       self.setValue(value)
       
     else:
-      QtGui.QSpinBox.stepBy(self, steps)
+      QtWidgets.QSpinBox.stepBy(self, steps)
   
   def _convertValue(self, value):
   
     return int(value)
 
 
-class FloatSpinBox(QtGui.QDoubleSpinBox, _SpinBase):
+class FloatSpinBox(QtWidgets.QDoubleSpinBox, _SpinBase):
 
   def __init__(self, parent, value=0, minValue=-MAXINT, maxValue=MAXINT, step=1.0,
                callback=None, suffix=None, prefix=None, multiplier=None, **kw):
     
-    QtGui.QDoubleSpinBox.__init__(self, parent)
+    QtWidgets.QDoubleSpinBox.__init__(self, parent)
     _SpinBase.__init__(self, parent, value, minValue, maxValue, step,
                        callback, suffix, prefix, **kw)
 
@@ -145,7 +145,7 @@ class FloatSpinBox(QtGui.QDoubleSpinBox, _SpinBase):
       self.setValue(value)
       
     else:
-      QtGui.QDoubleSpinBox.stepBy(self, steps)
+      QtWidgets.QDoubleSpinBox.stepBy(self, steps)
   
   def _convertValue(self, value):
   

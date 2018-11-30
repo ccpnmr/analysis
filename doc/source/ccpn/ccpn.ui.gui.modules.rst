@@ -9,14 +9,6 @@ ccpn.ui.gui.modules package
 Submodules
 ----------
 
-ccpn.ui.gui.modules.BlankDisplay module
----------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.BlankDisplay
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.ui.gui.modules.CcpnModule module
 -------------------------------------
 
@@ -33,138 +25,18 @@ ccpn.ui.gui.modules.ChemicalShiftTable module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment module
+-----------------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.ChemicalShiftTableWithAssignment
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.modules.ChemicalShiftsMappingModule module
 ------------------------------------------------------
 
 .. automodule:: ccpn.ui.gui.modules.ChemicalShiftsMappingModule
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.CopyPeaksModule module
-------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.CopyPeaksModule
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.CreateChainPopup module
--------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.CreateChainPopup
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiIntegralListView module
-----------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiIntegralListView
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiMainWindow module
-----------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiMainWindow
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiPeakListView module
-------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiPeakListView
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiPopupGenerator module
---------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiPopupGenerator
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiSpectrumDisplay module
----------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiSpectrumDisplay
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiSpectrumView module
-------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiSpectrumView
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiSpectrumView1d module
---------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiSpectrumView1d
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiSpectrumViewNd module
---------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiSpectrumViewNd
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiStrip module
------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiStrip
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiStrip1d module
--------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiStrip1d
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiStripDisplay1d module
---------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiStripDisplay1d
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiStripDisplayNd module
---------------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiStripDisplayNd
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiStripNd module
--------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiStripNd
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.GuiWindow module
-------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.GuiWindow
     :members:
     :undoc-members:
     :show-inheritance:
@@ -181,6 +53,14 @@ ccpn.ui.gui.modules.MacroEditor module
 --------------------------------------
 
 .. automodule:: ccpn.ui.gui.modules.MacroEditor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.modules.MultipletListTable module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.MultipletListTable
     :members:
     :undoc-members:
     :show-inheritance:
@@ -205,14 +85,6 @@ ccpn.ui.gui.modules.ObjectAssigner module
 -----------------------------------------
 
 .. automodule:: ccpn.ui.gui.modules.ObjectAssigner
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.ui.gui.modules.PeakAssigner module
----------------------------------------
-
-.. automodule:: ccpn.ui.gui.modules.PeakAssigner
     :members:
     :undoc-members:
     :show-inheritance:
@@ -265,6 +137,14 @@ ccpn.ui.gui.modules.ResidueInformation module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.modules.ResidueTable module
+---------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.ResidueTable
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.modules.RestraintTable module
 -----------------------------------------
 
@@ -281,10 +161,18 @@ ccpn.ui.gui.modules.SequenceModule module
     :undoc-members:
     :show-inheritance:
 
-ccpn.ui.gui.modules.ShortcutModule module
------------------------------------------
+ccpn.ui.gui.modules.SpectrumDisplay1d module
+--------------------------------------------
 
-.. automodule:: ccpn.ui.gui.modules.ShortcutModule
+.. automodule:: ccpn.ui.gui.modules.SpectrumDisplay1d
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.modules.SpectrumDisplayNd module
+--------------------------------------------
+
+.. automodule:: ccpn.ui.gui.modules.SpectrumDisplayNd
     :members:
     :undoc-members:
     :show-inheritance:

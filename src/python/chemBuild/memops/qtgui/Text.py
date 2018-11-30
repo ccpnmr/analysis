@@ -2,17 +2,17 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .Base import Base
 
-class Text(QtGui.QPlainTextEdit, Base):
+class Text(QtWidgets.QPlainTextEdit, Base):
 
   def __init__(self, parent, text='', callback=None, wrap=False, readOnly=False, **kw):
     
-    QtGui.QPlainTextEdit.__init__(self, text, parent)
+    QtWidgets.QPlainTextEdit.__init__(self, text, parent)
     Base.__init__(self, parent, **kw)
     
     if wrap:
-      self.setLineWrapMode(QtGui.QPlainTextEdit.WidgetWidth)
+      self.setLineWrapMode(QtWidgets.QPlainTextEdit.WidgetWidth)
     else:
-      self.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+      self.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
     
     self.setReadOnly(readOnly)
     self.callback = callback
@@ -26,7 +26,7 @@ class Text(QtGui.QPlainTextEdit, Base):
   
   def leaveEvent(self, event):
   
-    QtGui.QPlainTextEdit.leaveEvent(self, event)
+    QtWidgets.QPlainTextEdit.leaveEvent(self, event)
     
     if self._isUserModified and self.callback:
       self.callback()
@@ -55,14 +55,14 @@ import sys
 from code import InteractiveConsole
 from io import StringIO
   
-class Console(QtGui.QPlainTextEdit, Base):
+class Console(QtWidgets.QPlainTextEdit, Base):
   
   def __init__(self, parent, message='', context=None, prompt='>>> ', **kw):
     
     major, minor, micro, rel, serial = sys.version_info
     startup = 'Python %d.%d.%d on %s' % (major, minor, micro, sys.platform)
     
-    QtGui.QPlainTextEdit.__init__(self, startup, parent)
+    QtWidgets.QPlainTextEdit.__init__(self, startup, parent)
     Base.__init__(self, parent, **kw)
 
     if message:
@@ -168,7 +168,7 @@ class Console(QtGui.QPlainTextEdit, Base):
     elif key == QtCore.Qt.Key_D and event.modifiers() == QtCore.Qt.ControlModifier:
       self.close()
       
-    QtGui.QPlainTextEdit.keyPressEvent(self, event)
+    QtWidgets.QPlainTextEdit.keyPressEvent(self, event)
     
   def getLastLine(self):
   

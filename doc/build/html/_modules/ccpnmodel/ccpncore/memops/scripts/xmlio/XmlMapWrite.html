@@ -65,7 +65,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__modifiedBy__</span> <span class="o">=</span> <span class="s2">&quot;$modifiedBy: CCPN $&quot;</span>
 <span class="n">__dateModified__</span> <span class="o">=</span> <span class="s2">&quot;$dateModified: 2017-07-07 16:33:25 +0100 (Fri, July 07, 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b2 $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 3.0.b3 $&quot;</span>
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Created</span>
 <span class="c1">#=========================================================================================</span>
@@ -788,9 +788,9 @@
     <span class="c1"># Write objects</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">writeComment</span><span class="p">(</span><span class="s1">&#39;Write objects&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">printMessage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toLiteral</span><span class="p">(</span><span class="s1">&#39;start generating output : &#39;</span><span class="p">),</span> 
-     <span class="bp">self</span><span class="o">.</span><span class="n">callFunc</span><span class="p">(</span><span class="s1">&#39;getQualifiedName&#39;</span><span class="p">,</span> <span class="s1">&#39;topObject&#39;</span><span class="p">,</span> <span class="n">doWrite</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="c1"># self.printMessage(self.toLiteral(&#39;start generating output : &#39;),</span>
+    <span class="c1">#  self.callFunc(&#39;getQualifiedName&#39;, &#39;topObject&#39;, doWrite=False)</span>
+    <span class="c1"># )</span>
 
     <span class="c1"># new stacks: stack and mapStack</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">newStack</span><span class="p">(</span><span class="s1">&#39;stack&#39;</span><span class="p">,</span> <span class="n">initValues</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;topObject&#39;</span><span class="p">,),</span> <span class="n">needDeclType</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -2742,10 +2742,10 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">startIf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicalOp</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="s1">&#39;and&#39;</span><span class="p">,</span> <span class="n">tt</span><span class="p">))</span>
     <span class="n">tt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">callFunc</span><span class="p">(</span><span class="s1">&#39;getFullKey&#39;</span><span class="p">,</span> <span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="n">doWrite</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setVar</span><span class="p">(</span><span class="s1">&#39;xx&#39;</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">varType</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">anyVarType</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">startIf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comparison</span><span class="p">(</span><span class="s1">&#39;topObjectKey&#39;</span><span class="p">,</span> <span class="s1">&#39;!=&#39;</span><span class="p">,</span> <span class="s1">&#39;xx&#39;</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">printMessage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toLiteral</span><span class="p">(</span><span class="s1">&#39;WARNING TopObject key changed on reading&#39;</span><span class="p">),</span>
-                      <span class="s1">&#39;topObjectKey&#39;</span><span class="p">,</span> <span class="s1">&#39;xx&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">endIf</span><span class="p">()</span>
+    <span class="c1"># self.startIf(self.comparison(&#39;topObjectKey&#39;, &#39;!=&#39;, &#39;xx&#39;))</span>
+    <span class="c1"># self.printMessage(self.toLiteral(&#39;WARNING TopObject key changed on reading&#39;),</span>
+    <span class="c1">#                   &#39;topObjectKey&#39;, &#39;xx&#39;)</span>
+    <span class="c1"># self.endIf()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">endIf</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span>
 

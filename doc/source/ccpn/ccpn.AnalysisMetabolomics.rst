@@ -49,20 +49,4 @@ ccpn.AnalysisMetabolomics.Integration module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisMetabolomics.PeakAssignment module
------------------------------------------------
-
-.. automodule:: ccpn.AnalysisMetabolomics.PeakAssignment
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.AnalysisMetabolomics.PickandFit module
--------------------------------------------
-
-.. automodule:: ccpn.AnalysisMetabolomics.PickandFit
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 

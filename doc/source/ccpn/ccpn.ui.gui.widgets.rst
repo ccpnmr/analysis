@@ -41,6 +41,14 @@ ccpn.ui.gui.widgets.BarGraph module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.BarGraphWidget module
+-----------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.BarGraphWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.Base module
 -------------------------------
 
@@ -57,6 +65,14 @@ ccpn.ui.gui.widgets.BasePopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.Blank module
+--------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.Blank
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.Button module
 ---------------------------------
 
@@ -69,6 +85,38 @@ ccpn.ui.gui.widgets.ButtonList module
 -------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.ButtonList
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget module
+-----------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.CalibrateXSpectrum1DWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.CalibrateXSpectrumNDWidget module
+-----------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.CalibrateXSpectrumNDWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget module
+-----------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.CalibrateYSpectrum1DWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.CalibrateYSpectrumNDWidget module
+-----------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.CalibrateYSpectrumNDWidget
     :members:
     :undoc-members:
     :show-inheritance:
@@ -113,10 +161,34 @@ ccpn.ui.gui.widgets.CheckBox module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.CheckBoxes module
+-------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.CheckBoxes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.ColourDialog module
 ---------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.ColourDialog
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.Column module
+---------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.Column
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.ColumnViewSettings module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.ColumnViewSettings
     :members:
     :undoc-members:
     :show-inheritance:
@@ -241,10 +313,34 @@ ccpn.ui.gui.widgets.Frame module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.GLLinearRegionsPlot module
+----------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.GLLinearRegionsPlot
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.GLWidgets module
+------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.GLWidgets
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.GroupBox module
 -----------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.GroupBox
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.HLine module
+--------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.HLine
     :members:
     :undoc-members:
     :show-inheritance:
@@ -361,6 +457,14 @@ ccpn.ui.gui.widgets.PlotWidget module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.ProjectTreeCheckBoxes module
+------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.ProjectTreeCheckBoxes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.PulldownList module
 ---------------------------------------
 
@@ -373,6 +477,22 @@ ccpn.ui.gui.widgets.PulldownListsForObjects module
 --------------------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.PulldownListsForObjects
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.PythonEditor module
+---------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.PythonEditor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.QuickTable module
+-------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.QuickTable
     :members:
     :undoc-members:
     :show-inheritance:
@@ -401,6 +521,22 @@ ccpn.ui.gui.widgets.ScrollArea module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.SearchWidget module
+---------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.SearchWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.SettingsWidgets module
+------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.SettingsWidgets
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.SideBar module
 ----------------------------------
 
@@ -421,6 +557,14 @@ ccpn.ui.gui.widgets.Spacer module
 ---------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.Spacer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.SpectraSelectionWidget module
+-------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.SpectraSelectionWidget
     :members:
     :undoc-members:
     :show-inheritance:
@@ -473,6 +617,14 @@ ccpn.ui.gui.widgets.Splitter module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.Stack1DWidget module
+----------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.Stack1DWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.Table module
 --------------------------------
 
@@ -481,10 +633,34 @@ ccpn.ui.gui.widgets.Table module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.widgets.TableFilter module
+--------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.TableFilter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.widgets.TableModel module
 -------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.TableModel
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.TableSearch module
+--------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.TableSearch
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.Tabs module
+-------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.Tabs
     :members:
     :undoc-members:
     :show-inheritance:
@@ -565,6 +741,14 @@ ccpn.ui.gui.widgets.resources_rc module
 ---------------------------------------
 
 .. automodule:: ccpn.ui.gui.widgets.resources_rc
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.widgets.testWidget module
+-------------------------------------
+
+.. automodule:: ccpn.ui.gui.widgets.testWidget
     :members:
     :undoc-members:
     :show-inheritance:

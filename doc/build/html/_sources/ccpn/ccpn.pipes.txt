@@ -33,6 +33,22 @@ ccpn.pipes.AssignMultiplets module
     :undoc-members:
     :show-inheritance:
 
+ccpn.pipes.AutoAssignmentPipe module
+------------------------------------
+
+.. automodule:: ccpn.pipes.AutoAssignmentPipe
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.pipes.BaselinePipe module
+------------------------------
+
+.. automodule:: ccpn.pipes.BaselinePipe
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.pipes.DuplicateSpectraPipe module
 --------------------------------------
 
@@ -81,10 +97,50 @@ ccpn.pipes.OutputPipeline module
     :undoc-members:
     :show-inheritance:
 
+ccpn.pipes.PeakFilterNdPipe module
+----------------------------------
+
+.. automodule:: ccpn.pipes.PeakFilterNdPipe
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.pipes.PeakPicker1DPipe module
 ----------------------------------
 
 .. automodule:: ccpn.pipes.PeakPicker1DPipe
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.pipes.PeakPickerNdPipe module
+----------------------------------
+
+.. automodule:: ccpn.pipes.PeakPickerNdPipe
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.pipes.PhasingPipe module
+-----------------------------
+
+.. automodule:: ccpn.pipes.PhasingPipe
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.pipes.ReferencingSpectra1Dpipe module
+------------------------------------------
+
+.. automodule:: ccpn.pipes.ReferencingSpectra1Dpipe
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.pipes.SimplifiedPeakPicker1DPipe module
+--------------------------------------------
+
+.. automodule:: ccpn.pipes.SimplifiedPeakPicker1DPipe
     :members:
     :undoc-members:
     :show-inheritance:

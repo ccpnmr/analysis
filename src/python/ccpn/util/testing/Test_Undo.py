@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.util.Undo import Undo
+from ccpn.core.lib.Undo import Undo
 from ccpnmodel.ccpncore.testing.CoreTesting import CoreTesting
 
 

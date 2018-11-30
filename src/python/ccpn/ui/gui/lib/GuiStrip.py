@@ -204,7 +204,7 @@ class GuiStrip(NotifierBase, Frame):
         self.storedZooms = []
 
         self.beingUpdated = False
-        # self.xPreviousRegion, self.yPreviousRegion = self.viewBox.viewRange()
+        # self.xPreviousRegion, self.yPreviousRegion = self.viewRange()
 
         # need to keep track of mouse position because Qt shortcuts don't provide
         # the widget or the position of where the cursor is
@@ -1307,7 +1307,7 @@ class GuiStrip(NotifierBase, Frame):
         """
         Adds current region to the zoom stack for the strip.
         """
-        self.storedZooms.append(self.viewBox.viewRange())
+        # self.storedZooms.append(self.viewBox.viewRange())
 
         try:
             self._CcpnGLWidget.storeZoom()

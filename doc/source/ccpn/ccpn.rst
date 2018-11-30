@@ -18,6 +18,7 @@ Subpackages
     ccpn.core
     ccpn.framework
     ccpn.pipes
+    ccpn.plugins
     ccpn.ui
     ccpn.util
 

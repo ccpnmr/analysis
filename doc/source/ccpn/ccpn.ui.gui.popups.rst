@@ -33,6 +33,30 @@ ccpn.ui.gui.popups.CopyPeakListPopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.CopyPeaksPopup module
+----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.CopyPeaksPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.CreateChainPopup module
+------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.CreateChainPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.CreateNmrChainPopup module
+---------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.CreateNmrChainPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.DataSetPopup module
 --------------------------------------
 
@@ -41,10 +65,34 @@ ccpn.ui.gui.popups.DataSetPopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.DeleteItems module
+-------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.DeleteItems
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.Dialog module
 --------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.Dialog
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.EditMultipletPopup module
+--------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.EditMultipletPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.EstimateNoisePopup module
+--------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.EstimateNoisePopup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -65,10 +113,26 @@ ccpn.ui.gui.popups.ExperimentTypePopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.ExportDialog module
+--------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ExportDialog
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.ExportNefPopup module
 ----------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.ExportNefPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.ExportStripToFile module
+-------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ExportStripToFile
     :members:
     :undoc-members:
     :show-inheritance:
@@ -85,6 +149,22 @@ ccpn.ui.gui.popups.IntegralListPopup module
 -------------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.IntegralListPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.IntegralListPropertiesPopup module
+-----------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.IntegralListPropertiesPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.MultipletListPropertiesPopup module
+------------------------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.MultipletListPropertiesPopup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -225,6 +305,14 @@ ccpn.ui.gui.popups.SetupNmrResiduesPopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.ShortcutsPopup module
+----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ShortcutsPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.SpectrumGroupEditor module
 ---------------------------------------------
 
@@ -249,6 +337,14 @@ ccpn.ui.gui.popups.SpectrumPropertiesPopup module
     :undoc-members:
     :show-inheritance:
 
+ccpn.ui.gui.popups.StripPlotPopup module
+----------------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.StripPlotPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.ui.gui.popups.StructurePopup module
 ----------------------------------------
 
@@ -269,6 +365,14 @@ ccpn.ui.gui.popups.SubstancePropertiesPopup module
 --------------------------------------------------
 
 .. automodule:: ccpn.ui.gui.popups.SubstancePropertiesPopup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.ui.gui.popups.ZoomPopup module
+-----------------------------------
+
+.. automodule:: ccpn.ui.gui.popups.ZoomPopup
     :members:
     :undoc-members:
     :show-inheritance:

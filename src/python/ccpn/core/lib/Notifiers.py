@@ -1,6 +1,6 @@
 """
-Notifier extensions, wrapping it into a class that also acts as the called 
-function, displatching the 'user' callback if required.
+Notifier extensions, wrapping it into a class that also acts as the called function,
+dispatching the 'user' callback if required.
 
 The Notifier can be defined relative to any valid V3 core object, as well as the current
 object as it first checks if the triggered signature is valid.
@@ -58,7 +58,7 @@ logger = getLogger()
 
 
 def skip(*args, **kwargs):
-    "Do nothing"
+    """Do nothing"""
     pass
 
 
@@ -474,13 +474,14 @@ class NotifierBase(object):
     def setNotifier(self, theObject:AbstractWrapperObject, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
+
         :param theObject: V3 object to register a notifier with
         :param triggers: list of triggers to trigger callback
         :param targetName: valid className, attributeName or None (See Notifier doc string for details)
         :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
         :param *args: optional arguments
         :param **kwargs: optional keyword,value arguments
-        :returns Notifier instance
+        :return: a Notifier instance
         """
         objNotifiers = self._getObjectNotifiersDict()
         notifier = Notifier(theObject=theObject, triggers=triggers, targetName=targetName,
@@ -496,6 +497,7 @@ class NotifierBase(object):
     def setGuiNotifier(self, theObject:AbstractWrapperObject, triggers: list, targetName: str, callback: Callable[..., str], *args, **kwargs) -> Notifier:
         """
         Set Notifier for Ccpn V3 object theObject
+
         :param theObject: V3 object to register a notifier with
         :param triggers: list of triggers to trigger callback
         :param targetName: valid className, attributeName or None (See Notifier doc string for details)
@@ -503,7 +505,8 @@ class NotifierBase(object):
         :param *args: optional arguments
         :param **kwargs: optional keyword,value arguments
 
-        :returns GuiNotifier instance
+        :return: a GuiNotifier instance
+
         """
         from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier  # To avoid circular imports
 

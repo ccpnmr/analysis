@@ -33,7 +33,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ccpn.util import Path
 
-class SplashScreen(QtGui.QSplashScreen):
+class SplashScreen(QtWidgets.QSplashScreen):
 
   def __init__(self, dummy=None, wait=1):
 
@@ -42,7 +42,7 @@ class SplashScreen(QtGui.QSplashScreen):
     #print(splashImagePath)
     pixmap = QtGui.QPixmap(splashImagePath)
     #super(QtGui.QSplashScreen, self).__init__(pixmap, QtCore.Qt.WindowStaysOnTopHint)
-    QtGui.QSplashScreen.__init__(self, pixmap, QtCore.Qt.WindowStaysOnTopHint)
+    QtWidgets.QSplashScreen.__init__(self, pixmap, QtCore.Qt.WindowStaysOnTopHint)
 
     self.show()
 
@@ -62,5 +62,5 @@ class SplashScreen(QtGui.QSplashScreen):
     time.sleep(self.wait)
     if hasattr(self,'w'):
         self.w.close()
-    super(QtGui.QSplashScreen, self).close()
+    super(QtWidgets.QSplashScreen, self).close()
 

@@ -64,6 +64,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ccpn.AnalysisMetabolomics.lib.html">ccpn.AnalysisMetabolomics.lib package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.AnalysisMetabolomics.lib.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.AnalysisMetabolomics.lib.html#module-ccpn.AnalysisMetabolomics.lib.BMRBquery">ccpn.AnalysisMetabolomics.lib.BMRBquery module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.AnalysisMetabolomics.lib.html#module-ccpn.AnalysisMetabolomics.lib.centering">ccpn.AnalysisMetabolomics.lib.centering module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.AnalysisMetabolomics.lib.html#module-ccpn.AnalysisMetabolomics.lib.commands">ccpn.AnalysisMetabolomics.lib.commands module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.AnalysisMetabolomics.lib.html#module-ccpn.AnalysisMetabolomics.lib.decomposition">ccpn.AnalysisMetabolomics.lib.decomposition module</a></li>
@@ -81,6 +82,7 @@
 <li class="toctree-l5"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.modules.html">ccpn.AnalysisMetabolomics.ui.gui.modules package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.modules.html#submodules">Submodules</a></li>
 <li class="toctree-l6"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.modules.html#module-ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule">ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.modules.html#module-ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder">ccpn.AnalysisMetabolomics.ui.gui.modules.MetaboliteFinder module</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="ccpn.AnalysisMetabolomics.ui.gui.widgets.html">ccpn.AnalysisMetabolomics.ui.gui.widgets package</a><ul>
@@ -107,7 +109,7 @@
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics">
 <em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.AnalysisMetabolomics.</code><code class="descname">Metabolomics</code><span class="sig-paren">(</span><em>applicationName</em>, <em>applicationVersion</em>, <em>commandLineArguments</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/AnalysisMetabolomics.html#Metabolomics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ccpn.framework.html#ccpn.framework.Framework.Framework" title="ccpn.framework.Framework.Framework"><code class="xref py py-class docutils literal"><span class="pre">ccpn.framework.Framework.Framework</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign" title="ccpn.AnalysisAssign.AnalysisAssign.Assign"><code class="xref py py-class docutils literal"><span class="pre">ccpn.AnalysisAssign.AnalysisAssign.Assign</span></code></a></p>
 <p>Root class for Metabolomics application</p>
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.setupMenus">
@@ -122,11 +124,6 @@
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showMetabolomicsPipeline">
 <code class="descname">showMetabolomicsPipeline</code><span class="sig-paren">(</span><em>position='bottom'</em>, <em>relativeTo=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/AnalysisMetabolomics.html#Metabolomics.showMetabolomicsPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showMetabolomicsPipeline" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showPeakFittingModule">
-<code class="descname">showPeakFittingModule</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/AnalysisMetabolomics.html#Metabolomics.showPeakFittingModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showPeakFittingModule" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -164,6 +161,11 @@
 <code class="descname">getSourceData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.getSourceData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.getSourceData" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.getSpectrumGroups">
+<code class="descname">getSpectrumGroups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.getSpectrumGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.getSpectrumGroups" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.loadings">
 <code class="descname">loadings</code><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.loadings" title="Permalink to this definition">¶</a></dt>
@@ -196,6 +198,11 @@
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.refreshSourceDataOptions">
 <code class="descname">refreshSourceDataOptions</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.refreshSourceDataOptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.refreshSourceDataOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisMetabolomics.Decomposition.Decomposition.refreshSpectrumGroupFilter">
+<code class="descname">refreshSpectrumGroupFilter</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Decomposition.html#Decomposition.refreshSpectrumGroupFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Decomposition.Decomposition.refreshSpectrumGroupFilter" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -251,7 +258,7 @@
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.IntegralAssignment.IntegralAssignment">
 <em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.IntegralAssignment.</code><code class="descname">IntegralAssignment</code><span class="sig-paren">(</span><em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/IntegralAssignment.html#IntegralAssignment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.IntegralAssignment.IntegralAssignment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QWidget</span></code></p>
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.IntegralAssignment.IntegralAssignment.assignAndMove">
 <code class="descname">assignAndMove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/IntegralAssignment.html#IntegralAssignment.assignAndMove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.IntegralAssignment.IntegralAssignment.assignAndMove" title="Permalink to this definition">¶</a></dt>
@@ -281,8 +288,8 @@
 
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.IntegralAssignment.IntegralTable">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.IntegralAssignment.</code><code class="descname">IntegralTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/IntegralAssignment.html#IntegralTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.IntegralAssignment.IntegralTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code></p>
+<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.IntegralAssignment.</code><code class="descname">IntegralTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/IntegralAssignment.html#IntegralTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.IntegralAssignment.IntegralTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QWidget</span></code></p>
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.IntegralAssignment.IntegralTable.integralCallback">
 <code class="descname">integralCallback</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/IntegralAssignment.html#IntegralTable.integralCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.IntegralAssignment.IntegralTable.integralCallback" title="Permalink to this definition">¶</a></dt>
@@ -298,8 +305,8 @@
 
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.IntegralAssignment.SubstanceTable">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.IntegralAssignment.</code><code class="descname">SubstanceTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/IntegralAssignment.html#SubstanceTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.IntegralAssignment.SubstanceTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.IntegralAssignment.</code><code class="descname">SubstanceTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/IntegralAssignment.html#SubstanceTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.IntegralAssignment.SubstanceTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.IntegralAssignment.SubstanceTable.setSubstancename">
 <code class="descname">setSubstancename</code><span class="sig-paren">(</span><em>substance</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/IntegralAssignment.html#SubstanceTable.setSubstancename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.IntegralAssignment.SubstanceTable.setSubstancename" title="Permalink to this definition">¶</a></dt>
@@ -318,8 +325,8 @@
 <p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.Integration.IntegrationTable">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.Integration.</code><code class="descname">IntegrationTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Integration.html#IntegrationTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Integration.IntegrationTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.Integration.</code><code class="descname">IntegrationTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Integration.html#IntegrationTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Integration.IntegrationTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.Integration.IntegrationTable.setupAreaView">
 <code class="descname">setupAreaView</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Integration.html#IntegrationTable.setupAreaView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Integration.IntegrationTable.setupAreaView" title="Permalink to this definition">¶</a></dt>
@@ -334,8 +341,8 @@
 
 <dl class="class">
 <dt id="ccpn.AnalysisMetabolomics.Integration.IntegrationWidget">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.Integration.</code><code class="descname">IntegrationWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Integration.html#IntegrationWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Integration.IntegrationWidget" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<em class="property">class </em><code class="descclassname">ccpn.AnalysisMetabolomics.Integration.</code><code class="descname">IntegrationWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>mainWindow=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Integration.html#IntegrationWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Integration.IntegrationWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt5.QtWidgets.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
 <dl class="method">
 <dt id="ccpn.AnalysisMetabolomics.Integration.IntegrationWidget.getParams">
 <code class="descname">getParams</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisMetabolomics/Integration.html#IntegrationWidget.getParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisMetabolomics.Integration.IntegrationWidget.getParams" title="Permalink to this definition">¶</a></dt>
@@ -369,12 +376,6 @@
 </dd></dl>
 
 </div>
-<div class="section" id="ccpn-analysismetabolomics-peakassignment-module">
-<h2>ccpn.AnalysisMetabolomics.PeakAssignment module<a class="headerlink" href="#ccpn-analysismetabolomics-peakassignment-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="ccpn-analysismetabolomics-pickandfit-module">
-<h2>ccpn.AnalysisMetabolomics.PickandFit module<a class="headerlink" href="#ccpn-analysismetabolomics-pickandfit-module" title="Permalink to this headline">¶</a></h2>
-</div>
 </div>
 
 
@@ -392,8 +393,6 @@
 <li><a class="reference internal" href="#module-ccpn.AnalysisMetabolomics.Decomposition">ccpn.AnalysisMetabolomics.Decomposition module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisMetabolomics.IntegralAssignment">ccpn.AnalysisMetabolomics.IntegralAssignment module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisMetabolomics.Integration">ccpn.AnalysisMetabolomics.Integration module</a></li>
-<li><a class="reference internal" href="#ccpn-analysismetabolomics-peakassignment-module">ccpn.AnalysisMetabolomics.PeakAssignment module</a></li>
-<li><a class="reference internal" href="#ccpn-analysismetabolomics-pickandfit-module">ccpn.AnalysisMetabolomics.PickandFit module</a></li>
 </ul>
 </li>
 </ul>

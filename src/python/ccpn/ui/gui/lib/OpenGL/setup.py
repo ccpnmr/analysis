@@ -29,26 +29,28 @@ from distutils.core import setup
 from distutils.extension import Extension
 import sys
 
-if '--use-cython' in sys.argv:
-    USE_CYTHON = True
-    sys.argv.remove('--use-cython')
-else:
-    USE_CYTHON = False
-ext = '.pyx' if USE_CYTHON else '.c'
+if __name__ == '__main__':
 
-# make a list of Extensions in here, or use '*', '*'+ext to catch all,
-# but puts .so files into a subdirectory /python
-# ignore 'does not match fully qualified name' warnings
-extensions = [Extension('CcpnOpenGLContours',
-                        ['CcpnOpenGLContours'+ext],
-                        language='c',
-                        include_dirs=['c/']),]
+    if '--use-cython' in sys.argv:
+        USE_CYTHON = True
+        sys.argv.remove('--use-cython')
+    else:
+        USE_CYTHON = False
+    ext = '.pyx' if USE_CYTHON else '.c'
 
-if USE_CYTHON:
-    from Cython.Build import cythonize
-    extensions = cythonize(extensions,
-                        annotate=True)
+    # make a list of Extensions in here, or use '*', '*'+ext to catch all,
+    # but puts .so files into a subdirectory /python
+    # ignore 'does not match fully qualified name' warnings
+    extensions = [Extension('CcpnOpenGLContours',
+                            ['CcpnOpenGLContours'+ext],
+                            language='c',
+                            include_dirs=['c/']),]
 
-setup(
-    ext_modules = extensions
-)
+    if USE_CYTHON:
+        from Cython.Build import cythonize
+        extensions = cythonize(extensions,
+                            annotate=True)
+
+    setup(
+        ext_modules = extensions
+    )

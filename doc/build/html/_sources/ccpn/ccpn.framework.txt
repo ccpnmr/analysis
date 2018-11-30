@@ -18,6 +18,14 @@ Subpackages
 Submodules
 ----------
 
+ccpn.framework.Application module
+---------------------------------
+
+.. automodule:: ccpn.framework.Application
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.framework.Current module
 -----------------------------
 

@@ -9,6 +9,14 @@ ccpn.AnalysisMetabolomics.lib package
 Submodules
 ----------
 
+ccpn.AnalysisMetabolomics.lib.BMRBquery module
+----------------------------------------------
+
+.. automodule:: ccpn.AnalysisMetabolomics.lib.BMRBquery
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.AnalysisMetabolomics.lib.centering module
 ----------------------------------------------
 

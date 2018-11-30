@@ -17,10 +17,18 @@ ccpn.AnalysisScreen.pipes.CreateSTD module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisScreen.pipes.LWHitFinder module
---------------------------------------------
+ccpn.AnalysisScreen.pipes.HitsOutput module
+-------------------------------------------
 
-.. automodule:: ccpn.AnalysisScreen.pipes.LWHitFinder
+.. automodule:: ccpn.AnalysisScreen.pipes.HitsOutput
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.AnalysisScreen.pipes.PeakBroadeningFinder module
+-----------------------------------------------------
+
+.. automodule:: ccpn.AnalysisScreen.pipes.PeakBroadeningFinder
     :members:
     :undoc-members:
     :show-inheritance:

@@ -111,7 +111,7 @@ def undoBlock(application=None):
 
         if not application.project._blockSideBar and not undo._blocked:
             if undo._waypointBlockingLevel < 1 and application.ui and application.ui.mainWindow:
-                application._storedState = application.ui.mainWindow.sideBar._saveExpandedState()
+                application.ui.mainWindow.sideBar._saveExpandedState()
 
     if not application._echoBlocking:
         application.project.suspendNotification()
@@ -131,7 +131,7 @@ def undoBlock(application=None):
         if undo is not None:
             if not application.project._blockSideBar and not undo._blocked:
                 if undo._waypointBlockingLevel < 1 and application.ui and application.ui.mainWindow:
-                    application.ui.mainWindow.sideBar._restoreExpandedState(application._storedState)
+                    application.ui.mainWindow.sideBar._restoreExpandedState()
 
             undo.decreaseWaypointBlocking()
 
@@ -169,7 +169,7 @@ def undoBlock(application=None):
 #
 #     if not self.project._blockSideBar and not undo._blocked:
 #       if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-#         self._storedState = self.ui.mainWindow.sideBar._saveExpandedState()
+#         self.ui.mainWindow.sideBar._saveExpandedState()
 #
 #     undo.increaseWaypointBlocking()
 #   if not self._echoBlocking:
@@ -258,6 +258,8 @@ def logCommandBlock(prefix='', get=None, isProperty=False, showArguments=[], log
                         By default, the parameters set to the defaults are not included.
 
     Examples:
+
+    ::
 
     1)  def something(self, name=None, value=0):
             logCommandManager(prefix='process.') as log:
@@ -479,12 +481,9 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    storedState = None
-    if application.mainWindow:
-        sidebar = application.mainWindow.sideBar
-        if not sidebar.sidebarBlocking:
-            storedState = sidebar._saveExpandedState()
-        sidebar.increaseSidebarBlocking()
+    if application.ui and application.ui.mainWindow:
+        sidebar = application.ui.mainWindow.sideBar
+        sidebar._saveExpandedState()
 
     try:
         # transfer control to the calling function
@@ -500,11 +499,9 @@ def sidebarBlocking(application=None, blockSidebarOnly=False):
 
     finally:
         # clean up after suspending sidebar updates
-        if application.mainWindow:
-            sidebar = application.mainWindow.sideBar
-            sidebar.decreaseSidebarBlocking()
-            if not sidebar.sidebarBlocking:
-                sidebar._restoreExpandedState(storedState)
+        if application.ui and application.ui.mainWindow:
+            sidebar = application.ui.mainWindow.sideBar
+            sidebar._restoreExpandedState()
 
 
 @contextmanager
@@ -582,8 +579,12 @@ def notificationUnblanking():
 def undoStackBlocking(application=None):
     """
     Block addition of items to the undo stack, re-enable at the end of the function block.
-    New user items can be added to the undo stack after blocking is re-enabled
+
+    New user items can be added to the undo stack after blocking is re-enabled.
+
     Example:
+
+    ::
 
         with undoStackBlocking() as addUndoItem:
             ...
@@ -594,6 +595,7 @@ def undoStackBlocking(application=None):
             do more here
 
     Multiple undoItems can be appended.
+
     """
 
     # get the current application
@@ -700,7 +702,7 @@ def newObject(klass):
     """A decorator wrap a newObject method's of the various classes in an undo block and calls
     result._finalise('create')
     """
-    from ccpn.util import Undo
+    from ccpn.core.lib import Undo
 
     @decorator.decorator
     def theDecorator(*args, **kwds):

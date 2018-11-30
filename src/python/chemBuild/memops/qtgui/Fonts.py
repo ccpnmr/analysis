@@ -29,11 +29,11 @@ LATIN = QtGui.QFontDatabase.Latin
 
 # Consider QFontComboBox -> "FontPanel"
 
-class FontDialog(QtGui.QFontDialog):
+class FontDialog(QtWidgets.QFontDialog):
 
   def __init__(self, parent=None, **kw):
     
-    QtGui.QFontDialog.__init__(self, parent)
+    QtWidgets.QFontDialog.__init__(self, parent)
     self.fontDb = QtGui.QFontDatabase()
     
   def setFont(self, font):
@@ -43,7 +43,7 @@ class FontDialog(QtGui.QFontDialog):
   
   def getFont(self):
   
-    font, wasNotCanceled = QtGui.QFontDialog.getFont(self)
+    font, wasNotCanceled = QtWidgets.QFontDialog.getFont(self)
     
     if wasNotCanceled:
       return font

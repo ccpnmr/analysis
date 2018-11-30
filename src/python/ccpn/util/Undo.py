@@ -1,4 +1,9 @@
 """General undo handle supporting undo/redo stack
+
+PyApiGen.py inserts the following line:
+
+from ccpn.core.lib.Undo import _deleteAllApiObjects, restoreOriginalLinks, no_op
+
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -26,6 +31,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from functools import partial, update_wrapper
 from collections import deque
+from ccpn.util.Logging import getLogger
 
 
 # def deleteAll(objects):
@@ -255,9 +261,6 @@ class Undo(deque):
             return
 
         if self._debug:
-            # print('undo.newItem', self.blocking, undoMethod, redoMethod, undoArgs, undoKwargs, redoArgs,
-            #       redoKwargs)
-            from sandbox.Geerten.Refactored.logger import getLogger
 
             getLogger().debug('undo._newItem %s %s %s' % (self.blocking, undoPartial,
                                                           redoPartial))
@@ -294,10 +297,6 @@ class Undo(deque):
             return
 
         if self._debug:
-            # print('undo.newItem', self.blocking, undoMethod, redoMethod, undoArgs, undoKwargs, redoArgs,
-            #       redoKwargs)
-            from ccpn.util.Logging import getLogger
-
             getLogger().debug('undo.newItem %s %s %s %s %s %s %s' % (self.blocking, undoMethod,
                                                                      redoMethod, undoArgs,
                                                                      undoKwargs, redoArgs,

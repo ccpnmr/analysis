@@ -17,6 +17,22 @@ ccpn.core.lib.AssignmentLib module
     :undoc-members:
     :show-inheritance:
 
+ccpn.core.lib.Cache module
+--------------------------
+
+.. automodule:: ccpn.core.lib.Cache
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.CallBack module
+-----------------------------
+
+.. automodule:: ccpn.core.lib.CallBack
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.core.lib.CcpnNefIo module
 ------------------------------
 
@@ -29,6 +45,30 @@ ccpn.core.lib.CcpnSorting module
 --------------------------------
 
 .. automodule:: ccpn.core.lib.CcpnSorting
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.CcpnSparkyIo module
+---------------------------------
+
+.. automodule:: ccpn.core.lib.CcpnSparkyIo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.ContextManagers module
+------------------------------------
+
+.. automodule:: ccpn.core.lib.ContextManagers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.DataFrameObject module
+------------------------------------
+
+.. automodule:: ccpn.core.lib.DataFrameObject
     :members:
     :undoc-members:
     :show-inheritance:
@@ -73,6 +113,14 @@ ccpn.core.lib.Notifiers module
     :undoc-members:
     :show-inheritance:
 
+ccpn.core.lib.OrderedSpectrumViews module
+-----------------------------------------
+
+.. automodule:: ccpn.core.lib.OrderedSpectrumViews
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.core.lib.Pid module
 ------------------------
 
@@ -101,6 +149,14 @@ ccpn.core.lib.Summary module
 ----------------------------
 
 .. automodule:: ccpn.core.lib.Summary
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.Undo module
+-------------------------
+
+.. automodule:: ccpn.core.lib.Undo
     :members:
     :undoc-members:
     :show-inheritance:

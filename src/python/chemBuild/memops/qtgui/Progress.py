@@ -3,11 +3,11 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from .Base import Base
 
 
-class ProgressDialog(QtGui.QProgressDialog):
+class ProgressDialog(QtWidgets.QProgressDialog):
 
   def __init__(self, parent=None, text='', minimum=0, maximum=99):
 
-    QtGui.QProgressDialog.__init__(self, parent=None)
+    QtWidgets.QProgressDialog.__init__(self, parent=None)
     
     self.setText(text)
     self.setRange(minimum, maximum)
@@ -47,12 +47,12 @@ class ProgressDialog(QtGui.QProgressDialog):
       
     self.setValue(int(value))
 
-class ProgressWidget(QtGui.QProgressBar, Base):
+class ProgressWidget(QtWidgets.QProgressBar, Base):
 
   def __init__(self, parent=None, minimum=0,
                maximum=99, total=None, **kw):
 
-    QtGui.QProgressBar.__init__(self, parent=None)
+    QtWidgets.QProgressBar.__init__(self, parent=None)
     Base.__init__(self, parent, **kw)
     
     self.setRange(minimum, maximum)
